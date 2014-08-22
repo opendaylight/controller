@@ -42,14 +42,27 @@
     <commons.catalina>7.0.32.v201211201336</commons.catalina>
     <commons.catalina.ha>7.0.32.v201211201952</commons.catalina.ha>
     <commons.catalina.tribes>7.0.32.v201211201952</commons.catalina.tribes>
-    <commons.checkstyle.version>0.0.3-SNAPSHOT</commons.checkstyle.version>
     <commons.coyote>7.0.32.v201211201952</commons.coyote>
     <commons.el>7.0.32.v201211081135</commons.el>
+    <commons.jasper>7.0.32.v201211201952</commons.jasper>
+    <commons.juli.version>7.0.32.v201211081135</commons.juli.version>
+    <commons.tomcat.api>7.0.32.v201211081135</commons.tomcat.api>
+    <commons.tomcat.util>7.0.32.v201211201952</commons.tomcat.util>
+
+    <commons.karaf.catalina>7.0.53.v201406061610</commons.karaf.catalina>
+    <commons.karaf.catalina.ha>7.0.53.v201406070630</commons.karaf.catalina.ha>
+    <commons.karaf.catalina.tribes>7.0.53.v201406070630</commons.karaf.catalina.tribes>
+    <commons.karaf.coyote>7.0.53.v201406070630</commons.karaf.coyote>
+    <commons.karaf.el>7.0.53.v201406060720</commons.karaf.el>
+    <commons.karaf.jasper>7.0.53.v201406070630</commons.karaf.jasper>
+    <commons.karaf.juli.version>7.0.53.v201406060720</commons.karaf.juli.version>
+    <commons.karaf.tomcat.api>7.0.53.v201406060720</commons.karaf.tomcat.api>
+    <commons.karaf.tomcat.util>7.0.53.v201406070630</commons.karaf.tomcat.util>
+
+    <commons.checkstyle.version>0.0.3-SNAPSHOT</commons.checkstyle.version>
     <commons.fileupload.version>1.2.2</commons.fileupload.version>
     <commons.httpclient.version>0.1.2-SNAPSHOT</commons.httpclient.version>
     <commons.io.version>2.4</commons.io.version>
-    <commons.jasper>7.0.32.v201211201952</commons.jasper>
-    <commons.juli.version>7.0.32.v201211081135</commons.juli.version>
     <commons.lang3.version>3.1</commons.lang3.version>
     <commons.logback_settings.version>0.0.2-SNAPSHOT</commons.logback_settings.version>
     <commons.net.version>3.0.1</commons.net.version>
@@ -57,8 +70,6 @@
     <commons.opendaylight.concepts.version>0.5.2-SNAPSHOT</commons.opendaylight.concepts.version>
     <commons.opendaylight.version>1.4.2-SNAPSHOT</commons.opendaylight.version>
     <commons.parent.version>1.0.2-SNAPSHOT</commons.parent.version>
-    <commons.tomcat.api>7.0.32.v201211081135</commons.tomcat.api>
-    <commons.tomcat.util>7.0.32.v201211201952</commons.tomcat.util>
     <compiler.version>2.3.2</compiler.version>
     <commons.httpclient.version>0.1.2-SNAPSHOT</commons.httpclient.version>
     <concepts.version>0.5.2-SNAPSHOT</concepts.version>
@@ -82,6 +93,7 @@
     <devices.web.version>0.4.2-SNAPSHOT</devices.web.version>
     <dummy-console.version>1.1.0-SNAPSHOT</dummy-console.version>
     <eclipse.persistence.version>2.5.0</eclipse.persistence.version>
+    <eclipse.jdt.core.compiler.batch.version>3.8.0.I20120518-2145</eclipse.jdt.core.compiler.batch.version>
     <!-- enforcer version -->
     <enforcer.version>1.3.1</enforcer.version>
     <enunciate.version>1.28</enunciate.version>
@@ -162,6 +174,7 @@
     <scala.version>2.10</scala.version>
     <scala.micro.version>4</scala.micro.version>
     <security.version>0.4.2-SNAPSHOT</security.version>
+    <karaf.security.version>0.4.2-SNAPSHOT</karaf.security.version>
     <shapeless.version>1.2.4</shapeless.version>
     <sitedeploy>dav:http://nexus.opendaylight.org/content/sites/site</sitedeploy>
     <sonar.branch>${user.name}-private-view</sonar.branch>
