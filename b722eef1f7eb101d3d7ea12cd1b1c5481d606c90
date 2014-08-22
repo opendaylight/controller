@@ -16,6 +16,24 @@
       "revId": "b722eef1f7eb101d3d7ea12cd1b1c5481d606c90",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_bc8e5a2c",
+        "filename": "features/adsal/src/main/resources/features.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-22T22:54:06Z",
+      "side": 1,
+      "message": "Reasonable point. I didnt add the Start-Level through this commit. It was carried forwad from past. I will try to remove the start-level and check.",
+      "parentUuid": "fa82b9bf_dcc6be67",
+      "revId": "b722eef1f7eb101d3d7ea12cd1b1c5481d606c90",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
