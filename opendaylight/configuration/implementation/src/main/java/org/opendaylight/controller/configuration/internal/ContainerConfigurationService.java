@@ -47,11 +47,12 @@ import org.slf4j.LoggerFactory;
  */
 
 public class ContainerConfigurationService implements IConfigurationContainerService,
-        IConfigurationAware, ICacheUpdateAware<ConfigurationEvent, String> {
+        IConfigurationAware,
+        ICacheUpdateAware<String, String> {
     public static final String CONTAINER_SAVE_EVENT_CACHE = "config.container.event.save";
     private static final Logger logger = LoggerFactory.getLogger(ContainerConfigurationService.class);
     private IClusterContainerServices clusterServices;
-    private ConcurrentMap <ConfigurationEvent, String> containerConfigEvent;
+    private ConcurrentMap<String, String> containerConfigEvent;
     // Directory which contains the startup files for this container
     private String root;
     private Set<IConfigurationContainerAware> configurationAwareList = Collections
@@ -142,12 +143,12 @@ public class ContainerConfigurationService implements IConfigurationContainerSer
 
     @Override
     public Status saveConfigurations() {
-        containerConfigEvent.put(ConfigurationEvent.SAVE, "");
+        containerConfigEvent.put(ConfigurationEvent.SAVE.toString(), "");
         return saveConfiguration();
     }
 
     @Override
-    public void entryCreated(ConfigurationEvent key, String cacheName,
+    public void entryCreated(String key, String cacheName,
             boolean originLocal) {
         if (originLocal) {
             return;
@@ -155,19 +156,19 @@ public class ContainerConfigurationService implements IConfigurationContainerSer
     }
 
     @Override
-    public void entryUpdated(ConfigurationEvent key, String new_value,
+    public void entryUpdated(String key, String new_value,
             String cacheName, boolean originLocal) {
         if (originLocal) {
             return;
         }
         logger.debug("Processing {} event", key);
-        if (key == ConfigurationEvent.SAVE) {
+        if (key.equals(ConfigurationEvent.SAVE.toString())) {
             saveConfiguration();
         }
     }
 
     @Override
-    public void entryDeleted(ConfigurationEvent key, String cacheName,
+    public void entryDeleted(String key, String cacheName,
             boolean originLocal) {
         if (originLocal) {
             return;
@@ -195,7 +196,8 @@ public class ContainerConfigurationService implements IConfigurationContainerSer
             logger.error("uninitialized clusterServices, can't retrieve cache");
             return;
         }
-        containerConfigEvent = (ConcurrentMap<ConfigurationEvent, String>) this.clusterServices.getCache(CONTAINER_SAVE_EVENT_CACHE);
+        containerConfigEvent =
+                (ConcurrentMap<String, String>) this.clusterServices.getCache(CONTAINER_SAVE_EVENT_CACHE);
         if (containerConfigEvent == null) {
             logger.error("Failed to retrieve configuration Cache");
         }
