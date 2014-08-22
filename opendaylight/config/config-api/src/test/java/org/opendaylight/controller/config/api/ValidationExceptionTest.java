@@ -8,6 +8,8 @@ import static org.junit.matchers.JUnitMatchers.containsString;
 
 import com.google.common.collect.Lists;
 import java.util.Map;
+
+import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
 public class ValidationExceptionTest {
@@ -47,6 +49,7 @@ public class ValidationExceptionTest {
         } catch (IllegalArgumentException ex) {
             // Duplicate exception
             assertThat(ex.getMessage(), containsString("Cannot merge"));
+
             return;
         }
         fail("Duplicate exception should have failed");
