@@ -30,6 +30,7 @@ import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolve
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryFound;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryNotFound;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
 
 import scala.concurrent.duration.Duration;
@@ -249,9 +250,10 @@ public class ShardManager extends AbstractUntypedActor {
         for(String shardName : memberShardNames){
             ShardIdentifier shardId = getShardIdentifier(memberName, shardName);
             Map<ShardIdentifier, String> peerAddresses = getPeerAddresses(shardName);
-            ActorRef actor = getContext()
-                .actorOf(Shard.props(shardId, peerAddresses, dataStoreProperties),
-                    shardId.toString());
+            ActorRef actor =
+                    getContext().actorOf(Shard.props(shardId, peerAddresses, dataStoreProperties).
+                            withMailbox(ActorContext.MAILBOX),shardId.toString());
+
             localShardActorNames.add(shardId.toString());
             localShards.put(shardName, new ShardInformation(shardName, actor, peerAddresses));
         }

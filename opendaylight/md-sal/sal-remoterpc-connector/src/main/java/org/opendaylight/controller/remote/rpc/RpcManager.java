@@ -15,8 +15,11 @@ import akka.actor.Props;
 import akka.actor.SupervisorStrategy;
 import akka.japi.Creator;
 import akka.japi.Function;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import org.opendaylight.controller.remote.rpc.messages.UpdateSchemaContext;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
+import org.opendaylight.controller.remote.rpc.utils.ActorUtil;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -69,10 +72,16 @@ public class RpcManager extends AbstractUntypedActor {
   private void createRpcActors() {
     LOG.debug("Create rpc registry and broker actors");
 
+      Config conf = ConfigFactory.load();
 
-    rpcRegistry = getContext().actorOf(Props.create(RpcRegistry.class), ActorConstants.RPC_REGISTRY);
+    rpcRegistry =
+            getContext().actorOf(Props.create(RpcRegistry.class).
+                withMailbox(ActorUtil.MAILBOX), ActorConstants.RPC_REGISTRY);
 
-    rpcBroker = getContext().actorOf(RpcBroker.props(brokerSession, rpcRegistry, schemaContext), ActorConstants.RPC_BROKER);
+    rpcBroker =
+            getContext().actorOf(RpcBroker.props(brokerSession, rpcRegistry, schemaContext).
+                withMailbox(ActorUtil.MAILBOX),ActorConstants.RPC_BROKER);
+
     RpcRegistry.Messages.SetLocalRouter localRouter = new RpcRegistry.Messages.SetLocalRouter(rpcBroker);
     rpcRegistry.tell(localRouter, self());
   }

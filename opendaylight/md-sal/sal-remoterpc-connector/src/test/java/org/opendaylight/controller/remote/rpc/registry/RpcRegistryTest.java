@@ -10,10 +10,8 @@ import akka.actor.Props;
 import akka.testkit.JavaTestKit;
 import com.google.common.base.Predicate;
 import com.typesafe.config.ConfigFactory;
-
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -22,8 +20,6 @@ import org.opendaylight.controller.remote.rpc.registry.gossip.Messages;
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.controller.utils.ConditionalProbe;
 import org.opendaylight.yangtools.yang.common.QName;
-import scala.concurrent.Await;
-import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
 import javax.annotation.Nullable;
@@ -33,9 +29,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.SetLocalRouter;
 import static org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.AddOrUpdateRoutes;
 import static org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.RemoveRoutes;
+import static org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.SetLocalRouter;
 
 public class RpcRegistryTest {
 
@@ -95,7 +91,6 @@ public class RpcRegistryTest {
    */
   @Test
   public void testAddRemoveRpcOnSameNode() throws URISyntaxException, InterruptedException {
-    validateSystemStartup();
 
     final JavaTestKit mockBroker = new JavaTestKit(node1);
 
@@ -137,15 +132,12 @@ public class RpcRegistryTest {
   @Test
   public void testRpcAddRemoveInCluster() throws URISyntaxException, InterruptedException {
 
-    validateSystemStartup();
-
     final JavaTestKit mockBroker1 = new JavaTestKit(node1);
 
     //install probe on node2's bucket store
     final ActorPath bucketStorePath = new ChildActorPath(registry2.path(), "store");
     final JavaTestKit probe2 = createProbeForMessage(
         node2, bucketStorePath, Messages.BucketStoreMessages.UpdateRemoteBuckets.class);
-
 
     //Add rpc on node 1
     registry1.tell(new SetLocalRouter(mockBroker1.getRef()), mockBroker1.getRef());
@@ -174,8 +166,6 @@ public class RpcRegistryTest {
    */
   @Test
   public void testRpcAddedOnMultiNodes() throws Exception {
-
-    validateSystemStartup();
 
     final JavaTestKit mockBroker1 = new JavaTestKit(node1);
     final JavaTestKit mockBroker2 = new JavaTestKit(node2);
@@ -223,49 +213,6 @@ public class RpcRegistryTest {
 
     return probe;
 
-  }
-
-  private void validateSystemStartup() throws InterruptedException {
-
-    ActorPath gossiper1Path = new ChildActorPath(new ChildActorPath(registry1.path(), "store"), "gossiper");
-    ActorPath gossiper2Path = new ChildActorPath(new ChildActorPath(registry2.path(), "store"), "gossiper");
-    ActorPath gossiper3Path = new ChildActorPath(new ChildActorPath(registry3.path(), "store"), "gossiper");
-
-    ActorSelection gossiper1 = node1.actorSelection(gossiper1Path);
-    ActorSelection gossiper2 = node2.actorSelection(gossiper2Path);
-    ActorSelection gossiper3 = node3.actorSelection(gossiper3Path);
-
-
-    if (!resolveReference(gossiper1, gossiper2, gossiper3))
-      Assert.fail("Could not find gossipers");
-  }
-
-  private Boolean resolveReference(ActorSelection... gossipers) {
-
-    Boolean resolved = true;
-    for (int i = 0; i < 5; i++) {
-
-      resolved = true;
-      System.out.println(System.currentTimeMillis() + " Resolving gossipers; trial #" + i);
-
-      for (ActorSelection gossiper : gossipers) {
-        ActorRef ref = null;
-
-        try {
-          Future<ActorRef> future = gossiper.resolveOne(new FiniteDuration(15000, TimeUnit.MILLISECONDS));
-          ref = Await.result(future, new FiniteDuration(10000, TimeUnit.MILLISECONDS));
-        } catch (Exception e) {
-          System.out.println("Could not find gossiper in attempt#" + i + ". Got exception " + e.getMessage());
-        }
-
-        if (ref == null)
-          resolved = false;
-      }
-
-      if (resolved) break;
-
-    }
-    return resolved;
   }
 
   private AddOrUpdateRoutes getAddRouteMessage() throws URISyntaxException {
