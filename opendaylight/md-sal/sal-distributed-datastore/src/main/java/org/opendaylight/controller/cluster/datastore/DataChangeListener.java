@@ -10,7 +10,9 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.Props;
 import akka.japi.Creator;
+
 import com.google.common.base.Preconditions;
+
 import org.opendaylight.controller.cluster.datastore.messages.DataChanged;
 import org.opendaylight.controller.cluster.datastore.messages.DataChangedReply;
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
@@ -18,20 +20,14 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class DataChangeListener extends AbstractUntypedActor {
     private final AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener;
-    private final SchemaContext schemaContext;
-    private final YangInstanceIdentifier pathId;
-    private boolean notificationsEnabled = false;
+    private volatile boolean notificationsEnabled = false;
 
-    public DataChangeListener(SchemaContext schemaContext,
-                              AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener, YangInstanceIdentifier pathId) {
-
-        this.schemaContext = Preconditions.checkNotNull(schemaContext, "schemaContext should not be null");
+    public DataChangeListener(AsyncDataChangeListener<YangInstanceIdentifier,
+                                                      NormalizedNode<?, ?>> listener) {
         this.listener = Preconditions.checkNotNull(listener, "listener should not be null");
-        this.pathId  = Preconditions.checkNotNull(pathId, "pathId should not be null");
     }
 
     @Override public void handleReceive(Object message) throws Exception {
@@ -63,14 +59,24 @@ public class DataChangeListener extends AbstractUntypedActor {
         }
     }
 
-    public static Props props(final SchemaContext schemaContext, final AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener, final YangInstanceIdentifier pathId) {
-        return Props.create(new Creator<DataChangeListener>() {
-            @Override
-            public DataChangeListener create() throws Exception {
-                return new DataChangeListener(schemaContext,listener,pathId );
-            }
+    public static Props props(final AsyncDataChangeListener<YangInstanceIdentifier,
+                                                            NormalizedNode<?, ?>> listener) {
+        return Props.create(new DataChangeListenerCreator(listener));
+    }
 
-        });
+    private static class DataChangeListenerCreator implements Creator<DataChangeListener> {
+        private static final long serialVersionUID = 1L;
 
+        final AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener;
+
+        DataChangeListenerCreator(
+                AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener) {
+            this.listener = listener;
+        }
+
+        @Override
+        public DataChangeListener create() throws Exception {
+            return new DataChangeListener(listener);
+        }
     }
 }

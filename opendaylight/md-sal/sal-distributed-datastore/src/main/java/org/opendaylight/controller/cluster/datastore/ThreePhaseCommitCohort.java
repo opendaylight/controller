@@ -14,9 +14,11 @@ import akka.actor.Props;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import akka.japi.Creator;
+
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransaction;
@@ -46,15 +48,8 @@ public class ThreePhaseCommitCohort extends AbstractUntypedActor {
 
     public static Props props(final DOMStoreThreePhaseCommitCohort cohort,
         final ActorRef shardActor, final CompositeModification modification) {
-        return Props.create(new Creator<ThreePhaseCommitCohort>() {
-            @Override
-            public ThreePhaseCommitCohort create() throws Exception {
-                return new ThreePhaseCommitCohort(cohort, shardActor,
-                    modification);
-            }
-        });
+        return Props.create(new ThreePhaseCommitCohortCreator(cohort, shardActor, modification));
     }
-
 
     @Override
     public void handleReceive(Object message) throws Exception {
@@ -81,12 +76,14 @@ public class ThreePhaseCommitCohort extends AbstractUntypedActor {
         final ActorRef self = getSelf();
 
         Futures.addCallback(future, new FutureCallback<Void>() {
+            @Override
             public void onSuccess(Void v) {
                 sender
                     .tell(new AbortTransactionReply().toSerializable(),
                         self);
             }
 
+            @Override
             public void onFailure(Throwable t) {
                 LOG.error(t, "An exception happened during abort");
                 sender
@@ -110,12 +107,14 @@ public class ThreePhaseCommitCohort extends AbstractUntypedActor {
         final ActorRef sender = getSender();
         final ActorRef self = getSelf();
         Futures.addCallback(future, new FutureCallback<Void>() {
+            @Override
             public void onSuccess(Void v) {
                 sender
                     .tell(new PreCommitTransactionReply().toSerializable(),
                         self);
             }
 
+            @Override
             public void onFailure(Throwable t) {
                 LOG.error(t, "An exception happened during pre-commit");
                 sender
@@ -130,18 +129,36 @@ public class ThreePhaseCommitCohort extends AbstractUntypedActor {
         final ActorRef sender = getSender();
         final ActorRef self = getSelf();
         Futures.addCallback(future, new FutureCallback<Boolean>() {
+            @Override
             public void onSuccess(Boolean canCommit) {
                 sender.tell(new CanCommitTransactionReply(canCommit)
                     .toSerializable(), self);
             }
 
+            @Override
             public void onFailure(Throwable t) {
                 LOG.error(t, "An exception happened during canCommit");
                 sender
                     .tell(new akka.actor.Status.Failure(t), self);
             }
         });
+    }
 
+    private static class ThreePhaseCommitCohortCreator implements Creator<ThreePhaseCommitCohort> {
+        final DOMStoreThreePhaseCommitCohort cohort;
+        final ActorRef shardActor;
+        final CompositeModification modification;
 
+        ThreePhaseCommitCohortCreator(DOMStoreThreePhaseCommitCohort cohort,
+                ActorRef shardActor, CompositeModification modification) {
+            this.cohort = cohort;
+            this.shardActor = shardActor;
+            this.modification = modification;
+        }
+
+        @Override
+        public ThreePhaseCommitCohort create() throws Exception {
+            return new ThreePhaseCommitCohort(cohort, shardActor, modification);
+        }
     }
 }
