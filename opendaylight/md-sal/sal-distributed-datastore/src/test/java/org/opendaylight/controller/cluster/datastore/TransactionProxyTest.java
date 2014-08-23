@@ -1,26 +1,16 @@
 package org.opendaylight.controller.cluster.datastore;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 import akka.actor.ActorPath;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
 import akka.dispatch.Futures;
 import com.google.common.base.Optional;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import static org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType.READ_ONLY;
-import static org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType.WRITE_ONLY;
-import static org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType.READ_WRITE;
-
 import org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType;
 import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
 import org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException;
@@ -47,21 +37,27 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCoh
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.isA;
+import static org.mockito.Mockito.verify;
+import static org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType.READ_ONLY;
+import static org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType.READ_WRITE;
+import static org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType.WRITE_ONLY;
 
 @SuppressWarnings("resource")
 public class TransactionProxyTest extends AbstractActorTest {
@@ -212,31 +208,39 @@ public class TransactionProxyTest extends AbstractActorTest {
         return actorRef;
     }
 
-    @Test
-    public void testRead() throws Exception {
-        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(READ_ONLY);
-
+    private void readTest(TransactionType transactionType) throws Exception{
+        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(transactionType);
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
-                READ_ONLY, schemaContext);
+            transactionType, schemaContext);
 
         doReturn(readDataReply(null)).when(mockActorContext).executeRemoteOperationAsync(
-                eq(actorSelection(actorRef)), eqReadData(), anyDuration());
+            eq(actorSelection(actorRef)), eqReadData(), anyDuration());
 
         Optional<NormalizedNode<?, ?>> readOptional = transactionProxy.read(
-                TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
+            TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
 
         assertEquals("NormalizedNode isPresent", false, readOptional.isPresent());
 
         NormalizedNode<?, ?> expectedNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         doReturn(readDataReply(expectedNode)).when(mockActorContext).executeRemoteOperationAsync(
-                eq(actorSelection(actorRef)), eqReadData(), anyDuration());
+            eq(actorSelection(actorRef)), eqReadData(), anyDuration());
 
         readOptional = transactionProxy.read(TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
 
         assertEquals("NormalizedNode isPresent", true, readOptional.isPresent());
 
         assertEquals("Response NormalizedNode", expectedNode, readOptional.get());
+    }
+
+    @Test
+    public void testReadWithReadOnlyTransaction() throws Exception {
+        readTest(READ_ONLY);
+    }
+
+    @Test
+    public void testReadWithAReadWriteTransaction() throws Exception {
+        readTest(READ_WRITE);
     }
 
     @Test(expected = ReadFailedException.class)

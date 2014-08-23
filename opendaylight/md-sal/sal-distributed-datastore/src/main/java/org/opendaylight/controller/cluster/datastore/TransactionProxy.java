@@ -99,7 +99,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         this.identifier = TransactionIdentifier.builder().memberName(memberName).counter(
                 counter.getAndIncrement()).build();
 
-        LOG.debug("Created txn {}", identifier);
+        LOG.debug("Created txn {} type {}", identifier, transactionType.name());
 
     }
 
@@ -107,8 +107,8 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
     public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(
             final YangInstanceIdentifier path) {
 
-        Preconditions.checkState(transactionType != TransactionType.WRITE_ONLY,
-                "Read operation on write-only transaction is not allowed");
+//        Preconditions.checkState(transactionType != TransactionType.WRITE_ONLY,
+//                "Read operation on write-only transaction is not allowed");
 
         LOG.debug("txn {} read {}", identifier, path);
 
@@ -120,8 +120,8 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
     @Override
     public CheckedFuture<Boolean, ReadFailedException> exists(YangInstanceIdentifier path) {
 
-        Preconditions.checkState(transactionType != TransactionType.WRITE_ONLY,
-                "Exists operation on write-only transaction is not allowed");
+//        Preconditions.checkState(transactionType != TransactionType.WRITE_ONLY,
+//                "Exists operation on write-only transaction is not allowed");
 
         LOG.debug("txn {} exists {}", identifier, path);
 
