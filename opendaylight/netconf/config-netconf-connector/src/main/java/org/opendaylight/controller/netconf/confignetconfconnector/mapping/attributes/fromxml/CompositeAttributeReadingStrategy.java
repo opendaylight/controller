@@ -11,6 +11,7 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 
@@ -39,13 +40,18 @@ public class CompositeAttributeReadingStrategy extends AbstractAttributeReadingS
 
         List<XmlElement> recognisedChildren = Lists.newArrayList();
         for (Entry<String, AttributeReadingStrategy> innerAttrEntry : innerStrategies.entrySet()) {
-            List<XmlElement> childItem = null;
-            childItem = complexElement.getChildElementsWithSameNamespace(innerAttrEntry.getKey());
+            List<XmlElement> childItem = complexElement.getChildElementsWithSameNamespace(
+                    innerAttrEntry.getKey());
             recognisedChildren.addAll(childItem);
 
             AttributeConfigElement resolvedInner = innerAttrEntry.getValue().readElement(childItem);
 
-            innerMap.put(innerAttrEntry.getKey(), resolvedInner.getValue());
+            Object value = resolvedInner.getValue();
+            if(value == null) {
+                value = resolvedInner.getDefaultValue();
+            }
+
+            innerMap.put(innerAttrEntry.getKey(), value);
         }
 
         complexElement.checkUnrecognisedElements(recognisedChildren);
