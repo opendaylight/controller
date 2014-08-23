@@ -62,12 +62,18 @@ abstract class TranslatingListenerInvoker implements AutoCloseable, DOMDataChang
         }
     }
 
+    @Override
+    public String toString() {
+        return getDelegate().getClass().getName();
+    }
+
     static final class TranslatingConfigListenerInvoker extends TranslatingListenerInvoker {
 
         public TranslatingConfigListenerInvoker(final DataChangeListener listener, final DataNormalizer normalizer) {
             super(listener, normalizer);
         }
 
+        @Override
         DataChangeEvent<YangInstanceIdentifier, CompositeNode> getLegacyEvent(final DataNormalizer normalizer, final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> normalizedChange) {
             return TranslatingDataChangeEvent.createConfiguration(normalizedChange, normalizer);
         }
@@ -85,6 +91,7 @@ abstract class TranslatingListenerInvoker implements AutoCloseable, DOMDataChang
             super(listener, normalizer);
         }
 
+        @Override
         DataChangeEvent<YangInstanceIdentifier, CompositeNode> getLegacyEvent(final DataNormalizer normalizer, final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> normalizedChange) {
             return TranslatingDataChangeEvent.createOperational(normalizedChange, normalizer);
         }

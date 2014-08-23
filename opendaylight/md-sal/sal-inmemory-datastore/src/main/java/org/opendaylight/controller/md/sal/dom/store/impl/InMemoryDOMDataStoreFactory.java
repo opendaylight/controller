@@ -9,13 +9,11 @@
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.annotation.Nullable;
 
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.yangtools.util.concurrent.SpecialExecutors;
-import com.google.common.util.concurrent.MoreExecutors;
 
 /**
  * A factory for creating InMemoryDOMDataStore instances.
@@ -61,9 +59,12 @@ public final class InMemoryDOMDataStoreFactory {
         ExecutorService dataChangeListenerExecutor = SpecialExecutors.newBlockingBoundedFastThreadPool(
                 dclExecutorMaxPoolSize, dclExecutorMaxQueueSize, name + "-DCL" );
 
+        ExecutorService domStoreExecutor = SpecialExecutors.newBoundedSingleThreadExecutor(
+                actualProperties.getMaxDataStoreExecutorQueueSize(), "DOMStore-" + name );
+
         InMemoryDOMDataStore dataStore = new InMemoryDOMDataStore(name,
-                MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor()),
-                dataChangeListenerExecutor, actualProperties.getMaxDataChangeListenerQueueSize());
+                domStoreExecutor, dataChangeListenerExecutor,
+                actualProperties.getMaxDataChangeListenerQueueSize());
 
         if(schemaService != null) {
             schemaService.registerSchemaContextListener(dataStore);
