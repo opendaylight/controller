@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_5ce62ee9",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/NormalizedNodeToNodeCodec.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-23T00:34:12Z",
+      "side": 1,
+      "message": "validate arguments",
+      "revId": "88352b657e6495919bc23fec794e207cb8d6b366",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
