@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_1c70a609",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-23T03:53:38Z",
+      "side": 1,
+      "message": "Good point but unfortunately I think this is the case where we need a sync call. In order to perform any read/write/merge/delete operation we need a shard Tx actor to talk to. This is what the CreateTransaction message to the Shard actor does, ie it creates a Tx actor and returns its path. From there, we create a TransactionContextImpl instance to which we delegate the subsequent  read/write/merge/delete requests. This method is called on the first  read/write/merge/delete request for a path and, while we could send the CreateTransaction async, we would have to immediately wait for its completion in order to complete the request. So I didn\u0027t think there was much point to making it async.",
+      "parentUuid": "fa82b9bf_41008533",
+      "revId": "2a314ba968981c8646612c4ddaa6a1b324b64c03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_81144d4d",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
         "patchSetId": 4
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_3c6b2a1f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 396,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-23T03:53:38Z",
+      "side": 1,
+      "message": "Not sure. This is the way it was and getResolvedCohortPath is even deprecated with comments similar to yours. I\u0027ll defer to the akka experts to clean this up.",
+      "parentUuid": "fa82b9bf_81144d4d",
+      "revId": "2a314ba968981c8646612c4ddaa6a1b324b64c03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_410ac526",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
         "patchSetId": 4
@@ -47,6 +83,24 @@
       "writtenOn": "2014-08-22T20:28:23Z",
       "side": 1,
       "message": "actorFor is deprecated. Use actorSelection.",
+      "revId": "2a314ba968981c8646612c4ddaa6a1b324b64c03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_dc755efa",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 401,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-23T03:53:38Z",
+      "side": 1,
+      "message": "See above - this is the way it was (I simply moved the code). Can you create a separate bug to fix this appropriately?",
+      "parentUuid": "fa82b9bf_410ac526",
       "revId": "2a314ba968981c8646612c4ddaa6a1b324b64c03",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
