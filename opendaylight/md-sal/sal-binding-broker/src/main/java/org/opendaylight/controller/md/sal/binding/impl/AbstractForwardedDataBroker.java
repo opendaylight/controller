@@ -145,6 +145,11 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
         public void onDataChanged(final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
             bindingDataChangeListener.onDataChanged(new TranslatedDataChangeEvent(change, path));
         }
+
+        @Override
+        public String toString() {
+            return bindingDataChangeListener.getClass().getName();
+        }
     }
 
     private class TranslatedDataChangeEvent implements AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> {

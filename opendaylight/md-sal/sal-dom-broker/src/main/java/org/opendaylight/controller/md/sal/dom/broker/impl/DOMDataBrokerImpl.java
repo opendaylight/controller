@@ -23,6 +23,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.util.DurationStatsTracker;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,11 +41,33 @@ public class DOMDataBrokerImpl extends AbstractDOMForwardedTransactionFactory<DO
     private final DOMDataCommitCoordinatorImpl coordinator;
     private final AtomicLong txNum = new AtomicLong();
     private final AtomicLong chainNum = new AtomicLong();
+    private volatile AutoCloseable closeable;
 
     public DOMDataBrokerImpl(final ImmutableMap<LogicalDatastoreType, DOMStore> datastores,
             final ListeningExecutorService executor) {
         super(datastores);
         this.coordinator = new DOMDataCommitCoordinatorImpl(executor);
+    }
+
+    public void setCloseable(AutoCloseable closeable) {
+        this.closeable = closeable;
+    }
+
+    public DurationStatsTracker getCommitStatsTracker() {
+        return coordinator.getCommitStatsTracker();
+    }
+
+    @Override
+    public void close() {
+        super.close();
+
+        if(closeable != null) {
+            try {
+                closeable.close();
+            } catch(Exception e) {
+                LOG.debug("Error closing instance", e);
+            }
+        }
     }
 
     @Override
@@ -82,5 +105,4 @@ public class DOMDataBrokerImpl extends AbstractDOMForwardedTransactionFactory<DO
         LOG.debug("Transaction: {} submitted with cohorts {}.", transaction.getIdentifier(), cohorts);
         return coordinator.submit(transaction, cohorts, Optional.<DOMDataCommitErrorListener> absent());
     }
-
 }
