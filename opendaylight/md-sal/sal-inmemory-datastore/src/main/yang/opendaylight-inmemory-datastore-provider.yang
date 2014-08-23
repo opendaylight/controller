@@ -52,6 +52,12 @@ module opendaylight-inmemory-datastore-provider {
                 type uint16;
                 description "The maximum queue size for the data change listeners.";
             }
+
+            leaf max-data-store-executor-queue-size {
+                default 5000;
+                type uint16;
+                description "The maximum queue size for the data store executor.";
+            }
     }
 
     // Augments the 'configuration' choice node under modules/module.
