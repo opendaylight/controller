@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_dc4c7eca",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-23T05:32:38Z",
+      "side": 1,
+      "message": "How about using using callbacks on the future returned from the async call? Or using a mapper as illustrated here (http://doc.akka.io/docs/akka/2.3.5/java/futures.html).\n\nBTW, I have used mapper in another component (sal-remoterpc-connector: org.opendaylight.controller.remote.rpc.registry.gossip.Gossiper) where ever such synchronous responses where needed. \n\nWould that not work in this case?",
+      "parentUuid": "fa82b9bf_1c70a609",
+      "revId": "2a314ba968981c8646612c4ddaa6a1b324b64c03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_81144d4d",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
         "patchSetId": 4
@@ -101,6 +119,24 @@
       "side": 1,
       "message": "See above - this is the way it was (I simply moved the code). Can you create a separate bug to fix this appropriately?",
       "parentUuid": "fa82b9bf_410ac526",
+      "revId": "2a314ba968981c8646612c4ddaa6a1b324b64c03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_fc4702a1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 401,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-23T05:32:38Z",
+      "side": 1,
+      "message": "Done.\nhttps://bugs.opendaylight.org/show_bug.cgi?id\u003d1607",
+      "parentUuid": "fa82b9bf_dc755efa",
       "revId": "2a314ba968981c8646612c4ddaa6a1b324b64c03",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
