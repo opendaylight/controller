@@ -13,9 +13,9 @@ package org.opendaylight.controller.cluster.datastore.node;
 import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.datastore.node.utils.NodeIdentifierFactory;
 import org.opendaylight.controller.cluster.datastore.node.utils.NormalizedNodeGetter;
 import org.opendaylight.controller.cluster.datastore.node.utils.NormalizedNodeNavigator;
+import org.opendaylight.controller.cluster.datastore.node.utils.PathUtils;
 import org.opendaylight.controller.cluster.datastore.util.TestModel;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Container;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node;
@@ -24,7 +24,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
@@ -43,20 +42,8 @@ public class NormalizedNodeToNodeCodecTest {
   }
 
   private YangInstanceIdentifier instanceIdentifierFromString(String s) {
-
-    String[] ids = s.split("/");
-
-    List<YangInstanceIdentifier.PathArgument> pathArguments = new ArrayList<>();
-    for (String nodeId : ids) {
-      if (!"".equals(nodeId)) {
-        pathArguments.add(NodeIdentifierFactory.getArgument(nodeId));
-      }
-    }
-    final YangInstanceIdentifier instanceIdentifier =
-        YangInstanceIdentifier.create(pathArguments);
-    return instanceIdentifier;
+      return PathUtils.toYangInstanceIdentifier(s);
   }
-
 
   @Test
   public void testNormalizeNodeAttributesToProtoBuffNode() {
@@ -69,7 +56,7 @@ public class NormalizedNodeToNodeCodecTest {
 
     NormalizedNodeGetter normalizedNodeGetter = new NormalizedNodeGetter(id);
     new NormalizedNodeNavigator(normalizedNodeGetter).navigate(
-        YangInstanceIdentifier.builder().build().toString(), documentOne);
+        PathUtils.toString(YangInstanceIdentifier.builder().build()), documentOne);
 
     // Validate the value of id can be retrieved from the normalized node
     NormalizedNode output = normalizedNodeGetter.getOutput();
