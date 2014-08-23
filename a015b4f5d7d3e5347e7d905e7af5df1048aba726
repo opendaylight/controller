@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_1c7ae6bc",
+        "filename": "opendaylight/md-sal/sal-inmemory-datastore/src/main/java/org/opendaylight/controller/md/sal/dom/store/impl/SnapshotBackedReadTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-23T14:23:56Z",
+      "side": 1,
+      "message": "Minor thing.... can you store this in a local var to avoid 2 volatile reads in this method (2nd one is on line 60)?",
+      "revId": "a015b4f5d7d3e5347e7d905e7af5df1048aba726",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
