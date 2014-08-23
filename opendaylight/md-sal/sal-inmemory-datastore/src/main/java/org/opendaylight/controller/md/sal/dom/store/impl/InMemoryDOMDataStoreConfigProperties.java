@@ -20,15 +20,18 @@ public class InMemoryDOMDataStoreConfigProperties {
     public static final int DEFAULT_MAX_DATA_CHANGE_EXECUTOR_QUEUE_SIZE = 1000;
     public static final int DEFAULT_MAX_DATA_CHANGE_EXECUTOR_POOL_SIZE = 20;
     public static final int DEFAULT_MAX_DATA_CHANGE_LISTENER_QUEUE_SIZE = 1000;
+    public static final int DEFAULT_MAX_DATA_STORE_EXECUTOR_QUEUE_SIZE = 5000;
 
     private static final InMemoryDOMDataStoreConfigProperties DEFAULT =
             create(DEFAULT_MAX_DATA_CHANGE_EXECUTOR_POOL_SIZE,
                     DEFAULT_MAX_DATA_CHANGE_EXECUTOR_QUEUE_SIZE,
-                    DEFAULT_MAX_DATA_CHANGE_LISTENER_QUEUE_SIZE);
+                    DEFAULT_MAX_DATA_CHANGE_LISTENER_QUEUE_SIZE,
+                    DEFAULT_MAX_DATA_STORE_EXECUTOR_QUEUE_SIZE);
 
     private final int maxDataChangeExecutorQueueSize;
     private final int maxDataChangeExecutorPoolSize;
     private final int maxDataChangeListenerQueueSize;
+    private final int maxDataStoreExecutorQueueSize;
 
     /**
      * Constructs an instance with the given property values.
@@ -39,11 +42,22 @@ public class InMemoryDOMDataStoreConfigProperties {
      *            maximum queue size for the data change notification executor.
      * @param maxDataChangeListenerQueueSize
      *            maximum queue size for the data change listeners.
+     * @param maxDataStoreExecutorQueueSize
+     *            maximum queue size for the data store executor.
      */
+    public static InMemoryDOMDataStoreConfigProperties create(int maxDataChangeExecutorPoolSize,
+            int maxDataChangeExecutorQueueSize, int maxDataChangeListenerQueueSize,
+            int maxDataStoreExecutorQueueSize) {
+        return new InMemoryDOMDataStoreConfigProperties(maxDataChangeExecutorPoolSize,
+                maxDataChangeExecutorQueueSize, maxDataChangeListenerQueueSize,
+                maxDataStoreExecutorQueueSize);
+    }
+
     public static InMemoryDOMDataStoreConfigProperties create(int maxDataChangeExecutorPoolSize,
             int maxDataChangeExecutorQueueSize, int maxDataChangeListenerQueueSize) {
         return new InMemoryDOMDataStoreConfigProperties(maxDataChangeExecutorPoolSize,
-                maxDataChangeExecutorQueueSize, maxDataChangeListenerQueueSize);
+                maxDataChangeExecutorQueueSize, maxDataChangeListenerQueueSize,
+                DEFAULT_MAX_DATA_STORE_EXECUTOR_QUEUE_SIZE);
     }
 
     /**
@@ -54,10 +68,12 @@ public class InMemoryDOMDataStoreConfigProperties {
     }
 
     private InMemoryDOMDataStoreConfigProperties(int maxDataChangeExecutorPoolSize,
-            int maxDataChangeExecutorQueueSize, int maxDataChangeListenerQueueSize) {
+            int maxDataChangeExecutorQueueSize, int maxDataChangeListenerQueueSize,
+            int maxDataStoreExecutorQueueSize) {
         this.maxDataChangeExecutorQueueSize = maxDataChangeExecutorQueueSize;
         this.maxDataChangeExecutorPoolSize = maxDataChangeExecutorPoolSize;
         this.maxDataChangeListenerQueueSize = maxDataChangeListenerQueueSize;
+        this.maxDataStoreExecutorQueueSize = maxDataStoreExecutorQueueSize;
     }
 
     /**
@@ -79,5 +95,12 @@ public class InMemoryDOMDataStoreConfigProperties {
      */
     public int getMaxDataChangeListenerQueueSize() {
         return maxDataChangeListenerQueueSize;
+    }
+
+    /**
+     * Returns the maximum queue size for the data store executor.
+     */
+    public int getMaxDataStoreExecutorQueueSize() {
+        return maxDataStoreExecutorQueueSize;
     }
 }
