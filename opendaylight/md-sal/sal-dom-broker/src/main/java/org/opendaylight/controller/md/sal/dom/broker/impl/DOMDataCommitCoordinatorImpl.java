@@ -16,6 +16,7 @@ import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.yangtools.util.DurationStatsTracker;
 import org.opendaylight.yangtools.util.concurrent.MappingCheckedFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,6 +70,8 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
 
     private final ListeningExecutorService executor;
 
+    private final DurationStatsTracker commitStatsTracker = new DurationStatsTracker();
+
     /**
      *
      * Construct DOMDataCommitCoordinator which uses supplied executor to
@@ -78,6 +81,10 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
      */
     public DOMDataCommitCoordinatorImpl(final ListeningExecutorService executor) {
         this.executor = Preconditions.checkNotNull(executor, "executor must not be null.");
+    }
+
+    public DurationStatsTracker getCommitStatsTracker() {
+        return commitStatsTracker;
     }
 
     @Override
@@ -90,7 +97,8 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
 
         ListenableFuture<Void> commitFuture = null;
         try {
-            commitFuture = executor.submit(new CommitCoordinationTask(transaction, cohorts, listener));
+            commitFuture = executor.submit(new CommitCoordinationTask(transaction, cohorts,
+                    listener, commitStatsTracker));
         } catch(RejectedExecutionException e) {
             LOG.error("The commit executor's queue is full - submit task was rejected. \n" +
                       executor, e);
@@ -154,21 +162,25 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
 
         private final DOMDataWriteTransaction tx;
         private final Iterable<DOMStoreThreePhaseCommitCohort> cohorts;
+        private final DurationStatsTracker commitStatTracker;
 
         @GuardedBy("this")
         private CommitPhase currentPhase;
 
         public CommitCoordinationTask(final DOMDataWriteTransaction transaction,
                 final Iterable<DOMStoreThreePhaseCommitCohort> cohorts,
-                final Optional<DOMDataCommitErrorListener> listener) {
+                final Optional<DOMDataCommitErrorListener> listener,
+                final DurationStatsTracker commitStatTracker) {
             this.tx = Preconditions.checkNotNull(transaction, "transaction must not be null");
             this.cohorts = Preconditions.checkNotNull(cohorts, "cohorts must not be null");
             this.currentPhase = CommitPhase.SUBMITTED;
+            this.commitStatTracker = commitStatTracker;
         }
 
         @Override
         public Void call() throws TransactionCommitFailedException {
 
+            long startTime = System.nanoTime();
             try {
                 canCommitBlocking();
                 preCommitBlocking();
@@ -178,6 +190,10 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
                 LOG.warn("Tx: {} Error during phase {}, starting Abort", tx.getIdentifier(), currentPhase, e);
                 abortBlocking(e);
                 throw e;
+            } finally {
+                if(commitStatTracker != null) {
+                    commitStatTracker.addDuration(System.nanoTime() - startTime);
+                }
             }
         }
 

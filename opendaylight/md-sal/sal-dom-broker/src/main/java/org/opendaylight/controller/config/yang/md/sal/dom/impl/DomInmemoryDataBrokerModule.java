@@ -7,11 +7,13 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.dom.impl;
 
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
+
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitDeadlockException;
+import org.opendaylight.controller.md.sal.common.util.jmx.ThreadExecutorStatsMXBeanImpl;
 import org.opendaylight.controller.md.sal.dom.broker.impl.DOMDataBrokerImpl;
+import org.opendaylight.controller.md.sal.dom.broker.impl.jmx.CommitStatsMXBeanImpl;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreFactory;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.yangtools.util.concurrent.DeadlockDetectingListeningExecutorService;
@@ -23,6 +25,8 @@ import com.google.common.collect.ImmutableMap;
 */
 public final class DomInmemoryDataBrokerModule extends
         org.opendaylight.controller.config.yang.md.sal.dom.impl.AbstractDomInmemoryDataBrokerModule {
+
+    private static final String JMX_BEAN_TYPE = "DOMDataBroker";
 
     public DomInmemoryDataBrokerModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier,
             final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
@@ -78,7 +82,7 @@ public final class DomInmemoryDataBrokerModule extends
          * nothing on success. The executor queue capacity is bounded and, if the capacity is
          * reached, subsequent submitted tasks will block the caller.
          */
-        Executor listenableFutureExecutor = SpecialExecutors.newBlockingBoundedCachedThreadPool(
+        ExecutorService listenableFutureExecutor = SpecialExecutors.newBlockingBoundedCachedThreadPool(
                 getMaxDataBrokerFutureCallbackPoolSize(), getMaxDataBrokerFutureCallbackQueueSize(),
                 "CommitFutures");
 
@@ -86,6 +90,29 @@ public final class DomInmemoryDataBrokerModule extends
                 new DeadlockDetectingListeningExecutorService(commitExecutor,
                     TransactionCommitDeadlockException.DEADLOCK_EXECUTOR_FUNCTION,
                     listenableFutureExecutor));
+
+        final CommitStatsMXBeanImpl commitStatsMXBean = new CommitStatsMXBeanImpl(
+                newDataBroker.getCommitStatsTracker(), JMX_BEAN_TYPE);
+        commitStatsMXBean.registerMBean();
+
+        final ThreadExecutorStatsMXBeanImpl commitExecutorStatsMXBean =
+                new ThreadExecutorStatsMXBeanImpl(commitExecutor, "CommitExecutorStats",
+                        JMX_BEAN_TYPE, null);
+        commitExecutorStatsMXBean.registerMBean();
+
+        final ThreadExecutorStatsMXBeanImpl commitFutureStatsMXBean =
+                new ThreadExecutorStatsMXBeanImpl(listenableFutureExecutor,
+                        "CommitFutureExecutorStats", JMX_BEAN_TYPE, null);
+        commitFutureStatsMXBean.registerMBean();
+
+        newDataBroker.setCloseable(new AutoCloseable() {
+            @Override
+            public void close() {
+                commitStatsMXBean.unregisterMBean();
+                commitExecutorStatsMXBean.unregisterMBean();
+                commitFutureStatsMXBean.unregisterMBean();
+            }
+        });
 
         return newDataBroker;
     }
