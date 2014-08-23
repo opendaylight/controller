@@ -12,8 +12,6 @@ package org.opendaylight.controller.sal.core.spi.data;
  * sequence and each transaction must see the effects of previous transactions
  * as if they happened. A chain makes no guarantees of atomicity, in fact
  * transactions are committed as soon as possible.
- *
- *
  */
 public interface DOMStoreTransactionChain extends DOMStoreTransactionFactory, AutoCloseable {
 
@@ -35,7 +33,7 @@ public interface DOMStoreTransactionChain extends DOMStoreTransactionFactory, Au
      *             if the chain has been closed.
      */
     @Override
-    public DOMStoreReadTransaction newReadOnlyTransaction();
+    DOMStoreReadTransaction newReadOnlyTransaction();
 
     /**
      * Create a new read write transaction which will continue the chain. The
@@ -55,10 +53,10 @@ public interface DOMStoreTransactionChain extends DOMStoreTransactionFactory, Au
      *             if the chain has been closed.
      */
     @Override
-    public DOMStoreReadWriteTransaction newReadWriteTransaction();
+    DOMStoreReadWriteTransaction newReadWriteTransaction();
 
     /**
-     * Create a new read write transaction which will continue the chain. The
+     * Create a new write-only transaction which will continue the chain. The
      * previous read-write transaction has to be either READY or CANCELLED.
      *
      *
@@ -68,8 +66,7 @@ public interface DOMStoreTransactionChain extends DOMStoreTransactionFactory, Au
      *             if the chain has been closed.
      */
     @Override
-    public DOMStoreWriteTransaction newWriteOnlyTransaction();
-
+    DOMStoreWriteTransaction newWriteOnlyTransaction();
 
     /**
      * Closes Transaction Chain.
@@ -80,6 +77,5 @@ public interface DOMStoreTransactionChain extends DOMStoreTransactionFactory, Au
      * @throws IllegalStateException If any of the outstanding created transactions was not canceled or ready.
      */
     @Override
-    public void close();
-
+    void close();
 }
