@@ -34,6 +34,24 @@
       "revId": "b722eef1f7eb101d3d7ea12cd1b1c5481d606c90",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3caeca2e",
+        "filename": "features/adsal/src/main/resources/features.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-08-23T13:31:06Z",
+      "side": 1,
+      "message": "Yep... I know its a carry forward.  Thank you for the work on this :)",
+      "parentUuid": "fa82b9bf_bc8e5a2c",
+      "revId": "b722eef1f7eb101d3d7ea12cd1b1c5481d606c90",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
