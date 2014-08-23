@@ -109,8 +109,9 @@ public class Shard extends RaftActor {
 
         store = InMemoryDOMDataStoreFactory.create(name.toString(), null, dataStoreProperties);
 
-        shardMBean = ShardMBeanFactory.getShardStatsMBean(name.toString());
-
+        shardMBean = ShardMBeanFactory.getShardStatsMBean(name.toString(), mxBeanType);
+        shardMBean.setDataStoreExecutor(store.getDomStoreExecutor());
+        shardMBean.setNotificationManager(store.getDataChangeListenerNotificationManager());
     }
 
     private static Map<String, String> mapPeerAddresses(
@@ -272,7 +273,7 @@ public class Shard extends RaftActor {
             public void onSuccess(Void v) {
                sender.tell(new CommitTransactionReply().toSerializable(),self);
                shardMBean.incrementCommittedTransactionCount();
-               shardMBean.setLastCommittedTransactionTime(new Date());
+               shardMBean.setLastCommittedTransactionTime(System.currentTimeMillis());
             }
 
             public void onFailure(Throwable t) {

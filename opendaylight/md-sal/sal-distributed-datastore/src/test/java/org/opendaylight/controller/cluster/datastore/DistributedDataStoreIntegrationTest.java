@@ -69,10 +69,12 @@ public class DistributedDataStoreIntegrationTest {
             {
 
                 new Within(duration("10 seconds")) {
+                    @Override
                     protected void run() {
                         try {
                             final DistributedDataStore distributedDataStore =
-                                new DistributedDataStore(getSystem(), "config", new MockClusterWrapper(), configuration, null);
+                                new DistributedDataStore(getSystem(), "config", new MockClusterWrapper(),
+                                        configuration, null, null);
 
                             distributedDataStore.onGlobalContextUpdated(TestModel.createTestContext());
 
@@ -80,6 +82,7 @@ public class DistributedDataStoreIntegrationTest {
                             final boolean result =
                                 new JavaTestKit.EventFilter<Boolean>(Logging.Info.class
                                     ) {
+                                    @Override
                                     protected Boolean run() {
                                         return true;
                                     }
@@ -150,11 +153,12 @@ public class DistributedDataStoreIntegrationTest {
             {
 
                 new Within(duration("10 seconds")) {
+                    @Override
                     protected void run() {
                         try {
                             final DistributedDataStore distributedDataStore =
                                 new DistributedDataStore(getSystem(), "config",
-                                    new MockClusterWrapper(), configuration, null);
+                                    new MockClusterWrapper(), configuration, null, null);
 
                             distributedDataStore.onGlobalContextUpdated(
                                 SchemaContextHelper.full());
@@ -164,6 +168,7 @@ public class DistributedDataStoreIntegrationTest {
                                 new JavaTestKit.EventFilter<Boolean>(
                                     Logging.Info.class
                                 ) {
+                                    @Override
                                     protected Boolean run() {
                                         return true;
                                     }

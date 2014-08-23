@@ -42,11 +42,12 @@ public class ShardManagerTest {
         new JavaTestKit(system) {{
             final Props props = ShardManager
                 .props("config", new MockClusterWrapper(),
-                    new MockConfiguration(), null);
+                    new MockConfiguration(), null, null);
             final TestActorRef<ShardManager> subject =
                 TestActorRef.create(system, props);
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     subject.tell(new FindPrimary("inventory").toSerializable(), getRef());
@@ -66,11 +67,12 @@ public class ShardManagerTest {
         new JavaTestKit(system) {{
             final Props props = ShardManager
                 .props("config", new MockClusterWrapper(),
-                    new MockConfiguration(), null);
+                    new MockConfiguration(), null, null);
             final TestActorRef<ShardManager> subject =
                 TestActorRef.create(system, props);
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     subject.tell(new FindPrimary(Shard.DEFAULT_NAME).toSerializable(), getRef());
@@ -89,16 +91,18 @@ public class ShardManagerTest {
         new JavaTestKit(system) {{
             final Props props = ShardManager
                 .props("config", new MockClusterWrapper(),
-                    new MockConfiguration(), null);
+                    new MockConfiguration(), null, null);
             final TestActorRef<ShardManager> subject =
                 TestActorRef.create(system, props);
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     subject.tell(new FindLocalShard("inventory"), getRef());
 
                     final String out = new ExpectMsg<String>(duration("1 seconds"), "find local") {
+                        @Override
                         protected String match(Object in) {
                             if (in instanceof LocalShardNotFound) {
                                 return ((LocalShardNotFound) in).getShardName();
@@ -124,16 +128,18 @@ public class ShardManagerTest {
         new JavaTestKit(system) {{
             final Props props = ShardManager
                 .props("config", mockClusterWrapper,
-                    new MockConfiguration(), null);
+                    new MockConfiguration(), null, null);
             final TestActorRef<ShardManager> subject =
                 TestActorRef.create(system, props);
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     subject.tell(new FindLocalShard(Shard.DEFAULT_NAME), getRef());
 
                     final ActorRef out = new ExpectMsg<ActorRef>(duration("1 seconds"), "find local") {
+                        @Override
                         protected ActorRef match(Object in) {
                             if (in instanceof LocalShardFound) {
                                 return ((LocalShardFound) in).getPath();
@@ -158,12 +164,13 @@ public class ShardManagerTest {
         new JavaTestKit(system) {{
             final Props props = ShardManager
                 .props("config", new MockClusterWrapper(),
-                    new MockConfiguration(), null);
+                    new MockConfiguration(), null, null);
             final TestActorRef<ShardManager> subject =
                 TestActorRef.create(system, props);
 
             // the run() method needs to finish within 3 seconds
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     MockClusterWrapper.sendMemberUp(subject, "member-2", getRef().path().toString());
@@ -172,6 +179,7 @@ public class ShardManagerTest {
 
                     final String out = new ExpectMsg<String>(duration("1 seconds"), "primary found") {
                         // do not put code outside this method, will run afterwards
+                        @Override
                         protected String match(Object in) {
                             if (in.getClass().equals(PrimaryFound.SERIALIZABLE_CLASS)) {
                                 PrimaryFound f = PrimaryFound.fromSerializable(in);
@@ -196,12 +204,13 @@ public class ShardManagerTest {
         new JavaTestKit(system) {{
             final Props props = ShardManager
                 .props("config", new MockClusterWrapper(),
-                    new MockConfiguration(), null);
+                    new MockConfiguration(), null, null);
             final TestActorRef<ShardManager> subject =
                 TestActorRef.create(system, props);
 
             // the run() method needs to finish within 3 seconds
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     MockClusterWrapper.sendMemberUp(subject, "member-2", getRef().path().toString());

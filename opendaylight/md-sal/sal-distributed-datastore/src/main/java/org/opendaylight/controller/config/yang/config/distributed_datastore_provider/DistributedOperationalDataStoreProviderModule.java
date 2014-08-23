@@ -30,7 +30,8 @@ public class DistributedOperationalDataStoreProviderModule extends
                 getOperationalSchemaServiceDependency(),
                 InMemoryDOMDataStoreConfigProperties.create(getOperationalMaxShardDataChangeExecutorPoolSize(),
                         getOperationalMaxShardDataChangeExecutorQueueSize(),
-                        getOperationalMaxShardDataChangeListenerQueueSize()));
+                        getOperationalMaxShardDataChangeListenerQueueSize(),
+                        getMaxShardDataStoreExecutorQueueSize()));
     }
 
 }

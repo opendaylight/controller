@@ -40,6 +40,7 @@ module distributed-datastore-provider {
     augment "/config:modules/config:module/config:configuration" {
         case distributed-config-datastore-provider {
             when "/config:modules/config:module/config:type = 'distributed-config-datastore-provider'";
+
             container config-schema-service {
                 uses config:service-ref {
                     refine type {
@@ -66,6 +67,12 @@ module distributed-datastore-provider {
                 type uint16;
                 description "The maximum queue size for each shard's data store data change listeners.";
             }
+
+            leaf max-shard-data-store-executor-queue-size {
+                default 5000;
+                type uint16;
+                description "The maximum queue size for each shard's data store executor.";
+            }
         }
     }
 
@@ -73,14 +80,15 @@ module distributed-datastore-provider {
     augment "/config:modules/config:module/config:configuration" {
         case distributed-operational-datastore-provider {
             when "/config:modules/config:module/config:type = 'distributed-operational-datastore-provider'";
-                container operational-schema-service {
-                    uses config:service-ref {
-                        refine type {
-                            mandatory false;
-                            config:required-identity sal:schema-service;
-                        }
+
+            container operational-schema-service {
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity sal:schema-service;
                     }
                 }
+            }
 
             leaf operational-max-shard-data-change-executor-queue-size {
                 default 1000;
@@ -99,6 +107,12 @@ module distributed-datastore-provider {
                 type uint16;
                 description "The maximum queue size for each shard's data store data change listeners.";
             }
+
+            leaf max-shard-data-store-executor-queue-size {
+                default 5000;
+                type uint16;
+                description "The maximum queue size for each shard's data store executor.";
             }
         }
+    }
 }
