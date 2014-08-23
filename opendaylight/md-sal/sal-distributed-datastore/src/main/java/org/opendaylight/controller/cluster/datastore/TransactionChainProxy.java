@@ -36,13 +36,13 @@ public class TransactionChainProxy implements DOMStoreTransactionChain{
     @Override
     public DOMStoreReadWriteTransaction newReadWriteTransaction() {
         return new TransactionProxy(actorContext,
-            TransactionProxy.TransactionType.WRITE_ONLY, schemaContext);
+            TransactionProxy.TransactionType.READ_WRITE, schemaContext);
     }
 
     @Override
     public DOMStoreWriteTransaction newWriteOnlyTransaction() {
         return new TransactionProxy(actorContext,
-            TransactionProxy.TransactionType.READ_WRITE, schemaContext);
+            TransactionProxy.TransactionType.WRITE_ONLY, schemaContext);
     }
 
     @Override
