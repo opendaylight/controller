@@ -52,6 +52,24 @@
       "revId": "b722eef1f7eb101d3d7ea12cd1b1c5481d606c90",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_57084727",
+        "filename": "features/adsal/src/main/resources/features.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-08-23T16:24:06Z",
+      "side": 1,
+      "message": "It is.. I\u0027ll try to cleanup if Madhu doesn\u0027t beat me to it.. :)",
+      "parentUuid": "fa82b9bf_3caeca2e",
+      "revId": "b722eef1f7eb101d3d7ea12cd1b1c5481d606c90",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
