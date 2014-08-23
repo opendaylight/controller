@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_1c8c26d9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-23T12:49:44Z",
+      "side": 1,
+      "message": "This part is tricky - it\u0027s kind of a chicken and the egg thing here. The Tx operations are done in the TransactionContextImpl class but, if we get here, then we don\u0027t have  a TransactionContextImpl instance yet. We may be able to do this with Future transforms so we don\u0027t have to block. The trickiness would come with the next Tx operation call by the client. I\u0027ll have to think about it some more. \n\nMoiz and I intended to first handle put/merge/delete errors async, then handle readyTransaction async, then look at handling initial Tx create async, i.e. do them in stages. I\u0027ve the actually done the first 2 in this patch b/c it turns out they went hand-in-hand. I\u0027d prefer to defer the 3rd to another patch, if we decide it\u0027s reasonably possible to do it async.",
+      "parentUuid": "fa82b9bf_dc4c7eca",
+      "revId": "2a314ba968981c8646612c4ddaa6a1b324b64c03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_81144d4d",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
         "patchSetId": 4
