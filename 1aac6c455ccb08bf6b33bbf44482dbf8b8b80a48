@@ -1,0 +1,76 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_f242c9a9",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/CompositeNodeCompatibility.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-24T22:00:18Z",
+      "side": 1,
+      "message": "This code is based on DataNormalizer so I would assume all conditions are taken care of.\n\nAugmentation is taken care of by the MixinNode/NormalizedNodeContainer. All other cases are handled by addToBuilder which eventually finds a Leaf/LeafList node and adds it to the output. I do not believe there is any special handling required.",
+      "parentUuid": "fa82b9bf_124e4d3b",
+      "revId": "1aac6c455ccb08bf6b33bbf44482dbf8b8b80a48",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_92157d9d",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/CompositeNodeCompatibility.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-24T22:00:18Z",
+      "side": 1,
+      "message": "It could if the node was a MixinNode so this is valid. Also code pattern is from DataNormalizer.",
+      "parentUuid": "fa82b9bf_d25305e0",
+      "revId": "1aac6c455ccb08bf6b33bbf44482dbf8b8b80a48",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b218c1d3",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/CompositeNodeCompatibility.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-24T22:00:18Z",
+      "side": 1,
+      "message": "Looks like for datastore this is not a concern. Will need to check further on that - a separate commit maybe.",
+      "parentUuid": "fa82b9bf_52aff57c",
+      "revId": "1aac6c455ccb08bf6b33bbf44482dbf8b8b80a48",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_720eb98d",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/CompositeNodeCompatibility.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 474,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-24T22:00:18Z",
+      "side": 1,
+      "message": "It is. It\u0027s just that the \u0027schema\u0027 information needs to be derived from the DataSchema of ChoiceNode.",
+      "parentUuid": "fa82b9bf_f2bde9b1",
+      "revId": "1aac6c455ccb08bf6b33bbf44482dbf8b8b80a48",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
