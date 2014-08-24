@@ -6,11 +6,11 @@
   <repository>mvn:org.opendaylight.yangtools/features-yangtools/${yangtools.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.controller/features-netconf/${netconf.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.controller/features-config/${config.version}/xml/features</repository>
-  <feature name='odl-config-all' version='${project.version}'>
+  <feature name='odl-config-persister-all' version='${project.version}' description="OpenDaylight :: Config Persister:: All">
     <feature version='${project.version}'>odl-config-persister</feature>
     <feature version='${project.version}'>odl-config-startup</feature>
   </feature>
-  <feature name='odl-config-persister' version='${project.version}'>
+  <feature name='odl-config-persister' version='${project.version}' description="OpenDaylight :: Config Persister ">
     <feature version='${netconf.version}'>odl-netconf-api</feature>
     <feature version='${project.version}'>odl-config-api</feature>
     <feature version='${yangtools.version}'>odl-yangtools-binding-generator</feature>
@@ -27,7 +27,7 @@
     <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.core/${eclipse.persistence.version}</bundle>
     <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.moxy/${eclipse.persistence.version}</bundle>
   </feature>
-  <feature name='odl-config-startup' version='${project.version}'>
+  <feature name='odl-config-startup' version='${project.version}' description="OpenDaylight :: Config Persister:: Config Startup">
     <feature version='${project.version}'>odl-config-netconf-connector</feature>
     <feature version='${project.version}'>odl-config-persister</feature>
     <feature version='${project.version}'>odl-netconf-impl</feature>
