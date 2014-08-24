@@ -13,6 +13,7 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.testkit.TestActorRef;
+import akka.util.Timeout;
 
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListeningExecutorService;
@@ -184,17 +185,17 @@ public class ThreePhaseCommitCohortFailureTest extends AbstractActorTest {
 
             ).build();
 
+        Timeout askTimeout = new Timeout(ASK_RESULT_DURATION);
+
         //This is done so that Modification list is updated which is used during commit
-        Future future =
-            akka.pattern.Patterns.ask(shardTransaction, writeData, 3000);
+        Future<Object> future = akka.pattern.Patterns.ask(shardTransaction, writeData, askTimeout);
 
         //ready transaction creates the cohort so that we get into the
         //block where in commmit is done
         ShardTransactionMessages.ReadyTransaction readyTransaction =
             ShardTransactionMessages.ReadyTransaction.newBuilder().build();
 
-        future =
-            akka.pattern.Patterns.ask(shardTransaction, readyTransaction, 3000);
+        future = akka.pattern.Patterns.ask(shardTransaction, readyTransaction, askTimeout);
 
         //but when the message is sent it will have the MockCommit object
         //so that we can simulate throwing of exception
@@ -215,10 +216,7 @@ public class ThreePhaseCommitCohortFailureTest extends AbstractActorTest {
         when(mockModification.toSerializable()).thenReturn(
             PersistentMessages.CompositeModification.newBuilder().build());
 
-        future =
-            akka.pattern.Patterns.ask(subject,
-                mockForwardCommitTransaction
-                , 3000);
+        future = akka.pattern.Patterns.ask(subject, mockForwardCommitTransaction, askTimeout);
         Await.result(future, ASK_RESULT_DURATION);
     }
 
