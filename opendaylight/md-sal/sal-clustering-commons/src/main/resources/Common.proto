@@ -11,7 +11,10 @@ message Attribute{
 }
 
 message QName {
-    required string value=1;
+    optional string value=1; // may not be used
+    optional int32 namespace=2 [default = -1];
+    optional int32 revision=3 [default = -1];
+    optional string localName=4;
 }
 
 message PathArgument {
@@ -27,14 +30,17 @@ message InstanceIdentifier {
 }
 
 message Node{
-  optional string path = 1;
-  optional string type = 2;
+  optional string path = 1; // may not be used
+  optional string type = 2; // LeafNode, ContainerNode and such
   repeated Attribute attributes = 3;
   repeated Node child=4;
   optional string value = 5;
   optional string valueType = 6;
   repeated string bitsValue = 7;
   optional InstanceIdentifier instanceIdentifierValue = 8;
+  optional QName nodeType = 9; // yang node type
+  repeated string namespace=10; // a list of namespaces that appear in a top level node
+  repeated string revision=11; // a list of revisions that appear in a top level node
 }
 
 message Container{
