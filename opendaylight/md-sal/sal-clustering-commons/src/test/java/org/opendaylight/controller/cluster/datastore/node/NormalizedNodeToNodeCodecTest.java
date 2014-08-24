@@ -78,27 +78,30 @@ public class NormalizedNodeToNodeCodecTest {
 
     NormalizedNodeToNodeCodec codec =
         new NormalizedNodeToNodeCodec(schemaContext);
-    long start = System.currentTimeMillis();
+    long start = System.nanoTime();
     Container container =
         codec.encode(instanceIdentifierFromString(id), output);
-    long end = System.currentTimeMillis();
+    long end = System.nanoTime();
 
-    System.out.println("Timetaken to encode :"+(end-start));
+    System.out.println("Timetaken to encode (nanos) :"+(end-start));
 
     assertNotNull(container);
-    assertEquals(id, container.getParentPath() + "/"
-        + container.getNormalizedNode().getPath());
+      CompositeNodeCompatibility.TopLevelNode topLevelNode =
+          new CompositeNodeCompatibility.TopLevelNode(
+              container.getNormalizedNode());
+      assertEquals(id, container.getParentPath() + "/"
+        + CompositeNodeCompatibility.toString(topLevelNode, container.getNormalizedNode().getNodeType()));
 
     // Decode the normalized node from the ProtocolBuffer form
     // first get the node representation of normalized node
     final Node node = container.getNormalizedNode();
 
-    start = System.currentTimeMillis();
+    start = System.nanoTime();
     NormalizedNode<?, ?> normalizedNode =
         codec.decode(instanceIdentifierFromString(id), node);
-    end = System.currentTimeMillis();
+    end = System.nanoTime();
 
-    System.out.println("Timetaken to decode :"+(end-start));
+    System.out.println("Timetaken to decode (nanos) :"+(end-start));
 
     assertEquals(normalizedNode.getValue().toString(), output.getValue()
         .toString());
@@ -139,7 +142,9 @@ public class NormalizedNodeToNodeCodecTest {
     // check first level children are proper
     List<Node> childrenResult =
         containerResult.getNormalizedNode().getChildList();
-    List<Node> childrenOriginal = container.getNormalizedNode().getChildList();
+
+      CompositeNodeCompatibility.TopLevelNode topLevelNode = new CompositeNodeCompatibility.TopLevelNode(container.getNormalizedNode());
+      List<Node> childrenOriginal = container.getNormalizedNode().getChildList();
 
     System.out.println("-------------------------------------------------");
 
@@ -153,7 +158,8 @@ public class NormalizedNodeToNodeCodecTest {
     for (Node resultChild : childrenResult) {
       bFound = false;
       for (Node originalChild : childrenOriginal) {
-        if (originalChild.getPath().equals(resultChild.getPath())
+        if (CompositeNodeCompatibility.toString(topLevelNode, originalChild.getNodeType())
+            .equals(CompositeNodeCompatibility.toString(topLevelNode, resultChild.getNodeType()))
             && resultChild.getType().equals(resultChild.getType())) {
           bFound = true;
           break;
