@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_b288c171",
+        "filename": "features/base/src/main/resources/features.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-08-24T18:01:54Z",
+      "side": 1,
+      "message": "Cosmetic nit... the start\u003d\"true\" is the default... so no need to set it (I checked in with the karaf guys to be sure).",
+      "revId": "1047adbeeb82ae80ad047e3a861e1034ade45f7e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
