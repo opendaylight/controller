@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <features name="adsal-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
    xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+   <repository>mvn:org.opendaylight.controller/features-base/${commons.opendaylight.version}/xml/features</repository>
    <feature name="odl-adsal-all" description="OpenDaylight AD-SAL All Features" version="${sal.version}">
       <feature version="${sal.version}">odl-adsal-core</feature>
       <feature version="${sal.networkconfiguration.version}">odl-adsal-networkconfiguration</feature>
@@ -12,12 +13,13 @@
       <feature>base-felix-dm</feature>
       <feature>base-dummy-console</feature>
       <feature version="${project.version}">odl-adsal-thirdparty</feature>
-      <bundle start="true" start-level="35">mvn:org.apache.commons/commons-lang3/${commons.lang3.version}</bundle>
+      <bundle start="true">mvn:org.apache.commons/commons-lang3/${commons.lang3.version}</bundle>
   <!--    <bundle>mvn:org.osgi/org.osgi.compendium/${osgi.compendium.version}</bundle> -->
       <bundle>mvn:org.opendaylight.controller/sal/${sal.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/sal.implementation/${sal.implementation.version}</bundle>
    </feature>
    <feature name="odl-adsal-networkconfiguration" description="OpenDaylight :: AD-SAL :: Network Configuration" version="${sal.networkconfiguration.version}">
+      <feature>odl-adsal-core</feature>
       <bundle>mvn:org.opendaylight.controller/sal.networkconfiguration/${sal.networkconfiguration.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/sal.networkconfiguration.implementation/${sal.networkconfiguration.version}</bundle>
    </feature>
