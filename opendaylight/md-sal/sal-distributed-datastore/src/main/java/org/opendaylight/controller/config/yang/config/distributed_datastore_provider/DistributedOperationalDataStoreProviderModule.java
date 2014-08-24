@@ -34,10 +34,12 @@ public class DistributedOperationalDataStoreProviderModule extends
 
         return DistributedDataStoreFactory.createInstance("operational",
                 getOperationalSchemaServiceDependency(),
-                new DistributedDataStoreProperties(props.getMaxShardDataChangeExecutorPoolSize(),
-                        props.getMaxShardDataChangeExecutorQueueSize(),
-                        props.getMaxShardDataChangeListenerQueueSize(),
-                        props.getShardTransactionIdleTimeoutInMinutes()));
+                new DistributedDataStoreProperties(
+                        props.getMaxShardDataChangeExecutorPoolSize().getValue(),
+                        props.getMaxShardDataChangeExecutorQueueSize().getValue(),
+                        props.getMaxShardDataChangeListenerQueueSize().getValue(),
+                        props.getShardTransactionIdleTimeoutInMinutes().getValue(),
+                        props.getOperationTimeoutInSeconds().getValue()));
     }
 
 }
