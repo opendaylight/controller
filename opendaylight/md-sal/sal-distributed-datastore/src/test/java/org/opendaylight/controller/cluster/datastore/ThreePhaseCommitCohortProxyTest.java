@@ -35,7 +35,6 @@ import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.DoNothingActor;
 
 import scala.concurrent.Future;
-import scala.concurrent.duration.FiniteDuration;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -93,12 +92,12 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
         }
 
         stubber.when(actorContext).executeRemoteOperationAsync(any(ActorSelection.class),
-                isA(requestType), any(FiniteDuration.class));
+                isA(requestType));
     }
 
     private void verifyCohortInvocations(int nCohorts, Class<?> requestType) {
         verify(actorContext, times(nCohorts)).executeRemoteOperationAsync(
-                any(ActorSelection.class), isA(requestType), any(FiniteDuration.class));
+                any(ActorSelection.class), isA(requestType));
     }
 
     private void propagateExecutionExceptionCause(ListenableFuture<?> future) throws Throwable {

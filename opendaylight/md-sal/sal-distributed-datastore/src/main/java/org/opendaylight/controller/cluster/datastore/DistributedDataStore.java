@@ -70,6 +70,8 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
         actorContext = new ActorContext(actorSystem, actorSystem
             .actorOf(ShardManager.props(type, cluster, configuration, shardContext),
                 shardManagerId ), cluster, configuration);
+
+        actorContext.setOperationTimeout(dataStoreProperties.getRemoteOperationTimeoutInSeconds());
     }
 
     public DistributedDataStore(ActorContext actorContext) {
@@ -97,7 +99,7 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
 
         Object result = actorContext.executeLocalShardOperation(shardName,
             new RegisterChangeListener(path, dataChangeListenerActor.path(), scope),
-            ActorContext.ASK_DURATION);
+            ActorContext.DEFAULT_OPER_DURATION);
 
         if (result != null) {
             RegisterChangeListenerReply reply = (RegisterChangeListenerReply) result;

@@ -33,12 +33,12 @@ public class MockActorContext extends ActorContext {
 
 
     @Override public Object executeShardOperation(String shardName,
-        Object message, FiniteDuration duration) {
+        Object message) {
         return executeShardOperationResponse;
     }
 
     @Override public Object executeRemoteOperation(ActorSelection actor,
-        Object message, FiniteDuration duration) {
+        Object message) {
         return executeRemoteOperationResponse;
     }
 
@@ -76,7 +76,7 @@ public class MockActorContext extends ActorContext {
 
     @Override
     public Object executeLocalOperation(ActorRef actor,
-        Object message, FiniteDuration duration) {
+        Object message) {
         return this.executeLocalOperationResponse;
     }
 
