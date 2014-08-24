@@ -21,8 +21,7 @@ public class TestUtils {
         ActorContext testContext = new ActorContext(actorSystem, actorSystem.actorOf(
             Props.create(DoNothingActor.class)), new MockClusterWrapper(), new MockConfiguration());
         Object messages = testContext
-            .executeLocalOperation(actorRef, "messages",
-                ActorContext.ASK_DURATION);
+            .executeLocalOperation(actorRef, "messages");
 
         Assert.assertNotNull(messages);
 
