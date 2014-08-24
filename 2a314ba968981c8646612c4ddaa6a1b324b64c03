@@ -73,6 +73,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_775a2bf3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-24T05:39:10Z",
+      "side": 1,
+      "message": "Sounds good.",
+      "parentUuid": "fa82b9bf_1c8c26d9",
+      "revId": "2a314ba968981c8646612c4ddaa6a1b324b64c03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_81144d4d",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
         "patchSetId": 4
