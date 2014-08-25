@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication;
 
-import ch.ethz.ssh2.Connection;
 import java.io.IOException;
 import org.apache.sshd.ClientSession;
 
@@ -16,8 +15,6 @@ import org.apache.sshd.ClientSession;
  * Class providing authentication facility to SSH handler.
  */
 public abstract class AuthenticationHandler {
-    public abstract void authenticate(Connection connection) throws IOException;
-
 
     public abstract String getUsername();
 
