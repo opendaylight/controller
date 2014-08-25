@@ -9,13 +9,10 @@
 package org.opendaylight.controller.netconf.it;
 
 import static java.util.Arrays.asList;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
-import ch.ethz.ssh2.Connection;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -30,8 +27,6 @@ import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
@@ -47,6 +42,7 @@ import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProduce
 import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
 import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.AuthenticationHandler;
+import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.LoginPassword;
 import org.opendaylight.controller.netconf.ssh.NetconfSSHServer;
 import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
 import org.opendaylight.controller.netconf.ssh.authentication.AuthProviderImpl;
@@ -144,16 +140,6 @@ public class NetconfITSecureTest extends AbstractNetconfConfigTest {
     }
 
     public AuthenticationHandler getAuthHandler() throws IOException {
-        final AuthenticationHandler authHandler = mock(AuthenticationHandler.class);
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(final InvocationOnMock invocation) throws Throwable {
-                Connection conn = (Connection) invocation.getArguments()[0];
-                conn.authenticateWithPassword("user", "pwd");
-                return null;
-            }
-        }).when(authHandler).authenticate(any(Connection.class));
-        doReturn("auth handler").when(authHandler).toString();
-        return authHandler;
+        return new LoginPassword("user", "pwd");
     }
 }
