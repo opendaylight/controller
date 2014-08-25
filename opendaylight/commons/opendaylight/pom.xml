@@ -216,7 +216,8 @@
     <yang-ext.version>2013.09.07.4-SNAPSHOT</yang-ext.version>
     <yang-jmx-generator.version>1.0.0-SNAPSHOT</yang-jmx-generator.version>
     <yangtools.version>0.6.2-SNAPSHOT</yangtools.version>
-      <sshd-core.version>0.12.0</sshd-core.version>
+    <aaa.version>0.1.0-SNAPSHOT</aaa.version>
+    <sshd-core.version>0.12.0</sshd-core.version>
   </properties>
 
   <dependencyManagement>

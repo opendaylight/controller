@@ -52,6 +52,15 @@
           down with testing... ie, no broken feature repos
     -->
 
+    <!-- AAA Related Features -->
+    <dependency>
+      <groupId>org.opendaylight.aaa</groupId>
+      <artifactId>features-aaa</artifactId>
+      <version>${aaa.version}</version>
+      <classifier>features</classifier>
+      <type>xml</type>
+    </dependency>
+
     <!-- AD-SAL Related Features -->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
