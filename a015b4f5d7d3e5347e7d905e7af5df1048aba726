@@ -16,6 +16,24 @@
       "revId": "a015b4f5d7d3e5347e7d905e7af5df1048aba726",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b732f0ef",
+        "filename": "opendaylight/md-sal/sal-inmemory-datastore/src/main/java/org/opendaylight/controller/md/sal/dom/store/impl/SnapshotBackedReadTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-08-25T12:50:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_1c7ae6bc",
+      "revId": "a015b4f5d7d3e5347e7d905e7af5df1048aba726",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
