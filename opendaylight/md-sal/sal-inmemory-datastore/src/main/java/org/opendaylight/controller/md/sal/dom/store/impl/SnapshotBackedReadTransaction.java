@@ -33,7 +33,7 @@ final class SnapshotBackedReadTransaction extends AbstractDOMStoreTransaction
                                           implements DOMStoreReadTransaction {
 
     private static final Logger LOG = LoggerFactory.getLogger(SnapshotBackedReadTransaction.class);
-    private DataTreeSnapshot stableSnapshot;
+    private volatile DataTreeSnapshot stableSnapshot;
 
     public SnapshotBackedReadTransaction(final Object identifier, final DataTreeSnapshot snapshot) {
         super(identifier);
@@ -52,19 +52,21 @@ final class SnapshotBackedReadTransaction extends AbstractDOMStoreTransaction
         LOG.debug("Tx: {} Read: {}", getIdentifier(), path);
         checkNotNull(path, "Path must not be null.");
 
-        if(stableSnapshot == null) {
+        final DataTreeSnapshot snapshot = stableSnapshot;
+        if (snapshot == null) {
             return Futures.immediateFailedCheckedFuture(new ReadFailedException("Transaction is closed"));
         }
 
         try {
-            return Futures.immediateCheckedFuture(stableSnapshot.readNode(path));
+            return Futures.immediateCheckedFuture(snapshot.readNode(path));
         } catch (Exception e) {
             LOG.error("Tx: {} Failed Read of {}", getIdentifier(), path, e);
             return Futures.immediateFailedCheckedFuture(new ReadFailedException("Read failed",e));
         }
     }
 
-    @Override public CheckedFuture<Boolean, ReadFailedException> exists(YangInstanceIdentifier path) {
+    @Override
+    public CheckedFuture<Boolean, ReadFailedException> exists(YangInstanceIdentifier path) {
         LOG.debug("Tx: {} Exists: {}", getIdentifier(), path);
         checkNotNull(path, "Path must not be null.");
 
