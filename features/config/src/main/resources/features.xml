@@ -5,7 +5,7 @@
           xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
   <repository>mvn:org.opendaylight.yangtools/features-yangtools/${yangtools.version}/xml/features</repository>
 
-  <feature name='odl-config-all' version='${project.version}'>
+  <feature name='odl-config-all' version='${project.version}' description="OpenDaylight :: Config :: All">
       <feature version='${mdsal.version}'>odl-mdsal-common</feature>
       <feature version='${project.version}'>odl-config-api</feature>
       <feature version='${project.version}'>odl-config-netty-config-api</feature>
@@ -13,7 +13,7 @@
       <feature version='${project.version}'>odl-config-manager</feature>
   </feature>
 
-  <feature name='odl-mdsal-common' version='${mdsal.version}'>
+  <feature name='odl-mdsal-common' version='${mdsal.version}' description="OpenDaylight :: Config :: All">
       <feature version='${yangtools.version}'>odl-yangtools-data-binding</feature>
       <bundle>mvn:org.opendaylight.controller/sal-common/${mdsal.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/sal-common-api/${mdsal.version}</bundle>
@@ -21,13 +21,13 @@
       <bundle>mvn:org.opendaylight.controller/sal-common-util/${mdsal.version}</bundle>
   </feature>
 
-  <feature name='odl-config-api' version='${project.version}'>
+  <feature name='odl-config-api' version='${project.version}' description="OpenDaylight :: Config :: API">
     <bundle>mvn:org.opendaylight.controller/config-api/${project.version}</bundle>
     <feature version='${yangtools.version}'>odl-yangtools-common</feature>
     <feature version='${yangtools.version}'>odl-yangtools-binding</feature>
   </feature>
 
-  <feature name='odl-config-netty-config-api' version='${project.version}'>
+  <feature name='odl-config-netty-config-api' version='${project.version}' description="OpenDaylight :: Config :: Netty Config API">
     <feature version='${project.version}'>odl-config-api</feature>
     <bundle>mvn:org.opendaylight.controller/netty-config-api/${project.version}</bundle>
     <bundle>mvn:io.netty/netty-transport/${netty.version}</bundle>
@@ -35,7 +35,7 @@
     <bundle>mvn:io.netty/netty-buffer/${netty.version}</bundle>
   </feature>
 
-  <feature name='odl-config-core' version='${project.version}'>
+  <feature name='odl-config-core' version='${project.version}' description="OpenDaylight :: Config :: Core">
     <feature version='${yangtools.version}'>odl-yangtools-common</feature>
     <feature version='${yangtools.version}'>odl-yangtools-binding</feature>
     <feature version='${yangtools.version}'>odl-yangtools-binding-generator</feature>
@@ -49,7 +49,7 @@
     <bundle>mvn:com.google.guava/guava/${guava.version}</bundle>
     <bundle>mvn:org.javassist/javassist/${javassist.version}</bundle>
   </feature>
-  <feature name='odl-config-manager' version='${project.version}'>
+  <feature name='odl-config-manager' version='${project.version}' description="OpenDaylight :: Config :: Manager">
     <feature version='${project.version}'>odl-config-core</feature>
     <bundle>mvn:org.opendaylight.controller/config-manager/${project.version}</bundle>
   </feature>

@@ -4,7 +4,7 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
   <repository>mvn:org.opendaylight.controller/features-config/${config.version}/xml/features</repository>
-  <feature name='odl-protocol-framework' version='${project.version}'>
+  <feature name='odl-protocol-framework' version='${project.version}' description="OpenDaylight :: Protocol Framework">
     <feature version='${config.version}'>odl-config-api</feature>
     <feature version='${config.version}'>odl-config-netty-config-api</feature>
     <bundle>mvn:org.opendaylight.controller/protocol-framework/${protocol-framework.version}</bundle>

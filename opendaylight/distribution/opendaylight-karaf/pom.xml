@@ -261,6 +261,11 @@
                         <fileset dir="${project.build.directory}/assembly/bin">
                           <include name="karaf"/>
                           <include name="instance"/>
+                          <include name="start"/>
+                          <include name="stop"/>
+                          <include name="status"/>
+                          <include name="client"/>
+                          <include name="shell"/>
                         </fileset>
                     </chmod>
                   </tasks>
