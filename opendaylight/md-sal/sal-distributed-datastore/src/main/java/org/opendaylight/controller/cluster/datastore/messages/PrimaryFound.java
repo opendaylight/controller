@@ -8,10 +8,9 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import org.opendaylight.controller.protobuff.messages.shard.ShardManagerMessages;
 
 public class PrimaryFound implements SerializableMessage {
-  public static final Class SERIALIZABLE_CLASS = ShardManagerMessages.PrimaryFound.class;
+  public static final Class SERIALIZABLE_CLASS = PrimaryFound.class;
   private final String primaryPath;
 
   public PrimaryFound(String primaryPath) {
@@ -49,10 +48,10 @@ public class PrimaryFound implements SerializableMessage {
 
   @Override
   public Object toSerializable() {
-    return  ShardManagerMessages.PrimaryFound.newBuilder().setPrimaryPath(primaryPath).build();
+    return  this;
   }
 
   public static PrimaryFound fromSerializable(Object message){
-    return new PrimaryFound(((ShardManagerMessages.PrimaryFound)message).getPrimaryPath());
+    return (PrimaryFound) message;
   }
 }
