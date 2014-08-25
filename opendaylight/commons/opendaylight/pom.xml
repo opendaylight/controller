@@ -1017,6 +1017,11 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
+        <artifactId>hosttracker.shell</artifactId>
+        <version>${hosttracker.shell.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
         <artifactId>hosttracker_new</artifactId>
         <version>${hosttracker_new.api.version}</version>
       </dependency>
@@ -1051,6 +1056,11 @@
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>logging.bridge</artifactId>
         <version>${logging.bridge.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>dummy-console</artifactId>
+        <version>${dummy-console.version}</version>
       </dependency>
 
       <!-- Netconf -->
@@ -1407,6 +1417,11 @@
         <artifactId>security</artifactId>
         <version>${security.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>karaf-tomcat-security</artifactId>
+        <version>${karaf.security.version}</version>
+      </dependency>
 
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
@@ -1479,6 +1494,11 @@
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>topologymanager</artifactId>
         <version>${topologymanager.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>topologymanager.shell</artifactId>
+        <version>${topologymanager.shell.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
