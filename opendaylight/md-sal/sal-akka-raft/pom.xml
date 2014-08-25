@@ -55,7 +55,18 @@
       <artifactId>scala-library</artifactId>
     </dependency>
 
-    <!-- Test Dependencies -->
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.typesafe.akka</groupId>
+      <artifactId>akka-slf4j_${scala.version}</artifactId>
+    </dependency>
+
+
+      <!-- Test Dependencies -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -110,8 +121,12 @@
         <artifactId>jacoco-maven-plugin</artifactId>
         <configuration>
           <includes>
-            <include>org.opendaylight.controller.*</include>
+            <include>org/opendaylight/controller/cluster/**/*</include>
           </includes>
+          <excludes>
+              <exclude>org/opendaylight/controller/cluster/raft/protobuff/**/*</exclude>
+              <exclude>org/opendaylight/controller/cluster/example/**/*</exclude>
+          </excludes>
           <check>false</check>
         </configuration>
         <executions>
