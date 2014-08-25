@@ -99,7 +99,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         this.identifier = TransactionIdentifier.builder().memberName(memberName).counter(
                 counter.getAndIncrement()).build();
 
-        LOG.debug("Created txn {}", identifier);
+        LOG.debug("Created txn {} of type {}", identifier, transactionType);
 
     }
 
