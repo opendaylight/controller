@@ -1,0 +1,24 @@
+module test-rpc-service {
+    yang-version 1;
+    namespace "urn:test";
+    prefix "rpc";
+
+    revision "2014-08-28" {
+        description 
+            "Initial revision";
+    }
+
+    rpc test-rpc {
+        input {
+            leaf input-data {
+                type string;
+            }
+        }
+        
+        output {
+            leaf output-data {
+                type string;
+            }
+        }
+    }
+}
