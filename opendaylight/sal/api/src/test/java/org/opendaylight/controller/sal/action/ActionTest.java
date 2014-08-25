@@ -1,12 +1,10 @@
-
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013-2014 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.sal.action;
 
 import org.opendaylight.controller.sal.core.ConstructionException;
@@ -176,8 +174,11 @@ public class ActionTest {
         action = new SetTpDst(65535);
         Assert.assertTrue(action.isValid());
 
+        action = new SetTpSrc(0);
+        Assert.assertTrue(action.isValid());
+
         action = new SetTpDst(0);
-        Assert.assertFalse(action.isValid());
+        Assert.assertTrue(action.isValid());
 
         action = new SetTpSrc(-1);
         Assert.assertFalse(action.isValid());

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013-2014 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -1191,7 +1191,7 @@ one.f.flows = {
             var h3 = "Set Transport Source Port";
             var placeholder = "Transport Source Port";
             var id = one.f.flows.id.modal.action.modifyTransportSourcePort;
-            var help = "Range: 1 - 65535";
+            var help = "Range: 0 - 65535";
             var action = 'SET_TP_SRC';
             var name = "Source Port";
             var body = function() {
@@ -1207,7 +1207,7 @@ one.f.flows = {
             var h3 = "Set Transport Destination Port";
             var placeholder = "Transport Destination Port";
             var id = one.f.flows.id.modal.action.modifyTransportDestinationPort;
-            var help = "Range: 1 - 65535";
+            var help = "Range: 0 - 65535";
             var action = 'SET_TP_DST';
             var name = "Destination Port";
             var body = function() {
