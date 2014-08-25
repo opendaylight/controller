@@ -25,7 +25,7 @@ public class NormalizedNodeGetter implements
 
     @Override
     public void visitNode(int level, String parentPath, NormalizedNode normalizedNode) {
-        String nodePath = parentPath + "/"+ normalizedNode.getIdentifier().toString();
+        String nodePath = parentPath + "/"+ PathUtils.toString(normalizedNode.getIdentifier());
 
         if(nodePath.toString().equals(path)){
             output = normalizedNode;

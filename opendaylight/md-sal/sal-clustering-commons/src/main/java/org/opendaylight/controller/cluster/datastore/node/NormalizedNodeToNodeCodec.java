@@ -32,7 +32,7 @@ public class NormalizedNodeToNodeCodec {
         String parentPath = "";
 
         if(id != null){
-            parentPath = PathUtils.getParentPath(id.toString());
+            parentPath = PathUtils.getParentPath(PathUtils.toString(id));
         }
 
 
