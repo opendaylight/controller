@@ -9,15 +9,14 @@ package org.opendaylight.controller.md.sal.binding.impl;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
-import java.util.ArrayList;
+
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
 import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
@@ -88,7 +87,7 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
             final Map<YangInstanceIdentifier, ? extends NormalizedNode<?, ?>> normalized) {
         Map<InstanceIdentifier<?>, DataObject> newMap = new HashMap<>();
 
-        for (Map.Entry<YangInstanceIdentifier, ? extends NormalizedNode<?, ?>> entry : sortedEntries(normalized)) {
+        for (Map.Entry<YangInstanceIdentifier, ? extends NormalizedNode<?, ?>> entry : normalized.entrySet()) {
             try {
                 Optional<Entry<InstanceIdentifier<? extends DataObject>, DataObject>> potential = getCodec().toBinding(entry);
                 if (potential.isPresent()) {
@@ -100,38 +99,6 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
             }
         }
         return newMap;
-    }
-
-    private static final Comparator<Entry<YangInstanceIdentifier, ?>> MAP_ENTRY_COMPARATOR = new Comparator<Entry<YangInstanceIdentifier, ?>>() {
-        @Override
-        public int compare(final Entry<YangInstanceIdentifier, ?> left, final Entry<YangInstanceIdentifier, ?> right) {
-            final Iterator<?> li = left.getKey().getPathArguments().iterator();
-            final Iterator<?> ri = right.getKey().getPathArguments().iterator();
-
-            // Iterate until left is exhausted...
-            while (li.hasNext()) {
-                if (!ri.hasNext()) {
-                    // Left is deeper
-                    return 1;
-                }
-
-                li.next();
-                ri.next();
-            }
-
-            // Check if right is exhausted
-            return ri.hasNext() ? -1 : 0;
-        }
-    };
-
-    private static <T> Iterable<Entry<YangInstanceIdentifier, T>> sortedEntries(final Map<YangInstanceIdentifier, T> map) {
-        if (!map.isEmpty()) {
-            ArrayList<Entry<YangInstanceIdentifier, T>> entries = new ArrayList<>(map.entrySet());
-            Collections.sort(entries, MAP_ENTRY_COMPARATOR);
-            return entries;
-        } else {
-            return Collections.emptySet();
-        }
     }
 
     protected Set<InstanceIdentifier<?>> toBinding(final InstanceIdentifier<?> path,
