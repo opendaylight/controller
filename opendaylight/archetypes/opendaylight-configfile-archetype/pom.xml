@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.opendaylight.controller</groupId>
+  <artifactId>opendaylight-configfile-archetype</artifactId>
+  <version>1.1-SNAPSHOT</version>
+  <packaging>maven-archetype</packaging>
+
+
+  <build>
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.archetype</groupId>
+        <artifactId>archetype-packaging</artifactId>
+        <version>2.2</version>
+      </extension>
+    </extensions>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-archetype-plugin</artifactId>
+          <version>2.2</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+  <description>Configuration files for md-sal</description>
+
+  <scm>
+    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git/md-sal-config</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git/md-sal-config</developerConnection>
+    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL/md-sal-config</url>
+  </scm>
+
+  <distributionManagement>
+    <repository>
+      <id>opendaylight-release</id>
+      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.release/</url>
+    </repository>
+    <snapshotRepository>
+      <id>opendaylight-snapshot</id>
+      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.snapshot/</url>
+    </snapshotRepository>
+    <site>
+      <id>website</id>
+      <url>dav:http://nexus.opendaylight.org/content/sites/site/sal-parent</url>
+    </site>
+  </distributionManagement>
+</project>

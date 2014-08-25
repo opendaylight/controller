@@ -136,6 +136,9 @@
     <module>opendaylight/distribution/opendaylight-karaf</module>
     <module>opendaylight/distribution/opendaylight-karaf-resources</module>
     <module>features</module>
+
+    <!-- archetypes -->
+    <module>opendaylight/archetypes</module>
   </modules>
   <scm>
     <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
