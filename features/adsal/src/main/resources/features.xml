@@ -10,8 +10,8 @@
       <feature version="${configuration.version}">odl-adsal-configuration</feature>
    </feature>
    <feature name="odl-adsal-core" description="OpenDaylight :: AD-SAL :: Core" version="${sal.version}">
-      <feature>base-felix-dm</feature>
-      <feature>base-dummy-console</feature>
+      <feature>odl-base-felix-dm</feature>
+      <feature>odl-base-dummy-console</feature>
       <feature version="${project.version}">odl-adsal-thirdparty</feature>
       <bundle start="true">mvn:org.apache.commons/commons-lang3/${commons.lang3.version}</bundle>
   <!--    <bundle>mvn:org.osgi/org.osgi.compendium/${osgi.compendium.version}</bundle> -->
@@ -30,8 +30,8 @@
    </feature>
    <feature name="odl-adsal-clustering" description="OpenDaylight :: AD-SAL :: Clustering" version="${clustering.services.version}">
       <feature>transaction</feature>
-      <feature>base-felix-dm</feature>
-      <feature>base-eclipselink-persistence</feature>
+      <feature>odl-base-felix-dm</feature>
+      <feature>odl-base-eclipselink-persistence</feature>
       <feature version="${sal.version}">odl-adsal-core</feature>
       <bundle>mvn:org.opendaylight.controller/clustering.services/${clustering.services.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/clustering.services-implementation/${clustering.services_implementation.version}</bundle>
