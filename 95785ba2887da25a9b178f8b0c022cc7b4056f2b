@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_b4faee40",
+        "filename": "opendaylight/config/config-api/src/test/java/org/opendaylight/controller/config/api/JmxAttributeValidationExceptionTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-08-25T10:49:16Z",
+      "side": 1,
+      "message": "Please move tests related only to JmxAttribute to another test file e.g. JmxAttributeTest",
+      "revId": "95785ba2887da25a9b178f8b0c022cc7b4056f2b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_94f48a5b",
+        "filename": "opendaylight/config/config-api/src/test/java/org/opendaylight/controller/config/api/ValidationExceptionTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-08-25T10:49:16Z",
+      "side": 1,
+      "message": "Please remove this changes if there is no real change to the code",
+      "revId": "95785ba2887da25a9b178f8b0c022cc7b4056f2b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
