@@ -15,11 +15,9 @@ import static org.opendaylight.md.controller.topology.manager.FlowCapableNodeMap
 import static org.opendaylight.md.controller.topology.manager.FlowCapableNodeMapping.toTopologyNode;
 import static org.opendaylight.md.controller.topology.manager.FlowCapableNodeMapping.toTopologyNodeId;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
+import java.util.Collections;
+import java.util.List;
+
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
@@ -49,6 +47,12 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 
 class FlowCapableTopologyExporter implements FlowTopologyDiscoveryListener, OpendaylightInventoryListener {
 
@@ -193,8 +197,9 @@ class FlowCapableTopologyExporter implements FlowTopologyDiscoveryListener, Open
                     @Override
                     public void onSuccess(Optional<Topology> topologyOptional) {
                         if (topologyOptional.isPresent()) {
-                            Topology topologyData = topologyOptional.get();
-                            for (Link link : topologyData.getLink()) {
+                            List<Link> linkList = topologyOptional.get().getLink() != null
+                                    ? topologyOptional.get().getLink() : Collections.<Link> emptyList();
+                            for (Link link : linkList) {
                                 if (id.equals(link.getSource().getSourceNode()) || id.equals(link.getDestination().getDestNode())) {
                                     transaction.delete(LogicalDatastoreType.OPERATIONAL, linkPath(link));
                                 }
@@ -220,8 +225,9 @@ class FlowCapableTopologyExporter implements FlowTopologyDiscoveryListener, Open
                     @Override
                     public void onSuccess(Optional<Topology> topologyOptional) {
                         if (topologyOptional.isPresent()) {
-                            Topology topologyData = topologyOptional.get();
-                            for (Link link : topologyData.getLink()) {
+                            List<Link> linkList = topologyOptional.get().getLink() != null
+                                    ? topologyOptional.get().getLink() : Collections.<Link> emptyList();
+                            for (Link link : linkList) {
                                 if (id.equals(link.getSource().getSourceTp()) || id.equals(link.getDestination().getDestTp())) {
                                     transaction.delete(LogicalDatastoreType.OPERATIONAL, linkPath(link));
                                 }
