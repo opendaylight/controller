@@ -75,9 +75,13 @@ public class XmlUtils {
    */
   public static String inputCompositeNodeToXml(CompositeNode cNode, SchemaContext schemaContext){
     LOG.debug("Converting input composite node to xml {}", cNode);
-    if (cNode == null) return BLANK;
+    if (cNode == null) {
+        return BLANK;
+    }
 
-    if(schemaContext == null) return BLANK;
+    if(schemaContext == null) {
+        return BLANK;
+    }
 
     Document domTree = null;
     try {
@@ -108,9 +112,13 @@ public class XmlUtils {
    */
   public static String outputCompositeNodeToXml(CompositeNode cNode, SchemaContext schemaContext){
     LOG.debug("Converting output composite node to xml {}", cNode);
-    if (cNode == null) return BLANK;
+    if (cNode == null) {
+        return BLANK;
+    }
 
-    if(schemaContext == null) return BLANK;
+    if(schemaContext == null) {
+        return BLANK;
+    }
 
     Document domTree = null;
     try {
@@ -150,7 +158,9 @@ public class XmlUtils {
   }
 
   public static CompositeNode xmlToCompositeNode(String xml){
-    if (xml==null || xml.length()==0) return null;
+    if (xml==null || xml.length()==0) {
+        return null;
+    }
 
     Node<?> dataTree;
     try {
@@ -179,11 +189,17 @@ public class XmlUtils {
    */
   public static CompositeNode inputXmlToCompositeNode(QName rpc, String xml,  SchemaContext schemaContext){
     LOG.debug("Converting input xml to composite node {}", xml);
-    if (xml==null || xml.length()==0) return null;
+    if (xml==null || xml.length()==0) {
+        return null;
+    }
 
-    if(rpc == null) return null;
+    if(rpc == null) {
+        return null;
+    }
 
-    if(schemaContext == null) return null;
+    if(schemaContext == null) {
+        return null;
+    }
 
     CompositeNode compositeNode = null;
     try {
@@ -213,7 +229,7 @@ public class XmlUtils {
           LOG.debug("Converted xml input to list of nodes  {}", dataNodes);
 
           final CompositeNodeBuilder<ImmutableCompositeNode> it = ImmutableCompositeNode.builder();
-          it.setQName(input);
+          it.setQName(rpc);
           it.add(ImmutableCompositeNode.create(input, dataNodes));
           compositeNode = it.toInstance();
           break;
