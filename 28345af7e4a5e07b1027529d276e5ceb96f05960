@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_34a49e06",
+        "filename": "opendaylight/config/config-api/src/test/java/org/opendaylight/controller/config/api/JmxAttributeValidationExceptionTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-08-25T07:19:23Z",
+      "side": 1,
+      "message": "Use assertNotNull",
+      "revId": "28345af7e4a5e07b1027529d276e5ceb96f05960",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_54a7e20a",
+        "filename": "opendaylight/config/config-api/src/test/java/org/opendaylight/controller/config/api/JmxAttributeValidationExceptionTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-08-25T07:19:23Z",
+      "side": 1,
+      "message": "Use assertThat instead",
+      "revId": "28345af7e4a5e07b1027529d276e5ceb96f05960",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
