@@ -18,17 +18,17 @@ import javax.xml.transform.dom.DOMResult;
 
 public class JaxBSerializer {
 
-    public Element toXml(NetconfState monitoringModel) {
-        DOMResult res = null;
+    public Element toXml(final NetconfState monitoringModel) {
+        final DOMResult res;
         try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(NetconfState.class);
-            Marshaller marshaller = jaxbContext.createMarshaller();
+            final JAXBContext jaxbContext = JAXBContext.newInstance(NetconfState.class);
+            final Marshaller marshaller = jaxbContext.createMarshaller();
 
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 
             res = new DOMResult();
             marshaller.marshal(monitoringModel, res);
-        } catch (JAXBException e) {
+        } catch (final JAXBException e) {
            throw new RuntimeException("Unable to serialize netconf state " + monitoringModel, e);
         }
         return ((Document)res.getNode()).getDocumentElement();

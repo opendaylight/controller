@@ -7,8 +7,7 @@
  */
 package org.opendaylight.controller.netconf.monitoring;
 
-import com.google.common.collect.Maps;
-
+import java.util.Collections;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
@@ -18,36 +17,26 @@ import org.opendaylight.controller.netconf.monitoring.xml.JaxBSerializer;
 import org.opendaylight.controller.netconf.monitoring.xml.model.NetconfState;
 import org.opendaylight.controller.netconf.util.mapping.AbstractNetconfOperation;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import java.util.Map;
 
 public class Get extends AbstractNetconfOperation {
 
     private static final Logger logger = LoggerFactory.getLogger(Get.class);
     private final NetconfMonitoringService netconfMonitor;
 
-    public Get(NetconfMonitoringService netconfMonitor) {
+    public Get(final NetconfMonitoringService netconfMonitor) {
         super(MonitoringConstants.MODULE_NAME);
         this.netconfMonitor = netconfMonitor;
     }
 
-    private Element getPlaceholder(Document innerResult) throws NetconfDocumentedException {
-        try {
-            XmlElement rootElement = null;
-            rootElement = XmlElement.fromDomElementWithExpected(innerResult.getDocumentElement(),
-                    XmlNetconfConstants.RPC_REPLY_KEY, XmlNetconfConstants.RFC4741_TARGET_NAMESPACE);
-            return rootElement.getOnlyChildElement(XmlNetconfConstants.DATA_KEY).getDomElement();
-        } catch (RuntimeException e) {
-            throw new IllegalArgumentException(String.format(
-                    "Input xml in wrong format, Expecting root element %s with child element %s, but was %s",
-                    XmlNetconfConstants.RPC_REPLY_KEY, XmlNetconfConstants.DATA_KEY,
-                    XmlUtil.toString(innerResult.getDocumentElement())), e);
-        }
+    private Element getPlaceholder(final Document innerResult)
+            throws NetconfDocumentedException {
+        final XmlElement rootElement = XmlElement.fromDomElementWithExpected(
+                innerResult.getDocumentElement(), XmlNetconfConstants.RPC_REPLY_KEY, XmlNetconfConstants.RFC4741_TARGET_NAMESPACE);
+        return rootElement.getOnlyChildElement(XmlNetconfConstants.DATA_KEY).getDomElement();
     }
 
     @Override
@@ -61,7 +50,7 @@ public class Get extends AbstractNetconfOperation {
     }
 
     @Override
-    public Document handle(Document requestMessage, NetconfOperationChainedExecution subsequentOperation)
+    public Document handle(final Document requestMessage, final NetconfOperationChainedExecution subsequentOperation)
             throws NetconfDocumentedException {
         if (subsequentOperation.isExecutionTermination()){
             throw new NetconfDocumentedException(String.format("Subsequent netconf operation expected by %s", this),
@@ -71,29 +60,29 @@ public class Get extends AbstractNetconfOperation {
         }
 
         try {
-            Document innerResult = subsequentOperation.execute(requestMessage);
+            final Document innerResult = subsequentOperation.execute(requestMessage);
 
-            NetconfState netconfMonitoring = new NetconfState(netconfMonitor);
+            final NetconfState netconfMonitoring = new NetconfState(netconfMonitor);
             Element monitoringXmlElement = new JaxBSerializer().toXml(netconfMonitoring);
 
             monitoringXmlElement = (Element) innerResult.importNode(monitoringXmlElement, true);
-            Element monitoringXmlElementPlaceholder = getPlaceholder(innerResult);
+            final Element monitoringXmlElementPlaceholder = getPlaceholder(innerResult);
             monitoringXmlElementPlaceholder.appendChild(monitoringXmlElement);
 
             return innerResult;
-        } catch (RuntimeException e) {
-            String errorMessage = "Get operation for netconf-state subtree failed";
+        } catch (final RuntimeException e) {
+            final String errorMessage = "Get operation for netconf-state subtree failed";
             logger.warn(errorMessage, e);
-            Map<String, String> info = Maps.newHashMap();
-            info.put(NetconfDocumentedException.ErrorSeverity.error.toString(), e.getMessage());
+
             throw new NetconfDocumentedException(errorMessage, NetconfDocumentedException.ErrorType.application,
                     NetconfDocumentedException.ErrorTag.operation_failed,
-                    NetconfDocumentedException.ErrorSeverity.error, info);
+                    NetconfDocumentedException.ErrorSeverity.error,
+                    Collections.singletonMap(NetconfDocumentedException.ErrorSeverity.error.toString(), e.getMessage()));
         }
     }
 
     @Override
-    protected Element handle(Document document, XmlElement message, NetconfOperationChainedExecution subsequentOperation)
+    protected Element handle(final Document document, final XmlElement message, final NetconfOperationChainedExecution subsequentOperation)
             throws NetconfDocumentedException {
         throw new UnsupportedOperationException("Never gets called");
     }
