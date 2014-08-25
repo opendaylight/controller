@@ -39,8 +39,7 @@ public class JmxAttribute {
 
         JmxAttribute that = (JmxAttribute) o;
 
-        if (attributeName != null ? !attributeName.equals(that.attributeName)
-                : that.attributeName != null) {
+        if (!attributeName.equals(that.attributeName)) {
             return false;
         }
 
@@ -49,7 +48,7 @@ public class JmxAttribute {
 
     @Override
     public int hashCode() {
-        return attributeName != null ? attributeName.hashCode() : 0;
+        return attributeName.hashCode();
     }
 
     @Override

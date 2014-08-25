@@ -3,11 +3,14 @@ package org.opendaylight.controller.config.api;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.matchers.JUnitMatchers.containsString;
 
 import com.google.common.collect.Lists;
 import java.util.Map;
+
+import org.junit.Assert;
 import org.junit.Test;
 
 public class ValidationExceptionTest {
@@ -50,5 +53,108 @@ public class ValidationExceptionTest {
             return;
         }
         fail("Duplicate exception should have failed");
+    }
+
+    @Test
+    public void testGetTrace() throws Exception {
+        ValidationException.ExceptionMessageWithStackTrace exp = new ValidationException.ExceptionMessageWithStackTrace();
+        exp.setTrace("trace");
+        Assert.assertEquals(exp.getTrace(), "trace");
+    }
+
+    @Test
+    public void testSetMessage() throws Exception {
+        ValidationException.ExceptionMessageWithStackTrace exp = new ValidationException.ExceptionMessageWithStackTrace();
+        exp.setMessage("message");
+        Assert.assertEquals(exp.getMessage(), "message");
+    }
+
+    @Test
+    public void testHashCode() throws Exception {
+        ValidationException.ExceptionMessageWithStackTrace exp = new ValidationException.ExceptionMessageWithStackTrace();
+        Assert.assertEquals(exp.hashCode(), new ValidationException.ExceptionMessageWithStackTrace().hashCode());
+    }
+
+    @Test
+    public void testExceptionMessageWithStackTraceConstructor() throws Exception {
+        ValidationException.ExceptionMessageWithStackTrace exp =
+                new ValidationException.ExceptionMessageWithStackTrace("string1", "string2");
+        Assert.assertEquals(exp, exp);
+    }
+
+    @Test
+    public void testExceptionMessageWithStackTraceConstructor2() throws Exception {
+        ValidationException.ExceptionMessageWithStackTrace exp =
+                new ValidationException.ExceptionMessageWithStackTrace("string1", "string2");
+        Assert.assertNotEquals(exp, null);
+    }
+
+    @Test
+    public void testExceptionMessageWithStackTraceConstructor3() throws Exception {
+        ValidationException.ExceptionMessageWithStackTrace exp =
+                new ValidationException.ExceptionMessageWithStackTrace("string1", "string2");
+        Assert.assertNotEquals(exp, new Exception());
+    }
+
+    @Test
+    public void testExceptionMessageWithStackTraceConstructor4() throws Exception {
+        ValidationException.ExceptionMessageWithStackTrace exp =
+                new ValidationException.ExceptionMessageWithStackTrace("string1", "string2");
+        Assert.assertEquals(exp, new ValidationException.ExceptionMessageWithStackTrace("string1", "string2"));
+    }
+
+    @Test
+    public void testEqual() throws Exception {
+        ValidationException.ExceptionMessageWithStackTrace exp =
+                new ValidationException.ExceptionMessageWithStackTrace("string1", "string2");
+        ValidationException.ExceptionMessageWithStackTrace exp2 =
+                new ValidationException.ExceptionMessageWithStackTrace(null, "string2");
+        Assert.assertNotEquals(exp, exp2);
+    }
+
+    @Test
+    public void testEqual2() throws Exception {
+        ValidationException.ExceptionMessageWithStackTrace exp =
+                new ValidationException.ExceptionMessageWithStackTrace("string1", "string2");
+        ValidationException.ExceptionMessageWithStackTrace exp2 =
+                new ValidationException.ExceptionMessageWithStackTrace("different", "string2");
+        Assert.assertNotEquals(exp, exp2);
+    }
+
+
+    @Test
+    public void testEqual3() throws Exception {
+        ValidationException.ExceptionMessageWithStackTrace exp =
+                new ValidationException.ExceptionMessageWithStackTrace("string1", "string2");
+        ValidationException.ExceptionMessageWithStackTrace exp2 =
+                new ValidationException.ExceptionMessageWithStackTrace("string1", null);
+        Assert.assertNotEquals(exp, exp2);
+    }
+
+    @Test
+    public void testEqual4() throws Exception {
+        ValidationException.ExceptionMessageWithStackTrace exp =
+                new ValidationException.ExceptionMessageWithStackTrace("string1", "string2");
+        ValidationException.ExceptionMessageWithStackTrace exp2 =
+                new ValidationException.ExceptionMessageWithStackTrace("string1", "different");
+        Assert.assertNotEquals(exp, exp2);
+    }
+
+    @Test
+    public void testEqual5() throws Exception {
+        ValidationException.ExceptionMessageWithStackTrace exp =
+                new ValidationException.ExceptionMessageWithStackTrace(null, "string2");
+        ValidationException.ExceptionMessageWithStackTrace exp2 =
+                new ValidationException.ExceptionMessageWithStackTrace("string1", "string2");
+        Assert.assertNotEquals(exp, exp2);
+    }
+
+    @Test
+    public void testEqual6() throws Exception {
+        ValidationException.ExceptionMessageWithStackTrace exp =
+                new ValidationException.ExceptionMessageWithStackTrace("string1", null);
+        ValidationException.ExceptionMessageWithStackTrace exp2 =
+                new ValidationException.ExceptionMessageWithStackTrace("string1", "string2");
+        Assert.assertNotEquals(exp, exp2);
     }
 }
