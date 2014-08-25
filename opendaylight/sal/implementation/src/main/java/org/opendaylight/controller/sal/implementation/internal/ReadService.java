@@ -1,6 +1,5 @@
-
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013-2014 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -43,7 +42,6 @@ import org.opendaylight.controller.sal.reader.NodeConnectorStatistics;
 import org.opendaylight.controller.sal.reader.NodeDescription;
 import org.opendaylight.controller.sal.reader.NodeTableStatistics;
 import org.opendaylight.controller.sal.utils.EtherTypes;
-import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.IPProtocols;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.NodeCreator;
@@ -60,8 +58,8 @@ import org.slf4j.LoggerFactory;
 public class ReadService implements IReadService, CommandProvider, IPluginOutReadService {
 
     protected static final Logger logger = LoggerFactory.getLogger(ReadService.class);
-    private ConcurrentHashMap<String, IPluginInReadService> pluginReader =
-        new ConcurrentHashMap<String, IPluginInReadService>();
+    private ConcurrentHashMap<String, ProtocolService<IPluginInReadService>> pluginReader =
+        new ConcurrentHashMap<String, ProtocolService<IPluginInReadService>>();
     private Set<IReadServiceListener> readerListeners =
         new CopyOnWriteArraySet<IReadServiceListener>();
 
@@ -107,58 +105,13 @@ public class ReadService implements IReadService, CommandProvider, IPluginOutRea
 
     // Set the reference to the plugin flow Reader service
     public void setService(Map<?, ?> props, IPluginInReadService s) {
-        if (this.pluginReader == null) {
-            logger.error("pluginReader store null");
-            return;
-        }
-
-        logger.trace("Got a service set request {}", s);
-        String type = null;
-        for (Object e : props.entrySet()) {
-            Map.Entry<?, ?> entry = (Map.Entry<?, ?>) e;
-            logger.trace("Prop key:({}) value:({})", entry.getKey(),
-                    entry.getValue());
-        }
-
-        Object value = props.get(GlobalConstants.PROTOCOLPLUGINTYPE.toString());
-        if (value instanceof String) {
-            type = (String) value;
-        }
-        if (type == null) {
-            logger.error("Received a pluginReader without any "
-                    + "protocolPluginType provided");
-        } else {
-            this.pluginReader.put(type, s);
-            logger.debug("Stored the pluginReader for type: {}", type);
-        }
+        ProtocolService.set(this.pluginReader, props, s, logger);
     }
 
     public void unsetService(Map<?, ?> props, IPluginInReadService s) {
-        if (this.pluginReader == null) {
-            logger.error("pluginReader store null");
-            return;
-        }
-
-        String type = null;
-        logger.debug("Received unsetpluginReader request");
-        for (Object e : props.entrySet()) {
-            Map.Entry<?, ?> entry = (Map.Entry<?, ?>) e;
-            logger.trace("Prop key:({}) value:({})", entry.getKey(),
-                    entry.getValue());
-        }
-
-        Object value = props.get(GlobalConstants.PROTOCOLPLUGINTYPE.toString());
-        if (value instanceof String) {
-            type = (String) value;
-        }
-        if (type == null) {
-            logger.error("Received a pluginReader without any "
-                    + "protocolPluginType provided");
-        } else if (this.pluginReader.get(type).equals(s)) {
-            this.pluginReader.remove(type);
-            logger.debug("Removed the pluginReader for type: {}", type);
-        }
+        ProtocolService.unset(this.pluginReader, props, s, logger);
     }
+
     public void setReaderListener(IReadServiceListener service) {
         logger.trace("Got a listener set request {}", service);
         this.readerListeners.add(service);
@@ -172,9 +125,10 @@ public class ReadService implements IReadService, CommandProvider, IPluginOutRea
     @Override
     public FlowOnNode readFlow(Node node, Flow flow) {
         if (pluginReader != null) {
-            if (this.pluginReader.get(node.getType()) != null) {
-                return this.pluginReader.get(node.getType())
-                        .readFlow(node, flow, true);
+            ProtocolService<IPluginInReadService> service =
+                this.pluginReader.get(node.getType());
+            if (service != null) {
+                return service.getService().readFlow(node, flow, true);
             }
         }
         logger.warn("Plugin {} unavailable", node.getType());
@@ -184,9 +138,10 @@ public class ReadService implements IReadService, CommandProvider, IPluginOutRea
     @Override
     public FlowOnNode nonCachedReadFlow(Node node, Flow flow) {
         if (pluginReader != null) {
-            if (this.pluginReader.get(node.getType()) != null) {
-                return this.pluginReader.get(node.getType())
-                        .readFlow(node, flow, false);
+            ProtocolService<IPluginInReadService> service =
+                this.pluginReader.get(node.getType());
+            if (service != null) {
+                return service.getService().readFlow(node, flow, false);
             }
         }
         logger.warn("Plugin {} unavailable", node.getType());
@@ -196,9 +151,10 @@ public class ReadService implements IReadService, CommandProvider, IPluginOutRea
     @Override
     public List<FlowOnNode> readAllFlows(Node node) {
         if (pluginReader != null) {
-            if (this.pluginReader.get(node.getType()) != null) {
-                return this.pluginReader.get(node.getType())
-                        .readAllFlow(node, true);
+            ProtocolService<IPluginInReadService> service =
+                this.pluginReader.get(node.getType());
+            if (service != null) {
+                return service.getService().readAllFlow(node, true);
             }
         }
         logger.warn("Plugin {} unavailable", node.getType());
@@ -208,9 +164,10 @@ public class ReadService implements IReadService, CommandProvider, IPluginOutRea
     @Override
     public List<FlowOnNode> nonCachedReadAllFlows(Node node) {
         if (pluginReader != null) {
-            if (this.pluginReader.get(node.getType()) != null) {
-                return this.pluginReader.get(node.getType())
-                        .readAllFlow(node, false);
+            ProtocolService<IPluginInReadService> service =
+                this.pluginReader.get(node.getType());
+            if (service != null) {
+                return service.getService().readAllFlow(node, false);
             }
         }
         logger.warn("Plugin {} unavailable", node.getType());
@@ -220,9 +177,10 @@ public class ReadService implements IReadService, CommandProvider, IPluginOutRea
     @Override
     public NodeDescription readDescription(Node node) {
         if (pluginReader != null) {
-            if (this.pluginReader.get(node.getType()) != null) {
-                return this.pluginReader.get(node.getType())
-                        .readDescription(node, true);
+            ProtocolService<IPluginInReadService> service =
+                this.pluginReader.get(node.getType());
+            if (service != null) {
+                return service.getService().readDescription(node, true);
             }
         }
         logger.warn("Plugin {} unavailable", node.getType());
@@ -232,9 +190,10 @@ public class ReadService implements IReadService, CommandProvider, IPluginOutRea
     @Override
     public NodeDescription nonCachedReadDescription(Node node) {
         if (pluginReader != null) {
-            if (this.pluginReader.get(node.getType()) != null) {
-                return this.pluginReader.get(node.getType())
-                        .readDescription(node, false);
+            ProtocolService<IPluginInReadService> service =
+                this.pluginReader.get(node.getType());
+            if (service != null) {
+                return service.getService().readDescription(node, false);
             }
         }
         logger.warn("Plugin {} unavailable", node.getType());
@@ -245,9 +204,10 @@ public class ReadService implements IReadService, CommandProvider, IPluginOutRea
     public NodeConnectorStatistics readNodeConnector(NodeConnector connector) {
         Node node = connector.getNode();
         if (pluginReader != null && node != null) {
-            if (this.pluginReader.get(node.getType()) != null) {
-                return this.pluginReader.get(node.getType())
-                        .readNodeConnector(connector, true);
+            ProtocolService<IPluginInReadService> service =
+                this.pluginReader.get(node.getType());
+            if (service != null) {
+                return service.getService().readNodeConnector(connector, true);
             }
         }
         logger.warn("Plugin {} unavailable", node.getType());
@@ -259,9 +219,10 @@ public class ReadService implements IReadService, CommandProvider, IPluginOutRea
             NodeConnector connector) {
         Node node = connector.getNode();
         if (pluginReader != null && node != null) {
-            if (this.pluginReader.get(node.getType()) != null) {
-                return this.pluginReader.get(node.getType())
-                        .readNodeConnector(connector, false);
+            ProtocolService<IPluginInReadService> service =
+                this.pluginReader.get(node.getType());
+            if (service != null) {
+                return service.getService().readNodeConnector(connector, false);
             }
         }
         logger.warn("Plugin {} unavailable", node.getType());
@@ -271,9 +232,10 @@ public class ReadService implements IReadService, CommandProvider, IPluginOutRea
     @Override
     public List<NodeConnectorStatistics> readNodeConnectors(Node node) {
         if (pluginReader != null) {
-            if (this.pluginReader.get(node.getType()) != null) {
-                return this.pluginReader.get(node.getType())
-                        .readAllNodeConnector(node, true);
+            ProtocolService<IPluginInReadService> service =
+                this.pluginReader.get(node.getType());
+            if (service != null) {
+                return service.getService().readAllNodeConnector(node, true);
             }
         }
         logger.warn("Plugin {} unavailable", node.getType());
@@ -283,9 +245,10 @@ public class ReadService implements IReadService, CommandProvider, IPluginOutRea
     @Override
     public List<NodeTableStatistics> readNodeTable(Node node) {
         if (pluginReader != null) {
-            if (this.pluginReader.get(node.getType()) != null) {
-                return this.pluginReader.get(node.getType())
-                        .readAllNodeTable(node, true);
+            ProtocolService<IPluginInReadService> service =
+                this.pluginReader.get(node.getType());
+            if (service != null) {
+                return service.getService().readAllNodeTable(node, true);
             }
         }
         logger.warn("Plugin {} unavailable", node.getType());
@@ -297,9 +260,10 @@ public class ReadService implements IReadService, CommandProvider, IPluginOutRea
     public NodeTableStatistics nonCachedReadNodeTable(NodeTable table) {
         Node node = table.getNode();
         if (pluginReader != null && node != null) {
-            if (this.pluginReader.get(node.getType()) != null) {
-                return this.pluginReader.get(node.getType())
-                        .readNodeTable(table, false);
+            ProtocolService<IPluginInReadService> service =
+                this.pluginReader.get(node.getType());
+            if (service != null) {
+                return service.getService().readNodeTable(table, false);
             }
         }
         logger.warn("Plugin {} unavailable", node.getType());
@@ -310,9 +274,10 @@ public class ReadService implements IReadService, CommandProvider, IPluginOutRea
     public NodeTableStatistics readNodeTable(NodeTable table) {
         Node node = table.getNode();
         if (pluginReader != null && node != null) {
-            if (this.pluginReader.get(node.getType()) != null) {
-                return this.pluginReader.get(node.getType())
-                        .readNodeTable(table, true);
+            ProtocolService<IPluginInReadService> service =
+                this.pluginReader.get(node.getType());
+            if (service != null) {
+                return service.getService().readNodeTable(table, true);
             }
         }
         logger.warn("Plugin {} unavailable", node.getType());
@@ -322,9 +287,10 @@ public class ReadService implements IReadService, CommandProvider, IPluginOutRea
     @Override
     public List<NodeConnectorStatistics> nonCachedReadNodeConnectors(Node node) {
         if (pluginReader != null) {
-            if (this.pluginReader.get(node.getType()) != null) {
-                return this.pluginReader.get(node.getType())
-                        .readAllNodeConnector(node, false);
+            ProtocolService<IPluginInReadService> service =
+                this.pluginReader.get(node.getType());
+            if (service != null) {
+                return service.getService().readAllNodeConnector(node, false);
             }
         }
         logger.warn("Plugin {} unavailable", node.getType());
@@ -335,9 +301,10 @@ public class ReadService implements IReadService, CommandProvider, IPluginOutRea
     public long getTransmitRate(NodeConnector connector) {
         Node node = connector.getNode();
         if (pluginReader != null && node != null) {
-            if (this.pluginReader.get(node.getType()) != null) {
-                return this.pluginReader.get(node.getType())
-                        .getTransmitRate(connector);
+            ProtocolService<IPluginInReadService> service =
+                this.pluginReader.get(node.getType());
+            if (service != null) {
+                return service.getService().getTransmitRate(connector);
             }
         }
         logger.warn("Plugin {} unavailable", node.getType());
