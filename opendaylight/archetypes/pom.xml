@@ -6,9 +6,9 @@
   </prerequisites>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>commons.parent</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
-    <relativePath>../commons/parent</relativePath>
+    <artifactId>commons.opendaylight</artifactId>
+    <version>1.4.2-SNAPSHOT</version>
+    <relativePath>../commons/opendaylight</relativePath>
   </parent>
   <scm>
     <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
@@ -39,5 +39,8 @@
   </distributionManagement>
   <modules>
     <module>odl-model-project</module>
+    <module>opendaylight-configfile-archetype</module>
+    <module>opendaylight-karaf-distro-archetype</module>
+    <module>opendaylight-karaf-features</module>
   </modules>
 </project>

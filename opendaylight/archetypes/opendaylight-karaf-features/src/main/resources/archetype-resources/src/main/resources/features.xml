@@ -1,0 +1,86 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- vi: set et smarttab sw=4 tabstop=4: -->
+<!--
+ Necessary TODO: Put your copyright statement here
+
+ This program and the accompanying materials are made available under the
+ terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ and is available at http://www.eclipse.org/legal/epl-v10.html
+-->
+<features name="odl-${repoName}-${symbol_dollar}{project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+    <!--
+        Necessary TODO: Please read the features guidelines:
+        https://wiki.opendaylight.org/view/Runtime:Karaf_Features_Guidelines#Feature_Best_Practices
+    -->
+    <!--
+    Necessary TODO: Add repo entries for the repositories of features you refer to
+        in this feature file but do not define here.
+        Examples:
+            <repository>mvn:org.opendaylight.yangtools/features-yangtools/0.6.2-SNAPSHOT/xml/features</repository>
+            <repository>mvn:org.opendaylight.controller/features-mdsal/1.1-SNAPSHOT/xml/features</repository>
+            <repository>mvn:org.opendaylight.openflowplugin/features-openflowplugin/0.0.3-SNAPSHOT/xml/features</repository>
+    -->
+    <feature name='odl-${repoName}-all' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${repoName} :: All'>
+        <!--
+            Necessary TODO:
+            List all of the user consumable features you define in this feature file here.
+            Generally you would *not* list individual bundles here, but only features defined in *this* file.
+            It is useful to list them in the same order they occur in the file.
+
+            Examples:
+            <feature version='${symbol_dollar}{project.version}'>odl-${repoName}-provider</feature>
+            <feature version='${symbol_dollar}{project.version}'>odl-${repoName}-model</feature>
+        -->
+    </feature>
+    <!--
+        Necessary TODO: Define your features.  It is useful to list then in order of dependency.  So if A depends on B, list A first.
+        When naming your features please be mindful of the guidelines:
+            https://wiki.opendaylight.org/view/Runtime:Karaf_Features_Guidelines
+        Particularly:
+            a) Prefixing names with 'odl-': https://wiki.opendaylight.org/view/Runtime:Karaf_Features_Guidelines#Feature_Naming
+            b) Descriptions: https://wiki.opendaylight.org/view/Runtime:Karaf_Features_Guidelines#Description
+            c) Avoid start-levels: https://wiki.opendaylight.org/view/Runtime:Karaf_Features_Guidelines#Avoid_start-levels
+
+        It's also nice to list inside a feature, first the features it needs, then the bundles it needs, then the configfiles.
+        Examples:
+
+        * Basic MD-SAL Provider
+        <feature name='odl-${repoName}-provider' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${repoName} :: Provider '>
+            <feature version='1.1-SNAPSHOT'>odl-mdsal-broker</feature>
+            <feature version='${symbol_dollar}{project.version}'>odl-${repoName}-model</feature>
+            <bundle>mvn:${groupId}/${repoName}-provider/${symbol_dollar}{project.version}</bundle>
+            ... whatever other bundles you need
+        </feature>
+
+        * Basic MD-SAL Model feature
+        <feature name='odl-${repoName}-model' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${repoName} :: Model'>
+            <feature version='0.6.2-SNAPSHOT'>odl-yangtools-binding</feature>
+            <feature version='0.6.2-SNAPSHOT'>odl-yangtools-models</feature>
+            <bundle>mvn:${groupId}/${repoName}-model/${symbol_dollar}{project.version}</bundle>
+            ... whatever other bundles you need
+        </feature>
+
+        * Config Subsystem example - the config file is your config subsystem configuration
+        <feature name='odl-${repoName}-provider' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${repoName} :: Provider'>
+            <feature version='1.1-SNAPSHOT'>odl-mdsal-broker</feature>
+            <bundle>mvn:${groupId}/${repoName}-provider/${symbol_dollar}{project.version}</bundle>
+            <configfile finalname="etc/opendaylight/karaf/80-${repoName}.xml">mvn:${groupId}/${repoName}-config/${symbol_dollar}{project.version}/xml/config</configfile>
+            ... whatever other bundles you need
+        </feature>
+
+        * Basic MD-SAL Provider that uses openflowplugin-flow-services (which brings along odl-mdsal-broker)
+        <feature name='odl-${repoName}-provider' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${repoName} :: Provider'>
+            <feature version='0.0.3-SNAPSHOT'>odl-openflowplugin-flow-services</feature>
+            <bundle>mvn:${groupId}/${repoName}-provider/${symbol_dollar}{project.version}</bundle>
+            ... whatever other bundles you need
+        </feature>
+
+    -->
+    <!-- Optional TODO: Remove TODO Comments -->
+
+</features>
