@@ -14,6 +14,8 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
+
+import java.util.HashMap;
 import java.util.Map;
 import javax.management.ObjectName;
 import junit.framework.Assert;
@@ -158,5 +160,21 @@ public class ObjectNameUtilTest {
         }
 
         fail(test + " should have failed on " + ex);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testCreateON() throws Exception {
+        ObjectNameUtil.createON(">}+!#");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testCreateON2() throws Exception {
+        Map map = new HashMap<String, String>();
+        ObjectNameUtil.createON(">}+!#", map);
+    }
+
+    @Test
+    public void testUnquoteAndUnescape() throws Exception {
+        ObjectNameUtil.withoutTransactionName(null);
     }
 }
