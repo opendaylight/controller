@@ -10,6 +10,11 @@
             <param-name>javax.ws.rs.Application</param-name>
             <param-value>org.opendaylight.controller.sal.rest.impl.RestconfApplication</param-value>
         </init-param>
+        <!-- AAA Auth Filter -->
+        <init-param>
+            <param-name>com.sun.jersey.spi.container.ContainerRequestFilters</param-name>
+            <param-value> org.opendaylight.aaa.sts.TokenAuthFilter</param-value>
+        </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
 
