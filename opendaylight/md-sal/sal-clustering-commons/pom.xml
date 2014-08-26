@@ -85,6 +85,11 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
       <version>${slf4j.version}</version>
@@ -167,5 +172,37 @@
           <version>3.0.1</version>
       </dependency>
   </dependencies>
+  <build>
+      <plugins>
+          <plugin>
+              <groupId>org.jacoco</groupId>
+              <artifactId>jacoco-maven-plugin</artifactId>
+              <configuration>
+                  <includes>
+                      <include>org.opendaylight.controller.*</include>
+                  </includes>
+                  <excludes>
+                      <exclude>org.opendaylight.controller.protobuff.*</exclude>
+                  </excludes>
+                  <check>false</check>
+              </configuration>
+              <executions>
+                  <execution>
+                      <id>pre-test</id>
+                      <goals>
+                          <goal>prepare-agent</goal>
+                      </goals>
+                  </execution>
+                  <execution>
+                      <id>post-test</id>
+                      <goals>
+                          <goal>report</goal>
+                      </goals>
+                      <phase>test</phase>
+                  </execution>
+              </executions>
+          </plugin>
+      </plugins>
+  </build>
 
 </project>
