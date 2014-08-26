@@ -81,7 +81,7 @@
           <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal</artifactId>
-            <version>0.7.1-SNAPSHOT</version>
+            <version>${sal.version}</version>
           </dependency>
         </dependencies>
       </plugin>
