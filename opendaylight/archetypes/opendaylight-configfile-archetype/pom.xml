@@ -38,15 +38,15 @@
   <distributionManagement>
     <repository>
       <id>opendaylight-release</id>
-      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.release/</url>
+      <url>${nexusproxy}/repositories/opendaylight.release/</url>
     </repository>
     <snapshotRepository>
       <id>opendaylight-snapshot</id>
-      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.snapshot/</url>
+      <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
     </snapshotRepository>
     <site>
       <id>website</id>
-      <url>dav:http://nexus.opendaylight.org/content/sites/site/sal-parent</url>
+      <url>dav:${nexusproxy}/sites/site/sal-parent</url>
     </site>
   </distributionManagement>
 </project>
