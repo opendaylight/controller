@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_1d941d89",
+        "filename": "opendaylight/config/config-util/src/test/java/org/opendaylight/controller/config/util/ConfigTransactionClientsTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-08-26T12:38:57Z",
+      "side": 1,
+      "message": "Spaces vs Tabs",
+      "revId": "c9c7cf87047944d4914349332f6486e9b2336e1e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7dec492a",
+        "filename": "opendaylight/config/config-util/src/test/java/org/opendaylight/controller/config/util/ConfigTransactionClientsTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-08-26T12:38:57Z",
+      "side": 1,
+      "message": "How does this test verify that it was (un)successful ?",
+      "revId": "c9c7cf87047944d4914349332f6486e9b2336e1e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_bd8e5177",
+        "filename": "opendaylight/config/config-util/src/test/java/org/opendaylight/controller/config/util/ConfigTransactionClientsTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-08-26T12:38:57Z",
+      "side": 1,
+      "message": "Please keep the test content uncommented but instead add @Ignore annotation over the test (and the description from above comment add as Ignore argument)",
+      "revId": "c9c7cf87047944d4914349332f6486e9b2336e1e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
