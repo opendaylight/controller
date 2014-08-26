@@ -13,6 +13,8 @@ import com.google.common.base.Optional;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
+import javax.annotation.Nonnull;
+
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationException;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationOperation;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizer;
@@ -72,7 +74,7 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener,AutoC
     public Optional<InstanceIdentifier<? extends DataObject>> toBinding(final YangInstanceIdentifier normalized)
                     throws DeserializationException {
         try {
-            return Optional.<InstanceIdentifier<? extends DataObject>>of(codecRegistry.fromYangInstanceIdentifier(normalized));
+            return Optional.<InstanceIdentifier<? extends DataObject>>fromNullable(codecRegistry.fromYangInstanceIdentifier(normalized));
         } catch (IllegalArgumentException e) {
             return Optional.absent();
         }
@@ -82,14 +84,11 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener,AutoC
         return legacyToNormalized;
     }
 
-    @SuppressWarnings("unchecked")
     public Optional<Entry<InstanceIdentifier<? extends DataObject>, DataObject>> toBinding(
-            final Entry<YangInstanceIdentifier, ? extends NormalizedNode<?, ?>> normalized)
+            final @Nonnull Entry<YangInstanceIdentifier, ? extends NormalizedNode<?, ?>> normalized)
                     throws DeserializationException {
         try {
-            @SuppressWarnings("rawtypes")
-            Entry binding = codecRegistry.fromNormalizedNode(normalized.getKey(), normalized.getValue());
-            return Optional.<Entry<InstanceIdentifier<? extends DataObject>, DataObject>>fromNullable(binding);
+            return Optional.fromNullable(codecRegistry.fromNormalizedNode(normalized.getKey(), normalized.getValue()));
         } catch (IllegalArgumentException e) {
             return Optional.absent();
         }
@@ -130,7 +129,7 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener,AutoC
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         // NOOP Intentionally
     }
 }
