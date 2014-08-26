@@ -16,6 +16,10 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>netconf-api</artifactId>
     </dependency>
+      <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>netconf-auth</artifactId>
+    </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>netconf-util</artifactId>
@@ -33,10 +37,6 @@
       <artifactId>bcprov-jdk15on</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>usermanager</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.opendaylight.controller.thirdparty</groupId>
       <artifactId>ganymed</artifactId>
     </dependency>
@@ -44,6 +44,10 @@
       <groupId>org.apache.sshd</groupId>
       <artifactId>sshd-core</artifactId>
     </dependency>
+      <dependency>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+      </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
@@ -73,21 +77,7 @@
         <configuration>
           <instructions>
             <Bundle-Activator>org.opendaylight.controller.netconf.ssh.osgi.NetconfSSHActivator</Bundle-Activator>
-            <Import-Package>com.google.common.base,
-              ch.ethz.ssh2,
-              ch.ethz.ssh2.signature,
-              org.apache.commons.io,
-              org.opendaylight.controller.netconf.util.osgi,
-              org.opendaylight.controller.usermanager,
-              org.opendaylight.controller.sal.authorization,
-              org.opendaylight.controller.sal.utils,
-              org.osgi.framework,
-              org.osgi.util.tracker,
-              org.slf4j,
-              org.bouncycastle.openssl,
-              io.netty.bootstrap, io.netty.buffer, io.netty.channel, io.netty.channel.local, io.netty.channel.nio,
-              io.netty.handler.stream, io.netty.util.concurrent, org.apache.commons.lang3,
-              org.opendaylight.controller.netconf.util.messages</Import-Package>
+            <Import-Package>*</Import-Package>
           </instructions>
         </configuration>
       </plugin>

@@ -1115,6 +1115,16 @@
         <version>${netconf.version}</version>
         <type>test-jar</type>
       </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>netconf-auth</artifactId>
+            <version>${netconf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>netconf-usermanager</artifactId>
+            <version>${netconf.version}</version>
+        </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>netconf-ssh</artifactId>

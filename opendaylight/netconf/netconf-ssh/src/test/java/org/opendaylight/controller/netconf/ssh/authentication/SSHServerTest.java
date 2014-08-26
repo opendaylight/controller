@@ -23,7 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.opendaylight.controller.netconf.StubUserManager;
+import org.opendaylight.controller.netconf.auth.AuthProvider;
 import org.opendaylight.controller.netconf.ssh.NetconfSSHServer;
 import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil;
 import org.osgi.framework.BundleContext;
@@ -55,16 +55,21 @@ public class SSHServerTest {
         doReturn(new ServiceReference[0]).when(mockedContext).getServiceReferences(anyString(), anyString());
 
         logger.info("Creating SSH server");
-        StubUserManager um = new StubUserManager(USER, PASSWORD);
         String pem;
         try (InputStream is = getClass().getResourceAsStream("/RSA.pk")) {
             pem = IOUtils.toString(is);
         }
-        AuthProviderImpl ap = new AuthProviderImpl(pem, mockedContext);
-        ap.setNullableUserManager(um);
+
+
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         NetconfSSHServer server = NetconfSSHServer.start(PORT, NetconfConfigUtil.getNetconfLocalAddress(),
-                ap, bossGroup);
+                bossGroup, pem.toCharArray());
+        server.setAuthProvider(new AuthProvider() {
+            @Override
+            public boolean authenticated(final String username, final String password) {
+                return true;
+            }
+        });
 
         sshServerThread = new Thread(server);
         sshServerThread.setDaemon(true);

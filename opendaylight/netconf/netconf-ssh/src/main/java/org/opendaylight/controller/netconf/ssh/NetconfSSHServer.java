@@ -7,9 +7,7 @@
  */
 package org.opendaylight.controller.netconf.ssh;
 
-import com.google.common.annotations.VisibleForTesting;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.local.LocalAddress;
+import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -17,11 +15,19 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
+
 import javax.annotation.concurrent.ThreadSafe;
-import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
+
+import org.opendaylight.controller.netconf.auth.AuthProvider;
 import org.opendaylight.controller.netconf.ssh.threads.Handshaker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
+
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.local.LocalAddress;
 
 /**
  * Thread that accepts client connections. Accepted socket is forwarded to {@link org.opendaylight.controller.netconf.ssh.threads.Handshaker},
@@ -36,13 +42,15 @@ public final class NetconfSSHServer extends Thread implements AutoCloseable {
     private final ServerSocket serverSocket;
     private final LocalAddress localAddress;
     private final EventLoopGroup bossGroup;
-    private final AuthProvider authProvider;
+    private Optional<AuthProvider> authProvider = Optional.absent();
     private final ExecutorService handshakeExecutor;
+    private final char[] pem;
     private volatile boolean up;
 
-    private NetconfSSHServer(int serverPort, LocalAddress localAddress, AuthProvider authProvider, EventLoopGroup bossGroup) throws IOException {
+    private NetconfSSHServer(final int serverPort, final LocalAddress localAddress, final EventLoopGroup bossGroup, final char[] pem) throws IOException {
         super(NetconfSSHServer.class.getSimpleName());
         this.bossGroup = bossGroup;
+        this.pem = pem;
         logger.trace("Creating SSH server socket on port {}", serverPort);
         this.serverSocket = new ServerSocket(serverPort);
         if (serverSocket.isBound() == false) {
@@ -50,15 +58,26 @@ public final class NetconfSSHServer extends Thread implements AutoCloseable {
         }
         logger.trace("Server socket created.");
         this.localAddress = localAddress;
-        this.authProvider = authProvider;
         this.up = true;
         handshakeExecutor = Executors.newFixedThreadPool(10);
     }
 
-    public static NetconfSSHServer start(int serverPort, LocalAddress localAddress, AuthProvider authProvider, EventLoopGroup bossGroup) throws IOException {
-        NetconfSSHServer netconfSSHServer = new NetconfSSHServer(serverPort, localAddress, authProvider, bossGroup);
+    public static NetconfSSHServer start(final int serverPort, final LocalAddress localAddress, final EventLoopGroup bossGroup, final char[] pemArray) throws IOException {
+        final NetconfSSHServer netconfSSHServer = new NetconfSSHServer(serverPort, localAddress, bossGroup, pemArray);
         netconfSSHServer.start();
         return netconfSSHServer;
+    }
+
+    public synchronized AuthProvider getAuthProvider() {
+        Preconditions.checkState(authProvider.isPresent(), "AuthenticationProvider is not set up, cannot authenticate user");
+        return authProvider.get();
+    }
+
+    public synchronized void setAuthProvider(final AuthProvider authProvider) {
+        if(this.authProvider != null) {
+            logger.debug("Changing auth provider to {}", authProvider);
+        }
+        this.authProvider = Optional.fromNullable(authProvider);
     }
 
     @Override
@@ -81,7 +100,7 @@ public final class NetconfSSHServer extends Thread implements AutoCloseable {
             Socket acceptedSocket = null;
             try {
                 acceptedSocket = serverSocket.accept();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 if (up == false) {
                     logger.trace("Exiting server thread", e);
                 } else {
@@ -90,18 +109,26 @@ public final class NetconfSSHServer extends Thread implements AutoCloseable {
             }
             if (acceptedSocket != null) {
                 try {
-                    Handshaker task = new Handshaker(acceptedSocket, localAddress, sessionIdCounter.incrementAndGet(), authProvider, bossGroup);
+                    final Handshaker task = new Handshaker(acceptedSocket, localAddress, sessionIdCounter.incrementAndGet(), getAuthProvider(), bossGroup, pem);
                     handshakeExecutor.submit(task);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     logger.warn("Cannot set PEMHostKey, closing connection", e);
-                    try {
-                        acceptedSocket.close();
-                    } catch (IOException e1) {
-                        logger.warn("Ignoring exception while closing socket", e);
-                    }
+                    closeSocket(acceptedSocket);
+                } catch (final IllegalStateException e) {
+                    logger.warn("Cannot accept connection, closing", e);
+                    closeSocket(acceptedSocket);
                 }
             }
         }
         logger.debug("Server thread is exiting");
     }
+
+    private void closeSocket(final Socket acceptedSocket) {
+        try {
+            acceptedSocket.close();
+        } catch (final IOException e) {
+            logger.warn("Ignoring exception while closing socket", e);
+        }
+    }
+
 }

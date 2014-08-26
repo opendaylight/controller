@@ -933,6 +933,14 @@
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
+          <artifactId>netconf-auth</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>netconf-usermanager</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
           <artifactId>netconf-tcp</artifactId>
         </dependency>
         <dependency>

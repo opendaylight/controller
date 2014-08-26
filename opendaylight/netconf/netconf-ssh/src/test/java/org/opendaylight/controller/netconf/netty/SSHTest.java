@@ -27,12 +27,11 @@ import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.netconf.auth.AuthProvider;
 import org.opendaylight.controller.netconf.netty.EchoClientHandler.State;
 import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.LoginPassword;
 import org.opendaylight.controller.netconf.nettyutil.handler.ssh.client.AsyncSshHandler;
 import org.opendaylight.controller.netconf.ssh.NetconfSSHServer;
-import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
-import org.opendaylight.controller.netconf.ssh.authentication.AuthProviderImpl;
 import org.opendaylight.controller.netconf.ssh.authentication.PEMGenerator;
 import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil;
 import org.slf4j.Logger;
@@ -59,11 +58,11 @@ public class SSHTest {
     @Test
     public void test() throws Exception {
         new Thread(new EchoServer(), "EchoServer").start();
-        AuthProvider authProvider = mock(AuthProviderImpl.class);
-        doReturn(PEMGenerator.generate().toCharArray()).when(authProvider).getPEMAsCharArray();
+        AuthProvider authProvider = mock(AuthProvider.class);
         doReturn(true).when(authProvider).authenticated(anyString(), anyString());
         NetconfSSHServer netconfSSHServer = NetconfSSHServer.start(10831, NetconfConfigUtil.getNetconfLocalAddress(),
-                authProvider, new NioEventLoopGroup());
+                new NioEventLoopGroup(), PEMGenerator.generate().toCharArray());
+        netconfSSHServer.setAuthProvider(authProvider);
 
         InetSocketAddress address = netconfSSHServer.getLocalSocketAddress();
         final EchoClientHandler echoClientHandler = connectClient(address);
