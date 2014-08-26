@@ -2581,6 +2581,10 @@
   <repositories>
 
     <!-- OpenDayLight Repo Mirror -->
+    <!-- NOTE: URLs need to be hardcoded in the repository section because we have
+         parent poms that do NOT exist in this project and thus need to be pulled
+         down from the repository. To override these URLs you should use the
+         mirror section in your local settings.xml file. -->
     <repository>
       <releases>
         <enabled>true</enabled>
@@ -2634,16 +2638,24 @@
       <url>http://nexus.opendaylight.org/content/repositories/opendaylight.snapshot/</url>
     </pluginRepository>
   </pluginRepositories>
+
+  <!-- distribution management only runs when you run mvn deploy
+       which is if you are deploying compiled artifacts to a
+       maven repository. In that case logic dictacts that you already
+       compiled and thus already have the necessary parent pom files
+       that do not exist in this project pulled down to your local
+       .m2. That way the variables can be resolved and artifacts can
+       be uploaded when running mvn deploy. -->
   <distributionManagement>
     <!-- OpenDayLight Released artifact -->
     <repository>
       <id>opendaylight-release</id>
-      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.release/</url>
+      <url>${nexusproxy}/repositories/opendaylight.release/</url>
     </repository>
     <!-- OpenDayLight Snapshot artifact -->
     <snapshotRepository>
       <id>opendaylight-snapshot</id>
-      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.snapshot/</url>
+      <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
     </snapshotRepository>
     <!-- Site deployment -->
     <site>
