@@ -10,12 +10,12 @@
 
 package org.opendaylight.controller.cluster.datastore.node;
 
-import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.node.utils.NormalizedNodeGetter;
 import org.opendaylight.controller.cluster.datastore.node.utils.NormalizedNodeNavigator;
 import org.opendaylight.controller.cluster.datastore.node.utils.PathUtils;
+import org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeSerializer;
 import org.opendaylight.controller.cluster.datastore.util.TestModel;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Container;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node;
@@ -28,6 +28,7 @@ import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class NormalizedNodeToNodeCodecTest {
 
@@ -74,7 +75,8 @@ public class NormalizedNodeToNodeCodecTest {
 
     assertNotNull(container);
     assertEquals(id, container.getParentPath() + "/"
-        + container.getNormalizedNode().getPath());
+        + NormalizedNodeSerializer.deSerialize(container.getNormalizedNode(),
+        container.getNormalizedNode().getPathArgument()));
 
     // Decode the normalized node from the ProtocolBuffer form
     // first get the node representation of normalized node
@@ -109,7 +111,7 @@ public class NormalizedNodeToNodeCodecTest {
             .decode(
                 instanceIdentifierFromString("/(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test"),
                 container.getNormalizedNode());
-    assertNotNull(decode != null);
+    assertNotNull(decode);
 
     // let us ensure that the return decode normalized node encode returns same container
     Container containerResult =
@@ -117,10 +119,8 @@ public class NormalizedNodeToNodeCodecTest {
             .build(), decode);
 
     assertEquals(container.getParentPath(), containerResult.getParentPath());
-    assertEquals(container.getNormalizedNode().getChildCount(), container
-        .getNormalizedNode().getChildCount());
 
-    Assert.assertEquals(containerResult.getNormalizedNode().getChildCount(),
+    assertEquals(containerResult.getNormalizedNode().getChildCount(),
         container.getNormalizedNode().getChildCount());
 
     // check first level children are proper
@@ -140,13 +140,22 @@ public class NormalizedNodeToNodeCodecTest {
     for (Node resultChild : childrenResult) {
       bFound = false;
       for (Node originalChild : childrenOriginal) {
-        if (originalChild.getPath().equals(resultChild.getPath())
-            && resultChild.getType().equals(resultChild.getType())) {
+
+        YangInstanceIdentifier.PathArgument result = NormalizedNodeSerializer.deSerialize(
+              containerResult.getNormalizedNode(),
+              resultChild.getPathArgument());
+
+          YangInstanceIdentifier.PathArgument original = NormalizedNodeSerializer.deSerialize(
+              container.getNormalizedNode(),
+              originalChild.getPathArgument());
+
+        if (original.equals(result)
+            && resultChild.getIntType() == resultChild.getIntType()) {
           bFound = true;
           break;
         }
       }
-      Assert.assertTrue(bFound);
+      assertTrue(bFound);
     }
 
   }
