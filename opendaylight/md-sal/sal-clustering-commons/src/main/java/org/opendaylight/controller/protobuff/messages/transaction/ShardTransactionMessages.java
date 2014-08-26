@@ -6945,11 +6945,11 @@ public final class ShardTransactionMessages {
 
       public final boolean isInitialized() {
         if (!hasInstanceIdentifierPathArguments()) {
-          
+
           return false;
         }
         if (!getInstanceIdentifierPathArguments().isInitialized()) {
-          
+
           return false;
         }
         return true;
@@ -7078,7 +7078,7 @@ public final class ShardTransactionMessages {
        * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
-          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder> 
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder>
           getInstanceIdentifierPathArgumentsFieldBuilder() {
         if (instanceIdentifierPathArgumentsBuilder_ == null) {
           instanceIdentifierPathArgumentsBuilder_ = new com.google.protobuf.SingleFieldBuilder<
@@ -7437,7 +7437,7 @@ public final class ShardTransactionMessages {
 
       public final boolean isInitialized() {
         if (!hasExists()) {
-          
+
           return false;
         }
         return true;

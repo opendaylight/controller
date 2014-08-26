@@ -10,10 +10,12 @@
 
 package org.opendaylight.controller.cluster.datastore.util;
 
+import com.google.common.collect.ImmutableSet;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.AugmentationNode;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
+import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafSetNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
@@ -24,6 +26,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeAttrBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeAttrBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetEntryNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetNodeBuilder;
@@ -355,12 +358,20 @@ public class TestModel {
     // Create augmentations
     MapEntryNode mapEntry = createAugmentedListEntry(1, "First Test");
 
+    // Create a bits leaf
+      NormalizedNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, Object, LeafNode<Object>>
+          myBits = Builders.leafBuilder().withNodeIdentifier(
+          new YangInstanceIdentifier.NodeIdentifier(
+              QName.create(TEST_QNAME, "my-bits"))).withValue(
+          ImmutableSet.of("foo", "bar"));
 
-    // Create the document
+
+      // Create the document
     return ImmutableContainerNodeBuilder
         .create()
         .withNodeIdentifier(
             new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME))
+        .withChild(myBits.build())
         .withChild(ImmutableNodes.leafNode(DESC_QNAME, DESC))
         .withChild(ImmutableNodes.leafNode(POINTER_QNAME, "pointer"))
         .withChild(
