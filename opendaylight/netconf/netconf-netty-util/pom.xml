@@ -64,7 +64,6 @@
       <groupId>org.openexi</groupId>
       <artifactId>nagasena-rta</artifactId>
     </dependency>
-
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
@@ -77,7 +76,10 @@
       <groupId>xmlunit</groupId>
       <artifactId>xmlunit</artifactId>
     </dependency>
-
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>mockito-configuration</artifactId>
+    </dependency>
   </dependencies>
 
   <build>

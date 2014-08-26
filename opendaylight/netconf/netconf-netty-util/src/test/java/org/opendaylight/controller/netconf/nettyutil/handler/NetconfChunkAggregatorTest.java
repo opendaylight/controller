@@ -7,15 +7,15 @@
  */
 package org.opendaylight.controller.netconf.nettyutil.handler;
 
+import static org.junit.Assert.assertEquals;
+
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import junit.framework.Assert;
+import java.util.List;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import java.util.List;
 
 public class NetconfChunkAggregatorTest {
 
@@ -45,26 +45,26 @@ public class NetconfChunkAggregatorTest {
 
     @Test
     public void testMultipleChunks() throws Exception {
-        List<Object> output = Lists.newArrayList();
-        ByteBuf input = Unpooled.copiedBuffer(CHUNKED_MESSAGE.getBytes(Charsets.UTF_8));
+        final List<Object> output = Lists.newArrayList();
+        final ByteBuf input = Unpooled.copiedBuffer(CHUNKED_MESSAGE.getBytes(Charsets.UTF_8));
         agr.decode(null, input, output);
 
-        Assert.assertEquals(1, output.size());
-        ByteBuf chunk = (ByteBuf) output.get(0);
+        assertEquals(1, output.size());
+        final ByteBuf chunk = (ByteBuf) output.get(0);
 
-        Assert.assertEquals(EXPECTED_MESSAGE, chunk.toString(Charsets.UTF_8));
+        assertEquals(EXPECTED_MESSAGE, chunk.toString(Charsets.UTF_8));
     }
 
     @Test
     public void testOneChunks() throws Exception {
-        List<Object> output = Lists.newArrayList();
-        ByteBuf input = Unpooled.copiedBuffer(CHUNKED_MESSAGE_ONE.getBytes(Charsets.UTF_8));
+        final List<Object> output = Lists.newArrayList();
+        final ByteBuf input = Unpooled.copiedBuffer(CHUNKED_MESSAGE_ONE.getBytes(Charsets.UTF_8));
         agr.decode(null, input, output);
 
-        Assert.assertEquals(1, output.size());
-        ByteBuf chunk = (ByteBuf) output.get(0);
+        assertEquals(1, output.size());
+        final ByteBuf chunk = (ByteBuf) output.get(0);
 
-        Assert.assertEquals(EXPECTED_MESSAGE, chunk.toString(Charsets.UTF_8));
+        assertEquals(EXPECTED_MESSAGE, chunk.toString(Charsets.UTF_8));
     }
 
 
