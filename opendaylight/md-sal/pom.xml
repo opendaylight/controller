@@ -83,6 +83,7 @@
 
     <!-- Clustering -->
     <module>sal-remoterpc-connector</module>
+    <module>sal-dom-xsql-config</module>
   </modules>
 
   <build>
@@ -123,7 +124,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore></ignore>
+                    <ignore/>
                   </action>
                 </pluginExecution>
                 <pluginExecution>
@@ -136,7 +137,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore></ignore>
+                    <ignore/>
                   </action>
                 </pluginExecution>
               </pluginExecutions>
