@@ -10,15 +10,26 @@ message Attribute{
   optional string type=3;
 }
 
+message PathArgumentAttribute{
+    optional QName name =1;
+    optional string value=2;
+    optional int32 type=3;
+}
+
+
 message QName {
-    required string value=1;
+    optional string value=1;
+    optional int32 namespace=2;
+    optional int32 revision=3;
+    optional int32 localName=4;
 }
 
 message PathArgument {
-  required string value=1;
+  optional string value=1;
   optional string type=2; //NodeIdentifier, NodeWithValue, NodeIdentifierWithPredicates
   optional QName nodeType=3;
-  repeated Attribute attributes=4;
+  repeated PathArgumentAttribute attribute=4;
+  repeated Attribute attributes=5; // For backward compatibility (see InstanceIdentifierUtils)
 
 }
 
@@ -27,14 +38,25 @@ message InstanceIdentifier {
 }
 
 message Node{
-  optional string path = 1;
-  optional string type = 2;
-  repeated Attribute attributes = 3;
-  repeated Node child=4;
-  optional string value = 5;
-  optional string valueType = 6;
-  repeated string bitsValue = 7;
-  optional InstanceIdentifier instanceIdentifierValue = 8;
+  optional string path = 1; // @deprecated(use pathArgument)
+  optional string type = 2; // @deprecated(use intType)
+  optional PathArgument pathArgument = 3;
+  optional int32 intType = 4;
+
+  repeated Attribute attributes = 5;
+
+  repeated Node child = 6;
+
+  optional string value = 7;
+  optional string valueType = 8; // @deprecated(use intValueType)
+  optional int32 intValueType = 9; // instead of valueType
+
+  // Specific values
+  optional InstanceIdentifier instanceIdentifierValue = 10; // intValueType = YangInstanceIdentifier
+
+  repeated string namespace = 11; // A list of namespaces that appear in the node
+  repeated string revision = 12;  // A list of revisions that appear in the node
+  repeated string localName = 13; // A list of localNames that appear in the node
 }
 
 message Container{
