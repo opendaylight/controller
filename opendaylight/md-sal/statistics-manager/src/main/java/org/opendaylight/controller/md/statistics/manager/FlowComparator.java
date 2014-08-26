@@ -12,8 +12,11 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Match;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.MacAddressFilter;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.EthernetMatch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.Layer3Match;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv4Match;
 import org.slf4j.Logger;
@@ -100,7 +103,7 @@ final class FlowComparator {
             if (statsFlow.getEthernetMatch() != null) {
                 return false;
             }
-        } else if(!storedFlow.getEthernetMatch().equals(statsFlow.getEthernetMatch())) {
+        } else if(!ethernetMatchEquals(statsFlow.getEthernetMatch(),storedFlow.getEthernetMatch())) {
             return false;
         }
         if (storedFlow.getIcmpv4Match()== null) {
@@ -181,6 +184,67 @@ final class FlowComparator {
             return false;
         }
         return true;
+    }
+
+    /*
+     * Custom EthernetMatch is required because mac address string provided by user in EthernetMatch can be in
+     * any case (upper or lower or mix). Ethernet Match which controller receives from switch is always
+     * an upper case string. Default EthernetMatch equals doesn't use equalsIgnoreCase() and hence it fails.
+     * E.g User provided mac address string in flow match is aa:bb:cc:dd:ee:ff and when controller fetch
+     * statistic data, openflow driver library returns AA:BB:CC:DD:EE:FF and default eqauls fails here.
+     */
+    @VisibleForTesting
+    static boolean ethernetMatchEquals(EthernetMatch statsEthernetMatch, EthernetMatch storedEthernetMatch){
+        boolean verdict = true;
+        Boolean checkNullValues = checkNullValues(statsEthernetMatch, storedEthernetMatch);
+        if (checkNullValues != null) {
+            verdict = checkNullValues;
+        } else {
+            if(verdict){
+                verdict = ethernetMatchFieldsEquals(statsEthernetMatch.getEthernetSource(),storedEthernetMatch.getEthernetSource());
+            }
+            if(verdict){
+                verdict = ethernetMatchFieldsEquals(statsEthernetMatch.getEthernetDestination(),storedEthernetMatch.getEthernetDestination());
+            }
+            if(verdict){
+                if(statsEthernetMatch.getEthernetType() == null){
+                    if(storedEthernetMatch.getEthernetType() != null){
+                        verdict = false;
+                    }
+                }else{
+                    verdict = statsEthernetMatch.getEthernetType().equals(storedEthernetMatch.getEthernetType());
+                }
+            }
+        }
+        return verdict;
+    }
+
+    private static boolean ethernetMatchFieldsEquals(MacAddressFilter statsEthernetMatchFields,
+                                                        MacAddressFilter storedEthernetMatchFields){
+        boolean verdict = true;
+        Boolean checkNullValues = checkNullValues(statsEthernetMatchFields, storedEthernetMatchFields);
+        if (checkNullValues != null) {
+            verdict = checkNullValues;
+        } else {
+            if(verdict){
+                verdict = macAddressEquals(statsEthernetMatchFields.getAddress(),storedEthernetMatchFields.getAddress());
+            }
+            if(verdict){
+                verdict = macAddressEquals(statsEthernetMatchFields.getMask(),storedEthernetMatchFields.getMask());
+            }
+        }
+        return verdict;
+    }
+
+    private static boolean macAddressEquals(MacAddress statsMacAddress, MacAddress storedMacAddress){
+        boolean verdict = true;
+        Boolean checkNullValues = checkNullValues(statsMacAddress, storedMacAddress);
+        if (checkNullValues != null) {
+            verdict = checkNullValues;
+        } else {
+            verdict = statsMacAddress.getValue().equalsIgnoreCase(storedMacAddress.getValue());
+        }
+        return verdict;
     }
 
     @VisibleForTesting
