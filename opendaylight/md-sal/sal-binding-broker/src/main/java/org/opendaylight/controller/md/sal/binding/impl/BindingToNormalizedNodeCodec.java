@@ -72,7 +72,7 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener,AutoC
     public Optional<InstanceIdentifier<? extends DataObject>> toBinding(final YangInstanceIdentifier normalized)
                     throws DeserializationException {
         try {
-            return Optional.<InstanceIdentifier<? extends DataObject>>of(codecRegistry.fromYangInstanceIdentifier(normalized));
+            return Optional.<InstanceIdentifier<? extends DataObject>>fromNullable(codecRegistry.fromYangInstanceIdentifier(normalized));
         } catch (IllegalArgumentException e) {
             return Optional.absent();
         }
