@@ -75,5 +75,5 @@ public interface INeutronLoadBalancerPoolMemberAware {
      *            instance of deleted LoadBalancerPool object
      * @return void
      */
-    public void NeutronLoadBalancerPoolMemberDeleted(NeutronLoadBalancerPoolMember loadBalancerPoolMember);
+    public void neutronLoadBalancerPoolMemberDeleted(NeutronLoadBalancerPoolMember loadBalancerPoolMember);
 }
