@@ -2570,6 +2570,15 @@
     <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
   </scm>
 
+  <!-- repositories need to have the url hard coded because the parent pom
+       odlparent does not exist in this project and therefore needs to be
+       downloaded before the project can be built. Unfortunetly it seems that
+       variables are not resolved in this case until after the parent pom
+       has been defined thus we get errors about accessing parents.
+ 
+       To override the repositories that are used to download artifacts you
+       will need to set up a mirror in your settings.xml file as defined here
+       http://maven.apache.org/settings.html. -->
   <repositories>
 
     <!-- OpenDayLight Repo Mirror -->
@@ -2630,12 +2639,12 @@
     <!-- OpenDayLight Released artifact -->
     <repository>
       <id>opendaylight-release</id>
-      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.release/</url>
+      <url>${nexusproxy}/repositories/opendaylight.release/</url>
     </repository>
     <!-- OpenDayLight Snapshot artifact -->
     <snapshotRepository>
       <id>opendaylight-snapshot</id>
-      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.snapshot/</url>
+      <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
     </snapshotRepository>
     <!-- Site deployment -->
     <site>
