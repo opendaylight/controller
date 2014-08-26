@@ -212,7 +212,11 @@
         <configuration>
           <includes>
             <include>org.opendaylight.controller.*</include>
+
           </includes>
+          <excludes>
+              <exclude>org.opendaylight.controller.config.yang.config.*</exclude>
+          </excludes>
           <check>false</check>
         </configuration>
         <executions>

@@ -11,6 +11,27 @@ module odl-datastore-test {
     }
 
     container test {
+        leaf my-bits {
+            type bits {
+                bit ten-mb-hd;
+                bit ten-mb-fd;
+                bit hundred-mb-hd;
+                bit hundred-mb-fd;
+                bit one-gb-hd;
+                bit one-gb-fd;
+                bit ten-gb-fd;
+                bit forty-gb-fd;
+                bit hundred-gb-fd;
+                bit one-tb-fd;
+                bit other;
+                bit copper;
+                bit fiber;
+                bit autoeng;
+                bit pause;
+                bit pause-asym;
+            }
+        }
+
         leaf desc {
             type string;
         }

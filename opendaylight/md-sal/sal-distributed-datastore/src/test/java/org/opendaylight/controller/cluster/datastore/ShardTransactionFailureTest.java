@@ -20,11 +20,14 @@ import com.google.common.util.concurrent.MoreExecutors;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
+import org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeSerializer;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 import scala.concurrent.Await;
@@ -176,7 +179,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
                 .setInstanceIdentifierPathArguments(
                     NormalizedNodeMessages.InstanceIdentifier.newBuilder()
                         .build()).setNormalizedNode(
-                NormalizedNodeMessages.Node.newBuilder().build()
+                buildNormalizedNode()
 
             ).build();
 
@@ -208,13 +211,18 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
             ShardTransactionMessages.WriteData.newBuilder()
                 .setInstanceIdentifierPathArguments(
                     NormalizedNodeMessages.InstanceIdentifier.newBuilder()
-                        .build()).setNormalizedNode(
-                NormalizedNodeMessages.Node.newBuilder().build()
-
-            ).build();
+                        .build()
+                )
+                .setNormalizedNode(buildNormalizedNode())
+                .build();
 
         future = akka.pattern.Patterns.ask(subject, writeData, 3000);
         Await.result(future, Duration.create(3, TimeUnit.SECONDS));
+    }
+
+    private NormalizedNodeMessages.Node buildNormalizedNode() {
+        return NormalizedNodeSerializer
+            .serialize(Builders.containerBuilder().withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).build());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -241,7 +249,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
                 .setInstanceIdentifierPathArguments(
                     NormalizedNodeMessages.InstanceIdentifier.newBuilder()
                         .build()).setNormalizedNode(
-                NormalizedNodeMessages.Node.newBuilder().build()
+                buildNormalizedNode()
 
             ).build();
 
