@@ -19,15 +19,15 @@ import javax.management.openmbean.OpenType;
  * of some module. Contains default value extracted from yang file.
  */
 public class AttributeConfigElement {
-    private final Object dafaultValue;
+    private final Object defaultValue;
     private final Object value;
 
     private Optional<?> resolvedValue;
     private Object resolvedDefaultValue;
     private String jmxName;
 
-    public AttributeConfigElement(Object dafaultValue, Object value) {
-        this.dafaultValue = dafaultValue;
+    public AttributeConfigElement(Object defaultValue, Object value) {
+        this.defaultValue = defaultValue;
         this.value = value;
     }
 
@@ -42,7 +42,7 @@ public class AttributeConfigElement {
     public void resolveValue(AttributeResolvingStrategy<?, ? extends OpenType<?>> attributeResolvingStrategy,
             String attrName) throws NetconfDocumentedException {
         resolvedValue = attributeResolvingStrategy.parseAttribute(attrName, value);
-        Optional<?> resolvedDefault = attributeResolvingStrategy.parseAttribute(attrName, dafaultValue);
+        Optional<?> resolvedDefault = attributeResolvingStrategy.parseAttribute(attrName, defaultValue);
         resolvedDefaultValue = resolvedDefault.isPresent() ? resolvedDefault.get() : null;
     }
 
@@ -58,6 +58,10 @@ public class AttributeConfigElement {
         return value;
     }
 
+    public Object getDefaultValue() {
+        return defaultValue;
+    }
+
     public Optional<?> getResolvedValue() {
         return resolvedValue;
     }
@@ -68,7 +72,7 @@ public class AttributeConfigElement {
 
     @Override
     public String toString() {
-        return "AttributeConfigElement [dafaultValue=" + dafaultValue + ", value=" + value + "]";
+        return "AttributeConfigElement [defaultValue=" + defaultValue + ", value=" + value + "]";
     }
 
 }

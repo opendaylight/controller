@@ -93,8 +93,9 @@ public class ObjectXmlReader extends AttributeIfcSwitchStatement<AttributeReadin
 
     @Override
     protected AttributeReadingStrategy caseTOAttribute(CompositeType openType) {
-        Preconditions.checkState(getLastAttribute() instanceof TOAttribute);
-        Map<String, AttributeIfc> inner = ((TOAttribute)getLastAttribute()).getYangPropertiesToTypesMap();
+        AttributeIfc lastAttribute = getLastAttribute();
+        Preconditions.checkState(lastAttribute instanceof TOAttribute);
+        Map<String, AttributeIfc> inner = ((TOAttribute)lastAttribute).getYangPropertiesToTypesMap();
 
         Map<String, AttributeReadingStrategy> innerStrategies = Maps.newHashMap();
 
@@ -104,21 +105,23 @@ public class ObjectXmlReader extends AttributeIfcSwitchStatement<AttributeReadin
             innerStrategies.put(innerAttrEntry.getKey(), innerStrat);
         }
 
-        return new CompositeAttributeReadingStrategy(getLastAttribute().getNullableDefault(), innerStrategies);
+        return new CompositeAttributeReadingStrategy(lastAttribute.getNullableDefault(), innerStrategies);
     }
 
     @Override
     protected AttributeReadingStrategy caseListAttribute(ArrayType<?> openType) {
-        Preconditions.checkState(getLastAttribute() instanceof ListAttribute);
-        AttributeReadingStrategy innerStrategy = prepareReadingStrategy(key, ((ListAttribute) getLastAttribute()).getInnerAttribute());
-        return new ArrayAttributeReadingStrategy(getLastAttribute().getNullableDefault(), innerStrategy);
+        AttributeIfc lastAttribute = getLastAttribute();
+        Preconditions.checkState(lastAttribute instanceof ListAttribute);
+        AttributeReadingStrategy innerStrategy = prepareReadingStrategy(key, ((ListAttribute) lastAttribute).getInnerAttribute());
+        return new ArrayAttributeReadingStrategy(lastAttribute.getNullableDefault(), innerStrategy);
     }
 
     @Override
     protected AttributeReadingStrategy caseListDependeciesAttribute(ArrayType<?> openType) {
-        Preconditions.checkState(getLastAttribute() instanceof ListDependenciesAttribute);
+        AttributeIfc lastAttribute = getLastAttribute();
+        Preconditions.checkState(lastAttribute instanceof ListDependenciesAttribute);
         AttributeReadingStrategy innerStrategy = caseDependencyAttribute(SimpleType.OBJECTNAME);
-        return new ArrayAttributeReadingStrategy(getLastAttribute().getNullableDefault(), innerStrategy);
+        return new ArrayAttributeReadingStrategy(lastAttribute.getNullableDefault(), innerStrategy);
     }
 
 }
