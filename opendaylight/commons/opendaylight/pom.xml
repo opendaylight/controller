@@ -78,6 +78,7 @@
     <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
     <config.netty.configfile>00-netty.xml</config.netty.configfile>
     <config.mdsal.configfile>01-mdsal.xml</config.mdsal.configfile>
+    <config.xsql.configfile>04-xsql.xml</config.xsql.configfile>
     <config.netconf.client.configfile>01-netconf.xml</config.netconf.client.configfile>
     <config.toaster.configfile>03-toaster-sample.xml</config.toaster.configfile>
     <config.restconf.configfile>10-rest-connector.xml</config.restconf.configfile>
@@ -1274,6 +1275,11 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>sal-connector-api</artifactId>
+        <version>${mdsal.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>sal-dom-xsql</artifactId>
         <version>${mdsal.version}</version>
       </dependency>
       <dependency>

@@ -11,6 +11,7 @@
         <feature version='${project.version}'>odl-mdsal-broker</feature>
         <feature version='${project.version}'>odl-mdsal-netconf-connector</feature>
         <feature version='${project.version}'>odl-restconf</feature>
+        <feature version='${project.version}'>odl-mdsal-xsql</feature>
         <feature version='${project.version}'>odl-toaster</feature>
     </feature>
     <feature name='odl-mdsal-broker' version='${project.version}' description="OpenDaylight :: MDSAL :: Broker">
@@ -64,5 +65,10 @@
         <bundle>mvn:org.opendaylight.controller.samples/sample-toaster-consumer/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller.samples/sample-toaster-provider/${project.version}</bundle>
         <configfile finalname="${config.configfile.directory}/${config.toaster.configfile}">mvn:org.opendaylight.controller.samples/toaster-config/${project.version}/xml/config</configfile>
+    </feature>
+    <feature name ='odl-mdsal-xsql' version='${project.version}'>
+        <feature version='${project.version}'>odl-mdsal-broker</feature>
+        <bundle>mvn:org.opendaylight.controller/sal-dom-xsql/${project.version}</bundle>
+        <configfile finalname="${config.configfile.directory}/${config.xsql.configfile}">mvn:org.opendaylight.controller/sal-dom-xsql-config/${project.version}/xml/config</configfile>
     </feature>
 </features>
