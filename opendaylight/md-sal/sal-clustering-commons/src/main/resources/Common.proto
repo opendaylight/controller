@@ -10,15 +10,26 @@ message Attribute{
   optional string type=3;
 }
 
+message PathArgumentAttribute{
+    optional QName name =1;
+    optional string value=2;
+    optional uint32 type=3;
+}
+
+
 message QName {
-    required string value=1;
+    optional string value=1;
+    optional uint32 namespace=2;
+    optional uint32 revision=3;
+    optional string localName=4;
 }
 
 message PathArgument {
-  required string value=1;
+  optional string value=1;
   optional string type=2; //NodeIdentifier, NodeWithValue, NodeIdentifierWithPredicates
   optional QName nodeType=3;
-  repeated Attribute attributes=4;
+  repeated PathArgumentAttribute attribute=4;
+  repeated Attribute attributes=5; // For backward compatibility (see InstanceIdentifierUtils)
 
 }
 
@@ -35,6 +46,10 @@ message Node{
   optional string valueType = 6;
   repeated string bitsValue = 7;
   optional InstanceIdentifier instanceIdentifierValue = 8;
+  optional PathArgument pathArgument = 9;
+  repeated string namespace = 10;
+  repeated string revision = 11;
+  optional uint32 intValueType = 12;
 }
 
 message Container{

@@ -10,9 +10,9 @@
 
 package org.opendaylight.controller.cluster.datastore.node;
 
-import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
 import org.opendaylight.controller.cluster.datastore.node.utils.PathUtils;
-import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeSerializer;
+import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -29,45 +29,27 @@ public class NormalizedNodeToNodeCodec {
     }
 
     public NormalizedNodeMessages.Container encode(YangInstanceIdentifier id, NormalizedNode node){
+
+        NormalizedNodeMessages.Container.Builder builder = NormalizedNodeMessages.Container.newBuilder();
         String parentPath = "";
 
         if(id != null){
             parentPath = PathUtils.getParentPath(PathUtils.toString(id));
         }
 
+        builder.setParentPath(parentPath);
+        if(node != null) {
+            builder.setNormalizedNode(NormalizedNodeSerializer.serialize(node));
+        }
 
-        NormalizedNodeToProtocolBufferNode encoder = new NormalizedNodeToProtocolBufferNode();
-        encoder.encode(parentPath, node);
-
-        return encoder.getContainer();
-
-
+        return builder.build();
     }
 
     public NormalizedNode<?,?> decode(YangInstanceIdentifier id, NormalizedNodeMessages.Node node){
-            NodeToNormalizedNodeBuilder currentOp = NodeToNormalizedNodeBuilder.from(ctx);
-
-            for(YangInstanceIdentifier.PathArgument pathArgument : id.getPathArguments()){
-                currentOp = currentOp.getChild(pathArgument);
-            }
-
-            QName nodeType = null;
-
-            if(id.getPath().size() < 1){
-                nodeType = null;
-            } else {
-                final YangInstanceIdentifier.PathArgument pathArgument = id.getPath().get(id.getPath().size() - 1);
-                if(pathArgument instanceof YangInstanceIdentifier.AugmentationIdentifier){
-                    nodeType = null;
-                } else {
-                    nodeType = pathArgument.getNodeType();
-                }
-            }
-            if((node != null)&& (!node.getType().isEmpty())){
-               return currentOp.normalize(nodeType, node);
-            } else{
-              return null;
-            }
+        if(node.getType().equals("")){
+            return null;
+        }
+        return NormalizedNodeSerializer.deSerialize(node);
     }
 
 

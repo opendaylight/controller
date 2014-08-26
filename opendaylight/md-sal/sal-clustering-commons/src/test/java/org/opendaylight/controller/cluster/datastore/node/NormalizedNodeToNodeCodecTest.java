@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.node.utils.NormalizedNodeGetter;
 import org.opendaylight.controller.cluster.datastore.node.utils.NormalizedNodeNavigator;
 import org.opendaylight.controller.cluster.datastore.node.utils.PathUtils;
+import org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeSerializer;
 import org.opendaylight.controller.cluster.datastore.util.TestModel;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Container;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node;
@@ -74,7 +75,7 @@ public class NormalizedNodeToNodeCodecTest {
 
     assertNotNull(container);
     assertEquals(id, container.getParentPath() + "/"
-        + container.getNormalizedNode().getPath());
+        + NormalizedNodeSerializer.deSerialize(container.getNormalizedNode(), container.getNormalizedNode().getPathArgument()));
 
     // Decode the normalized node from the ProtocolBuffer form
     // first get the node representation of normalized node
