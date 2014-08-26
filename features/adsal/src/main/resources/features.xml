@@ -2,12 +2,15 @@
 <features name="adsal-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
    xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
    <repository>mvn:org.opendaylight.controller/features-base/${commons.opendaylight.version}/xml/features</repository>
+   <repository>mvn:org.opendaylight.controller/features-mdsal/${mdsal.version}/xml/features</repository>
+   <repository>mvn:org.opendaylight.controller/features-flow/${mdsal.version}/xml/features</repository>
    <feature name="odl-adsal-all" description="OpenDaylight AD-SAL All Features" version="${sal.version}">
       <feature version="${sal.version}">odl-adsal-core</feature>
       <feature version="${sal.networkconfiguration.version}">odl-adsal-networkconfiguration</feature>
       <feature version="${sal.connection.version}">odl-adsal-connection</feature>
       <feature version="${clustering.services.version}">odl-adsal-clustering</feature>
       <feature version="${configuration.version}">odl-adsal-configuration</feature>
+      <feature version="${mdsal.version}">odl-adsal-compatibility</feature>
    </feature>
    <feature name="odl-adsal-core" description="OpenDaylight :: AD-SAL :: Core" version="${sal.version}">
       <feature>odl-base-felix-dm</feature>
@@ -45,5 +48,12 @@
    </feature>
    <feature name="odl-adsal-thirdparty" description="OpenDaylight :: AD-SAL :: Third-Party Depenencies" version="${project.version}">
       <bundle>mvn:org.opendaylight.controller/logging.bridge/${logging.bridge.version}</bundle>
+   </feature>
+   <feature name='odl-adsal-compatibility' description="OpenDaylight :: AD-SAL :: Compatibility" version="${mdsal.version}">
+      <feature version="${mdsal.version}">odl-mdsal-broker</feature>
+      <feature version="${mdsal.version}">odl-flow-model</feature>
+      <feature version="${felix.dependencymanager.version}">odl-base-felix-dm</feature>
+      <feature version="${clustering.services.version}">odl-adsal-clustering</feature>
+      <bundle>mvn:org.opendaylight.controller/sal-compatibility/${mdsal.version}</bundle>
    </feature>
 </features>
