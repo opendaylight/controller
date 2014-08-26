@@ -28,15 +28,12 @@ public final class NetconfState {
     private Schemas schemas;
     private Sessions sessions;
 
-    public NetconfState(NetconfMonitoringService monitoringService) {
+    public NetconfState(final NetconfMonitoringService monitoringService) {
         this.sessions = monitoringService.getSessions();
         this.schemas = monitoringService.getSchemas();
     }
 
-    public NetconfState() {
-    }
-
-
+    public NetconfState() {}
 
     @XmlElementWrapper(name="schemas")
     @XmlElement(name="schema")
@@ -44,7 +41,7 @@ public final class NetconfState {
         return Collections2.transform(schemas.getSchema(), new Function<Schema, MonitoringSchema>() {
             @Nullable
             @Override
-            public MonitoringSchema apply(@Nullable Schema input) {
+            public MonitoringSchema apply(@Nullable final Schema input) {
                 return new MonitoringSchema(input);
             }
         });
@@ -56,7 +53,7 @@ public final class NetconfState {
         return Collections2.transform(sessions.getSession(), new Function<Session, MonitoringSession>() {
             @Nullable
             @Override
-            public MonitoringSession apply(@Nullable Session input) {
+            public MonitoringSession apply(@Nullable final Session input) {
                 return new MonitoringSession(input);
             }
         });
