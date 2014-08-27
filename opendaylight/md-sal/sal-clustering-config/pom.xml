@@ -36,6 +36,21 @@
                   <type>xml</type>
                   <classifier>config</classifier>
                 </artifact>
+                <artifact>
+                  <file>${project.build.directory}/classes/initial/akka.conf</file>
+                  <type>xml</type>
+                  <classifier>akkaconf</classifier>
+                </artifact>
+                <artifact>
+                  <file>${project.build.directory}/classes/initial/module-shards.conf</file>
+                  <type>xml</type>
+                  <classifier>moduleshardconf</classifier>
+                </artifact>
+                <artifact>
+                  <file>${project.build.directory}/classes/initial/modules.conf</file>
+                  <type>xml</type>
+                  <classifier>moduleconf</classifier>
+                </artifact>
               </artifacts>
             </configuration>
           </execution>
