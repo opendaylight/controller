@@ -6,9 +6,8 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.common.actor;
+package org.opendaylight.controller.cluster.common.actor;
 
-import akka.actor.ActorPath;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.dispatch.BoundedDequeBasedMailbox;
@@ -18,18 +17,21 @@ import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Preconditions;
 import com.typesafe.config.Config;
-import org.opendaylight.controller.common.reporting.MetricsReporter;
+import org.opendaylight.controller.cluster.reporting.MetricsReporter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.FiniteDuration;
 
 import java.util.concurrent.TimeUnit;
 
 public class MeteredBoundedMailbox implements MailboxType, ProducesMessageQueue<MeteredBoundedMailbox.MeteredMessageQueue> {
 
+    private final Logger LOG = LoggerFactory.getLogger(MeteredBoundedMailbox.class);
+
     private MeteredMessageQueue queue;
     private Integer capacity;
     private FiniteDuration pushTimeOut;
-    private ActorPath actorPath;
-    private MetricsReporter reporter;
+    private MetricRegistry registry;
 
     private final String QUEUE_SIZE = "queue-size";
     private final String CAPACITY = "mailbox-capacity";
@@ -50,7 +52,8 @@ public class MeteredBoundedMailbox implements MailboxType, ProducesMessageQueue<
         Preconditions.checkArgument( timeout > 0, "mailbox-push-timeout-time must be > 0");
         this.pushTimeOut = new FiniteDuration(timeout, TimeUnit.NANOSECONDS);
 
-        reporter = MetricsReporter.getInstance();
+        MetricsReporter reporter = MetricsReporter.getInstance();
+        registry = reporter.getMetricsRegistry();
     }
 
 
@@ -65,22 +68,14 @@ public class MeteredBoundedMailbox implements MailboxType, ProducesMessageQueue<
         if (owner.isEmpty()) {
             return; //there's no actor to monitor
         }
-        actorPath = owner.get().path();
-        String actorInstanceId = Integer.toString(owner.get().hashCode());
+        String actorName = owner.get().path().toStringWithoutAddress();
+        String metricName = registry.name(actorName, QUEUE_SIZE);
 
-        MetricRegistry registry = reporter.getMetricsRegistry();
-        String actorName = registry.name(actorPath.toString(), actorInstanceId, QUEUE_SIZE);
-
-        if (registry.getMetrics().containsKey(actorName))
+        if (registry.getMetrics().containsKey(metricName))
             return; //already registered
 
-        registry.register(actorName,
-                new Gauge<Integer>() {
-                    @Override
-                    public Integer getValue() {
-                        return monitoredQueue.size();
-                    }
-                });
+        Gauge queueSize = getQueueSizeGuage(monitoredQueue);
+        registerQueueSizeMetric(metricName, queueSize);
     }
 
 
@@ -91,5 +86,21 @@ public class MeteredBoundedMailbox implements MailboxType, ProducesMessageQueue<
         }
     }
 
+    private Gauge getQueueSizeGuage(final MeteredMessageQueue monitoredQueue ){
+        return new Gauge<Integer>() {
+            @Override
+            public Integer getValue() {
+                return monitoredQueue.size();
+            }
+        };
+    }
+
+    private void registerQueueSizeMetric(String metricName, Gauge metric){
+        try {
+            registry.register(metricName,metric);
+        } catch (IllegalArgumentException e) {
+            LOG.warn("Unable to register queue size in metrics registry. Failed with exception {}. ", e);
+        }
+    }
 }
 
