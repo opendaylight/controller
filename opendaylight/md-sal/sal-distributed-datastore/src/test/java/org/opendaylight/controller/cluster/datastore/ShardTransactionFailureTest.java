@@ -64,12 +64,15 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
         store.onGlobalContextUpdated(testSchemaContext);
     }
 
+    private ActorRef createShard(){
+        return getSystem().actorOf(Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP, new DatastoreContext(), TestModel.createTestContext()));
+    }
+
     @Test(expected = ReadFailedException.class)
     public void testNegativeReadWithReadOnlyTransactionClosed()
         throws Throwable {
 
-        final ActorRef shard =
-            getSystem().actorOf(Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP, new DatastoreContext()));
+        final ActorRef shard = createShard();
         final Props props = ShardTransaction.props(store.newReadOnlyTransaction(), shard,
                 testSchemaContext, datastoreContext,SHARD_IDENTIFIER.toString());
 
@@ -98,8 +101,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
     public void testNegativeReadWithReadWriteTransactionClosed()
         throws Throwable {
 
-        final ActorRef shard =
-            getSystem().actorOf(Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP, new DatastoreContext()));
+        final ActorRef shard = createShard();
         final Props props = ShardTransaction.props(store.newReadWriteTransaction(), shard,
                 testSchemaContext, datastoreContext,SHARD_IDENTIFIER.toString());
 
@@ -128,8 +130,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
     public void testNegativeExistsWithReadWriteTransactionClosed()
         throws Throwable {
 
-        final ActorRef shard =
-            getSystem().actorOf(Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP, new DatastoreContext()));
+        final ActorRef shard = createShard();
         final Props props = ShardTransaction.props(store.newReadWriteTransaction(), shard,
                 testSchemaContext, datastoreContext,SHARD_IDENTIFIER.toString());
 
@@ -158,8 +159,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
     public void testNegativeWriteWithTransactionReady() throws Exception {
 
 
-        final ActorRef shard =
-            getSystem().actorOf(Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP, new DatastoreContext()));
+        final ActorRef shard = createShard();
         final Props props = ShardTransaction.props(store.newWriteOnlyTransaction(), shard,
                 testSchemaContext, datastoreContext,SHARD_IDENTIFIER.toString());
 
@@ -191,8 +191,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
     public void testNegativeReadWriteWithTransactionReady() throws Exception {
 
 
-        final ActorRef shard =
-            getSystem().actorOf(Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP, new DatastoreContext()));
+        final ActorRef shard = createShard();
         final Props props = ShardTransaction.props(store.newReadWriteTransaction(), shard,
                 testSchemaContext, datastoreContext,SHARD_IDENTIFIER.toString());
 
@@ -229,8 +228,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
     public void testNegativeMergeTransactionReady() throws Exception {
 
 
-        final ActorRef shard =
-            getSystem().actorOf(Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP, new DatastoreContext()));
+        final ActorRef shard = createShard();
         final Props props = ShardTransaction.props(store.newReadWriteTransaction(), shard,
                 testSchemaContext, datastoreContext,SHARD_IDENTIFIER.toString());
 
@@ -262,8 +260,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
     public void testNegativeDeleteDataWhenTransactionReady() throws Exception {
 
 
-        final ActorRef shard =
-            getSystem().actorOf(Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP, new DatastoreContext()));
+        final ActorRef shard = createShard();
         final Props props = ShardTransaction.props(store.newReadWriteTransaction(), shard,
                 testSchemaContext, datastoreContext,SHARD_IDENTIFIER.toString());
 

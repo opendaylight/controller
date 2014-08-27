@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import com.google.protobuf.ByteString;
 import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -45,5 +46,10 @@ public class ReadDataReply implements SerializableMessage{
   public static ReadDataReply fromSerializable(SchemaContext schemaContext,YangInstanceIdentifier id,Object serializable){
     ShardTransactionMessages.ReadDataReply o = (ShardTransactionMessages.ReadDataReply) serializable;
     return new ReadDataReply(schemaContext,new NormalizedNodeToNodeCodec(schemaContext).decode(id, o.getNormalizedNode()));
+  }
+
+  public static ByteString getNormalizedNodeByteString(Object serializable){
+      ShardTransactionMessages.ReadDataReply o = (ShardTransactionMessages.ReadDataReply) serializable;
+      return ((ShardTransactionMessages.ReadDataReply) serializable).getNormalizedNode().toByteString();
   }
 }
