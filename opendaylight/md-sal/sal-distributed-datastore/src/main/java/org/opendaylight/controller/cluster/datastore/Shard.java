@@ -10,18 +10,21 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
+import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import akka.japi.Creator;
 import akka.serialization.Serialization;
-
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardTransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardMBeanFactory;
@@ -34,26 +37,32 @@ import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionR
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
 import org.opendaylight.controller.cluster.datastore.messages.ForwardedCommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolved;
+import org.opendaylight.controller.cluster.datastore.messages.ReadData;
+import org.opendaylight.controller.cluster.datastore.messages.ReadDataReply;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
+import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
 import org.opendaylight.controller.cluster.raft.ConfigParams;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreFactory;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
+import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-
 import scala.concurrent.duration.FiniteDuration;
 
 import java.util.ArrayList;
@@ -99,6 +108,8 @@ public class Shard extends RaftActor {
     private final ShardContext shardContext;
 
     private SchemaContext schemaContext;
+
+    private ActorRef createSnapshotTransaction;
 
     private Shard(ShardIdentifier name, Map<ShardIdentifier, String> peerAddresses,
             ShardContext shardContext) {
@@ -153,6 +164,15 @@ public class Shard extends RaftActor {
             } else if (getLeader() != null) {
                 getLeader().forward(message, getContext());
             }
+        } else if(message.getClass().equals(ReadDataReply.SERIALIZABLE_CLASS)) {
+            // This must be for install snapshot. Don't want to open this up and trigger
+            // deSerialization
+            self().tell(new CaptureSnapshotReply(ReadDataReply.getNormalizedNodeByteString(message)), self());
+
+            // Send a PoisonPill instead of sending close transaction because we do not really need
+            // a response
+            getSender().tell(PoisonPill.getInstance(), self());
+
         } else if (message instanceof RegisterChangeListener) {
             registerChangeListener((RegisterChangeListener) message);
         } else if (message instanceof UpdateSchemaContext) {
@@ -176,9 +196,9 @@ public class Shard extends RaftActor {
     }
 
     private ActorRef createTypedTransactionActor(
-        CreateTransaction createTransaction,
+        int transactionType,
         ShardTransactionIdentifier transactionId) {
-        if (createTransaction.getTransactionType()
+        if (transactionType
             == TransactionProxy.TransactionType.READ_ONLY.ordinal()) {
 
             shardMBean.incrementReadOnlyTransactionCount();
@@ -187,7 +207,7 @@ public class Shard extends RaftActor {
                 ShardTransaction.props(store.newReadOnlyTransaction(), getSelf(),
                         schemaContext, shardContext), transactionId.toString());
 
-        } else if (createTransaction.getTransactionType()
+        } else if (transactionType
             == TransactionProxy.TransactionType.READ_WRITE.ordinal()) {
 
             shardMBean.incrementReadWriteTransactionCount();
@@ -197,7 +217,7 @@ public class Shard extends RaftActor {
                         schemaContext, shardContext), transactionId.toString());
 
 
-        } else if (createTransaction.getTransactionType()
+        } else if (transactionType
             == TransactionProxy.TransactionType.WRITE_ONLY.ordinal()) {
 
             shardMBean.incrementWriteOnlyTransactionCount();
@@ -208,26 +228,41 @@ public class Shard extends RaftActor {
         } else {
             throw new IllegalArgumentException(
                 "Shard="+name + ":CreateTransaction message has unidentified transaction type="
-                    + createTransaction.getTransactionType());
+                    + transactionType);
         }
     }
 
     private void createTransaction(CreateTransaction createTransaction) {
+        createTransaction(createTransaction.getTransactionType(),
+            createTransaction.getTransactionId());
+    }
+
+    private ActorRef createTransaction(int transactionType, String remoteTransactionId) {
 
         ShardTransactionIdentifier transactionId =
             ShardTransactionIdentifier.builder()
-                .remoteTransactionId(createTransaction.getTransactionId())
+                .remoteTransactionId(remoteTransactionId)
                 .build();
         LOG.debug("Creating transaction : {} ", transactionId);
         ActorRef transactionActor =
-            createTypedTransactionActor(createTransaction, transactionId);
+            createTypedTransactionActor(transactionType, transactionId);
 
         getSender()
             .tell(new CreateTransactionReply(
                     Serialization.serializedActorPath(transactionActor),
-                    createTransaction.getTransactionId()).toSerializable(),
+                    remoteTransactionId).toSerializable(),
                 getSelf());
+
+        return transactionActor;
     }
+
+    private void syncCommitTransaction(DOMStoreWriteTransaction transaction)
+        throws ExecutionException, InterruptedException {
+        DOMStoreThreePhaseCommitCohort commitCohort = transaction.ready();
+        commitCohort.preCommit().get();
+        commitCohort.commit().get();
+    }
+
 
     private void commit(final ActorRef sender, Object serialized) {
         Modification modification = MutableCompositeModification
@@ -238,16 +273,11 @@ public class Shard extends RaftActor {
             LOG.debug(
                 "Could not find cohort for modification : {}. Writing modification using a new transaction",
                 modification);
-            DOMStoreReadWriteTransaction transaction =
-                store.newReadWriteTransaction();
+            DOMStoreWriteTransaction transaction =
+                store.newWriteOnlyTransaction();
             modification.apply(transaction);
-            DOMStoreThreePhaseCommitCohort commitCohort = transaction.ready();
-            ListenableFuture<Void> future =
-                commitCohort.preCommit();
             try {
-                future.get();
-                future = commitCohort.commit();
-                future.get();
+                syncCommitTransaction(transaction);
             } catch (InterruptedException | ExecutionException e) {
                 shardMBean.incrementFailedTransactionsCount();
                 LOG.error("Failed to commit", e);
@@ -296,7 +326,12 @@ public class Shard extends RaftActor {
 
     private void updateSchemaContext(UpdateSchemaContext message) {
         this.schemaContext = message.getSchemaContext();
+        updateSchemaContext(message.getSchemaContext());
         store.onGlobalContextUpdated(message.getSchemaContext());
+    }
+
+    @VisibleForTesting void updateSchemaContext(SchemaContext schemaContext) {
+        store.onGlobalContextUpdated(schemaContext);
     }
 
     private void registerChangeListener(
@@ -381,11 +416,39 @@ public class Shard extends RaftActor {
     }
 
     @Override protected void createSnapshot() {
-        throw new UnsupportedOperationException("createSnapshot");
+        if (createSnapshotTransaction == null) {
+
+            // Create a transaction. We are really going to treat the transaction as a worker
+            // so that this actor does not get block building the snapshot
+            createSnapshotTransaction = createTransaction(
+                TransactionProxy.TransactionType.READ_ONLY.ordinal(),
+                "createSnapshot");
+
+            createSnapshotTransaction.tell(
+                new ReadData(YangInstanceIdentifier.builder().build()).toSerializable(), self());
+
+        }
     }
 
-    @Override protected void applySnapshot(ByteString snapshot) {
-        throw new UnsupportedOperationException("applySnapshot");
+    @VisibleForTesting @Override protected void applySnapshot(ByteString snapshot) {
+        // Since this will be done only on Recovery or when this actor is a Follower
+        // we can safely commit everything in here. We not need to worry about event notifications
+        // as they would have already been disabled on the follower
+        try {
+            DOMStoreWriteTransaction transaction = store.newWriteOnlyTransaction();
+            NormalizedNodeMessages.Node serializedNode = NormalizedNodeMessages.Node.parseFrom(snapshot);
+            NormalizedNode<?, ?> node = new NormalizedNodeToNodeCodec(schemaContext)
+                .decode(YangInstanceIdentifier.builder().build(), serializedNode);
+
+            // delete everything first
+            transaction.delete(YangInstanceIdentifier.builder().build());
+
+            // Add everything from the remote node back
+            transaction.write(YangInstanceIdentifier.builder().build(), node);
+            syncCommitTransaction(transaction);
+        } catch (InvalidProtocolBufferException | InterruptedException | ExecutionException e) {
+            LOG.error(e, "An exception occurred when applying snapshot");
+        }
     }
 
     @Override protected void onStateChanged() {
@@ -436,4 +499,27 @@ public class Shard extends RaftActor {
             return new Shard(name, peerAddresses, shardContext);
         }
     }
+
+    @VisibleForTesting NormalizedNode readStore() throws ExecutionException, InterruptedException {
+        DOMStoreReadTransaction transaction = store.newReadOnlyTransaction();
+
+        CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> future =
+            transaction.read(YangInstanceIdentifier.builder().build());
+
+        NormalizedNode<?, ?> node = future.get().get();
+
+        transaction.close();
+
+        return node;
+    }
+
+    @VisibleForTesting void writeToStore(YangInstanceIdentifier id, NormalizedNode node)
+        throws ExecutionException, InterruptedException {
+        DOMStoreWriteTransaction transaction = store.newWriteOnlyTransaction();
+
+        transaction.write(id, node);
+
+        syncCommitTransaction(transaction);
+    }
+
 }
