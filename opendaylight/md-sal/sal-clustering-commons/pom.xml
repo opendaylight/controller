@@ -165,6 +165,14 @@
 
 
       <dependency>
+          <groupId>com.typesafe.akka</groupId>
+          <artifactId>akka-osgi_${scala.version}</artifactId>
+      </dependency>
+      <dependency>
+          <groupId>com.typesafe.akka</groupId>
+          <artifactId>akka-actor_${scala.version}</artifactId>
+      </dependency>
+      <dependency>
           <groupId>com.google.guava</groupId>
           <artifactId>guava</artifactId>
       </dependency>

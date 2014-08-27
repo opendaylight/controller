@@ -9,12 +9,12 @@ import akka.actor.ChildActorPath;
 import akka.actor.Props;
 import akka.testkit.JavaTestKit;
 import com.google.common.base.Predicate;
-import com.typesafe.config.ConfigFactory;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
 import org.opendaylight.controller.remote.rpc.RouteIdentifierImpl;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Messages;
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
@@ -45,9 +45,12 @@ public class RpcRegistryTest {
 
   @BeforeClass
   public static void setup() throws InterruptedException {
-    node1 = ActorSystem.create("opendaylight-rpc", ConfigFactory.load().getConfig("memberA"));
-    node2 = ActorSystem.create("opendaylight-rpc", ConfigFactory.load().getConfig("memberB"));
-    node3 = ActorSystem.create("opendaylight-rpc", ConfigFactory.load().getConfig("memberC"));
+    RemoteRpcProviderConfig config1 = new RemoteRpcProviderConfig.Builder("memberA").build();
+    RemoteRpcProviderConfig config2 = new RemoteRpcProviderConfig.Builder("memberB").build();
+    RemoteRpcProviderConfig config3 = new RemoteRpcProviderConfig.Builder("memberC").build();
+    node1 = ActorSystem.create("opendaylight-rpc", config1.get());
+    node2 = ActorSystem.create("opendaylight-rpc", config2.get());
+    node3 = ActorSystem.create("opendaylight-rpc", config3.get());
   }
 
   @AfterClass
@@ -204,7 +207,10 @@ public class RpcRegistryTest {
         new ConditionalProbe(probe.getRef(), new Predicate() {
           @Override
           public boolean apply(@Nullable Object input) {
-            return clazz.equals(input.getClass());
+              if (input != null)
+                return clazz.equals(input.getClass());
+              else
+                  return false;
           }
         });
 

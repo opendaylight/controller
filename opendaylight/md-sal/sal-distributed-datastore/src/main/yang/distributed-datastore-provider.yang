@@ -41,13 +41,13 @@ module distributed-datastore-provider {
             range "1..max";
         }
     }
-    
+
     typedef operation-timeout-type {
         type uint16 {
             range "5..max";
         }
     }
-    
+
     grouping data-store-properties {
         leaf max-shard-data-change-executor-queue-size {
             default 1000;
@@ -72,20 +72,32 @@ module distributed-datastore-provider {
             type non-zero-uint16-type;
             description "The maximum queue size for each shard's data store executor.";
          }
-            
+
          leaf shard-transaction-idle-timeout-in-minutes {
             default 10;
             type non-zero-uint16-type;
             description "The maximum amount of time a shard transaction can be idle without receiving any messages before it self-destructs.";
          }
-         
+
          leaf operation-timeout-in-seconds {
             default 5;
             type operation-timeout-type;
             description "The maximum amount of time for akka operations (remote or local) to complete before failing.";
          }
+
+         leaf enable-metric-capture {
+            default false;
+            type boolean;
+            description "Enable or disable metric capture.";
+         }
+
+         leaf bounded-mailbox-capacity {
+             default 1000;
+             type non-zero-uint16-type;
+             description "Max queue size that an actor's mailbox can reach";
+         }
     }
-    
+
     // Augments the 'configuration' choice node under modules/module.
     augment "/config:modules/config:module/config:configuration" {
         case distributed-config-datastore-provider {
