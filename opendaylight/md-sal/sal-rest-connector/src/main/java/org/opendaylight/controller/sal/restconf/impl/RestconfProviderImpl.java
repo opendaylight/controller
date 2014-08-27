@@ -7,9 +7,6 @@
  */
 package org.opendaylight.controller.sal.restconf.impl;
 
-import java.math.BigInteger;
-import java.util.Collection;
-import java.util.Collections;
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.Config;
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.Get;
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.Operational;
@@ -28,18 +25,20 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 
-public class RestconfProviderImpl implements Provider, AutoCloseable, RestConnector, RestConnectorRuntimeMXBean {
+import java.math.BigInteger;
+import java.util.Collection;
+import java.util.Collections;
 
-    public final static String NOT_INITALIZED_MSG = "Restconf is not initialized yet. Please try again later";
+public class RestconfProviderImpl implements Provider, AutoCloseable, RestConnector, RestConnectorRuntimeMXBean {
 
     private final StatisticsRestconfServiceWrapper stats = StatisticsRestconfServiceWrapper.getInstance();
     private ListenerRegistration<SchemaContextListener> listenerRegistration;
     private PortNumber port;
+    private Thread webSocketServerThread;
+
     public void setWebsocketPort(PortNumber port) {
         this.port = port;
     }
-
-    private Thread webSocketServerThread;
 
     @Override
     public void onSessionInitiated(ProviderSession session) {
@@ -65,9 +64,12 @@ public class RestconfProviderImpl implements Provider, AutoCloseable, RestConnec
 
     @Override
     public void close() {
+
         if (listenerRegistration != null) {
             listenerRegistration.close();
         }
+
+        WebSocketServer.destroyInstance();
         webSocketServerThread.interrupt();
     }
 
