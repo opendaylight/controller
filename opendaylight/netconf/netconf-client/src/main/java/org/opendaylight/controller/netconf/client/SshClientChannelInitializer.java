@@ -32,6 +32,7 @@ final class SshClientChannelInitializer extends AbstractChannelInitializer<Netco
     @Override
     public void initialize(final Channel ch, final Promise<NetconfClientSession> promise) {
         try {
+            // ssh handler has to be the first handler in pipeline
             ch.pipeline().addFirst(AsyncSshHandler.createForNetconfSubsystem(authenticationHandler));
             super.initialize(ch,promise);
         } catch (final IOException e) {

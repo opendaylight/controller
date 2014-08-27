@@ -62,6 +62,8 @@ public class SSHTest {
         AuthProvider authProvider = mock(AuthProviderImpl.class);
         doReturn(PEMGenerator.generate().toCharArray()).when(authProvider).getPEMAsCharArray();
         doReturn(true).when(authProvider).authenticated(anyString(), anyString());
+        doReturn("auth").when(authProvider).toString();
+
         NetconfSSHServer netconfSSHServer = NetconfSSHServer.start(10831, NetconfConfigUtil.getNetconfLocalAddress(),
                 authProvider, new NioEventLoopGroup());
 
