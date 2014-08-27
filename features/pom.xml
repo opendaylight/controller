@@ -25,5 +25,6 @@
     <module>flow</module>
     <module>netconf</module>
     <module>protocol-framework</module>
+    <module>adsal-compatibility</module>
   </modules>
 </project>
