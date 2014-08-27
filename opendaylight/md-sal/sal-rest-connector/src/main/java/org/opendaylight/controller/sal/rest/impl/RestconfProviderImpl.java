@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.sal.rest.impl;
 
-import java.util.Collection;
-import java.util.Collections;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
@@ -22,17 +20,18 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 
-public class RestconfProviderImpl implements Provider, AutoCloseable, RestConnector {
+import java.util.Collection;
+import java.util.Collections;
 
-    public final static String NOT_INITALIZED_MSG = "Restconf is not initialized yet. Please try again later";
+public class RestconfProviderImpl implements Provider, AutoCloseable, RestConnector {
 
     private ListenerRegistration<SchemaContextListener> listenerRegistration;
     private PortNumber port;
+    private Thread webSocketServerThread;
+
     public void setWebsocketPort(PortNumber port) {
         this.port = port;
     }
-
-    private Thread webSocketServerThread;
 
     @Override
     public void onSessionInitiated(ProviderSession session) {
@@ -58,9 +57,12 @@ public class RestconfProviderImpl implements Provider, AutoCloseable, RestConnec
 
     @Override
     public void close() {
+
         if (listenerRegistration != null) {
             listenerRegistration.close();
         }
+
+        WebSocketServer.destroyInstance();
         webSocketServerThread.interrupt();
     }
 }
