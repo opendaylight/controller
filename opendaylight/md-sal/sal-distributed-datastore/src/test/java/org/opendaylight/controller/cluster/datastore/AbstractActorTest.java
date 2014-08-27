@@ -22,11 +22,6 @@ public abstract class AbstractActorTest {
 
     @BeforeClass
     public static void setUpClass() throws IOException {
-        File journal = new File("journal");
-
-        if(journal.exists()) {
-            FileUtils.deleteDirectory(journal);
-        }
 
         System.setProperty("shard.persistent", "false");
         system = ActorSystem.create("test");
@@ -36,12 +31,21 @@ public abstract class AbstractActorTest {
     public static void tearDownClass() throws IOException {
         JavaTestKit.shutdownActorSystem(system);
         system = null;
+    }
 
+    protected static void deletePersistenceFiles() throws IOException {
         File journal = new File("journal");
 
         if(journal.exists()) {
             FileUtils.deleteDirectory(journal);
         }
+
+        File snapshots = new File("snapshots");
+
+        if(snapshots.exists()){
+            FileUtils.deleteDirectory(snapshots);
+        }
+
     }
 
     protected ActorSystem getSystem() {

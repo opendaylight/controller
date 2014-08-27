@@ -64,7 +64,7 @@ public class BasicIntegrationTest extends AbstractActorTest {
             final SchemaContext schemaContext = TestModel.createTestContext();
             DatastoreContext datastoreContext = new DatastoreContext();
 
-            final Props props = Shard.props(identifier, Collections.EMPTY_MAP, datastoreContext);
+            final Props props = Shard.props(identifier, Collections.EMPTY_MAP, datastoreContext, TestModel.createTestContext());
             final ActorRef shard = getSystem().actorOf(props);
 
             new Within(duration("10 seconds")) {
