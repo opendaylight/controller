@@ -9,6 +9,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChain;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChainReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
@@ -32,6 +33,8 @@ public class ShardTransactionChainTest extends AbstractActorTest {
 
     private static final String mockShardName = "mockShardName";
 
+    private final ShardStats shardStats = new ShardStats(mockShardName, "DataStore");
+
     @BeforeClass
     public static void staticSetup() {
         store.onGlobalContextUpdated(testSchemaContext);
@@ -41,7 +44,7 @@ public class ShardTransactionChainTest extends AbstractActorTest {
     public void testOnReceiveCreateTransaction() throws Exception {
         new JavaTestKit(getSystem()) {{
             final Props props = ShardTransactionChain.props(store.createTransactionChain(),
-                    testSchemaContext, DATA_STORE_CONTEXT, mockShardName);
+                    testSchemaContext, DATA_STORE_CONTEXT, shardStats);
             final ActorRef subject = getSystem().actorOf(props, "testCreateTransaction");
 
             new Within(duration("1 seconds")) {
@@ -79,7 +82,7 @@ public class ShardTransactionChainTest extends AbstractActorTest {
     public void testOnReceiveCloseTransactionChain() throws Exception {
         new JavaTestKit(getSystem()) {{
             final Props props = ShardTransactionChain.props(store.createTransactionChain(),
-                    testSchemaContext, DATA_STORE_CONTEXT,mockShardName );
+                    testSchemaContext, DATA_STORE_CONTEXT, shardStats );
             final ActorRef subject = getSystem().actorOf(props, "testCloseTransactionChain");
 
             new Within(duration("1 seconds")) {

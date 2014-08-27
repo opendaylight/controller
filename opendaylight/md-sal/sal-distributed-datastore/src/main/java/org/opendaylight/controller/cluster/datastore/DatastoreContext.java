@@ -9,13 +9,15 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Preconditions;
+
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
+
 import scala.concurrent.duration.Duration;
 
 import java.util.concurrent.TimeUnit;
 
 /**
- * Contains contextual data for shards.
+ * Contains contextual data for a data store.
  *
  * @author Thomas Pantelis
  */
@@ -23,16 +25,24 @@ public class DatastoreContext {
 
     private final InMemoryDOMDataStoreConfigProperties dataStoreProperties;
     private final Duration shardTransactionIdleTimeout;
+    private final int operationTimeoutInSeconds;
+    private final String dataStoreMXBeanType;
 
     public DatastoreContext() {
         this.dataStoreProperties = null;
+        this.dataStoreMXBeanType = "DistributedDatastore";
         this.shardTransactionIdleTimeout = Duration.create(10, TimeUnit.MINUTES);
+        this.operationTimeoutInSeconds = 5;
     }
 
-    public DatastoreContext(InMemoryDOMDataStoreConfigProperties dataStoreProperties,
-        Duration shardTransactionIdleTimeout) {
+    public DatastoreContext(String dataStoreMXBeanType,
+            InMemoryDOMDataStoreConfigProperties dataStoreProperties,
+            Duration shardTransactionIdleTimeout,
+            int operationTimeoutInSeconds) {
+        this.dataStoreMXBeanType = dataStoreMXBeanType;
         this.dataStoreProperties = Preconditions.checkNotNull(dataStoreProperties);
-        this.shardTransactionIdleTimeout = Preconditions.checkNotNull(shardTransactionIdleTimeout);
+        this.shardTransactionIdleTimeout = shardTransactionIdleTimeout;
+        this.operationTimeoutInSeconds = operationTimeoutInSeconds;
     }
 
     public InMemoryDOMDataStoreConfigProperties getDataStoreProperties() {
@@ -43,5 +53,11 @@ public class DatastoreContext {
         return shardTransactionIdleTimeout;
     }
 
+    public String getDataStoreMXBeanType() {
+        return dataStoreMXBeanType;
+    }
 
+    public int getOperationTimeoutInSeconds() {
+        return operationTimeoutInSeconds;
+    }
 }

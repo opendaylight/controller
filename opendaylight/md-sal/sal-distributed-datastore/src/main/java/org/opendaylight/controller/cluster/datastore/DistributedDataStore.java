@@ -8,8 +8,6 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
-import java.util.concurrent.TimeUnit;
-
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 
@@ -22,7 +20,6 @@ import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
-import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
@@ -36,8 +33,6 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import scala.concurrent.duration.Duration;
-
 /**
  *
  */
@@ -46,41 +41,29 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
     private static final Logger LOG = LoggerFactory.getLogger(DistributedDataStore.class);
 
     private final ActorContext actorContext;
-    private final DatastoreContext datastoreContext;
 
     public DistributedDataStore(ActorSystem actorSystem, String type, ClusterWrapper cluster,
-            Configuration configuration, DistributedDataStoreProperties dataStoreProperties) {
+            Configuration configuration, DatastoreContext datastoreContext) {
         Preconditions.checkNotNull(actorSystem, "actorSystem should not be null");
         Preconditions.checkNotNull(type, "type should not be null");
         Preconditions.checkNotNull(cluster, "cluster should not be null");
         Preconditions.checkNotNull(configuration, "configuration should not be null");
-
+        Preconditions.checkNotNull(datastoreContext, "datastoreContext should not be null");
 
         String shardManagerId = ShardManagerIdentifier.builder().type(type).build().toString();
 
         LOG.info("Creating ShardManager : {}", shardManagerId);
 
-        datastoreContext = new DatastoreContext(InMemoryDOMDataStoreConfigProperties.create(
-                dataStoreProperties.getMaxShardDataChangeExecutorPoolSize(),
-                dataStoreProperties.getMaxShardDataChangeExecutorQueueSize(),
-                dataStoreProperties.getMaxShardDataChangeListenerQueueSize()),
-                Duration.create(dataStoreProperties.getShardTransactionIdleTimeoutInMinutes(),
-                        TimeUnit.MINUTES));
+        actorContext = new ActorContext(actorSystem, actorSystem.actorOf(
+                ShardManager.props(type, cluster, configuration, datastoreContext)
+                    .withMailbox(ActorContext.MAILBOX), shardManagerId ), cluster, configuration);
 
-        actorContext
-                = new ActorContext(
-                    actorSystem, actorSystem.actorOf(
-                        ShardManager.props(type, cluster, configuration, datastoreContext).
-                            withMailbox(ActorContext.MAILBOX), shardManagerId ), cluster, configuration);
-
-        actorContext.setOperationTimeout(dataStoreProperties.getOperationTimeoutInSeconds());
+        actorContext.setOperationTimeout(datastoreContext.getOperationTimeoutInSeconds());
     }
 
     public DistributedDataStore(ActorContext actorContext) {
         this.actorContext = Preconditions.checkNotNull(actorContext, "actorContext should not be null");
-        this.datastoreContext = new DatastoreContext();
     }
-
 
     @SuppressWarnings("unchecked")
     @Override
