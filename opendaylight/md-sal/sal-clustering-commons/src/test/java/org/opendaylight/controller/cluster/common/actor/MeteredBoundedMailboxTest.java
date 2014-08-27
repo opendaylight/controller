@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.common.actor;
+package org.opendaylight.controller.cluster.common.actor;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -39,7 +39,7 @@ public class MeteredBoundedMailboxTest {
     }
 
     @Test
-    public void test_WhenQueueIsFull_ShouldSendMsgToDeadLetter() throws InterruptedException {
+    public void shouldSendMsgToDeadLetterWhenQueueIsFull() throws InterruptedException {
         final JavaTestKit mockReceiver = new JavaTestKit(actorSystem);
         actorSystem.eventStream().subscribe(mockReceiver.getRef(), DeadLetter.class);
 
