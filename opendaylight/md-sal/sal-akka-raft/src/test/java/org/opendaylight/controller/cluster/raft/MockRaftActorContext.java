@@ -16,8 +16,8 @@ import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import com.google.protobuf.GeneratedMessage;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
-import org.opendaylight.controller.cluster.raft.protobuff.messages.AppendEntriesMessages;
-import org.opendaylight.controller.cluster.raft.protobuff.messages.MockPayloadMessages;
+import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
+import org.opendaylight.controller.protobuff.messages.cluster.raft.test.MockPayloadMessages;
 import com.google.common.base.Preconditions;
 
 import java.io.Serializable;

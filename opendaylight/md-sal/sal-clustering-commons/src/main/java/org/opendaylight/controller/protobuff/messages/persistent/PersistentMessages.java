@@ -1640,7 +1640,7 @@ public final class PersistentMessages {
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.getDescriptor(),
-          org.opendaylight.controller.cluster.raft.protobuff.messages.AppendEntriesMessages.getDescriptor(),
+          org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.getDescriptor(),
         }, assigner);
   }
 
