@@ -26,5 +26,6 @@
     <module>netconf</module>
     <module>protocol-framework</module>
     <module>adsal-compatibility</module>
+    <module>akka</module>
   </modules>
 </project>

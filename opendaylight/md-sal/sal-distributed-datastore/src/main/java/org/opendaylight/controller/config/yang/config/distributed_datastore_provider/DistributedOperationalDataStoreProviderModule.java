@@ -2,9 +2,12 @@ package org.opendaylight.controller.config.yang.config.distributed_datastore_pro
 
 import org.opendaylight.controller.cluster.datastore.DistributedDataStoreFactory;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStoreProperties;
+import org.osgi.framework.BundleContext;
 
 public class DistributedOperationalDataStoreProviderModule extends
     org.opendaylight.controller.config.yang.config.distributed_datastore_provider.AbstractDistributedOperationalDataStoreProviderModule {
+    private BundleContext bundleContext;
+
     public DistributedOperationalDataStoreProviderModule(
         org.opendaylight.controller.config.api.ModuleIdentifier identifier,
         org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
@@ -39,7 +42,11 @@ public class DistributedOperationalDataStoreProviderModule extends
                         props.getMaxShardDataChangeExecutorQueueSize().getValue(),
                         props.getMaxShardDataChangeListenerQueueSize().getValue(),
                         props.getShardTransactionIdleTimeoutInMinutes().getValue(),
-                        props.getOperationTimeoutInSeconds().getValue()));
+                        props.getOperationTimeoutInSeconds().getValue()), bundleContext);
+    }
+
+    public void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
     }
 
 }
