@@ -15,7 +15,7 @@ public final class CompositeModificationPayload {
    */
   public static final
     com.google.protobuf.GeneratedMessage.GeneratedExtension<
-      org.opendaylight.controller.cluster.raft.protobuff.messages.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Payload,
+      org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Payload,
       org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages.CompositeModification> modification = com.google.protobuf.GeneratedMessage
           .newFileScopedGeneratedExtension(
         org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages.CompositeModification.class,
@@ -51,7 +51,7 @@ public final class CompositeModificationPayload {
     com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
-          org.opendaylight.controller.cluster.raft.protobuff.messages.AppendEntriesMessages.getDescriptor(),
+          org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.getDescriptor(),
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.getDescriptor(),
           org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages.getDescriptor(),
         }, assigner);

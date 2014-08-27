@@ -1,8 +1,8 @@
 import "AppendEntriesMessages.proto";
 
-package org.opendaylight.controller.cluster.raft;
+package org.opendaylight.controller.cluster.raft.test;
 
-option java_package = "org.opendaylight.controller.cluster.raft.protobuff.messages";
+option java_package = "org.opendaylight.controller.protobuff.messages.cluster.raft.test";
 option java_outer_classname = "MockPayloadMessages";
 
 extend AppendEntries.ReplicatedLogEntry.Payload {

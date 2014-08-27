@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.raft.protobuff.client.messages;
 
 
 import com.google.protobuf.GeneratedMessage;
-import org.opendaylight.controller.cluster.raft.protobuff.messages.AppendEntriesMessages;
+import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
 
 import java.util.Map;
 
