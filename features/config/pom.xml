@@ -7,6 +7,7 @@
     <version>0.2.5-SNAPSHOT</version>
     <relativePath>../../opendaylight/config/</relativePath>
   </parent>
+  
   <artifactId>features-config</artifactId>
 
   <packaging>jar</packaging>
