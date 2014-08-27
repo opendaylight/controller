@@ -34,10 +34,12 @@ public class RemoteRpcProviderTest {
 
   static ActorSystem system;
 
+  private static ModuleConfig config;
 
   @BeforeClass
   public static void setup() throws InterruptedException {
     system = ActorSystem.create("odl-cluster-rpc", ConfigFactory.load().getConfig("odl-cluster-rpc"));
+    config = new ModuleConfig.Builder().build();
   }
 
   @AfterClass
@@ -48,14 +50,19 @@ public class RemoteRpcProviderTest {
 
   @Test
   public void testRemoteRpcProvider() throws Exception {
-    RemoteRpcProvider rpcProvider = new RemoteRpcProvider(system, mock(RpcProvisionRegistry.class));
+    RemoteRpcProvider rpcProvider = new RemoteRpcProvider(system, mock(RpcProvisionRegistry.class), config);
     Broker.ProviderSession session = mock(Broker.ProviderSession.class);
     SchemaService schemaService = mock(SchemaService.class);
     when(schemaService.getGlobalContext()). thenReturn(mock(SchemaContext.class));
     when(session.getService(SchemaService.class)).thenReturn(schemaService);
+
     rpcProvider.onSessionInitiated(session);
-    ActorRef actorRef = Await.result(system.actorSelection(ActorConstants.RPC_MANAGER_PATH).resolveOne(Duration.create(1, TimeUnit.SECONDS)),
-        Duration.create(2, TimeUnit.SECONDS));
-    Assert.assertTrue(actorRef.path().toString().contains(ActorConstants.RPC_MANAGER_PATH));
+
+    ActorRef actorRef = Await.result(
+            system.actorSelection(
+                    config.getRpcManagerPath()).resolveOne(Duration.create(1, TimeUnit.SECONDS)),
+                                                           Duration.create(2, TimeUnit.SECONDS));
+
+    Assert.assertTrue(actorRef.path().toString().contains(config.getRpcManagerPath()));
   }
 }
