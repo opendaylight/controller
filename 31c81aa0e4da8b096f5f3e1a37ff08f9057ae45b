@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_839bea16",
+        "filename": "opendaylight/config/config-api/src/test/java/org/opendaylight/controller/config/api/IdentityAttributeRefTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-08-27T08:58:34Z",
+      "side": 1,
+      "message": "these JmxAttribute tests are already present in JmxAttributeTest, please delete duplicate tests from here",
+      "revId": "31c81aa0e4da8b096f5f3e1a37ff08f9057ae45b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_239e9e07",
+        "filename": "opendaylight/config/config-api/src/test/java/org/opendaylight/controller/config/api/JmxAttributeTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-08-27T08:58:34Z",
+      "side": 1,
+      "message": "Might be NullPointerException",
+      "revId": "31c81aa0e4da8b096f5f3e1a37ff08f9057ae45b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_43a16244",
+        "filename": "opendaylight/config/config-api/src/test/java/org/opendaylight/controller/config/api/jmx/ObjectNameUtilTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-08-27T08:58:34Z",
+      "side": 1,
+      "message": "this map should be declare like this:\n\nMap\u003cString, String\u003e map \u003d new HashMap\u003c\u003e();",
+      "revId": "31c81aa0e4da8b096f5f3e1a37ff08f9057ae45b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
