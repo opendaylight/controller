@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "fa82b9bf_5b506a0a",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-27T19:33:20Z",
+      "side": 1,
+      "message": "Can you put the version in the ODL commons pom.xml so we don\u0027t have to hard-code it in every pom?",
+      "revId": "717c6cda544b79302c1f435398044d2bd89a2ae0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_0e7aa123",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/common/actor/MeteredBoundedMailbox.java",
         "patchSetId": 2
@@ -31,6 +48,57 @@
       "side": 1,
       "message": "Ok",
       "parentUuid": "fa82b9bf_0e7aa123",
+      "revId": "717c6cda544b79302c1f435398044d2bd89a2ae0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7b53ee16",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-27T19:33:20Z",
+      "side": 1,
+      "message": "Can you put the version in the ODL commons pom.xml so we don\u0027t have to hard-code it in every pom?",
+      "revId": "717c6cda544b79302c1f435398044d2bd89a2ae0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_1b566206",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-27T19:33:20Z",
+      "side": 1,
+      "message": "Can you put the version in the ODL commons pom.xml so we don\u0027t have to hard-code it in every pom?",
+      "revId": "717c6cda544b79302c1f435398044d2bd89a2ae0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_bb5bb620",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/utils/ActorUtil.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-27T19:33:20Z",
+      "side": 1,
+      "message": "Ideally these timeouts should be configurable via the config system. I have a patch to do that for the distributed store. Not as part of this patch but consider for another patch.\n\nAlso I don\u0027t think we really need separate timeouts for ask duration and await duration. Just use the same ask duration with Await. From my understanding, the duration passed to ask measures the full round-trip time for request/response so you\u0027d naturally want the same timeout for Await. Unless I\u0027m mistaken about that (I recall Moiz or Basheer telling me that).",
       "revId": "717c6cda544b79302c1f435398044d2bd89a2ae0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
