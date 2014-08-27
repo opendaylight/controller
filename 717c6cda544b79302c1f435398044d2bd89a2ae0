@@ -16,6 +16,24 @@
       "revId": "717c6cda544b79302c1f435398044d2bd89a2ae0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_691b2781",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/common/actor/MeteredBoundedMailbox.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-27T18:32:02Z",
+      "side": 1,
+      "message": "Ok",
+      "parentUuid": "fa82b9bf_0e7aa123",
+      "revId": "717c6cda544b79302c1f435398044d2bd89a2ae0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
