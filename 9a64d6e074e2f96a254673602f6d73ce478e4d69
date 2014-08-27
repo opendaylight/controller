@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_0e114151",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-27T11:10:10Z",
+      "side": 1,
+      "message": "Can you explain why this context.getLastApplied \u003c lastIndex() check is needed?",
+      "revId": "9a64d6e074e2f96a254673602f6d73ce478e4d69",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8e2c719a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 250,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-27T11:10:10Z",
+      "side": 1,
+      "message": "Move this whole block into a separate method it\u0027s too big",
+      "revId": "9a64d6e074e2f96a254673602f6d73ce478e4d69",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ee3c1dca",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-27T11:10:10Z",
+      "side": 1,
+      "message": "The toObject operation may be expensive - it may need to be made asynchronous as well.",
+      "revId": "9a64d6e074e2f96a254673602f6d73ce478e4d69",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6e500d0b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-27T11:10:10Z",
+      "side": 1,
+      "message": "This comment is a little out of place (because the reply is being sent elsewhere -\u003e a little below)",
+      "revId": "9a64d6e074e2f96a254673602f6d73ce478e4d69",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4e598933",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-27T11:10:10Z",
+      "side": 1,
+      "message": "Is a there a more specific exception that we could catch?",
+      "revId": "9a64d6e074e2f96a254673602f6d73ce478e4d69",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8e7a3186",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-27T11:10:10Z",
+      "side": 1,
+      "message": "We should probably consider renaming this method as it now does not just send append entries it can also send install snapshots",
+      "revId": "9a64d6e074e2f96a254673602f6d73ce478e4d69",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ce44b948",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 319,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-27T11:10:10Z",
+      "side": 1,
+      "message": "If we are sending the snapshot chunk then we should not need to send an append entries to the same follower right?",
+      "revId": "9a64d6e074e2f96a254673602f6d73ce478e4d69",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6e77ada0",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-27T11:10:10Z",
+      "side": 1,
+      "message": "didn\u0027t understand the comment \"if the follower is just not starting\"",
+      "revId": "9a64d6e074e2f96a254673602f6d73ce478e4d69",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
