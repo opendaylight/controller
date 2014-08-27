@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.common.reporting;
+package org.opendaylight.controller.cluster.reporting;
 
 import com.codahale.metrics.JmxReporter;
 import com.codahale.metrics.MetricRegistry;
@@ -21,7 +21,7 @@ import com.codahale.metrics.MetricRegistry;
 public class MetricsReporter implements AutoCloseable{
 
     private final MetricRegistry METRICS_REGISTRY = new MetricRegistry();
-    private final String DOMAIN = "org.opendaylight.controller";
+    private final String DOMAIN = "org.opendaylight.controller.actor.metric";
 
     public final JmxReporter jmxReporter = JmxReporter.forRegistry(METRICS_REGISTRY).inDomain(DOMAIN).build();
 
