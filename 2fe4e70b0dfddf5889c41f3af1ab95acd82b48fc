@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_030a7a25",
+        "filename": "features/adsal-compatibility/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-27T10:45:17Z",
+      "side": 1,
+      "message": "Can you please remove all these comments ?\n(I understand that these are from archetype), but can be confusing for the reader.",
+      "revId": "2fe4e70b0dfddf5889c41f3af1ab95acd82b48fc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
