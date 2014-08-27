@@ -6,10 +6,18 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.remote.rpc.utils;
+package org.opendaylight.controller.cluster.common.actor;
 
-import com.typesafe.config.Config;
+import akka.actor.ActorRef;
 
-public interface AkkaConfigurationReader {
-    Config read();
+public class Monitor {
+    private final ActorRef actorRef;
+
+    public Monitor(ActorRef actorRef){
+        this.actorRef = actorRef;
+    }
+
+    public ActorRef getActorRef() {
+        return actorRef;
+    }
 }

@@ -13,7 +13,7 @@ package org.opendaylight.controller.remote.rpc;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.testkit.JavaTestKit;
-import com.typesafe.config.ConfigFactory;
+import com.typesafe.config.Config;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -33,11 +33,14 @@ import static org.mockito.Mockito.when;
 public class RemoteRpcProviderTest {
 
   static ActorSystem system;
-
+  static RemoteRpcProviderConfig moduleConfig;
 
   @BeforeClass
   public static void setup() throws InterruptedException {
-    system = ActorSystem.create("odl-cluster-rpc", ConfigFactory.load().getConfig("odl-cluster-rpc"));
+    moduleConfig = new RemoteRpcProviderConfig.Builder("odl-cluster-rpc").build();
+    Config config = moduleConfig.get();
+    system = ActorSystem.create("odl-cluster-rpc", config);
+
   }
 
   @AfterClass
@@ -53,9 +56,14 @@ public class RemoteRpcProviderTest {
     SchemaService schemaService = mock(SchemaService.class);
     when(schemaService.getGlobalContext()). thenReturn(mock(SchemaContext.class));
     when(session.getService(SchemaService.class)).thenReturn(schemaService);
+
     rpcProvider.onSessionInitiated(session);
-    ActorRef actorRef = Await.result(system.actorSelection(ActorConstants.RPC_MANAGER_PATH).resolveOne(Duration.create(1, TimeUnit.SECONDS)),
-        Duration.create(2, TimeUnit.SECONDS));
-    Assert.assertTrue(actorRef.path().toString().contains(ActorConstants.RPC_MANAGER_PATH));
+
+    ActorRef actorRef = Await.result(
+            system.actorSelection(
+                    moduleConfig.getRpcManagerPath()).resolveOne(Duration.create(1, TimeUnit.SECONDS)),
+                                                                 Duration.create(2, TimeUnit.SECONDS));
+
+    Assert.assertTrue(actorRef.path().toString().contains(moduleConfig.getRpcManagerPath()));
   }
 }
