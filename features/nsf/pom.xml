@@ -28,6 +28,21 @@
       <version>1.4.2-SNAPSHOT</version>
       <type>zip</type>
     </dependency>
+    <!-- Feature Dependencies -->
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>features-adsal</artifactId>
+      <version>${sal.version}</version>
+      <classifier>features</classifier>
+      <type>xml</type>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>features-base</artifactId>
+      <classifier>features</classifier>
+      <version>${commons.opendaylight.version}</version>
+      <type>xml</type>
+    </dependency>
     <!-- Bundle Dependencies -->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
