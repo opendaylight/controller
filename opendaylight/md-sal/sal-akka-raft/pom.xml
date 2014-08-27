@@ -97,9 +97,8 @@
         <configuration>
           <instructions>
             <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
-            <Export-package></Export-package>
-            <Private-Package></Private-Package>
-            <Import-Package></Import-Package>
+            <Export-package>org.opendaylight.cluster.raft</Export-package>
+            <Import-Package>*</Import-Package>
           </instructions>
         </configuration>
       </plugin>
