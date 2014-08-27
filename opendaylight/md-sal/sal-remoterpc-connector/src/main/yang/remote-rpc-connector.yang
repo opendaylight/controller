@@ -5,11 +5,11 @@ module remote-rpc-connector {
 
     import config { prefix config; revision-date 2013-04-05; }
     import opendaylight-md-sal-dom {prefix dom;}
-    
+
     description
         "This module contains the base YANG definitions for
                  the remote routed rpc";
- 
+
     revision "2014-07-07" {
         description
             "Initial revision";
@@ -25,7 +25,7 @@ module remote-rpc-connector {
     augment "/config:modules/config:module/config:configuration" {
         case remote-rpc-connector {
             when "/config:modules/config:module/config:type = 'remote-rpc-connector'";
-            
+
             container dom-broker {
                 uses config:service-ref {
                     refine type {
@@ -33,6 +33,24 @@ module remote-rpc-connector {
                         config:required-identity dom:dom-broker-osgi-registry;
                     }
                 }
+            }
+
+            leaf enable-metric-capture {
+                default false;
+                type boolean;
+                description "Enable or disable metric capture.";
+            }
+
+            leaf actor-system-name {
+                default odl-cluster-rpc;
+                type string;
+                description "Name by which actor system is identified. Its also used to find relevant configuration";
+            }
+
+            leaf bounded-mailbox-capacity {
+                default 1000;
+                type uint16;
+                description "Max queue size that an actor's mailbox can reach";
             }
         }
     }

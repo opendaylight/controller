@@ -8,27 +8,26 @@
 
 package org.opendaylight.controller.remote.rpc;
 
-import static org.junit.Assert.assertEquals;
-import java.net.URI;
-import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-
+import akka.testkit.JavaTestKit;
+import com.google.common.util.concurrent.ListenableFuture;
 import org.junit.Test;
 import org.opendaylight.controller.remote.rpc.messages.InvokeRpc;
 import org.opendaylight.controller.remote.rpc.messages.RpcResponse;
 import org.opendaylight.controller.xml.codec.XmlUtils;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorSeverity;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
+import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
-import akka.testkit.JavaTestKit;
+import java.net.URI;
+import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
-import com.google.common.util.concurrent.ListenableFuture;
+import static org.junit.Assert.assertEquals;
 
 /***
  * Unit tests for RemoteRpcImplementation.
@@ -42,7 +41,7 @@ public class RemoteRpcImplementationTest extends AbstractRpcTest {
         final AtomicReference<AssertionError> assertError = new AtomicReference<>();
         try {
             RemoteRpcImplementation rpcImpl = new RemoteRpcImplementation(
-                    probeReg1.getRef(), schemaContext);
+                    probeReg1.getRef(), schemaContext, getConfig());
 
             final CompositeNode input = makeRPCInput("foo");
             final CompositeNode output = makeRPCOutput("bar");
@@ -68,7 +67,7 @@ public class RemoteRpcImplementationTest extends AbstractRpcTest {
         final AtomicReference<AssertionError> assertError = new AtomicReference<>();
         try {
             RemoteRpcImplementation rpcImpl = new RemoteRpcImplementation(
-                    probeReg1.getRef(), schemaContext);
+                    probeReg1.getRef(), schemaContext, getConfig());
 
             QName instanceQName = new QName(new URI("ns"), "instance");
             YangInstanceIdentifier identifier = YangInstanceIdentifier.of(instanceQName);
@@ -99,7 +98,7 @@ public class RemoteRpcImplementationTest extends AbstractRpcTest {
         final AtomicReference<AssertionError> assertError = new AtomicReference<>();
         try {
             RemoteRpcImplementation rpcImpl = new RemoteRpcImplementation(
-                    probeReg1.getRef(), schemaContext);
+                    probeReg1.getRef(), schemaContext, getConfig());
 
             final CompositeNode input = makeRPCInput("foo");
 
@@ -125,7 +124,7 @@ public class RemoteRpcImplementationTest extends AbstractRpcTest {
         final AtomicReference<AssertionError> assertError = new AtomicReference<>();
         try {
             RemoteRpcImplementation rpcImpl = new RemoteRpcImplementation(
-                    probeReg1.getRef(), schemaContext);
+                    probeReg1.getRef(), schemaContext, getConfig());
 
             final CompositeNode input = makeRPCInput("foo");
 
@@ -181,5 +180,9 @@ public class RemoteRpcImplementationTest extends AbstractRpcTest {
         }.start();
 
         return invokeRpcMsg;
+    }
+
+    private RemoteRpcProviderConfig getConfig(){
+        return new RemoteRpcProviderConfig.Builder("unit-test").build();
     }
 }

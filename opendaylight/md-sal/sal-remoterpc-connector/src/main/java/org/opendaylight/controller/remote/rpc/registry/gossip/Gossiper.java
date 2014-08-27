@@ -12,7 +12,6 @@ import akka.actor.ActorRefProvider;
 import akka.actor.ActorSelection;
 import akka.actor.Address;
 import akka.actor.Cancellable;
-import akka.actor.UntypedActor;
 import akka.cluster.Cluster;
 import akka.cluster.ClusterActorRefProvider;
 import akka.cluster.ClusterEvent;
@@ -21,7 +20,8 @@ import akka.dispatch.Mapper;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import akka.pattern.Patterns;
-import org.opendaylight.controller.remote.rpc.utils.ActorUtil;
+import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;
+import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -59,7 +59,7 @@ import static org.opendaylight.controller.remote.rpc.registry.gossip.Messages.Go
  *
  */
 
-public class Gossiper extends UntypedActor {
+public class Gossiper extends AbstractUntypedActorWithMetering {
 
     final LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
@@ -79,7 +79,11 @@ public class Gossiper extends UntypedActor {
 
     private Boolean autoStartGossipTicks = true;
 
-    public Gossiper(){}
+    private RemoteRpcProviderConfig config;
+
+    public Gossiper(){
+        config = new RemoteRpcProviderConfig(getContext().system().settings().config());
+    }
 
     /**
      * Helpful for testing
@@ -106,7 +110,7 @@ public class Gossiper extends UntypedActor {
         if (autoStartGossipTicks) {
             gossipTask = getContext().system().scheduler().schedule(
                     new FiniteDuration(1, TimeUnit.SECONDS),        //initial delay
-                    ActorUtil.GOSSIP_TICK_INTERVAL,                 //interval
+                    config.getGossipTickInterval(),                 //interval
                     getSelf(),                                       //target
                     new Messages.GossiperMessages.GossipTick(),      //message
                     getContext().dispatcher(),                       //execution context
@@ -124,22 +128,19 @@ public class Gossiper extends UntypedActor {
     }
 
     @Override
-    public void onReceive(Object message) throws Exception {
-
-        log.debug("Received message: node[{}], message[{}]", selfAddress, message);
-
+    protected void handleReceive(Object message) throws Exception {
         //Usually sent by self via gossip task defined above. But its not enforced.
         //These ticks can be sent by another actor as well which is esp. useful while testing
         if (message instanceof GossipTick)
             receiveGossipTick();
 
-        //Message from remote gossiper with its bucket versions
+            //Message from remote gossiper with its bucket versions
         else if (message instanceof GossipStatus)
             receiveGossipStatus((GossipStatus) message);
 
-        //Message from remote gossiper with buckets. This is usually in response to GossipStatus message
-        //The contained buckets are newer as determined by the remote gossiper by comparing the GossipStatus
-        //message with its local versions
+            //Message from remote gossiper with buckets. This is usually in response to GossipStatus message
+            //The contained buckets are newer as determined by the remote gossiper by comparing the GossipStatus
+            //message with its local versions
         else if (message instanceof GossipEnvelope)
             receiveGossip((GossipEnvelope) message);
 
@@ -196,7 +197,7 @@ public class Gossiper extends UntypedActor {
     void receiveGossipTick(){
         if (clusterMembers.size() == 0) return; //no members to send gossip status to
 
-        Address remoteMemberToGossipTo = null;
+        Address remoteMemberToGossipTo;
 
         if (clusterMembers.size() == 1)
             remoteMemberToGossipTo = clusterMembers.get(0);
@@ -229,7 +230,7 @@ public class Gossiper extends UntypedActor {
 
         final ActorRef sender = getSender();
         Future<Object> futureReply =
-                Patterns.ask(getContext().parent(), new GetBucketVersions(), ActorUtil.ASK_DURATION.toMillis());
+                Patterns.ask(getContext().parent(), new GetBucketVersions(), config.getAskDuration());
 
         futureReply.map(getMapperToProcessRemoteStatus(sender, status), getContext().dispatcher());
 
@@ -271,7 +272,7 @@ public class Gossiper extends UntypedActor {
     void sendGossipTo(final ActorRef remote, final Set<Address> addresses){
 
         Future<Object> futureReply =
-                Patterns.ask(getContext().parent(), new GetBucketsByMembers(addresses), ActorUtil.ASK_DURATION.toMillis());
+                Patterns.ask(getContext().parent(), new GetBucketsByMembers(addresses), config.getAskDuration());
         futureReply.map(getMapperToSendGossip(remote), getContext().dispatcher());
     }
 
@@ -284,7 +285,7 @@ public class Gossiper extends UntypedActor {
 
         //Get local status from bucket store and send to remote
         Future<Object> futureReply =
-                Patterns.ask(getContext().parent(), new GetBucketVersions(), ActorUtil.ASK_DURATION.toMillis());
+                Patterns.ask(getContext().parent(), new GetBucketVersions(), config.getAskDuration());
 
         //Find gossiper on remote system
         ActorSelection remoteRef = getContext().system().actorSelection(
@@ -382,8 +383,6 @@ public class Gossiper extends UntypedActor {
                             localIsOlder.add(address);
                         else if (localVersions.get(address) > remoteVersions.get(address))
                             localIsNewer.add(address);
-                        else
-                            continue;
                     }
 
                     if (!localIsOlder.isEmpty())
