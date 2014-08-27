@@ -56,10 +56,10 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-        	<groupId>org.opendaylight.controller</groupId>
-        	<artifactId>sal-dom-xsql</artifactId>
-        	<version>1.1-SNAPSHOT</version>
-        	<type>bundle</type>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>sal-dom-xsql</artifactId>
+            <version>1.1-SNAPSHOT</version>
+            <type>bundle</type>
         </dependency>
     </dependencies>
 

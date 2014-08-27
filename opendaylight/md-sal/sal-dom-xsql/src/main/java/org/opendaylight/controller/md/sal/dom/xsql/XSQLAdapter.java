@@ -199,7 +199,7 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
         elements.put(o.toString(), entry);
 
     }
-
+    //switch to public for karaf
     public void processCommand(StringBuffer inputString, PrintStream sout) {
         if (inputString.toString().trim().equals("r")) {
             sout.println(lastInputString);

@@ -17,7 +17,7 @@ public class xsql extends OsgiCommandSupport {
     private String argument;
 
     protected Object doExecute() throws Exception {
-    	XSQLAdapter.getInstance().processCommand(new StringBuffer(argument), System.out);
-    	return null;
+        XSQLAdapter.getInstance().processCommand(new StringBuffer(argument), System.out);
+        return null;
     }
 }
