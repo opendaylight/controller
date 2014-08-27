@@ -14,6 +14,7 @@ import akka.actor.Props;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import akka.japi.Creator;
+import akka.persistence.RecoveryFailure;
 import akka.serialization.Serialization;
 
 import com.google.common.base.Optional;
@@ -144,8 +145,19 @@ public class Shard extends RaftActor {
         return Props.create(new ShardCreator(name, peerAddresses, datastoreContext));
     }
 
+    @Override public void onReceiveRecover(Object message) {
+        LOG.debug("onReceiveRecover: Received message {} from {}", message.getClass().toString(),
+            getSender());
+
+        if (message instanceof RecoveryFailure){
+            LOG.error(((RecoveryFailure) message).cause(), "Recovery failed because of this cause");
+        } else {
+            super.onReceiveRecover(message);
+        }
+    }
+
     @Override public void onReceiveCommand(Object message) {
-        LOG.debug("Received message {} from {}", message.getClass().toString(),
+        LOG.debug("onReceiveCommand: Received message {} from {}", message.getClass().toString(),
             getSender());
 
         if (message.getClass()
@@ -228,7 +240,8 @@ public class Shard extends RaftActor {
             .tell(new CreateTransactionReply(
                     Serialization.serializedActorPath(transactionActor),
                     createTransaction.getTransactionId()).toSerializable(),
-                getSelf());
+                getSelf()
+            );
     }
 
     private void commit(final ActorRef sender, Object serialized) {
@@ -266,9 +279,9 @@ public class Shard extends RaftActor {
         Futures.addCallback(future, new FutureCallback<Void>() {
             @Override
             public void onSuccess(Void v) {
-               sender.tell(new CommitTransactionReply().toSerializable(),self);
-               shardMBean.incrementCommittedTransactionCount();
-               shardMBean.setLastCommittedTransactionTime(new Date());
+                sender.tell(new CommitTransactionReply().toSerializable(), self);
+                shardMBean.incrementCommittedTransactionCount();
+                shardMBean.setLastCommittedTransactionTime(new Date());
             }
 
             @Override
