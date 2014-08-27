@@ -5,20 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
+package org.opendaylight.controller.cluster.common.actor;
 
-package org.opendaylight.controller.remote.rpc.messages;
+import com.typesafe.config.Config;
 
-import akka.actor.ActorRef;
-
-public class Monitor {
-    private final ActorRef actorRef;
-
-    public Monitor(ActorRef actorRef){
-
-        this.actorRef = actorRef;
-    }
-
-    public ActorRef getActorRef() {
-        return actorRef;
-    }
+public interface UnifiedConfig {
+    public Config get();
 }

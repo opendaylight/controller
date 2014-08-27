@@ -15,11 +15,9 @@ import akka.actor.Props;
 import akka.actor.SupervisorStrategy;
 import akka.japi.Creator;
 import akka.japi.Function;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
+import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.remote.rpc.messages.UpdateSchemaContext;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
-import org.opendaylight.controller.remote.rpc.utils.ActorUtil;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -27,6 +25,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.Duration;
+
 import java.util.Set;
 
 /**
@@ -43,16 +42,19 @@ public class RpcManager extends AbstractUntypedActor {
   private ActorRef rpcBroker;
   private ActorRef rpcRegistry;
   private final Broker.ProviderSession brokerSession;
+  private final RemoteRpcProviderConfig config;
   private RpcListener rpcListener;
   private RoutedRpcListener routeChangeListener;
   private RemoteRpcImplementation rpcImplementation;
   private final RpcProvisionRegistry rpcProvisionRegistry;
 
   private RpcManager(SchemaContext schemaContext,
-                     Broker.ProviderSession brokerSession, RpcProvisionRegistry rpcProvisionRegistry) {
+                     Broker.ProviderSession brokerSession,
+                     RpcProvisionRegistry rpcProvisionRegistry) {
     this.schemaContext = schemaContext;
     this.brokerSession = brokerSession;
     this.rpcProvisionRegistry = rpcProvisionRegistry;
+    this.config = new RemoteRpcProviderConfig(getContext().system().settings().config());
 
     createRpcActors();
     startListeners();
@@ -60,7 +62,8 @@ public class RpcManager extends AbstractUntypedActor {
 
 
   public static Props props(final SchemaContext schemaContext,
-                            final Broker.ProviderSession brokerSession, final RpcProvisionRegistry rpcProvisionRegistry) {
+                            final Broker.ProviderSession brokerSession,
+                            final RpcProvisionRegistry rpcProvisionRegistry) {
     return Props.create(new Creator<RpcManager>() {
       @Override
       public RpcManager create() throws Exception {
@@ -72,15 +75,13 @@ public class RpcManager extends AbstractUntypedActor {
   private void createRpcActors() {
     LOG.debug("Create rpc registry and broker actors");
 
-      Config conf = ConfigFactory.load();
-
     rpcRegistry =
             getContext().actorOf(Props.create(RpcRegistry.class).
-                withMailbox(ActorUtil.MAILBOX), ActorConstants.RPC_REGISTRY);
+                withMailbox(config.getMailBoxName()), config.getRpcRegistryName());
 
     rpcBroker =
             getContext().actorOf(RpcBroker.props(brokerSession, rpcRegistry, schemaContext).
-                withMailbox(ActorUtil.MAILBOX),ActorConstants.RPC_BROKER);
+                withMailbox(config.getMailBoxName()), config.getRpcBrokerName());
 
     RpcRegistry.Messages.SetLocalRouter localRouter = new RpcRegistry.Messages.SetLocalRouter(rpcBroker);
     rpcRegistry.tell(localRouter, self());
@@ -91,7 +92,7 @@ public class RpcManager extends AbstractUntypedActor {
 
     rpcListener = new RpcListener(rpcRegistry);
     routeChangeListener = new RoutedRpcListener(rpcRegistry);
-    rpcImplementation = new RemoteRpcImplementation(rpcBroker, schemaContext);
+    rpcImplementation = new RemoteRpcImplementation(rpcBroker, schemaContext, config);
 
     brokerSession.addRpcRegistrationListener(rpcListener);
     rpcProvisionRegistry.registerRouteChangeListener(routeChangeListener);

@@ -12,11 +12,11 @@ import akka.actor.ActorRef;
 import akka.actor.ActorRefProvider;
 import akka.actor.Address;
 import akka.actor.Props;
-import akka.actor.UntypedActor;
 import akka.cluster.ClusterActorRefProvider;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
-import org.opendaylight.controller.remote.rpc.utils.ActorUtil;
+import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;
+import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
 import org.opendaylight.controller.utils.ConditionalProbe;
 
 import java.util.HashMap;
@@ -45,14 +45,14 @@ import static org.opendaylight.controller.remote.rpc.registry.gossip.Messages.Bu
  * This store uses a {@link org.opendaylight.controller.remote.rpc.registry.gossip.Gossiper}.
  *
  */
-public class BucketStore extends UntypedActor {
+public class BucketStore extends AbstractUntypedActorWithMetering {
 
     final LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
     /**
      * Bucket owned by the node
      */
-    private BucketImpl localBucket = new BucketImpl();;
+    private BucketImpl localBucket = new BucketImpl();
 
     /**
      * Buckets ownded by other known nodes in the cluster
@@ -71,20 +71,24 @@ public class BucketStore extends UntypedActor {
 
     private ConditionalProbe probe;
 
+    private final RemoteRpcProviderConfig config;
+
+    public BucketStore(){
+        config = new RemoteRpcProviderConfig(getContext().system().settings().config());
+    }
+
     @Override
     public void preStart(){
         ActorRefProvider provider = getContext().provider();
         selfAddress = provider.getDefaultAddress();
 
         if ( provider instanceof ClusterActorRefProvider)
-            getContext().actorOf(Props.create(Gossiper.class).withMailbox(ActorUtil.MAILBOX), "gossiper");
+            getContext().actorOf(Props.create(Gossiper.class).withMailbox(config.getMailBoxName()), "gossiper");
     }
 
+
     @Override
-    public void onReceive(Object message) throws Exception {
-
-        log.debug("Received message: node[{}], message[{}]", selfAddress, message);
-
+    protected void handleReceive(Object message) throws Exception {
         if (probe != null) {
             probe.tell(message, getSelf());
         }
@@ -100,17 +104,16 @@ public class BucketStore extends UntypedActor {
             receiveGetLocalBucket();
         } else if (message instanceof GetBucketsByMembers) {
             receiveGetBucketsByMembers(
-                ((GetBucketsByMembers) message).getMembers());
+                    ((GetBucketsByMembers) message).getMembers());
         } else if (message instanceof GetBucketVersions) {
             receiveGetBucketVersions();
         } else if (message instanceof UpdateRemoteBuckets) {
             receiveUpdateRemoteBuckets(
-                ((UpdateRemoteBuckets) message).getBuckets());
+                    ((UpdateRemoteBuckets) message).getBuckets());
         } else {
             log.debug("Unhandled message [{}]", message);
             unhandled(message);
         }
-
     }
 
     /**
