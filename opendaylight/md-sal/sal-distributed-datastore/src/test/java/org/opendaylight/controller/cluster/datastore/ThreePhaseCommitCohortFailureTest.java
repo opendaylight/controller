@@ -74,12 +74,14 @@ public class ThreePhaseCommitCohortFailureTest extends AbstractActorTest {
 
     private final FiniteDuration ASK_RESULT_DURATION = Duration.create(5000, TimeUnit.MILLISECONDS);
 
+    private ActorRef createShard(){
+        return getSystem().actorOf(Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP, datastoreContext, TestModel.createTestContext()));
+    }
 
     @Test(expected = TestException.class)
     public void testNegativeAbortResultsInException() throws Exception {
 
-        final ActorRef shard = getSystem().actorOf(Shard.props(SHARD_IDENTIFIER,
-                Collections.EMPTY_MAP, datastoreContext));
+        final ActorRef shard = createShard();
         final DOMStoreThreePhaseCommitCohort mockCohort = Mockito
             .mock(DOMStoreThreePhaseCommitCohort.class);
         final CompositeModification mockComposite =
@@ -107,8 +109,7 @@ public class ThreePhaseCommitCohortFailureTest extends AbstractActorTest {
     @Test(expected = OptimisticLockFailedException.class)
     public void testNegativeCanCommitResultsInException() throws Exception {
 
-        final ActorRef shard = getSystem().actorOf(Shard.props(SHARD_IDENTIFIER,
-                Collections.EMPTY_MAP, datastoreContext));
+        final ActorRef shard = createShard();
         final DOMStoreThreePhaseCommitCohort mockCohort = Mockito
             .mock(DOMStoreThreePhaseCommitCohort.class);
         final CompositeModification mockComposite =
@@ -139,8 +140,7 @@ public class ThreePhaseCommitCohortFailureTest extends AbstractActorTest {
     @Test(expected = TestException.class)
     public void testNegativePreCommitResultsInException() throws Exception {
 
-        final ActorRef shard = getSystem().actorOf(Shard.props(SHARD_IDENTIFIER,
-                Collections.EMPTY_MAP, datastoreContext));
+        final ActorRef shard = createShard();
         final DOMStoreThreePhaseCommitCohort mockCohort = Mockito
             .mock(DOMStoreThreePhaseCommitCohort.class);
         final CompositeModification mockComposite =
@@ -170,7 +170,7 @@ public class ThreePhaseCommitCohortFailureTest extends AbstractActorTest {
     public void testNegativeCommitResultsInException() throws Exception {
 
         final TestActorRef<Shard> subject = TestActorRef.create(getSystem(),
-                Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP, datastoreContext),
+                Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP, datastoreContext, TestModel.createTestContext()),
                 "testNegativeCommitResultsInException");
 
         final ActorRef shardTransaction =
