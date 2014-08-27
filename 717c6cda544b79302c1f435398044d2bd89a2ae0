@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_1b40a205",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-27T20:22:05Z",
+      "side": 1,
+      "message": "yes.",
+      "parentUuid": "fa82b9bf_5b506a0a",
+      "revId": "717c6cda544b79302c1f435398044d2bd89a2ae0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_0e7aa123",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/common/actor/MeteredBoundedMailbox.java",
         "patchSetId": 2
@@ -71,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_3b432614",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-27T20:22:05Z",
+      "side": 1,
+      "message": "yes",
+      "parentUuid": "fa82b9bf_7b53ee16",
+      "revId": "717c6cda544b79302c1f435398044d2bd89a2ae0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_1b566206",
         "filename": "opendaylight/md-sal/sal-remoterpc-connector/pom.xml",
         "patchSetId": 2
@@ -88,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_db4d5a3f",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-27T20:22:05Z",
+      "side": 1,
+      "message": "yes",
+      "parentUuid": "fa82b9bf_1b566206",
+      "revId": "717c6cda544b79302c1f435398044d2bd89a2ae0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_bb5bb620",
         "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/utils/ActorUtil.java",
         "patchSetId": 2
@@ -99,6 +153,24 @@
       "writtenOn": "2014-08-27T19:33:20Z",
       "side": 1,
       "message": "Ideally these timeouts should be configurable via the config system. I have a patch to do that for the distributed store. Not as part of this patch but consider for another patch.\n\nAlso I don\u0027t think we really need separate timeouts for ask duration and await duration. Just use the same ask duration with Await. From my understanding, the duration passed to ask measures the full round-trip time for request/response so you\u0027d naturally want the same timeout for Await. Unless I\u0027m mistaken about that (I recall Moiz or Basheer telling me that).",
+      "revId": "717c6cda544b79302c1f435398044d2bd89a2ae0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3b5a46f2",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/utils/ActorUtil.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-27T20:22:05Z",
+      "side": 1,
+      "message": "I will change it in another patch. \n\nAbout timeouts, I think Await time should be higher than Ask time just to cover the corner case of Ask completing at the end of timeout but the control could not be passed to Await and it times out. Yeah, the chances are slim but its possible.",
+      "parentUuid": "fa82b9bf_bb5bb620",
       "revId": "717c6cda544b79302c1f435398044d2bd89a2ae0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
