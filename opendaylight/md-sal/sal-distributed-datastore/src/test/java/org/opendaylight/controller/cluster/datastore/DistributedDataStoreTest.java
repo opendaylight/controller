@@ -71,7 +71,7 @@ public class DistributedDataStoreTest extends AbstractActorTest{
 
         new DistributedDataStore(actorSystem, "config",
             mock(ClusterWrapper.class), mock(Configuration.class),
-            new DistributedDataStoreProperties());
+            new DatastoreContext());
 
         verify(actorSystem).actorOf(any(Props.class), eq("shardmanager-config"));
     }

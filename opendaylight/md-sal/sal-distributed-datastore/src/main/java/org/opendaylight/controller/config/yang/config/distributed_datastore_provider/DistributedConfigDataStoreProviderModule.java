@@ -1,8 +1,13 @@
 package org.opendaylight.controller.config.yang.config.distributed_datastore_provider;
 
+import java.util.concurrent.TimeUnit;
+
+import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStoreFactory;
-import org.opendaylight.controller.cluster.datastore.DistributedDataStoreProperties;
+import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
 import org.osgi.framework.BundleContext;
+
+import scala.concurrent.duration.Duration;
 
 public class DistributedConfigDataStoreProviderModule extends
     org.opendaylight.controller.config.yang.config.distributed_datastore_provider.AbstractDistributedConfigDataStoreProviderModule {
@@ -35,13 +40,18 @@ public class DistributedConfigDataStoreProviderModule extends
             props = new ConfigProperties();
         }
 
-        return DistributedDataStoreFactory.createInstance("config", getConfigSchemaServiceDependency(),
-                new DistributedDataStoreProperties(
+        DatastoreContext datastoreContext = new DatastoreContext("DistributedConfigDatastore",
+                InMemoryDOMDataStoreConfigProperties.create(
                         props.getMaxShardDataChangeExecutorPoolSize().getValue(),
                         props.getMaxShardDataChangeExecutorQueueSize().getValue(),
                         props.getMaxShardDataChangeListenerQueueSize().getValue(),
-                        props.getShardTransactionIdleTimeoutInMinutes().getValue(),
-                        props.getOperationTimeoutInSeconds().getValue()), bundleContext);
+                        props.getMaxShardDataStoreExecutorQueueSize().getValue()),
+                Duration.create(props.getShardTransactionIdleTimeoutInMinutes().getValue(),
+                        TimeUnit.MINUTES),
+                props.getOperationTimeoutInSeconds().getValue());
+
+        return DistributedDataStoreFactory.createInstance("config", getConfigSchemaServiceDependency(),
+                datastoreContext, bundleContext);
     }
 
     public void setBundleContext(BundleContext bundleContext) {

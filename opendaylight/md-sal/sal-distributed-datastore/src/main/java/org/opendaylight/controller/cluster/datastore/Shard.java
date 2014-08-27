@@ -58,7 +58,6 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.duration.FiniteDuration;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -118,8 +117,10 @@ public class Shard extends RaftActor {
         store = InMemoryDOMDataStoreFactory.create(name.toString(), null,
                 datastoreContext.getDataStoreProperties());
 
-        shardMBean = ShardMBeanFactory.getShardStatsMBean(name.toString());
-
+        shardMBean = ShardMBeanFactory.getShardStatsMBean(name.toString(),
+                datastoreContext.getDataStoreMXBeanType());
+        shardMBean.setDataStoreExecutor(store.getDomStoreExecutor());
+        shardMBean.setNotificationManager(store.getDataChangeListenerNotificationManager());
 
     }
 
@@ -199,7 +200,7 @@ public class Shard extends RaftActor {
 
             return getContext().actorOf(
                 ShardTransaction.props(store.newReadOnlyTransaction(), getSelf(),
-                        schemaContext,datastoreContext, name.toString()), transactionId.toString());
+                        schemaContext,datastoreContext, shardMBean), transactionId.toString());
 
         } else if (createTransaction.getTransactionType()
             == TransactionProxy.TransactionType.READ_WRITE.ordinal()) {
@@ -208,7 +209,7 @@ public class Shard extends RaftActor {
 
             return getContext().actorOf(
                 ShardTransaction.props(store.newReadWriteTransaction(), getSelf(),
-                        schemaContext, datastoreContext,name.toString()), transactionId.toString());
+                        schemaContext, datastoreContext, shardMBean), transactionId.toString());
 
 
         } else if (createTransaction.getTransactionType()
@@ -218,7 +219,7 @@ public class Shard extends RaftActor {
 
             return getContext().actorOf(
                 ShardTransaction.props(store.newWriteOnlyTransaction(), getSelf(),
-                        schemaContext, datastoreContext, name.toString()), transactionId.toString());
+                        schemaContext, datastoreContext, shardMBean), transactionId.toString());
         } else {
             throw new IllegalArgumentException(
                 "Shard="+name + ":CreateTransaction message has unidentified transaction type="
@@ -281,7 +282,7 @@ public class Shard extends RaftActor {
             public void onSuccess(Void v) {
                 sender.tell(new CommitTransactionReply().toSerializable(), self);
                 shardMBean.incrementCommittedTransactionCount();
-                shardMBean.setLastCommittedTransactionTime(new Date());
+                shardMBean.setLastCommittedTransactionTime(System.currentTimeMillis());
             }
 
             @Override
@@ -358,7 +359,7 @@ public class Shard extends RaftActor {
     private void createTransactionChain() {
         DOMStoreTransactionChain chain = store.createTransactionChain();
         ActorRef transactionChain = getContext().actorOf(
-                ShardTransactionChain.props(chain, schemaContext, datastoreContext,name.toString() ));
+                ShardTransactionChain.props(chain, schemaContext, datastoreContext, shardMBean));
         getSender().tell(new CreateTransactionChainReply(transactionChain.path()).toSerializable(),
                 getSelf());
     }

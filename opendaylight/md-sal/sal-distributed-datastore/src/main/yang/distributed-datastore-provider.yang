@@ -66,7 +66,13 @@ module distributed-datastore-provider {
             type non-zero-uint16-type;
             description "The maximum queue size for each shard's data store data change listeners.";
          }
-         
+
+         leaf max-shard-data-store-executor-queue-size {
+            default 5000;
+            type non-zero-uint16-type;
+            description "The maximum queue size for each shard's data store executor.";
+         }
+            
          leaf shard-transaction-idle-timeout-in-minutes {
             default 10;
             type non-zero-uint16-type;
