@@ -22,6 +22,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.ForwardedCommitTransaction;
 import org.opendaylight.controller.cluster.datastore.modification.CompositeModification;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
@@ -65,6 +66,7 @@ public class ThreePhaseCommitCohortFailureTest extends AbstractActorTest {
 
     private final DatastoreContext datastoreContext = new DatastoreContext();
 
+    private final ShardStats shardStats = new ShardStats(SHARD_IDENTIFIER.toString(), "DataStore");
 
     @BeforeClass
     public static void staticSetup() {
@@ -84,7 +86,7 @@ public class ThreePhaseCommitCohortFailureTest extends AbstractActorTest {
         final CompositeModification mockComposite =
             Mockito.mock(CompositeModification.class);
         final Props props =
-            ThreePhaseCommitCohort.props(mockCohort, shard, mockComposite,SHARD_IDENTIFIER.toString());
+            ThreePhaseCommitCohort.props(mockCohort, shard, mockComposite, shardStats);
 
         final TestActorRef<ThreePhaseCommitCohort> subject = TestActorRef
             .create(getSystem(), props,
@@ -113,7 +115,7 @@ public class ThreePhaseCommitCohortFailureTest extends AbstractActorTest {
         final CompositeModification mockComposite =
             Mockito.mock(CompositeModification.class);
         final Props props =
-            ThreePhaseCommitCohort.props(mockCohort, shard, mockComposite,SHARD_IDENTIFIER.toString());
+            ThreePhaseCommitCohort.props(mockCohort, shard, mockComposite, shardStats);
 
         final TestActorRef<ThreePhaseCommitCohort> subject = TestActorRef
             .create(getSystem(), props,
@@ -145,7 +147,7 @@ public class ThreePhaseCommitCohortFailureTest extends AbstractActorTest {
         final CompositeModification mockComposite =
             Mockito.mock(CompositeModification.class);
         final Props props =
-            ThreePhaseCommitCohort.props(mockCohort, shard, mockComposite,SHARD_IDENTIFIER.toString());
+            ThreePhaseCommitCohort.props(mockCohort, shard, mockComposite, shardStats);
 
         final TestActorRef<ThreePhaseCommitCohort> subject = TestActorRef
             .create(getSystem(), props,
@@ -174,7 +176,7 @@ public class ThreePhaseCommitCohortFailureTest extends AbstractActorTest {
 
         final ActorRef shardTransaction =
             getSystem().actorOf(ShardTransaction.props(store.newReadWriteTransaction(), subject,
-                    testSchemaContext, datastoreContext,SHARD_IDENTIFIER.toString()));
+                    testSchemaContext, datastoreContext, shardStats));
 
         ShardTransactionMessages.WriteData writeData =
             ShardTransactionMessages.WriteData.newBuilder()

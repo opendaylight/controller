@@ -1,7 +1,12 @@
 package org.opendaylight.controller.config.yang.config.distributed_datastore_provider;
 
+import java.util.concurrent.TimeUnit;
+
+import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStoreFactory;
-import org.opendaylight.controller.cluster.datastore.DistributedDataStoreProperties;
+import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
+
+import scala.concurrent.duration.Duration;
 
 public class DistributedOperationalDataStoreProviderModule extends
     org.opendaylight.controller.config.yang.config.distributed_datastore_provider.AbstractDistributedOperationalDataStoreProviderModule {
@@ -32,12 +37,17 @@ public class DistributedOperationalDataStoreProviderModule extends
             props = new OperationalProperties();
         }
 
-        return DistributedDataStoreFactory.createInstance("operational",
-                getOperationalSchemaServiceDependency(),
-                new DistributedDataStoreProperties(props.getMaxShardDataChangeExecutorPoolSize(),
+        DatastoreContext datastoreContext = new DatastoreContext("DistributedOperationalDatastore",
+                InMemoryDOMDataStoreConfigProperties.create(
+                        props.getMaxShardDataChangeExecutorPoolSize(),
                         props.getMaxShardDataChangeExecutorQueueSize(),
                         props.getMaxShardDataChangeListenerQueueSize(),
-                        props.getShardTransactionIdleTimeoutInMinutes()));
+                        props.getMaxShardDataStoreExecutorQueueSize()),
+                Duration.create(props.getShardTransactionIdleTimeoutInMinutes(),
+                        TimeUnit.MINUTES));
+
+        return DistributedDataStoreFactory.createInstance("operational",
+                getOperationalSchemaServiceDependency(), datastoreContext);
     }
 
 }
