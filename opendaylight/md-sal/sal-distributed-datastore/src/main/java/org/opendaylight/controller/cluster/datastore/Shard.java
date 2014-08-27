@@ -15,6 +15,8 @@ import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import akka.japi.Creator;
 import akka.serialization.Serialization;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -22,6 +24,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
+import com.typesafe.config.Config;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardTransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardMBeanFactory;
@@ -43,6 +46,7 @@ import org.opendaylight.controller.cluster.raft.ConfigParams;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.reporting.MetricsReporter;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreFactory;
@@ -96,6 +100,11 @@ public class Shard extends RaftActor {
 
     private final List<ActorSelection> dataChangeListeners = new ArrayList<>();
 
+    private final String MSG_PROCESSING_RATE = "msg-rate";
+    private final MetricRegistry METRICREGISTRY = MetricsReporter.getInstance().getMetricsRegistry();
+    private String actorName;
+    private Timer msgProcessingTimer;
+
     private final DatastoreContext datastoreContext;
 
 
@@ -119,7 +128,11 @@ public class Shard extends RaftActor {
 
         shardMBean = ShardMBeanFactory.getShardStatsMBean(name.toString());
 
-
+        if (isMetricsCaptureEnabled()) {
+            actorName = getSelf().path().toStringWithoutAddress();
+            final String msgProcessingTime = MetricRegistry.name(actorName, MSG_PROCESSING_RATE);
+            msgProcessingTimer = METRICREGISTRY.timer(msgProcessingTime);
+        }
     }
 
     private static Map<String, String> mapPeerAddresses(
@@ -145,9 +158,31 @@ public class Shard extends RaftActor {
     }
 
     @Override public void onReceiveCommand(Object message) {
-        LOG.debug("Received message {} from {}", message.getClass().toString(),
-            getSender());
+        if (isMetricsCaptureEnabled())
+            timedReceive(message);
+        else
+            receive(message);
+    }
 
+    private void timedReceive(Object message) {
+        final String messageType = message.getClass().getSimpleName();
+        LOG.debug("Received message {} from {}", messageType, getSender());
+
+        final String msgProcessingTimeByMsgType =
+                MetricRegistry.name(actorName, MSG_PROCESSING_RATE, messageType);
+
+        final Timer msgProcessingTimerByMsgType = METRICREGISTRY.timer(msgProcessingTimeByMsgType);
+
+        final Timer.Context context = msgProcessingTimer.time();
+        final Timer.Context contextByMsgType = msgProcessingTimerByMsgType.time();
+
+        receive(message);
+
+        contextByMsgType.stop();
+        context.stop();
+    }
+
+    private void receive(Object message) {
         if (message.getClass()
             .equals(CreateTransactionChain.SERIALIZABLE_CLASS)) {
             if (isLeader()) {
@@ -348,6 +383,15 @@ public class Shard extends RaftActor {
                 ShardTransactionChain.props(chain, schemaContext, datastoreContext,name.toString() ));
         getSender().tell(new CreateTransactionChainReply(transactionChain.path()).toSerializable(),
                 getSelf());
+    }
+
+    private boolean isMetricsCaptureEnabled(){
+        Config actorSystemConfig = getContext().system().settings().config();
+
+        if (actorSystemConfig.hasPath("metric-capture-enabled"))
+            return actorSystemConfig.getBoolean("metric-capture-enabled");
+        else
+            return false;
     }
 
     @Override protected void applyState(ActorRef clientActor, String identifier,

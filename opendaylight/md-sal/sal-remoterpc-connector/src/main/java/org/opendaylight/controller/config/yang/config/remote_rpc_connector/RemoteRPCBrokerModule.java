@@ -1,5 +1,6 @@
 package org.opendaylight.controller.config.yang.config.remote_rpc_connector;
 
+import org.opendaylight.controller.remote.rpc.ModuleConfig;
 import org.opendaylight.controller.remote.rpc.RemoteRpcProviderFactory;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.osgi.framework.BundleContext;
@@ -22,7 +23,12 @@ public class RemoteRPCBrokerModule extends org.opendaylight.controller.config.ya
   @Override
   public java.lang.AutoCloseable createInstance() {
     Broker broker = getDomBrokerDependency();
-    return RemoteRpcProviderFactory.createInstance(broker, bundleContext);
+
+    ModuleConfig config = new ModuleConfig.Builder()
+                              .metricCaptureEnabled(getEnableMetricCapture())
+                              .build();
+
+    return RemoteRpcProviderFactory.createInstance(broker, bundleContext, config);
   }
 
   public void setBundleContext(BundleContext bundleContext) {
