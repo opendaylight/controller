@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.common.actor;
+package org.opendaylight.controller.cluster.common.actor;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -25,11 +25,13 @@ import java.util.concurrent.locks.ReentrantLock;
 public class MeteredBoundedMailboxTest {
 
     private static ActorSystem actorSystem;
+    private static CommonConfig config;
     private final ReentrantLock lock = new ReentrantLock();
 
     @Before
     public void setUp() throws Exception {
-        actorSystem = ActorSystem.create("testsystem");
+        config = new CommonConfig.Builder<>("testsystem").build();
+        actorSystem = ActorSystem.create("testsystem", config.get());
     }
 
     @After
@@ -39,15 +41,14 @@ public class MeteredBoundedMailboxTest {
     }
 
     @Test
-    public void test_WhenQueueIsFull_ShouldSendMsgToDeadLetter() throws InterruptedException {
+    public void shouldSendMsgToDeadLetterWhenQueueIsFull() throws InterruptedException {
         final JavaTestKit mockReceiver = new JavaTestKit(actorSystem);
         actorSystem.eventStream().subscribe(mockReceiver.getRef(), DeadLetter.class);
 
 
         final FiniteDuration TWENTY_SEC = new FiniteDuration(20, TimeUnit.SECONDS);
 
-        String boundedMailBox = actorSystem.name() + ".bounded-mailbox";
-        ActorRef pingPongActor = actorSystem.actorOf(PingPongActor.props(lock).withMailbox(boundedMailBox),
+        ActorRef pingPongActor = actorSystem.actorOf(PingPongActor.props(lock).withMailbox(config.getMailBoxName()),
                                                      "pingpongactor");
 
         actorSystem.mailboxes().settings();

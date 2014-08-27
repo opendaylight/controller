@@ -12,7 +12,7 @@ import akka.actor.Terminated;
 import akka.actor.UntypedActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
-import org.opendaylight.controller.remote.rpc.messages.Monitor;
+import org.opendaylight.controller.cluster.common.actor.Monitor;
 
 public class TerminationMonitor extends UntypedActor{
     protected final LoggingAdapter LOG =

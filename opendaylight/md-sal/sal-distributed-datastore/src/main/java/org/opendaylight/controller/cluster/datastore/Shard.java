@@ -26,6 +26,8 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import org.opendaylight.controller.cluster.common.actor.CommonConfig;
+import org.opendaylight.controller.cluster.common.actor.MeteringBehavior;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardTransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardMBeanFactory;
@@ -138,6 +140,9 @@ public class Shard extends RaftActor {
         shardMBean.setDataStoreExecutor(store.getDomStoreExecutor());
         shardMBean.setNotificationManager(store.getDataChangeListenerNotificationManager());
 
+        if (isMetricsCaptureEnabled()) {
+            getContext().become(new MeteringBehavior(this));
+        }
     }
 
     private static Map<String, String> mapPeerAddresses(
@@ -406,7 +411,12 @@ public class Shard extends RaftActor {
         ActorRef transactionChain = getContext().actorOf(
                 ShardTransactionChain.props(chain, schemaContext, datastoreContext, shardMBean));
         getSender().tell(new CreateTransactionChainReply(transactionChain.path()).toSerializable(),
-            getSelf());
+                getSelf());
+    }
+
+    private boolean isMetricsCaptureEnabled(){
+        CommonConfig config = new CommonConfig(getContext().system().settings().config());
+        return config.isMetricCaptureEnabled();
     }
 
     @Override protected void applyState(ActorRef clientActor, String identifier,
