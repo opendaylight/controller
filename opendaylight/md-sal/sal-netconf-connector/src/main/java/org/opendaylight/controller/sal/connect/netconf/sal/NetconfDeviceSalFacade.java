@@ -95,7 +95,7 @@ public final class NetconfDeviceSalFacade implements AutoCloseable, RemoteDevice
     }
 
     @Override
-    public void onDeviceDisconnected() {
+    public synchronized void onDeviceDisconnected() {
         salProvider.getDatastoreAdapter().updateDeviceState(false, Collections.<QName>emptySet());
         salProvider.getMountInstance().onDeviceDisconnected();
     }
