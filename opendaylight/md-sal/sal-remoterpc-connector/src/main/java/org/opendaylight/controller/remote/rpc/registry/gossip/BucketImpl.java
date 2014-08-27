@@ -11,7 +11,7 @@ import java.io.Serializable;
 
 public class BucketImpl<T extends Copier<T>> implements Bucket<T>, Serializable {
 
-    private Long version = System.currentTimeMillis();;
+    private Long version = System.currentTimeMillis();
 
     private T data;
 

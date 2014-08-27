@@ -204,7 +204,10 @@ public class RpcRegistryTest {
         new ConditionalProbe(probe.getRef(), new Predicate() {
           @Override
           public boolean apply(@Nullable Object input) {
-            return clazz.equals(input.getClass());
+              if (input != null)
+                return clazz.equals(input.getClass());
+              else
+                  return false;
           }
         });
 
