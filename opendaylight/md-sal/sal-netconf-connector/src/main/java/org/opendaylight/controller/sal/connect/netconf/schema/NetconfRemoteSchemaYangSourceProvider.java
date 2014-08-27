@@ -16,7 +16,6 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.concurrent.ExecutionException;
 import org.apache.commons.io.IOUtils;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
@@ -97,18 +96,18 @@ public final class NetconfRemoteSchemaYangSourceProvider implements SchemaSource
                 rpc.invokeRpc(GET_SCHEMA_QNAME, getSchemaRequest),
                 new ResultToYangSourceTransformer(id, sourceIdentifier, moduleName, revision));
 
-        // FIXME remove this get, it is only present to wait until source is retrieved
+        final CheckedFuture<YangTextSchemaSource, SchemaSourceException> checked = Futures.makeChecked(transformed, MAPPER);
+
+        // / FIXME remove this get, it is only present to wait until source is retrieved
         // (goal is to limit concurrent schema download, since NetconfDevice listener does not handle concurrent messages properly)
         try {
             logger.trace("{}: Blocking for {}", id, sourceIdentifier);
-            transformed.get();
-        } catch (final InterruptedException e) {
-            throw new RuntimeException(e);
-        } catch (final ExecutionException e) {
-           throw new IllegalStateException(id + ": Failed while getting source: " + sourceIdentifier, e);
+            checked.checkedGet();
+        } catch (final SchemaSourceException e) {
+            return Futures.immediateFailedCheckedFuture(e);
         }
 
-        return Futures.makeChecked(transformed, MAPPER);
+        return checked;
     }
 
     /**
