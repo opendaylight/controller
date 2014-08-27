@@ -1,0 +1,208 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_1bc982ab",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/NormalizedNodeSerializer.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-27T21:35:33Z",
+      "side": 1,
+      "message": "Another option may be to use Java serialization. It also optimizes by serializing an Object instance once and thereafter encoding a pointer to it for subsequent references. But Java serialization also adds overhead for serializing class info as well although I think that\u0027s pretty minimal.\n\nAdding gzip compression on top the encoding may yield even smaller payloads but, of course, that comes with some cost.",
+      "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_1b5742cb",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/NormalizedNodeSerializer.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-27T21:35:33Z",
+      "side": 1,
+      "message": "It looks like this code to handle Collection is exactly the same as the code below to handle Iterable, in which case, since Collection extends Iterable, this code can be removed.",
+      "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_bbb73620",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/NormalizedNodeSerializer.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-27T21:35:33Z",
+      "side": 1,
+      "message": "Use Integer.valueOf(code) here for the map key. This will avoid an implicit auto-boxed Integer instance as Integer.valueOf internally caches re-usable Integer instances for int values 0-1000.",
+      "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3b11e603",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/NormalizedNodeSerializer.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 498,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-27T21:35:33Z",
+      "side": 1,
+      "message": "Will this TODO be done in a follow-up patch?",
+      "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_1b25025b",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/NormalizedNodeType.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-27T21:35:33Z",
+      "side": 1,
+      "message": "Use Integer.valueOf() in the above code. I realize these are statics but we\u0027ll avoid Sonar warnings about doing new Integer().",
+      "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3bb6c6f9",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/PathArgumentSerializer.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-27T21:35:33Z",
+      "side": 1,
+      "message": "I\u0027m wondering if we need to construct a Serializer instance here. I think we could make the Serializer methods static and pass the context around. This would save an object creation.",
+      "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_dbd0fa20",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/PathArgumentSerializer.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-27T21:35:33Z",
+      "side": 1,
+      "message": "Same as for Serializer above - can we make the DeSerializer methods static?",
+      "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9b18321f",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/PathArgumentSerializer.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-27T21:35:33Z",
+      "side": 1,
+      "message": "Really minor thing but you can use Collections.emptyList() to avoid compiler warning.",
+      "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5bd62a29",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/PathArgumentSerializer.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-27T21:35:33Z",
+      "side": 1,
+      "message": "Indented too far...",
+      "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9befd2e8",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/PathArgumentSerializer.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-27T21:35:33Z",
+      "side": 1,
+      "message": "Do we need to concat the QName to a String here? It seems we have all the parts necessary to construct a QName instance instead of obtaining from the QNameFactory cache via String representation.",
+      "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9bc6f266",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/PathArgumentType.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-27T21:35:33Z",
+      "side": 1,
+      "message": "Use Integer.valueOf() here to avoid Sonar warnings. NormalizedNodeType returns Integers - any specific reason why this class returns Integer Strings? Integers would probably be more efficient.",
+      "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3bad669b",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/ValueType.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-27T21:35:33Z",
+      "side": 1,
+      "message": "Use Inetger.valueOf() above to avoid Sonar warnings.",
+      "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
