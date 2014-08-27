@@ -45,6 +45,11 @@
       <artifactId>akka-slf4j_${scala.version}</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>com.typesafe.akka</groupId>
+      <artifactId>akka-osgi_${scala.version}</artifactId>
+    </dependency>
+
     <!-- SAL Dependencies -->
 
     <dependency>
@@ -178,6 +183,7 @@
             <Export-package></Export-package>
             <Private-Package></Private-Package>
             <Import-Package>!*snappy;!org.jboss.*;!com.jcraft.*;*</Import-Package>
+            <!--
             <Embed-Dependency>
                 sal-clustering-commons;
                 sal-akka-raft;
@@ -195,6 +201,7 @@
                 *scala*;
             </Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
+            -->
           </instructions>
         </configuration>
       </plugin>
