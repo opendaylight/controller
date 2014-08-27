@@ -209,6 +209,7 @@
       </dependency>
   </dependencies>
   <build>
+
       <plugins>
           <plugin>
               <groupId>org.jacoco</groupId>
@@ -238,7 +239,18 @@
                   </execution>
               </executions>
           </plugin>
-      </plugins>
+          <plugin>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>maven-bundle-plugin</artifactId>
+            <extensions>true</extensions>
+            <configuration>
+            <instructions>
+                <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
+                <Export-Package>org.opendaylight.controller.cluster.*,org.opendaylight.common.actor,org.opendaylight.common.reporting,org.opendaylight.controller.protobuff.*,org.opendaylight.controller.xml.*</Export-Package>
+                <Import-Package>*</Import-Package>
+            </instructions>
+            </configuration>
+          </plugin>
+    </plugins>
   </build>
-
 </project>

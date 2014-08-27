@@ -16,11 +16,10 @@ import org.slf4j.LoggerFactory;
 public class WebSocketServer implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(WebSocketServer.class);
-    public static final String WEBSOCKET_SERVER_CONFIG_PROPERTY = "restconf.websocket.port";
     public static final int DEFAULT_PORT = 8181;
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
-    private static WebSocketServer singleton = null;
+    private static WebSocketServer instance = null;
     private int port = DEFAULT_PORT;
 
     private WebSocketServer(int port) {
@@ -35,14 +34,11 @@ public class WebSocketServer implements Runnable {
      * @return instance of {@link WebSocketServer}
      */
     public static WebSocketServer createInstance(int port) {
-        if (singleton != null) {
-            throw new IllegalStateException("createInstance() has already been called");
-        }
-        if (port < 1024) {
-            throw new IllegalArgumentException("Privileged port (below 1024) is not allowed");
-        }
-        singleton = new WebSocketServer(port);
-        return singleton;
+        Preconditions.checkState(instance == null, "createInstance() has already been called");
+        Preconditions.checkArgument(port > 1024, "Privileged port (below 1024) is not allowed");
+
+        instance = new WebSocketServer(port);
+        return instance;
     }
 
     /**
@@ -58,18 +54,18 @@ public class WebSocketServer implements Runnable {
      * @return instance of {@link WebSocketServer}
      */
     public static WebSocketServer getInstance() {
-        Preconditions.checkNotNull(singleton, "createInstance() must be called prior to getInstance()");
-        return singleton;
+        Preconditions.checkNotNull(instance, "createInstance() must be called prior to getInstance()");
+        return instance;
     }
 
     /**
      * Destroy this already created instance
      */
     public static void destroyInstance() {
-        if (singleton == null) {
-            throw new IllegalStateException("createInstance() must be called prior to destroyInstance()");
-        }
-        getInstance().stop();
+        Preconditions.checkState(instance != null, "createInstance() must be called prior to destroyInstance()");
+
+        instance.stop();
+        instance = null;
     }
 
     @Override
@@ -99,9 +95,11 @@ public class WebSocketServer implements Runnable {
         Notificator.removeAllListeners();
         if (bossGroup != null) {
             bossGroup.shutdownGracefully();
+            bossGroup = null;
         }
         if (workerGroup != null) {
             workerGroup.shutdownGracefully();
+            workerGroup = null;
         }
     }
 

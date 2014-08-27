@@ -10,9 +10,11 @@ package org.opendaylight.controller.remote.rpc;
 
 
 import akka.actor.ActorSystem;
+import com.typesafe.config.ConfigFactory;
 import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Test;
+import org.opendaylight.controller.remote.rpc.utils.AkkaConfigurationReader;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
@@ -27,13 +29,17 @@ public class ActorSystemFactoryTest {
   public void testActorSystemCreation(){
     BundleContext context = mock(BundleContext.class);
     when(context.getBundle()).thenReturn(mock(Bundle.class));
-    ActorSystemFactory.createInstance(context);
+
+    AkkaConfigurationReader reader = mock(AkkaConfigurationReader.class);
+    when(reader.read()).thenReturn(ConfigFactory.load());
+
+    ActorSystemFactory.createInstance(context, reader);
     system = ActorSystemFactory.getInstance();
     Assert.assertNotNull(system);
     // Check illegal state exception
 
     try {
-      ActorSystemFactory.createInstance(context);
+      ActorSystemFactory.createInstance(context, reader);
       fail("Illegal State exception should be thrown, while creating actor system second time");
     } catch (IllegalStateException e) {
     }
@@ -45,5 +51,4 @@ public class ActorSystemFactoryTest {
       system.shutdown();
     }
   }
-
 }
