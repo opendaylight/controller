@@ -15,8 +15,10 @@ import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryFound;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryNotFound;
+import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.utils.MockConfiguration;
+import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import scala.concurrent.duration.Duration;
 
 import static junit.framework.Assert.assertEquals;
@@ -70,6 +72,8 @@ public class ShardManagerTest {
                     new MockConfiguration(), new ShardContext());
             final TestActorRef<ShardManager> subject =
                 TestActorRef.create(system, props);
+
+            subject.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
 
             new Within(duration("10 seconds")) {
                 @Override
@@ -131,6 +135,8 @@ public class ShardManagerTest {
                     new MockConfiguration(), new ShardContext());
             final TestActorRef<ShardManager> subject =
                 TestActorRef.create(system, props);
+
+            subject.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
 
             new Within(duration("10 seconds")) {
                 @Override
