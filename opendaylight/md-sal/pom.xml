@@ -77,13 +77,13 @@
 
     <!-- XSQL -->
     <module>sal-dom-xsql</module>
+    <module>sal-dom-xsql-config</module>
 
     <!-- Yang Test Models for MD-SAL -->
     <module>sal-test-model</module>
 
     <!-- Clustering -->
     <module>sal-remoterpc-connector</module>
-    <module>sal-dom-xsql-config</module>
   </modules>
 
   <build>
