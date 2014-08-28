@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_14e62fe8",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/NormalizedNodeType.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-28T19:23:11Z",
+      "side": 1,
+      "message": "The last line will throw NPE if node is null.",
+      "revId": "c2104d94b727886eb15a4f124a9b7d1904fdf6d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_94d9df23",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/PathArgumentType.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-28T19:23:11Z",
+      "side": 1,
+      "message": "pathArgument.toString may throw NPE",
+      "revId": "c2104d94b727886eb15a4f124a9b7d1904fdf6d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_14fdcf6d",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/ValueSerializer.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-28T19:23:11Z",
+      "side": 1,
+      "message": "Do you think using a set may result in loss of values since it doesnt allow duplicates?",
+      "revId": "c2104d94b727886eb15a4f124a9b7d1904fdf6d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d441a7a9",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/ValueType.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-28T19:23:11Z",
+      "side": 1,
+      "message": "null check on node?",
+      "revId": "c2104d94b727886eb15a4f124a9b7d1904fdf6d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
