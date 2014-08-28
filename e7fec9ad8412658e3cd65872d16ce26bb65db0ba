@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_51bfe960",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/ValueSerializer.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-28T14:38:34Z",
+      "side": 1,
+      "message": "Will do. What would be better performance wise a switch or a Map\u003cInteger, Function\u003e?",
+      "parentUuid": "fa82b9bf_3b848609",
+      "revId": "e7fec9ad8412658e3cd65872d16ce26bb65db0ba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_fba05e91",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/ValueSerializer.java",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2014-08-27T21:34:49Z",
       "side": 1,
       "message": "It would be safest to not rely on the toString representation of Collection (i.e. HashSet). It would also be more efficient without having to do the replace calls above. I would suggest to handle BitSet specially in the serialize code to output CSV without \"[]\". If it\u0027s empty then output \"\".",
+      "revId": "e7fec9ad8412658e3cd65872d16ce26bb65db0ba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_11b5e17c",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/ValueSerializer.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-28T14:38:34Z",
+      "side": 1,
+      "message": "Will fix.",
+      "parentUuid": "fa82b9bf_fba05e91",
       "revId": "e7fec9ad8412658e3cd65872d16ce26bb65db0ba",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
