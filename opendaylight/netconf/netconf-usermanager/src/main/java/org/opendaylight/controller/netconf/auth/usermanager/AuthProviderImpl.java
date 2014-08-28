@@ -5,11 +5,9 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.netconf.ssh.authentication;
+package org.opendaylight.controller.netconf.auth.usermanager;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.annotations.VisibleForTesting;
+import org.opendaylight.controller.netconf.auth.AuthProvider;
 import org.opendaylight.controller.sal.authorization.AuthResultEnum;
 import org.opendaylight.controller.usermanager.IUserManager;
 import org.osgi.framework.BundleContext;
@@ -19,40 +17,41 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.annotations.VisibleForTesting;
+
+/**
+ * AuthProvider implementation delegating to AD-SAL UserManager instance.
+ */
 public class AuthProviderImpl implements AuthProvider {
     private static final Logger logger = LoggerFactory.getLogger(AuthProviderImpl.class);
 
-    private final String pem;
     private IUserManager nullableUserManager;
 
-    public AuthProviderImpl(String pemCertificate, final BundleContext bundleContext) {
-        checkNotNull(pemCertificate, "Parameter 'pemCertificate' is null");
-        pem = pemCertificate;
+    public AuthProviderImpl(final BundleContext bundleContext) {
 
-        ServiceTrackerCustomizer<IUserManager, IUserManager> customizer = new ServiceTrackerCustomizer<IUserManager, IUserManager>() {
+        final ServiceTrackerCustomizer<IUserManager, IUserManager> customizer = new ServiceTrackerCustomizer<IUserManager, IUserManager>() {
             @Override
             public IUserManager addingService(final ServiceReference<IUserManager> reference) {
-                logger.trace("Service {} added", reference);
+                logger.trace("UerManager {} added", reference);
                 nullableUserManager = bundleContext.getService(reference);
                 return nullableUserManager;
             }
 
             @Override
             public void modifiedService(final ServiceReference<IUserManager> reference, final IUserManager service) {
-                logger.trace("Replacing modified service {} in netconf SSH.", reference);
+                logger.trace("Replacing modified UerManager {}", reference);
                 nullableUserManager = service;
             }
 
             @Override
             public void removedService(final ServiceReference<IUserManager> reference, final IUserManager service) {
-                logger.trace("Removing service {} from netconf SSH. " +
-                        "SSH won't authenticate users until IUserManager service will be started.", reference);
+                logger.trace("Removing UerManager {}. This AuthProvider will fail to authenticate every time", reference);
                 synchronized (AuthProviderImpl.this) {
                     nullableUserManager = null;
                 }
             }
         };
-        ServiceTracker<IUserManager, IUserManager> listenerTracker = new ServiceTracker<>(bundleContext, IUserManager.class, customizer);
+        final ServiceTracker<IUserManager, IUserManager> listenerTracker = new ServiceTracker<>(bundleContext, IUserManager.class, customizer);
         listenerTracker.open();
     }
 
@@ -61,23 +60,18 @@ public class AuthProviderImpl implements AuthProvider {
      * available, IllegalStateException is thrown.
      */
     @Override
-    public synchronized boolean authenticated(String username, String password) {
+    public synchronized boolean authenticated(final String username, final String password) {
         if (nullableUserManager == null) {
             logger.warn("Cannot authenticate user '{}', user manager service is missing", username);
             throw new IllegalStateException("User manager service is not available");
         }
-        AuthResultEnum authResult = nullableUserManager.authenticate(username, password);
+        final AuthResultEnum authResult = nullableUserManager.authenticate(username, password);
         logger.debug("Authentication result for user '{}' : {}", username, authResult);
         return authResult.equals(AuthResultEnum.AUTH_ACCEPT) || authResult.equals(AuthResultEnum.AUTH_ACCEPT_LOC);
     }
 
-    @Override
-    public char[] getPEMAsCharArray() {
-        return pem.toCharArray();
-    }
-
     @VisibleForTesting
-    void setNullableUserManager(IUserManager nullableUserManager) {
+    void setNullableUserManager(final IUserManager nullableUserManager) {
         this.nullableUserManager = nullableUserManager;
     }
 }

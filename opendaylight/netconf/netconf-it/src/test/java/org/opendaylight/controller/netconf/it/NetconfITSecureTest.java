@@ -14,12 +14,6 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
-import com.google.common.collect.Lists;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
-import io.netty.util.concurrent.GlobalEventExecutor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
@@ -27,13 +21,16 @@ import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import junit.framework.Assert;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.opendaylight.controller.netconf.auth.AuthProvider;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
 import org.opendaylight.controller.netconf.client.SimpleNetconfClientSessionListener;
@@ -48,14 +45,21 @@ import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFact
 import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.AuthenticationHandler;
 import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.LoginPassword;
 import org.opendaylight.controller.netconf.ssh.NetconfSSHServer;
-import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
-import org.opendaylight.controller.netconf.ssh.authentication.AuthProviderImpl;
 import org.opendaylight.controller.netconf.ssh.authentication.PEMGenerator;
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageUtil;
 import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.protocol.framework.NeverReconnectStrategy;
+
+import com.google.common.collect.Lists;
+
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
+import io.netty.util.concurrent.GlobalEventExecutor;
 
 public class NetconfITSecureTest extends AbstractNetconfConfigTest {
 
@@ -79,9 +83,13 @@ public class NetconfITSecureTest extends AbstractNetconfConfigTest {
 
 
         final NetconfServerDispatcher dispatchS = createDispatcher(factoriesListener);
-        dispatchS.createLocalServer(NetconfConfigUtil.getNetconfLocalAddress()).await();
-        final EventLoopGroup bossGroup  = new NioEventLoopGroup();
-        sshServer = NetconfSSHServer.start(tlsAddress.getPort(), NetconfConfigUtil.getNetconfLocalAddress(), getAuthProvider(), bossGroup);
+        ChannelFuture s = dispatchS.createLocalServer(NetconfConfigUtil.getNetconfLocalAddress());
+        s.await();
+        EventLoopGroup bossGroup  = new NioEventLoopGroup();
+
+        final char[] pem = PEMGenerator.generate().toCharArray();
+        sshServer = NetconfSSHServer.start(tlsAddress.getPort(), NetconfConfigUtil.getNetconfLocalAddress(), bossGroup, pem);
+        sshServer.setAuthProvider(getAuthProvider());
     }
 
     private NetconfServerDispatcher createDispatcher(final NetconfOperationServiceFactoryListenerImpl factoriesListener) {
@@ -172,9 +180,8 @@ public class NetconfITSecureTest extends AbstractNetconfConfigTest {
     }
 
     public AuthProvider getAuthProvider() throws Exception {
-        final AuthProvider mock = mock(AuthProviderImpl.class);
+        AuthProvider mock = mock(AuthProvider.class);
         doReturn(true).when(mock).authenticated(anyString(), anyString());
-        doReturn(PEMGenerator.generate().toCharArray()).when(mock).getPEMAsCharArray();
         return mock;
     }
 
