@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
@@ -18,24 +19,33 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore.ThreePhaseCommitImpl;
 import org.opendaylight.controller.md.sal.dom.store.impl.SnapshotBackedWriteTransaction.TransactionReadyPrototype;
+import org.opendaylight.controller.md.sal.dom.store.impl.jmx.InMemoryDataStoreTransactionStatsTracker;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
+import org.opendaylight.controller.sal.core.spi.data.statistics.DOMStoreTransactionStatsMXBean;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.ConflictingModificationAppliedException;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -272,7 +282,8 @@ public class InMemoryDataStoreTest {
         Mockito.doThrow( new RuntimeException( "mock ex" ) ).when( mockSnapshot )
         .readNode( Mockito.any( YangInstanceIdentifier.class ) );
 
-        DOMStoreReadTransaction readTx = new SnapshotBackedReadTransaction("1", true, mockSnapshot);
+        DOMStoreReadTransaction readTx = new SnapshotBackedReadTransaction("1", true, mockSnapshot,
+                new InMemoryDataStoreTransactionStatsTracker());
 
         doReadAndThrowEx( readTx );
     }
@@ -297,7 +308,8 @@ public class InMemoryDataStoreTest {
         .readNode( Mockito.any( YangInstanceIdentifier.class ) );
         Mockito.doReturn( mockModification ).when( mockSnapshot ).newModification();
         TransactionReadyPrototype mockReady = Mockito.mock( TransactionReadyPrototype.class );
-        DOMStoreReadTransaction readTx = new SnapshotBackedReadWriteTransaction("1", false, mockSnapshot, mockReady);
+        DOMStoreReadTransaction readTx = new SnapshotBackedReadWriteTransaction("1", false, mockSnapshot,
+                mockReady, new InMemoryDataStoreTransactionStatsTracker());
 
         doReadAndThrowEx( readTx );
     }
@@ -350,6 +362,149 @@ public class InMemoryDataStoreTest {
         Optional<NormalizedNode<?, ?>> afterCommitRead = domStore.newReadOnlyTransaction().read(TestModel.TEST_PATH)
                 .get();
         assertFalse(afterCommitRead.isPresent());
+    }
+
+    private InMemoryDataStoreTransactionStatsTracker getDOMStoreTxStatsTracker() {
+        return (InMemoryDataStoreTransactionStatsTracker)domStore.getDOMStoreTransactionStatsMXBean();
+    }
+
+    @Test
+    public void testTransactionStats() throws Exception {
+
+        // Read/write Tx
+
+        DOMStoreReadWriteTransaction rwTx = domStore.newReadWriteTransaction();
+
+        NormalizedNode<?, ?> containerNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        rwTx.write(TestModel.TEST_PATH, containerNode);
+
+        rwTx.merge(TestModel.TEST_PATH, containerNode);
+
+        rwTx.read(TestModel.TEST_PATH);
+
+        assertThreePhaseCommit(rwTx.ready());
+
+        // Read-only Tx
+
+        DOMStoreReadTransaction readTx = domStore.newReadOnlyTransaction();
+
+        readTx.read(TestModel.TEST_PATH);
+
+        // Write-only Tx
+
+        DOMStoreWriteTransaction writeTx = domStore.newWriteOnlyTransaction();
+
+        writeTx.write(TestModel.TEST_PATH, containerNode);
+
+        writeTx.delete(TestModel.TEST_PATH);
+
+        DOMStoreTransactionStatsMXBean statsTracker = getDOMStoreTxStatsTracker();
+        assertEquals("getReadWriteTransactionCount", 1, statsTracker.getReadWriteTransactionCount());
+        assertEquals("getReadOnlyTransactionCount", 1, statsTracker.getReadOnlyTransactionCount());
+        assertEquals("getWriteOnlyTransactionCount", 1, statsTracker.getWriteOnlyTransactionCount());
+        assertEquals("getSuccessfulReadCount", 2, statsTracker.getSuccessfulReadCount());
+        assertEquals("getSuccessfulWriteCount", 3, statsTracker.getSuccessfulWriteCount());
+        assertEquals("getSuccessfulDeleteCount", 1, statsTracker.getSuccessfulDeleteCount());
+        assertEquals("getSuccessfulCommitCount", 1, statsTracker.getSuccessfulCommitCount());
+        assertEquals("getSubmittedWriteTransactionCount", 1, statsTracker.getSubmittedWriteTransactionCount());
+    }
+
+    @SuppressWarnings("resource")
+    @Test
+    public void testTransactionFailedStats() throws Exception {
+        NormalizedNode<?, ?> containerNode = ImmutableNodes.containerNode( TestModel.TEST_QNAME );
+
+        DataTreeSnapshot mockSnapshot = Mockito.mock(DataTreeSnapshot.class);
+        Mockito.doThrow(new RuntimeException("mock ex")).when(mockSnapshot)
+                .readNode( Mockito.any(YangInstanceIdentifier.class));
+        DataTreeModification mockTreeMod = Mockito.mock(DataTreeModification.class);
+        Mockito.doThrow(new RuntimeException("mock ex")).when(mockTreeMod)
+                .write(Mockito.any(YangInstanceIdentifier.class), Mockito.any(NormalizedNode.class));
+        Mockito.doThrow(new RuntimeException("mock ex")).when(mockTreeMod)
+                .merge(Mockito.any(YangInstanceIdentifier.class), Mockito.any(NormalizedNode.class));
+        Mockito.doThrow(new RuntimeException("mock ex")).when(mockTreeMod)
+                .delete(Mockito.any(YangInstanceIdentifier.class));
+        Mockito.doNothing().when(mockTreeMod).ready();
+        Mockito.doReturn("").when(mockTreeMod).toString();
+        Mockito.doReturn(mockTreeMod).when(mockSnapshot).newModification();
+
+        DOMStoreReadWriteTransaction rwTx = new SnapshotBackedReadWriteTransaction(
+                "1", false, mockSnapshot, domStore, getDOMStoreTxStatsTracker());
+
+        DOMStoreReadTransaction readTx = new SnapshotBackedReadTransaction(
+                "1", false, mockSnapshot, getDOMStoreTxStatsTracker());
+
+        // Read failures
+
+        try {
+            readTx.read(TestModel.TEST_PATH).get();
+        } catch( Exception e ) {} // Expected
+
+        try {
+            rwTx.read(TestModel.TEST_PATH).get();
+        } catch( Exception e ) {} // Expected
+
+        // Write failures
+
+        try {
+            rwTx.write(TestModel.TEST_PATH, containerNode);
+        } catch( Exception e ) {} // Expected
+
+        try {
+            rwTx.merge(TestModel.TEST_PATH, containerNode);
+        } catch( Exception e ) {} // Expected
+
+        // Delete failure
+
+        try {
+            rwTx.delete(TestModel.TEST_PATH);
+        } catch( Exception e ) {} // Expected
+
+        // Optimistic lock failure in canCommit phase
+
+        DataTree mockDataTree = Mockito.mock(DataTree.class);
+        Mockito.doThrow(new ConflictingModificationAppliedException(
+                TestModel.TEST_PATH, "mock ex" )).when(mockDataTree).validate(mockTreeMod);
+
+        ThreePhaseCommitImpl ready = (ThreePhaseCommitImpl) rwTx.ready();
+        ready.setDataTree(mockDataTree);
+
+        assertExecutionExceptionCause(ready.canCommit(), OptimisticLockFailedException.class);
+
+        // Data validation failure in canCommit phase
+
+        rwTx = new SnapshotBackedReadWriteTransaction(
+                "2", false, mockSnapshot, domStore, getDOMStoreTxStatsTracker());
+        ready = (ThreePhaseCommitImpl) rwTx.ready();
+        ready.setDataTree(mockDataTree);
+
+        Mockito.doThrow(new DataValidationFailedException(
+                TestModel.TEST_PATH, "mock ex" )).when(mockDataTree).validate(mockTreeMod);
+
+        assertExecutionExceptionCause(ready.canCommit(), TransactionCommitFailedException.class);
+
+        // Pre-commit failure
+
+        rwTx = new SnapshotBackedReadWriteTransaction(
+                "3", false, mockSnapshot, domStore, getDOMStoreTxStatsTracker());
+        ready = (ThreePhaseCommitImpl) rwTx.ready();
+        ready.setDataTree(mockDataTree);
+
+        Mockito.doThrow(new IllegalStateException("mock ex")).when(mockDataTree).prepare(mockTreeMod);
+
+        assertExecutionExceptionCause(ready.preCommit(), IllegalStateException.class);
+
+        DOMStoreTransactionStatsMXBean statsTracker = getDOMStoreTxStatsTracker();
+        assertEquals("getFailedReadCount", 2, statsTracker.getFailedReadCount());
+        assertEquals("getFailedWriteCount", 2, statsTracker.getFailedWriteCount());
+        assertEquals("getFailedDeleteCount", 1, statsTracker.getFailedDeleteCount());
+        assertEquals("getFailedCommitCount", 3, statsTracker.getFailedCommitCount());
+        assertEquals("getCanCommitOptimisticLockFailedCount", 1,
+                statsTracker.getCanCommitOptimisticLockFailedCount());
+        assertEquals("getCanCommitDataValidationFailedCount", 1,
+                statsTracker.getCanCommitDataValidationFailedCount());
+        assertEquals("getFailedPreCommitCount", 1, statsTracker.getFailedPreCommitCount());
+        assertEquals("getSubmittedWriteTransactionCount", 3, statsTracker.getSubmittedWriteTransactionCount());
     }
 
     @Test
@@ -449,6 +604,16 @@ public class InMemoryDataStoreTest {
          * Asserts that txTwo could not be commited
          */
         assertFalse(txTwo.ready().canCommit().get());
+    }
+
+    private static void assertExecutionExceptionCause(Future<?> future,
+            Class<? extends Exception> expExType) throws Exception {
+        try {
+            future.get();
+            fail("Expected ExecutionException");
+        } catch(ExecutionException e) {
+            assertEquals("ExecutionException cause type", expExType, e.getCause().getClass());
+        }
     }
 
     private static void assertThreePhaseCommit(final DOMStoreThreePhaseCommitCohort cohort)
