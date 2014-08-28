@@ -16,6 +16,57 @@
       "revId": "b0f122b34e03eab693717bace4d258286b774d32",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_14b5cf7c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-28T21:38:45Z",
+      "side": 1,
+      "message": "What are we testing? Can we avoid this code?",
+      "revId": "b0f122b34e03eab693717bace4d258286b774d32",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_74c21bea",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-28T21:38:45Z",
+      "side": 1,
+      "message": "This exception will not make it to the sender. It will only cause this actor to resume itself (based on supervision strategy). Use unhandled(message) from super if you dont care about the message. It will be sent to dead letter queue.",
+      "revId": "b0f122b34e03eab693717bace4d258286b774d32",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_34b81374",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-28T21:38:45Z",
+      "side": 1,
+      "message": "Can we avoid these?",
+      "revId": "b0f122b34e03eab693717bace4d258286b774d32",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
