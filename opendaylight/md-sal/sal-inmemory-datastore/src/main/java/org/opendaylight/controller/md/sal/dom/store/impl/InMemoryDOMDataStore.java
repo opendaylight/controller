@@ -36,6 +36,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransactio
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
+import org.opendaylight.controller.sal.core.spi.data.statistics.DOMStoreTransactionStatsTracker;
 import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
@@ -94,6 +95,8 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
 
     private final String name;
 
+    private final DOMStoreTransactionStatsTracker txStatsTracker = new DOMStoreTransactionStatsTracker();
+
     private volatile AutoCloseable closeable;
 
     public InMemoryDOMDataStore(final String name, final ExecutorService domStoreExecutor,
@@ -127,6 +130,10 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         return domStoreExecutor;
     }
 
+    public DOMStoreTransactionStatsTracker getDOMStoreTransactionStatsTracker() {
+        return txStatsTracker;
+    }
+
     @Override
     public final String getIdentifier() {
         return name;
@@ -134,17 +141,20 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
 
     @Override
     public DOMStoreReadTransaction newReadOnlyTransaction() {
-        return new SnapshotBackedReadTransaction(nextIdentifier(), dataTree.takeSnapshot());
+        return new SnapshotBackedReadTransaction(nextIdentifier(), dataTree.takeSnapshot(),
+                txStatsTracker);
     }
 
     @Override
     public DOMStoreReadWriteTransaction newReadWriteTransaction() {
-        return new SnapshotBackedReadWriteTransaction(nextIdentifier(), dataTree.takeSnapshot(), this);
+        return new SnapshotBackedReadWriteTransaction(nextIdentifier(), dataTree.takeSnapshot(),
+                this, txStatsTracker);
     }
 
     @Override
     public DOMStoreWriteTransaction newWriteOnlyTransaction() {
-        return new SnapshotBackedWriteTransaction(nextIdentifier(), dataTree.takeSnapshot(), this);
+        return new SnapshotBackedWriteTransaction(nextIdentifier(), dataTree.takeSnapshot(),
+                this, txStatsTracker);
     }
 
     @Override
@@ -242,7 +252,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
             } else {
                 snapshot = dataTree.takeSnapshot();
             }
-            return new SnapshotBackedReadTransaction(nextIdentifier(), snapshot);
+            return new SnapshotBackedReadTransaction(nextIdentifier(), snapshot, txStatsTracker);
         }
 
         @Override
@@ -255,8 +265,8 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
             } else {
                 snapshot = dataTree.takeSnapshot();
             }
-            final SnapshotBackedReadWriteTransaction ret = new SnapshotBackedReadWriteTransaction(nextIdentifier(),
-                    snapshot, this);
+            final SnapshotBackedReadWriteTransaction ret = new SnapshotBackedReadWriteTransaction(
+                    nextIdentifier(), snapshot, this, txStatsTracker);
             latestOutstandingTx = ret;
             return ret;
         }
@@ -271,8 +281,8 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
             } else {
                 snapshot = dataTree.takeSnapshot();
             }
-            final SnapshotBackedWriteTransaction ret = new SnapshotBackedWriteTransaction(nextIdentifier(), snapshot,
-                    this);
+            final SnapshotBackedWriteTransaction ret = new SnapshotBackedWriteTransaction(
+                    nextIdentifier(), snapshot, this, txStatsTracker);
             latestOutstandingTx = ret;
             return ret;
         }

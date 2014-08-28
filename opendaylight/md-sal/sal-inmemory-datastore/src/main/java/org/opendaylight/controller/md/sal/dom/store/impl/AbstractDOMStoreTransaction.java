@@ -8,6 +8,7 @@
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
+import org.opendaylight.controller.sal.core.spi.data.statistics.DOMStoreTransactionStatsTracker;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Objects.ToStringHelper;
@@ -23,9 +24,16 @@ import com.google.common.base.Preconditions;
  */
 abstract class AbstractDOMStoreTransaction implements DOMStoreTransaction {
     private final Object identifier;
+    private final DOMStoreTransactionStatsTracker statsTracker;
 
-    protected AbstractDOMStoreTransaction(final Object identifier) {
+    protected AbstractDOMStoreTransaction(final Object identifier,
+            final DOMStoreTransactionStatsTracker statsTracker) {
         this.identifier = Preconditions.checkNotNull(identifier,"Identifier must not be null.");
+        this.statsTracker = Preconditions.checkNotNull(statsTracker,"statsTracker must not be null.");
+    }
+
+    protected DOMStoreTransactionStatsTracker getStatsTracker() {
+        return statsTracker;
     }
 
     @Override

@@ -11,6 +11,7 @@ import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
+
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -22,6 +23,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransactio
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
+import org.opendaylight.controller.sal.core.spi.data.statistics.DOMStoreTransactionStatsTracker;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
@@ -271,7 +273,8 @@ public class InMemoryDataStoreTest {
         Mockito.doThrow( new RuntimeException( "mock ex" ) ).when( mockSnapshot )
         .readNode( Mockito.any( YangInstanceIdentifier.class ) );
 
-        DOMStoreReadTransaction readTx = new SnapshotBackedReadTransaction( "1", mockSnapshot );
+        DOMStoreReadTransaction readTx = new SnapshotBackedReadTransaction( "1", mockSnapshot,
+                new DOMStoreTransactionStatsTracker());
 
         doReadAndThrowEx( readTx );
     }
@@ -296,7 +299,8 @@ public class InMemoryDataStoreTest {
         .readNode( Mockito.any( YangInstanceIdentifier.class ) );
         Mockito.doReturn( mockModification ).when( mockSnapshot ).newModification();
         TransactionReadyPrototype mockReady = Mockito.mock( TransactionReadyPrototype.class );
-        DOMStoreReadTransaction readTx = new SnapshotBackedReadWriteTransaction( "1", mockSnapshot, mockReady );
+        DOMStoreReadTransaction readTx = new SnapshotBackedReadWriteTransaction( "1", mockSnapshot,
+                mockReady, new DOMStoreTransactionStatsTracker() );
 
         doReadAndThrowEx( readTx );
     }
@@ -349,6 +353,92 @@ public class InMemoryDataStoreTest {
         Optional<NormalizedNode<?, ?>> afterCommitRead = domStore.newReadOnlyTransaction().read(TestModel.TEST_PATH)
                 .get();
         assertFalse(afterCommitRead.isPresent());
+    }
+
+    @SuppressWarnings("resource")
+    @Test
+    public void testTransactionStats() {
+
+        // Read/write Tx
+
+        DOMStoreReadWriteTransaction rwTx = domStore.newReadWriteTransaction();
+
+        NormalizedNode<?, ?> containerNode = ImmutableNodes.containerNode( TestModel.TEST_QNAME );
+        rwTx.write( TestModel.TEST_PATH, containerNode );
+
+        rwTx.merge( TestModel.TEST_PATH, containerNode );
+
+        rwTx.read( TestModel.TEST_PATH );
+
+        // Read-only Tx
+
+        DOMStoreReadTransaction readTx = domStore.newReadOnlyTransaction();
+
+        readTx.read( TestModel.TEST_PATH );
+
+        // Write-only Tx
+
+        DOMStoreWriteTransaction writeTx = domStore.newWriteOnlyTransaction();
+
+        writeTx.write( TestModel.TEST_PATH, containerNode );
+
+        writeTx.delete( TestModel.TEST_PATH );
+
+        DOMStoreTransactionStatsTracker statsTracker = domStore.getDOMStoreTransactionStatsTracker();
+        assertEquals("getReadWriteTransactionCount", 1, statsTracker.getReadWriteTransactionCount());
+        assertEquals("getReadOnlyTransactionCount", 1, statsTracker.getReadOnlyTransactionCount());
+        assertEquals("getWriteOnlyTransactionCount", 1, statsTracker.getWriteOnlyTransactionCount());
+        assertEquals("getTotalSuccessfulReadCount", 2, statsTracker.getTotalSuccessfulReadCount());
+        assertEquals("getTotalSuccessfulWriteCount", 3, statsTracker.getTotalSuccessfulWriteCount());
+        assertEquals("getTotalSuccessfulDeleteCount", 1, statsTracker.getTotalSuccessfulDeleteCount());
+    }
+
+    @SuppressWarnings("resource")
+    @Test
+    public void testTransactionFailedStats() {
+        NormalizedNode<?, ?> containerNode = ImmutableNodes.containerNode( TestModel.TEST_QNAME );
+
+        DataTreeSnapshot mockSnapshot = Mockito.mock( DataTreeSnapshot.class );
+        Mockito.doThrow( new RuntimeException( "mock ex" ) ).when( mockSnapshot )
+                .readNode( Mockito.any( YangInstanceIdentifier.class ) );
+        DataTreeModification mockTreeMod = Mockito.mock(DataTreeModification.class);
+        Mockito.doThrow( new RuntimeException( "mock ex" ) ).when( mockTreeMod )
+                .write(Mockito.any( YangInstanceIdentifier.class ),
+                       Mockito.any( NormalizedNode.class ));
+        Mockito.doThrow( new RuntimeException( "mock ex" ) ).when( mockTreeMod )
+                .merge(Mockito.any( YangInstanceIdentifier.class ),
+                       Mockito.any( NormalizedNode.class ));
+        Mockito.doThrow( new RuntimeException( "mock ex" ) ).when( mockTreeMod )
+                .delete(Mockito.any( YangInstanceIdentifier.class ));
+        Mockito.doReturn(mockTreeMod).when( mockSnapshot ).newModification();
+
+        DOMStoreReadWriteTransaction rwTx = new SnapshotBackedReadWriteTransaction(
+                "1", mockSnapshot, domStore, domStore.getDOMStoreTransactionStatsTracker());
+
+        try {
+            rwTx.read(TestModel.TEST_PATH).get();
+        } catch( Exception e ) {} // Expected
+
+        try {
+            rwTx.read(TestModel.TEST_PATH).get();
+        } catch( Exception e ) {} // Expected
+
+        try {
+            rwTx.write(TestModel.TEST_PATH, containerNode);
+        } catch( Exception e ) {} // Expected
+
+        try {
+            rwTx.merge(TestModel.TEST_PATH, containerNode);
+        } catch( Exception e ) {} // Expected
+
+        try {
+            rwTx.delete(TestModel.TEST_PATH);
+        } catch( Exception e ) {} // Expected
+
+        DOMStoreTransactionStatsTracker statsTracker = domStore.getDOMStoreTransactionStatsTracker();
+        assertEquals("getTotalFailedReadCount", 2, statsTracker.getTotalFailedReadCount());
+        assertEquals("getTotalFailedWriteCount", 2, statsTracker.getTotalFailedWriteCount());
+        assertEquals("getTotalFailedDeleteCount", 1, statsTracker.getTotalFailedDeleteCount());
     }
 
     @Test

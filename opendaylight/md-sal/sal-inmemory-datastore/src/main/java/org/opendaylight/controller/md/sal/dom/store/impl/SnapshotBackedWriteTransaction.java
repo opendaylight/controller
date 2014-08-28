@@ -9,9 +9,9 @@ package org.opendaylight.controller.md.sal.dom.store.impl;
 
 import static com.google.common.base.Preconditions.checkState;
 
-
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
+import org.opendaylight.controller.sal.core.spi.data.statistics.DOMStoreTransactionStatsTracker;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Objects.ToStringHelper;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
+
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
@@ -47,11 +48,22 @@ class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction impleme
      *            Implementation of ready method.
      */
     public SnapshotBackedWriteTransaction(final Object identifier, final DataTreeSnapshot snapshot,
-            final TransactionReadyPrototype readyImpl) {
-        super(identifier);
+            final TransactionReadyPrototype readyImpl,
+            final DOMStoreTransactionStatsTracker statsTracker) {
+        this(identifier, snapshot, readyImpl, statsTracker, true);
+    }
+
+    protected SnapshotBackedWriteTransaction(final Object identifier, final DataTreeSnapshot snapshot,
+            final TransactionReadyPrototype readyImpl,
+            final DOMStoreTransactionStatsTracker statsTracker, final boolean isWriteOnly) {
+        super(identifier, statsTracker);
         mutableTree = snapshot.newModification();
         this.readyImpl = Preconditions.checkNotNull(readyImpl, "readyImpl must not be null.");
         LOG.debug("Write Tx: {} allocated with snapshot {}", identifier, snapshot);
+
+        if(isWriteOnly) {
+            getStatsTracker().incrementWriteOnlyTransactionCount();
+        }
     }
 
     @Override
@@ -67,8 +79,12 @@ class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction impleme
         try {
             LOG.debug("Tx: {} Write: {}:{}", getIdentifier(), path, data);
             mutableTree.write(path, data);
+
+            getStatsTracker().incrementTotalSuccessfulWriteCount();
             // FIXME: Add checked exception
         } catch (Exception e) {
+            getStatsTracker().incrementTotalFailedWriteCount();
+
             LOG.error("Tx: {}, failed to write {}:{} in {}", getIdentifier(), path, data, mutableTree, e);
             // Rethrow original ones if they are subclasses of RuntimeException
             // or Error
@@ -84,8 +100,13 @@ class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction impleme
         try {
             LOG.debug("Tx: {} Merge: {}:{}", getIdentifier(), path, data);
             mutableTree.merge(path, data);
+
+            getStatsTracker().incrementTotalSuccessfulWriteCount();
+
             // FIXME: Add checked exception
         } catch (Exception e) {
+            getStatsTracker().incrementTotalFailedWriteCount();
+
             LOG.error("Tx: {}, failed to write {}:{} in {}", getIdentifier(), path, data, mutableTree, e);
             // Rethrow original ones if they are subclasses of RuntimeException
             // or Error
@@ -101,8 +122,13 @@ class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction impleme
         try {
             LOG.debug("Tx: {} Delete: {}", getIdentifier(), path);
             mutableTree.delete(path);
+
+            getStatsTracker().incrementTotalSuccessfulDeleteCount();
+
             // FIXME: Add checked exception
         } catch (Exception e) {
+            getStatsTracker().incrementTotalFailedDeleteCount();
+
             LOG.error("Tx: {}, failed to delete {} in {}", getIdentifier(), path, mutableTree, e);
             // Rethrow original ones if they are subclasses of RuntimeException
             // or Error
