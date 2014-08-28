@@ -45,19 +45,23 @@
                 <module>
                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:inmemory-datastore-provider">prefix:inmemory-config-datastore-provider</type>
                     <name>config-store-service</name>
-                    <schema-service>
-                        <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:schema-service</type>
-                        <name>yang-schema-service</name>
-                    </schema-service>
+                    <inmemory-config-datastore-provider xmlns="urn:opendaylight:params:xml:ns:yang:controller:inmemory-datastore-provider">
+                        <schema-service>
+                            <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:schema-service</type>
+                            <name>yang-schema-service</name>
+                        </schema-service>
+                    </inmemory-config-datastore-provider>
                 </module>
 
                 <module>
                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:inmemory-datastore-provider">prefix:inmemory-operational-datastore-provider</type>
                     <name>operational-store-service</name>
-                    <operational-schema-service>
-                        <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:schema-service</type>
-                        <name>yang-schema-service</name>
-                    </operational-schema-service>
+                    <inmemory-operational-datastore-provider xmlns="urn:opendaylight:params:xml:ns:yang:controller:inmemory-datastore-provider">
+                        <schema-service>
+                             <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:schema-service</type>
+                             <name>yang-schema-service</name>
+                        </schema-service>
+                    </inmemory-operational-datastore-provider>
                 </module>
                 <!--
                      Tree-based in-memory data store. This is the data store which is currently
