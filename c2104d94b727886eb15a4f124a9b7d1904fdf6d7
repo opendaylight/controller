@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_0f1ff85b",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/NormalizedNodeType.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-28T23:14:52Z",
+      "side": 1,
+      "message": "Will add precondition",
+      "parentUuid": "fa82b9bf_14e62fe8",
+      "revId": "c2104d94b727886eb15a4f124a9b7d1904fdf6d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_94d9df23",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/PathArgumentType.java",
         "patchSetId": 6
@@ -30,6 +48,24 @@
       "writtenOn": "2014-08-28T19:23:11Z",
       "side": 1,
       "message": "pathArgument.toString may throw NPE",
+      "revId": "c2104d94b727886eb15a4f124a9b7d1904fdf6d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_cf3cb0ca",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/PathArgumentType.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-28T23:14:52Z",
+      "side": 1,
+      "message": "will fix",
+      "parentUuid": "fa82b9bf_94d9df23",
       "revId": "c2104d94b727886eb15a4f124a9b7d1904fdf6d7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_2f22fca2",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/ValueSerializer.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-28T23:14:52Z",
+      "side": 1,
+      "message": "It will not because the original value is a set. Anyway I am reworking this in the next commit. The serialization/deserialization will be more straightforward.",
+      "parentUuid": "fa82b9bf_14fdcf6d",
+      "revId": "c2104d94b727886eb15a4f124a9b7d1904fdf6d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_d441a7a9",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/ValueType.java",
         "patchSetId": 6
@@ -64,6 +118,24 @@
       "writtenOn": "2014-08-28T19:23:11Z",
       "side": 1,
       "message": "null check on node?",
+      "revId": "c2104d94b727886eb15a4f124a9b7d1904fdf6d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ef3734e1",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/ValueType.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-28T23:14:52Z",
+      "side": 1,
+      "message": "will fix",
+      "parentUuid": "fa82b9bf_d441a7a9",
       "revId": "c2104d94b727886eb15a4f124a9b7d1904fdf6d7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
