@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_7488db70",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/NormalizedNodeSerializer.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-28T15:56:39Z",
+      "side": 1,
+      "message": "Agreed. I didn\u0027t mean to change it to use Java serialization. I was just commenting on your comment above.",
+      "parentUuid": "fa82b9bf_f1d87df0",
+      "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_1b5742cb",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/NormalizedNodeSerializer.java",
         "patchSetId": 4
@@ -136,6 +154,24 @@
       "side": 1,
       "message": "I don\u0027t see how one can add attributes using yang - so I\u0027m wondering if this needs to be done for this release. What do you think?",
       "parentUuid": "fa82b9bf_3b11e603",
+      "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f4938ba0",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/NormalizedNodeSerializer.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 498,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-28T15:56:39Z",
+      "side": 1,
+      "message": "I don\u0027t know either. I\u0027ve seen the attributes stuff but I don\u0027t know what it\u0027s used for or how one would define them. I agree - let it ride.",
+      "parentUuid": "fa82b9bf_71f46d5a",
       "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -352,6 +388,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_b4898370",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/PathArgumentSerializer.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-28T15:56:39Z",
+      "side": 1,
+      "message": "Yeah - it should be fine. Was just wondering....",
+      "parentUuid": "fa82b9bf_5198491b",
+      "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_9bc6f266",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/PathArgumentType.java",
         "patchSetId": 4
@@ -381,6 +435,24 @@
       "side": 1,
       "message": "I\u0027ve kept them strings for compatibility with the older serialization code. Let me see if I can eliminate the need for using strings here as well.",
       "parentUuid": "fa82b9bf_9bc6f266",
+      "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d4df6767",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/PathArgumentType.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-28T15:56:39Z",
+      "side": 1,
+      "message": "It\u0027s not that big a deal. I understand the reason - I wouldn\u0027t want to hold up this patch for that.",
+      "parentUuid": "fa82b9bf_9191f1f2",
       "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
