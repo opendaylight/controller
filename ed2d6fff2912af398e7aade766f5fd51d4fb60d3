@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_31590535",
+        "filename": "opendaylight/md-sal/compatibility/sal-compatibility/src/main/java/org/opendaylight/controller/sal/compatibility/NodeMapping.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-08-28T09:41:58Z",
+      "side": 1,
+      "message": "Use a combination of String.indexOf(), String.substring() instead of this costly operation.",
+      "revId": "ed2d6fff2912af398e7aade766f5fd51d4fb60d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_11564106",
+        "filename": "opendaylight/md-sal/compatibility/sal-compatibility/src/main/java/org/opendaylight/controller/sal/compatibility/NodeMapping.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-08-28T09:41:58Z",
+      "side": 1,
+      "message": "precompile this pattern",
+      "revId": "ed2d6fff2912af398e7aade766f5fd51d4fb60d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d143f93f",
+        "filename": "opendaylight/md-sal/compatibility/sal-compatibility/src/main/java/org/opendaylight/controller/sal/compatibility/NodeMapping.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-08-28T09:41:58Z",
+      "side": 1,
+      "message": "precompile pattern",
+      "revId": "ed2d6fff2912af398e7aade766f5fd51d4fb60d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
