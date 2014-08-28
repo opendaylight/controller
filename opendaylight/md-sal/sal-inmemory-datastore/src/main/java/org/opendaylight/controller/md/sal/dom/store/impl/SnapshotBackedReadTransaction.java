@@ -11,8 +11,10 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
+
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
+import org.opendaylight.controller.sal.core.spi.data.statistics.DOMStoreTransactionStatsTracker;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
@@ -35,9 +37,11 @@ final class SnapshotBackedReadTransaction extends AbstractDOMStoreTransaction
     private static final Logger LOG = LoggerFactory.getLogger(SnapshotBackedReadTransaction.class);
     private volatile DataTreeSnapshot stableSnapshot;
 
-    public SnapshotBackedReadTransaction(final Object identifier, final DataTreeSnapshot snapshot) {
-        super(identifier);
+    public SnapshotBackedReadTransaction(final Object identifier, final DataTreeSnapshot snapshot,
+            final DOMStoreTransactionStatsTracker statsTracker) {
+        super(identifier, statsTracker);
         this.stableSnapshot = Preconditions.checkNotNull(snapshot);
+        getStatsTracker().incrementReadOnlyTransactionCount();
         LOG.debug("ReadOnly Tx: {} allocated with snapshot {}", identifier, snapshot);
     }
 
@@ -58,9 +62,13 @@ final class SnapshotBackedReadTransaction extends AbstractDOMStoreTransaction
         }
 
         try {
-            return Futures.immediateCheckedFuture(snapshot.readNode(path));
+            CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> future =
+                    Futures.immediateCheckedFuture(snapshot.readNode(path));
+            getStatsTracker().incrementSuccessfulReadCount();
+            return future;
         } catch (Exception e) {
             LOG.error("Tx: {} Failed Read of {}", getIdentifier(), path, e);
+            getStatsTracker().incrementFailedReadCount();
             return Futures.immediateFailedCheckedFuture(new ReadFailedException("Read failed",e));
         }
     }
