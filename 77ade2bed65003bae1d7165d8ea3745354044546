@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_3ea7940c",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/akka.conf",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-28T00:57:50Z",
+      "side": 1,
+      "message": "There\u0027s some trailing char here - hope that doesn\u0027t cause issues.",
+      "revId": "77ade2bed65003bae1d7165d8ea3745354044546",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
