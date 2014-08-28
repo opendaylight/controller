@@ -11,7 +11,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
+import org.opendaylight.controller.md.sal.common.util.jmx.MBeanRegistrar;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -32,7 +32,7 @@ public class ShardStatsTest {
         shardStats.registerMBean();
         mbeanServer = ManagementFactory.getPlatformMBeanServer();
         String objectName =
-            AbstractMXBean.BASE_JMX_PREFIX + "type=" + shardStats
+            MBeanRegistrar.BASE_JMX_PREFIX + "type=" + shardStats
                 .getMBeanType() + ",Category=" +
                 shardStats.getMBeanCategory() + ",name=" +
                 shardStats.getMBeanName();
