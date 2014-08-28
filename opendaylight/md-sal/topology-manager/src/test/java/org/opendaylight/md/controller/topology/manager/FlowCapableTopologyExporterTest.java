@@ -147,9 +147,9 @@ public class FlowCapableTopologyExporterTest {
                 newLink("link2", newSourceNode("source2"), newDestNode("dest2")));
         final Topology topology = new TopologyBuilder().setLink(linkList).build();
 
+        //Only the links that have its source created by somebody should be deleted by them.
         InstanceIdentifier[] expDeletedIIDs = {
                 topologyIID.child(Link.class, linkList.get(0).getKey()),
-                topologyIID.child(Link.class, linkList.get(1).getKey()),
                 topologyIID.child(Node.class, new NodeKey(new NodeId("node1")))
             };
 
@@ -241,9 +241,9 @@ public class FlowCapableTopologyExporterTest {
                 newLink("link3", newSourceTp("source2"), newDestTp("dest2")));
         final Topology topology = new TopologyBuilder().setLink(linkList).build();
 
+        //Only the links that have its source created by somebody should be deleted by them.
         InstanceIdentifier[] expDeletedIIDs = {
                 topologyIID.child(Link.class, linkList.get(0).getKey()),
-                topologyIID.child(Link.class, linkList.get(1).getKey()),
                 topologyIID.child(Node.class, new NodeKey(new NodeId("node1")))
                         .child(TerminationPoint.class, new TerminationPointKey(new TpId("tp1")))
             };
