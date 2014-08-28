@@ -200,8 +200,7 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
 
     }
 
-    protected void processCommand(StringBuffer inputString, PrintStream sout,
-            TelnetConnection tc) {
+    public void processCommand(StringBuffer inputString, PrintStream sout) {
         if (inputString.toString().trim().equals("r")) {
             sout.println(lastInputString);
             inputString = lastInputString;
@@ -262,25 +261,6 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
             sout.println();
             for (int i = 0; i < iNames.length; i++) {
                 sout.println(iNames[i]);
-            }
-        } else if (input.startsWith("cd sid")) {
-            String substr = input.substring("cd sid".length()).trim();
-            for (NEEntry e : elements.values()) {
-                if (((Module) e.ne).getName().equals(substr)) {
-                    tc.currentModule = (Module) e.ne;
-                }
-            }
-        } else if (input.equals("list sid")) {
-            String arr[] = new String[elements.size()];
-
-            int i = 0;
-            for (NEEntry entry : elements.values()) {
-                arr[i] = entry.toString();
-                i++;
-            }
-            Arrays.sort(arr);
-            for (String s : arr) {
-                sout.println(s);
             }
         } else if (input.equals("help") || input.equals("?")) {
             // sout.println(getLongDescription());
@@ -517,7 +497,7 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
                         }
                     }
 
-                    processCommand(inputString, out, this);
+                    processCommand(inputString, out);
                     inputString = new StringBuffer();
                 }
             } catch (Exception err) {
