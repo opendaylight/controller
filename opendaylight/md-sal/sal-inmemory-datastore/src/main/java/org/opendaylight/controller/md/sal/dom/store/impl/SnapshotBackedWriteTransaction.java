@@ -13,6 +13,7 @@ import com.google.common.base.Objects.ToStringHelper;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 
+import org.opendaylight.controller.md.sal.dom.store.impl.jmx.InMemoryDataStoreTransactionStatsTracker;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -46,11 +47,22 @@ class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction impleme
      *            Implementation of ready method.
      */
     public SnapshotBackedWriteTransaction(final Object identifier, final boolean debug,
-            final DataTreeSnapshot snapshot, final TransactionReadyPrototype readyImpl) {
-        super(identifier, debug);
+            final DataTreeSnapshot snapshot, final TransactionReadyPrototype readyImpl,
+            final InMemoryDataStoreTransactionStatsTracker statsTracker) {
+        this(identifier, debug, snapshot, readyImpl, statsTracker, true);
+    }
+
+    protected SnapshotBackedWriteTransaction(final Object identifier, final boolean debug,
+            final DataTreeSnapshot snapshot, final TransactionReadyPrototype readyImpl,
+            final InMemoryDataStoreTransactionStatsTracker statsTracker, final boolean isWriteOnly) {
+        super(identifier, statsTracker, debug);
         mutableTree = snapshot.newModification();
         this.readyImpl = Preconditions.checkNotNull(readyImpl, "readyImpl must not be null.");
         LOG.debug("Write Tx: {} allocated with snapshot {}", identifier, snapshot);
+
+        if(isWriteOnly) {
+            getStatsTracker().incrementWriteOnlyTransactionCount();
+        }
     }
 
     @Override
@@ -66,8 +78,12 @@ class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction impleme
         try {
             LOG.debug("Tx: {} Write: {}:{}", getIdentifier(), path, data);
             mutableTree.write(path, data);
+
+            getStatsTracker().incrementSuccessfulWriteCount();
             // FIXME: Add checked exception
         } catch (Exception e) {
+            getStatsTracker().incrementFailedWriteCount();
+
             LOG.error("Tx: {}, failed to write {}:{} in {}", getIdentifier(), path, data, mutableTree, e);
             // Rethrow original ones if they are subclasses of RuntimeException
             // or Error
@@ -83,8 +99,13 @@ class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction impleme
         try {
             LOG.debug("Tx: {} Merge: {}:{}", getIdentifier(), path, data);
             mutableTree.merge(path, data);
+
+            getStatsTracker().incrementSuccessfulWriteCount();
+
             // FIXME: Add checked exception
         } catch (Exception e) {
+            getStatsTracker().incrementFailedWriteCount();
+
             LOG.error("Tx: {}, failed to write {}:{} in {}", getIdentifier(), path, data, mutableTree, e);
             // Rethrow original ones if they are subclasses of RuntimeException
             // or Error
@@ -100,8 +121,13 @@ class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction impleme
         try {
             LOG.debug("Tx: {} Delete: {}", getIdentifier(), path);
             mutableTree.delete(path);
+
+            getStatsTracker().incrementSuccessfulDeleteCount();
+
             // FIXME: Add checked exception
         } catch (Exception e) {
+            getStatsTracker().incrementFailedDeleteCount();
+
             LOG.error("Tx: {}, failed to delete {} in {}", getIdentifier(), path, mutableTree, e);
             // Rethrow original ones if they are subclasses of RuntimeException
             // or Error
@@ -125,7 +151,9 @@ class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction impleme
         ready = true;
         LOG.debug("Store transaction: {} : Ready", getIdentifier());
         mutableTree.ready();
-        return readyImpl.ready(this);
+        DOMStoreThreePhaseCommitCohort cohort = readyImpl.ready(this);
+        getStatsTracker().incrementSubmittedWriteTransactionCount();
+        return cohort;
     }
 
     protected DataTreeModification getMutatedView() {

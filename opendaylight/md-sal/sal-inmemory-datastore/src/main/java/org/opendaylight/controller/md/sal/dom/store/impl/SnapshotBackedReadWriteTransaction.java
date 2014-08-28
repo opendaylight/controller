@@ -14,6 +14,7 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.controller.md.sal.dom.store.impl.jmx.InMemoryDataStoreTransactionStatsTracker;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -40,8 +41,10 @@ class SnapshotBackedReadWriteTransaction extends SnapshotBackedWriteTransaction
      * @param readyImpl Implementation of ready method.
      */
     protected SnapshotBackedReadWriteTransaction(final Object identifier, final boolean debug,
-            final DataTreeSnapshot snapshot, final TransactionReadyPrototype store) {
-        super(identifier, debug, snapshot, store);
+            final DataTreeSnapshot snapshot, final TransactionReadyPrototype store,
+            final InMemoryDataStoreTransactionStatsTracker statsTracker) {
+        super(identifier, debug, snapshot, store, statsTracker, false);
+        getStatsTracker().incrementReadWriteTransactionCount();
     }
 
     @Override
@@ -55,9 +58,13 @@ class SnapshotBackedReadWriteTransaction extends SnapshotBackedWriteTransaction
         }
 
         try {
-            return Futures.immediateCheckedFuture(dataView.readNode(path));
+            CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> future =
+                    Futures.immediateCheckedFuture(dataView.readNode(path));
+            getStatsTracker().incrementSuccessfulReadCount();
+            return future;
         } catch (Exception e) {
             LOG.error("Tx: {} Failed Read of {}", getIdentifier(), path, e);
+            getStatsTracker().incrementFailedReadCount();
             return Futures.immediateFailedCheckedFuture(new ReadFailedException("Read failed",e));
         }
     }

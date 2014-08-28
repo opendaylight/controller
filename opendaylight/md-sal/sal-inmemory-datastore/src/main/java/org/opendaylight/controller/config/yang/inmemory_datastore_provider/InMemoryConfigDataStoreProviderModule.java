@@ -28,8 +28,8 @@ public class InMemoryConfigDataStoreProviderModule extends org.opendaylight.cont
                         getMaxDataChangeExecutorQueueSize(), getMaxDataChangeListenerQueueSize(),
                         getMaxDataStoreExecutorQueueSize()));
 
-        InMemoryDataStoreStats statsBean = new InMemoryDataStoreStats("InMemoryConfigDataStore",
-                dataStore.getDataChangeListenerNotificationManager(), dataStore.getDomStoreExecutor());
+        InMemoryDataStoreStats statsBean = new InMemoryDataStoreStats(
+                "InMemoryConfigDataStore", dataStore);
 
         dataStore.setCloseable(statsBean);
 

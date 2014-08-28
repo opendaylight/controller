@@ -11,6 +11,7 @@ import com.google.common.base.Objects;
 import com.google.common.base.Objects.ToStringHelper;
 import com.google.common.base.Preconditions;
 
+import org.opendaylight.controller.md.sal.dom.store.impl.jmx.InMemoryDataStoreTransactionStatsTracker;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
 import org.slf4j.Logger;
 
@@ -23,10 +24,17 @@ import org.slf4j.Logger;
 abstract class AbstractDOMStoreTransaction implements DOMStoreTransaction {
     private final Throwable debugContext;
     private final Object identifier;
+    private final InMemoryDataStoreTransactionStatsTracker statsTracker;
 
-    protected AbstractDOMStoreTransaction(final Object identifier, final boolean debug) {
+    protected AbstractDOMStoreTransaction(final Object identifier,
+            final InMemoryDataStoreTransactionStatsTracker statsTracker, final boolean debug) {
         this.identifier = Preconditions.checkNotNull(identifier, "Identifier must not be null.");
         this.debugContext = debug ? new Throwable().fillInStackTrace() : null;
+        this.statsTracker = Preconditions.checkNotNull(statsTracker,"statsTracker must not be null.");
+    }
+
+    protected InMemoryDataStoreTransactionStatsTracker getStatsTracker() {
+        return statsTracker;
     }
 
     @Override
