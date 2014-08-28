@@ -42,6 +42,9 @@ public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingSt
         if(attributeIfc instanceof DependencyAttribute) {
             serviceNameOfDepAttr = ((DependencyAttribute)attributeIfc).getDependency().getSie().getQName().getLocalName();
             namespaceOfDepAttr = ((DependencyAttribute)attributeIfc).getDependency().getSie().getQName().getNamespace().toString();
+        } else if (attributeIfc instanceof ListDependenciesAttribute) {
+            serviceNameOfDepAttr = ((ListDependenciesAttribute)attributeIfc).getDependency().getSie().getQName().getLocalName();
+            namespaceOfDepAttr = ((ListDependenciesAttribute)attributeIfc).getDependency().getSie().getQName().getNamespace().toString();
         }
 
         return switchAttribute(attributeIfc);
