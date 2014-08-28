@@ -11,6 +11,12 @@ package org.opendaylight.controller.md.statistics.manager;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.ethernet.match.fields.EthernetSourceBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.ethernet.match.fields.EthernetTypeBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.EthernetMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.EthernetMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv4Match;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv4MatchBuilder;
 import org.slf4j.Logger;
@@ -111,5 +117,96 @@ public class StatisticsUpdateCommiterTest {
 
         return ipv4MatchBuilder.build();
     }
+    /**
+     * Test method for {@link org.opendaylight.controller.md.statistics.manager.FlowComparator#ethernetMatchEquals(EthernetMatch, EthernetMatch)
+     */
+    @Test
+    public void testEthernetMatchEquals() {
+        String[][][] ethernetMatchSeeds = new String[][][] {
+                {{"aa:bb:cc:dd:ee:ff", "ff:ff:ff:ff:ff:ff","0800"}, {"aa:bb:cc:dd:ee:ff", "ff:ff:ff:ff:ff:ff","0800"}},
+                {{"aa:bb:cc:dd:ee:ff", "ff:ff:ff:ff:ff:ff","0800"}, {"aa:bb:bc:cd:ee:ff", "ff:ff:ff:ff:ff:ff","0800"}},
+                {{"aa:bb:cc:dd:ee:ff", "ff:ff:ff:ff:ff:ff","0800"}, {"AA:BB:CC:DD:EE:FF", "ff:ff:ff:ff:ff:ff","0800"}},
+                {{"AA:BB:CC:dd:ee:ff", "ff:ff:ff:ff:ff:ff","0800"}, {"aa:bb:cc:dd:ee:ff", "ff:ff:ff:ff:ff:ff","0800"}},
+                {{"AA:BB:CC:dd:ee:ff", "ff:ff:ff:ff:ff:ff","0800"}, {"aa:bb:cc:dd:ee:ff", "FF:FF:FF:FF:FF:FF","0800"}},
+                {{"AA:BB:CC:dd:ee:ff", "ff:ff:ff:ee:ee:ee","0800"}, {"aa:bb:cc:dd:ee:ff", "FF:FF:FF:FF:FF:FF","0800"}},
 
+                {{"AA:BB:CC:dd:ee:ff", null,"0800"}, {"aa:bb:cc:dd:ee:ff", null,"0800"}},
+                {{"AA:BB:CC:dd:ee:ff", null,"0800"}, {"aa:bb:cc:dd:ee:ff", null,"0806"}},
+                {{"AA:BB:CC:dd:ee:ff", null,"0800"}, {"aa:bb:cc:dd:ee:ff", "FF:FF:FF:FF:FF:FF","0800"}},
+                {{"AA:BB:CC:dd:ee:ff", null,"0800"}, {null, "FF:FF:FF:FF:FF:FF","0800"}},
+
+                {{"AA:BB:CC:dd:ee:ff", "ff:ff:ff:ff:ff:ff",null}, {null, "FF:FF:FF:FF:FF:FF","0800"}},
+                {{"AA:BB:CC:dd:ee:ff", "ff:ff:ff:ff:ff:ff",null}, {"aa:bb:cc:dd:ee:ff", "FF:FF:FF:FF:FF:FF",null}},
+                {{"AA:BB:CC:dd:ee:ff", "ff:ff:ff:ff:ff:ff",null}, {null, "FF:FF:FF:FF:FF:FF",null}},
+
+                {{null, null,null}, {null, null,"0800"}},
+                {{null, null,null}, {null, null,null}},
+        };
+
+        boolean[] matches = new boolean[] {
+                true,
+                false,
+                true,
+                true,
+                true,
+                false,
+
+                true,
+                false,
+                false,
+                false,
+
+                false,
+                true,
+                false,
+
+                false,
+                true
+        };
+
+        for (int i = 0; i < matches.length; i++) {
+            checkComparisonOfEthernetMatch(
+                    ethernetMatchSeeds[i][0][0], ethernetMatchSeeds[i][0][1],ethernetMatchSeeds[i][0][2],
+                    ethernetMatchSeeds[i][1][0], ethernetMatchSeeds[i][1][1],ethernetMatchSeeds[i][1][2],
+                    matches[i]);
+        }
+    }
+
+    /*
+     * @param ethernetMatch1
+     * @param ethernetMatch2
+     */
+    private static void checkComparisonOfEthernetMatch(String macAddress1, String macAddressMask1,String etherType1,
+            String macAddress2, String macAddressMask2,String etherType2, boolean expectedResult) {
+        EthernetMatch ethernetMatch1 = prepareEthernetMatch(macAddress1, macAddressMask1,etherType1);
+        EthernetMatch ethernetMatch2 = prepareEthernetMatch(macAddress2, macAddressMask2,etherType2);
+        boolean comparisonResult;
+        try {
+            comparisonResult = FlowComparator.ethernetMatchEquals(ethernetMatch1, ethernetMatch2);
+            Assert.assertEquals("failed to compare: "+ethernetMatch1+" vs. "+ethernetMatch2,
+                    expectedResult, comparisonResult);
+        } catch (Exception e) {
+            LOG.error("failed to compare: {} vs. {}", ethernetMatch1, ethernetMatch2, e);
+            Assert.fail(e.getMessage());
+        }
+    }
+
+    private static EthernetMatch prepareEthernetMatch(String macAddress, String macAddressMask, String etherType) {
+        EthernetMatchBuilder ethernetMatchBuilder = new EthernetMatchBuilder();
+        EthernetSourceBuilder ethernetSourceBuilder =  new EthernetSourceBuilder();
+        if (macAddress != null) {
+            ethernetSourceBuilder.setAddress(new MacAddress(macAddress));
+        }
+        if (macAddressMask != null) {
+            ethernetSourceBuilder.setMask(new MacAddress(macAddressMask));
+        }
+        if(etherType != null){
+            EthernetTypeBuilder ethernetType = new EthernetTypeBuilder();
+            ethernetType.setType(new EtherType(Long.parseLong(etherType,16)));
+            ethernetMatchBuilder.setEthernetType(ethernetType.build());
+        }
+        ethernetMatchBuilder.setEthernetSource(ethernetSourceBuilder.build());
+
+        return ethernetMatchBuilder.build();
+    }
 }
