@@ -176,7 +176,7 @@ class FlowCapableTopologyExporter implements FlowTopologyDiscoveryListener, Open
 
     @Override
     public void onLinkOverutilized(final LinkOverutilized notification) {
-        // NOOP
+// NOOP
     }
 
     @Override
@@ -196,7 +196,7 @@ class FlowCapableTopologyExporter implements FlowTopologyDiscoveryListener, Open
 
     @Override
     public void onLinkUtilizationNormal(final LinkUtilizationNormal notification) {
-        // NOOP
+// NOOP
     }
 
     private InstanceIdentifier<Node> toNodeIdentifier(final NodeRef ref) {
@@ -236,8 +236,7 @@ class FlowCapableTopologyExporter implements FlowTopologyDiscoveryListener, Open
                 topologyOptional.get().getLink() : Collections.<Link> emptyList();
         final List<InstanceIdentifier<Link>> linkIDsToDelete = Lists.newArrayList();
         for (Link link : linkList) {
-            if (id.equals(link.getSource().getSourceNode()) ||
-                    id.equals(link.getDestination().getDestNode())) {
+            if (id.equals(link.getSource().getSourceNode())) {
                 linkIDsToDelete.add(linkPath(link));
             }
         }
@@ -288,8 +287,7 @@ class FlowCapableTopologyExporter implements FlowTopologyDiscoveryListener, Open
                 ? topologyOptional.get().getLink() : Collections.<Link> emptyList();
         final List<InstanceIdentifier<Link>> linkIDsToDelete = Lists.newArrayList();
         for (Link link : linkList) {
-            if (id.equals(link.getSource().getSourceTp()) ||
-                    id.equals(link.getDestination().getDestTp())) {
+            if (id.equals(link.getSource().getSourceTp())) {
                 linkIDsToDelete.add(linkPath(link));
             }
         }
