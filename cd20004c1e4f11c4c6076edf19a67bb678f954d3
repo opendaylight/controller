@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_f1d87df0",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/NormalizedNodeSerializer.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-28T14:38:24Z",
+      "side": 1,
+      "message": "I\u0027m going to leave things alone for now. We have tested and found that Java serialization is actually much slower than Protocol buffers. Also it can introduce issues with versioning which protocol buffers handles rather cleanly.",
+      "parentUuid": "fa82b9bf_1bc982ab",
+      "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_1b5742cb",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/NormalizedNodeSerializer.java",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2014-08-27T21:35:33Z",
       "side": 1,
       "message": "It looks like this code to handle Collection is exactly the same as the code below to handle Iterable, in which case, since Collection extends Iterable, this code can be removed.",
+      "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b1de75d8",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/NormalizedNodeSerializer.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-28T14:38:24Z",
+      "side": 1,
+      "message": "Will do",
+      "parentUuid": "fa82b9bf_1b5742cb",
       "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_51f12969",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/NormalizedNodeSerializer.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-28T14:38:24Z",
+      "side": 1,
+      "message": "Good point will do.",
+      "parentUuid": "fa82b9bf_bbb73620",
+      "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_3b11e603",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/NormalizedNodeSerializer.java",
         "patchSetId": 4
@@ -64,6 +118,24 @@
       "writtenOn": "2014-08-27T21:35:33Z",
       "side": 1,
       "message": "Will this TODO be done in a follow-up patch?",
+      "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_71f46d5a",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/NormalizedNodeSerializer.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 498,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-28T14:38:24Z",
+      "side": 1,
+      "message": "I don\u0027t see how one can add attributes using yang - so I\u0027m wondering if this needs to be done for this release. What do you think?",
+      "parentUuid": "fa82b9bf_3b11e603",
       "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_11e721ad",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/NormalizedNodeType.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-28T14:38:24Z",
+      "side": 1,
+      "message": "Will do",
+      "parentUuid": "fa82b9bf_1b25025b",
+      "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_3bb6c6f9",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/PathArgumentSerializer.java",
         "patchSetId": 4
@@ -98,6 +188,24 @@
       "writtenOn": "2014-08-27T21:35:33Z",
       "side": 1,
       "message": "I\u0027m wondering if we need to construct a Serializer instance here. I think we could make the Serializer methods static and pass the context around. This would save an object creation.",
+      "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d104594b",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/PathArgumentSerializer.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-28T14:38:24Z",
+      "side": 1,
+      "message": "Can do",
+      "parentUuid": "fa82b9bf_3bb6c6f9",
       "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_f1ff1d32",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/PathArgumentSerializer.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-28T14:38:24Z",
+      "side": 1,
+      "message": "Can do",
+      "parentUuid": "fa82b9bf_dbd0fa20",
+      "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_9b18321f",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/PathArgumentSerializer.java",
         "patchSetId": 4
@@ -132,6 +258,24 @@
       "writtenOn": "2014-08-27T21:35:33Z",
       "side": 1,
       "message": "Really minor thing but you can use Collections.emptyList() to avoid compiler warning.",
+      "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_31ea6574",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/PathArgumentSerializer.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-28T14:38:24Z",
+      "side": 1,
+      "message": "Will do",
+      "parentUuid": "fa82b9bf_9b18321f",
       "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_91fa5141",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/PathArgumentSerializer.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-28T14:38:24Z",
+      "side": 1,
+      "message": "Will fix",
+      "parentUuid": "fa82b9bf_5bd62a29",
+      "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_9befd2e8",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/PathArgumentSerializer.java",
         "patchSetId": 4
@@ -166,6 +328,24 @@
       "writtenOn": "2014-08-27T21:35:33Z",
       "side": 1,
       "message": "Do we need to concat the QName to a String here? It seems we have all the parts necessary to construct a QName instance instead of obtaining from the QNameFactory cache via String representation.",
+      "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5198491b",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/PathArgumentSerializer.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-28T14:38:24Z",
+      "side": 1,
+      "message": "To create a QName you can either use a string or you can pass a URI, Date and String.\n\nBoth of these involve parsing of the string. I figured that creating a concatenating a string with StringBuilder and looking up the QName from the cache would be faster than the parsing.",
+      "parentUuid": "fa82b9bf_9befd2e8",
       "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_9191f1f2",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/PathArgumentType.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-28T14:38:24Z",
+      "side": 1,
+      "message": "I\u0027ve kept them strings for compatibility with the older serialization code. Let me see if I can eliminate the need for using strings here as well.",
+      "parentUuid": "fa82b9bf_9bc6f266",
+      "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_3bad669b",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/ValueType.java",
         "patchSetId": 4
@@ -200,6 +398,24 @@
       "writtenOn": "2014-08-27T21:35:33Z",
       "side": 1,
       "message": "Use Inetger.valueOf() above to avoid Sonar warnings.",
+      "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b18c35d8",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/ValueType.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-28T14:38:24Z",
+      "side": 1,
+      "message": "Will do",
+      "parentUuid": "fa82b9bf_3bad669b",
       "revId": "cd20004c1e4f11c4c6076edf19a67bb678f954d3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
