@@ -52,4 +52,11 @@ public class Neutron_IPs extends ConfigurationObject implements Serializable {
     public void setSubnetUUID(String subnetUUID) {
         this.subnetUUID = subnetUUID;
     }
+
+    @Override
+    public String toString() {
+        return "Neutron_IPs{" +
+               "ipAddress='" + ipAddress + '\'' +
+               ", subnetUUID='" + subnetUUID + '\'' + "}";
+    }
 }
