@@ -9,6 +9,7 @@ package org.opendaylight.controller.md.sal.dom.store.impl;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FutureCallback;
@@ -36,6 +37,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransactio
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
+import org.opendaylight.controller.sal.core.spi.data.statistics.DOMStoreTransactionStatsTracker;
 import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
@@ -94,6 +96,8 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
 
     private final String name;
 
+    private final DOMStoreTransactionStatsTracker txStatsTracker = new DOMStoreTransactionStatsTracker();
+
     private volatile AutoCloseable closeable;
 
     public InMemoryDOMDataStore(final String name, final ExecutorService domStoreExecutor,
@@ -127,6 +131,10 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         return domStoreExecutor;
     }
 
+    public DOMStoreTransactionStatsTracker getDOMStoreTransactionStatsTracker() {
+        return txStatsTracker;
+    }
+
     @Override
     public final String getIdentifier() {
         return name;
@@ -134,17 +142,20 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
 
     @Override
     public DOMStoreReadTransaction newReadOnlyTransaction() {
-        return new SnapshotBackedReadTransaction(nextIdentifier(), dataTree.takeSnapshot());
+        return new SnapshotBackedReadTransaction(nextIdentifier(), dataTree.takeSnapshot(),
+                txStatsTracker);
     }
 
     @Override
     public DOMStoreReadWriteTransaction newReadWriteTransaction() {
-        return new SnapshotBackedReadWriteTransaction(nextIdentifier(), dataTree.takeSnapshot(), this);
+        return new SnapshotBackedReadWriteTransaction(nextIdentifier(), dataTree.takeSnapshot(),
+                this, txStatsTracker);
     }
 
     @Override
     public DOMStoreWriteTransaction newWriteOnlyTransaction() {
-        return new SnapshotBackedWriteTransaction(nextIdentifier(), dataTree.takeSnapshot(), this);
+        return new SnapshotBackedWriteTransaction(nextIdentifier(), dataTree.takeSnapshot(),
+                this, txStatsTracker);
     }
 
     @Override
@@ -242,7 +253,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
             } else {
                 snapshot = dataTree.takeSnapshot();
             }
-            return new SnapshotBackedReadTransaction(nextIdentifier(), snapshot);
+            return new SnapshotBackedReadTransaction(nextIdentifier(), snapshot, txStatsTracker);
         }
 
         @Override
@@ -255,8 +266,8 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
             } else {
                 snapshot = dataTree.takeSnapshot();
             }
-            final SnapshotBackedReadWriteTransaction ret = new SnapshotBackedReadWriteTransaction(nextIdentifier(),
-                    snapshot, this);
+            final SnapshotBackedReadWriteTransaction ret = new SnapshotBackedReadWriteTransaction(
+                    nextIdentifier(), snapshot, this, txStatsTracker);
             latestOutstandingTx = ret;
             return ret;
         }
@@ -271,8 +282,8 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
             } else {
                 snapshot = dataTree.takeSnapshot();
             }
-            final SnapshotBackedWriteTransaction ret = new SnapshotBackedWriteTransaction(nextIdentifier(), snapshot,
-                    this);
+            final SnapshotBackedWriteTransaction ret = new SnapshotBackedWriteTransaction(
+                    nextIdentifier(), snapshot, this, txStatsTracker);
             latestOutstandingTx = ret;
             return ret;
         }
@@ -359,7 +370,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
 
     }
 
-    private class ThreePhaseCommitImpl implements DOMStoreThreePhaseCommitCohort {
+    class ThreePhaseCommitImpl implements DOMStoreThreePhaseCommitCohort {
 
         private final SnapshotBackedWriteTransaction transaction;
         private final DataTreeModification modification;
@@ -367,9 +378,18 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         private ResolveDataChangeEventsTask listenerResolver;
         private DataTreeCandidate candidate;
 
+        private DataTree dataTree;
+
         public ThreePhaseCommitImpl(final SnapshotBackedWriteTransaction writeTransaction) {
             this.transaction = writeTransaction;
             this.modification = transaction.getMutatedView();
+            this.dataTree = InMemoryDOMDataStore.this.dataTree;
+        }
+
+        // For unit tests only!
+        @VisibleForTesting
+        void setDataTree(DataTree newDataTree) {
+            dataTree = newDataTree;
         }
 
         @Override
@@ -382,10 +402,16 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
                         LOG.debug("Store Transaction: {} can be committed", transaction.getIdentifier());
                         return true;
                     } catch (ConflictingModificationAppliedException e) {
+                        InMemoryDOMDataStore.this.txStatsTracker.incrementFailedCommitCount();
+                        InMemoryDOMDataStore.this.txStatsTracker.incrementCanCommitOptimisticLockFailedCount();
+
                         LOG.warn("Store Tx: {} Conflicting modification for {}.", transaction.getIdentifier(),
                                 e.getPath());
                         throw new OptimisticLockFailedException("Optimistic lock failed.",e);
                     } catch (DataValidationFailedException e) {
+                        InMemoryDOMDataStore.this.txStatsTracker.incrementFailedCommitCount();
+                        InMemoryDOMDataStore.this.txStatsTracker.incrementCanCommitDataValidationFailedCount();
+
                         LOG.warn("Store Tx: {} Data Precondition failed for {}.", transaction.getIdentifier(),
                                 e.getPath(), e);
                         throw new TransactionCommitFailedException("Data did not pass validation.",e);
@@ -399,8 +425,15 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
             return listeningExecutor.submit(new Callable<Void>() {
                 @Override
                 public Void call() {
-                    candidate = dataTree.prepare(modification);
-                    listenerResolver = ResolveDataChangeEventsTask.create(candidate, listenerTree);
+                    try {
+                        candidate = dataTree.prepare(modification);
+                        listenerResolver = ResolveDataChangeEventsTask.create(candidate, listenerTree);
+                    } catch(RuntimeException e) {
+                        InMemoryDOMDataStore.this.txStatsTracker.incrementFailedCommitCount();
+                        InMemoryDOMDataStore.this.txStatsTracker.incrementFailedPreCommitCount();
+                        throw e;
+                    }
+
                     return null;
                 }
             });
