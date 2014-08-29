@@ -283,6 +283,24 @@
       "revId": "b0f122b34e03eab693717bace4d258286b774d32",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4f2e60fc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-29T05:43:22Z",
+      "side": 1,
+      "message": "Yeah, I see what you are saying. I dont see any reason why we could not make these public though.\nMy whole point is about maintainability. New contributor may not understand the intent of these sections and may unknowingly misuse it.\nIts not a big deal though. If Tom or you think it wont be a problem then lets leave it here.",
+      "parentUuid": "fa82b9bf_cf7ef018",
+      "revId": "b0f122b34e03eab693717bace4d258286b774d32",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
