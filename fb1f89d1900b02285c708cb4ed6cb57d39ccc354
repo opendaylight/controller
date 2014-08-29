@@ -16,6 +16,24 @@
       "revId": "fb1f89d1900b02285c708cb4ed6cb57d39ccc354",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8af0d691",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-08-29T18:42:55Z",
+      "side": 1,
+      "message": "Like the comment above mentioned: \"Last applied can be equal to lastIndex\"\n\nWhen a follower crashes and comes back up, the last applied and last index can be same. \nSo even though the leader\u0027s commitIndex \u003e followers lastApplied, there are no entries in the followers log to be applied.\nSo a call to applyLogToStateMachine would be waste, if there are no entries to be applied.\n\nAlso i have also changed the applyLogToStateMachine in AbstractRaftBehaviour to set the last applied",
+      "parentUuid": "fa82b9bf_4f4d0099",
+      "revId": "fb1f89d1900b02285c708cb4ed6cb57d39ccc354",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
