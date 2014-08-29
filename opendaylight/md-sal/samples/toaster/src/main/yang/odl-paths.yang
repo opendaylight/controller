@@ -1,0 +1,62 @@
+module parent_test {
+  
+    //Question - why are we choosing this namespace?
+    namespace "urn:ietf:params:xml:ns:yang:parent_test";
+  
+    prefix ptest;
+    
+  //  import ietf-inet-types {
+   //     prefix "inet";
+  //  }
+    
+   // import opendaylight-inventory { prefix inv; revision-date "2013-08-19"; }
+   // import flow-node-inventory { prefix flow-node; revision-date "2013-08-19"; }
+    
+    organization "Brocade Communications Inc.";
+    
+    contact "Brocade ODL group <>";
+    
+    description "This module contains a collection of YANG definitions 
+                 for managing OpenDaylight Paths";
+    
+    revision 2014-06-26 {
+        description "Modified via comments to reduce complexity.";
+    }
+    
+    revision 2014-06-20 {
+        description "Initial revision.";
+    }
+    
+    container root_container {
+        
+        leaf rootAttr{
+        	type string;
+        }
+        
+        list child_list {
+            
+            key "id";
+            
+            leaf id{
+            	type uint32;
+            }
+            
+            leaf string_attr{
+            	type string;
+            }
+            
+			list child_nested_list{
+			 
+			 	key "nested_id";
+			 	
+			 	leaf nested_id{
+			 		type uint32;
+			 	}
+			 	
+			 	leaf string_nested_attr{
+			 		type string;
+			 	}
+			}
+        }
+    }
+}
