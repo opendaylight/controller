@@ -28,8 +28,8 @@ public class ShardWriteTransaction extends ShardTransaction {
     private final DOMStoreWriteTransaction transaction;
 
     public ShardWriteTransaction(DOMStoreWriteTransaction transaction, ActorRef shardActor,
-            SchemaContext schemaContext) {
-        super(shardActor, schemaContext);
+            SchemaContext schemaContext,ShardContext shardContext) {
+        super(shardActor, schemaContext,shardContext );
         this.transaction = transaction;
     }
 

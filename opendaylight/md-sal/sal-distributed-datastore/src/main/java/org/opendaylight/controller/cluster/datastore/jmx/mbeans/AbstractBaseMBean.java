@@ -24,7 +24,7 @@ import java.lang.management.ManagementFactory;
 /**
  * All MBeans should extend this class that help in registering and
  * unregistering the MBeans.
- *
+ * @author Basheeruddin <syedbahm@cisco.com>
  */
 
 

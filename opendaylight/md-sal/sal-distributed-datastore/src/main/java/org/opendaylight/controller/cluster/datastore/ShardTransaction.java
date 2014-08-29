@@ -13,11 +13,10 @@ import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.ReceiveTimeout;
 import akka.japi.Creator;
-
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
-
 import org.opendaylight.controller.cluster.datastore.exceptions.UnknownMessageException;
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardMBeanFactory;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
@@ -74,12 +73,16 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
 
     private final ActorRef shardActor;
     protected final SchemaContext schemaContext;
+    private final ShardContext shardContext;
+
 
     private final MutableCompositeModification modification = new MutableCompositeModification();
 
-    protected ShardTransaction(ActorRef shardActor, SchemaContext schemaContext) {
+    protected ShardTransaction(ActorRef shardActor, SchemaContext schemaContext,
+        ShardContext shardContext) {
         this.shardActor = shardActor;
         this.schemaContext = schemaContext;
+        this.shardContext = shardContext;
     }
 
     public static Props props(DOMStoreTransaction transaction, ActorRef shardActor,
@@ -134,7 +137,8 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
                         sender.tell(new ReadDataReply(schemaContext,null).toSerializable(), self);
                     }
                 } catch (Exception e) {
-                    sender.tell(new akka.actor.Status.Failure(e),self);
+                    ShardMBeanFactory.getShardStatsMBean(shardContext.getShardName()).incrementFailedReadTransactionsCount();
+                    sender.tell(new akka.actor.Status.Failure(e), self);
                 }
 
             }
@@ -192,7 +196,7 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
     protected void readyTransaction(DOMStoreWriteTransaction transaction, ReadyTransaction message) {
         DOMStoreThreePhaseCommitCohort cohort =  transaction.ready();
         ActorRef cohortActor = getContext().actorOf(
-                ThreePhaseCommitCohort.props(cohort, shardActor, modification), "cohort");
+            ThreePhaseCommitCohort.props(cohort, shardActor, modification, shardContext), "cohort");
         getSender()
         .tell(new ReadyTransactionReply(cohortActor.path()).toSerializable(), getSelf());
 
@@ -220,13 +224,13 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
             ShardTransaction tx;
             if(transaction instanceof DOMStoreReadWriteTransaction) {
                 tx = new ShardReadWriteTransaction((DOMStoreReadWriteTransaction)transaction,
-                        shardActor, schemaContext);
+                        shardActor, schemaContext,shardContext);
             } else if(transaction instanceof DOMStoreReadTransaction) {
                 tx = new ShardReadTransaction((DOMStoreReadTransaction)transaction, shardActor,
-                        schemaContext);
+                        schemaContext,shardContext);
             } else {
                 tx = new ShardWriteTransaction((DOMStoreWriteTransaction)transaction,
-                        shardActor, schemaContext);
+                        shardActor, schemaContext,shardContext);
             }
 
             tx.getContext().setReceiveTimeout(shardContext.getShardTransactionIdleTimeout());

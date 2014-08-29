@@ -117,6 +117,7 @@ public class Shard extends RaftActor {
                 shardContext.getDataStoreProperties());
 
         shardMBean = ShardMBeanFactory.getShardStatsMBean(name.toString());
+        shardContext.setShardName(name.toString());
 
     }
 

@@ -32,4 +32,10 @@ public interface ShardStatsMBean {
 
     Long getFailedTransactionsCount();
 
+    Long getFailedReadTransactionsCount();
+
+    Long getAbortTransactionsCount();
+
+    void resetTransactionCounters();
+
 }
