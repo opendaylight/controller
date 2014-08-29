@@ -8,27 +8,33 @@
  */
 package org.opendaylight.controller.md.sal.xpath;
 
-import org.w3c.dom.Element;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
-public class NodeBuilderText extends ThrowExceptionText {
-    Node parent;
-    Node nextSibling;
-    String nodeValue;
+/**
+ * Defines a NormalizedNode implementations that represents a string or text field.
+ * @author Devin Avery
+ * @author Neel Bommisetty
+ *
+ */
+public class NormalizedNodeProxy extends ThrowExceptionNode implements XPathNodeProxy {
+    private final Node parent;
+    private final NormalizedNode<?,?> nodeToProxy;
 
-    public NodeBuilderText(String Nodevalue, Element parentNode,
-            Node nextsibling) {
-
-        nodeValue = Nodevalue;
+    public NormalizedNodeProxy(NormalizedNode<?,?> nodeValue, Node parentNode ) {
+        this.nodeToProxy = nodeValue;
         parent = parentNode;
-        nextSibling = nextsibling;
     }
 
     @Override
     public short getNodeType() {
         return Node.TEXT_NODE;
+    }
 
+    @Override
+    public NormalizedNode<?, ?> getProxiedNode() {
+        return nodeToProxy;
     }
 
     @Override
@@ -38,13 +44,12 @@ public class NodeBuilderText extends ThrowExceptionText {
 
     @Override
     public String getNodeValue() {
-        return nodeValue;
+        return nodeToProxy.getValue().toString();
     }
 
     @Override
     public String getNamespaceURI() {
         return null;
-
     }
 
     @Override
@@ -59,7 +64,6 @@ public class NodeBuilderText extends ThrowExceptionText {
 
     @Override
     public String getNodeName() {
-
         return "#text";
     }
 
@@ -70,12 +74,12 @@ public class NodeBuilderText extends ThrowExceptionText {
 
     @Override
     public String getLocalName() {
-        return "#text";
+        return null;//this.getNodeName();
     }
 
     @Override
     public Node getNextSibling() {
-        return nextSibling;
+        return null;
     }
 
     @Override
@@ -84,15 +88,14 @@ public class NodeBuilderText extends ThrowExceptionText {
         return null;
     }
 
-    @Override
-    public Node getLastChild() {
-
-        return null;
-    }
+//    @Override
+//    public Node getLastChild() {
+//
+//        return null;
+//    }
 
     @Override
     public String getTextContent() {
-        return nodeValue;
-
+        return getNodeValue();
     }
 }

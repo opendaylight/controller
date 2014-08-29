@@ -1,0 +1,60 @@
+module opendaylight-simple-container-and-list-test {
+
+    namespace "opendaylight:xpath:test:simple:list";
+    prefix list-test;
+
+
+    description
+        "This module contains a collection of YANG definitions used for
+        some test cases.";
+
+    revision 2014-08-25 {
+        description
+        "Test model for testing data broker with nested lists.";
+    }
+
+	grouping top-container-grouping {
+		 leaf topLeafString{
+           type string;
+        }
+        
+		list unorderList{
+		    leaf-list unorderLeafList{
+		         type string;
+		    }
+		}
+		
+		leaf-list userOrderedList{
+            type string;
+            ordered-by user;
+		}
+		
+		list orderedList {
+			key "orderedListKey";
+            leaf orderedListKey {
+                type string;
+            }
+            
+            leaf-list orderedListNestedList{
+                type string;
+                ordered-by user;
+    		}
+            
+		}
+        
+        container childContainer{
+        	
+        	leaf childContainerLeafString{
+        	   type string;
+        	}
+        }
+        
+	}
+
+    container topContainer {
+        uses top-container-grouping;
+       
+        
+    }
+
+}

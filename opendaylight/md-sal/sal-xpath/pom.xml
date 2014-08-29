@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
@@ -7,88 +8,107 @@
     <version>1.1-SNAPSHOT</version>
   </parent>
   <artifactId>sal-xpath</artifactId>
-
-   <packaging>bundle</packaging>
-   <name>sal-xpath</name>
-   <description>xpath for md-sal</description>
-   <version>0.1-SNAPSHOT</version>
+  <packaging>bundle</packaging>
+  <name>sal-xpath</name>
+  <description>xpath for md-sal</description>
+  <version>0.1-SNAPSHOT</version>
   <dependencies>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-binding-it</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller.samples</groupId>
-      <artifactId>sample-toaster</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller.samples</groupId>
-      <artifactId>sample-toaster-consumer</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.opendaylight.controller.samples</groupId>
-      <artifactId>sample-toaster-provider</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.openexi</groupId>
-      <artifactId>nagasena</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.openexi</groupId>
-      <artifactId>nagasena-rta</artifactId>
-    </dependency>
-     <dependency>
-           <groupId>org.opendaylight.yangtools</groupId>
-           <artifactId>yang-data-api</artifactId>
-       </dependency>
-    <dependency>
-      <groupId>equinoxSDK381</groupId>
-      <artifactId>org.eclipse.osgi</artifactId>
+      <artifactId>sal-test-model</artifactId>
+      <groupId>org.opendaylight.controller</groupId>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam-container-native</artifactId>
-      <version>${exam.version}</version>
+      <artifactId>sal-rest-connector</artifactId>
+      <groupId>org.opendaylight.controller</groupId>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-binding-broker-impl</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-binding-broker-impl</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+    <!-- <dependency> <groupId>org.openexi</groupId> <artifactId>nagasena</artifactId>
+      </dependency> <dependency> <groupId>org.openexi</groupId> <artifactId>nagasena-rta</artifactId>
+      </dependency> -->
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-data-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-binding</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-common</artifactId>
     </dependency>
   </dependencies>
-
   <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <executions>
+            <execution>
+              <goals>
+                <goal>test-jar</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <version>1.8</version>
+          <executions>
+            <execution>
+              <id>add-source</id>
+              <phase>generate-sources</phase>
+              <goals>
+                <goal>add-source</goal>
+              </goals>
+              <configuration>
+                <sources>
+                  <source>src/test/yang</source>
+                  <source>src/test/yang-gen-sal</source>
+                </sources>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>2.4.1</version>
+          <configuration>
+            <filesets>
+              <fileset>
+                <directory>src/test/yang-gen-sal</directory>
+                <includes>
+                  <include>**</include>
+                </includes>
+              </fileset>
+            </filesets>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
     <plugins>
-               <plugin>
-                   <groupId>org.eclipse.m2e</groupId>
-                   <artifactId>lifecycle-mapping</artifactId>
-                   <version>1.0.0</version>
-                   <configuration>
-                       <lifecycleMappingMetadata>
-                           <pluginExecutions>
-                               <pluginExecution>
-                                   <pluginExecutionFilter>
-                                       <groupId>
-                                           org.opendaylight.controller
-                                       </groupId>
-                                       <artifactId>
-                                           yang-maven-plugin
-                                       </artifactId>
-                                       <versionRange>
-                                           [0.5,)
-                                       </versionRange>
-                                       <goals>
-                                           <goal>
-                                               generate-sources
-                                           </goal>
-                                       </goals>
-                                   </pluginExecutionFilter>
-                                   <action>
-                                       <ignore></ignore>
-                                   </action>
-                               </pluginExecution>
-                           </pluginExecutions>
-                       </lifecycleMappingMetadata>
-                   </configuration>
-               </plugin>
     </plugins>
   </build>
   <scm>
