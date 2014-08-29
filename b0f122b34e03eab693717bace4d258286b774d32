@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_6f0b24d6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStore.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-29T01:39:22Z",
+      "side": 1,
+      "message": "I actually moved it into the ActorContext.",
+      "parentUuid": "fa82b9bf_94323ff0",
+      "revId": "b0f122b34e03eab693717bace4d258286b774d32",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_14b5cf7c",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
         "patchSetId": 9
@@ -48,6 +66,24 @@
       "side": 1,
       "message": "This is used by a test to get to the composite modification. The objective is to get to the state accumulated in the transaction so that we can verify that it\u0027s been properly populated.",
       "parentUuid": "fa82b9bf_14b5cf7c",
+      "revId": "b0f122b34e03eab693717bace4d258286b774d32",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6f3244a8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-29T01:39:22Z",
+      "side": 1,
+      "message": "This was existing code - same below. They show as changed because I corrected the indentation.  I really should have done that in a different patch to make review easier - sorry about that. In a previous first patch set I had noted with inline comments which lines were just indentation changes but of course that gets lost once subsequent ones are submitted.",
+      "parentUuid": "fa82b9bf_4f850058",
       "revId": "b0f122b34e03eab693717bace4d258286b774d32",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
