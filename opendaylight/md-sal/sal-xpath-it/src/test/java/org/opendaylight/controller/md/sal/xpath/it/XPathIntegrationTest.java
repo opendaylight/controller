@@ -52,7 +52,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.xpath.NodeBuilderElement;
+import org.opendaylight.controller.md.sal.xpath.NormalizedNodeElement;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -72,7 +72,7 @@ import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 
 @RunWith(PaxExam.class)
-public class ToasterTest {
+public class XPathIntegrationTest {
 
     XPath xpath;
 
@@ -119,7 +119,7 @@ public class ToasterTest {
         CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read2 = readTx2
                 .read(LogicalDatastoreType.OPERATIONAL, build);
         NormalizedNode<?, ?> normalizedNode = read2.get().get();
-        rootTestNode = new NodeBuilderElement(normalizedNode, null);
+        rootTestNode = new NormalizedNodeElement(normalizedNode, null);
 
     }
 

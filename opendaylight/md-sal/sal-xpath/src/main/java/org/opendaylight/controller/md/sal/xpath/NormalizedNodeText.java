@@ -12,12 +12,12 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
-public class NodeBuilderText extends ThrowExceptionText {
+public class NormalizedNodeText extends ThrowExceptionText {
     Node parent;
     Node nextSibling;
     String nodeValue;
 
-    public NodeBuilderText(String Nodevalue, Element parentNode,
+    public NormalizedNodeText(String Nodevalue, Element parentNode,
             Node nextsibling) {
 
         nodeValue = Nodevalue;
