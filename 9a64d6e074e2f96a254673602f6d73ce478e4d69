@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_4ab96eca",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 250,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-08-29T18:38:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_8e2c719a",
+      "revId": "9a64d6e074e2f96a254673602f6d73ce478e4d69",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_ee3c1dca",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
         "patchSetId": 2
@@ -47,6 +65,24 @@
       "writtenOn": "2014-08-27T11:10:10Z",
       "side": 1,
       "message": "The toObject operation may be expensive - it may need to be made asynchronous as well.",
+      "revId": "9a64d6e074e2f96a254673602f6d73ce478e4d69",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6abc72bb",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-08-29T18:38:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_ee3c1dca",
       "revId": "9a64d6e074e2f96a254673602f6d73ce478e4d69",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -70,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_0aafe67d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-08-29T18:38:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_6e500d0b",
+      "revId": "9a64d6e074e2f96a254673602f6d73ce478e4d69",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_4e598933",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
         "patchSetId": 2
@@ -81,6 +135,24 @@
       "writtenOn": "2014-08-27T11:10:10Z",
       "side": 1,
       "message": "Is a there a more specific exception that we could catch?",
+      "revId": "9a64d6e074e2f96a254673602f6d73ce478e4d69",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_eac72243",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-08-29T18:38:34Z",
+      "side": 1,
+      "message": "Wanted to ensure that in the if there is any exception during bytestring concat, we should be sending an InstallSanpshotReply with failure status.",
+      "parentUuid": "fa82b9bf_4e598933",
       "revId": "9a64d6e074e2f96a254673602f6d73ce478e4d69",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -104,6 +176,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_4ae08ecc",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-08-29T18:38:34Z",
+      "side": 1,
+      "message": "Will rename it to sendAppendEntriesAndSanpshots.",
+      "parentUuid": "fa82b9bf_8e7a3186",
+      "revId": "9a64d6e074e2f96a254673602f6d73ce478e4d69",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_ce44b948",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
         "patchSetId": 2
@@ -121,6 +211,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_cad33e02",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 319,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-08-29T18:38:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_ce44b948",
+      "revId": "9a64d6e074e2f96a254673602f6d73ce478e4d69",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_6e77ada0",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
         "patchSetId": 2
@@ -132,6 +240,24 @@
       "writtenOn": "2014-08-27T11:10:10Z",
       "side": 1,
       "message": "didn\u0027t understand the comment \"if the follower is just not starting\"",
+      "revId": "9a64d6e074e2f96a254673602f6d73ce478e4d69",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_aad4bae8",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-08-29T18:38:34Z",
+      "side": 1,
+      "message": "At the start, the followersNextIndex \u003d  -1. And leadersLastIndex will be \u003e than -1.  In order to avoid Snapshots being sent , introduced the check  followerNextIndex \u003e\u003d 0. \nMaybe i need to reword the comment.",
+      "parentUuid": "fa82b9bf_6e77ada0",
       "revId": "9a64d6e074e2f96a254673602f6d73ce478e4d69",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
