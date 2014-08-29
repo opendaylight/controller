@@ -1,0 +1,23 @@
+<topContainer xmlns="opendaylight:xpath:test:simple:list">
+    <childContainer>
+        <childContainerLeafString>childContainerLeaf</childContainerLeafString>
+    </childContainer>
+    <unorderList>
+        <unorderLeafList>second</unorderLeafList>
+        <unorderLeafList>first</unorderLeafList>
+    </unorderList>
+    <unorderList>
+        <unorderLeafList>third</unorderLeafList>
+        <unorderLeafList>forth</unorderLeafList>
+    </unorderList>
+    <topLeafString>topLeaf</topLeafString>
+    <orderedList>
+        <orderedListKey>key 1</orderedListKey>
+        <orderedListNestedList>1</orderedListNestedList>
+        <orderedListNestedList>2</orderedListNestedList>
+        <orderedListNestedList>3</orderedListNestedList>
+    </orderedList>
+    <userOrderedList>8</userOrderedList>
+    <userOrderedList>7</userOrderedList>
+    <userOrderedList>9</userOrderedList>
+</topContainer>
