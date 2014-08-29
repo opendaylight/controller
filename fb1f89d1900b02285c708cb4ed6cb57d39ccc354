@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_4f4d0099",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-29T11:43:36Z",
+      "side": 1,
+      "message": "Kamal, why do we need to check if lastApplied is \u003c lastIndex?",
+      "revId": "fb1f89d1900b02285c708cb4ed6cb57d39ccc354",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
