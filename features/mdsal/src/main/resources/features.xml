@@ -10,9 +10,9 @@
     <repository>mvn:org.opendaylight.controller/features-akka/${commons.opendaylight.version}/xml/features</repository>
     <feature name='odl-mdsal-all' version='${project.version}' description="OpenDaylight :: MDSAL :: All">
         <feature version='${project.version}'>odl-mdsal-broker</feature>
+        <feature version='${project.version}'>odl-mdsal-clustering</feature>
         <feature version='${project.version}'>odl-restconf</feature>
         <feature version='${project.version}'>odl-mdsal-xsql</feature>
-        <feature version='${project.version}'>odl-mdsal-clustering</feature>
         <feature version='${project.version}'>odl-toaster</feature>
     </feature>
     <feature name='odl-mdsal-broker' version='${project.version}' description="OpenDaylight :: MDSAL :: Broker">
