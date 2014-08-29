@@ -9,9 +9,9 @@
 package org.opendaylight.controller.cluster.example.messages;
 
 import com.google.protobuf.GeneratedMessage;
-import org.opendaylight.controller.cluster.example.protobuff.messages.KeyValueMessages;
+import org.opendaylight.controller.protobuff.messages.cluster.example.KeyValueMessages;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
-import org.opendaylight.controller.cluster.raft.protobuff.messages.AppendEntriesMessages;
+import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
 
 import java.io.Serializable;
 import java.util.HashMap;

@@ -2,7 +2,7 @@ package org.opendaylight.controller.cluster.raft;
 
 import "AppendEntriesMessages.proto";
 
-option java_package = "org.opendaylight.controller.cluster.example.protobuff.messages";
+option java_package = "org.opendaylight.controller.protobuff.messages.cluster.example";
 option java_outer_classname = "KeyValueMessages";
 option optimize_for = SPEED;
 

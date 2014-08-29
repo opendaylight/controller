@@ -12,7 +12,46 @@
 
   <packaging>bundle</packaging>
 
-  <dependencies>
+    <dependencies>
+
+    <dependency>
+        <groupId>com.typesafe.akka</groupId>
+        <artifactId>akka-actor_${scala.version}</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>com.typesafe.akka</groupId>
+        <artifactId>akka-cluster_${scala.version}</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>com.typesafe.akka</groupId>
+        <artifactId>akka-persistence-experimental_${scala.version}</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>com.typesafe.akka</groupId>
+        <artifactId>akka-remote_${scala.version}</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>com.typesafe.akka</groupId>
+        <artifactId>akka-testkit_${scala.version}</artifactId>
+    </dependency>
+
+
+    <dependency>
+        <groupId>org.scala-lang</groupId>
+        <artifactId>scala-library</artifactId>
+    </dependency>
+
+
+    <dependency>
+        <groupId>com.typesafe.akka</groupId>
+        <artifactId>akka-slf4j_${scala.version}</artifactId>
+    </dependency>
+
+
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
       <artifactId>jsr305</artifactId>
@@ -119,11 +158,6 @@
           <artifactId>yang-binding</artifactId>
       </dependency>
 
-      <dependency>
-          <groupId>org.opendaylight.controller</groupId>
-          <artifactId>sal-akka-raft</artifactId>
-          <version>1.1-SNAPSHOT</version>
-      </dependency>
 
       <dependency>
           <groupId>com.google.guava</groupId>
