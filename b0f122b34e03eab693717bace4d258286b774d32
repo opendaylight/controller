@@ -121,6 +121,24 @@
       "revId": "b0f122b34e03eab693717bace4d258286b774d32",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8f5308e1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-29T01:09:20Z",
+      "side": 1,
+      "message": "Sure I wouldn\u0027t hold up the review for this either. We should move these classes to messages packages if they are to stay.",
+      "parentUuid": "fa82b9bf_afb28c46",
+      "revId": "b0f122b34e03eab693717bace4d258286b774d32",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
