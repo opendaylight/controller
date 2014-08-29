@@ -8,30 +8,29 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
-import java.util.concurrent.TimeUnit;
-
-import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
 import com.google.common.base.Preconditions;
-
+import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
 import scala.concurrent.duration.Duration;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Contains contextual data for shards.
  *
  * @author Thomas Pantelis
  */
-public class ShardContext {
+public class DatastoreContext {
 
     private final InMemoryDOMDataStoreConfigProperties dataStoreProperties;
     private final Duration shardTransactionIdleTimeout;
 
-    public ShardContext() {
+    public DatastoreContext() {
         this.dataStoreProperties = null;
         this.shardTransactionIdleTimeout = Duration.create(10, TimeUnit.MINUTES);
     }
 
-    public ShardContext(InMemoryDOMDataStoreConfigProperties dataStoreProperties,
-            Duration shardTransactionIdleTimeout) {
+    public DatastoreContext(InMemoryDOMDataStoreConfigProperties dataStoreProperties,
+        Duration shardTransactionIdleTimeout) {
         this.dataStoreProperties = Preconditions.checkNotNull(dataStoreProperties);
         this.shardTransactionIdleTimeout = Preconditions.checkNotNull(shardTransactionIdleTimeout);
     }
@@ -43,4 +42,6 @@ public class ShardContext {
     public Duration getShardTransactionIdleTimeout() {
         return shardTransactionIdleTimeout;
     }
+
+
 }

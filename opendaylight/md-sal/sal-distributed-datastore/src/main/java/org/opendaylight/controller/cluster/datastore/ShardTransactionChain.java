@@ -25,14 +25,16 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 public class ShardTransactionChain extends AbstractUntypedActor {
 
     private final DOMStoreTransactionChain chain;
-    private final ShardContext shardContext;
+    private final DatastoreContext datastoreContext;
     private final SchemaContext schemaContext;
+    private final String shardName;
 
     public ShardTransactionChain(DOMStoreTransactionChain chain, SchemaContext schemaContext,
-            ShardContext shardContext) {
+            DatastoreContext datastoreContext,String shardName) {
         this.chain = chain;
-        this.shardContext = shardContext;
+        this.datastoreContext = datastoreContext;
         this.schemaContext = schemaContext;
+        this.shardName = shardName;
     }
 
     @Override
@@ -58,17 +60,17 @@ public class ShardTransactionChain extends AbstractUntypedActor {
                 TransactionProxy.TransactionType.READ_ONLY.ordinal()) {
             return getContext().actorOf(
                     ShardTransaction.props( chain.newReadOnlyTransaction(), getShardActor(),
-                            schemaContext, shardContext), transactionId);
+                            schemaContext, datastoreContext,shardName), transactionId);
         } else if (createTransaction.getTransactionType() ==
                 TransactionProxy.TransactionType.READ_WRITE.ordinal()) {
             return getContext().actorOf(
                     ShardTransaction.props( chain.newReadWriteTransaction(), getShardActor(),
-                            schemaContext, shardContext), transactionId);
+                            schemaContext, datastoreContext,shardName), transactionId);
         } else if (createTransaction.getTransactionType() ==
                 TransactionProxy.TransactionType.WRITE_ONLY.ordinal()) {
             return getContext().actorOf(
                     ShardTransaction.props( chain.newWriteOnlyTransaction(), getShardActor(),
-                            schemaContext, shardContext), transactionId);
+                            schemaContext, datastoreContext,shardName), transactionId);
         } else {
             throw new IllegalArgumentException (
                     "CreateTransaction message has unidentified transaction type=" +
@@ -85,27 +87,30 @@ public class ShardTransactionChain extends AbstractUntypedActor {
     }
 
     public static Props props(DOMStoreTransactionChain chain, SchemaContext schemaContext,
-            ShardContext shardContext) {
-        return Props.create(new ShardTransactionChainCreator(chain, schemaContext, shardContext));
+        DatastoreContext datastoreContext, String shardName) {
+        return Props.create(new ShardTransactionChainCreator(chain, schemaContext, datastoreContext, shardName));
     }
 
     private static class ShardTransactionChainCreator implements Creator<ShardTransactionChain> {
         private static final long serialVersionUID = 1L;
 
         final DOMStoreTransactionChain chain;
-        final ShardContext shardContext;
+        final DatastoreContext datastoreContext;
         final SchemaContext schemaContext;
+        final String shardName;
+
 
         ShardTransactionChainCreator(DOMStoreTransactionChain chain, SchemaContext schemaContext,
-                ShardContext shardContext) {
+            DatastoreContext datastoreContext, String shardName) {
             this.chain = chain;
-            this.shardContext = shardContext;
+            this.datastoreContext = datastoreContext;
             this.schemaContext = schemaContext;
+            this.shardName = shardName;
         }
 
         @Override
         public ShardTransactionChain create() throws Exception {
-            return new ShardTransactionChain(chain, schemaContext, shardContext);
+            return new ShardTransactionChain(chain, schemaContext, datastoreContext,shardName);
         }
     }
 }

@@ -6,30 +6,36 @@ package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
 public interface ShardStatsMBean {
     String getShardName();
 
-    Long getCommittedTransactionsCount();
+    long getCommittedTransactionsCount();
 
     String getLeader();
 
     String getRaftState();
 
-    Long getReadOnlyTransactionCount();
+    long getReadOnlyTransactionCount();
 
-    Long getWriteOnlyTransactionCount();
+    long getWriteOnlyTransactionCount();
 
-    Long getReadWriteTransactionCount();
+    long getReadWriteTransactionCount();
 
-    Long getLastLogIndex();
+    long getLastLogIndex();
 
-    Long getLastLogTerm();
+    long getLastLogTerm();
 
-    Long getCurrentTerm();
+    long getCurrentTerm();
 
-    Long getCommitIndex();
+    long getCommitIndex();
 
-    Long getLastApplied();
+    long getLastApplied();
 
     String getLastCommittedTransactionTime();
 
-    Long getFailedTransactionsCount();
+    long getFailedTransactionsCount();
+
+    long getFailedReadTransactionsCount();
+
+    long getAbortTransactionsCount();
+
+    void resetTransactionCounters();
 
 }

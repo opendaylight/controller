@@ -42,7 +42,7 @@ public class ShardManagerTest {
         new JavaTestKit(system) {{
             final Props props = ShardManager
                 .props("config", new MockClusterWrapper(),
-                    new MockConfiguration(), new ShardContext());
+                    new MockConfiguration(), new DatastoreContext());
             final TestActorRef<ShardManager> subject =
                 TestActorRef.create(system, props);
 
@@ -67,7 +67,7 @@ public class ShardManagerTest {
         new JavaTestKit(system) {{
             final Props props = ShardManager
                 .props("config", new MockClusterWrapper(),
-                    new MockConfiguration(), new ShardContext());
+                    new MockConfiguration(), new DatastoreContext());
             final TestActorRef<ShardManager> subject =
                 TestActorRef.create(system, props);
 
@@ -91,7 +91,7 @@ public class ShardManagerTest {
         new JavaTestKit(system) {{
             final Props props = ShardManager
                 .props("config", new MockClusterWrapper(),
-                    new MockConfiguration(), new ShardContext());
+                    new MockConfiguration(), new DatastoreContext());
             final TestActorRef<ShardManager> subject =
                 TestActorRef.create(system, props);
 
@@ -128,7 +128,7 @@ public class ShardManagerTest {
         new JavaTestKit(system) {{
             final Props props = ShardManager
                 .props("config", mockClusterWrapper,
-                    new MockConfiguration(), new ShardContext());
+                    new MockConfiguration(), new DatastoreContext());
             final TestActorRef<ShardManager> subject =
                 TestActorRef.create(system, props);
 
@@ -164,7 +164,7 @@ public class ShardManagerTest {
         new JavaTestKit(system) {{
             final Props props = ShardManager
                 .props("config", new MockClusterWrapper(),
-                    new MockConfiguration(), new ShardContext());
+                    new MockConfiguration(), new DatastoreContext());
             final TestActorRef<ShardManager> subject =
                 TestActorRef.create(system, props);
 
@@ -204,7 +204,7 @@ public class ShardManagerTest {
         new JavaTestKit(system) {{
             final Props props = ShardManager
                 .props("config", new MockClusterWrapper(),
-                    new MockConfiguration(), new ShardContext());
+                    new MockConfiguration(), new DatastoreContext());
             final TestActorRef<ShardManager> subject =
                 TestActorRef.create(system, props);
 
