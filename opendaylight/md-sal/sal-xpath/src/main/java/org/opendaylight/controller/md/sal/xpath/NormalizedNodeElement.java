@@ -22,32 +22,32 @@ import com.google.common.collect.Iterators;
 /*
  *
  */
-public class NodeBuilderElement extends NewElement {
+public class NormalizedNodeElement extends ThrowExceptionElement {
 
     boolean hasChildren;
     NormalizedNode<?, ?> node;
-    NodeBuilderElement parent;
+    NormalizedNodeElement parent;
 
-    NodeBuilderElement lastChild;
-    NodeBuilderElement[] Children;
+    NormalizedNodeElement lastChild;
+    NormalizedNodeElement[] Children;
 
     boolean isFirstInit = false;
     Node firstChild;
 
     boolean isFirstSiblingInit = false;
-    NodeBuilderElement nextSibling;
+    NormalizedNodeElement nextSibling;
     @SuppressWarnings("rawtypes")
     Iterator iterator;
 
-    public NodeBuilderElement(NormalizedNode<?, ?> node1,
-            NodeBuilderElement parent1) {
+    public NormalizedNodeElement(NormalizedNode<?, ?> node1,
+            NormalizedNodeElement parent1) {
         node = node1;
         parent = parent1;
 
     }
 
     @SuppressWarnings("rawtypes")
-    NodeBuilderElement(NormalizedNode<?, ?> nodeDelegate,NodeBuilderElement parentNode,Iterator nextSib) {
+    NormalizedNodeElement(NormalizedNode<?, ?> nodeDelegate,NormalizedNodeElement parentNode,Iterator nextSib) {
         // store nodeDelegate to class variable
         // store parent to class variable.
         // store the iterator to the next sibling
@@ -86,7 +86,7 @@ public class NodeBuilderElement extends NewElement {
 
     @Override
     public NamedNodeMap getAttributes() {
-        return new NamedNodeMapImpl();
+        return NamedNodeMapImpl.EMPTY_MAP;
     }
 
     @Override
@@ -115,7 +115,7 @@ public class NodeBuilderElement extends NewElement {
             // cache the node builder element to first child
 
             if (iterator.hasNext()) {
-                nextSibling = new NodeBuilderElement((NormalizedNode<?, ?>) iterator.next(), this,this.iterator);
+                nextSibling = new NormalizedNodeElement((NormalizedNode<?, ?>) iterator.next(), this,this.iterator);
             }
             isFirstSiblingInit = true;
 
@@ -134,7 +134,7 @@ public class NodeBuilderElement extends NewElement {
             {
               //  System.out.println("The node is "+ this.getNodeName());
               //  System.out.println("The above node is either leaf node or leafsetentry node");
-                firstChild = new NodeBuilderText(node.getValue().toString(),this,null);
+                firstChild = new NormalizedNodeText(node.getValue().toString(),this,null);
             }
             else if(node instanceof org.opendaylight.yangtools.yang.data.api.schema.UnkeyedListNode )
             {
@@ -150,7 +150,7 @@ public class NodeBuilderElement extends NewElement {
 
                     Iterator<DataContainerChild<? extends PathArgument, ?>> Childiterator = dataContainerNode
                             .getValue().iterator();
-                    firstChild = new NodeBuilderElement((NormalizedNode<?, ?>) iterator.next(), this,
+                    firstChild = new NormalizedNodeElement((NormalizedNode<?, ?>) iterator.next(), this,
                             Childiterator);
                     this.iterator=Iterators.concat(listiter,this.iterator);
                   //  System.out.println("its first child is "+ firstChild.getNodeName());
@@ -165,7 +165,7 @@ public class NodeBuilderElement extends NewElement {
 
                 Iterator<NormalizedNode<?,?>>listiter = list.iterator();
 
-                    firstChild = new NodeBuilderText(listiter.next().getValue().toString(),this, null);
+                    firstChild = new NormalizedNodeText(listiter.next().getValue().toString(),this, null);
                     //TypeConflict here
                      this.iterator=Iterators.concat(listiter,this.iterator);
                 //     System.out.println("its first child is "+ firstChild.getNodeName());
@@ -190,7 +190,7 @@ public class NodeBuilderElement extends NewElement {
                  }
                 else
                 {*/
-                firstChild = new NodeBuilderElement(something, this,
+                firstChild = new NormalizedNodeElement(something, this,
                         dataiterator);
                // }
               }
