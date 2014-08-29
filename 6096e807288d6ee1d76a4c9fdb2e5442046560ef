@@ -1,0 +1,94 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_efce5459",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/PathArgumentSerializer.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-29T05:15:56Z",
+      "side": 1,
+      "message": "Basically this was a way for me to avoid having to write if else to check the type of the class and then executing some code. This makes it a quick lookup in a map and execution of a function. Is it harder to read?",
+      "parentUuid": "fa82b9bf_2ff51cec",
+      "revId": "6096e807288d6ee1d76a4c9fdb2e5442046560ef",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8fd9c823",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/PathArgumentSerializer.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-29T05:15:56Z",
+      "side": 1,
+      "message": "QName could be because as per the contract it\u0027s optional. However in reality it will not be because when we serialize we atleast set it to a default instance. I will add a null check just in case.",
+      "parentUuid": "fa82b9bf_cfdfd067",
+      "revId": "6096e807288d6ee1d76a4c9fdb2e5442046560ef",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_afd4cce8",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/ValueSerializer.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-29T05:15:56Z",
+      "side": 1,
+      "message": "yes it does will remove.",
+      "parentUuid": "fa82b9bf_6fd6c450",
+      "revId": "6096e807288d6ee1d76a4c9fdb2e5442046560ef",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4f074082",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/resources/Common.proto",
+        "patchSetId": 7
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-29T05:15:56Z",
+      "side": 1,
+      "message": "The intent in this patch was to add the new serialization and in a subsequent patch to cleanup what was not used. So yes this will go away.",
+      "parentUuid": "fa82b9bf_8fbc6807",
+      "revId": "6096e807288d6ee1d76a4c9fdb2e5442046560ef",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6f0a448b",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/test/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/Main.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-29T05:15:56Z",
+      "side": 1,
+      "message": "It is covered in a test case. I think I\u0027ll just remove this.",
+      "parentUuid": "fa82b9bf_2f43dc13",
+      "revId": "6096e807288d6ee1d76a4c9fdb2e5442046560ef",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
