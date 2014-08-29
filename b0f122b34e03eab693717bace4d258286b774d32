@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_2f843c09",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStore.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-29T02:48:14Z",
+      "side": 1,
+      "message": "Yes but ActorContext is not passed to Shard. The message was supposed to be the way to send a schema context update to all Shards that were local to the ShardManager. Earlier you had put it in ShardContext and that was available to Shard that way but when you reverted back not having SchemaContext in ShardContext looks like this was forgotten.",
+      "parentUuid": "fa82b9bf_6f0b24d6",
+      "revId": "b0f122b34e03eab693717bace4d258286b774d32",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_efe4140e",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
         "patchSetId": 9
@@ -244,6 +262,24 @@
       "side": 1,
       "message": "Sure I wouldn\u0027t hold up the review for this either. We should move these classes to messages packages if they are to stay.",
       "parentUuid": "fa82b9bf_afb28c46",
+      "revId": "b0f122b34e03eab693717bace4d258286b774d32",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_cf7ef018",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-29T02:48:14Z",
+      "side": 1,
+      "message": "I left this message here as this really isn\u0027t something that should \"others\" need to know about. It\u0027s kind of private and for test purposes only - not to be advertised.",
+      "parentUuid": "fa82b9bf_8f5308e1",
       "revId": "b0f122b34e03eab693717bace4d258286b774d32",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
