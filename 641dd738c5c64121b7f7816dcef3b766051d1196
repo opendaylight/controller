@@ -16,6 +16,24 @@
       "revId": "641dd738c5c64121b7f7816dcef3b766051d1196",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4a664e2b",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/common/actor/MeteredBoundedMailbox.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-29T20:24:12Z",
+      "side": 1,
+      "message": "Noted. I will make it consistent.",
+      "parentUuid": "fa82b9bf_4a988e1b",
+      "revId": "641dd738c5c64121b7f7816dcef3b766051d1196",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
