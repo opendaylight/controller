@@ -20,7 +20,7 @@ public class InMemoryOperationalDataStoreProviderModule extends org.opendaylight
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        return InMemoryDOMDataStoreFactory.create("DOM-OPER", getOperationalSchemaServiceDependency(),
+        return InMemoryDOMDataStoreFactory.create("DOM-OPER", getSchemaServiceDependency(),
                 InMemoryDOMDataStoreConfigProperties.create(getMaxDataChangeExecutorPoolSize(),
                         getMaxDataChangeExecutorQueueSize(), getMaxDataChangeListenerQueueSize()));
     }
