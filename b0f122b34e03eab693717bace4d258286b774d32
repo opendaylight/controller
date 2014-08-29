@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_4f850058",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-29T00:30:58Z",
+      "side": 1,
+      "message": "This is used by a test to get to the composite modification. The objective is to get to the state accumulated in the transaction so that we can verify that it\u0027s been properly populated.",
+      "parentUuid": "fa82b9bf_14b5cf7c",
+      "revId": "b0f122b34e03eab693717bace4d258286b774d32",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_74c21bea",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
         "patchSetId": 9
@@ -53,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_6f880471",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-29T00:30:58Z",
+      "side": 1,
+      "message": "This was from an earlier commit as well - we should enter a separate defect to address it.",
+      "parentUuid": "fa82b9bf_74c21bea",
+      "revId": "b0f122b34e03eab693717bace4d258286b774d32",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_34b81374",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
         "patchSetId": 9
@@ -64,6 +100,24 @@
       "writtenOn": "2014-08-28T21:38:45Z",
       "side": 1,
       "message": "Can we avoid these?",
+      "revId": "b0f122b34e03eab693717bace4d258286b774d32",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_afb28c46",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-29T00:30:58Z",
+      "side": 1,
+      "message": "These were added by me - a long time back :) I wouldn\u0027t hold up this review for it. I found it easier to test with this.",
+      "parentUuid": "fa82b9bf_34b81374",
       "revId": "b0f122b34e03eab693717bace4d258286b774d32",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
