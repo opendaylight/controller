@@ -52,6 +52,8 @@ public class MutableCompositeModification
         PersistentMessages.CompositeModification.Builder builder =
             PersistentMessages.CompositeModification.newBuilder();
 
+        builder.setTimeStamp(System.nanoTime());
+
         for (Modification m : modifications) {
             builder.addModification(
                 (PersistentMessages.Modification) m.toSerializable());
