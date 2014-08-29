@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_6a50f231",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/xml/codec/XmlUtils.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-29T20:39:21Z",
+      "side": 1,
+      "message": "Eclipse automatically added the braces below.",
+      "revId": "afed46e16505c95eb0c6fc4d236aeeb0c25ab968",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0a43666c",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/xml/codec/XmlUtils.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-29T20:39:21Z",
+      "side": 1,
+      "message": "Eclipse automatically added the braces below.",
+      "revId": "afed46e16505c95eb0c6fc4d236aeeb0c25ab968",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2a466a7b",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/xml/codec/XmlUtils.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-29T20:39:21Z",
+      "side": 1,
+      "message": "Eclipse automatically added the braces below.",
+      "revId": "afed46e16505c95eb0c6fc4d236aeeb0c25ab968",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ca601e03",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/xml/codec/XmlUtils.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-29T20:39:21Z",
+      "side": 1,
+      "message": "Eclipse automatically added the braces below.",
+      "revId": "afed46e16505c95eb0c6fc4d236aeeb0c25ab968",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8a569628",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/xml/codec/XmlUtils.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-29T20:39:21Z",
+      "side": 1,
+      "message": "I wasn\u0027t sure about this but I believe the QName for the outer CompositeNode that wraps the input node should be the RPC name. Either way I don\u0027t think it matters but it screwed up my unit tests.",
+      "revId": "afed46e16505c95eb0c6fc4d236aeeb0c25ab968",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_aa511a31",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcImplementation.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-29T20:39:21Z",
+      "side": 1,
+      "message": "Corrected indentation in the code above.",
+      "revId": "afed46e16505c95eb0c6fc4d236aeeb0c25ab968",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4a340efb",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcBroker.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-29T20:39:21Z",
+      "side": 1,
+      "message": "Corrected indentation in the code above.",
+      "revId": "afed46e16505c95eb0c6fc4d236aeeb0c25ab968",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6a3792ff",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcBroker.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-29T20:39:21Z",
+      "side": 1,
+      "message": "Added Creator class so unit tests run in Eclipse.",
+      "revId": "afed46e16505c95eb0c6fc4d236aeeb0c25ab968",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
