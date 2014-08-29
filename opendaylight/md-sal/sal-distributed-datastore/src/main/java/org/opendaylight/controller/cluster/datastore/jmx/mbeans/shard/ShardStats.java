@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
 
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.AbstractBaseMBean;
@@ -6,7 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * @author: syedbahm
+ * @author  Basheeruddin syedbahm@cisco.com
  */
 public class ShardStats extends AbstractBaseMBean implements ShardStatsMBean {
 
@@ -37,6 +45,10 @@ public class ShardStats extends AbstractBaseMBean implements ShardStatsMBean {
     private Date lastCommittedTransactionTime = new Date(0L);
 
     private Long failedTransactionsCount = 0L;
+
+    private Long failedReadTransactionsCount = 0L;
+
+    private Long abortTransactionsCount = 0L;
 
     private SimpleDateFormat sdf =
         new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -106,6 +118,14 @@ public class ShardStats extends AbstractBaseMBean implements ShardStatsMBean {
         return failedTransactionsCount;
     }
 
+    @Override public Long getFailedReadTransactionsCount() {
+        return failedReadTransactionsCount;
+    }
+
+    @Override public Long getAbortTransactionsCount() {
+        return abortTransactionsCount;
+    }
+
     public Long incrementCommittedTransactionCount() {
         return committedTransactionsCount++;
     }
@@ -121,6 +141,16 @@ public class ShardStats extends AbstractBaseMBean implements ShardStatsMBean {
     public Long incrementReadWriteTransactionCount() {
         return readWriteTransactionCount++;
     }
+
+    public Long incrementFailedTransactionsCount() {
+        return failedTransactionsCount++;
+    }
+
+    public Long incrementFailedReadTransactionsCount() {
+        return failedReadTransactionsCount++;
+    }
+
+    public Long incrementAbortTransactionsCount () { return abortTransactionsCount++;}
 
     public void setLeader(String leader) {
         this.leader = leader;
@@ -171,8 +201,28 @@ public class ShardStats extends AbstractBaseMBean implements ShardStatsMBean {
         return JMX_CATEGORY_SHARD;
     }
 
+    /**
+     * resets the counters related to transactions
+     */
 
-    public void incrementFailedTransactionsCount() {
-        this.failedTransactionsCount++;
+    public void resetTransactionCounters(){
+        committedTransactionsCount = 0L;
+
+        readOnlyTransactionCount = 0L;
+
+        writeOnlyTransactionCount = 0L;
+
+        readWriteTransactionCount = 0L;
+
+        lastCommittedTransactionTime = new Date(0L);
+
+        failedTransactionsCount = 0L;
+
+        failedReadTransactionsCount = 0L;
+
+        abortTransactionsCount = 0L;
+
     }
+
+
 }

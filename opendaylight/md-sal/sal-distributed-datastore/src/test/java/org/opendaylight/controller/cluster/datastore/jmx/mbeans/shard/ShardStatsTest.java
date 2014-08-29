@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
 
 import org.junit.After;
@@ -86,7 +93,69 @@ public class ShardStatsTest {
         Object attribute =
             mbeanServer.getAttribute(testMBeanName, "FailedTransactionsCount");
         Assert.assertEquals((Long) attribute, (Long) 2L);
+    }
 
+    @Test
+    public void testGetAbortTransactionsCount() throws Exception {
+        //let us increment AbortTransactions count and then check
+        shardStats.incrementAbortTransactionsCount();
+        shardStats.incrementAbortTransactionsCount();
+
+
+        //now let us get from MBeanServer what is the transaction count.
+        Object attribute =
+            mbeanServer.getAttribute(testMBeanName, "AbortTransactionsCount");
+        Assert.assertEquals((Long) attribute, (Long) 2L);
+    }
+
+    @Test
+    public void testGetFailedReadTransactionsCount() throws Exception {
+        //let us increment FailedReadTransactions count and then check
+        shardStats.incrementFailedReadTransactionsCount();
+        shardStats.incrementFailedReadTransactionsCount();
+
+
+        //now let us get from MBeanServer what is the transaction count.
+        Object attribute =
+            mbeanServer.getAttribute(testMBeanName, "FailedReadTransactionsCount");
+        Assert.assertEquals((Long) attribute, (Long) 2L);
+    }
+
+    @Test
+    public void testResetTransactionCounters() throws Exception {
+
+        //let us increment committed transactions count and then check
+        shardStats.incrementCommittedTransactionCount();
+        shardStats.incrementCommittedTransactionCount();
+        shardStats.incrementCommittedTransactionCount();
+
+        //now let us get from MBeanServer what is the transaction count.
+        Object attribute = mbeanServer.getAttribute(testMBeanName,
+            "CommittedTransactionsCount");
+        Assert.assertEquals((Long) attribute, (Long) 3L);
+
+        //let us increment FailedReadTransactions count and then check
+        shardStats.incrementFailedReadTransactionsCount();
+        shardStats.incrementFailedReadTransactionsCount();
+
+
+        //now let us get from MBeanServer what is the transaction count.
+        attribute =
+            mbeanServer.getAttribute(testMBeanName, "FailedReadTransactionsCount");
+        Assert.assertEquals((Long) attribute, (Long) 2L);
+
+
+        //here we will reset the counters and check the above ones are 0 after reset
+        mbeanServer.invoke(testMBeanName, "resetTransactionCounters", null, null);
+
+        //now let us get from MBeanServer what is the transaction count.
+        attribute = mbeanServer.getAttribute(testMBeanName,
+            "CommittedTransactionsCount");
+        Assert.assertEquals((Long) attribute, (Long) 0L);
+
+        attribute =
+            mbeanServer.getAttribute(testMBeanName, "FailedReadTransactionsCount");
+        Assert.assertEquals((Long) attribute, (Long) 0L);
 
 
     }

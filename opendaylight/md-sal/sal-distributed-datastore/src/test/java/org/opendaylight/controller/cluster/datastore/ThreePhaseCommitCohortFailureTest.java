@@ -65,6 +65,7 @@ public class ThreePhaseCommitCohortFailureTest extends AbstractActorTest {
 
     private final ShardContext shardContext = new ShardContext();
 
+
     @BeforeClass
     public static void staticSetup() {
         store.onGlobalContextUpdated(testSchemaContext);
@@ -83,7 +84,7 @@ public class ThreePhaseCommitCohortFailureTest extends AbstractActorTest {
         final CompositeModification mockComposite =
             Mockito.mock(CompositeModification.class);
         final Props props =
-            ThreePhaseCommitCohort.props(mockCohort, shard, mockComposite);
+            ThreePhaseCommitCohort.props(mockCohort, shard, mockComposite, shardContext);
 
         final TestActorRef<ThreePhaseCommitCohort> subject = TestActorRef
             .create(getSystem(), props,
@@ -112,7 +113,7 @@ public class ThreePhaseCommitCohortFailureTest extends AbstractActorTest {
         final CompositeModification mockComposite =
             Mockito.mock(CompositeModification.class);
         final Props props =
-            ThreePhaseCommitCohort.props(mockCohort, shard, mockComposite);
+            ThreePhaseCommitCohort.props(mockCohort, shard, mockComposite,shardContext );
 
         final TestActorRef<ThreePhaseCommitCohort> subject = TestActorRef
             .create(getSystem(), props,
@@ -144,7 +145,7 @@ public class ThreePhaseCommitCohortFailureTest extends AbstractActorTest {
         final CompositeModification mockComposite =
             Mockito.mock(CompositeModification.class);
         final Props props =
-            ThreePhaseCommitCohort.props(mockCohort, shard, mockComposite);
+            ThreePhaseCommitCohort.props(mockCohort, shard, mockComposite,shardContext );
 
         final TestActorRef<ThreePhaseCommitCohort> subject = TestActorRef
             .create(getSystem(), props,

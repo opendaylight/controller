@@ -26,8 +26,8 @@ public class ShardReadTransaction extends ShardTransaction {
     private final DOMStoreReadTransaction transaction;
 
     public ShardReadTransaction(DOMStoreReadTransaction transaction, ActorRef shardActor,
-            SchemaContext schemaContext) {
-        super(shardActor, schemaContext);
+            SchemaContext schemaContext,ShardContext shardContext) {
+        super(shardActor, schemaContext, shardContext);
         this.transaction = transaction;
     }
 

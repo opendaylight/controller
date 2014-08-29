@@ -249,7 +249,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         Preconditions.checkState(transactionType != TransactionType.READ_ONLY,
                 "Modification operation on read-only transaction is not allowed");
         Preconditions.checkState(!inReadyState,
-                "Transaction is sealed - further modifications are allowed");
+                "Transaction is sealed - further modifications are not allowed");
     }
 
     @Override
@@ -612,6 +612,8 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
                         returnFuture.setException(new ReadFailedException(
                                 "Error reading data for path " + path, failure));
+                        //here we will increment the failed reads
+
                     } else {
                         LOG.debug("Tx {} read operation succeeded", identifier, failure);
 
