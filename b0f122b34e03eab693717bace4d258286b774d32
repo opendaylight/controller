@@ -37,6 +37,60 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_efe4140e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-29T02:09:01Z",
+      "side": 1,
+      "message": "It shouldn\u0027t be null. I can add a PreCondition.",
+      "parentUuid": "fa82b9bf_0f25b85a",
+      "revId": "b0f122b34e03eab693717bace4d258286b774d32",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8fef88e8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-29T02:09:01Z",
+      "side": 1,
+      "message": "It can\u0027t be static - an instance is created per DistributedDataStore, i.e. operational and config.",
+      "parentUuid": "fa82b9bf_8f18e81e",
+      "revId": "b0f122b34e03eab693717bace4d258286b774d32",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_afea8cd5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-29T02:09:01Z",
+      "side": 1,
+      "message": "I\u0027m actually not familiar with the supervisor strategy and actor restarts. ShardTransaction actors are transient so I imagine if it fails with a runtime error the Tx is probably hosed and we wouldn\u0027t want it to restart. But I don\u0027t know what the behavior would be - Moiz might. I\u0027m still new to akka - lots to learn...",
+      "parentUuid": "fa82b9bf_6fd9e455",
+      "revId": "b0f122b34e03eab693717bace4d258286b774d32",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_14b5cf7c",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
         "patchSetId": 9
