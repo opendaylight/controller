@@ -91,6 +91,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_0faa9884",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-29T02:26:11Z",
+      "side": 1,
+      "message": "As per ShardManager\u0027s supervision strategy, all children are \"resumed\". This means that actor current state is maintained except the message that caused exception is lost. You dont want to process that anyways. Now, this resumed transaction actor will not send any message back to Tx proxy. Someone will need to send poison pill to this actor. My guess is Tx proxy will do that but need to check.",
+      "parentUuid": "fa82b9bf_afea8cd5",
+      "revId": "b0f122b34e03eab693717bace4d258286b774d32",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_14b5cf7c",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
         "patchSetId": 9
