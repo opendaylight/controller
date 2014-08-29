@@ -12,7 +12,18 @@ import org.w3c.dom.DOMException;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
+/**
+ * Defines an empty NamedNodeMap.
+ * @author Devin Avery
+ *
+ */
 public class NamedNodeMapImpl implements NamedNodeMap {
+
+    public static final NamedNodeMap EMPTY_MAP = new NamedNodeMapImpl();
+
+    private NamedNodeMapImpl(){
+
+    }
 
     @Override
     public Node getNamedItem(String name) {
