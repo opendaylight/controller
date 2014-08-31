@@ -10,11 +10,10 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSystem;
 import akka.testkit.JavaTestKit;
-import org.apache.commons.io.FileUtils;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
-import java.io.File;
 import java.io.IOException;
 
 public abstract class AbstractActorTest {
@@ -25,35 +24,15 @@ public abstract class AbstractActorTest {
 
         System.setProperty("shard.persistent", "false");
         system = ActorSystem.create("test");
-
-        deletePersistenceFiles();
     }
 
     @AfterClass
     public static void tearDownClass() throws IOException {
         JavaTestKit.shutdownActorSystem(system);
         system = null;
-
-        deletePersistenceFiles();
-    }
-
-    protected static void deletePersistenceFiles() throws IOException {
-        File journal = new File("journal");
-
-        if(journal.exists()) {
-            FileUtils.deleteDirectory(journal);
-        }
-
-        File snapshots = new File("snapshots");
-
-        if(snapshots.exists()){
-            FileUtils.deleteDirectory(snapshots);
-        }
-
     }
 
     protected ActorSystem getSystem() {
         return system;
     }
-
 }

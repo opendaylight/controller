@@ -16,46 +16,66 @@ import akka.persistence.SnapshotSelectionCriteria;
 import akka.persistence.snapshot.japi.SnapshotStore;
 import com.google.common.collect.Iterables;
 import scala.concurrent.Future;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import org.opendaylight.controller.cluster.raft.Snapshot;
 
 public class InMemorySnapshotStore extends SnapshotStore {
 
-    Map<String, List<Snapshot>> snapshots = new HashMap<>();
+    private static Map<String, List<StoredSnapshot>> snapshots = new ConcurrentHashMap<>();
 
-    @Override public Future<Option<SelectedSnapshot>> doLoadAsync(String s,
+    public static void addSnapshot(String persistentId, Snapshot snapshot) {
+        List<StoredSnapshot> snapshotList = snapshots.get(persistentId);
+
+        if(snapshotList == null) {
+            snapshotList = new ArrayList<>();
+            snapshots.put(persistentId, snapshotList);
+        }
+
+        snapshotList.add(new StoredSnapshot(new SnapshotMetadata(persistentId, snapshotList.size(),
+                System.currentTimeMillis()), snapshot));
+    }
+
+    public static void clear() {
+        snapshots.clear();
+    }
+
+    @Override
+    public Future<Option<SelectedSnapshot>> doLoadAsync(String s,
         SnapshotSelectionCriteria snapshotSelectionCriteria) {
-        List<Snapshot> snapshotList = snapshots.get(s);
+        List<StoredSnapshot> snapshotList = snapshots.get(s);
         if(snapshotList == null){
             return Futures.successful(Option.<SelectedSnapshot>none());
         }
 
-        Snapshot snapshot = Iterables.getLast(snapshotList);
+        StoredSnapshot snapshot = Iterables.getLast(snapshotList);
         SelectedSnapshot selectedSnapshot =
             new SelectedSnapshot(snapshot.getMetadata(), snapshot.getData());
         return Futures.successful(Option.some(selectedSnapshot));
     }
 
-    @Override public Future<Void> doSaveAsync(SnapshotMetadata snapshotMetadata, Object o) {
-        List<Snapshot> snapshotList = snapshots.get(snapshotMetadata.persistenceId());
+    @Override
+    public Future<Void> doSaveAsync(SnapshotMetadata snapshotMetadata, Object o) {
+        List<StoredSnapshot> snapshotList = snapshots.get(snapshotMetadata.persistenceId());
 
         if(snapshotList == null){
             snapshotList = new ArrayList<>();
             snapshots.put(snapshotMetadata.persistenceId(), snapshotList);
         }
-        snapshotList.add(new Snapshot(snapshotMetadata, o));
+        snapshotList.add(new StoredSnapshot(snapshotMetadata, o));
 
         return Futures.successful(null);
     }
 
-    @Override public void onSaved(SnapshotMetadata snapshotMetadata) throws Exception {
+    @Override
+    public void onSaved(SnapshotMetadata snapshotMetadata) throws Exception {
     }
 
-    @Override public void doDelete(SnapshotMetadata snapshotMetadata) throws Exception {
-        List<Snapshot> snapshotList = snapshots.get(snapshotMetadata.persistenceId());
+    @Override
+    public void doDelete(SnapshotMetadata snapshotMetadata) throws Exception {
+        List<StoredSnapshot> snapshotList = snapshots.get(snapshotMetadata.persistenceId());
 
         if(snapshotList == null){
             return;
@@ -64,7 +84,7 @@ public class InMemorySnapshotStore extends SnapshotStore {
         int deleteIndex = -1;
 
         for(int i=0;i<snapshotList.size(); i++){
-            Snapshot snapshot = snapshotList.get(i);
+            StoredSnapshot snapshot = snapshotList.get(i);
             if(snapshotMetadata.equals(snapshot.getMetadata())){
                 deleteIndex = i;
                 break;
@@ -77,9 +97,10 @@ public class InMemorySnapshotStore extends SnapshotStore {
 
     }
 
-    @Override public void doDelete(String s, SnapshotSelectionCriteria snapshotSelectionCriteria)
+    @Override
+    public void doDelete(String s, SnapshotSelectionCriteria snapshotSelectionCriteria)
         throws Exception {
-        List<Snapshot> snapshotList = snapshots.get(s);
+        List<StoredSnapshot> snapshotList = snapshots.get(s);
 
         if(snapshotList == null){
             return;
@@ -90,11 +111,11 @@ public class InMemorySnapshotStore extends SnapshotStore {
         snapshots.remove(s);
     }
 
-    private static class Snapshot {
+    private static class StoredSnapshot {
         private final SnapshotMetadata metadata;
         private final Object data;
 
-        private Snapshot(SnapshotMetadata metadata, Object data) {
+        private StoredSnapshot(SnapshotMetadata metadata, Object data) {
             this.metadata = metadata;
             this.data = data;
         }
