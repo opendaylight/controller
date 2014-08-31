@@ -47,7 +47,7 @@ class FlowCapableInventoryProvider implements AutoCloseable, Runnable, Transacti
         final NodeChangeCommiter changeCommiter = new NodeChangeCommiter(FlowCapableInventoryProvider.this);
         this.listenerRegistration = this.notificationService.registerNotificationListener(changeCommiter);
 
-        this.txChain =  dataBroker.createTransactionChain(this);
+        this.txChain = dataBroker.createTransactionChain(this);
         thread = new Thread(this);
         thread.setDaemon(true);
         thread.setName("FlowCapableInventoryProvider");
@@ -81,7 +81,7 @@ class FlowCapableInventoryProvider implements AutoCloseable, Runnable, Transacti
             thread.join();
             thread = null;
         }
-        if(txChain != null) {
+        if (txChain != null) {
             txChain.close();
             txChain = null;
         }
@@ -137,8 +137,8 @@ class FlowCapableInventoryProvider implements AutoCloseable, Runnable, Transacti
 
     @Override
     public void onTransactionChainFailed(final TransactionChain<?, ?> chain, final AsyncTransaction<?, ?> transaction,
-            final Throwable cause) {
-        LOG.error("Failed to export Flow Capable Inventory, Transaction {} failed.",transaction.getIdentifier(),cause);
+                                         final Throwable cause) {
+        LOG.error("Failed to export Flow Capable Inventory, Transaction {} failed.", transaction.getIdentifier(), cause);
 
     }
 
