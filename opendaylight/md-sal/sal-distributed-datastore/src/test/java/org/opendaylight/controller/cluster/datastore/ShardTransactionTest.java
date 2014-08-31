@@ -503,7 +503,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
         datastoreContext = new DatastoreContext("Test",
                 InMemoryDOMDataStoreConfigProperties.getDefault(),
-                Duration.create(500, TimeUnit.MILLISECONDS), 5);
+                Duration.create(500, TimeUnit.MILLISECONDS), 5, 1000, 1000, 500);
 
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = createShard();

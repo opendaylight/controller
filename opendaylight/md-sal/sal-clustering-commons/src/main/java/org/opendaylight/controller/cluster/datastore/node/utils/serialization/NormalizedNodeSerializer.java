@@ -447,8 +447,10 @@ public class NormalizedNodeSerializer {
 
         private NormalizedNode deSerialize(NormalizedNodeMessages.Node node){
             Preconditions.checkNotNull(node, "node should not be null");
+
             DeSerializationFunction deSerializationFunction =
-                Preconditions.checkNotNull(deSerializationFunctions.get(NormalizedNodeType.values()[node.getIntType()]), "Unknown type " + node);
+                Preconditions.checkNotNull(deSerializationFunctions.get(
+                        NormalizedNodeType.values()[node.getIntType()]), "Unknown type {}", node.getIntType());
 
             return deSerializationFunction.apply(this, node);
         }

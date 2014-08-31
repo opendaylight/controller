@@ -20,12 +20,14 @@ public class DefaultConfigParamsImpl implements ConfigParams {
 
     private static final int SNAPSHOT_BATCH_COUNT = 20000;
 
+    private static final int JOURNAL_RECOVERY_LOG_BATCH_SIZE = 1000;
+
     /**
      * The maximum election time variance
      */
     private static final int ELECTION_TIME_MAX_VARIANCE = 100;
 
-    private final int SNAPSHOT_CHUNK_SIZE = 2048 * 1000; //2MB
+    private static final int SNAPSHOT_CHUNK_SIZE = 2048 * 1000; //2MB
 
 
     /**
@@ -39,16 +41,31 @@ public class DefaultConfigParamsImpl implements ConfigParams {
         new FiniteDuration(100, TimeUnit.MILLISECONDS);
 
 
+    private FiniteDuration heartBeatInterval = HEART_BEAT_INTERVAL;
+    private long snapshotBatchCount = SNAPSHOT_BATCH_COUNT;
+    private int journalRecoveryLogBatchSize = JOURNAL_RECOVERY_LOG_BATCH_SIZE;
+
+    public void setHeartBeatInterval(FiniteDuration heartBeatInterval) {
+        this.heartBeatInterval = heartBeatInterval;
+    }
+
+    public void setSnapshotBatchCount(long snapshotBatchCount) {
+        this.snapshotBatchCount = snapshotBatchCount;
+    }
+
+    public void setJournalRecoveryLogBatchSize(int journalRecoveryLogBatchSize) {
+        this.journalRecoveryLogBatchSize = journalRecoveryLogBatchSize;
+    }
+
     @Override
     public long getSnapshotBatchCount() {
-        return SNAPSHOT_BATCH_COUNT;
+        return snapshotBatchCount;
     }
 
     @Override
     public FiniteDuration getHeartBeatInterval() {
-        return HEART_BEAT_INTERVAL;
+        return heartBeatInterval;
     }
-
 
     @Override
     public FiniteDuration getElectionTimeOutInterval() {
@@ -64,5 +81,10 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     @Override
     public int getSnapshotChunkSize() {
         return SNAPSHOT_CHUNK_SIZE;
+    }
+
+    @Override
+    public int getJournalRecoveryLogBatchSize() {
+        return journalRecoveryLogBatchSize;
     }
 }

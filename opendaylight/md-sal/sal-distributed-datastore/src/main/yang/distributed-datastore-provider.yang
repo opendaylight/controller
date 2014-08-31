@@ -48,6 +48,12 @@ module distributed-datastore-provider {
         }
     }
 
+    typedef heartbeat-interval-type {
+        type uint16 {
+            range "100..max";
+        }
+    }
+
     grouping data-store-properties {
         leaf max-shard-data-change-executor-queue-size {
             default 1000;
@@ -79,10 +85,28 @@ module distributed-datastore-provider {
             description "The maximum amount of time a shard transaction can be idle without receiving any messages before it self-destructs.";
          }
 
+         leaf shard-snapshot-batch-count {
+            default 20000;
+            type non-zero-uint16-type;
+            description "The minimum number of entries to be present in the in-memory journal log before a snapshot to be taken.";
+         }
+
+         leaf shard-hearbeat-interval-in-millis {
+            default 500;
+            type heartbeat-interval-type;
+            description "The interval at which a shard will send a heart beat message to its remote shard.";
+         }
+
          leaf operation-timeout-in-seconds {
             default 5;
             type operation-timeout-type;
             description "The maximum amount of time for akka operations (remote or local) to complete before failing.";
+         }
+
+         leaf shard-journal-recovery-log-batch-size {
+            default 1000;
+            type non-zero-uint16-type;
+            description "The maximum number of journal log entries to batch on recovery for a shard before committing to the data store.";
          }
 
          leaf enable-metric-capture {

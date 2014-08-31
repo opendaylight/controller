@@ -11,8 +11,10 @@ package org.opendaylight.controller.cluster.example;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.japi.Creator;
+
 import com.google.common.base.Optional;
 import com.google.protobuf.ByteString;
+
 import org.opendaylight.controller.cluster.example.messages.KeyValue;
 import org.opendaylight.controller.cluster.example.messages.KeyValueSaved;
 import org.opendaylight.controller.cluster.example.messages.PrintRole;
@@ -158,5 +160,17 @@ public class ExampleActor extends RaftActor {
 
     @Override public String persistenceId() {
         return getId();
+    }
+
+    @Override
+    protected void startRecoveryStateBatch() {
+    }
+
+    @Override
+    protected void appendRecoveryState(Payload data) {
+    }
+
+    @Override
+    protected void applyCurrentRecoveryStateBatch() {
     }
 }

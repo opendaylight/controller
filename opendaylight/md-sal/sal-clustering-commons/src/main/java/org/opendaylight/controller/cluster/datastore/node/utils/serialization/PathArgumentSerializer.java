@@ -191,8 +191,6 @@ public class PathArgumentSerializer {
         // adding null check only in case someone tried to deSerialize a protocol buffer node
         // that was not serialized using the PathArgumentSerializer
         Preconditions.checkNotNull(qName, "qName should not be null");
-        Preconditions.checkArgument(!"".equals(qName.getLocalName()),
-            "qName.localName cannot be empty qName = " + qName.toString());
         Preconditions.checkArgument(qName.getNamespace() != -1, "qName.namespace should be valid");
 
         StringBuilder sb = new StringBuilder();
@@ -210,7 +208,6 @@ public class PathArgumentSerializer {
         }
 
         return sb.toString();
-
     }
 
     /**
@@ -225,7 +222,7 @@ public class PathArgumentSerializer {
 
         Preconditions.checkArgument(pathArgument.getIntType() >= 0
             && pathArgument.getIntType() < PathArgumentType.values().length,
-            "Illegal PathArgumentType " + pathArgument.getIntType());
+            "Illegal PathArgumentType {}", pathArgument.getIntType());
 
         switch(PathArgumentType.values()[pathArgument.getIntType()]){
             case NODE_IDENTIFIER_WITH_VALUE : {
