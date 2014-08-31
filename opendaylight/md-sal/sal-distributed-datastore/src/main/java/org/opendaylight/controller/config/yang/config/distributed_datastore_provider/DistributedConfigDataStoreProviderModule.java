@@ -48,7 +48,10 @@ public class DistributedConfigDataStoreProviderModule extends
                         props.getMaxShardDataStoreExecutorQueueSize().getValue()),
                 Duration.create(props.getShardTransactionIdleTimeoutInMinutes().getValue(),
                         TimeUnit.MINUTES),
-                props.getOperationTimeoutInSeconds().getValue());
+                props.getOperationTimeoutInSeconds().getValue(),
+                props.getShardJournalRecoveryLogBatchSize().getValue(),
+                props.getShardSnapshotBatchCount().getValue(),
+                props.getShardHearbeatIntervalInMillis().getValue());
 
         return DistributedDataStoreFactory.createInstance("config", getConfigSchemaServiceDependency(),
                 datastoreContext, bundleContext);

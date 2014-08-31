@@ -75,6 +75,13 @@ public interface ReplicatedLog {
     void append(ReplicatedLogEntry replicatedLogEntry);
 
     /**
+     * Optimization method to increase the capacity of the journal log prior to appending entries.
+     *
+     * @param amount the amount to increase by
+     */
+    void increaseJournalLogCapacity(int amount);
+
+    /**
      *
      * @param replicatedLogEntry
      */
