@@ -112,7 +112,7 @@ while true ; do
         -Xmx*) jvmMaxMemory="$1"; shift;;
         -D*) extraJVMOpts="${extraJVMOpts} $1"; shift;;
         -X*) extraJVMOpts="${extraJVMOpts} $1"; shift;;
-	-J*) extraJVMOpts="${extraJVMOpts} -$(echo "$1" | cut -d'J' -f2)"; shift;;
+        -J*) extraJVMOpts="${extraJVMOpts} -$(echo "$1" | cut -d'J' -f2)"; shift;;
         -agentpath:*) agentPath="$1"; shift;;
         "") break ;;
         *) echo "Unknown option $1"; unknown_option=1; break ;;
