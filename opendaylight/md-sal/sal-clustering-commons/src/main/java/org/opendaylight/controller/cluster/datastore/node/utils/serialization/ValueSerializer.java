@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.cluster.datastore.node.utils.serialization;
 
-import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.datastore.node.utils.QNameFactory;
 import org.opendaylight.controller.cluster.datastore.util.InstanceIdentifierUtils;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
@@ -70,9 +69,6 @@ public class ValueSerializer {
 
 
     private static Object deSerializeBasicTypes(int valueType, String value) {
-        Preconditions.checkArgument(valueType >= 0 && valueType < ValueType.values().length,
-            "Illegal value type " + valueType );
-
         switch(ValueType.values()[valueType]){
            case SHORT_TYPE: {
                return Short.valueOf(value);

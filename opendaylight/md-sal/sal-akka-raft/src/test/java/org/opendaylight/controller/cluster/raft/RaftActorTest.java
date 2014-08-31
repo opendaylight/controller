@@ -6,10 +6,13 @@ import akka.actor.Props;
 import akka.event.Logging;
 import akka.japi.Creator;
 import akka.testkit.JavaTestKit;
+
 import com.google.protobuf.ByteString;
+
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 
 import java.util.Collections;
 import java.util.Map;
@@ -40,6 +43,26 @@ public class RaftActorTest extends AbstractActorTest {
             Object data) {
         }
 
+        @Override
+        protected void startLogRecoveryBatch(int maxBatchSize) {
+        }
+
+        @Override
+        protected void appendRecoveryLogEntry(Payload data) {
+        }
+
+        @Override
+        protected void applyCurrentLogRecoveryBatch() {
+        }
+
+        @Override
+        protected void onRecoveryComplete() {
+        }
+
+        @Override
+        protected void applyRecoverySnapshot(ByteString snapshot) {
+        }
+
         @Override protected void createSnapshot() {
             throw new UnsupportedOperationException("createSnapshot");
         }
@@ -54,7 +77,6 @@ public class RaftActorTest extends AbstractActorTest {
         @Override public String persistenceId() {
             return this.getId();
         }
-
     }
 
 
@@ -76,6 +98,7 @@ public class RaftActorTest extends AbstractActorTest {
             return
                 new JavaTestKit.EventFilter<Boolean>(Logging.Info.class
                 ) {
+                    @Override
                     protected Boolean run() {
                         return true;
                     }
@@ -90,6 +113,7 @@ public class RaftActorTest extends AbstractActorTest {
 
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     raftActor.tell(new FindLeader(), getRef());
@@ -97,6 +121,7 @@ public class RaftActorTest extends AbstractActorTest {
                     String s = new ExpectMsg<String>(duration("1 seconds"),
                         "findLeader") {
                         // do not put code outside this method, will run afterwards
+                        @Override
                         protected String match(Object in) {
                             if (in instanceof FindLeaderReply) {
                                 return ((FindLeaderReply) in).getLeaderActor();

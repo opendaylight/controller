@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.node.utils.serialization;
 
 import com.google.common.base.Preconditions;
+
 import org.opendaylight.controller.cluster.datastore.node.utils.NodeIdentifierFactory;
 import org.opendaylight.controller.cluster.datastore.node.utils.QNameFactory;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
@@ -26,6 +27,7 @@ import java.util.Set;
 import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.PathArgumentType.getSerializablePathArgumentType;
 
 public class PathArgumentSerializer {
+    private static final String REVISION_ARG = "?revision=";
     private static final Map<Class, PathArgumentAttributesGetter> pathArgumentAttributesGetters = new HashMap<>();
 
     public static NormalizedNodeMessages.PathArgument serialize(NormalizedNodeSerializationContext context, YangInstanceIdentifier.PathArgument pathArgument){
@@ -190,27 +192,24 @@ public class PathArgumentSerializer {
         // If this serializer is used qName cannot be null (see encodeQName)
         // adding null check only in case someone tried to deSerialize a protocol buffer node
         // that was not serialized using the PathArgumentSerializer
-        Preconditions.checkNotNull(qName, "qName should not be null");
-        Preconditions.checkArgument(!"".equals(qName.getLocalName()),
-            "qName.localName cannot be empty qName = " + qName.toString());
-        Preconditions.checkArgument(qName.getNamespace() != -1, "qName.namespace should be valid");
+//        Preconditions.checkNotNull(qName, "qName should not be null");
+//        Preconditions.checkArgument(qName.getNamespace() != -1, "qName.namespace should be valid");
 
-        StringBuilder sb = new StringBuilder();
         String namespace = context.getNamespace(qName.getNamespace());
-        String revision = "";
         String localName = context.getLocalName(qName.getLocalName());
+        StringBuilder sb;
         if(qName.getRevision() != -1){
-            revision = context.getRevision(qName.getRevision());
-            sb.append("(").append(namespace).append("?revision=").append(
-                revision).append(")").append(
-                localName);
+            String revision = context.getRevision(qName.getRevision());
+            sb = new StringBuilder(namespace.length() + REVISION_ARG.length() + revision.length() +
+                    localName.length() + 2);
+            sb.append('(').append(namespace).append(REVISION_ARG).append(
+                revision).append(')').append(localName);
         } else {
-            sb.append("(").append(namespace).append(")").append(
-                localName);
+            sb = new StringBuilder(namespace.length() + localName.length() + 2);
+            sb.append('(').append(namespace).append(')').append(localName);
         }
 
         return sb.toString();
-
     }
 
     /**
@@ -222,10 +221,6 @@ public class PathArgumentSerializer {
     private static YangInstanceIdentifier.PathArgument parsePathArgument(
         NormalizedNodeDeSerializationContext context,
         NormalizedNodeMessages.PathArgument pathArgument) {
-
-        Preconditions.checkArgument(pathArgument.getIntType() >= 0
-            && pathArgument.getIntType() < PathArgumentType.values().length,
-            "Illegal PathArgumentType " + pathArgument.getIntType());
 
         switch(PathArgumentType.values()[pathArgument.getIntType()]){
             case NODE_IDENTIFIER_WITH_VALUE : {
@@ -272,13 +267,21 @@ public class PathArgumentSerializer {
         NormalizedNodeDeSerializationContext context,
         List<NormalizedNodeMessages.PathArgumentAttribute> attributesList) {
 
-        Map<QName, Object> map = new HashMap<>();
-
-        for(NormalizedNodeMessages.PathArgumentAttribute attribute : attributesList){
+        Map<QName, Object> map;
+        if(attributesList.size() == 1) {
+            NormalizedNodeMessages.PathArgumentAttribute attribute = attributesList.get(0);
             NormalizedNodeMessages.QName name = attribute.getName();
             Object value = parseAttribute(context, attribute);
+            map = Collections.singletonMap(QNameFactory.create(qNameToString(context, name)), value);
+        } else {
+            map = new HashMap<>();
 
-            map.put(QNameFactory.create(qNameToString(context, name)), value);
+            for(NormalizedNodeMessages.PathArgumentAttribute attribute : attributesList){
+                NormalizedNodeMessages.QName name = attribute.getName();
+                Object value = parseAttribute(context, attribute);
+
+                map.put(QNameFactory.create(qNameToString(context, name)), value);
+            }
         }
 
         return map;
