@@ -35,7 +35,6 @@ import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChain;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
-import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionChainReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
 import org.opendaylight.controller.cluster.datastore.messages.ForwardedCommitTransaction;
@@ -321,11 +320,12 @@ public class Shard extends RaftActor {
 
 
     private void commit(final ActorRef sender, Object serialized) {
-        Modification modification = MutableCompositeModification
-            .fromSerializable(serialized, schemaContext);
         DOMStoreThreePhaseCommitCohort cohort =
             modificationToCohort.remove(serialized);
         if (cohort == null) {
+            Modification modification = MutableCompositeModification
+                    .fromSerializable(serialized, schemaContext);
+
             LOG.debug(
                 "Could not find cohort for modification : {}. Writing modification using a new transaction",
                 modification);
@@ -339,7 +339,7 @@ public class Shard extends RaftActor {
                 syncCommitTransaction(transaction);
             } catch (InterruptedException | ExecutionException e) {
                 shardMBean.incrementFailedTransactionsCount();
-                LOG.error("Failed to commit", e);
+                LOG.error(e, "Failed to commit");
                 return;
             }
             //we want to just apply the recovery commit and return
@@ -440,39 +440,36 @@ public class Shard extends RaftActor {
                 getSelf());
     }
 
-    private void createTransactionChain() {
-        DOMStoreTransactionChain chain = store.createTransactionChain();
-        ActorRef transactionChain = getContext().actorOf(
-                ShardTransactionChain.props(chain, schemaContext, datastoreContext, shardMBean));
-        getSender().tell(new CreateTransactionChainReply(transactionChain.path()).toSerializable(),
-                getSelf());
-    }
-
     private boolean isMetricsCaptureEnabled(){
         CommonConfig config = new CommonConfig(getContext().system().settings().config());
         return config.isMetricCaptureEnabled();
     }
 
-    @Override protected void applyState(ActorRef clientActor, String identifier,
-        Object data) {
+    @Override
+    protected void applyState(ActorRef clientActor, String identifier, Object data) {
 
         if (data instanceof CompositeModificationPayload) {
-            Object modification =
-                ((CompositeModificationPayload) data).getModification();
+            Object modification = ((CompositeModificationPayload) data).getModification();
 
             if (modification != null) {
                 commit(clientActor, modification);
             } else {
                 LOG.error(
                     "modification is null - this is very unexpected, clientActor = {}, identifier = {}",
-                    identifier, clientActor.path().toString());
+                    identifier, clientActor != null ? clientActor.path().toString() : null);
             }
 
         } else {
-            LOG.error("Unknown state received {} Class loader = {} CompositeNodeMod.ClassLoader = {}", data, data.getClass().getClassLoader(), CompositeModificationPayload.class.getClassLoader());
+            LOG.error("Unknown state received {} Class loader = {} CompositeNodeMod.ClassLoader = {}",
+                    data, data.getClass().getClassLoader(),
+                    CompositeModificationPayload.class.getClassLoader());
         }
 
-        // Update stats
+        updateJournalStats();
+
+    }
+
+    private void updateJournalStats() {
         ReplicatedLogEntry lastLogEntry = getLastLogEntry();
 
         if (lastLogEntry != null) {
@@ -482,10 +479,10 @@ public class Shard extends RaftActor {
 
         shardMBean.setCommitIndex(getCommitIndex());
         shardMBean.setLastApplied(getLastApplied());
-
     }
 
-    @Override protected void createSnapshot() {
+    @Override
+    protected void createSnapshot() {
         if (createSnapshotTransaction == null) {
 
             // Create a transaction. We are really going to treat the transaction as a worker
@@ -500,7 +497,9 @@ public class Shard extends RaftActor {
         }
     }
 
-    @VisibleForTesting @Override protected void applySnapshot(ByteString snapshot) {
+    @VisibleForTesting
+    @Override
+    protected void applySnapshot(ByteString snapshot) {
         // Since this will be done only on Recovery or when this actor is a Follower
         // we can safely commit everything in here. We not need to worry about event notifications
         // as they would have already been disabled on the follower
@@ -587,20 +586,24 @@ public class Shard extends RaftActor {
         }
     }
 
-    @VisibleForTesting NormalizedNode readStore() throws ExecutionException, InterruptedException {
+    @VisibleForTesting
+    NormalizedNode<?,?> readStore(YangInstanceIdentifier id)
+            throws ExecutionException, InterruptedException {
         DOMStoreReadTransaction transaction = store.newReadOnlyTransaction();
 
         CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> future =
-            transaction.read(YangInstanceIdentifier.builder().build());
+            transaction.read(id);
 
-        NormalizedNode<?, ?> node = future.get().get();
+        Optional<NormalizedNode<?, ?>> optional = future.get();
+        NormalizedNode<?, ?> node = optional.isPresent()? optional.get() : null;
 
         transaction.close();
 
         return node;
     }
 
-    @VisibleForTesting void writeToStore(YangInstanceIdentifier id, NormalizedNode node)
+    @VisibleForTesting
+    void writeToStore(YangInstanceIdentifier id, NormalizedNode<?,?> node)
         throws ExecutionException, InterruptedException {
         DOMStoreWriteTransaction transaction = store.newWriteOnlyTransaction();
 
@@ -609,4 +612,8 @@ public class Shard extends RaftActor {
         syncCommitTransaction(transaction);
     }
 
+    @VisibleForTesting
+    ShardStats getShardMBean() {
+        return shardMBean;
+    }
 }
