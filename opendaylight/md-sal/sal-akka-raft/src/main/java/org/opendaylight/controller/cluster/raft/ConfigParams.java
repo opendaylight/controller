@@ -26,7 +26,7 @@ public interface ConfigParams {
      *
      * @return long
      */
-    public long getSnapshotBatchCount();
+    long getSnapshotBatchCount();
 
     /**
      * The interval at which a heart beat message will be sent to the remote
@@ -34,7 +34,7 @@ public interface ConfigParams {
      *
      * @return FiniteDuration
      */
-    public FiniteDuration getHeartBeatInterval();
+    FiniteDuration getHeartBeatInterval();
 
     /**
      * The interval in which a new election would get triggered if no leader is found
@@ -43,7 +43,7 @@ public interface ConfigParams {
      *
      * @return FiniteDuration
      */
-    public FiniteDuration getElectionTimeOutInterval();
+    FiniteDuration getElectionTimeOutInterval();
 
     /**
      * The maximum election time variance. The election is scheduled using both
@@ -51,10 +51,15 @@ public interface ConfigParams {
      *
      * @return int
      */
-    public int getElectionTimeVariance();
+    int getElectionTimeVariance();
 
     /**
      * The size (in bytes) of the snapshot chunk sent from Leader
      */
-    public int getSnapshotChunkSize();
+    int getSnapshotChunkSize();
+
+    /**
+     * The number of journal log entries to batch on recovery before applying.
+     */
+    int getJournalRecoveryLogBatchSize();
 }

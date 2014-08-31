@@ -50,8 +50,9 @@ public enum ValueType {
     public static final ValueType getSerializableType(Object node){
         Preconditions.checkNotNull(node, "node should not be null");
 
-        if(types.containsKey(node.getClass())) {
-            return types.get(node.getClass());
+        ValueType type = types.get(node.getClass());
+        if(type != null) {
+            return type;
         } else if(node instanceof Set){
             return BITS_TYPE;
         }
