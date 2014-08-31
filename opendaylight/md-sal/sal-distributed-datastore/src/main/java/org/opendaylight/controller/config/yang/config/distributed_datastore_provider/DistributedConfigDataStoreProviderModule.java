@@ -42,13 +42,16 @@ public class DistributedConfigDataStoreProviderModule extends
 
         DatastoreContext datastoreContext = new DatastoreContext("DistributedConfigDatastore",
                 InMemoryDOMDataStoreConfigProperties.create(
-                        props.getMaxShardDataChangeExecutorPoolSize().getValue(),
-                        props.getMaxShardDataChangeExecutorQueueSize().getValue(),
-                        props.getMaxShardDataChangeListenerQueueSize().getValue(),
-                        props.getMaxShardDataStoreExecutorQueueSize().getValue()),
+                        props.getMaxShardDataChangeExecutorPoolSize().getValue().intValue(),
+                        props.getMaxShardDataChangeExecutorQueueSize().getValue().intValue(),
+                        props.getMaxShardDataChangeListenerQueueSize().getValue().intValue(),
+                        props.getMaxShardDataStoreExecutorQueueSize().getValue().intValue()),
                 Duration.create(props.getShardTransactionIdleTimeoutInMinutes().getValue(),
                         TimeUnit.MINUTES),
-                props.getOperationTimeoutInSeconds().getValue());
+                props.getOperationTimeoutInSeconds().getValue(),
+                props.getShardJournalRecoveryLogBatchSize().getValue().intValue(),
+                props.getShardSnapshotBatchCount().getValue().intValue(),
+                props.getShardHearbeatIntervalInMillis().getValue());
 
         return DistributedDataStoreFactory.createInstance("config", getConfigSchemaServiceDependency(),
                 datastoreContext, bundleContext);

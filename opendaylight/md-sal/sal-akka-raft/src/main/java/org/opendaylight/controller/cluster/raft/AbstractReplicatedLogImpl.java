@@ -18,13 +18,14 @@ import java.util.List;
  */
 public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
 
-    protected List<ReplicatedLogEntry> journal;
+    // We define this as ArrayList so we can use ensureCapacity.
+    protected ArrayList<ReplicatedLogEntry> journal;
     protected ByteString snapshot;
     protected long snapshotIndex = -1;
     protected long snapshotTerm = -1;
 
     // to be used for rollback during save snapshot failure
-    protected List<ReplicatedLogEntry> snapshottedJournal;
+    protected ArrayList<ReplicatedLogEntry> snapshottedJournal;
     protected ByteString previousSnapshot;
     protected long previousSnapshotIndex = -1;
     protected long previousSnapshotTerm = -1;
@@ -104,6 +105,11 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     @Override
     public void append(ReplicatedLogEntry replicatedLogEntry) {
         journal.add(replicatedLogEntry);
+    }
+
+    @Override
+    public void increaseJournalLogCapacity(int amount) {
+        journal.ensureCapacity(journal.size() + amount);
     }
 
     @Override
@@ -208,7 +214,6 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
 
     @Override
     public void snapshotCommit() {
-        snapshottedJournal.clear();
         snapshottedJournal = null;
         previousSnapshotIndex = -1;
         previousSnapshotTerm = -1;
@@ -218,7 +223,6 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     @Override
     public void snapshotRollback() {
         snapshottedJournal.addAll(journal);
-        journal.clear();
         journal = snapshottedJournal;
         snapshottedJournal = null;
 

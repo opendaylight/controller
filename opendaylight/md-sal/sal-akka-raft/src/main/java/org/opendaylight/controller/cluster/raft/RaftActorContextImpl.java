@@ -59,26 +59,32 @@ public class RaftActorContextImpl implements RaftActorContext {
         this.LOG = logger;
     }
 
+    @Override
     public ActorRef actorOf(Props props){
         return context.actorOf(props);
     }
 
+    @Override
     public ActorSelection actorSelection(String path){
         return context.actorSelection(path);
     }
 
+    @Override
     public String getId() {
         return id;
     }
 
+    @Override
     public ActorRef getActor() {
         return actor;
     }
 
+    @Override
     public ElectionTerm getTermInformation() {
         return termInformation;
     }
 
+    @Override
     public long getCommitIndex() {
         return commitIndex;
     }
@@ -87,6 +93,7 @@ public class RaftActorContextImpl implements RaftActorContext {
         this.commitIndex = commitIndex;
     }
 
+    @Override
     public long getLastApplied() {
         return lastApplied;
     }
