@@ -32,7 +32,7 @@
 	var loadMount = function(mountIndex, mountPath) {
 		$("#message").empty();
 		$("#message").append( "<p>Loading...</p>" );
-		loadSwagger("http://localhost:8080/apidoc/apis/mounts/" + mountIndex,
+		loadSwagger("/apidoc/apis/mounts/" + mountIndex,
 				"swagger-ui-container");
 		$("#message").empty();
 		$("#message").append( "<h2><b>Showing mount points for " + mountPath + "</b></h2>");
@@ -48,7 +48,7 @@
 	//loads the root swagger documenation (which comes from RestConf)
 	var loadRootSwagger = function() {
 		$("#message").empty();
-		loadSwagger("http://localhost:8080/apidoc/apis", "swagger-ui-container");
+		loadSwagger("/apidoc/apis", "swagger-ui-container");
 	}
 
 	//main method to initialize the mount list / swagger docs / tabs on page load
