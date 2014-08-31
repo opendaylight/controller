@@ -96,7 +96,7 @@ public abstract class RaftActor extends UntypedPersistentActor {
      * This context should NOT be passed directly to any other actor it is
      * only to be consumed by the RaftActorBehaviors
      */
-    private RaftActorContext context;
+    private final RaftActorContext context;
 
     /**
      * The in-memory journal
@@ -148,9 +148,10 @@ public abstract class RaftActor extends UntypedPersistentActor {
 
             // Apply State immediately
             replicatedLog.append(logEntry);
-            applyState(null, "recovery", logEntry.getData());
             context.setLastApplied(logEntry.getIndex());
             context.setCommitIndex(logEntry.getIndex());
+
+            applyState(null, "recovery", logEntry.getData());
         } else if (message instanceof DeleteEntries) {
             replicatedLog.removeFrom(((DeleteEntries) message).getFromIndex());
         } else if (message instanceof UpdateElectionTerm) {
@@ -159,10 +160,11 @@ public abstract class RaftActor extends UntypedPersistentActor {
             LOG.debug(
                 "RecoveryCompleted - Switching actor to Follower - " +
                     "Persistence Id =  " + persistenceId() +
-                    " Last index in log:{}, snapshotIndex={}, snapshotTerm={}, " +
+                    " Last index in log={}, snapshotIndex={}, snapshotTerm={}, " +
                     "journal-size={}",
                 replicatedLog.lastIndex(), replicatedLog.snapshotIndex,
                 replicatedLog.snapshotTerm, replicatedLog.size());
+
             currentBehavior = switchBehavior(RaftState.Follower);
             onStateChanged();
         }
@@ -568,6 +570,7 @@ public abstract class RaftActor extends UntypedPersistentActor {
             // of a single command.
             persist(replicatedLogEntry,
                 new Procedure<ReplicatedLogEntry>() {
+                    @Override
                     public void apply(ReplicatedLogEntry evt) throws Exception {
                         // when a snaphsot is being taken, captureSnapshot != null
                         if (hasSnapshotCaptureInitiated == false &&
@@ -629,10 +632,12 @@ public abstract class RaftActor extends UntypedPersistentActor {
         private long currentTerm = 0;
         private String votedFor = null;
 
+        @Override
         public long getCurrentTerm() {
             return currentTerm;
         }
 
+        @Override
         public String getVotedFor() {
             return votedFor;
         }
