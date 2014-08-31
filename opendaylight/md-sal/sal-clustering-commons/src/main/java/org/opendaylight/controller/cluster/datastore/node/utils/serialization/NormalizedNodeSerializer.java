@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.node.utils.serialization;
 
 import com.google.common.base.Preconditions;
+
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
 import org.opendaylight.yangtools.yang.common.SimpleDateFormatUtil;
 import org.opendaylight.yangtools.yang.data.api.Node;
@@ -36,6 +37,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNo
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -232,7 +234,7 @@ public class NormalizedNodeSerializer {
 
     private static class DeSerializer implements NormalizedNodeDeSerializationContext {
         private static Map<NormalizedNodeType, DeSerializationFunction>
-            deSerializationFunctions = new HashMap<>();
+            deSerializationFunctions = new EnumMap<>(NormalizedNodeType.class);
 
         static {
             deSerializationFunctions.put(CONTAINER_NODE_TYPE,
@@ -447,8 +449,9 @@ public class NormalizedNodeSerializer {
 
         private NormalizedNode deSerialize(NormalizedNodeMessages.Node node){
             Preconditions.checkNotNull(node, "node should not be null");
-            DeSerializationFunction deSerializationFunction =
-                Preconditions.checkNotNull(deSerializationFunctions.get(NormalizedNodeType.values()[node.getIntType()]), "Unknown type " + node);
+
+            DeSerializationFunction deSerializationFunction = deSerializationFunctions.get(
+                    NormalizedNodeType.values()[node.getIntType()]);
 
             return deSerializationFunction.apply(this, node);
         }
@@ -544,8 +547,4 @@ public class NormalizedNodeSerializer {
             NormalizedNode apply(DeSerializer deserializer, NormalizedNodeMessages.Node node);
         }
     }
-
-
-
-
 }
