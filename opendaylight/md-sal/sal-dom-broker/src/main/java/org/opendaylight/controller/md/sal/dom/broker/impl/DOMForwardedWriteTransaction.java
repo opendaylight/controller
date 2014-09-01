@@ -9,18 +9,22 @@ package org.opendaylight.controller.md.sal.dom.broker.impl;
 
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.common.impl.service.AbstractDataTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
+import org.opendaylight.controller.md.sal.dom.broker.impl.jmx.TransactionStatsTracker;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -78,28 +82,58 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
      */
     private volatile Future<?> commitFuture;
 
+    /**
+     * The following are local, unsynchronized stat counters. We update the shared txStatsTracker
+     * on submit, 1) so we only incur a volatile write once for each stat, 2) so we only update the
+     * stats if the commit was successful or wasn't cancelled.
+     */
+    private int successfulWritesCount;
+    private int successfulDeletesCount;
+
     protected DOMForwardedWriteTransaction(final Object identifier,
-            final Map<LogicalDatastoreType, T> backingTxs, final DOMDataCommitImplementation commitImpl) {
-        super(identifier, backingTxs);
+            final Map<LogicalDatastoreType, T> backingTxs, final DOMDataCommitImplementation commitImpl,
+            final TransactionStatsTracker txStatsTracker) {
+        super(identifier, backingTxs, txStatsTracker);
         this.commitImpl = Preconditions.checkNotNull(commitImpl, "commitImpl must not be null.");
     }
 
     @Override
     public void put(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
         checkRunning(commitImpl);
-        getSubtransaction(store).write(path, data);
+
+        try {
+            getSubtransaction(store).write(path, data);
+            successfulWritesCount++;
+        } catch(RuntimeException e) {
+            getTxStatsTracker().incrementFailedWrites();
+            throw e;
+        }
     }
 
     @Override
     public void delete(final LogicalDatastoreType store, final YangInstanceIdentifier path) {
         checkRunning(commitImpl);
-        getSubtransaction(store).delete(path);
+
+        try {
+            getSubtransaction(store).delete(path);
+            successfulDeletesCount++;
+        } catch(RuntimeException e) {
+            getTxStatsTracker().incrementFailedDeletes();
+            throw e;
+        }
     }
 
     @Override
     public void merge(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
         checkRunning(commitImpl);
-        getSubtransaction(store).merge(path, data);
+
+        try {
+            getSubtransaction(store).merge(path, data);
+            successfulWritesCount++;
+        } catch(RuntimeException e) {
+            getTxStatsTracker().incrementFailedWrites();
+            throw e;
+        }
     }
 
     @Override
@@ -140,6 +174,26 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
         }
 
         final CheckedFuture<Void, TransactionCommitFailedException> ret = impl.submit(this, cohorts);
+
+        if(successfulWritesCount > 0 || successfulDeletesCount > 0) {
+            // Add a callback to update the txStatsTracker counters. Store the following in local
+            // final vars to ensure visibility to the commit thread.
+            final int finalSuccessfulWritesCount = successfulWritesCount;
+            final int finalSuccessfulDeletesCount = successfulDeletesCount;
+            final TransactionStatsTracker finalTxStatsTracker = getTxStatsTracker();
+            Futures.addCallback(ret, new FutureCallback<Void>() {
+                @Override
+                public void onSuccess(Void result) {
+                    finalTxStatsTracker.addSuccessfulWrites(finalSuccessfulWritesCount);
+                    finalTxStatsTracker.addSuccessfulDeletes(finalSuccessfulDeletesCount);
+                }
+
+                @Override
+                public void onFailure(Throwable t) {
+                }
+            });
+        }
+
         FUTURE_UPDATER.lazySet(this, ret);
         return ret;
     }
