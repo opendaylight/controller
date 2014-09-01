@@ -8,13 +8,16 @@
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
 import static com.google.common.base.Preconditions.checkState;
+
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
+
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicLong;
+
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
@@ -22,11 +25,12 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
+import org.opendaylight.controller.md.sal.dom.broker.impl.jmx.NoopTransactionStatsTracker;
+import org.opendaylight.controller.md.sal.dom.broker.impl.jmx.TransactionStatsTracker;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.util.DurationStatsTracker;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,20 +43,21 @@ public class DOMDataBrokerImpl extends AbstractDOMForwardedTransactionFactory<DO
     private final DOMDataCommitCoordinatorImpl coordinator;
     private final AtomicLong txNum = new AtomicLong();
     private final AtomicLong chainNum = new AtomicLong();
-    private volatile AutoCloseable closeable;
+    private AutoCloseable closeable;
 
     public DOMDataBrokerImpl(final Map<LogicalDatastoreType, DOMStore> datastores,
             final ListeningExecutorService executor) {
-        super(datastores);
-        this.coordinator = new DOMDataCommitCoordinatorImpl(executor);
+        this(datastores, executor, new NoopTransactionStatsTracker());
+    }
+
+    public DOMDataBrokerImpl(final Map<LogicalDatastoreType, DOMStore> datastores,
+            final ListeningExecutorService executor, final TransactionStatsTracker txStatsTracker) {
+        super(datastores, txStatsTracker);
+        this.coordinator = new DOMDataCommitCoordinatorImpl(executor, getTxStatsTracker());
     }
 
     public void setCloseable(final AutoCloseable closeable) {
         this.closeable = closeable;
-    }
-
-    public DurationStatsTracker getCommitStatsTracker() {
-        return coordinator.getCommitStatsTracker();
     }
 
     @Override
@@ -94,7 +99,8 @@ public class DOMDataBrokerImpl extends AbstractDOMForwardedTransactionFactory<DO
         final long chainId = chainNum.getAndIncrement();
         LOG.debug("Transactoin chain {} created with listener {}, backing store chains {}", chainId, listener,
                 backingChains);
-        return new DOMDataBrokerTransactionChainImpl(chainId, backingChains, coordinator, listener);
+        return new DOMDataBrokerTransactionChainImpl(chainId, backingChains, coordinator,
+                listener, getTxStatsTracker());
 
     }
 
