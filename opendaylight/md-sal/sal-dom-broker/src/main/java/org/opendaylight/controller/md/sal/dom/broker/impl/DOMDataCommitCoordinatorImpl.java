@@ -14,14 +14,17 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
+
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+
+import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
+import org.opendaylight.controller.md.sal.dom.broker.impl.jmx.TransactionStatsTracker;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
-import org.opendaylight.yangtools.util.DurationStatsTracker;
 import org.opendaylight.yangtools.util.concurrent.MappingCheckedFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +46,7 @@ import org.slf4j.LoggerFactory;
 public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
 
     private static final Logger LOG = LoggerFactory.getLogger(DOMDataCommitCoordinatorImpl.class);
-    private final DurationStatsTracker commitStatsTracker = new DurationStatsTracker();
+    private final TransactionStatsTracker commitStatsTracker;
     private final ListeningExecutorService executor;
 
     /**
@@ -53,12 +56,11 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
      *
      * @param executor
      */
-    public DOMDataCommitCoordinatorImpl(final ListeningExecutorService executor) {
+    public DOMDataCommitCoordinatorImpl(final ListeningExecutorService executor,
+            final TransactionStatsTracker commitStatsTracker) {
         this.executor = Preconditions.checkNotNull(executor, "executor must not be null.");
-    }
-
-    public DurationStatsTracker getCommitStatsTracker() {
-        return commitStatsTracker;
+        this.commitStatsTracker = Preconditions.checkNotNull(commitStatsTracker,
+                "commitStatsTracker must not be null.");
     }
 
     @Override
@@ -135,23 +137,24 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
                 AtomicReferenceFieldUpdater.newUpdater(CommitCoordinationTask.class, CommitPhase.class, "currentPhase");
         private final DOMDataWriteTransaction tx;
         private final Iterable<DOMStoreThreePhaseCommitCohort> cohorts;
-        private final DurationStatsTracker commitStatTracker;
+        private final TransactionStatsTracker commitStatsTracker;
         private final int cohortSize;
         private volatile CommitPhase currentPhase = CommitPhase.SUBMITTED;
 
         public CommitCoordinationTask(final DOMDataWriteTransaction transaction,
                 final Iterable<DOMStoreThreePhaseCommitCohort> cohorts,
                 final Optional<DOMDataCommitErrorListener> listener,
-                final DurationStatsTracker commitStatTracker) {
+                final TransactionStatsTracker commitStatsTracker) {
             this.tx = Preconditions.checkNotNull(transaction, "transaction must not be null");
             this.cohorts = Preconditions.checkNotNull(cohorts, "cohorts must not be null");
-            this.commitStatTracker = commitStatTracker;
+            this.commitStatsTracker = Preconditions.checkNotNull(commitStatsTracker,
+                    "commitStatsTracker must not be null.");
             this.cohortSize = Iterables.size(cohorts);
         }
 
         @Override
         public Void call() throws TransactionCommitFailedException {
-            final long startTime = commitStatTracker != null ? System.nanoTime() : 0;
+            final long startTime = System.nanoTime();
 
             try {
                 canCommitBlocking();
@@ -159,14 +162,16 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
                 commitBlocking();
                 return null;
             } catch (TransactionCommitFailedException e) {
+                if(e instanceof OptimisticLockFailedException) {
+                    commitStatsTracker.incrementOptimisticLockFailures();
+                }
+
                 final CommitPhase phase = currentPhase;
                 LOG.warn("Tx: {} Error during phase {}, starting Abort", tx.getIdentifier(), phase, e);
                 abortBlocking(e, phase);
                 throw e;
             } finally {
-                if (commitStatTracker != null) {
-                    commitStatTracker.addDuration(System.nanoTime() - startTime);
-                }
+                commitStatsTracker.addCommitDuration(System.nanoTime() - startTime);
             }
         }
 
@@ -190,6 +195,7 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
                         throw new TransactionCommitFailedException("Can Commit failed, no detailed cause available.");
                     }
                 } catch (InterruptedException | ExecutionException e) {
+                    commitStatsTracker.incrementCanCommitPhaseFailures();
                     throw TransactionCommitFailedExceptionMapper.CAN_COMMIT_ERROR_MAPPER.apply(e);
                 }
             }
@@ -238,6 +244,7 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
                     future.get();
                 }
             } catch (InterruptedException | ExecutionException e) {
+                commitStatsTracker.incrementPreCommitPhaseFailures();
                 throw TransactionCommitFailedExceptionMapper.PRE_COMMIT_MAPPER.apply(e);
             }
         }
@@ -286,6 +293,7 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
                     future.get();
                 }
             } catch (InterruptedException | ExecutionException e) {
+                commitStatsTracker.incrementCommitPhaseFailures();
                 throw TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER.apply(e);
             }
         }

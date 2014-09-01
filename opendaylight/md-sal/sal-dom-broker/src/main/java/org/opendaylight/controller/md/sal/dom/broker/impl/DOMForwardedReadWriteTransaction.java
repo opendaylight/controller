@@ -8,10 +8,13 @@
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
+
 import java.util.Map;
+
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
+import org.opendaylight.controller.md.sal.dom.broker.impl.jmx.TransactionStatsTracker;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -37,14 +40,18 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 final class DOMForwardedReadWriteTransaction extends DOMForwardedWriteTransaction<DOMStoreReadWriteTransaction> implements DOMDataReadWriteTransaction {
     protected DOMForwardedReadWriteTransaction(final Object identifier,
             final Map<LogicalDatastoreType, DOMStoreReadWriteTransaction> backingTxs,
-            final DOMDataCommitImplementation commitImpl) {
-        super(identifier, backingTxs, commitImpl);
+            final DOMDataCommitImplementation commitImpl,
+            final TransactionStatsTracker txStatsTracker) {
+        super(identifier, backingTxs, commitImpl, txStatsTracker);
     }
 
     @Override
     public CheckedFuture<Optional<NormalizedNode<?,?>>, ReadFailedException> read(
             final LogicalDatastoreType store, final YangInstanceIdentifier path) {
-        return getSubtransaction(store).read(path);
+        CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> future =
+                getSubtransaction(store).read(path);
+        getTxStatsTracker().updateReadStatsAsync(future);
+        return future;
     }
 
     @Override

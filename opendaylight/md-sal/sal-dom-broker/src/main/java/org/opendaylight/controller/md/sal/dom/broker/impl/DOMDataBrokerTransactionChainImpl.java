@@ -9,13 +9,16 @@ package org.opendaylight.controller.md.sal.dom.broker.impl;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
+
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
+
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
+import org.opendaylight.controller.md.sal.dom.broker.impl.jmx.TransactionStatsTracker;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.slf4j.Logger;
@@ -55,8 +58,9 @@ public class DOMDataBrokerTransactionChainImpl extends AbstractDOMForwardedTrans
      */
     public DOMDataBrokerTransactionChainImpl(final long chainId,
             final Map<LogicalDatastoreType, DOMStoreTransactionChain> chains,
-            final DOMDataCommitExecutor coordinator, final TransactionChainListener listener) {
-        super(chains);
+            final DOMDataCommitExecutor coordinator, final TransactionChainListener listener,
+            final TransactionStatsTracker txStatsTracker) {
+        super(chains, txStatsTracker);
         this.chainId = chainId;
         this.coordinator = Preconditions.checkNotNull(coordinator);
         this.listener = Preconditions.checkNotNull(listener);

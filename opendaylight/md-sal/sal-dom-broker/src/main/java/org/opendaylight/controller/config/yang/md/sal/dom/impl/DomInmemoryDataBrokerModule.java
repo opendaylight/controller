@@ -10,12 +10,13 @@ package org.opendaylight.controller.config.yang.md.sal.dom.impl;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitDeadlockException;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 import org.opendaylight.controller.md.sal.common.util.jmx.ThreadExecutorStatsMXBeanImpl;
 import org.opendaylight.controller.md.sal.dom.broker.impl.DOMDataBrokerImpl;
-import org.opendaylight.controller.md.sal.dom.broker.impl.jmx.CommitStatsMXBeanImpl;
+import org.opendaylight.controller.md.sal.dom.broker.impl.jmx.TransactionStatsMXBeanImpl;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreFactory;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.yangtools.util.concurrent.DeadlockDetectingListeningExecutorService;
@@ -88,14 +89,13 @@ public final class DomInmemoryDataBrokerModule extends
                 getMaxDataBrokerFutureCallbackPoolSize(), getMaxDataBrokerFutureCallbackQueueSize(),
                 "CommitFutures");
 
+        final TransactionStatsMXBeanImpl txStatsMBean = new TransactionStatsMXBeanImpl();
+        txStatsMBean.register(JMX_BEAN_TYPE);
+
         DOMDataBrokerImpl newDataBroker = new DOMDataBrokerImpl(datastores,
                 new DeadlockDetectingListeningExecutorService(commitExecutor,
                     TransactionCommitDeadlockException.DEADLOCK_EXCEPTION_SUPPLIER,
-                    listenableFutureExecutor));
-
-        final CommitStatsMXBeanImpl commitStatsMXBean = new CommitStatsMXBeanImpl(
-                newDataBroker.getCommitStatsTracker(), JMX_BEAN_TYPE);
-        commitStatsMXBean.registerMBean();
+                    listenableFutureExecutor), txStatsMBean);
 
         final AbstractMXBean commitExecutorStatsMXBean =
                 ThreadExecutorStatsMXBeanImpl.create(commitExecutor, "CommitExecutorStats",
@@ -107,7 +107,7 @@ public final class DomInmemoryDataBrokerModule extends
         newDataBroker.setCloseable(new AutoCloseable() {
             @Override
             public void close() {
-                commitStatsMXBean.unregisterMBean();
+                txStatsMBean.unregister();
                 if (commitExecutorStatsMXBean != null) {
                     commitExecutorStatsMXBean.unregisterMBean();
                 }
