@@ -223,14 +223,6 @@ public class NeutronSecurityRulesNorthbound {
                     service.neutronSecurityRuleCreated(singleton);
                 }
             }
-
-            securityRuleInterface.addNeutronSecurityRule(singleton);
-            if (instances != null) {
-                for (Object instance : instances) {
-                    INeutronSecurityRuleAware service = (INeutronSecurityRuleAware) instance;
-                    service.neutronSecurityRuleCreated(singleton);
-                }
-            }
         } else {
             List<NeutronSecurityRule> bulk = input.getBulk();
             Iterator<NeutronSecurityRule> i = bulk.iterator();
