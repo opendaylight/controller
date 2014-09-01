@@ -25,9 +25,12 @@ import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
 import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
+import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
 import org.opendaylight.yangtools.yang.data.codec.gson.JSONNormalizedNodeStreamWriter;
+import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 
 @Provider
 @Produces({ Draft02.MediaTypes.API + RestconfService.JSON, Draft02.MediaTypes.DATA + RestconfService.JSON,
@@ -54,10 +57,13 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
 
         InstanceIdentifierContext pathContext = t.getInstanceIdentifierContext();
         OutputStreamWriter ouWriter = new OutputStreamWriter(entityStream, Charsets.UTF_8);
-        NormalizedNodeStreamWriter jsonWriter = JSONNormalizedNodeStreamWriter.create(pathContext.getSchemaContext(),ouWriter);
+        NormalizedNodeStreamWriter jsonWriter = JSONNormalizedNodeStreamWriter.create(pathContext.getSchemaContext(),pathContext.getSchemaNode().getPath().getParent(),ouWriter);
         NormalizedNodeWriter nnWriter = NormalizedNodeWriter.forStreamWriter(jsonWriter);
-
-        nnWriter.write(t.getData());
+        NormalizedNode<?, ?> data = t.getData();
+        if (data instanceof MapEntryNode) {
+            data = ImmutableNodes.mapNodeBuilder(data.getNodeType()).addChild((MapEntryNode) data).build();
+        }
+        nnWriter.write(data);
         nnWriter.flush();
     }
 }
