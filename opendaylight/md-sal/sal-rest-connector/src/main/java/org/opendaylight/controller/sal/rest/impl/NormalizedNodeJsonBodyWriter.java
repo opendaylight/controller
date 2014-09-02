@@ -8,7 +8,6 @@
 package org.opendaylight.controller.sal.rest.impl;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -33,6 +32,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
 import org.opendaylight.yangtools.yang.data.codec.gson.JSONNormalizedNodeStreamWriter;
+import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
@@ -68,7 +68,7 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
         if (SchemaPath.ROOT.equals(path)) {
             // FIXME: Add proper handling of reading root.
         } else if (data instanceof MapEntryNode) {
-            writeMapEntryStart(outputWriter,data.getNodeType(),context.getSchemaContext());
+            writeMapEntryStart(outputWriter,context.getSchemaNode(),context.getSchemaContext());
         } else if (data instanceof ContainerNode) {
             path = path.getParent();
         } else {
@@ -84,14 +84,20 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
         outputWriter.flush();
     }
 
-    private void writeMapEntryStart(OutputStreamWriter writer, QName qname, SchemaContext schemaContext) throws IOException {
-        Module module = schemaContext.findModuleByNamespaceAndRevision(qname.getNamespace(), qname.getRevision());
-        Preconditions.checkArgument(module != null,"YANG Module not available for %s",qname);
-
-
+    private void writeMapEntryStart(OutputStreamWriter writer, DataSchemaNode dataSchemaNode, SchemaContext schemaContext) throws IOException {
+        QName qname = dataSchemaNode.getQName();
         writer.write('"');
-        writer.write(module.getName());
-        writer.write(':');
+        /*
+         * FIXME: JSON Draft allows both forms (e.g. moduleName:localName and localName) but module name is
+         * preffered. Commented out code used preffered way, but as it turned out there are some users
+         * out there,which requires original behaviour, so we will print fully qualified name
+         * only for root JSON node which was added by augmenation.
+         */
+        if(dataSchemaNode.isAugmenting()) {
+            Module module = schemaContext.findModuleByNamespaceAndRevision(qname.getNamespace(), qname.getRevision());
+            writer.write(module.getName());
+            writer.write(':');
+        }
         writer.write(qname.getLocalName());
         writer.write('"');
         writer.write(':');
