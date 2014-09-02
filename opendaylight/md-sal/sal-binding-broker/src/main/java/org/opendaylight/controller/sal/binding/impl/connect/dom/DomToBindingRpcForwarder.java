@@ -3,6 +3,12 @@ package org.opendaylight.controller.sal.binding.impl.connect.dom;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+
 import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -21,25 +27,19 @@ import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
 import org.opendaylight.yangtools.concepts.CompositeObjectRegistration;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
+import org.opendaylight.yangtools.util.ClassLoaderUtils;
 import org.opendaylight.yangtools.yang.binding.BaseIdentity;
 import org.opendaylight.yangtools.yang.binding.BindingMapping;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
-import org.opendaylight.yangtools.yang.binding.util.ClassLoaderUtils;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 
 class DomToBindingRpcForwarder implements RpcImplementation, InvocationHandler {
 
@@ -65,8 +65,8 @@ class DomToBindingRpcForwarder implements RpcImplementation, InvocationHandler {
     static {
         try {
             EQUALS_METHOD = Object.class.getMethod("equals", Object.class);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (NoSuchMethodException | SecurityException e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 
@@ -94,7 +94,7 @@ class DomToBindingRpcForwarder implements RpcImplementation, InvocationHandler {
     }
 
     /**
-     * Constructor for Routed RPC Forwareder.
+     * Constructor for Routed RPC Forwarder.
      *
      * @param service
      * @param context
