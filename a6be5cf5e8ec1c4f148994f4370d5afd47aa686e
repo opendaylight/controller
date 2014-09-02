@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_4bebadb0",
+        "filename": "opendaylight/config/config-util/src/test/java/org/opendaylight/controller/config/util/ConfigRegistryClientsTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-09-02T12:17:51Z",
+      "side": 1,
+      "message": "new HashMap\u003c\u003e(); should be enough on java 7, type parameters are not necessary",
+      "revId": "a6be5cf5e8ec1c4f148994f4370d5afd47aa686e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4b864d15",
+        "filename": "opendaylight/config/config-util/src/test/java/org/opendaylight/controller/config/util/ConfigRegistryClientsTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-09-02T12:17:51Z",
+      "side": 1,
+      "message": "Does this case test whether created transaction is not null ? If so, there is a much better way of doing that:\n\nassertNotNull(jmxTransactionClient)\n\nAssertionError should never be expected from a test\n\n... please fix other tests as well",
+      "revId": "a6be5cf5e8ec1c4f148994f4370d5afd47aa686e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_abd91924",
+        "filename": "opendaylight/config/config-util/src/test/java/org/opendaylight/controller/config/util/ConfigRegistryClientsTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-09-02T12:17:51Z",
+      "side": 1,
+      "message": "assertNull ... in other tests as well",
+      "revId": "a6be5cf5e8ec1c4f148994f4370d5afd47aa686e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6b031177",
+        "filename": "opendaylight/config/config-util/src/test/java/org/opendaylight/controller/config/util/ConfigRegistryClientsTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-09-02T12:17:51Z",
+      "side": 1,
+      "message": "this is not a good assertion.\n\nyou can create a set containing expected eloements and use assertEquals. Or use assertThat(clientLookupServiceInterfaceNames(testingRegistryON), hasItem(TestingConfigRegistry.serviceQName1)) and for second item as well.\n\n... other tests as well.",
+      "revId": "a6be5cf5e8ec1c4f148994f4370d5afd47aa686e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_cbed7db9",
+        "filename": "opendaylight/config/config-util/src/test/java/org/opendaylight/controller/config/util/ConfigTransactionClientsTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-09-02T12:17:51Z",
+      "side": 1,
+      "message": "should this really be null ? or is it expected to be set in one test and used in another ?",
+      "revId": "a6be5cf5e8ec1c4f148994f4370d5afd47aa686e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2b342949",
+        "filename": "opendaylight/config/config-util/src/test/java/org/opendaylight/controller/config/util/ConfigTransactionClientsTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-09-02T12:17:51Z",
+      "side": 1,
+      "message": "This expects a set full of nulls ?",
+      "revId": "a6be5cf5e8ec1c4f148994f4370d5afd47aa686e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_eb3de12d",
+        "filename": "opendaylight/config/config-util/src/test/java/org/opendaylight/controller/config/util/ConfigTransactionClientsTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 282,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-09-02T12:17:51Z",
+      "side": 1,
+      "message": "attribute might be set to null or to some value from next test (depending on test execution order) is that ok ?",
+      "revId": "a6be5cf5e8ec1c4f148994f4370d5afd47aa686e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
