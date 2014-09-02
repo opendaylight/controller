@@ -19,6 +19,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardMBeanFactory;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransaction;
@@ -34,21 +35,25 @@ public class ThreePhaseCommitCohort extends AbstractUntypedActor {
     private final DOMStoreThreePhaseCommitCohort cohort;
     private final ActorRef shardActor;
     private final CompositeModification modification;
+    private final String shardName;
 
     public ThreePhaseCommitCohort(DOMStoreThreePhaseCommitCohort cohort,
-        ActorRef shardActor, CompositeModification modification) {
+        ActorRef shardActor, CompositeModification modification,String shardName) {
 
         this.cohort = cohort;
         this.shardActor = shardActor;
         this.modification = modification;
+        this.shardName = shardName;
     }
 
     private final LoggingAdapter log =
         Logging.getLogger(getContext().system(), this);
 
     public static Props props(final DOMStoreThreePhaseCommitCohort cohort,
-        final ActorRef shardActor, final CompositeModification modification) {
-        return Props.create(new ThreePhaseCommitCohortCreator(cohort, shardActor, modification));
+        final ActorRef shardActor, final CompositeModification modification,
+        String shardName) {
+        return Props.create(new ThreePhaseCommitCohortCreator(cohort, shardActor, modification,
+           shardName));
     }
 
     @Override
@@ -78,9 +83,10 @@ public class ThreePhaseCommitCohort extends AbstractUntypedActor {
         Futures.addCallback(future, new FutureCallback<Void>() {
             @Override
             public void onSuccess(Void v) {
+                ShardMBeanFactory.getShardStatsMBean(shardName).incrementAbortTransactionsCount();
                 sender
                     .tell(new AbortTransactionReply().toSerializable(),
-                        self);
+                    self);
             }
 
             @Override
@@ -148,17 +154,19 @@ public class ThreePhaseCommitCohort extends AbstractUntypedActor {
         final DOMStoreThreePhaseCommitCohort cohort;
         final ActorRef shardActor;
         final CompositeModification modification;
+        final String shardName;
 
         ThreePhaseCommitCohortCreator(DOMStoreThreePhaseCommitCohort cohort,
-                ActorRef shardActor, CompositeModification modification) {
+            ActorRef shardActor, CompositeModification modification, String shardName) {
             this.cohort = cohort;
             this.shardActor = shardActor;
             this.modification = modification;
+            this.shardName = shardName;
         }
 
         @Override
         public ThreePhaseCommitCohort create() throws Exception {
-            return new ThreePhaseCommitCohort(cohort, shardActor, modification);
+            return new ThreePhaseCommitCohort(cohort, shardActor, modification, shardName);
         }
     }
 }

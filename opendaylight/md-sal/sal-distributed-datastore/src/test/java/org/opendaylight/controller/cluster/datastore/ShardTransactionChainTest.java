@@ -28,7 +28,9 @@ public class ShardTransactionChainTest extends AbstractActorTest {
 
     private static final SchemaContext testSchemaContext = TestModel.createTestContext();
 
-    private static final ShardContext shardContext = new ShardContext();
+    private static final DatastoreContext DATA_STORE_CONTEXT = new DatastoreContext();
+
+    private static final String mockShardName = "mockShardName";
 
     @BeforeClass
     public static void staticSetup() {
@@ -39,7 +41,7 @@ public class ShardTransactionChainTest extends AbstractActorTest {
     public void testOnReceiveCreateTransaction() throws Exception {
         new JavaTestKit(getSystem()) {{
             final Props props = ShardTransactionChain.props(store.createTransactionChain(),
-                    testSchemaContext, shardContext);
+                    testSchemaContext, DATA_STORE_CONTEXT, mockShardName);
             final ActorRef subject = getSystem().actorOf(props, "testCreateTransaction");
 
             new Within(duration("1 seconds")) {
@@ -77,7 +79,7 @@ public class ShardTransactionChainTest extends AbstractActorTest {
     public void testOnReceiveCloseTransactionChain() throws Exception {
         new JavaTestKit(getSystem()) {{
             final Props props = ShardTransactionChain.props(store.createTransactionChain(),
-                    testSchemaContext, shardContext);
+                    testSchemaContext, DATA_STORE_CONTEXT,mockShardName );
             final ActorRef subject = getSystem().actorOf(props, "testCloseTransactionChain");
 
             new Within(duration("1 seconds")) {

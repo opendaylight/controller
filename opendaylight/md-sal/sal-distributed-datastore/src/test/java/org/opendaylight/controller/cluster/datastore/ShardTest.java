@@ -35,7 +35,7 @@ import static org.junit.Assert.assertTrue;
 
 public class ShardTest extends AbstractActorTest {
 
-    private static final ShardContext shardContext = new ShardContext();
+    private static final DatastoreContext DATA_STORE_CONTEXT = new DatastoreContext();
 
     @Test
     public void testOnReceiveCreateTransactionChain() throws Exception {
@@ -44,7 +44,7 @@ public class ShardTest extends AbstractActorTest {
                 ShardIdentifier.builder().memberName("member-1")
                     .shardName("inventory").type("config").build();
 
-            final Props props = Shard.props(identifier, Collections.EMPTY_MAP, shardContext);
+            final Props props = Shard.props(identifier, Collections.EMPTY_MAP, DATA_STORE_CONTEXT);
             final ActorRef subject =
                 getSystem().actorOf(props, "testCreateTransactionChain");
 
@@ -103,7 +103,7 @@ public class ShardTest extends AbstractActorTest {
                 ShardIdentifier.builder().memberName("member-1")
                     .shardName("inventory").type("config").build();
 
-            final Props props = Shard.props(identifier, Collections.EMPTY_MAP, shardContext);
+            final Props props = Shard.props(identifier, Collections.EMPTY_MAP, DATA_STORE_CONTEXT);
             final ActorRef subject =
                 getSystem().actorOf(props, "testRegisterChangeListener");
 
@@ -165,7 +165,7 @@ public class ShardTest extends AbstractActorTest {
                 ShardIdentifier.builder().memberName("member-1")
                     .shardName("inventory").type("config").build();
 
-            final Props props = Shard.props(identifier, Collections.EMPTY_MAP, shardContext);
+            final Props props = Shard.props(identifier, Collections.EMPTY_MAP, DATA_STORE_CONTEXT);
             final ActorRef subject =
                 getSystem().actorOf(props, "testCreateTransaction");
 
@@ -227,7 +227,7 @@ public class ShardTest extends AbstractActorTest {
                     .shardName("inventory").type("config").build();
 
             peerAddresses.put(identifier, null);
-            final Props props = Shard.props(identifier, peerAddresses, shardContext);
+            final Props props = Shard.props(identifier, peerAddresses, DATA_STORE_CONTEXT);
             final ActorRef subject =
                 getSystem().actorOf(props, "testPeerAddressResolved");
 

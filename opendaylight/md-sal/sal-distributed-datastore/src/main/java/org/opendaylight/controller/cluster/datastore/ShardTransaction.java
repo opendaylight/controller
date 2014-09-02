@@ -13,11 +13,10 @@ import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.ReceiveTimeout;
 import akka.japi.Creator;
-
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
-
 import org.opendaylight.controller.cluster.datastore.exceptions.UnknownMessageException;
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardMBeanFactory;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
@@ -74,18 +73,22 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
 
     private final ActorRef shardActor;
     protected final SchemaContext schemaContext;
+    private final String  shardName;
+
 
     private final MutableCompositeModification modification = new MutableCompositeModification();
 
-    protected ShardTransaction(ActorRef shardActor, SchemaContext schemaContext) {
+    protected ShardTransaction(ActorRef shardActor, SchemaContext schemaContext,
+        String shardName) {
         this.shardActor = shardActor;
         this.schemaContext = schemaContext;
+        this.shardName = shardName;
     }
 
     public static Props props(DOMStoreTransaction transaction, ActorRef shardActor,
-            SchemaContext schemaContext, ShardContext shardContext) {
+            SchemaContext schemaContext,DatastoreContext datastoreContext, String shardName) {
         return Props.create(new ShardTransactionCreator(transaction, shardActor, schemaContext,
-                shardContext));
+           datastoreContext, shardName));
     }
 
     protected abstract DOMStoreTransaction getDOMStoreTransaction();
@@ -134,7 +137,8 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
                         sender.tell(new ReadDataReply(schemaContext,null).toSerializable(), self);
                     }
                 } catch (Exception e) {
-                    sender.tell(new akka.actor.Status.Failure(e),self);
+                    ShardMBeanFactory.getShardStatsMBean(shardName).incrementFailedReadTransactionsCount();
+                    sender.tell(new akka.actor.Status.Failure(e), self);
                 }
 
             }
@@ -192,7 +196,7 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
     protected void readyTransaction(DOMStoreWriteTransaction transaction, ReadyTransaction message) {
         DOMStoreThreePhaseCommitCohort cohort =  transaction.ready();
         ActorRef cohortActor = getContext().actorOf(
-                ThreePhaseCommitCohort.props(cohort, shardActor, modification), "cohort");
+            ThreePhaseCommitCohort.props(cohort, shardActor, modification, shardName), "cohort");
         getSender()
         .tell(new ReadyTransactionReply(cohortActor.path()).toSerializable(), getSelf());
 
@@ -205,14 +209,16 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
         final DOMStoreTransaction transaction;
         final ActorRef shardActor;
         final SchemaContext schemaContext;
-        final ShardContext shardContext;
+        final DatastoreContext datastoreContext;
+        final String shardName;
 
         ShardTransactionCreator(DOMStoreTransaction transaction, ActorRef shardActor,
-                SchemaContext schemaContext, ShardContext actorContext) {
+                SchemaContext schemaContext, DatastoreContext datastoreContext, String shardName) {
             this.transaction = transaction;
             this.shardActor = shardActor;
-            this.shardContext = actorContext;
+            this.shardName = shardName;
             this.schemaContext = schemaContext;
+            this.datastoreContext = datastoreContext;
         }
 
         @Override
@@ -220,16 +226,16 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
             ShardTransaction tx;
             if(transaction instanceof DOMStoreReadWriteTransaction) {
                 tx = new ShardReadWriteTransaction((DOMStoreReadWriteTransaction)transaction,
-                        shardActor, schemaContext);
+                        shardActor, schemaContext, shardName);
             } else if(transaction instanceof DOMStoreReadTransaction) {
                 tx = new ShardReadTransaction((DOMStoreReadTransaction)transaction, shardActor,
-                        schemaContext);
+                        schemaContext, shardName);
             } else {
                 tx = new ShardWriteTransaction((DOMStoreWriteTransaction)transaction,
-                        shardActor, schemaContext);
+                        shardActor, schemaContext, shardName);
             }
 
-            tx.getContext().setReceiveTimeout(shardContext.getShardTransactionIdleTimeout());
+            tx.getContext().setReceiveTimeout(datastoreContext.getShardTransactionIdleTimeout());
             return tx;
         }
     }

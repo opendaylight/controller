@@ -63,7 +63,8 @@ public class ThreePhaseCommitCohortFailureTest extends AbstractActorTest {
         ShardIdentifier.builder().memberName("member-1")
             .shardName("inventory").type("config").build();
 
-    private final ShardContext shardContext = new ShardContext();
+    private final DatastoreContext datastoreContext = new DatastoreContext();
+
 
     @BeforeClass
     public static void staticSetup() {
@@ -77,13 +78,13 @@ public class ThreePhaseCommitCohortFailureTest extends AbstractActorTest {
     public void testNegativeAbortResultsInException() throws Exception {
 
         final ActorRef shard = getSystem().actorOf(Shard.props(SHARD_IDENTIFIER,
-                Collections.EMPTY_MAP, shardContext));
+                Collections.EMPTY_MAP, datastoreContext));
         final DOMStoreThreePhaseCommitCohort mockCohort = Mockito
             .mock(DOMStoreThreePhaseCommitCohort.class);
         final CompositeModification mockComposite =
             Mockito.mock(CompositeModification.class);
         final Props props =
-            ThreePhaseCommitCohort.props(mockCohort, shard, mockComposite);
+            ThreePhaseCommitCohort.props(mockCohort, shard, mockComposite,SHARD_IDENTIFIER.toString());
 
         final TestActorRef<ThreePhaseCommitCohort> subject = TestActorRef
             .create(getSystem(), props,
@@ -106,13 +107,13 @@ public class ThreePhaseCommitCohortFailureTest extends AbstractActorTest {
     public void testNegativeCanCommitResultsInException() throws Exception {
 
         final ActorRef shard = getSystem().actorOf(Shard.props(SHARD_IDENTIFIER,
-                Collections.EMPTY_MAP, shardContext));
+                Collections.EMPTY_MAP, datastoreContext));
         final DOMStoreThreePhaseCommitCohort mockCohort = Mockito
             .mock(DOMStoreThreePhaseCommitCohort.class);
         final CompositeModification mockComposite =
             Mockito.mock(CompositeModification.class);
         final Props props =
-            ThreePhaseCommitCohort.props(mockCohort, shard, mockComposite);
+            ThreePhaseCommitCohort.props(mockCohort, shard, mockComposite,SHARD_IDENTIFIER.toString());
 
         final TestActorRef<ThreePhaseCommitCohort> subject = TestActorRef
             .create(getSystem(), props,
@@ -138,13 +139,13 @@ public class ThreePhaseCommitCohortFailureTest extends AbstractActorTest {
     public void testNegativePreCommitResultsInException() throws Exception {
 
         final ActorRef shard = getSystem().actorOf(Shard.props(SHARD_IDENTIFIER,
-                Collections.EMPTY_MAP, shardContext));
+                Collections.EMPTY_MAP, datastoreContext));
         final DOMStoreThreePhaseCommitCohort mockCohort = Mockito
             .mock(DOMStoreThreePhaseCommitCohort.class);
         final CompositeModification mockComposite =
             Mockito.mock(CompositeModification.class);
         final Props props =
-            ThreePhaseCommitCohort.props(mockCohort, shard, mockComposite);
+            ThreePhaseCommitCohort.props(mockCohort, shard, mockComposite,SHARD_IDENTIFIER.toString());
 
         final TestActorRef<ThreePhaseCommitCohort> subject = TestActorRef
             .create(getSystem(), props,
@@ -168,12 +169,12 @@ public class ThreePhaseCommitCohortFailureTest extends AbstractActorTest {
     public void testNegativeCommitResultsInException() throws Exception {
 
         final TestActorRef<Shard> subject = TestActorRef.create(getSystem(),
-                Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP, shardContext),
+                Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP, datastoreContext),
                 "testNegativeCommitResultsInException");
 
         final ActorRef shardTransaction =
             getSystem().actorOf(ShardTransaction.props(store.newReadWriteTransaction(), subject,
-                    testSchemaContext, shardContext));
+                    testSchemaContext, datastoreContext,SHARD_IDENTIFIER.toString()));
 
         ShardTransactionMessages.WriteData writeData =
             ShardTransactionMessages.WriteData.newBuilder()

@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
 
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.AbstractBaseMBean;
@@ -6,37 +14,41 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * @author: syedbahm
+ * @author  Basheeruddin syedbahm@cisco.com
  */
 public class ShardStats extends AbstractBaseMBean implements ShardStatsMBean {
 
     private final String shardName;
 
-    private Long committedTransactionsCount = 0L;
+    private long committedTransactionsCount = 0L;
 
-    private Long readOnlyTransactionCount = 0L;
+    private long readOnlyTransactionCount = 0L;
 
-    private Long writeOnlyTransactionCount = 0L;
+    private long writeOnlyTransactionCount = 0L;
 
-    private Long readWriteTransactionCount = 0L;
+    private long readWriteTransactionCount = 0L;
 
     private String leader;
 
     private String raftState;
 
-    private Long lastLogTerm = -1L;
+    private long lastLogTerm = -1L;
 
-    private Long lastLogIndex = -1L;
+    private long lastLogIndex = -1L;
 
-    private Long currentTerm = -1L;
+    private long currentTerm = -1L;
 
-    private Long commitIndex = -1L;
+    private long commitIndex = -1L;
 
-    private Long lastApplied = -1L;
+    private long lastApplied = -1L;
 
     private Date lastCommittedTransactionTime = new Date(0L);
 
-    private Long failedTransactionsCount = 0L;
+    private long failedTransactionsCount = 0L;
+
+    private long failedReadTransactionsCount = 0L;
+
+    private long abortTransactionsCount = 0L;
 
     private SimpleDateFormat sdf =
         new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -52,7 +64,7 @@ public class ShardStats extends AbstractBaseMBean implements ShardStatsMBean {
     }
 
     @Override
-    public Long getCommittedTransactionsCount() {
+    public long getCommittedTransactionsCount() {
         return committedTransactionsCount;
     }
 
@@ -64,35 +76,35 @@ public class ShardStats extends AbstractBaseMBean implements ShardStatsMBean {
         return raftState;
     }
 
-    @Override public Long getReadOnlyTransactionCount() {
+    @Override public long getReadOnlyTransactionCount() {
         return readOnlyTransactionCount;
     }
 
-    @Override public Long getWriteOnlyTransactionCount() {
+    @Override public long getWriteOnlyTransactionCount() {
         return writeOnlyTransactionCount;
     }
 
-    @Override public Long getReadWriteTransactionCount() {
+    @Override public long getReadWriteTransactionCount() {
         return readWriteTransactionCount;
     }
 
-    @Override public Long getLastLogIndex() {
+    @Override public long getLastLogIndex() {
         return lastLogIndex;
     }
 
-    @Override public Long getLastLogTerm() {
+    @Override public long getLastLogTerm() {
         return lastLogTerm;
     }
 
-    @Override public Long getCurrentTerm() {
+    @Override public long getCurrentTerm() {
         return currentTerm;
     }
 
-    @Override public Long getCommitIndex() {
+    @Override public long getCommitIndex() {
         return commitIndex;
     }
 
-    @Override public Long getLastApplied() {
+    @Override public long getLastApplied() {
         return lastApplied;
     }
 
@@ -102,25 +114,43 @@ public class ShardStats extends AbstractBaseMBean implements ShardStatsMBean {
         return sdf.format(lastCommittedTransactionTime);
     }
 
-    @Override public Long getFailedTransactionsCount() {
+    @Override public long getFailedTransactionsCount() {
         return failedTransactionsCount;
     }
 
-    public Long incrementCommittedTransactionCount() {
+    @Override public long getFailedReadTransactionsCount() {
+        return failedReadTransactionsCount;
+    }
+
+    @Override public long getAbortTransactionsCount() {
+        return abortTransactionsCount;
+    }
+
+    public long incrementCommittedTransactionCount() {
         return committedTransactionsCount++;
     }
 
-    public Long incrementReadOnlyTransactionCount() {
+    public long incrementReadOnlyTransactionCount() {
         return readOnlyTransactionCount++;
     }
 
-    public Long incrementWriteOnlyTransactionCount() {
+    public long incrementWriteOnlyTransactionCount() {
         return writeOnlyTransactionCount++;
     }
 
-    public Long incrementReadWriteTransactionCount() {
+    public long incrementReadWriteTransactionCount() {
         return readWriteTransactionCount++;
     }
+
+    public long incrementFailedTransactionsCount() {
+        return failedTransactionsCount++;
+    }
+
+    public long incrementFailedReadTransactionsCount() {
+        return failedReadTransactionsCount++;
+    }
+
+    public long incrementAbortTransactionsCount () { return abortTransactionsCount++;}
 
     public void setLeader(String leader) {
         this.leader = leader;
@@ -130,23 +160,23 @@ public class ShardStats extends AbstractBaseMBean implements ShardStatsMBean {
         this.raftState = raftState;
     }
 
-    public void setLastLogTerm(Long lastLogTerm) {
+    public void setLastLogTerm(long lastLogTerm) {
         this.lastLogTerm = lastLogTerm;
     }
 
-    public void setLastLogIndex(Long lastLogIndex) {
+    public void setLastLogIndex(long lastLogIndex) {
         this.lastLogIndex = lastLogIndex;
     }
 
-    public void setCurrentTerm(Long currentTerm) {
+    public void setCurrentTerm(long currentTerm) {
         this.currentTerm = currentTerm;
     }
 
-    public void setCommitIndex(Long commitIndex) {
+    public void setCommitIndex(long commitIndex) {
         this.commitIndex = commitIndex;
     }
 
-    public void setLastApplied(Long lastApplied) {
+    public void setLastApplied(long lastApplied) {
         this.lastApplied = lastApplied;
     }
 
@@ -171,8 +201,28 @@ public class ShardStats extends AbstractBaseMBean implements ShardStatsMBean {
         return JMX_CATEGORY_SHARD;
     }
 
+    /**
+     * resets the counters related to transactions
+     */
 
-    public void incrementFailedTransactionsCount() {
-        this.failedTransactionsCount++;
+    public void resetTransactionCounters(){
+        committedTransactionsCount = 0L;
+
+        readOnlyTransactionCount = 0L;
+
+        writeOnlyTransactionCount = 0L;
+
+        readWriteTransactionCount = 0L;
+
+        lastCommittedTransactionTime = new Date(0L);
+
+        failedTransactionsCount = 0L;
+
+        failedReadTransactionsCount = 0L;
+
+        abortTransactionsCount = 0L;
+
     }
+
+
 }

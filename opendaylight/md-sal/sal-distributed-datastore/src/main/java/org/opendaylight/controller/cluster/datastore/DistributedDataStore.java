@@ -46,7 +46,7 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
     private static final Logger LOG = LoggerFactory.getLogger(DistributedDataStore.class);
 
     private final ActorContext actorContext;
-    private final ShardContext shardContext;
+    private final DatastoreContext datastoreContext;
 
     public DistributedDataStore(ActorSystem actorSystem, String type, ClusterWrapper cluster,
             Configuration configuration, DistributedDataStoreProperties dataStoreProperties) {
@@ -60,7 +60,7 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
 
         LOG.info("Creating ShardManager : {}", shardManagerId);
 
-        shardContext = new ShardContext(InMemoryDOMDataStoreConfigProperties.create(
+        datastoreContext = new DatastoreContext(InMemoryDOMDataStoreConfigProperties.create(
                 dataStoreProperties.getMaxShardDataChangeExecutorPoolSize(),
                 dataStoreProperties.getMaxShardDataChangeExecutorQueueSize(),
                 dataStoreProperties.getMaxShardDataChangeListenerQueueSize()),
@@ -70,13 +70,13 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
         actorContext
                 = new ActorContext(
                     actorSystem, actorSystem.actorOf(
-                        ShardManager.props(type, cluster, configuration, shardContext).
+                        ShardManager.props(type, cluster, configuration, datastoreContext).
                             withMailbox(ActorContext.MAILBOX), shardManagerId ), cluster, configuration);
     }
 
     public DistributedDataStore(ActorContext actorContext) {
         this.actorContext = Preconditions.checkNotNull(actorContext, "actorContext should not be null");
-        this.shardContext = new ShardContext();
+        this.datastoreContext = new DatastoreContext();
     }
 
 

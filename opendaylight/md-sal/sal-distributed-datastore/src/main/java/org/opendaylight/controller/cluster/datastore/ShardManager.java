@@ -72,19 +72,19 @@ public class ShardManager extends AbstractUntypedActor {
 
     private ShardManagerInfoMBean mBean;
 
-    private final ShardContext shardContext;
+    private final DatastoreContext datastoreContext;
 
     /**
      * @param type defines the kind of data that goes into shards created by this shard manager. Examples of type would be
      *             configuration or operational
      */
     private ShardManager(String type, ClusterWrapper cluster, Configuration configuration,
-            ShardContext shardContext) {
+            DatastoreContext datastoreContext) {
 
         this.type = Preconditions.checkNotNull(type, "type should not be null");
         this.cluster = Preconditions.checkNotNull(cluster, "cluster should not be null");
         this.configuration = Preconditions.checkNotNull(configuration, "configuration should not be null");
-        this.shardContext = shardContext;
+        this.datastoreContext = datastoreContext;
 
         // Subscribe this actor to cluster member events
         cluster.subscribeToMemberEvents(getSelf());
@@ -97,13 +97,13 @@ public class ShardManager extends AbstractUntypedActor {
     public static Props props(final String type,
         final ClusterWrapper cluster,
         final Configuration configuration,
-        final ShardContext shardContext) {
+        final DatastoreContext datastoreContext) {
 
         Preconditions.checkNotNull(type, "type should not be null");
         Preconditions.checkNotNull(cluster, "cluster should not be null");
         Preconditions.checkNotNull(configuration, "configuration should not be null");
 
-        return Props.create(new ShardManagerCreator(type, cluster, configuration, shardContext));
+        return Props.create(new ShardManagerCreator(type, cluster, configuration, datastoreContext));
     }
 
     @Override
@@ -245,7 +245,7 @@ public class ShardManager extends AbstractUntypedActor {
             ShardIdentifier shardId = getShardIdentifier(memberName, shardName);
             Map<ShardIdentifier, String> peerAddresses = getPeerAddresses(shardName);
             ActorRef actor = getContext()
-                .actorOf(Shard.props(shardId, peerAddresses, shardContext).
+                .actorOf(Shard.props(shardId, peerAddresses, datastoreContext).
                     withMailbox(ActorContext.MAILBOX), shardId.toString());
 
             localShardActorNames.add(shardId.toString());
@@ -354,19 +354,19 @@ public class ShardManager extends AbstractUntypedActor {
         final String type;
         final ClusterWrapper cluster;
         final Configuration configuration;
-        final ShardContext shardContext;
+        final DatastoreContext datastoreContext;
 
         ShardManagerCreator(String type, ClusterWrapper cluster,
-                Configuration configuration, ShardContext shardContext) {
+                Configuration configuration, DatastoreContext datastoreContext) {
             this.type = type;
             this.cluster = cluster;
             this.configuration = configuration;
-            this.shardContext = shardContext;
+            this.datastoreContext = datastoreContext;
         }
 
         @Override
         public ShardManager create() throws Exception {
-            return new ShardManager(type, cluster, configuration, shardContext);
+            return new ShardManager(type, cluster, configuration, datastoreContext);
         }
     }
 }

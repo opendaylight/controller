@@ -96,16 +96,17 @@ public class Shard extends RaftActor {
 
     private final List<ActorSelection> dataChangeListeners = new ArrayList<>();
 
-    private final ShardContext shardContext;
+    private final DatastoreContext datastoreContext;
+
 
     private SchemaContext schemaContext;
 
     private Shard(ShardIdentifier name, Map<ShardIdentifier, String> peerAddresses,
-            ShardContext shardContext) {
+            DatastoreContext datastoreContext) {
         super(name.toString(), mapPeerAddresses(peerAddresses), Optional.of(configParams));
 
         this.name = name;
-        this.shardContext = shardContext;
+        this.datastoreContext = datastoreContext;
 
         String setting = System.getProperty("shard.persistent");
 
@@ -114,9 +115,10 @@ public class Shard extends RaftActor {
         LOG.info("Shard created : {} persistent : {}", name, persistent);
 
         store = InMemoryDOMDataStoreFactory.create(name.toString(), null,
-                shardContext.getDataStoreProperties());
+                datastoreContext.getDataStoreProperties());
 
         shardMBean = ShardMBeanFactory.getShardStatsMBean(name.toString());
+
 
     }
 
@@ -134,12 +136,12 @@ public class Shard extends RaftActor {
 
     public static Props props(final ShardIdentifier name,
         final Map<ShardIdentifier, String> peerAddresses,
-        ShardContext shardContext) {
+        DatastoreContext datastoreContext) {
         Preconditions.checkNotNull(name, "name should not be null");
         Preconditions.checkNotNull(peerAddresses, "peerAddresses should not be null");
-        Preconditions.checkNotNull(shardContext, "shardContext should not be null");
+        Preconditions.checkNotNull(datastoreContext, "shardContext should not be null");
 
-        return Props.create(new ShardCreator(name, peerAddresses, shardContext));
+        return Props.create(new ShardCreator(name, peerAddresses, datastoreContext));
     }
 
     @Override public void onReceiveCommand(Object message) {
@@ -185,7 +187,7 @@ public class Shard extends RaftActor {
 
             return getContext().actorOf(
                 ShardTransaction.props(store.newReadOnlyTransaction(), getSelf(),
-                        schemaContext, shardContext), transactionId.toString());
+                        schemaContext,datastoreContext, name.toString()), transactionId.toString());
 
         } else if (createTransaction.getTransactionType()
             == TransactionProxy.TransactionType.READ_WRITE.ordinal()) {
@@ -194,7 +196,7 @@ public class Shard extends RaftActor {
 
             return getContext().actorOf(
                 ShardTransaction.props(store.newReadWriteTransaction(), getSelf(),
-                        schemaContext, shardContext), transactionId.toString());
+                        schemaContext, datastoreContext,name.toString()), transactionId.toString());
 
 
         } else if (createTransaction.getTransactionType()
@@ -204,7 +206,7 @@ public class Shard extends RaftActor {
 
             return getContext().actorOf(
                 ShardTransaction.props(store.newWriteOnlyTransaction(), getSelf(),
-                        schemaContext, shardContext), transactionId.toString());
+                        schemaContext, datastoreContext, name.toString()), transactionId.toString());
         } else {
             throw new IllegalArgumentException(
                 "Shard="+name + ":CreateTransaction message has unidentified transaction type="
@@ -343,7 +345,7 @@ public class Shard extends RaftActor {
     private void createTransactionChain() {
         DOMStoreTransactionChain chain = store.createTransactionChain();
         ActorRef transactionChain = getContext().actorOf(
-                ShardTransactionChain.props(chain, schemaContext, shardContext));
+                ShardTransactionChain.props(chain, schemaContext, datastoreContext,name.toString() ));
         getSender().tell(new CreateTransactionChainReply(transactionChain.path()).toSerializable(),
                 getSelf());
     }
@@ -423,18 +425,18 @@ public class Shard extends RaftActor {
 
         final ShardIdentifier name;
         final Map<ShardIdentifier, String> peerAddresses;
-        final ShardContext shardContext;
+        final DatastoreContext datastoreContext;
 
         ShardCreator(ShardIdentifier name, Map<ShardIdentifier, String> peerAddresses,
-                ShardContext shardContext) {
+                DatastoreContext datastoreContext) {
             this.name = name;
             this.peerAddresses = peerAddresses;
-            this.shardContext = shardContext;
+            this.datastoreContext = datastoreContext;
         }
 
         @Override
         public Shard create() throws Exception {
-            return new Shard(name, peerAddresses, shardContext);
+            return new Shard(name, peerAddresses, datastoreContext);
         }
     }
 }
