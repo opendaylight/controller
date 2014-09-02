@@ -68,6 +68,7 @@ import org.slf4j.LoggerFactory;
 public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, SchemaContextListener,
         TransactionReadyPrototype,AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(InMemoryDOMDataStore.class);
+    private static final ListenableFuture<Void> SUCCESSFUL_FUTURE = Futures.immediateFuture(null);
 
     private static final Invoker<DataChangeListenerRegistration<?>, DOMImmutableDataChangeEvent> DCL_NOTIFICATION_MGR_INVOKER =
             new Invoker<DataChangeListenerRegistration<?>, DOMImmutableDataChangeEvent>() {
@@ -382,7 +383,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         @Override
         public ListenableFuture<Void> abort() {
             candidate = null;
-            return Futures.immediateFuture(null);
+            return SUCCESSFUL_FUTURE;
         }
 
         @Override
@@ -398,7 +399,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
                 listenerResolver.resolve(dataChangeListenerNotificationManager);
             }
 
-            return Futures.immediateFuture(null);
+            return SUCCESSFUL_FUTURE;
         }
     }
 }
