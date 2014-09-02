@@ -21,8 +21,8 @@
       <artifactId>junit</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.xtend</groupId>
-      <artifactId>org.eclipse.xtend.lib</artifactId>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -47,6 +47,11 @@
       <version>${slf4j.version}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-binding-broker-impl</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -57,7 +62,7 @@
         <configuration>
           <instructions>
             <Bundle-Activator>org.opendaylight.controller.md.statistics.manager.StatisticsManagerActivator</Bundle-Activator>
-            <Private-Package>org.opendaylight.controller.md.statistics.manager</Private-Package>
+            <!--<Private-Package>org.opendaylight.controller.md.statistics.manager</Private-Package>  -->
           </instructions>
         </configuration>
       </plugin>
