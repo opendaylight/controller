@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_fc3849d6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-02T23:31:30Z",
+      "side": 1,
+      "message": "Commenting out the embedded dependencies breaks this component for the regular distribution",
+      "revId": "bb0a35749d5e61c186d89d93467cd58eff7fb1cb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5c24d5ae",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-02T23:31:30Z",
+      "side": 1,
+      "message": "Doing this breaks this component for the regular distribution",
+      "revId": "bb0a35749d5e61c186d89d93467cd58eff7fb1cb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
