@@ -100,6 +100,7 @@ public class TestHelper {
                 mavenBundle("org.javassist", "javassist").versionAsInProject(), // //
 
                 mavenBundle(YANGTOOLS, "yang-data-api").versionAsInProject(), // //
+                mavenBundle(YANGTOOLS, "yang-data-util").versionAsInProject(), // //
                 mavenBundle(YANGTOOLS, "yang-data-impl").versionAsInProject(), // //
                 mavenBundle(YANGTOOLS, "yang-model-api").versionAsInProject(), // //
                 mavenBundle(YANGTOOLS, "yang-model-util").versionAsInProject(), // //
