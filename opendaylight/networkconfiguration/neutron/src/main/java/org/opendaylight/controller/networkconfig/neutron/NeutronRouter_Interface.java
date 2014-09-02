@@ -59,6 +59,10 @@ public class NeutronRouter_Interface implements Serializable {
         this.portUUID = portUUID;
     }
 
+    public String getID() {
+        return id;
+    }
+
     public void setID(String id) {
         this.id = id;
     }
