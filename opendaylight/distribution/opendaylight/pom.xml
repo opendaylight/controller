@@ -1261,6 +1261,10 @@
         </dependency>
         <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>yang-data-codec-gson</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>yang-data-composite-node</artifactId>
         </dependency>
         <!-- yang model dependencies -->
