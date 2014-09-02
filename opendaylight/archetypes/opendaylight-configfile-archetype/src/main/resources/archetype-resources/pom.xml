@@ -14,6 +14,10 @@
     will pick the pom.xml from the parent directory as the parent pom, which may or may
     not be correct.
   -->
+  <!--
+    Necessary TODO: Replace the contents of src/main/resources/80-${repoName}.xml with
+    the proper config subsystem contents for your module
+  -->
   <artifactId>${artifactId}</artifactId>
   <groupId>${groupId}</groupId>
   <description>Configuration files for md-sal</description>
@@ -23,7 +27,7 @@
   <packaging>jar</packaging>
   <properties>
       <!-- Optional TODO: Rename your configfile to taste -->
-      <configfile>80-configfile.xml</configfile>
+      <configfile>80-${repoName}.xml</configfile>
   </properties>
   <build>
     <plugins>
@@ -44,6 +48,18 @@
                   <type>xml</type>
                   <classifier>config</classifier>
                 </artifact>
+                <!--
+                  Optional TODO: Add additional config files
+                    You may need to add more than one config file
+                    if so, you just need to add additional <artifact> entries
+                    here WITH DIFFERENT CLASSIFIERS
+                    Example:
+                    <artifact>
+                      <file>${project.build.directory}/classes/<another-configfile></file>
+                      <type>xml</type>
+                      <classifier>config-<meaningful suffix to describe your other configfile></classifier>
+                    </artifact>
+                -->
               </artifacts>
             </configuration>
           </execution>
