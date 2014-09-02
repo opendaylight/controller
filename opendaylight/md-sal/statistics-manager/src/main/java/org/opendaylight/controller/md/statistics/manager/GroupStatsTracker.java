@@ -17,6 +17,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.OpendaylightGroupStatisticsService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.group.statistics.GroupStatisticsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group.statistics.reply.GroupStats;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group.statistics.reply.GroupStatsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.groups.Group;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.groups.GroupBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.groups.GroupKey;
@@ -104,5 +105,13 @@ final class GroupStatsTracker extends AbstractListeningStatsTracker<GroupStats, 
         }
 
         super.start(dbs);
+    }
+
+    @Override
+    protected GroupStats createInvariantKey(GroupStats item) {
+        GroupStatsBuilder groupStatsBuilder = new GroupStatsBuilder();
+        groupStatsBuilder.setKey(item.getKey());
+        groupStatsBuilder.setGroupId(item.getGroupId());
+        return groupStatsBuilder.build();
     }
 }
