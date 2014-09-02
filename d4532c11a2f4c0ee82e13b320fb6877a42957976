@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_d6fe84ae",
+        "filename": "opendaylight/config/config-manager/src/test/java/org/opendaylight/controller/config/manager/impl/osgi/RefreshingSCPModuleInfoRegistryTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-09-02T14:44:58Z",
+      "side": 1,
+      "message": "Mocking generic interface like this produces warning. You can avoid the warning by using @Mock annotation with a field. No need to fix now, just for future reference.",
+      "revId": "d4532c11a2f4c0ee82e13b320fb6877a42957976",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9630fc9f",
+        "filename": "opendaylight/config/config-manager/src/test/java/org/opendaylight/controller/config/manager/impl/osgi/RefreshingSCPModuleInfoRegistryTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-09-02T14:44:58Z",
+      "side": 1,
+      "message": "It is a little strange that a closed object allows further interaction. Could you please check if the close in scpreg is implemented correctly and also why it accepts registration after close ? ... Just to be sure",
+      "revId": "d4532c11a2f4c0ee82e13b320fb6877a42957976",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
