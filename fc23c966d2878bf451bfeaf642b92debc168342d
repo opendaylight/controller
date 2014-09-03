@@ -37,6 +37,42 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_bfbcf007",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/AbstractMeteredUntypedActor.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-09-03T23:44:58Z",
+      "side": 1,
+      "message": "I can add one.",
+      "parentUuid": "fa82b9bf_0c24d8c4",
+      "revId": "fc23c966d2878bf451bfeaf642b92debc168342d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5f45a415",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/AbstractMeteredUntypedActor.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-09-03T23:44:58Z",
+      "side": 1,
+      "message": "This configuration is enabled via config subsystem. Config subsystem recreates the module when ever a configuration is changed.\nisMetricsCaptureEnabled() looks into actor system\u0027s config which is in memory. akka.conf is read only once while creating the actor system.",
+      "parentUuid": "fa82b9bf_9f032c0d",
+      "revId": "fc23c966d2878bf451bfeaf642b92debc168342d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_ccf03094",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
         "patchSetId": 8
@@ -66,6 +102,42 @@
       "side": 1,
       "message": "I wanted to but....\nShard class hierarchy (Shard -\u003e RaftActor -\u003e ) is different than AbstractMeteredUntypedActor( Abs*Metered* -\u003e AbstractUntypedActor -\u003e UntypedActor). \nI didnt want metering capability to be inherited by all actors but only specific ones. Eg: Transient actors (Transaction ones) does need to be metered.\n\nIt would have been easier if Java 7 had interfaces with default method :-) \n\nLet me know if you have any ideas on this.",
       "parentUuid": "fa82b9bf_ccf03094",
+      "revId": "fc23c966d2878bf451bfeaf642b92debc168342d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_dffe94ae",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-09-03T23:44:58Z",
+      "side": 1,
+      "message": "On 1, the actors which will implement the interface will be duplicating the code.\n\nOn 2, I could move isMetricsCaptureEnabled() into a utility. I didnt because, well, its a small method and I didnt want to create a class for just one method. Also, it will be used by only 2 classes(Shard and AbstractMeteredUntypedActor). \ntimedReceive() encapsulates receive(). If we have to move it out, we need to implement some closure like class so that external timedReceive() can call receive(). It can be complicated and make code harder to read.\n\nWhat do you think?",
+      "parentUuid": "fa82b9bf_df46944f",
+      "revId": "fc23c966d2878bf451bfeaf642b92debc168342d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7f2bc833",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-09-03T23:44:58Z",
+      "side": 1,
+      "message": "As I replied on the earlier comment, the config is in memory and read only once from file during actor creation.",
+      "parentUuid": "fa82b9bf_7f73c8b4",
       "revId": "fc23c966d2878bf451bfeaf642b92debc168342d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
