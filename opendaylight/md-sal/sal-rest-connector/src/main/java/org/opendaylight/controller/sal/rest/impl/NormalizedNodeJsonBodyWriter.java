@@ -14,6 +14,7 @@ import java.io.OutputStreamWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.net.URI;
+import java.util.Iterator;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -26,6 +27,9 @@ import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
 import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
+import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
@@ -64,26 +68,43 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
             throw new RestconfDocumentedException(Response.Status.NOT_FOUND);
         }
 
-
+        boolean isDataRoot = false;
         URI initialNs = null;
         outputWriter.write('{');
-        if (!SchemaPath.ROOT.equals(path)) {
+        if (SchemaPath.ROOT.equals(path)) {
+            isDataRoot = true;
+        } else {
             path = path.getParent();
             // FIXME: Add proper handling of reading root.
-        }
-        if(data instanceof MapEntryNode) {
-            data = ImmutableNodes.mapNodeBuilder(data.getNodeType()).withChild(((MapEntryNode) data)).build();
         }
         if(!schema.isAugmenting() && !(schema instanceof SchemaContext)) {
             initialNs = schema.getQName().getNamespace();
         }
         NormalizedNodeStreamWriter jsonWriter = JSONNormalizedNodeStreamWriter.create(context.getSchemaContext(),path,initialNs,outputWriter);
         NormalizedNodeWriter nnWriter = NormalizedNodeWriter.forStreamWriter(jsonWriter);
-        nnWriter.write(data);
+        if(isDataRoot) {
+            writeDataRoot(outputWriter,nnWriter,(ContainerNode) data);
+        } else {
+            if(data instanceof MapEntryNode) {
+                data = ImmutableNodes.mapNodeBuilder(data.getNodeType()).withChild(((MapEntryNode) data)).build();
+            }
+            nnWriter.write(data);
+        }
         nnWriter.flush();
-
         outputWriter.write('}');
         outputWriter.flush();
+    }
+
+    private void writeDataRoot(OutputStreamWriter outputWriter, NormalizedNodeWriter nnWriter, ContainerNode data) throws IOException {
+        Iterator<DataContainerChild<? extends PathArgument, ?>> iterator = data.getValue().iterator();
+        while(iterator.hasNext()) {
+            DataContainerChild<? extends PathArgument, ?> child = iterator.next();
+            nnWriter.write(child);
+            nnWriter.flush();
+            if(iterator.hasNext()) {
+                outputWriter.write(",");
+            }
+        }
     }
 
 }
