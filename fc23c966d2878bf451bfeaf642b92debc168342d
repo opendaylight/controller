@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_4c43c06c",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/AbstractMeteredUntypedActor.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-09-03T22:20:59Z",
+      "side": 1,
+      "message": "No its not needed. I think I had constructor with arguments earlier.\nI will remove it.",
+      "parentUuid": "fa82b9bf_6c024471",
+      "revId": "fc23c966d2878bf451bfeaf642b92debc168342d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_ccf03094",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
         "patchSetId": 8
@@ -30,6 +48,24 @@
       "writtenOn": "2014-09-03T20:35:10Z",
       "side": 1,
       "message": "This same code is there in AbstractMeteredUntypedActor, Can we put them at single location?",
+      "revId": "fc23c966d2878bf451bfeaf642b92debc168342d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ac992c21",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-09-03T22:20:59Z",
+      "side": 1,
+      "message": "I wanted to but....\nShard class hierarchy (Shard -\u003e RaftActor -\u003e ) is different than AbstractMeteredUntypedActor( Abs*Metered* -\u003e AbstractUntypedActor -\u003e UntypedActor). \nI didnt want metering capability to be inherited by all actors but only specific ones. Eg: Transient actors (Transaction ones) does need to be metered.\n\nIt would have been easier if Java 7 had interfaces with default method :-) \n\nLet me know if you have any ideas on this.",
+      "parentUuid": "fa82b9bf_ccf03094",
       "revId": "fc23c966d2878bf451bfeaf642b92debc168342d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
