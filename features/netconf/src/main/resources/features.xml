@@ -5,11 +5,15 @@
           xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
   <repository>mvn:org.opendaylight.controller/features-protocol-framework/${protocol-framework.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.controller/features-config/${config.version}/xml/features</repository>
+  <repository>mvn:org.opendaylight.aaa/features-aaa/${aaa.version}/xml/features</repository>
+
   <feature name='odl-netconf-all' version='${project.version}' description="OpenDaylight :: Netconf :: All">
     <feature version='${project.version}'>odl-netconf-api</feature>
     <feature version='${project.version}'>odl-netconf-mapping-api</feature>
     <feature version='${project.version}'>odl-netconf-util</feature>
     <feature version='${project.version}'>odl-netconf-impl</feature>
+    <feature version='${project.version}'>odl-netconf-tcp</feature>
+    <feature version='${project.version}'>odl-netconf-ssh</feature>
     <feature version='${project.version}'>odl-config-netconf-connector</feature>
     <feature version='${project.version}'>odl-netconf-netty-util</feature>
     <feature version='${project.version}'>odl-netconf-client</feature>
@@ -38,7 +42,22 @@
     <feature version='${project.version}'>odl-netconf-mapping-api</feature>
     <feature version='${project.version}'>odl-netconf-util</feature>
     <feature version='${project.version}'>odl-netconf-netty-util</feature>
+    <!-- Netconf server without config connector is just an empty shell -->
+    <feature version='${project.version}'>odl-config-netconf-connector</feature>
+    <!-- Netconf will not provide schemas without monitoring -->
+    <feature version='${project.version}'>odl-netconf-monitoring</feature>
     <bundle>mvn:org.opendaylight.controller/netconf-impl/${project.version}</bundle>
+  </feature>
+  <feature name='odl-netconf-ssh' version='${project.version}' description="OpenDaylight :: Netconf :: SSSH">
+    <feature version='${project.version}'>odl-netconf-tcp</feature>
+    <feature version='${aaa.version}'>odl-aaa-authn-plugin</feature>
+    <bundle>mvn:org.opendaylight.controller/netconf-ssh/${project.version}</bundle>
+    <bundle>mvn:org.bouncycastle/bcpkix-jdk15on/${bouncycastle.version}</bundle>
+    <bundle>mvn:org.bouncycastle/bcprov-jdk15on/${bouncycastle.version}</bundle>
+  </feature>
+  <feature name='odl-netconf-tcp' version='${project.version}' description="OpenDaylight :: Netconf :: TCP">
+    <feature version='${project.version}'>odl-netconf-impl</feature>
+    <bundle>mvn:org.opendaylight.controller/netconf-tcp/${project.version}</bundle>
   </feature>
   <feature name='odl-config-netconf-connector' version='${project.version}' description="OpenDaylight :: Netconf :: Connector">
     <feature version='${config.version}'>odl-config-manager</feature>
@@ -64,7 +83,6 @@
   <feature name='odl-netconf-client' version='${project.version}' description="OpenDaylight :: Netconf :: Client">
     <feature version='${project.version}'>odl-netconf-netty-util</feature>
     <bundle>mvn:org.opendaylight.controller/netconf-client/${project.version}</bundle>
-    <configfile finalname='${config.configfile.directory}/${config.netconf.client.configfile}'>mvn:org.opendaylight.controller/netconf-config/${netconf.version}/xml/config</configfile>
   </feature>
   <feature name='odl-netconf-monitoring' version='${project.version}' description="OpenDaylight :: Netconf :: Monitoring">
     <feature version='${project.version}'>odl-netconf-util</feature>
