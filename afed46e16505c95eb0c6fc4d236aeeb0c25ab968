@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_eca89479",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/xml/codec/XmlUtils.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-09-03T20:12:41Z",
+      "side": 1,
+      "message": "Null check before log makes more sense, when we are throwing exception, in this case, we are returning value. \ndebug statements is there to make sure we are entering the method",
+      "parentUuid": "fa82b9bf_6ca9e4de",
+      "revId": "afed46e16505c95eb0c6fc4d236aeeb0c25ab968",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_2a466a7b",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/xml/codec/XmlUtils.java",
         "patchSetId": 4
@@ -98,6 +116,24 @@
       "writtenOn": "2014-09-03T19:01:31Z",
       "side": 1,
       "message": "Hmm...no idea. Adding Harman to the review to check this.",
+      "parentUuid": "fa82b9bf_8a569628",
+      "revId": "afed46e16505c95eb0c6fc4d236aeeb0c25ab968",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8cdc681a",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/xml/codec/XmlUtils.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-09-03T20:12:41Z",
+      "side": 1,
+      "message": "Yes, you are right, It should work, because input node qname is same as rpc qname, and moreover we are adding input node just below it. Just test it once, for routed rpcs for clusters",
       "parentUuid": "fa82b9bf_8a569628",
       "revId": "afed46e16505c95eb0c6fc4d236aeeb0c25ab968",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
