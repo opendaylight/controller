@@ -12,14 +12,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map.Entry;
-import java.util.concurrent.Callable;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent.Builder;
 import org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent.SimpleEventFactory;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree;
@@ -40,35 +36,23 @@ import org.slf4j.LoggerFactory;
  * Computes data change events for all affected registered listeners in data
  * tree.
  */
-final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListenerNotifyTask>> {
+final class ResolveDataChangeEventsTask {
     private static final Logger LOG = LoggerFactory.getLogger(ResolveDataChangeEventsTask.class);
 
-    @SuppressWarnings("rawtypes")
-    private final NotificationManager<AsyncDataChangeListener, AsyncDataChangeEvent> notificationMgr;
     private final DataTreeCandidate candidate;
     private final ListenerTree listenerRoot;
 
     private Multimap<DataChangeListenerRegistration<?>, DOMImmutableDataChangeEvent> collectedEvents;
 
-    @SuppressWarnings("rawtypes")
-    public ResolveDataChangeEventsTask(final DataTreeCandidate candidate, final ListenerTree listenerTree,
-            final NotificationManager<AsyncDataChangeListener, AsyncDataChangeEvent> notificationMgr) {
+    public ResolveDataChangeEventsTask(final DataTreeCandidate candidate, final ListenerTree listenerTree) {
         this.candidate = Preconditions.checkNotNull(candidate);
         this.listenerRoot = Preconditions.checkNotNull(listenerTree);
-        this.notificationMgr = Preconditions.checkNotNull(notificationMgr);
     }
 
     /**
-     * Resolves and creates Notification Tasks
-     *
-     * Implementation of done as Map-Reduce with two steps: 1. resolving events
-     * and their mapping to listeners 2. merging events affecting same listener
-     *
-     * @return An {@link Iterable} of Notification Tasks which needs to be executed in
-     *         order to delivery data change events.
+     * Resolves and submits notification tasks to the specified manager.
      */
-    @Override
-    public synchronized Iterable<ChangeListenerNotifyTask> call() {
+    public synchronized void resolve(final NotificationManager<DataChangeListenerRegistration<?>, DOMImmutableDataChangeEvent> manager) {
         try (final Walker w = listenerRoot.getWalker()) {
             // Defensive: reset internal state
             collectedEvents = ArrayListMultimap.create();
@@ -81,7 +65,6 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
              * Convert to tasks, but be mindful of multiple values -- those indicate multiple
              * wildcard matches, which need to be merged.
              */
-            final Collection<ChangeListenerNotifyTask> ret = new ArrayList<>();
             for (Entry<DataChangeListenerRegistration<?>, Collection<DOMImmutableDataChangeEvent>> e : collectedEvents.asMap().entrySet()) {
                 final Collection<DOMImmutableDataChangeEvent> col = e.getValue();
                 final DOMImmutableDataChangeEvent event;
@@ -98,12 +81,8 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
                     event = col.iterator().next();
                 }
 
-                ret.add(new ChangeListenerNotifyTask(e.getKey(), event, notificationMgr));
+                manager.submitNotification(e.getKey(), event);
             }
-
-            // FIXME: so now we have tasks to submit tasks... Inception-style!
-            LOG.debug("Created tasks {}", ret);
-            return ret;
         }
     }
 
@@ -333,10 +312,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
         return scope != null;
     }
 
-    @SuppressWarnings("rawtypes")
-    public static ResolveDataChangeEventsTask create(final DataTreeCandidate candidate,
-            final ListenerTree listenerTree,
-            final NotificationManager<AsyncDataChangeListener,AsyncDataChangeEvent> notificationMgr) {
-        return new ResolveDataChangeEventsTask(candidate, listenerTree, notificationMgr);
+    public static ResolveDataChangeEventsTask create(final DataTreeCandidate candidate, final ListenerTree listenerTree) {
+        return new ResolveDataChangeEventsTask(candidate, listenerTree);
     }
 }
