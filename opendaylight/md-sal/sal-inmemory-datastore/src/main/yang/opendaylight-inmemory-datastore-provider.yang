@@ -1,4 +1,3 @@
-
 module opendaylight-inmemory-datastore-provider {
 
     yang-version 1;
@@ -7,8 +6,8 @@ module opendaylight-inmemory-datastore-provider {
 
     import config { prefix config; revision-date 2013-04-05; }
     import rpc-context { prefix rpcx; revision-date 2013-06-17; }
- 	import opendaylight-config-dom-datastore {prefix config-dom-store-spi;}
- 	import opendaylight-operational-dom-datastore {prefix operational-dom-store-spi;}
+    import opendaylight-config-dom-datastore {prefix config-dom-store-spi;}
+    import opendaylight-operational-dom-datastore {prefix operational-dom-store-spi;}
     import opendaylight-md-sal-dom {prefix sal;}
 
     description
@@ -28,11 +27,11 @@ module opendaylight-inmemory-datastore-provider {
 
         // This is the definition of the service implementation as a module identity.
 
-     identity inmemory-operational-datastore-provider {
-             base config:module-type;
-             config:provided-service operational-dom-store-spi:operational-dom-datastore;
-             config:java-name-prefix InMemoryOperationalDataStoreProvider;
-      }
+    identity inmemory-operational-datastore-provider {
+            base config:module-type;
+            config:provided-service operational-dom-store-spi:operational-dom-datastore;
+            config:java-name-prefix InMemoryOperationalDataStoreProvider;
+    }
 
     grouping datastore-configuration {
             leaf max-data-change-executor-queue-size {
@@ -52,11 +51,15 @@ module opendaylight-inmemory-datastore-provider {
                 type uint16;
                 description "The maximum queue size for the data change listeners.";
             }
-
             leaf max-data-store-executor-queue-size {
                 default 5000;
                 type uint16;
                 description "The maximum queue size for the data store executor.";
+            }
+            leaf debug-transactions {
+                type boolean;
+                default false;
+                description "Enable transaction lifecycle debugging.";
             }
     }
 

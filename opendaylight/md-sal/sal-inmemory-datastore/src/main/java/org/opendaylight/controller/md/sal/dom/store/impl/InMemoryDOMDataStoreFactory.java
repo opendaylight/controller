@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
+import com.google.common.util.concurrent.MoreExecutors;
+
 import java.util.concurrent.ExecutorService;
 
 import javax.annotation.Nullable;
@@ -42,6 +44,22 @@ public final class InMemoryDOMDataStoreFactory {
     public static InMemoryDOMDataStore create(final String name,
             @Nullable final SchemaService schemaService,
             @Nullable final InMemoryDOMDataStoreConfigProperties properties) {
+        return create(name, schemaService, false, properties);
+    }
+
+    /**
+     * Creates an InMemoryDOMDataStore instance.
+     *
+     * @param name the name of the data store
+     * @param schemaService the SchemaService to which to register the data store.
+     * @param debugTransactions enable transaction debugging
+     * @param properties configuration properties for the InMemoryDOMDataStore instance. If null,
+     *                   default property values are used.
+     * @return an InMemoryDOMDataStore instance
+     */
+    public static InMemoryDOMDataStore create(final String name,
+            @Nullable final SchemaService schemaService, final boolean debugTransactions,
+            @Nullable final InMemoryDOMDataStoreConfigProperties properties) {
 
         InMemoryDOMDataStoreConfigProperties actualProperties = properties;
         if(actualProperties == null) {
@@ -64,7 +82,7 @@ public final class InMemoryDOMDataStoreFactory {
 
         InMemoryDOMDataStore dataStore = new InMemoryDOMDataStore(name,
                 domStoreExecutor, dataChangeListenerExecutor,
-                actualProperties.getMaxDataChangeListenerQueueSize());
+                actualProperties.getMaxDataChangeListenerQueueSize(), debugTransactions);
 
         if(schemaService != null) {
             schemaService.registerSchemaContextListener(dataStore);
