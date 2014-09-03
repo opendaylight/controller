@@ -40,6 +40,22 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
+      <artifactId>netconf-tcp</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>netconf-ssh</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcpkix-jdk15on</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk15on</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
       <artifactId>ietf-netconf-monitoring</artifactId>
     </dependency>
     <dependency>
@@ -119,7 +135,21 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
+      <artifactId>netconf-connector-config</artifactId>
+      <version>${config.version}</version>
+      <type>xml</type>
+      <classifier>config</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
       <artifactId>netconf-monitoring</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.aaa</groupId>
+      <artifactId>features-aaa</artifactId>
+      <version>${aaa.version}</version>
+      <classifier>features</classifier>
+      <type>xml</type>
     </dependency>
   </dependencies>
 
