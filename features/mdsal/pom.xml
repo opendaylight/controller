@@ -63,6 +63,8 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-dom-xsql-config</artifactId>
+      <classifier>config</classifier>
+      <type>xml</type>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
