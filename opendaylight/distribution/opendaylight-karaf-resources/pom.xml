@@ -18,4 +18,35 @@
   <artifactId>opendaylight-karaf-resources</artifactId>
   <description>Resources for opendaylight-karaf</description>
   <packaging>jar</packaging>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.6</version>
+        <executions>
+          <execution>
+            <id>copy</id>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <!-- here the phase you need -->
+            <phase>generate-resources</phase>
+            <configuration>
+              <artifactItems>
+                  <!-- Needs to be copied to lib/ext in order to start bouncy provider for mina sshd -->
+                <artifactItem>
+                    <groupId>org.bouncycastle</groupId>
+                    <artifactId>bcprov-jdk15on</artifactId>
+                    <version>${bouncycastle.version}</version>
+                    <outputDirectory>target/assembly/lib/ext</outputDirectory>
+                    <destFileName>bcprov-jdk15on-${bouncycastle.version}.jar</destFileName>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>
