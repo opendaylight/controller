@@ -2470,6 +2470,7 @@
         <version>${surefire.version}</version>
         <configuration>
           <argLine>${testvm.argLine} ${jacoco.agent.ut.arg}</argLine>
+            <runOrder>random</runOrder>
           <systemProperties>
             <property>
               <name>logback.configurationFile</name>
