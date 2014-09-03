@@ -1307,6 +1307,8 @@
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>sal-dom-xsql-config</artifactId>
         <version>${mdsal.version}</version>
+        <classifier>config</classifier>
+        <type>xml</type>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>

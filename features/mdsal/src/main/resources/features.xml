@@ -45,6 +45,7 @@
         <feature>war</feature>
         <bundle>mvn:org.opendaylight.controller/sal-rest-connector/${project.version}</bundle>
         <bundle>mvn:com.google.code.gson/gson/${gson.version}</bundle>
+        <bundle>mvn:org.opendaylight.yangtools/yang-data-codec-gson/${yangtools.version}</bundle>
         <bundle>mvn:com.sun.jersey/jersey-core/${jersey.version}</bundle>
         <bundle>mvn:com.sun.jersey/jersey-server/${jersey.version}</bundle>
         <bundle>mvn:com.sun.jersey/jersey-servlet/${jersey.version}</bundle>
