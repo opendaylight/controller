@@ -226,6 +226,14 @@
                   <outputDirectory>target/assembly/lib</outputDirectory>
                   <destFileName>karaf.branding-${branding.version}.jar</destFileName>
                 </artifactItem>
+                  <!-- Needs to be copied to lib/ext in order to start bouncy provider for mina sshd -->
+              <artifactItem>
+                  <groupId>org.bouncycastle</groupId>
+                  <artifactId>bcprov-jdk15on</artifactId>
+                  <version>${bouncycastle.version}</version>
+                  <outputDirectory>target/assembly/lib/ext</outputDirectory>
+                  <destFileName>bcprov-jdk15on-${bouncycastle.version}.jar</destFileName>
+              </artifactItem>
               </artifactItems>
             </configuration>
           </execution>
