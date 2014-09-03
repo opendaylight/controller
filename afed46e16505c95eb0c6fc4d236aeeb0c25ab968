@@ -87,6 +87,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_ac860c64",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/xml/codec/XmlUtils.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-09-03T19:01:31Z",
+      "side": 1,
+      "message": "Hmm...no idea. Adding Harman to the review to check this.",
+      "parentUuid": "fa82b9bf_8a569628",
+      "revId": "afed46e16505c95eb0c6fc4d236aeeb0c25ab968",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_aa511a31",
         "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcImplementation.java",
         "patchSetId": 4
@@ -121,6 +139,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_8ce8e817",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcBroker.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-09-03T19:01:31Z",
+      "side": 1,
+      "message": "There are 2 executeRpc methods now. Shall we add method comments to describe what each does?",
+      "revId": "afed46e16505c95eb0c6fc4d236aeeb0c25ab968",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_6a3792ff",
         "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcBroker.java",
         "patchSetId": 4
@@ -132,6 +167,23 @@
       "writtenOn": "2014-08-29T20:39:21Z",
       "side": 1,
       "message": "Added Creator class so unit tests run in Eclipse.",
+      "revId": "afed46e16505c95eb0c6fc4d236aeeb0c25ab968",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_acedac27",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcErrorsException.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-09-03T19:01:31Z",
+      "side": 1,
+      "message": "I have seen author in any source files. But I am not sure what the coding guidelines for ODL are on this.",
       "revId": "afed46e16505c95eb0c6fc4d236aeeb0c25ab968",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
