@@ -54,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_accb6c1d",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/xml/codec/XmlUtils.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-03T21:37:33Z",
+      "side": 1,
+      "message": "I agree - if cNode is null, trace debug will tell that.",
+      "parentUuid": "fa82b9bf_eca89479",
+      "revId": "afed46e16505c95eb0c6fc4d236aeeb0c25ab968",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_2a466a7b",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/xml/codec/XmlUtils.java",
         "patchSetId": 4
@@ -192,6 +210,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_4cd0a0c9",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcBroker.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-03T21:37:33Z",
+      "side": 1,
+      "message": "sure",
+      "parentUuid": "fa82b9bf_8ce8e817",
+      "revId": "afed46e16505c95eb0c6fc4d236aeeb0c25ab968",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_6a3792ff",
         "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcBroker.java",
         "patchSetId": 4
@@ -220,6 +256,24 @@
       "writtenOn": "2014-09-03T19:01:31Z",
       "side": 1,
       "message": "I have seen author in any source files. But I am not sure what the coding guidelines for ODL are on this.",
+      "revId": "afed46e16505c95eb0c6fc4d236aeeb0c25ab968",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0cda98e9",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcErrorsException.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-03T21:37:33Z",
+      "side": 1,
+      "message": "I have seen others put it in (e.g. Basheer). I haven\u0027t had any prior rejections b/c of this so it seems like it\u0027s allowed. Also I asked Ed W and he doesn\u0027t see a problem with it. I did read somewhere that you\u0027re allowed to put your name in EPL license if you want but it seems everyone just puts their company name. I\u0027m used to putting my name in (I have eclipse setup to do it) so that others can easily see at least the original author in case they need to contact me about the class. Several times I wanted to find the original author of a class but had to dig thru git history to find it.",
+      "parentUuid": "fa82b9bf_acedac27",
       "revId": "afed46e16505c95eb0c6fc4d236aeeb0c25ab968",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
