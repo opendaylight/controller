@@ -1,0 +1,22 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_0c53786d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStore.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-03T21:07:52Z",
+      "side": 1,
+      "message": "I can remove remote from the config.",
+      "parentUuid": "fa82b9bf_8ca0e8a6",
+      "revId": "928c3a2a2562845eac083eda8c482f212cf37740",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
