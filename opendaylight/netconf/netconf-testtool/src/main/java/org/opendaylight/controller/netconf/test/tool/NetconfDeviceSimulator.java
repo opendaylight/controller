@@ -23,6 +23,7 @@ import io.netty.channel.local.LocalAddress;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.HashedWheelTimer;
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
@@ -55,6 +56,7 @@ import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceSnapshot;
 import org.opendaylight.controller.netconf.monitoring.osgi.NetconfMonitoringOperationService;
 import org.opendaylight.controller.netconf.ssh.NetconfSSHServer;
+import org.opendaylight.controller.netconf.ssh.authentication.PEMGenerator;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceException;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceRepresentation;
@@ -165,7 +167,8 @@ public class NetconfDeviceSimulator implements Closeable {
 
                 server = dispatcher.createLocalServer(tcpLocalAddress);
                 try {
-                    NetconfSSHServer.start(currentPort, tcpLocalAddress, new AcceptingAuthProvider(), nettyThreadgroup);
+                    final NetconfSSHServer sshServer = NetconfSSHServer.start(currentPort, tcpLocalAddress, nettyThreadgroup, getPemArray());
+                    sshServer.setAuthProvider(new AcceptingAuthProvider());
                 } catch (final Exception e) {
                     LOG.warn("Cannot start simulated device on {}, skipping", address, e);
                     // Close local server and continue
@@ -217,6 +220,14 @@ public class NetconfDeviceSimulator implements Closeable {
         }
 
         return openDevices;
+    }
+
+    private char[] getPemArray() {
+        try {
+            return PEMGenerator.readOrGeneratePK(new File("PK")).toCharArray();
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private Map<ModuleBuilder, String> parseSchemasToModuleBuilders(final Main.Params params) {
