@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_8981ba4f",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/AbstractForwardedDataBroker.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-03T15:40:27Z",
+      "side": 1,
+      "message": "What do you mean by information leak? This is a debug toString - it\u0027s usually good practice to override and output useful info. I did this so we can identify the underlying listener instance in QueuedNotificationMgr log and stat output. Otherwise you just see org...TranslatingListenerInvoker@12345 which isn\u0027t useful. Since when is it a requirement to document toString output?",
+      "parentUuid": "fa82b9bf_972f96f6",
+      "revId": "91bd673da9ecff27d48719020548952c9658a755",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_37348a49",
         "filename": "opendaylight/md-sal/sal-common-util/src/main/java/org/opendaylight/controller/md/sal/common/util/jmx/AbstractMXBean.java",
         "patchSetId": 8
@@ -30,6 +48,24 @@
       "writtenOn": "2014-09-03T11:35:35Z",
       "side": 1,
       "message": "type/category look like concepts, but I cannot find them explained.",
+      "revId": "91bd673da9ecff27d48719020548952c9658a755",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c98ee279",
+        "filename": "opendaylight/md-sal/sal-common-util/src/main/java/org/opendaylight/controller/md/sal/common/util/jmx/AbstractMXBean.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-03T15:40:27Z",
+      "side": 1,
+      "message": "First I didn\u0027t actually write this class originally (I think Moiz did) - I basically moved it for re-usabiity from the distributed data store. \n\ntype/category are properties of ObjectName. I couldn\u0027t find much info on this but apparently they\u0027re used to create groupings in JMX.",
+      "parentUuid": "fa82b9bf_37348a49",
       "revId": "91bd673da9ecff27d48719020548952c9658a755",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_e98ba666",
+        "filename": "opendaylight/md-sal/sal-common-util/src/main/java/org/opendaylight/controller/md/sal/common/util/jmx/AbstractMXBean.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-03T15:40:27Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "fa82b9bf_57390e40",
+      "revId": "91bd673da9ecff27d48719020548952c9658a755",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_173b8639",
         "filename": "opendaylight/md-sal/sal-common-util/src/main/java/org/opendaylight/controller/md/sal/common/util/jmx/AbstractMXBean.java",
         "patchSetId": 8
@@ -64,6 +118,24 @@
       "writtenOn": "2014-09-03T11:35:35Z",
       "side": 1,
       "message": "This checks the return of a private method, whose only return ends with a \u0027new ...\u0027 stanza.",
+      "revId": "91bd673da9ecff27d48719020548952c9658a755",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_49f2d207",
+        "filename": "opendaylight/md-sal/sal-common-util/src/main/java/org/opendaylight/controller/md/sal/common/util/jmx/AbstractMXBean.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-03T15:40:27Z",
+      "side": 1,
+      "message": "yup - I\u0027ll remove. I think originally getMBeanObjectName was a protected abstract method.",
+      "parentUuid": "fa82b9bf_173b8639",
       "revId": "91bd673da9ecff27d48719020548952c9658a755",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_29d98e83",
+        "filename": "opendaylight/md-sal/sal-common-util/src/main/java/org/opendaylight/controller/md/sal/common/util/jmx/AbstractMXBean.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-03T15:40:27Z",
+      "side": 1,
+      "message": "I assume you mean getCanonicalName. I\u0027ll re-arrange it.",
+      "parentUuid": "fa82b9bf_b7473abc",
+      "revId": "91bd673da9ecff27d48719020548952c9658a755",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_d7443eb9",
         "filename": "opendaylight/md-sal/sal-common-util/src/main/java/org/opendaylight/controller/md/sal/common/util/jmx/AbstractMXBean.java",
         "patchSetId": 8
@@ -98,6 +188,24 @@
       "writtenOn": "2014-09-03T11:35:35Z",
       "side": 1,
       "message": "wrong logic: if this throws, you return true...",
+      "revId": "91bd673da9ecff27d48719020548952c9658a755",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c9e58239",
+        "filename": "opendaylight/md-sal/sal-common-util/src/main/java/org/opendaylight/controller/md/sal/common/util/jmx/AbstractMXBean.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-03T15:40:27Z",
+      "side": 1,
+      "message": "yup",
+      "parentUuid": "fa82b9bf_d7443eb9",
       "revId": "91bd673da9ecff27d48719020548952c9658a755",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_09c36a8b",
+        "filename": "opendaylight/md-sal/sal-common-util/src/main/java/org/opendaylight/controller/md/sal/common/util/jmx/AbstractMXBean.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-03T15:40:27Z",
+      "side": 1,
+      "message": "This was there originally for unit tests I think. Not used now - will remove.",
+      "parentUuid": "fa82b9bf_9716b6a6",
+      "revId": "91bd673da9ecff27d48719020548952c9658a755",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_7778d2f8",
         "filename": "opendaylight/md-sal/sal-common-util/src/main/java/org/opendaylight/controller/md/sal/common/util/jmx/QueuedNotificationManagerMXBean.java",
         "patchSetId": 8
@@ -132,6 +258,24 @@
       "writtenOn": "2014-09-03T11:35:35Z",
       "side": 1,
       "message": "missing documentation. Is the \u0027list\u0027 nature needed, or is this really an immutable Collection?",
+      "revId": "91bd673da9ecff27d48719020548952c9658a755",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_495732cb",
+        "filename": "opendaylight/md-sal/sal-common-util/src/main/java/org/opendaylight/controller/md/sal/common/util/jmx/QueuedNotificationManagerMXBean.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-03T15:40:27Z",
+      "side": 1,
+      "message": "This method is called by the JMX server. Returning Collection is not supported by the MXBean spec - must be either List or Set.",
+      "parentUuid": "fa82b9bf_7778d2f8",
       "revId": "91bd673da9ecff27d48719020548952c9658a755",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_a9091edf",
+        "filename": "opendaylight/md-sal/sal-common-util/src/main/java/org/opendaylight/controller/md/sal/common/util/jmx/QueuedNotificationManagerStats.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-03T15:40:27Z",
+      "side": 1,
+      "message": "Collection is not supported  by the MXBean spec.",
+      "parentUuid": "fa82b9bf_f76b821d",
+      "revId": "91bd673da9ecff27d48719020548952c9658a755",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_977d56ea",
         "filename": "opendaylight/md-sal/sal-common-util/src/main/java/org/opendaylight/controller/md/sal/common/util/jmx/QueuedNotificationManagerStats.java",
         "patchSetId": 8
@@ -166,6 +328,24 @@
       "writtenOn": "2014-09-03T11:35:35Z",
       "side": 1,
       "message": "what do negative values here mean?",
+      "revId": "91bd673da9ecff27d48719020548952c9658a755",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6913160e",
+        "filename": "opendaylight/md-sal/sal-common-util/src/main/java/org/opendaylight/controller/md/sal/common/util/jmx/QueuedNotificationManagerStats.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-03T15:40:27Z",
+      "side": 1,
+      "message": "Probably not much. This is just a DTO for the MXBean interface. We wouldn\u0027t have gotten this far if it was negative.",
+      "parentUuid": "fa82b9bf_977d56ea",
       "revId": "91bd673da9ecff27d48719020548952c9658a755",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_c90102b1",
+        "filename": "opendaylight/md-sal/sal-common-util/src/main/java/org/opendaylight/controller/md/sal/common/util/jmx/QueuedNotificationManagerStats.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-03T15:40:27Z",
+      "side": 1,
+      "message": "Again this is just a DTO - this is called by the JMX server and it doesn\u0027t care about immutability. We really don\u0027t need to get that picky here.",
+      "parentUuid": "fa82b9bf_d772fe10",
+      "revId": "91bd673da9ecff27d48719020548952c9658a755",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_775f7276",
         "filename": "opendaylight/md-sal/sal-common-util/src/main/java/org/opendaylight/controller/md/sal/common/util/jmx/QueuedNotificationManagerStats.java",
         "patchSetId": 8
@@ -200,6 +398,24 @@
       "writtenOn": "2014-09-03T11:35:35Z",
       "side": 1,
       "message": "missing @Override annotation (and everywhere else)",
+      "revId": "91bd673da9ecff27d48719020548952c9658a755",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e9fe46ae",
+        "filename": "opendaylight/md-sal/sal-common-util/src/main/java/org/opendaylight/controller/md/sal/common/util/jmx/QueuedNotificationManagerStats.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-03T15:40:27Z",
+      "side": 1,
+      "message": "This doesn\u0027t implement any interface nor have a base class.",
+      "parentUuid": "fa82b9bf_775f7276",
       "revId": "91bd673da9ecff27d48719020548952c9658a755",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_692a362e",
+        "filename": "opendaylight/md-sal/sal-common-util/src/main/java/org/opendaylight/controller/md/sal/common/util/jmx/ThreadExecutorStats.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-03T15:40:27Z",
+      "side": 1,
+      "message": "Because this can be null if the executor doesn\u0027t have a suitable RejectedExecutionHandler. I\u0027ll add a comment.",
+      "parentUuid": "fa82b9bf_3759ea8e",
+      "revId": "91bd673da9ecff27d48719020548952c9658a755",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_575eee77",
         "filename": "opendaylight/md-sal/sal-common-util/src/main/java/org/opendaylight/controller/md/sal/common/util/jmx/ThreadExecutorStatsMXBean.java",
         "patchSetId": 8
@@ -240,6 +474,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_e9ec06f6",
+        "filename": "opendaylight/md-sal/sal-common-util/src/main/java/org/opendaylight/controller/md/sal/common/util/jmx/ThreadExecutorStatsMXBean.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-03T15:40:27Z",
+      "side": 1,
+      "message": "It\u0027s a simple getter - that\u0027s implied by the comment. @return would just be redundant. This interface only exists for the JXM server anyway.",
+      "parentUuid": "fa82b9bf_575eee77",
+      "revId": "91bd673da9ecff27d48719020548952c9658a755",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_f752a267",
         "filename": "opendaylight/md-sal/sal-common-util/src/main/java/org/opendaylight/controller/md/sal/common/util/jmx/ThreadExecutorStatsMXBean.java",
         "patchSetId": 8
@@ -251,6 +503,24 @@
       "writtenOn": "2014-09-03T11:35:35Z",
       "side": 1,
       "message": "Looks like a usecase for Optional. It seems that \u0027null\u0027 indicated non-presents, but it is not stated anywhere.",
+      "revId": "91bd673da9ecff27d48719020548952c9658a755",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c9c6e268",
+        "filename": "opendaylight/md-sal/sal-common-util/src/main/java/org/opendaylight/controller/md/sal/common/util/jmx/ThreadExecutorStatsMXBean.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-03T15:40:27Z",
+      "side": 1,
+      "message": "Can\u0027t return Optional in an MXBean interface. Only primitives and other specific types are supported.",
+      "parentUuid": "fa82b9bf_f752a267",
       "revId": "91bd673da9ecff27d48719020548952c9658a755",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -291,6 +561,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_69af9695",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/config/yang/md/sal/dom/impl/DomInmemoryDataBrokerModule.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-03T15:40:27Z",
+      "side": 1,
+      "message": "It\u0027s the MBean name for display - can be anything you want. The string only appears once in code. What about the \"DOM-OPER\" and \"DOM-CFG\" hard-coded strings above? Aren\u0027t those magic strings as well? Shouldn\u0027t they also be constants? I\u0027m sure there\u0027s many such strings throughout MD-SAL and ODL code. Does that mean every string needs to be a constant for consistency? I think that would be a bit overkill.",
+      "parentUuid": "fa82b9bf_d7499eb8",
+      "revId": "91bd673da9ecff27d48719020548952c9658a755",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_b74c1aca",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/config/yang/md/sal/dom/impl/DomInmemoryDataBrokerModule.java",
         "patchSetId": 8
@@ -302,6 +590,24 @@
       "writtenOn": "2014-09-03T11:35:35Z",
       "side": 1,
       "message": "is \u0027Exception\u0027 really thrown? If not, please declare specific exceptions, otherwise sonar will complain.",
+      "revId": "91bd673da9ecff27d48719020548952c9658a755",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e99ac66d",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/config/yang/md/sal/dom/impl/DomInmemoryDataBrokerModule.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-03T15:40:27Z",
+      "side": 1,
+      "message": "No - eclipse put that in as it\u0027s defined in the interface. Will remove.",
+      "parentUuid": "fa82b9bf_b74c1aca",
       "revId": "91bd673da9ecff27d48719020548952c9658a755",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -325,6 +631,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_e9716645",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataBrokerImpl.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-03T15:40:27Z",
+      "side": 1,
+      "message": "This is an artifact of the config system. It makes it hard to clean things up as you have to return 1 AutoCloseable from getInstance() so you have to close everything via one instance. I believe the Module class has to return a DOMDataBroker instance (no documentation on that).  So it\u0027s either return this instance and have it close everything else or have the Module return an anonymous delegating instance of DOMDataBroker. Either way it\u0027s not clean. I chose the former. I\u0027m open to suggestions.",
+      "parentUuid": "fa82b9bf_57d58eb7",
+      "revId": "91bd673da9ecff27d48719020548952c9658a755",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_f7d942f5",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataBrokerImpl.java",
         "patchSetId": 8
@@ -336,6 +660,24 @@
       "writtenOn": "2014-09-03T11:35:35Z",
       "side": 1,
       "message": "Looks a bit like a layering violation. What are the lifecycle rules here?",
+      "revId": "91bd673da9ecff27d48719020548952c9658a755",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_09a28a9a",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataBrokerImpl.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-03T15:40:27Z",
+      "side": 1,
+      "message": "There was a reason originally I was passing it down but it no longer needs to be. I changed it to create the DurationStatsTracker in the DOMDataCommitCoordinator and get it via accessor. I assume that\u0027s not a layering violation.",
+      "parentUuid": "fa82b9bf_f7d942f5",
       "revId": "91bd673da9ecff27d48719020548952c9658a755",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -359,6 +701,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_e9a88679",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataCommitCoordinatorImpl.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-03T15:40:27Z",
+      "side": 1,
+      "message": "I removed this.",
+      "parentUuid": "fa82b9bf_17d706c1",
+      "revId": "91bd673da9ecff27d48719020548952c9658a755",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_b7e3baa3",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/compat/TranslatingListenerInvoker.java",
         "patchSetId": 8
@@ -370,6 +730,24 @@
       "writtenOn": "2014-09-03T11:35:35Z",
       "side": 1,
       "message": "Why are we exposing the identity of our delegate\u0027s class? It looks like an implementation leak. Certainly looks like an implicit undocumented API contract.",
+      "revId": "91bd673da9ecff27d48719020548952c9658a755",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_69b476d1",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/compat/TranslatingListenerInvoker.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-03T15:40:27Z",
+      "side": 1,
+      "message": "For debugging. See comments in AbstractForwardedDataBroker.",
+      "parentUuid": "fa82b9bf_b7e3baa3",
       "revId": "91bd673da9ecff27d48719020548952c9658a755",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -410,6 +788,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_29c66e4a",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/jmx/CommitStatsMXBean.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-03T15:40:27Z",
+      "side": 1,
+      "message": "It\u0027s formatted with the appropriate scaled units along with the timestamp. I showed this yesterday on the call.",
+      "parentUuid": "fa82b9bf_77ed328e",
+      "revId": "91bd673da9ecff27d48719020548952c9658a755",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_37e7aaae",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/jmx/CommitStatsMXBeanImpl.java",
         "patchSetId": 8
@@ -421,6 +817,24 @@
       "writtenOn": "2014-09-03T11:35:35Z",
       "side": 1,
       "message": "Please add comment and note that mBeanType is the concept defined in AbstractMXBean.",
+      "revId": "91bd673da9ecff27d48719020548952c9658a755",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_89dc5a1a",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/jmx/CommitStatsMXBeanImpl.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-03T15:40:27Z",
+      "side": 1,
+      "message": "It\u0027s not really a concept defined by AbstractMXBean - it\u0027s defined by ObjectName.",
+      "parentUuid": "fa82b9bf_37e7aaae",
       "revId": "91bd673da9ecff27d48719020548952c9658a755",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -444,6 +858,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_e9bf26a9",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/jmx/CommitStatsMXBeanImpl.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-03T15:40:27Z",
+      "side": 1,
+      "message": "Shouldn\u0027t be. What is the best practice here? Add @Nonnull or a Precondition or both?",
+      "parentUuid": "fa82b9bf_97f2366e",
+      "revId": "91bd673da9ecff27d48719020548952c9658a755",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_57ecae8f",
         "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/statistics/DOMStoreStatsTracker.java",
         "patchSetId": 8
@@ -461,6 +893,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_a9e11ed2",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/statistics/DOMStoreStatsTracker.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-03T15:40:27Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "fa82b9bf_57ecae8f",
+      "revId": "91bd673da9ecff27d48719020548952c9658a755",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_17fe2639",
         "filename": "opendaylight/md-sal/sal-inmemory-datastore/src/main/java/org/opendaylight/controller/config/yang/inmemory_datastore_provider/InMemoryConfigDataStoreProviderModule.java",
         "patchSetId": 8
@@ -472,6 +922,24 @@
       "writtenOn": "2014-09-03T11:35:35Z",
       "side": 1,
       "message": "This needs to be restructured. Why is the statistics bean instantiated here and not by the datastore itself? The lifecycle is obviously merged already via this .setCloseable() hack.",
+      "revId": "91bd673da9ecff27d48719020548952c9658a755",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_29f42e86",
+        "filename": "opendaylight/md-sal/sal-inmemory-datastore/src/main/java/org/opendaylight/controller/config/yang/inmemory_datastore_provider/InMemoryConfigDataStoreProviderModule.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-03T15:40:27Z",
+      "side": 1,
+      "message": "Mainly b/c I was trying to separate the MXBean stuff from the implementation. But then I needed the setCloseable is an unfortunate hack due to the config system as explained in another comment. Can we create a separate follow-up bug for this? It\u0027s not that important at this point and the code freeze is tomorrow and I need to finish other stuff. Or if you have cycle  now maybe you could clean this up a bit.",
+      "parentUuid": "fa82b9bf_17fe2639",
       "revId": "91bd673da9ecff27d48719020548952c9658a755",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
