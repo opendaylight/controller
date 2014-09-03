@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FutureCallback;
@@ -14,23 +16,20 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+
+import javax.annotation.concurrent.GuardedBy;
+
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.store.impl.SnapshotBackedWriteTransaction.TransactionReadyPrototype;
-import org.opendaylight.yangtools.util.ExecutorServiceUtil;
-import org.opendaylight.yangtools.util.concurrent.NotificationManager;
-import org.opendaylight.yangtools.util.concurrent.QueuedNotificationManager;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.ConflictingModificationAppliedException;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree;
-import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
@@ -40,21 +39,22 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.util.ExecutorServiceUtil;
+import org.opendaylight.yangtools.util.concurrent.NotificationManager;
+import org.opendaylight.yangtools.util.concurrent.QueuedNotificationManager;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.ConflictingModificationAppliedException;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
+import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.concurrent.GuardedBy;
-
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
-
-import static com.google.common.base.Preconditions.checkState;
 
 /**
  * In-memory DOM Data Store
@@ -77,8 +77,8 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
 
                 @SuppressWarnings("unchecked")
                 @Override
-                public void invokeListener( AsyncDataChangeListener listener,
-                                            AsyncDataChangeEvent notification ) {
+                public void invokeListener( final AsyncDataChangeListener listener,
+                                            final AsyncDataChangeEvent notification ) {
                     listener.onDataChanged(notification);
                 }
             };
@@ -95,14 +95,17 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
 
     private final String name;
 
+    private final boolean debugTransactions;
+
     public InMemoryDOMDataStore(final String name, final ListeningExecutorService listeningExecutor,
             final ExecutorService dataChangeListenerExecutor) {
         this(name, listeningExecutor, dataChangeListenerExecutor,
-                InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_CHANGE_LISTENER_QUEUE_SIZE);
+                InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_CHANGE_LISTENER_QUEUE_SIZE, false);
     }
 
     public InMemoryDOMDataStore(final String name, final ListeningExecutorService listeningExecutor,
-            final ExecutorService dataChangeListenerExecutor, int maxDataChangeListenerQueueSize) {
+            final ExecutorService dataChangeListenerExecutor, final int maxDataChangeListenerQueueSize,
+            final boolean debugTransactions) {
         this.name = Preconditions.checkNotNull(name);
         this.listeningExecutor = Preconditions.checkNotNull(listeningExecutor);
 
@@ -112,6 +115,8 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
                 new QueuedNotificationManager<>(this.dataChangeListenerExecutor,
                         DCL_NOTIFICATION_MGR_INVOKER, maxDataChangeListenerQueueSize,
                         "DataChangeListenerQueueMgr");
+
+        this.debugTransactions = debugTransactions;
     }
 
     @Override
@@ -121,17 +126,17 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
 
     @Override
     public DOMStoreReadTransaction newReadOnlyTransaction() {
-        return new SnapshotBackedReadTransaction(nextIdentifier(), dataTree.takeSnapshot());
+        return new SnapshotBackedReadTransaction(nextIdentifier(), debugTransactions, dataTree.takeSnapshot());
     }
 
     @Override
     public DOMStoreReadWriteTransaction newReadWriteTransaction() {
-        return new SnapshotBackedReadWriteTransaction(nextIdentifier(), dataTree.takeSnapshot(), this);
+        return new SnapshotBackedReadWriteTransaction(nextIdentifier(), debugTransactions, dataTree.takeSnapshot(), this);
     }
 
     @Override
     public DOMStoreWriteTransaction newWriteOnlyTransaction() {
-        return new SnapshotBackedWriteTransaction(nextIdentifier(), dataTree.takeSnapshot(), this);
+        return new SnapshotBackedWriteTransaction(nextIdentifier(), debugTransactions, dataTree.takeSnapshot(), this);
     }
 
     @Override
@@ -149,6 +154,11 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         ExecutorServiceUtil.tryGracefulShutdown(listeningExecutor, 30, TimeUnit.SECONDS);
         ExecutorServiceUtil.tryGracefulShutdown(dataChangeListenerExecutor, 30, TimeUnit.SECONDS);
     }
+
+    boolean getDebugTransactions() {
+        return debugTransactions;
+    }
+
     @Override
     public <L extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> ListenerRegistration<L> registerChangeListener(
             final YangInstanceIdentifier path, final L listener, final DataChangeScope scope) {
@@ -221,7 +231,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
             } else {
                 snapshot = dataTree.takeSnapshot();
             }
-            return new SnapshotBackedReadTransaction(nextIdentifier(), snapshot);
+            return new SnapshotBackedReadTransaction(nextIdentifier(), getDebugTransactions(), snapshot);
         }
 
         @Override
@@ -235,7 +245,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
                 snapshot = dataTree.takeSnapshot();
             }
             final SnapshotBackedReadWriteTransaction ret = new SnapshotBackedReadWriteTransaction(nextIdentifier(),
-                    snapshot, this);
+                    getDebugTransactions(), snapshot, this);
             latestOutstandingTx = ret;
             return ret;
         }
@@ -250,8 +260,8 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
             } else {
                 snapshot = dataTree.takeSnapshot();
             }
-            final SnapshotBackedWriteTransaction ret = new SnapshotBackedWriteTransaction(nextIdentifier(), snapshot,
-                    this);
+            final SnapshotBackedWriteTransaction ret = new SnapshotBackedWriteTransaction(nextIdentifier(),
+                    getDebugTransactions(), snapshot, this);
             latestOutstandingTx = ret;
             return ret;
         }
@@ -277,7 +287,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         }
 
         public synchronized void onTransactionCommited(final SnapshotBackedWriteTransaction transaction) {
-            // If commited transaction is latestOutstandingTx we clear
+            // If committed transaction is latestOutstandingTx we clear
             // latestOutstandingTx
             // field in order to base new transactions on Datastore Data Tree
             // directly.
@@ -363,10 +373,12 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
                     } catch (ConflictingModificationAppliedException e) {
                         LOG.warn("Store Tx: {} Conflicting modification for {}.", transaction.getIdentifier(),
                                 e.getPath());
+                        transaction.warnDebugContext(LOG);
                         throw new OptimisticLockFailedException("Optimistic lock failed.",e);
                     } catch (DataValidationFailedException e) {
                         LOG.warn("Store Tx: {} Data Precondition failed for {}.", transaction.getIdentifier(),
                                 e.getPath(), e);
+                        transaction.warnDebugContext(LOG);
                         throw new TransactionCommitFailedException("Data did not pass validation.",e);
                     }
                 }

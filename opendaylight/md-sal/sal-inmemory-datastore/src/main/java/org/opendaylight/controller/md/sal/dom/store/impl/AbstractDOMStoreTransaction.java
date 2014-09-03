@@ -7,30 +7,37 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
-
 import com.google.common.base.Objects;
 import com.google.common.base.Objects.ToStringHelper;
 import com.google.common.base.Preconditions;
+
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
+import org.slf4j.Logger;
 
 /**
  * Abstract DOM Store Transaction
  *
  * Convenience super implementation of DOM Store transaction which provides
  * common implementation of {@link #toString()} and {@link #getIdentifier()}.
- *
- *
  */
 abstract class AbstractDOMStoreTransaction implements DOMStoreTransaction {
+    private final Throwable debugContext;
     private final Object identifier;
 
-    protected AbstractDOMStoreTransaction(final Object identifier) {
-        this.identifier = Preconditions.checkNotNull(identifier,"Identifier must not be null.");
+    protected AbstractDOMStoreTransaction(final Object identifier, final boolean debug) {
+        this.identifier = Preconditions.checkNotNull(identifier, "Identifier must not be null.");
+        this.debugContext = debug ? new Throwable().fillInStackTrace() : null;
     }
 
     @Override
     public final Object getIdentifier() {
         return identifier;
+    }
+
+    protected final void warnDebugContext(final Logger logger) {
+        if (debugContext != null) {
+            logger.warn("Transaction {} has been allocated in the following context", identifier, debugContext);
+        }
     }
 
     @Override

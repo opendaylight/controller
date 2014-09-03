@@ -9,18 +9,18 @@ package org.opendaylight.controller.md.sal.dom.store.impl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.Futures;
+
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.Futures;
 
 /**
  * Implementation of Read-Write transaction which is backed by {@link DataTreeSnapshot}
@@ -39,9 +39,9 @@ class SnapshotBackedReadWriteTransaction extends SnapshotBackedWriteTransaction
      * @param snapshot Snapshot which will be modified.
      * @param readyImpl Implementation of ready method.
      */
-    protected SnapshotBackedReadWriteTransaction(final Object identifier, final DataTreeSnapshot snapshot,
-            final TransactionReadyPrototype store) {
-        super(identifier, snapshot, store);
+    protected SnapshotBackedReadWriteTransaction(final Object identifier, final boolean debug,
+            final DataTreeSnapshot snapshot, final TransactionReadyPrototype store) {
+        super(identifier, debug, snapshot, store);
     }
 
     @Override
@@ -62,8 +62,8 @@ class SnapshotBackedReadWriteTransaction extends SnapshotBackedWriteTransaction
         }
     }
 
-    @Override public CheckedFuture<Boolean, ReadFailedException> exists(
-        YangInstanceIdentifier path) {
+    @Override
+    public CheckedFuture<Boolean, ReadFailedException> exists(final YangInstanceIdentifier path) {
         try {
             return Futures.immediateCheckedFuture(
                 read(path).checkedGet().isPresent());
