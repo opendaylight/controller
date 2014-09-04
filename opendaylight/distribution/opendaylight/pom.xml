@@ -1066,10 +1066,6 @@
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-restconf-broker</artifactId>
         </dependency>
-        <dependency>
-          <groupId>org.opendaylight.controller</groupId>
-          <artifactId>sal-remoterpc-connector</artifactId>
-        </dependency>
 
 
         <dependency>
@@ -1315,10 +1311,6 @@
           <groupId>org.zeromq</groupId>
           <artifactId>jeromq</artifactId>
           <version>0.3.1</version>
-        </dependency>
-        <dependency>
-          <groupId>org.opendaylight.controller</groupId>
-          <artifactId>sal-distributed-datastore</artifactId>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>

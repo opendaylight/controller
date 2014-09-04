@@ -189,6 +189,7 @@
             <Export-package></Export-package>
             <Private-Package></Private-Package>
             <Import-Package>!org.iq80.*;!*snappy;!org.jboss.*;!com.jcraft.*;!org.fusesource.*;!*jetty*;!sun.security.*;*</Import-Package>
+            <!--
             <Embed-Dependency>
                 sal-clustering-commons;
                 sal-akka-raft;
@@ -204,6 +205,7 @@
                 *uncommons*;
             </Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
+          -->
           </instructions>
         </configuration>
       </plugin>

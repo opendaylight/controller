@@ -5,6 +5,8 @@ import org.opendaylight.controller.sal.restconf.impl.RestconfProviderImpl;
 
 public class RestConnectorModule extends org.opendaylight.controller.config.yang.md.sal.rest.connector.AbstractRestConnectorModule {
 
+    private static RestConnectorRuntimeRegistration runtimeRegistration;
+
     public RestConnectorModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
@@ -27,8 +29,12 @@ public class RestConnectorModule extends org.opendaylight.controller.config.yang
         // Register it with the Broker
         getDomBrokerDependency().registerProvider(instance);
 
+        if(runtimeRegistration != null){
+            runtimeRegistration.close();
+        }
 
-        getRootRuntimeBeanRegistratorWrapper().register(instance);
+        runtimeRegistration =
+            getRootRuntimeBeanRegistratorWrapper().register(instance);
 
         return instance;
     }

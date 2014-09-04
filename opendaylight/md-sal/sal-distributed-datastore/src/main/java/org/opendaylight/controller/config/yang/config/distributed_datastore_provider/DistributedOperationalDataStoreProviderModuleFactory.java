@@ -8,6 +8,27 @@
 * Do not modify this file unless it is present under src/main directory
 */
 package org.opendaylight.controller.config.yang.config.distributed_datastore_provider;
+
+import org.opendaylight.controller.config.api.DependencyResolver;
+import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
+import org.opendaylight.controller.config.spi.Module;
+import org.osgi.framework.BundleContext;
+
 public class DistributedOperationalDataStoreProviderModuleFactory extends org.opendaylight.controller.config.yang.config.distributed_datastore_provider.AbstractDistributedOperationalDataStoreProviderModuleFactory {
+    @Override
+    public Module createModule(String instanceName, DependencyResolver dependencyResolver, BundleContext bundleContext) {
+        DistributedOperationalDataStoreProviderModule module = (DistributedOperationalDataStoreProviderModule)super.createModule(instanceName,dependencyResolver,bundleContext);
+        module.setBundleContext(bundleContext);
+        return module;
+    }
+
+    @Override
+    public Module createModule(String instanceName, DependencyResolver dependencyResolver,
+        DynamicMBeanWithInstance old, BundleContext bundleContext) throws Exception {
+        DistributedOperationalDataStoreProviderModule module = (DistributedOperationalDataStoreProviderModule)super.createModule(instanceName, dependencyResolver,
+            old, bundleContext);
+        module.setBundleContext(bundleContext);
+        return module;
+    }
 
 }
