@@ -7,23 +7,21 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
+import com.google.common.util.concurrent.CheckedFuture;
 import java.util.Collections;
 import java.util.Map.Entry;
-
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.Iterables;
-import com.google.common.util.concurrent.CheckedFuture;
 
 /**
  *
@@ -33,34 +31,30 @@ import com.google.common.util.concurrent.CheckedFuture;
 public abstract class AbstractWriteTransaction<T extends DOMDataWriteTransaction> extends
         AbstractForwardedTransaction<T> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractWriteTransaction.class);
-
-    protected AbstractWriteTransaction(final T delegate,
-            final BindingToNormalizedNodeCodec codec) {
+    protected AbstractWriteTransaction(final T delegate, final BindingToNormalizedNodeCodec codec) {
         super(delegate, codec);
     }
 
-
     public final <U extends DataObject> void put(final LogicalDatastoreType store,
             final InstanceIdentifier<U> path, final U data, final boolean createParents) {
-       final Entry<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, NormalizedNode<?, ?>> normalized = getCodec()
-                .toNormalizedNode(path, data);
-        if(createParents) {
+        Preconditions.checkArgument(!path.isWildcarded(), "Cannot put data into wildcarded path %s", path);
+
+        final Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> normalized = getCodec().toNormalizedNode(path, data);
+        if (createParents) {
             ensureParentsByMerge(store, normalized.getKey(), path);
         } else {
             ensureListParentIfNeeded(store,path,normalized);
         }
+
         getDelegate().put(store, normalized.getKey(), normalized.getValue());
     }
 
-
     public final <U extends DataObject> void merge(final LogicalDatastoreType store,
             final InstanceIdentifier<U> path, final U data,final boolean createParents) {
+        Preconditions.checkArgument(!path.isWildcarded(), "Cannot merge data into wildcarded path %s", path);
 
-        final Entry<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, NormalizedNode<?, ?>> normalized = getCodec()
-                .toNormalizedNode(path, data);
-
-        if(createParents) {
+        final Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> normalized = getCodec().toNormalizedNode(path, data);
+        if (createParents) {
             ensureParentsByMerge(store, normalized.getKey(), path);
         } else {
             ensureListParentIfNeeded(store,path,normalized);
@@ -68,7 +62,6 @@ public abstract class AbstractWriteTransaction<T extends DOMDataWriteTransaction
 
         getDelegate().merge(store, normalized.getKey(), normalized.getValue());
     }
-
 
     /**
      *
@@ -103,25 +96,24 @@ public abstract class AbstractWriteTransaction<T extends DOMDataWriteTransaction
      * @param normalized Normalized version of data to be written
      */
     private void ensureListParentIfNeeded(final LogicalDatastoreType store, final InstanceIdentifier<?> path,
-            final Entry<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, NormalizedNode<?, ?>> normalized) {
-        if(Identifiable.class.isAssignableFrom(path.getTargetType())) {
-            org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier parentMapPath = getParent(normalized.getKey()).get();
+            final Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> normalized) {
+        if (Identifiable.class.isAssignableFrom(path.getTargetType())) {
+            YangInstanceIdentifier parentMapPath = getParent(normalized.getKey()).get();
             NormalizedNode<?, ?> emptyParent = getCodec().getDefaultNodeFor(parentMapPath);
             getDelegate().merge(store, parentMapPath, emptyParent);
         }
-
     }
 
     // FIXME (should be probaly part of InstanceIdentifier)
-    protected static Optional<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier> getParent(
-            final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier child) {
+    protected static Optional<YangInstanceIdentifier> getParent(
+            final YangInstanceIdentifier child) {
 
         Iterable<PathArgument> mapEntryItemPath = child.getPathArguments();
         int parentPathSize = Iterables.size(mapEntryItemPath) - 1;
-        if(parentPathSize > 1) {
-            return Optional.of(org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.create(Iterables.limit(mapEntryItemPath,  parentPathSize)));
+        if (parentPathSize > 1) {
+            return Optional.of(YangInstanceIdentifier.create(Iterables.limit(mapEntryItemPath,  parentPathSize)));
         } else if(parentPathSize == 0) {
-            return Optional.of(org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.create(Collections.<PathArgument>emptyList()));
+            return Optional.of(YangInstanceIdentifier.create(Collections.<PathArgument>emptyList()));
         } else {
             return Optional.absent();
         }
@@ -136,11 +128,13 @@ public abstract class AbstractWriteTransaction<T extends DOMDataWriteTransaction
      * @param path
      */
     protected abstract void ensureParentsByMerge(LogicalDatastoreType store,
-            org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier key, InstanceIdentifier<?> path);
+            YangInstanceIdentifier key, InstanceIdentifier<?> path);
 
     protected final void doDelete(final LogicalDatastoreType store,
             final InstanceIdentifier<?> path) {
-        final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier normalized = getCodec().toNormalized(path);
+        Preconditions.checkArgument(!path.isWildcarded(), "Cannot delete wildcarded path %s", path);
+
+        final YangInstanceIdentifier normalized = getCodec().toNormalized(path);
         getDelegate().delete(store, normalized);
     }
 
