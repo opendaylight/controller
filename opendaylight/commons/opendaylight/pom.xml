@@ -40,25 +40,16 @@
     <commmons.northbound.version>0.4.2-SNAPSHOT</commmons.northbound.version>
     <!-- Third Party Versions -->
     <codahale.metrics.version>3.0.1</codahale.metrics.version>
-    <commons.catalina>7.0.32.v201211201336</commons.catalina>
-    <commons.catalina.ha>7.0.32.v201211201952</commons.catalina.ha>
-    <commons.catalina.tribes>7.0.32.v201211201952</commons.catalina.tribes>
-    <commons.coyote>7.0.32.v201211201952</commons.coyote>
-    <commons.el>7.0.32.v201211081135</commons.el>
-    <commons.jasper>7.0.32.v201211201952</commons.jasper>
-    <commons.juli.version>7.0.32.v201211081135</commons.juli.version>
-    <commons.tomcat.api>7.0.32.v201211081135</commons.tomcat.api>
-    <commons.tomcat.util>7.0.32.v201211201952</commons.tomcat.util>
 
-    <commons.karaf.catalina>7.0.53.v201406061610</commons.karaf.catalina>
-    <commons.karaf.catalina.ha>7.0.53.v201406070630</commons.karaf.catalina.ha>
-    <commons.karaf.catalina.tribes>7.0.53.v201406070630</commons.karaf.catalina.tribes>
-    <commons.karaf.coyote>7.0.53.v201406070630</commons.karaf.coyote>
-    <commons.karaf.el>7.0.53.v201406060720</commons.karaf.el>
-    <commons.karaf.jasper>7.0.53.v201406070630</commons.karaf.jasper>
-    <commons.karaf.juli.version>7.0.53.v201406060720</commons.karaf.juli.version>
-    <commons.karaf.tomcat.api>7.0.53.v201406060720</commons.karaf.tomcat.api>
-    <commons.karaf.tomcat.util>7.0.53.v201406070630</commons.karaf.tomcat.util>
+    <commons.catalina>7.0.53.v201406061610</commons.catalina>
+    <commons.catalina.ha>7.0.53.v201406070630</commons.catalina.ha>
+    <commons.catalina.tribes>7.0.53.v201406070630</commons.catalina.tribes>
+    <commons.coyote>7.0.53.v201406070630</commons.coyote>
+    <commons.el>7.0.53.v201406060720</commons.el>
+    <commons.jasper>7.0.53.v201406070630</commons.jasper>
+    <commons.juli.version>7.0.53.v201406060720</commons.juli.version>
+    <commons.tomcat.api>7.0.53.v201406060720</commons.tomcat.api>
+    <commons.tomcat.util>7.0.53.v201406070630</commons.tomcat.util>
 
     <commons.checkstyle.version>0.0.3-SNAPSHOT</commons.checkstyle.version>
     <commons.fileupload.version>1.2.2</commons.fileupload.version>
