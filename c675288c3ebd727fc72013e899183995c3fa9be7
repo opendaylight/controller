@@ -1,0 +1,22 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_b0365ab3",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-04T21:51:31Z",
+      "side": 1,
+      "message": "Leader address being null is valid case that can happen when a leaders address has not been set. leaderAddress being empty would be a coding error. If there is a place that it needs to be checked it would be where the leaderAddress is being set. I wouldn\u0027t check it here.",
+      "parentUuid": "fa82b9bf_10b5c630",
+      "revId": "c675288c3ebd727fc72013e899183995c3fa9be7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
