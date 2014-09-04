@@ -50,7 +50,7 @@ public class MeterForwarder extends AbstractListeningCommiter<Meter> {
         super(manager, Meter.class);
         Preconditions.checkNotNull(db, "DataBroker can not be null!");
         this.listenerRegistration = db.registerDataChangeListener(LogicalDatastoreType.CONFIGURATION,
-                getWildCardPath(), MeterForwarder.this, DataChangeScope.BASE);
+                getWildCardPath(), MeterForwarder.this, DataChangeScope.SUBTREE);
     }
 
     @Override
