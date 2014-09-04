@@ -73,6 +73,58 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_5feb64b0",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/AbstractMeteredUntypedActor.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-04T01:26:31Z",
+      "side": 1,
+      "message": "While it is looking up in memory, there\u0027s still overhead there, including converting to a boolean. Since this will be incurred on every message, I think it would be best to store once in a boolean since it won\u0027t change dynamically.",
+      "parentUuid": "fa82b9bf_5f45a415",
+      "revId": "fc23c966d2878bf451bfeaf642b92debc168342d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_bf9150f3",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/MeteredBoundedMailbox.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-04T01:26:31Z",
+      "side": 1,
+      "message": "It seems this matches the config param set by ModuleConfig. Can this be made public and referenced by ModuleConfig?",
+      "revId": "fc23c966d2878bf451bfeaf642b92debc168342d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ff87d8b4",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/MeteredBoundedMailbox.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-04T01:26:31Z",
+      "side": 1,
+      "message": "I know this is preexisting but this should use the CAPACITY constant.",
+      "revId": "fc23c966d2878bf451bfeaf642b92debc168342d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_ccf03094",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
         "patchSetId": 8
@@ -126,6 +178,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_1f507c5d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-04T01:26:31Z",
+      "side": 1,
+      "message": "I agree. We could create a MeteredActorAdapter class that takes the Actor instance and then delegate onReceiveCommand to the adapter, eg.\n\ninterface MeteredActor {\n    void handleReceive(Object message);\n}\n\npublic class MeteredActorAdapter {\n    private final MeteredActor meteredActor;\n    private final boolean meteringEnabled;\n    private String actorName;\n\n    ....\n   public void onReceiveCommand(Object message) {\n       if(meteringEnabled) {\n           timedReceive(message);\n       } else {\n           actor. handleReceive(message);\n       }\n   }\n}\n\nIn Shard and AbstractMeteredUntypedActor (implement MeteredActor),\n\nprivate final MeteredActorAdapter adapter;\n\npublic void onReceiveCommand(Object message) {\n     adapter.onReceiveCommand(message);\n}",
+      "parentUuid": "fa82b9bf_df71b445",
+      "revId": "fc23c966d2878bf451bfeaf642b92debc168342d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_7f2bc833",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
         "patchSetId": 8
@@ -138,6 +208,57 @@
       "side": 1,
       "message": "As I replied on the earlier comment, the config is in memory and read only once from file during actor creation.",
       "parentUuid": "fa82b9bf_7f73c8b4",
+      "revId": "fc23c966d2878bf451bfeaf642b92debc168342d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9fcb2c1e",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/config/yang/config/remote_rpc_connector/RemoteRPCBrokerModule.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-04T01:26:31Z",
+      "side": 1,
+      "message": "Shouldn\u0027t we also call mailboxCapacity to transfer the config XML setting?",
+      "revId": "fc23c966d2878bf451bfeaf642b92debc168342d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_1f739ce8",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/ModuleConfig.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-04T01:26:31Z",
+      "side": 1,
+      "message": "I didn\u0027t see where getAskDuration is being called. I assume this is intended to be used by RpcBroker and RemoteRpcImplementation... is this coming in a later patch? \n\nAlso, I\u0027d suggest creating the FiniteDuration instance and caching to avoid any lookup and parsing overhead to obtain the duration.",
+      "revId": "fc23c966d2878bf451bfeaf642b92debc168342d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_df7c54b8",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/ModuleConfig.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-04T01:26:31Z",
+      "side": 1,
+      "message": "Note: getAwaitDuration won\u0027t be needed as soon as https://git.opendaylight.org/gerrit/#/c/10443/ is merged (no more blocking calls).",
       "revId": "fc23c966d2878bf451bfeaf642b92debc168342d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
