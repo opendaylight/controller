@@ -926,6 +926,16 @@ public final class PersistentMessages {
      */
     org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages.ModificationOrBuilder getModificationOrBuilder(
         int index);
+
+    // optional int64 timeStamp = 2;
+    /**
+     * <code>optional int64 timeStamp = 2;</code>
+     */
+    boolean hasTimeStamp();
+    /**
+     * <code>optional int64 timeStamp = 2;</code>
+     */
+    long getTimeStamp();
   }
   /**
    * Protobuf type {@code org.opendaylight.controller.mdsal.CompositeModification}
@@ -986,6 +996,11 @@ public final class PersistentMessages {
               modification_.add(input.readMessage(org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages.Modification.PARSER, extensionRegistry));
               break;
             }
+            case 16: {
+              bitField0_ |= 0x00000001;
+              timeStamp_ = input.readInt64();
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -1028,6 +1043,7 @@ public final class PersistentMessages {
       return PARSER;
     }
 
+    private int bitField0_;
     // repeated .org.opendaylight.controller.mdsal.Modification modification = 1;
     public static final int MODIFICATION_FIELD_NUMBER = 1;
     private java.util.List<org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages.Modification> modification_;
@@ -1064,8 +1080,25 @@ public final class PersistentMessages {
       return modification_.get(index);
     }
 
+    // optional int64 timeStamp = 2;
+    public static final int TIMESTAMP_FIELD_NUMBER = 2;
+    private long timeStamp_;
+    /**
+     * <code>optional int64 timeStamp = 2;</code>
+     */
+    public boolean hasTimeStamp() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional int64 timeStamp = 2;</code>
+     */
+    public long getTimeStamp() {
+      return timeStamp_;
+    }
+
     private void initFields() {
       modification_ = java.util.Collections.emptyList();
+      timeStamp_ = 0L;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -1088,6 +1121,9 @@ public final class PersistentMessages {
       for (int i = 0; i < modification_.size(); i++) {
         output.writeMessage(1, modification_.get(i));
       }
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeInt64(2, timeStamp_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -1100,6 +1136,10 @@ public final class PersistentMessages {
       for (int i = 0; i < modification_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, modification_.get(i));
+      }
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(2, timeStamp_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1224,6 +1264,8 @@ public final class PersistentMessages {
         } else {
           modificationBuilder_.clear();
         }
+        timeStamp_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
 
@@ -1251,6 +1293,7 @@ public final class PersistentMessages {
       public org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages.CompositeModification buildPartial() {
         org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages.CompositeModification result = new org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages.CompositeModification(this);
         int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
         if (modificationBuilder_ == null) {
           if (((bitField0_ & 0x00000001) == 0x00000001)) {
             modification_ = java.util.Collections.unmodifiableList(modification_);
@@ -1260,6 +1303,11 @@ public final class PersistentMessages {
         } else {
           result.modification_ = modificationBuilder_.build();
         }
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.timeStamp_ = timeStamp_;
+        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
@@ -1300,6 +1348,9 @@ public final class PersistentMessages {
               modificationBuilder_.addAllMessages(other.modification_);
             }
           }
+        }
+        if (other.hasTimeStamp()) {
+          setTimeStamp(other.getTimeStamp());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -1574,6 +1625,39 @@ public final class PersistentMessages {
         return modificationBuilder_;
       }
 
+      // optional int64 timeStamp = 2;
+      private long timeStamp_ ;
+      /**
+       * <code>optional int64 timeStamp = 2;</code>
+       */
+      public boolean hasTimeStamp() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional int64 timeStamp = 2;</code>
+       */
+      public long getTimeStamp() {
+        return timeStamp_;
+      }
+      /**
+       * <code>optional int64 timeStamp = 2;</code>
+       */
+      public Builder setTimeStamp(long value) {
+        bitField0_ |= 0x00000002;
+        timeStamp_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int64 timeStamp = 2;</code>
+       */
+      public Builder clearTimeStamp() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        timeStamp_ = 0L;
+        onChanged();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:org.opendaylight.controller.mdsal.CompositeModification)
     }
 
@@ -1610,11 +1694,12 @@ public final class PersistentMessages {
       "e\030\001 \002(\t\022C\n\004path\030\002 \002(\01325.org.opendaylight" +
       ".controller.mdsal.InstanceIdentifier\0225\n\004" +
       "data\030\003 \001(\0132\'.org.opendaylight.controller" +
-      ".mdsal.Node\"^\n\025CompositeModification\022E\n\014" +
+      ".mdsal.Node\"q\n\025CompositeModification\022E\n\014" +
       "modification\030\001 \003(\0132/.org.opendaylight.co" +
-      "ntroller.mdsal.ModificationBO\n9org.opend" +
-      "aylight.controller.protobuff.messages.pe",
-      "rsistentB\022PersistentMessages"
+      "ntroller.mdsal.Modification\022\021\n\ttimeStamp" +
+      "\030\002 \001(\003BO\n9org.opendaylight.controller.pr",
+      "otobuff.messages.persistentB\022PersistentM" +
+      "essages"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -1632,7 +1717,7 @@ public final class PersistentMessages {
           internal_static_org_opendaylight_controller_mdsal_CompositeModification_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_org_opendaylight_controller_mdsal_CompositeModification_descriptor,
-              new java.lang.String[] { "Modification", });
+              new java.lang.String[] { "Modification", "TimeStamp", });
           return null;
         }
       };

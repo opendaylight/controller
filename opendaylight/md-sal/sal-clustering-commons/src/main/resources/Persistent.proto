@@ -11,10 +11,12 @@ message Modification {
     required string type=1;
     required InstanceIdentifier path=2;
     optional Node data=3;
+
 }
 
 
 message CompositeModification {
     repeated Modification modification=1;
+    optional int64 timeStamp = 2;
 }
 
