@@ -1,0 +1,58 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_3071ea77",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shard/ShardMBeanFactory.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-04T22:13:50Z",
+      "side": 1,
+      "message": "I changed it to use Cache mainly for thread safety. Even though all Shard actors are currently created on startup, due to async nature of akka, I think they may still be created on separate threads.  Also, in the future, we\u0027ll likely support dynamic creation of Shards and maybe removal so this sets us up for that. Usage of weakValues will cleanup stale beans from the map on config module restart.",
+      "parentUuid": "fa82b9bf_0e0b682c",
+      "revId": "4fcd50882a6ad329e85191c972b69795f6294897",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_105146d8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shard/ShardMBeanFactory.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-04T22:13:50Z",
+      "side": 1,
+      "message": "Just so we don\u0027t return a null instance and the Shard always gets a non-null instance so we don\u0027t have to check for null all over the place. While registration failure *shouldn\u0027t* happen, It\u0027s not fatal if it did, we\u0027d update the stats but with no way to see them externally.",
+      "parentUuid": "fa82b9bf_4e43b06c",
+      "revId": "4fcd50882a6ad329e85191c972b69795f6294897",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f06aa280",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shard/ShardStats.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-04T22:13:50Z",
+      "side": 1,
+      "message": "Currently there aren\u0027t. Jan created a bug to add them which I assigned to me.",
+      "parentUuid": "fa82b9bf_f0494261",
+      "revId": "4fcd50882a6ad329e85191c972b69795f6294897",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
