@@ -18,21 +18,24 @@ public class DistributedDataStoreProperties {
     private final int maxShardDataChangeExecutorQueueSize;
     private final int maxShardDataChangeExecutorPoolSize;
     private final int shardTransactionIdleTimeoutInMinutes;
+    private final int operationTimeoutInSeconds;
 
     public DistributedDataStoreProperties() {
         maxShardDataChangeListenerQueueSize = 1000;
         maxShardDataChangeExecutorQueueSize = 1000;
         maxShardDataChangeExecutorPoolSize = 20;
         shardTransactionIdleTimeoutInMinutes = 10;
+        operationTimeoutInSeconds = 5;
     }
 
     public DistributedDataStoreProperties(int maxShardDataChangeListenerQueueSize,
             int maxShardDataChangeExecutorQueueSize, int maxShardDataChangeExecutorPoolSize,
-            int shardTransactionIdleTimeoutInMinutes) {
+            int shardTransactionIdleTimeoutInMinutes, int operationTimeoutInSeconds) {
         this.maxShardDataChangeListenerQueueSize = maxShardDataChangeListenerQueueSize;
         this.maxShardDataChangeExecutorQueueSize = maxShardDataChangeExecutorQueueSize;
         this.maxShardDataChangeExecutorPoolSize = maxShardDataChangeExecutorPoolSize;
         this.shardTransactionIdleTimeoutInMinutes = shardTransactionIdleTimeoutInMinutes;
+        this.operationTimeoutInSeconds = operationTimeoutInSeconds;
     }
 
     public int getMaxShardDataChangeListenerQueueSize() {
@@ -49,5 +52,9 @@ public class DistributedDataStoreProperties {
 
     public int getShardTransactionIdleTimeoutInMinutes() {
         return shardTransactionIdleTimeoutInMinutes;
+    }
+
+    public int getOperationTimeoutInSeconds() {
+        return operationTimeoutInSeconds;
     }
 }

@@ -117,7 +117,7 @@ public class ActorContextTest extends AbstractActorTest{
                         new ActorContext(getSystem(), shardManagerActorRef , mock(ClusterWrapper.class),
                             mock(Configuration.class));
 
-                    Object out = actorContext.executeLocalShardOperation("default", "hello", duration("1 seconds"));
+                    Object out = actorContext.executeLocalShardOperation("default", "hello");
 
                     assertEquals("hello", out);
 
@@ -144,7 +144,7 @@ public class ActorContextTest extends AbstractActorTest{
                         new ActorContext(getSystem(), shardManagerActorRef , mock(ClusterWrapper.class),
                             mock(Configuration.class));
 
-                    Object out = actorContext.executeLocalShardOperation("default", "hello", duration("1 seconds"));
+                    Object out = actorContext.executeLocalShardOperation("default", "hello");
 
                     assertNull(out);
 
@@ -232,7 +232,7 @@ public class ActorContextTest extends AbstractActorTest{
 
                     ActorSelection actor = actorContext.actorSelection(shardActorRef.path());
 
-                    Object out = actorContext.executeRemoteOperation(actor, "hello", duration("3 seconds"));
+                    Object out = actorContext.executeRemoteOperation(actor, "hello");
 
                     assertEquals("hello", out);
 
@@ -261,8 +261,7 @@ public class ActorContextTest extends AbstractActorTest{
 
                     ActorSelection actor = actorContext.actorSelection(shardActorRef.path());
 
-                    Future<Object> future = actorContext.executeRemoteOperationAsync(actor, "hello",
-                            Duration.create(3, TimeUnit.SECONDS));
+                    Future<Object> future = actorContext.executeRemoteOperationAsync(actor, "hello");
 
                     try {
                         Object result = Await.result(future, Duration.create(3, TimeUnit.SECONDS));
