@@ -8,29 +8,13 @@
 
 package org.opendaylight.controller.netconf.test.tool;
 
-import java.io.File;
-import java.io.IOException;
-import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
-import org.opendaylight.controller.netconf.ssh.authentication.PEMGenerator;
+import org.opendaylight.controller.netconf.auth.AuthProvider;
 
 class AcceptingAuthProvider implements AuthProvider {
-    private final String privateKeyPEMString;
-
-    public AcceptingAuthProvider() {
-        try {
-            this.privateKeyPEMString = PEMGenerator.readOrGeneratePK(new File("PK"));
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     @Override
     public synchronized boolean authenticated(final String username, final String password) {
         return true;
     }
 
-    @Override
-    public char[] getPEMAsCharArray() {
-        return privateKeyPEMString.toCharArray();
-    }
 }
