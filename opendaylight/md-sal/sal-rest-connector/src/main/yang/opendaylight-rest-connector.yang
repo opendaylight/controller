@@ -27,6 +27,12 @@ module opendaylight-rest-connector {
         config:java-name-prefix RestConnector;
     }
     
+    grouping statistics {
+        leaf received-requests {
+           type uint64;
+        }
+    }
+
     augment "/config:modules/config:module/config:configuration" {
         case rest-connector-impl {
             when "/config:modules/config:module/config:type = 'rest-connector-impl'";
@@ -40,6 +46,35 @@ module opendaylight-rest-connector {
                         mandatory true;
                         config:required-identity dom:dom-broker-osgi-registry;
                     }
+                }
+            }
+        }
+    }
+    
+    augment "/config:modules/config:module/config:state" {
+        case rest-connector-impl {
+            when "/config:modules/config:module/config:type = 'rest-connector-impl'";
+            container rpcs {
+                uses statistics;
+            }
+
+            container config {
+                container get {
+                    uses statistics;
+                }
+                
+                container post {
+                    uses statistics;
+                }
+                
+                container put {
+                    uses statistics;
+                }
+            }
+
+            container operational {
+                container get {
+                    uses statistics;
                 }
             }
         }
