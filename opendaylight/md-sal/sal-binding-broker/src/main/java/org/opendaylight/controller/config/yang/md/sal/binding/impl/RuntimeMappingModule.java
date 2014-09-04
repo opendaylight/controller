@@ -22,6 +22,7 @@ import org.opendaylight.yangtools.sal.binding.generator.impl.GeneratedClassLoadi
 import org.opendaylight.yangtools.sal.binding.generator.impl.RuntimeGeneratedMappingServiceImpl;
 import org.opendaylight.yangtools.yang.binding.DataContainer;
 import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
@@ -38,8 +39,7 @@ import org.slf4j.LoggerFactory;
 /**
 *
 */
-public final class RuntimeMappingModule extends
-        org.opendaylight.controller.config.yang.md.sal.binding.impl.AbstractRuntimeMappingModule {
+public final class RuntimeMappingModule extends AbstractRuntimeMappingModule {
 
     private static final Logger LOG = LoggerFactory.getLogger(RuntimeMappingModule.class);
 
@@ -138,25 +138,24 @@ public final class RuntimeMappingModule extends
 
         @Override
         public Entry<YangInstanceIdentifier, CompositeNode> toDataDom(
-                final Entry<org.opendaylight.yangtools.yang.binding.InstanceIdentifier<? extends DataObject>, DataObject> entry) {
+                final Entry<InstanceIdentifier<? extends DataObject>, DataObject> entry) {
             return delegate.toDataDom(entry);
         }
 
         @Override
-        public YangInstanceIdentifier toDataDom(
-                final org.opendaylight.yangtools.yang.binding.InstanceIdentifier<? extends DataObject> path) {
+        public YangInstanceIdentifier toDataDom(final InstanceIdentifier<? extends DataObject> path) {
             return delegate.toDataDom(path);
         }
 
         @Override
         public DataObject dataObjectFromDataDom(
-                final org.opendaylight.yangtools.yang.binding.InstanceIdentifier<? extends DataObject> path,
+                final InstanceIdentifier<? extends DataObject> path,
                 final CompositeNode result) throws DeserializationException {
             return delegate.dataObjectFromDataDom(path, result);
         }
 
         @Override
-        public org.opendaylight.yangtools.yang.binding.InstanceIdentifier<?> fromDataDom(final YangInstanceIdentifier entry)
+        public InstanceIdentifier<?> fromDataDom(final YangInstanceIdentifier entry)
                 throws DeserializationException {
             return delegate.fromDataDom(entry);
         }

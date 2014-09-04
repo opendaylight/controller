@@ -7,10 +7,11 @@
  */
 package org.opendaylight.controller.sal.binding.impl;
 
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
-
 import org.opendaylight.controller.md.sal.binding.util.AbstractBindingSalProviderInstance;
 import org.opendaylight.controller.sal.binding.api.mount.MountProviderInstance;
 import org.opendaylight.controller.sal.binding.api.mount.MountProviderService;
@@ -19,9 +20,6 @@ import org.opendaylight.yangtools.util.ListenerRegistry;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
 
 public class MountPointManagerImpl implements MountProviderService {
 
@@ -113,7 +111,7 @@ public class MountPointManagerImpl implements MountProviderService {
 
         private final InstanceIdentifier<?> identifier;
 
-        public BindingMountPointImpl(final org.opendaylight.yangtools.yang.binding.InstanceIdentifier<?> identifier,
+        public BindingMountPointImpl(final InstanceIdentifier<?> identifier,
                 final RpcProviderRegistryImpl rpcRegistry, final NotificationBrokerImpl notificationBroker,
                 final DataBrokerImpl dataBroker) {
             super(rpcRegistry, notificationBroker, dataBroker);
