@@ -24,8 +24,7 @@ import com.google.common.base.Preconditions;
 
 public final class SSLUtil {
 
-    private SSLUtil() {
-    }
+    private SSLUtil() {}
 
     public static SSLContext initializeSecureContext(final String pass, final InputStream ksKeysFile, final InputStream ksTrustFile,
                                                      final String algorithm) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException,
