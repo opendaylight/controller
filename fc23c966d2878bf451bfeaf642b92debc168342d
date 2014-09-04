@@ -374,6 +374,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_a24e1395",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/ModuleConfig.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-04T05:02:25Z",
+      "side": 1,
+      "message": "Yeah - that\u0027s fine. I figured you were trying to avoid conflict with https://git.opendaylight.org/gerrit/#/c/10443/.",
+      "parentUuid": "fa82b9bf_c2a8f722",
+      "revId": "fc23c966d2878bf451bfeaf642b92debc168342d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_df7c54b8",
         "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/ModuleConfig.java",
         "patchSetId": 8
@@ -403,6 +421,24 @@
       "side": 1,
       "message": "Cool. I\u0027ll remove it then.",
       "parentUuid": "fa82b9bf_df7c54b8",
+      "revId": "fc23c966d2878bf451bfeaf642b92debc168342d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_025d7f48",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/ModuleConfig.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-04T05:02:25Z",
+      "side": 1,
+      "message": "In fact I think you\u0027ll be able to remove ActorUtil as well after you change RpcBroker and RemoteRpcImplementation to use the configurable ask duration.",
+      "parentUuid": "fa82b9bf_e2a5fb47",
       "revId": "fc23c966d2878bf451bfeaf642b92debc168342d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
