@@ -314,6 +314,10 @@ public abstract class RaftActor extends UntypedPersistentActor {
     protected ActorSelection getLeader(){
         String leaderAddress = getLeaderAddress();
 
+        if(leaderAddress == null){
+            return null;
+        }
+
         return context.actorSelection(leaderAddress);
     }
 
