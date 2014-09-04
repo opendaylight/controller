@@ -196,6 +196,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_02125f58",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-04T01:33:30Z",
+      "side": 1,
+      "message": "Actually to avoid the closure problem, in the above code, we should pass the MeteredActor instance to the adapter on each call and not cache in the adapter:\n\n   public void onReceiveCommand(MeteredActor meteredActor, Object message) {\n       if(meteringEnabled) {\n           timedReceive(meteredActor, message);\n       } else {\n           meteredActor.handleReceive(message);\n       }\n   }",
+      "parentUuid": "fa82b9bf_1f507c5d",
+      "revId": "fc23c966d2878bf451bfeaf642b92debc168342d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_7f2bc833",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
         "patchSetId": 8
