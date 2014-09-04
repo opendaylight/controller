@@ -14,6 +14,7 @@ import javax.ws.rs.core.Application;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
+import org.opendaylight.controller.sal.restconf.impl.StatisticsRestconfServiceWrapper;
 
 public class RestconfApplication extends Application {
 
@@ -38,7 +39,7 @@ public class RestconfApplication extends Application {
         restconfImpl.setControllerContext(controllerContext);
         singletons.add(controllerContext);
         singletons.add(brokerFacade);
-        singletons.add(restconfImpl);
+        singletons.add(StatisticsRestconfServiceWrapper.getInstance());
         singletons.add(StructuredDataToXmlProvider.INSTANCE);
         singletons.add(StructuredDataToJsonProvider.INSTANCE);
         singletons.add(JsonToCompositeNodeProvider.INSTANCE);

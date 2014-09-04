@@ -15,6 +15,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import java.math.BigInteger;
 import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -85,6 +86,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class RestconfImpl implements RestconfService {
+
     private enum UriParameters {
         PRETTY_PRINT("prettyPrint"),
         DEPTH("depth");
@@ -100,6 +102,8 @@ public class RestconfImpl implements RestconfService {
             return uriParameterName;
         }
     }
+
+
 
     private final static RestconfImpl INSTANCE = new RestconfImpl();
 
@@ -1549,5 +1553,10 @@ public class RestconfImpl implements RestconfService {
             return true;
         }
         return false;
+    }
+
+    public BigInteger getOperationalReceived() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

@@ -1,6 +1,6 @@
 package org.opendaylight.controller.config.yang.md.sal.rest.connector;
 
-import org.opendaylight.controller.sal.rest.impl.RestconfProviderImpl;
+import org.opendaylight.controller.sal.restconf.impl.RestconfProviderImpl;
 
 
 public class RestConnectorModule extends org.opendaylight.controller.config.yang.md.sal.rest.connector.AbstractRestConnectorModule {
@@ -26,6 +26,10 @@ public class RestConnectorModule extends org.opendaylight.controller.config.yang
         instance.setWebsocketPort(getWebsocketPort());
         // Register it with the Broker
         getDomBrokerDependency().registerProvider(instance);
+
+
+        getRootRuntimeBeanRegistratorWrapper().register(instance);
+
         return instance;
     }
 }
