@@ -177,7 +177,7 @@
             <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
             <Export-package></Export-package>
             <Private-Package></Private-Package>
-            <Import-Package>!*snappy;!org.jboss.*;!com.jcraft.*;*</Import-Package>
+            <Import-Package>!*snappy;!org.jboss.*;!com.jcraft.*;!*jetty*;!sun.security.*;*</Import-Package>
             <Embed-Dependency>
                 sal-clustering-commons;
                 sal-akka-raft;
