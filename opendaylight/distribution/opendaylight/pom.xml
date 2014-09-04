@@ -1375,8 +1375,8 @@
                 <phase>generate-resources</phase>
                 <configuration>
                    <outputDirectory>${project.build.directory}/configuration</outputDirectory>
-                   <includeArtifactIds>sal-rest-connector-config,config-netty-config,md-sal-config,netconf-config,toaster-config,netconf-connector-config</includeArtifactIds>
-                   <includes>**\/*.xml</includes>
+                    <includeArtifactIds>sal-rest-connector-config,config-netty-config,md-sal-config,netconf-config,toaster-config,netconf-connector-config,sal-clustering-config</includeArtifactIds>
+                    <includes>**\/*.xml,**/*.conf</includes>
                    <excludeTransitive>true</excludeTransitive>
                    <ignorePermissions>false</ignorePermissions>
                 </configuration>
