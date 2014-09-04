@@ -53,7 +53,7 @@ public class FlowForwarder extends AbstractListeningCommiter<Flow> {
         super(manager, Flow.class);
         Preconditions.checkNotNull(db, "DataBroker can not be null!");
         this.listenerRegistration = db.registerDataChangeListener(LogicalDatastoreType.CONFIGURATION,
-                getWildCardPath(), FlowForwarder.this, DataChangeScope.BASE);
+                getWildCardPath(), FlowForwarder.this, DataChangeScope.SUBTREE);
     }
 
     @Override
