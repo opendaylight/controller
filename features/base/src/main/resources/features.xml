@@ -114,16 +114,16 @@
    <feature name="odl-base-tomcat" description="OpenDaylight Tomcat" version="7.0.53">
       <feature>odl-base-gemini-web</feature>
       <feature>odl-base-eclipselink-persistence</feature>
-      <bundle start="true">mvn:orbit/org.apache.catalina/${commons.karaf.catalina}</bundle>
+      <bundle start="true">mvn:orbit/org.apache.catalina/${commons.catalina}</bundle>
       <bundle start="true">mvn:geminiweb/org.eclipse.gemini.web.tomcat/${geminiweb.version}</bundle>
-      <bundle start="true">mvn:orbit/org.apache.catalina.ha/${commons.karaf.catalina.ha}</bundle>
-      <bundle start="true">mvn:orbit/org.apache.catalina.tribes/${commons.karaf.catalina.tribes}</bundle>
-      <bundle start="true">mvn:orbit/org.apache.coyote/${commons.karaf.coyote}</bundle>
-      <bundle start="true">mvn:orbit/org.apache.el/${commons.karaf.el}</bundle>
-      <bundle start="true">mvn:orbit/org.apache.jasper/${commons.karaf.jasper}</bundle>
-      <bundle start="true">mvn:orbit/org.apache.juli.extras/${commons.karaf.juli.version}</bundle>
-      <bundle start="true">mvn:orbit/org.apache.tomcat.api/${commons.karaf.tomcat.api}</bundle>
-      <bundle start="true">mvn:orbit/org.apache.tomcat.util/${commons.karaf.tomcat.util}</bundle>
+      <bundle start="true">mvn:orbit/org.apache.catalina.ha/${commons.catalina.ha}</bundle>
+      <bundle start="true">mvn:orbit/org.apache.catalina.tribes/${commons.catalina.tribes}</bundle>
+      <bundle start="true">mvn:orbit/org.apache.coyote/${commons.coyote}</bundle>
+      <bundle start="true">mvn:orbit/org.apache.el/${commons.el}</bundle>
+      <bundle start="true">mvn:orbit/org.apache.jasper/${commons.jasper}</bundle>
+      <bundle start="true">mvn:orbit/org.apache.juli.extras/${commons.juli.version}</bundle>
+      <bundle start="true">mvn:orbit/org.apache.tomcat.api/${commons.tomcat.api}</bundle>
+      <bundle start="true">mvn:orbit/org.apache.tomcat.util/${commons.tomcat.util}</bundle>
       <bundle start="true" >mvn:org.opendaylight.controller/karaf-tomcat-security/${karaf.security.version}</bundle>
       <bundle start="true">wrap:mvn:virgomirror/org.eclipse.jdt.core.compiler.batch/${eclipse.jdt.core.compiler.batch.version}</bundle>
    </feature>
