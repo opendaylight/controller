@@ -25,8 +25,12 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
 import org.opendaylight.yangtools.concepts.Delegator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-class BindingTranslatedTransactionChain implements BindingTransactionChain, Delegator<DOMTransactionChain> {
+final class BindingTranslatedTransactionChain implements BindingTransactionChain, Delegator<DOMTransactionChain> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(BindingTranslatedTransactionChain.class);
 
     private final DOMTransactionChain delegate;
     private final BindingToNormalizedNodeCodec codec;
@@ -82,7 +86,7 @@ class BindingTranslatedTransactionChain implements BindingTransactionChain, Dele
         return bindingTx;
     }
 
-    protected CheckedFuture<Void, TransactionCommitFailedException> listenForFailure(
+    private CheckedFuture<Void, TransactionCommitFailedException> listenForFailure(
             final WriteTransaction tx, CheckedFuture<Void, TransactionCommitFailedException> future) {
         Futures.addCallback(future, new FutureCallback<Void>() {
             @Override
@@ -99,10 +103,13 @@ class BindingTranslatedTransactionChain implements BindingTransactionChain, Dele
         return future;
     }
 
-    protected void failTransactionChain(WriteTransaction tx, Throwable t) {
-        // We asume correct state change for underlaying transaction
-        // chain, so we are not changing any of our internal state
-        // to mark that we failed.
+    private void failTransactionChain(WriteTransaction tx, Throwable t) {
+        /*
+         *  We asume correct state change for underlaying transaction
+         *
+         * chain, so we are not changing any of our internal state
+         * to mark that we failed.
+         */
         this.delegatingListener.onTransactionChainFailed(this, tx, t);
     }
 
@@ -116,14 +123,18 @@ class BindingTranslatedTransactionChain implements BindingTransactionChain, Dele
         @Override
         public void onTransactionChainFailed(final TransactionChain<?, ?> chain,
                 final AsyncTransaction<?, ?> transaction, final Throwable cause) {
+            Preconditions.checkState(delegate.equals(chain),
+                    "Illegal state - listener for %s was invoked for incorrect chain %s.", delegate, chain);
             /*
              * Intentionally NOOP, callback for failure, since we
-             * are also listening on each transaction for failure.
+             * are also listening on each transaction future for failure,
+             * in order to have reference to Binding Transaction (which was seen by client
+             * of this transaction chain), instead of DOM transaction
+             * which is known only to this chain, binding transaction implementation
+             * and underlying transaction chain.
              *
-             * by listening on submit future for Binding transaction
-             * in order to provide Binding transaction (which was seen by client
-             * of this transaction chain, instead of
-            */
+             */
+            LOG.debug("Transaction chain {} failed. Failed DOM Transaction {}",this,transaction,cause);
         }
 
         @Override
