@@ -58,6 +58,7 @@ abstract class AbstractForwardedTransaction<T extends AsyncTransaction<YangInsta
     protected final <D extends DataObject> CheckedFuture<Optional<D>,ReadFailedException> doRead(
             final DOMDataReadTransaction readTx, final LogicalDatastoreType store,
             final InstanceIdentifier<D> path) {
+        Preconditions.checkArgument(!path.isWildcarded(), "Invalid read of wildcarded path %s", path);
 
         return MappingCheckedFuture.create(
                     Futures.transform(readTx.read(store, codec.toNormalized(path)),
