@@ -5,13 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
 import java.util.concurrent.ExecutorService;
-
 import javax.annotation.Nullable;
-
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.yangtools.util.concurrent.SpecialExecutors;
 
@@ -42,6 +39,22 @@ public final class InMemoryDOMDataStoreFactory {
     public static InMemoryDOMDataStore create(final String name,
             @Nullable final SchemaService schemaService,
             @Nullable final InMemoryDOMDataStoreConfigProperties properties) {
+        return create(name, schemaService, false, properties);
+    }
+
+    /**
+     * Creates an InMemoryDOMDataStore instance.
+     *
+     * @param name the name of the data store
+     * @param schemaService the SchemaService to which to register the data store.
+     * @param debugTransactions enable transaction debugging
+     * @param properties configuration properties for the InMemoryDOMDataStore instance. If null,
+     *                   default property values are used.
+     * @return an InMemoryDOMDataStore instance
+     */
+    public static InMemoryDOMDataStore create(final String name,
+            @Nullable final SchemaService schemaService, final boolean debugTransactions,
+            @Nullable final InMemoryDOMDataStoreConfigProperties properties) {
 
         InMemoryDOMDataStoreConfigProperties actualProperties = properties;
         if(actualProperties == null) {
@@ -64,7 +77,7 @@ public final class InMemoryDOMDataStoreFactory {
 
         InMemoryDOMDataStore dataStore = new InMemoryDOMDataStore(name,
                 domStoreExecutor, dataChangeListenerExecutor,
-                actualProperties.getMaxDataChangeListenerQueueSize());
+                actualProperties.getMaxDataChangeListenerQueueSize(), debugTransactions);
 
         if(schemaService != null) {
             schemaService.registerSchemaContextListener(dataStore);

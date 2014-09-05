@@ -16,14 +16,11 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
-
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-
 import javax.annotation.concurrent.GuardedBy;
-
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedException;
@@ -91,7 +88,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
     private final ExecutorService dataChangeListenerExecutor;
 
     private final ExecutorService domStoreExecutor;
-
+    private final boolean debugTransactions;
     private final String name;
 
     private volatile AutoCloseable closeable;
@@ -99,15 +96,17 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
     public InMemoryDOMDataStore(final String name, final ExecutorService domStoreExecutor,
             final ExecutorService dataChangeListenerExecutor) {
         this(name, domStoreExecutor, dataChangeListenerExecutor,
-             InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_CHANGE_LISTENER_QUEUE_SIZE);
+             InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_CHANGE_LISTENER_QUEUE_SIZE, false);
     }
 
     public InMemoryDOMDataStore(final String name, final ExecutorService domStoreExecutor,
-            final ExecutorService dataChangeListenerExecutor, final int maxDataChangeListenerQueueSize) {
+            final ExecutorService dataChangeListenerExecutor, final int maxDataChangeListenerQueueSize,
+            final boolean debugTransactions) {
         this.name = Preconditions.checkNotNull(name);
         this.domStoreExecutor = Preconditions.checkNotNull(domStoreExecutor);
         this.listeningExecutor = MoreExecutors.listeningDecorator(this.domStoreExecutor);
         this.dataChangeListenerExecutor = Preconditions.checkNotNull(dataChangeListenerExecutor);
+        this.debugTransactions = debugTransactions;
 
         dataChangeListenerNotificationManager =
                 new QueuedNotificationManager<>(this.dataChangeListenerExecutor,
@@ -134,17 +133,17 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
 
     @Override
     public DOMStoreReadTransaction newReadOnlyTransaction() {
-        return new SnapshotBackedReadTransaction(nextIdentifier(), dataTree.takeSnapshot());
+        return new SnapshotBackedReadTransaction(nextIdentifier(), debugTransactions, dataTree.takeSnapshot());
     }
 
     @Override
     public DOMStoreReadWriteTransaction newReadWriteTransaction() {
-        return new SnapshotBackedReadWriteTransaction(nextIdentifier(), dataTree.takeSnapshot(), this);
+        return new SnapshotBackedReadWriteTransaction(nextIdentifier(), debugTransactions, dataTree.takeSnapshot(), this);
     }
 
     @Override
     public DOMStoreWriteTransaction newWriteOnlyTransaction() {
-        return new SnapshotBackedWriteTransaction(nextIdentifier(), dataTree.takeSnapshot(), this);
+        return new SnapshotBackedWriteTransaction(nextIdentifier(), debugTransactions, dataTree.takeSnapshot(), this);
     }
 
     @Override
@@ -169,6 +168,10 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
                 LOG.debug("Error closing instance", e);
             }
         }
+    }
+
+    boolean getDebugTransactions() {
+        return debugTransactions;
     }
 
     @Override
@@ -242,7 +245,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
             } else {
                 snapshot = dataTree.takeSnapshot();
             }
-            return new SnapshotBackedReadTransaction(nextIdentifier(), snapshot);
+            return new SnapshotBackedReadTransaction(nextIdentifier(), getDebugTransactions(), snapshot);
         }
 
         @Override
@@ -256,7 +259,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
                 snapshot = dataTree.takeSnapshot();
             }
             final SnapshotBackedReadWriteTransaction ret = new SnapshotBackedReadWriteTransaction(nextIdentifier(),
-                    snapshot, this);
+                    getDebugTransactions(), snapshot, this);
             latestOutstandingTx = ret;
             return ret;
         }
@@ -271,8 +274,8 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
             } else {
                 snapshot = dataTree.takeSnapshot();
             }
-            final SnapshotBackedWriteTransaction ret = new SnapshotBackedWriteTransaction(nextIdentifier(), snapshot,
-                    this);
+            final SnapshotBackedWriteTransaction ret = new SnapshotBackedWriteTransaction(nextIdentifier(),
+                    getDebugTransactions(), snapshot, this);
             latestOutstandingTx = ret;
             return ret;
         }
@@ -384,10 +387,12 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
                     } catch (ConflictingModificationAppliedException e) {
                         LOG.warn("Store Tx: {} Conflicting modification for {}.", transaction.getIdentifier(),
                                 e.getPath());
+                        transaction.warnDebugContext(LOG);
                         throw new OptimisticLockFailedException("Optimistic lock failed.",e);
                     } catch (DataValidationFailedException e) {
                         LOG.warn("Store Tx: {} Data Precondition failed for {}.", transaction.getIdentifier(),
                                 e.getPath(), e);
+                        transaction.warnDebugContext(LOG);
                         throw new TransactionCommitFailedException("Data did not pass validation.",e);
                     }
                 }

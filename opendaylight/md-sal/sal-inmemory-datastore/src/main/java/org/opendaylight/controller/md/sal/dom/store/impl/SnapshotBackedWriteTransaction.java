@@ -9,19 +9,18 @@ package org.opendaylight.controller.md.sal.dom.store.impl;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.base.Objects.ToStringHelper;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Objects.ToStringHelper;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
 /**
  * Implementation of Write transaction which is backed by
@@ -46,9 +45,9 @@ class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction impleme
      * @param readyImpl
      *            Implementation of ready method.
      */
-    public SnapshotBackedWriteTransaction(final Object identifier, final DataTreeSnapshot snapshot,
-            final TransactionReadyPrototype readyImpl) {
-        super(identifier);
+    public SnapshotBackedWriteTransaction(final Object identifier, final boolean debug,
+            final DataTreeSnapshot snapshot, final TransactionReadyPrototype readyImpl) {
+        super(identifier, debug);
         mutableTree = snapshot.newModification();
         this.readyImpl = Preconditions.checkNotNull(readyImpl, "readyImpl must not be null.");
         LOG.debug("Write Tx: {} allocated with snapshot {}", identifier, snapshot);
