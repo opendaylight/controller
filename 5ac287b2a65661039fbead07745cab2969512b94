@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_366c8236",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-05T13:54:44Z",
+      "side": 1,
+      "message": "yes",
+      "parentUuid": "fa82b9bf_3625620a",
+      "revId": "5ac287b2a65661039fbead07745cab2969512b94",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_56226602",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2014-09-05T13:51:02Z",
       "side": 1,
       "message": "Can this be null? If not, can we use isEmpty() for better readability?",
+      "revId": "5ac287b2a65661039fbead07745cab2969512b94",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_76820aca",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-05T13:54:44Z",
+      "side": 1,
+      "message": "agreed.",
+      "parentUuid": "fa82b9bf_56226602",
       "revId": "5ac287b2a65661039fbead07745cab2969512b94",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
