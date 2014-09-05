@@ -147,8 +147,8 @@ public final class PersisterAggregator implements Persister {
     public void persistConfig(ConfigSnapshotHolder holder) throws IOException {
         for (PersisterWithConfiguration persisterWithConfiguration: persisterWithConfigurations){
             if (!persisterWithConfiguration.readOnly){
-                logger.debug("Calling {}.persistConfig",persisterWithConfiguration.storage);
-                persisterWithConfiguration.storage.persistConfig(holder);
+                logger.debug("Calling {}.persistConfig", persisterWithConfiguration.getStorage());
+                persisterWithConfiguration.getStorage().persistConfig(holder);
             }
         }
     }

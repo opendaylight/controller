@@ -34,18 +34,20 @@ public class ConfigPersisterNotificationHandler implements Closeable {
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigPersisterNotificationHandler.class);
     private final MBeanServerConnection mBeanServerConnection;
-    private final ConfigPersisterNotificationListener listener;
+    private final NotificationListener listener;
 
 
-    public ConfigPersisterNotificationHandler(MBeanServerConnection mBeanServerConnection,
-                                              Persister persisterAggregator) {
-        this.mBeanServerConnection = mBeanServerConnection;
-        listener = new ConfigPersisterNotificationListener(persisterAggregator);
-        registerAsJMXListener(mBeanServerConnection, listener);
-
+    public ConfigPersisterNotificationHandler(final MBeanServerConnection mBeanServerConnection, final Persister persisterAggregator) {
+        this(mBeanServerConnection, new ConfigPersisterNotificationListener(persisterAggregator));
     }
 
-    private static void registerAsJMXListener(MBeanServerConnection mBeanServerConnection, ConfigPersisterNotificationListener listener) {
+    public ConfigPersisterNotificationHandler(final MBeanServerConnection mBeanServerConnection, final NotificationListener notificationListener) {
+        this.mBeanServerConnection = mBeanServerConnection;
+        this.listener = notificationListener;
+        registerAsJMXListener(mBeanServerConnection, listener);
+    }
+
+    private static void registerAsJMXListener(final MBeanServerConnection mBeanServerConnection, final NotificationListener listener) {
         logger.trace("Called registerAsJMXListener");
         try {
             mBeanServerConnection.addNotificationListener(DefaultCommitOperationMXBean.OBJECT_NAME, listener, null, null);
@@ -57,12 +59,12 @@ public class ConfigPersisterNotificationHandler implements Closeable {
     @Override
     public synchronized void close() {
         // unregister from JMX
-        ObjectName on = DefaultCommitOperationMXBean.OBJECT_NAME;
+        final ObjectName on = DefaultCommitOperationMXBean.OBJECT_NAME;
         try {
             if (mBeanServerConnection.isRegistered(on)) {
                 mBeanServerConnection.removeNotificationListener(on, listener);
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logger.warn("Unable to unregister {} as listener for {}", listener, on, e);
         }
     }
@@ -73,12 +75,12 @@ class ConfigPersisterNotificationListener implements NotificationListener {
 
     private final Persister persisterAggregator;
 
-    ConfigPersisterNotificationListener(Persister persisterAggregator) {
+    ConfigPersisterNotificationListener(final Persister persisterAggregator) {
         this.persisterAggregator = persisterAggregator;
     }
 
     @Override
-    public void handleNotification(Notification notification, Object handback) {
+    public void handleNotification(final Notification notification, final Object handback) {
         if (!(notification instanceof NetconfJMXNotification))
             return;
 
@@ -89,7 +91,7 @@ class ConfigPersisterNotificationListener implements NotificationListener {
         if (notification instanceof CommitJMXNotification) {
             try {
                 handleAfterCommitNotification((CommitJMXNotification) notification);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 // log exceptions from notification Handler here since
                 // notificationBroadcastSupport logs only DEBUG level
                 logger.warn("Failed to handle notification {}", notification, e);
@@ -105,7 +107,7 @@ class ConfigPersisterNotificationListener implements NotificationListener {
             persisterAggregator.persistConfig(new CapabilityStrippingConfigSnapshotHolder(notification.getConfigSnapshot(),
                     notification.getCapabilities()));
             logger.trace("Configuration persisted successfully");
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new RuntimeException("Unable to persist configuration snapshot", e);
         }
     }
