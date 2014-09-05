@@ -142,6 +142,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_59ab79d6",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/MeteringBehavior.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-05T19:26:05Z",
+      "side": 1,
+      "message": "Yeah - don\u0027t worry about it now. Just more for my understanding at this point. At some point we may have metered actors that will go away.....",
+      "parentUuid": "fa82b9bf_9648ee88",
+      "revId": "7ccabae1cb640bb11a461cf8a12a4b6108f23148",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_9639ce43",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/MeteringBehavior.java",
         "patchSetId": 12
@@ -206,6 +224,24 @@
       "side": 1,
       "message": "A variety of metric gets reported to JMX for the timer. I can add comments.\nThis page details about it.\nhttp://dropwizard.github.io/metrics/manual/core/#timers",
       "parentUuid": "fa82b9bf_363ec22a",
+      "revId": "7ccabae1cb640bb11a461cf8a12a4b6108f23148",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f9b7ed38",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/MeteringBehavior.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-05T19:26:05Z",
+      "side": 1,
+      "message": "Putting that link in comments would be cool.",
+      "parentUuid": "fa82b9bf_565a6651",
       "revId": "7ccabae1cb640bb11a461cf8a12a4b6108f23148",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
