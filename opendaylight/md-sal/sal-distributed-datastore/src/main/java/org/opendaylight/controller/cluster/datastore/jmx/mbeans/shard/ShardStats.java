@@ -8,149 +8,193 @@
 
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
 
-import org.opendaylight.controller.cluster.datastore.jmx.mbeans.AbstractBaseMBean;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicLong;
+
+import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
+import org.opendaylight.controller.md.sal.common.util.jmx.QueuedNotificationManagerMXBeanImpl;
+import org.opendaylight.controller.md.sal.common.util.jmx.ThreadExecutorStats;
+import org.opendaylight.controller.md.sal.common.util.jmx.ThreadExecutorStatsMXBeanImpl;
+import org.opendaylight.yangtools.util.concurrent.ListenerNotificationQueueStats;
+import org.opendaylight.yangtools.util.concurrent.QueuedNotificationManager;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
+ * Maintains statistics for a shard.
+ *
  * @author  Basheeruddin syedbahm@cisco.com
  */
-public class ShardStats extends AbstractBaseMBean implements ShardStatsMBean {
+public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
+    public static String JMX_CATEGORY_SHARD = "Shards";
 
-    private final String shardName;
+    private final AtomicLong committedTransactionsCount = new AtomicLong();
 
-    private long committedTransactionsCount = 0L;
+    private final AtomicLong readOnlyTransactionCount = new AtomicLong();
 
-    private long readOnlyTransactionCount = 0L;
+    private final AtomicLong writeOnlyTransactionCount = new AtomicLong();
 
-    private long writeOnlyTransactionCount = 0L;
-
-    private long readWriteTransactionCount = 0L;
+    private final AtomicLong readWriteTransactionCount = new AtomicLong();
 
     private String leader;
 
     private String raftState;
 
-    private long lastLogTerm = -1L;
+    private volatile long lastLogTerm = -1L;
 
-    private long lastLogIndex = -1L;
+    private volatile long lastLogIndex = -1L;
 
-    private long currentTerm = -1L;
+    private volatile long currentTerm = -1L;
 
-    private long commitIndex = -1L;
+    private volatile long commitIndex = -1L;
 
-    private long lastApplied = -1L;
+    private volatile long lastApplied = -1L;
 
-    private Date lastCommittedTransactionTime = new Date(0L);
+    private volatile long lastCommittedTransactionTime;
 
-    private long failedTransactionsCount = 0L;
+    private final AtomicLong failedTransactionsCount = new AtomicLong();
 
-    private long failedReadTransactionsCount = 0L;
+    private final AtomicLong failedReadTransactionsCount = new AtomicLong();
 
-    private long abortTransactionsCount = 0L;
+    private final AtomicLong abortTransactionsCount = new AtomicLong();
 
-    private SimpleDateFormat sdf =
+    private ThreadExecutorStatsMXBeanImpl notificationExecutorStatsBean;
+
+    private ThreadExecutorStatsMXBeanImpl dataStoreExecutorStatsBean;
+
+    private QueuedNotificationManagerMXBeanImpl notificationManagerStatsBean;
+
+    private final SimpleDateFormat sdf =
         new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
-    ShardStats(String shardName) {
-        this.shardName = shardName;
+    public ShardStats(String shardName, String mxBeanType) {
+        super(shardName, mxBeanType, JMX_CATEGORY_SHARD);
     }
 
+    public void setDataStoreExecutor(ExecutorService dsExecutor) {
+        this.dataStoreExecutorStatsBean = new ThreadExecutorStatsMXBeanImpl(dsExecutor,
+                "notification-executor", getMBeanType(), getMBeanCategory());
+    }
+
+    public void setNotificationManager(QueuedNotificationManager<?, ?> manager) {
+        this.notificationManagerStatsBean = new QueuedNotificationManagerMXBeanImpl(manager,
+                "notification-manager", getMBeanType(), getMBeanCategory());
+
+        this.notificationExecutorStatsBean = new ThreadExecutorStatsMXBeanImpl(manager.getExecutor(),
+                "data-store-executor", getMBeanType(), getMBeanCategory());
+    }
 
     @Override
     public String getShardName() {
-        return shardName;
+        return getMBeanName();
     }
 
     @Override
     public long getCommittedTransactionsCount() {
-        return committedTransactionsCount;
+        return committedTransactionsCount.get();
     }
 
-    @Override public String getLeader() {
+    @Override
+    public String getLeader() {
         return leader;
     }
 
-    @Override public String getRaftState() {
+    @Override
+    public String getRaftState() {
         return raftState;
     }
 
-    @Override public long getReadOnlyTransactionCount() {
-        return readOnlyTransactionCount;
+    @Override
+    public long getReadOnlyTransactionCount() {
+        return readOnlyTransactionCount.get();
     }
 
-    @Override public long getWriteOnlyTransactionCount() {
-        return writeOnlyTransactionCount;
+    @Override
+    public long getWriteOnlyTransactionCount() {
+        return writeOnlyTransactionCount.get();
     }
 
-    @Override public long getReadWriteTransactionCount() {
-        return readWriteTransactionCount;
+    @Override
+    public long getReadWriteTransactionCount() {
+        return readWriteTransactionCount.get();
     }
 
-    @Override public long getLastLogIndex() {
+    @Override
+    public long getLastLogIndex() {
         return lastLogIndex;
     }
 
-    @Override public long getLastLogTerm() {
+    @Override
+    public long getLastLogTerm() {
         return lastLogTerm;
     }
 
-    @Override public long getCurrentTerm() {
+    @Override
+    public long getCurrentTerm() {
         return currentTerm;
     }
 
-    @Override public long getCommitIndex() {
+    @Override
+    public long getCommitIndex() {
         return commitIndex;
     }
 
-    @Override public long getLastApplied() {
+    @Override
+    public long getLastApplied() {
         return lastApplied;
     }
 
     @Override
     public String getLastCommittedTransactionTime() {
 
-        return sdf.format(lastCommittedTransactionTime);
+        return sdf.format(new Date(lastCommittedTransactionTime));
     }
 
-    @Override public long getFailedTransactionsCount() {
-        return failedTransactionsCount;
+    @Override
+    public long getFailedTransactionsCount() {
+        return failedTransactionsCount.get();
     }
 
-    @Override public long getFailedReadTransactionsCount() {
-        return failedReadTransactionsCount;
+    @Override
+    public long getFailedReadTransactionsCount() {
+        return failedReadTransactionsCount.get();
     }
 
-    @Override public long getAbortTransactionsCount() {
-        return abortTransactionsCount;
+    @Override
+    public long getAbortTransactionsCount() {
+        return abortTransactionsCount.get();
     }
 
     public long incrementCommittedTransactionCount() {
-        return committedTransactionsCount++;
+        return committedTransactionsCount.incrementAndGet();
     }
 
     public long incrementReadOnlyTransactionCount() {
-        return readOnlyTransactionCount++;
+        return readOnlyTransactionCount.incrementAndGet();
     }
 
     public long incrementWriteOnlyTransactionCount() {
-        return writeOnlyTransactionCount++;
+        return writeOnlyTransactionCount.incrementAndGet();
     }
 
     public long incrementReadWriteTransactionCount() {
-        return readWriteTransactionCount++;
+        return readWriteTransactionCount.incrementAndGet();
     }
 
     public long incrementFailedTransactionsCount() {
-        return failedTransactionsCount++;
+        return failedTransactionsCount.incrementAndGet();
     }
 
     public long incrementFailedReadTransactionsCount() {
-        return failedReadTransactionsCount++;
+        return failedReadTransactionsCount.incrementAndGet();
     }
 
-    public long incrementAbortTransactionsCount () { return abortTransactionsCount++;}
+    public long incrementAbortTransactionsCount ()
+    {
+        return abortTransactionsCount.incrementAndGet();
+    }
 
     public void setLeader(String leader) {
         this.leader = leader;
@@ -180,49 +224,50 @@ public class ShardStats extends AbstractBaseMBean implements ShardStatsMBean {
         this.lastApplied = lastApplied;
     }
 
-
-    public void setLastCommittedTransactionTime(
-        Date lastCommittedTransactionTime) {
+    public void setLastCommittedTransactionTime(long lastCommittedTransactionTime) {
         this.lastCommittedTransactionTime = lastCommittedTransactionTime;
     }
 
     @Override
-    protected String getMBeanName() {
-        return shardName;
+    public ThreadExecutorStats getDataStoreExecutorStats() {
+        return dataStoreExecutorStatsBean.toThreadExecutorStats();
     }
 
     @Override
-    protected String getMBeanType() {
-        return JMX_TYPE_DISTRIBUTED_DATASTORE;
+    public ThreadExecutorStats getNotificationMgrExecutorStats() {
+        return notificationExecutorStatsBean.toThreadExecutorStats();
     }
 
     @Override
-    protected String getMBeanCategory() {
-        return JMX_CATEGORY_SHARD;
+    public List<ListenerNotificationQueueStats> getCurrentNotificationMgrListenerQueueStats() {
+        return notificationManagerStatsBean.getCurrentListenerQueueStats();
+    }
+
+    @Override
+    public int getMaxNotificationMgrListenerQueueSize() {
+        return notificationManagerStatsBean.getMaxListenerQueueSize();
     }
 
     /**
      * resets the counters related to transactions
      */
-
+    @Override
     public void resetTransactionCounters(){
-        committedTransactionsCount = 0L;
+        committedTransactionsCount.set(0);
 
-        readOnlyTransactionCount = 0L;
+        readOnlyTransactionCount.set(0);
 
-        writeOnlyTransactionCount = 0L;
+        writeOnlyTransactionCount.set(0);
 
-        readWriteTransactionCount = 0L;
+        readWriteTransactionCount.set(0);
 
-        lastCommittedTransactionTime = new Date(0L);
+        lastCommittedTransactionTime = 0;
 
-        failedTransactionsCount = 0L;
+        failedTransactionsCount.set(0);
 
-        failedReadTransactionsCount = 0L;
+        failedReadTransactionsCount.set(0);
 
-        abortTransactionsCount = 0L;
+        abortTransactionsCount.set(0);
 
     }
-
-
 }

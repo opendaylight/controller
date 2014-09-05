@@ -78,7 +78,7 @@ public class DistributedDataStoreIntegrationTest {
                             final DistributedDataStore distributedDataStore =
                                 new DistributedDataStore(getSystem(), "config",
                                         new MockClusterWrapper(), configuration,
-                                        new DistributedDataStoreProperties());
+                                        new DatastoreContext());
 
                             distributedDataStore.onGlobalContextUpdated(TestModel.createTestContext());
 

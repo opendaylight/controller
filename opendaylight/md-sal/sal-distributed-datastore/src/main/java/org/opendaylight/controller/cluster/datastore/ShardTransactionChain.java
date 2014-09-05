@@ -12,6 +12,7 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.japi.Creator;
 
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChain;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChainReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
@@ -27,14 +28,14 @@ public class ShardTransactionChain extends AbstractUntypedActor {
     private final DOMStoreTransactionChain chain;
     private final DatastoreContext datastoreContext;
     private final SchemaContext schemaContext;
-    private final String shardName;
+    private final ShardStats shardStats;
 
     public ShardTransactionChain(DOMStoreTransactionChain chain, SchemaContext schemaContext,
-            DatastoreContext datastoreContext,String shardName) {
+            DatastoreContext datastoreContext, ShardStats shardStats) {
         this.chain = chain;
         this.datastoreContext = datastoreContext;
         this.schemaContext = schemaContext;
-        this.shardName = shardName;
+        this.shardStats = shardStats;
     }
 
     @Override
@@ -60,17 +61,17 @@ public class ShardTransactionChain extends AbstractUntypedActor {
                 TransactionProxy.TransactionType.READ_ONLY.ordinal()) {
             return getContext().actorOf(
                     ShardTransaction.props( chain.newReadOnlyTransaction(), getShardActor(),
-                            schemaContext, datastoreContext,shardName), transactionId);
+                            schemaContext, datastoreContext, shardStats), transactionId);
         } else if (createTransaction.getTransactionType() ==
                 TransactionProxy.TransactionType.READ_WRITE.ordinal()) {
             return getContext().actorOf(
                     ShardTransaction.props( chain.newReadWriteTransaction(), getShardActor(),
-                            schemaContext, datastoreContext,shardName), transactionId);
+                            schemaContext, datastoreContext, shardStats), transactionId);
         } else if (createTransaction.getTransactionType() ==
                 TransactionProxy.TransactionType.WRITE_ONLY.ordinal()) {
             return getContext().actorOf(
                     ShardTransaction.props( chain.newWriteOnlyTransaction(), getShardActor(),
-                            schemaContext, datastoreContext,shardName), transactionId);
+                            schemaContext, datastoreContext, shardStats), transactionId);
         } else {
             throw new IllegalArgumentException (
                     "CreateTransaction message has unidentified transaction type=" +
@@ -87,8 +88,9 @@ public class ShardTransactionChain extends AbstractUntypedActor {
     }
 
     public static Props props(DOMStoreTransactionChain chain, SchemaContext schemaContext,
-        DatastoreContext datastoreContext, String shardName) {
-        return Props.create(new ShardTransactionChainCreator(chain, schemaContext, datastoreContext, shardName));
+        DatastoreContext datastoreContext, ShardStats shardStats) {
+        return Props.create(new ShardTransactionChainCreator(chain, schemaContext,
+                datastoreContext, shardStats));
     }
 
     private static class ShardTransactionChainCreator implements Creator<ShardTransactionChain> {
@@ -97,20 +99,20 @@ public class ShardTransactionChain extends AbstractUntypedActor {
         final DOMStoreTransactionChain chain;
         final DatastoreContext datastoreContext;
         final SchemaContext schemaContext;
-        final String shardName;
+        final ShardStats shardStats;
 
 
         ShardTransactionChainCreator(DOMStoreTransactionChain chain, SchemaContext schemaContext,
-            DatastoreContext datastoreContext, String shardName) {
+            DatastoreContext datastoreContext, ShardStats shardStats) {
             this.chain = chain;
             this.datastoreContext = datastoreContext;
             this.schemaContext = schemaContext;
-            this.shardName = shardName;
+            this.shardStats = shardStats;
         }
 
         @Override
         public ShardTransactionChain create() throws Exception {
-            return new ShardTransactionChain(chain, schemaContext, datastoreContext,shardName);
+            return new ShardTransactionChain(chain, schemaContext, datastoreContext, shardStats);
         }
     }
 }

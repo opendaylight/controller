@@ -8,44 +8,32 @@
 
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shardmanager;
 
-import org.opendaylight.controller.cluster.datastore.jmx.mbeans.AbstractBaseMBean;
-
 import java.util.List;
 
-public class ShardManagerInfo extends AbstractBaseMBean implements
-    ShardManagerInfoMBean {
+import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 
-    private final String name;
+public class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfoMBean {
+
+    public static String JMX_CATEGORY_SHARD_MANAGER = "ShardManager";
+
     private final List<String> localShards;
 
-    public ShardManagerInfo(String name, List<String> localShards) {
-        this.name = name;
+    public ShardManagerInfo(String name, String mxBeanType, List<String> localShards) {
+        super(name, mxBeanType, JMX_CATEGORY_SHARD_MANAGER);
         this.localShards = localShards;
     }
 
-
-    @Override protected String getMBeanName() {
-        return name;
-    }
-
-    @Override protected String getMBeanType() {
-        return JMX_TYPE_DISTRIBUTED_DATASTORE;
-    }
-
-    @Override protected String getMBeanCategory() {
-        return JMX_CATEGORY_SHARD_MANAGER;
-    }
-
-    public static ShardManagerInfo createShardManagerMBean(String name, List<String> localShards){
-        ShardManagerInfo shardManagerInfo = new ShardManagerInfo(name,
-            localShards);
+    public static ShardManagerInfo createShardManagerMBean(String name, String mxBeanType,
+            List<String> localShards){
+        ShardManagerInfo shardManagerInfo = new ShardManagerInfo(name, mxBeanType, localShards);
 
         shardManagerInfo.registerMBean();
 
         return shardManagerInfo;
     }
 
-    @Override public List<String> getLocalShards() {
+    @Override
+    public List<String> getLocalShards() {
         return localShards;
     }
 }

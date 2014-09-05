@@ -7,28 +7,41 @@
  */
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 /**
  * @author Basheeruddin syedbahm@cisco.com
  *
  */
 public class ShardMBeanFactory {
-    private static Map<String, ShardStats> shardMBeans =
-        new HashMap<String, ShardStats>();
 
-    public static ShardStats getShardStatsMBean(String shardName) {
-        if (shardMBeans.containsKey(shardName)) {
-            return shardMBeans.get(shardName);
-        } else {
-            ShardStats shardStatsMBeanImpl = new ShardStats(shardName);
+    private static final Logger LOG = LoggerFactory.getLogger(ShardMBeanFactory.class);
 
-            if (shardStatsMBeanImpl.registerMBean()) {
-                shardMBeans.put(shardName, shardStatsMBeanImpl);
-            }
-            return shardStatsMBeanImpl;
+    private static Cache<String,ShardStats> shardMBeansCache =
+                                      CacheBuilder.newBuilder().weakValues().build();
+
+    public static ShardStats getShardStatsMBean(final String shardName, final String mxBeanType) {
+        final String finalMXBeanType = mxBeanType != null ? mxBeanType : "DistDataStore";
+        try {
+            return shardMBeansCache.get(shardName, new Callable<ShardStats>() {
+                @Override
+                public ShardStats call() throws Exception {
+                    ShardStats shardStatsMBeanImpl = new ShardStats(shardName, finalMXBeanType);
+                    shardStatsMBeanImpl.registerMBean();
+                    return shardStatsMBeanImpl;
+                }
+            });
+        } catch(ExecutionException e) {
+            LOG.error(String.format("Could not create MXBean for shard: %s", shardName), e);
+            // Just return an instance that isn't registered.
+            return new ShardStats(shardName, finalMXBeanType);
         }
     }
-
 }

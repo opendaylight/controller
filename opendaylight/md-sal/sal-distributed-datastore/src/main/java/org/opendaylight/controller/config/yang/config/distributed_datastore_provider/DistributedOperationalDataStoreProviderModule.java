@@ -1,8 +1,13 @@
 package org.opendaylight.controller.config.yang.config.distributed_datastore_provider;
 
+import java.util.concurrent.TimeUnit;
+
+import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStoreFactory;
-import org.opendaylight.controller.cluster.datastore.DistributedDataStoreProperties;
+import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
 import org.osgi.framework.BundleContext;
+
+import scala.concurrent.duration.Duration;
 
 public class DistributedOperationalDataStoreProviderModule extends
     org.opendaylight.controller.config.yang.config.distributed_datastore_provider.AbstractDistributedOperationalDataStoreProviderModule {
@@ -35,14 +40,18 @@ public class DistributedOperationalDataStoreProviderModule extends
             props = new OperationalProperties();
         }
 
-        return DistributedDataStoreFactory.createInstance("operational",
-                getOperationalSchemaServiceDependency(),
-                new DistributedDataStoreProperties(
+        DatastoreContext datastoreContext = new DatastoreContext("DistributedOperationalDatastore",
+                InMemoryDOMDataStoreConfigProperties.create(
                         props.getMaxShardDataChangeExecutorPoolSize().getValue(),
                         props.getMaxShardDataChangeExecutorQueueSize().getValue(),
                         props.getMaxShardDataChangeListenerQueueSize().getValue(),
-                        props.getShardTransactionIdleTimeoutInMinutes().getValue(),
-                        props.getOperationTimeoutInSeconds().getValue()), bundleContext);
+                        props.getMaxShardDataStoreExecutorQueueSize().getValue()),
+                Duration.create(props.getShardTransactionIdleTimeoutInMinutes().getValue(),
+                        TimeUnit.MINUTES),
+                props.getOperationTimeoutInSeconds().getValue());
+
+        return DistributedDataStoreFactory.createInstance("operational",
+                getOperationalSchemaServiceDependency(), datastoreContext, bundleContext);
     }
 
     public void setBundleContext(BundleContext bundleContext) {
