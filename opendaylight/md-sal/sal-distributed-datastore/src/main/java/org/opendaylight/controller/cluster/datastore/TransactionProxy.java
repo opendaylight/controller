@@ -71,6 +71,9 @@ import java.util.concurrent.atomic.AtomicLong;
  * </p>
  */
 public class TransactionProxy implements DOMStoreReadWriteTransaction {
+    private final String transactionChainId;
+
+
     public enum TransactionType {
         READ_ONLY,
         WRITE_ONLY,
@@ -177,12 +180,17 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
     private boolean inReadyState;
 
     public TransactionProxy(ActorContext actorContext, TransactionType transactionType) {
+        this(actorContext, transactionType, "");
+    }
+
+    public TransactionProxy(ActorContext actorContext, TransactionType transactionType, String transactionChainId) {
         this.actorContext = Preconditions.checkNotNull(actorContext,
-                "actorContext should not be null");
+            "actorContext should not be null");
         this.transactionType = Preconditions.checkNotNull(transactionType,
-                "transactionType should not be null");
+            "transactionType should not be null");
         this.schemaContext = Preconditions.checkNotNull(actorContext.getSchemaContext(),
-                "schemaContext should not be null");
+            "schemaContext should not be null");
+        this.transactionChainId = transactionChainId;
 
         String memberName = actorContext.getCurrentMemberName();
         if(memberName == null){
@@ -190,7 +198,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         }
 
         this.identifier = TransactionIdentifier.builder().memberName(memberName).counter(
-                counter.getAndIncrement()).build();
+            counter.getAndIncrement()).build();
 
         if(transactionType == TransactionType.READ_ONLY) {
             // Read-only Tx's aren't explicitly closed by the client so we create a PhantomReference
@@ -201,7 +209,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             remoteTransactionActorsMB = new AtomicBoolean();
 
             TransactionProxyCleanupPhantomReference cleanup =
-                                              new TransactionProxyCleanupPhantomReference(this);
+                new TransactionProxyCleanupPhantomReference(this);
             phantomReferenceCache.put(cleanup, cleanup);
         }
 
@@ -353,7 +361,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
         try {
             Object response = actorContext.executeShardOperation(shardName,
-                new CreateTransaction(identifier.toString(),this.transactionType.ordinal() ).toSerializable());
+                new CreateTransaction(identifier.toString(),this.transactionType.ordinal() , transactionChainId).toSerializable());
             if (response.getClass().equals(CreateTransactionReply.SERIALIZABLE_CLASS)) {
                 CreateTransactionReply reply =
                     CreateTransactionReply.fromSerializable(response);

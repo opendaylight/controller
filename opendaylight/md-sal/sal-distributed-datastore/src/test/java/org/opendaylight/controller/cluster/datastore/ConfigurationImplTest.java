@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -82,5 +83,16 @@ public class ConfigurationImplTest {
     public void testReadConfigurationFromFile(){
         File f = new File("./module-shards.conf");
         ConfigFactory.parseFile(f);
+    }
+
+    @Test
+    public void testGetAllShardNames(){
+        Set<String> allShardNames = configuration.getAllShardNames();
+
+        assertEquals(4, allShardNames.size());
+        assertTrue(allShardNames.contains("default"));
+        assertTrue(allShardNames.contains("people-1"));
+        assertTrue(allShardNames.contains("cars-1"));
+        assertTrue(allShardNames.contains("test-1"));
     }
 }
