@@ -653,6 +653,21 @@ public final class ShardTransactionMessages {
      * <code>required int32 transactionType = 2;</code>
      */
     int getTransactionType();
+
+    // optional string transactionChainId = 3;
+    /**
+     * <code>optional string transactionChainId = 3;</code>
+     */
+    boolean hasTransactionChainId();
+    /**
+     * <code>optional string transactionChainId = 3;</code>
+     */
+    java.lang.String getTransactionChainId();
+    /**
+     * <code>optional string transactionChainId = 3;</code>
+     */
+    com.google.protobuf.ByteString
+        getTransactionChainIdBytes();
   }
   /**
    * Protobuf type {@code org.opendaylight.controller.mdsal.CreateTransaction}
@@ -713,6 +728,11 @@ public final class ShardTransactionMessages {
             case 16: {
               bitField0_ |= 0x00000002;
               transactionType_ = input.readInt32();
+              break;
+            }
+            case 26: {
+              bitField0_ |= 0x00000004;
+              transactionChainId_ = input.readBytes();
               break;
             }
           }
@@ -814,9 +834,53 @@ public final class ShardTransactionMessages {
       return transactionType_;
     }
 
+    // optional string transactionChainId = 3;
+    public static final int TRANSACTIONCHAINID_FIELD_NUMBER = 3;
+    private java.lang.Object transactionChainId_;
+    /**
+     * <code>optional string transactionChainId = 3;</code>
+     */
+    public boolean hasTransactionChainId() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional string transactionChainId = 3;</code>
+     */
+    public java.lang.String getTransactionChainId() {
+      java.lang.Object ref = transactionChainId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          transactionChainId_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>optional string transactionChainId = 3;</code>
+     */
+    public com.google.protobuf.ByteString
+        getTransactionChainIdBytes() {
+      java.lang.Object ref = transactionChainId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b =
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        transactionChainId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private void initFields() {
       transactionId_ = "";
       transactionType_ = 0;
+      transactionChainId_ = "";
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -844,6 +908,9 @@ public final class ShardTransactionMessages {
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         output.writeInt32(2, transactionType_);
       }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeBytes(3, getTransactionChainIdBytes());
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -860,6 +927,10 @@ public final class ShardTransactionMessages {
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(2, transactionType_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(3, getTransactionChainIdBytes());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -981,6 +1052,8 @@ public final class ShardTransactionMessages {
         bitField0_ = (bitField0_ & ~0x00000001);
         transactionType_ = 0;
         bitField0_ = (bitField0_ & ~0x00000002);
+        transactionChainId_ = "";
+        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
 
@@ -1017,6 +1090,10 @@ public final class ShardTransactionMessages {
           to_bitField0_ |= 0x00000002;
         }
         result.transactionType_ = transactionType_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.transactionChainId_ = transactionChainId_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -1040,6 +1117,11 @@ public final class ShardTransactionMessages {
         }
         if (other.hasTransactionType()) {
           setTransactionType(other.getTransactionType());
+        }
+        if (other.hasTransactionChainId()) {
+          bitField0_ |= 0x00000004;
+          transactionChainId_ = other.transactionChainId_;
+          onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -1179,6 +1261,80 @@ public final class ShardTransactionMessages {
       public Builder clearTransactionType() {
         bitField0_ = (bitField0_ & ~0x00000002);
         transactionType_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // optional string transactionChainId = 3;
+      private java.lang.Object transactionChainId_ = "";
+      /**
+       * <code>optional string transactionChainId = 3;</code>
+       */
+      public boolean hasTransactionChainId() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional string transactionChainId = 3;</code>
+       */
+      public java.lang.String getTransactionChainId() {
+        java.lang.Object ref = transactionChainId_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          transactionChainId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>optional string transactionChainId = 3;</code>
+       */
+      public com.google.protobuf.ByteString
+          getTransactionChainIdBytes() {
+        java.lang.Object ref = transactionChainId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b =
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          transactionChainId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>optional string transactionChainId = 3;</code>
+       */
+      public Builder setTransactionChainId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+        transactionChainId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string transactionChainId = 3;</code>
+       */
+      public Builder clearTransactionChainId() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        transactionChainId_ = getDefaultInstance().getTransactionChainId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string transactionChainId = 3;</code>
+       */
+      public Builder setTransactionChainIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+        transactionChainId_ = value;
         onChanged();
         return this;
       }
@@ -7597,36 +7753,37 @@ public final class ShardTransactionMessages {
     java.lang.String[] descriptorData = {
       "\n\026ShardTransaction.proto\022!org.opendaylig" +
       "ht.controller.mdsal\032\014Common.proto\"\022\n\020Clo" +
-      "seTransaction\"\027\n\025CloseTransactionReply\"C" +
+      "seTransaction\"\027\n\025CloseTransactionReply\"_" +
       "\n\021CreateTransaction\022\025\n\rtransactionId\030\001 \002" +
-      "(\t\022\027\n\017transactionType\030\002 \002(\005\"M\n\026CreateTra" +
-      "nsactionReply\022\034\n\024transactionActorPath\030\001 " +
-      "\002(\t\022\025\n\rtransactionId\030\002 \002(\t\"\022\n\020ReadyTrans" +
-      "action\"*\n\025ReadyTransactionReply\022\021\n\tactor" +
-      "Path\030\001 \002(\t\"l\n\nDeleteData\022^\n\037instanceIden" +
-      "tifierPathArguments\030\001 \002(\01325.org.opendayl",
-      "ight.controller.mdsal.InstanceIdentifier" +
-      "\"\021\n\017DeleteDataReply\"j\n\010ReadData\022^\n\037insta" +
-      "nceIdentifierPathArguments\030\001 \002(\01325.org.o" +
-      "pendaylight.controller.mdsal.InstanceIde" +
-      "ntifier\"P\n\rReadDataReply\022?\n\016normalizedNo" +
-      "de\030\001 \001(\0132\'.org.opendaylight.controller.m" +
-      "dsal.Node\"\254\001\n\tWriteData\022^\n\037instanceIdent" +
-      "ifierPathArguments\030\001 \002(\01325.org.opendayli" +
-      "ght.controller.mdsal.InstanceIdentifier\022" +
-      "?\n\016normalizedNode\030\002 \002(\0132\'.org.opendaylig",
-      "ht.controller.mdsal.Node\"\020\n\016WriteDataRep" +
-      "ly\"\254\001\n\tMergeData\022^\n\037instanceIdentifierPa" +
-      "thArguments\030\001 \002(\01325.org.opendaylight.con" +
-      "troller.mdsal.InstanceIdentifier\022?\n\016norm" +
-      "alizedNode\030\002 \002(\0132\'.org.opendaylight.cont" +
-      "roller.mdsal.Node\"\020\n\016MergeDataReply\"l\n\nD" +
-      "ataExists\022^\n\037instanceIdentifierPathArgum" +
-      "ents\030\001 \002(\01325.org.opendaylight.controller" +
-      ".mdsal.InstanceIdentifier\"!\n\017DataExistsR" +
-      "eply\022\016\n\006exists\030\001 \002(\010BV\n:org.opendaylight",
-      ".controller.protobuff.messages.transacti" +
-      "onB\030ShardTransactionMessages"
+      "(\t\022\027\n\017transactionType\030\002 \002(\005\022\032\n\022transacti" +
+      "onChainId\030\003 \001(\t\"M\n\026CreateTransactionRepl" +
+      "y\022\034\n\024transactionActorPath\030\001 \002(\t\022\025\n\rtrans" +
+      "actionId\030\002 \002(\t\"\022\n\020ReadyTransaction\"*\n\025Re" +
+      "adyTransactionReply\022\021\n\tactorPath\030\001 \002(\t\"l" +
+      "\n\nDeleteData\022^\n\037instanceIdentifierPathAr",
+      "guments\030\001 \002(\01325.org.opendaylight.control" +
+      "ler.mdsal.InstanceIdentifier\"\021\n\017DeleteDa" +
+      "taReply\"j\n\010ReadData\022^\n\037instanceIdentifie" +
+      "rPathArguments\030\001 \002(\01325.org.opendaylight." +
+      "controller.mdsal.InstanceIdentifier\"P\n\rR" +
+      "eadDataReply\022?\n\016normalizedNode\030\001 \001(\0132\'.o" +
+      "rg.opendaylight.controller.mdsal.Node\"\254\001" +
+      "\n\tWriteData\022^\n\037instanceIdentifierPathArg" +
+      "uments\030\001 \002(\01325.org.opendaylight.controll" +
+      "er.mdsal.InstanceIdentifier\022?\n\016normalize",
+      "dNode\030\002 \002(\0132\'.org.opendaylight.controlle" +
+      "r.mdsal.Node\"\020\n\016WriteDataReply\"\254\001\n\tMerge" +
+      "Data\022^\n\037instanceIdentifierPathArguments\030" +
+      "\001 \002(\01325.org.opendaylight.controller.mdsa" +
+      "l.InstanceIdentifier\022?\n\016normalizedNode\030\002" +
+      " \002(\0132\'.org.opendaylight.controller.mdsal" +
+      ".Node\"\020\n\016MergeDataReply\"l\n\nDataExists\022^\n" +
+      "\037instanceIdentifierPathArguments\030\001 \002(\01325" +
+      ".org.opendaylight.controller.mdsal.Insta" +
+      "nceIdentifier\"!\n\017DataExistsReply\022\016\n\006exis",
+      "ts\030\001 \002(\010BV\n:org.opendaylight.controller." +
+      "protobuff.messages.transactionB\030ShardTra" +
+      "nsactionMessages"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -7650,7 +7807,7 @@ public final class ShardTransactionMessages {
           internal_static_org_opendaylight_controller_mdsal_CreateTransaction_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_org_opendaylight_controller_mdsal_CreateTransaction_descriptor,
-              new java.lang.String[] { "TransactionId", "TransactionType", });
+              new java.lang.String[] { "TransactionId", "TransactionType", "TransactionChainId", });
           internal_static_org_opendaylight_controller_mdsal_CreateTransactionReply_descriptor =
             getDescriptor().getMessageTypes().get(3);
           internal_static_org_opendaylight_controller_mdsal_CreateTransactionReply_fieldAccessorTable = new
