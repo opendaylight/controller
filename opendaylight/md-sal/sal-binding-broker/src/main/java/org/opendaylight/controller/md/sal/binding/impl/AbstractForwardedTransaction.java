@@ -7,6 +7,10 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.Futures;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
@@ -15,14 +19,9 @@ import org.opendaylight.yangtools.concepts.Delegator;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.util.concurrent.MappingCheckedFuture;
 import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.Futures;
-
 
 abstract class AbstractForwardedTransaction<T extends AsyncTransaction<YangInstanceIdentifier, NormalizedNode<?, ?>>>
         implements Delegator<T>, Identifiable<Object> {
@@ -56,9 +55,9 @@ abstract class AbstractForwardedTransaction<T extends AsyncTransaction<YangInsta
         return codec;
     }
 
-    protected final <T extends DataObject> CheckedFuture<Optional<T>,ReadFailedException> doRead(
+    protected final <D extends DataObject> CheckedFuture<Optional<D>,ReadFailedException> doRead(
             final DOMDataReadTransaction readTx, final LogicalDatastoreType store,
-            final org.opendaylight.yangtools.yang.binding.InstanceIdentifier<T> path) {
+            final InstanceIdentifier<D> path) {
 
         return MappingCheckedFuture.create(
                     Futures.transform(readTx.read(store, codec.toNormalized(path)),
