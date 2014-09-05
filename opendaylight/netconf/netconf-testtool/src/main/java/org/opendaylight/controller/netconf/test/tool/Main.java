@@ -53,6 +53,9 @@ public final class Main {
         @Arg(dest = "generate-config-connection-timeout")
         public int generateConfigsTimeout;
 
+        @Arg(dest = "generate-config-address")
+        public String generateConfigsAddress;
+
         @Arg(dest = "generate-configs-dir")
         public File generateConfigsDir;
 
@@ -91,6 +94,12 @@ public final class Main {
                     .setDefault((int)TimeUnit.MINUTES.toMillis(5))
                     .help("Timeout to be generated in initial config files")
                     .dest("generate-config-connection-timeout");
+
+            parser.addArgument("--generate-config-address")
+                    .type(String.class)
+                    .setDefault("127.0.0.1")
+                    .help("Address to be placed in generated configs")
+                    .dest("generate-config-address");
 
             parser.addArgument("--generate-configs-batch-size")
                     .type(Integer.class)
@@ -138,7 +147,7 @@ public final class Main {
         try {
             final List<Integer> openDevices = netconfDeviceSimulator.start(params);
             if(params.generateConfigsDir != null) {
-                new ConfigGenerator(params.generateConfigsDir, openDevices).generate(params.ssh, params.generateConfigBatchSize, params.generateConfigsTimeout);
+                new ConfigGenerator(params.generateConfigsDir, openDevices).generate(params.ssh, params.generateConfigBatchSize, params.generateConfigsTimeout, params.generateConfigsAddress);
             }
         } catch (final Exception e) {
             LOG.error("Unhandled exception", e);
@@ -174,6 +183,7 @@ public final class Main {
         public static final String NETCONF_CONNECTOR_XML = "/initial/99-netconf-connector.xml";
         public static final String NETCONF_CONNECTOR_NAME = "controller-config";
         public static final String NETCONF_CONNECTOR_PORT = "1830";
+        public static final String NETCONF_CONNECTOR_ADDRESS = "127.0.0.1";
         public static final String NETCONF_USE_SSH = "false";
         public static final String SIM_DEVICE_SUFFIX = "-sim-device";
 
@@ -185,7 +195,7 @@ public final class Main {
             this.openDevices = openDevices;
         }
 
-        public void generate(final boolean useSsh, final int batchSize, final int generateConfigsTimeout) {
+        public void generate(final boolean useSsh, final int batchSize, final int generateConfigsTimeout, final String address) {
             if(directory.exists() == false) {
                 checkState(directory.mkdirs(), "Unable to create folder %s" + directory);
             }
@@ -198,7 +208,9 @@ public final class Main {
                 checkState(configBlueprint.contains(NETCONF_CONNECTOR_NAME));
                 checkState(configBlueprint.contains(NETCONF_CONNECTOR_PORT));
                 checkState(configBlueprint.contains(NETCONF_USE_SSH));
+                checkState(configBlueprint.contains(NETCONF_CONNECTOR_ADDRESS));
                 configBlueprint = configBlueprint.replace(NETCONF_CONNECTOR_NAME, "%s");
+                configBlueprint = configBlueprint.replace(NETCONF_CONNECTOR_ADDRESS, "%s");
                 configBlueprint = configBlueprint.replace(NETCONF_CONNECTOR_PORT, "%s");
                 configBlueprint = configBlueprint.replace(NETCONF_USE_SSH, "%s");
 
@@ -217,7 +229,7 @@ public final class Main {
                     }
 
                     final String name = String.valueOf(openDevice) + SIM_DEVICE_SUFFIX;
-                    String configContent = String.format(middleBlueprint, name, String.valueOf(openDevice), String.valueOf(!useSsh));
+                    String configContent = String.format(middleBlueprint, name, address, String.valueOf(openDevice), String.valueOf(!useSsh));
                     configContent = String.format("%s%s%d%s\n%s\n", configContent, "<connection-timeout-millis>", generateConfigsTimeout, "</connection-timeout-millis>", "</module>");
 
                     b.append(configContent);
