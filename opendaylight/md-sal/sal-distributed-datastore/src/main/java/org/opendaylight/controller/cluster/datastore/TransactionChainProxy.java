@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
+import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChain;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
@@ -19,32 +20,34 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
  */
 public class TransactionChainProxy implements DOMStoreTransactionChain{
     private final ActorContext actorContext;
+    private final String transactionChainId;
 
     public TransactionChainProxy(ActorContext actorContext) {
         this.actorContext = actorContext;
+        transactionChainId = actorContext.getCurrentMemberName() + "-" + System.currentTimeMillis();
     }
 
     @Override
     public DOMStoreReadTransaction newReadOnlyTransaction() {
         return new TransactionProxy(actorContext,
-            TransactionProxy.TransactionType.READ_ONLY);
+            TransactionProxy.TransactionType.READ_ONLY, transactionChainId);
     }
 
     @Override
     public DOMStoreReadWriteTransaction newReadWriteTransaction() {
         return new TransactionProxy(actorContext,
-            TransactionProxy.TransactionType.READ_WRITE);
+            TransactionProxy.TransactionType.READ_WRITE, transactionChainId);
     }
 
     @Override
     public DOMStoreWriteTransaction newWriteOnlyTransaction() {
         return new TransactionProxy(actorContext,
-            TransactionProxy.TransactionType.WRITE_ONLY);
+            TransactionProxy.TransactionType.WRITE_ONLY, transactionChainId);
     }
 
     @Override
     public void close() {
-        // FIXME : The problem here is don't know which shard the transaction chain is to be created on ???
-        throw new UnsupportedOperationException("close - not sure what to do here?");
+        // Send a close transaction chain request to each and every shard
+        actorContext.broadcast(new CloseTransactionChain(transactionChainId));
     }
 }

@@ -14,13 +14,10 @@ import akka.actor.ActorSelection;
 import akka.actor.Props;
 import akka.event.Logging;
 import akka.testkit.JavaTestKit;
-
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
-import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionChain;
-import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionChainReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.PreCommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.PreCommitTransactionReply;
@@ -32,7 +29,6 @@ import org.opendaylight.controller.cluster.datastore.messages.WriteDataReply;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
@@ -87,31 +83,8 @@ public class BasicIntegrationTest extends AbstractActorTest {
 
                     assertEquals(true, result);
 
-                    // 1. Create a TransactionChain
-                    shard.tell(new CreateTransactionChain().toSerializable(), getRef());
-
-                    final ActorSelection transactionChain =
-                        new ExpectMsg<ActorSelection>(duration("3 seconds"), "CreateTransactionChainReply") {
-                            @Override
-                            protected ActorSelection match(Object in) {
-                                if (in.getClass().equals(CreateTransactionChainReply.SERIALIZABLE_CLASS)) {
-                                    ActorPath transactionChainPath =
-                                        CreateTransactionChainReply.fromSerializable(getSystem(),in)
-                                            .getTransactionChainPath();
-                                    return getSystem()
-                                        .actorSelection(transactionChainPath);
-                                } else {
-                                    throw noMatch();
-                                }
-                            }
-                        }.get(); // this extracts the received message
-
-                    assertNotNull(transactionChain);
-
-                    System.out.println("Successfully created transaction chain");
-
-                    // 2. Create a Transaction on the TransactionChain
-                    transactionChain.tell(new CreateTransaction("txn-1", TransactionProxy.TransactionType.WRITE_ONLY.ordinal() ).toSerializable(), getRef());
+                    // Create a transaction on the shard
+                    shard.tell(new CreateTransaction("txn-1", TransactionProxy.TransactionType.WRITE_ONLY.ordinal() ).toSerializable(), getRef());
 
                     final ActorSelection transaction =
                         new ExpectMsg<ActorSelection>(duration("3 seconds"), "CreateTransactionReply") {

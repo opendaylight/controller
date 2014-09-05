@@ -213,6 +213,13 @@ public class ActorContext {
         actor.tell(message, ActorRef.noSender());
     }
 
+    public void sendShardOperationAsync(String shardName, Object message) {
+        ActorSelection primary = findPrimary(shardName);
+
+        primary.tell(message, ActorRef.noSender());
+    }
+
+
     /**
      * Execute an operation on the primary for a given shard
      * <p>
@@ -293,6 +300,17 @@ public class ActorContext {
 
     public String getCurrentMemberName(){
         return clusterWrapper.getCurrentMemberName();
+    }
+
+    /**
+     * Send the message to each and every shard
+     *
+     * @param message
+     */
+    public void broadcast(Object message){
+        for(String shardName : configuration.getAllShardNames()){
+            sendShardOperationAsync(shardName, message);
+        }
     }
 
 }

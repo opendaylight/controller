@@ -21,6 +21,7 @@ import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelpe
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 
@@ -134,6 +135,94 @@ public class DistributedDataStoreIntegrationTest {
                             ListenableFuture<Void> commit = ready.commit();
 
                             commit.get(5, TimeUnit.SECONDS);
+                        } catch (ExecutionException | TimeoutException | InterruptedException e){
+                            fail(e.getMessage());
+                        }
+                    }
+                };
+            }
+        };
+
+    }
+
+    @Test
+    public void transactionChainIntegrationTest() throws Exception {
+        final Configuration configuration = new ConfigurationImpl("module-shards.conf", "modules.conf");
+        ShardStrategyFactory.setConfiguration(configuration);
+
+
+
+        new JavaTestKit(getSystem()) {
+            {
+
+                new Within(duration("10 seconds")) {
+                    @Override
+                    protected void run() {
+                        try {
+                            final DistributedDataStore distributedDataStore =
+                                new DistributedDataStore(getSystem(), "config",
+                                    new MockClusterWrapper(), configuration,
+                                    new DatastoreContext());
+
+                            distributedDataStore.onGlobalContextUpdated(TestModel.createTestContext());
+
+                            // Wait for a specific log message to show up
+                            final boolean result =
+                                new JavaTestKit.EventFilter<Boolean>(Logging.Info.class
+                                ) {
+                                    @Override
+                                    protected Boolean run() {
+                                        return true;
+                                    }
+                                }.from("akka://test/user/shardmanager-config/member-1-shard-test-1-config")
+                                    .message("Switching from state Candidate to Leader")
+                                    .occurrences(1).exec();
+
+                            assertEquals(true, result);
+
+                            DOMStoreTransactionChain transactionChain =
+                                distributedDataStore.createTransactionChain();
+
+                            DOMStoreReadWriteTransaction transaction =
+                                transactionChain.newReadWriteTransaction();
+
+                            transaction
+                                .write(TestModel.TEST_PATH, ImmutableNodes
+                                    .containerNode(TestModel.TEST_QNAME));
+
+                            ListenableFuture<Optional<NormalizedNode<?, ?>>>
+                                future =
+                                transaction.read(TestModel.TEST_PATH);
+
+                            Optional<NormalizedNode<?, ?>> optional =
+                                future.get();
+
+                            Assert.assertTrue("Node not found", optional.isPresent());
+
+                            NormalizedNode<?, ?> normalizedNode =
+                                optional.get();
+
+                            assertEquals(TestModel.TEST_QNAME,
+                                normalizedNode.getNodeType());
+
+                            DOMStoreThreePhaseCommitCohort ready =
+                                transaction.ready();
+
+                            ListenableFuture<Boolean> canCommit =
+                                ready.canCommit();
+
+                            assertTrue(canCommit.get(5, TimeUnit.SECONDS));
+
+                            ListenableFuture<Void> preCommit =
+                                ready.preCommit();
+
+                            preCommit.get(5, TimeUnit.SECONDS);
+
+                            ListenableFuture<Void> commit = ready.commit();
+
+                            commit.get(5, TimeUnit.SECONDS);
+
+                            transactionChain.close();
                         } catch (ExecutionException | TimeoutException | InterruptedException e){
                             fail(e.getMessage());
                         }
