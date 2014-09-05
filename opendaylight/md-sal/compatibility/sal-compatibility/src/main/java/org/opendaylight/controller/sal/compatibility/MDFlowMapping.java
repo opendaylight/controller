@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
@@ -272,10 +272,7 @@ public final class MDFlowMapping {
         return new PushVlanActionCaseBuilder()
         .setPushVlanAction(
                 new PushVlanActionBuilder()
-                .setCfi(new VlanCfi(sourceAction.getCfi()))
-                .setPcp(sourceAction.getPcp())
-                .setTag(sourceAction.getTag())
-                .setVlanId(new VlanId(sourceAction.getVlanId()))
+                .setEthernetType(Integer.valueOf(sourceAction.getTag()))
                 .build()
                 ).build();
     }

@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 2013-2014 Cisco Systems, Inc. and others.  All rights reserved.
-*
-* This program and the accompanying materials are made available under the
-* terms of the Eclipse Public License v1.0 which accompanies this distribution,
-* and is available at http://www.eclipse.org/legal/epl-v10.html
-*/
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.opendaylight.controller.sal.compatibility.test;
 
 import static org.junit.Assert.assertEquals;
@@ -272,14 +272,8 @@ public class TestFromSalConversionsUtils {
             if (cl.isInstance(innerAction)) {
                 numOfFoundActions++;
                 if (innerAction instanceof PushVlanActionCase) {
-                    assertEquals("Wrong value of cfi in PushVlanAction.", (Integer) 1, ((PushVlanActionCase) innerAction).getPushVlanAction()
-                            .getCfi().getValue());
-                    assertEquals("Wrong value of pcp in PushVlanAction.", (Integer) 7,
-                            ((PushVlanActionCase) innerAction).getPushVlanAction().getPcp());
                     assertEquals("Wrong value of tag in PushVlanAction.", (Integer) 0x8100,
-                            ((PushVlanActionCase) innerAction).getPushVlanAction().getTag());
-                    assertEquals("Wrong value of vlad ID in PushVlanAction.", (Integer) 4095,
-                            ((PushVlanActionCase) innerAction).getPushVlanAction().getVlanId().getValue());
+                            ((PushVlanActionCase) innerAction).getPushVlanAction().getEthernetType());
                 } else if (innerAction instanceof SetDlDstActionCase) {
                     assertEquals("Wrong MAC destination address in SetDlDstAction.", "ff:ee:dd:cc:bb:aa",
                             ((SetDlDstActionCase) innerAction).getSetDlDstAction().getAddress().getValue());
@@ -420,7 +414,7 @@ public class TestFromSalConversionsUtils {
         salActions.add(new Loopback());
         // salActions.add(new Output //TODO: mapping is missing
         salActions.add(new PopVlan());
-        salActions.add(new PushVlan(0x8100, 7, 1, 4095));
+        salActions.add(new PushVlan(0x8100));
         salActions.add(new SetDlDst(new byte[]{(byte )0xff,(byte )0xee,(byte )0xdd,(byte )0xcc,(byte )0xbb,(byte )0xaa}));
         salActions.add(new SetDlSrc(new byte[]{(byte )0xff,(byte )0xee,(byte )0xdd,(byte )0xcc,(byte )0xbb,(byte )0xaa}));
         salActions.add(new SetDlType(513));

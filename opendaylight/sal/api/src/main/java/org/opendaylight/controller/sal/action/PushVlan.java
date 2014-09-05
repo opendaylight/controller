@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013-2014 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -57,6 +57,32 @@ public class PushVlan extends Action {
         this.tci = createTci();
         this.header = createHeader();
         runChecks();
+    }
+
+    /**
+     * Construct a new action instance which represents OF 1.3 PUSH_VLAN.
+     *
+     * @param tag  An {@link EtherTypes} instance.
+     */
+    public PushVlan(EtherTypes tag) {
+        this(tag.intValue());
+    }
+
+    /**
+     * Construct a new action instance which represents OF 1.3 PUSH_VLAN.
+     *
+     * @param tag  An ethernet type of a new VLAN tag.
+     */
+    public PushVlan(int tag) {
+        type = ActionType.PUSH_VLAN;
+        this.tag = tag;
+
+        if (tag != EtherTypes.VLANTAGGED.intValue() &&
+            tag != EtherTypes.QINQ.intValue()) {
+            // pass a value which will tell fail and tell something about the
+            // original wrong value
+            checkValue(ActionType.SET_DL_TYPE, 0xBAD << 16 | tag);
+        }
     }
 
     private int createTci() {

@@ -356,23 +356,9 @@ public class ToSalConversionsUtils {
     }
 
     private static PushVlan pushVlanFrom(org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.push.vlan.action._case.PushVlanAction pushVlanAction) {
-        final int tag;
-        final int pcp;
-        final int cfi;
-        final int vlanId;
-
-        if (pushVlanAction.getTag() != null) {
-            tag = pushVlanAction.getTag();
-            if (pushVlanAction.getPcp() != null) {
-                pcp = pushVlanAction.getPcp();
-                if (pushVlanAction.getCfi() != null && pushVlanAction.getCfi().getValue() != null) {
-                    cfi = pushVlanAction.getCfi().getValue();
-                    if (pushVlanAction.getVlanId() != null && pushVlanAction.getVlanId().getValue() != null) {
-                        vlanId = pushVlanAction.getVlanId().getValue();
-                        return new PushVlan(tag, pcp, cfi, vlanId);
-                    }
-                }
-            }
+        Integer tag = pushVlanAction.getTag();
+        if (tag != null) {
+            return new PushVlan(tag.intValue());
         }
         return null;
     }
