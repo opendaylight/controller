@@ -13,6 +13,7 @@ import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface Configuration {
 
@@ -52,4 +53,10 @@ public interface Configuration {
      * @return
      */
     List<String> getMembersFromShardName(String shardName);
+
+    /**
+     *
+     * @return
+     */
+    Set<String> getAllShardNames();
 }

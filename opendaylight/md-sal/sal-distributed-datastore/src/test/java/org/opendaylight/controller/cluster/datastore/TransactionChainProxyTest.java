@@ -10,12 +10,9 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
-import static org.mockito.Mockito.doReturn;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
@@ -23,9 +20,15 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 public class TransactionChainProxyTest {
-    ActorContext actorContext = Mockito.mock(ActorContext.class);
-    SchemaContext schemaContext = Mockito.mock(SchemaContext.class);
+    ActorContext actorContext = mock(ActorContext.class);
+    SchemaContext schemaContext = mock(SchemaContext.class);
 
     @Before
     public void setUp() {
@@ -57,8 +60,12 @@ public class TransactionChainProxyTest {
 
     }
 
-    @Test(expected=UnsupportedOperationException.class)
+    @Test
     public void testClose() throws Exception {
-        new TransactionChainProxy(actorContext).close();
+        ActorContext context = mock(ActorContext.class);
+
+        new TransactionChainProxy(context).close();
+
+        verify(context, times(1)).broadcast(anyObject());
     }
 }
