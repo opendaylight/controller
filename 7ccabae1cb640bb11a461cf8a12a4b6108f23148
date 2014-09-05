@@ -1,0 +1,208 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_7698ca6a",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/CommonConfig.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-05T13:15:51Z",
+      "side": 1,
+      "message": "Cosmetic thing... please put return on separate line with braces (that is part of the ODL coding style).",
+      "revId": "7ccabae1cb640bb11a461cf8a12a4b6108f23148",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_969d4e5c",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/CommonConfig.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-05T13:15:51Z",
+      "side": 1,
+      "message": "Please put return on separate line.",
+      "revId": "7ccabae1cb640bb11a461cf8a12a4b6108f23148",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_36a2429b",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/CommonConfig.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-05T13:15:51Z",
+      "side": 1,
+      "message": "Please put return on separate line.",
+      "revId": "7ccabae1cb640bb11a461cf8a12a4b6108f23148",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b62ad2e5",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/MeteringBehavior.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-05T13:15:51Z",
+      "side": 1,
+      "message": "Does this timer need to be cleaned up from the registry when the actor goes away?",
+      "revId": "7ccabae1cb640bb11a461cf8a12a4b6108f23148",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9639ce43",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/MeteringBehavior.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-05T13:15:51Z",
+      "side": 1,
+      "message": "I assume this reuses an existing timer if one was previously created? Also what about clean up when the actor goes away?\n\nI think a few comments here on how the metric timer mechanism works would be useful.",
+      "revId": "7ccabae1cb640bb11a461cf8a12a4b6108f23148",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_363ec22a",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/MeteringBehavior.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-05T13:15:51Z",
+      "side": 1,
+      "message": "I assume this also records the elapsed time in a JMX metric? If so, does it track each elapsed time or the max? Maybe a short comment explaining this.",
+      "revId": "7ccabae1cb640bb11a461cf8a12a4b6108f23148",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_96b46ed2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/yang/distributed-datastore-provider.yang",
+        "patchSetId": 12
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-05T13:15:51Z",
+      "side": 1,
+      "message": "I assume this shouldn\u0027t be 0. If so, can you use non-zero-uint16-type for this?",
+      "revId": "7ccabae1cb640bb11a461cf8a12a4b6108f23148",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_56c6e64a",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcImplementation.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-05T13:15:51Z",
+      "side": 1,
+      "message": "We could even change config to return a Timeout instance (getAskTimeout) to save an object creation.",
+      "revId": "7ccabae1cb640bb11a461cf8a12a4b6108f23148",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f6c29a33",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcProviderConfig.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-05T13:15:51Z",
+      "side": 1,
+      "message": "I think we can remove this now?",
+      "revId": "7ccabae1cb640bb11a461cf8a12a4b6108f23148",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_76fd2a6e",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/test/java/org/opendaylight/controller/remote/rpc/RemoteRpcProviderConfigTest.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-05T13:15:51Z",
+      "side": 1,
+      "message": "Should we also assert getMailBoxCapacity not null?\n\nAlso can you add a test with all custom values and assert correct values?",
+      "revId": "7ccabae1cb640bb11a461cf8a12a4b6108f23148",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_16d7feee",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/test/java/org/opendaylight/controller/remote/rpc/RemoteRpcProviderConfigTest.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-05T13:15:51Z",
+      "side": 1,
+      "message": "expectedCapacity?",
+      "revId": "7ccabae1cb640bb11a461cf8a12a4b6108f23148",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b603b275",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/test/java/org/opendaylight/controller/remote/rpc/RemoteRpcProviderConfigTest.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-05T13:15:51Z",
+      "side": 1,
+      "message": "Should we assertEquals expected capacity?",
+      "revId": "7ccabae1cb640bb11a461cf8a12a4b6108f23148",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
