@@ -10,6 +10,21 @@ public final class ShardTransactionChainMessages {
   }
   public interface CloseTransactionChainOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
+
+    // optional string transactionChainId = 1;
+    /**
+     * <code>optional string transactionChainId = 1;</code>
+     */
+    boolean hasTransactionChainId();
+    /**
+     * <code>optional string transactionChainId = 1;</code>
+     */
+    java.lang.String getTransactionChainId();
+    /**
+     * <code>optional string transactionChainId = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getTransactionChainIdBytes();
   }
   /**
    * Protobuf type {@code org.opendaylight.controller.mdsal.CloseTransactionChain}
@@ -44,6 +59,7 @@ public final class ShardTransactionChainMessages {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       initFields();
+      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -59,6 +75,11 @@ public final class ShardTransactionChainMessages {
                                      extensionRegistry, tag)) {
                 done = true;
               }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              transactionChainId_ = input.readBytes();
               break;
             }
           }
@@ -100,7 +121,52 @@ public final class ShardTransactionChainMessages {
       return PARSER;
     }
 
+    private int bitField0_;
+    // optional string transactionChainId = 1;
+    public static final int TRANSACTIONCHAINID_FIELD_NUMBER = 1;
+    private java.lang.Object transactionChainId_;
+    /**
+     * <code>optional string transactionChainId = 1;</code>
+     */
+    public boolean hasTransactionChainId() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional string transactionChainId = 1;</code>
+     */
+    public java.lang.String getTransactionChainId() {
+      java.lang.Object ref = transactionChainId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          transactionChainId_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>optional string transactionChainId = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getTransactionChainIdBytes() {
+      java.lang.Object ref = transactionChainId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b =
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        transactionChainId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private void initFields() {
+      transactionChainId_ = "";
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -114,6 +180,9 @@ public final class ShardTransactionChainMessages {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, getTransactionChainIdBytes());
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -123,6 +192,10 @@ public final class ShardTransactionChainMessages {
       if (size != -1) return size;
 
       size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, getTransactionChainIdBytes());
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
       return size;
@@ -239,6 +312,8 @@ public final class ShardTransactionChainMessages {
 
       public Builder clear() {
         super.clear();
+        transactionChainId_ = "";
+        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -265,6 +340,13 @@ public final class ShardTransactionChainMessages {
 
       public org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChain buildPartial() {
         org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChain result = new org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChain(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.transactionChainId_ = transactionChainId_;
+        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
@@ -280,6 +362,11 @@ public final class ShardTransactionChainMessages {
 
       public Builder mergeFrom(org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChain other) {
         if (other == org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChain.getDefaultInstance()) return this;
+        if (other.hasTransactionChainId()) {
+          bitField0_ |= 0x00000001;
+          transactionChainId_ = other.transactionChainId_;
+          onChanged();
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
@@ -303,6 +390,81 @@ public final class ShardTransactionChainMessages {
             mergeFrom(parsedMessage);
           }
         }
+        return this;
+      }
+      private int bitField0_;
+
+      // optional string transactionChainId = 1;
+      private java.lang.Object transactionChainId_ = "";
+      /**
+       * <code>optional string transactionChainId = 1;</code>
+       */
+      public boolean hasTransactionChainId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional string transactionChainId = 1;</code>
+       */
+      public java.lang.String getTransactionChainId() {
+        java.lang.Object ref = transactionChainId_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          transactionChainId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>optional string transactionChainId = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getTransactionChainIdBytes() {
+        java.lang.Object ref = transactionChainId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b =
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          transactionChainId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>optional string transactionChainId = 1;</code>
+       */
+      public Builder setTransactionChainId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        transactionChainId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string transactionChainId = 1;</code>
+       */
+      public Builder clearTransactionChainId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        transactionChainId_ = getDefaultInstance().getTransactionChainId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string transactionChainId = 1;</code>
+       */
+      public Builder setTransactionChainIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        transactionChainId_ = value;
+        onChanged();
         return this;
       }
 
@@ -1444,13 +1606,14 @@ public final class ShardTransactionChainMessages {
   static {
     java.lang.String[] descriptorData = {
       "\n\033ShardTransactionChain.proto\022!org.opend" +
-      "aylight.controller.mdsal\"\027\n\025CloseTransac" +
-      "tionChain\"\034\n\032CloseTransactionChainReply\"" +
-      "\030\n\026CreateTransactionChain\";\n\033CreateTrans" +
-      "actionChainReply\022\034\n\024transactionChainPath" +
-      "\030\001 \002(\tB[\n:org.opendaylight.controller.pr" +
-      "otobuff.messages.transactionB\035ShardTrans" +
-      "actionChainMessages"
+      "aylight.controller.mdsal\"3\n\025CloseTransac" +
+      "tionChain\022\032\n\022transactionChainId\030\001 \001(\t\"\034\n" +
+      "\032CloseTransactionChainReply\"\030\n\026CreateTra" +
+      "nsactionChain\";\n\033CreateTransactionChainR" +
+      "eply\022\034\n\024transactionChainPath\030\001 \002(\tB[\n:or" +
+      "g.opendaylight.controller.protobuff.mess" +
+      "ages.transactionB\035ShardTransactionChainM" +
+      "essages"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -1462,7 +1625,7 @@ public final class ShardTransactionChainMessages {
           internal_static_org_opendaylight_controller_mdsal_CloseTransactionChain_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_org_opendaylight_controller_mdsal_CloseTransactionChain_descriptor,
-              new java.lang.String[] { });
+              new java.lang.String[] { "TransactionChainId", });
           internal_static_org_opendaylight_controller_mdsal_CloseTransactionChainReply_descriptor =
             getDescriptor().getMessageTypes().get(1);
           internal_static_org_opendaylight_controller_mdsal_CloseTransactionChainReply_fieldAccessorTable = new

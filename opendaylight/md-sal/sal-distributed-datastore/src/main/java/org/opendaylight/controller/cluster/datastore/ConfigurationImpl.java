@@ -23,8 +23,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ConfigurationImpl implements Configuration {
 
@@ -159,6 +161,16 @@ public class ConfigurationImpl implements Configuration {
         }
         shardReplicaNames.put(shardName, Collections.EMPTY_LIST);
         return Collections.EMPTY_LIST;
+    }
+
+    @Override public Set<String> getAllShardNames() {
+        Set<String> shardNames = new LinkedHashSet<>();
+        for(ModuleShard ms : moduleShards){
+            for(Shard s : ms.getShards()) {
+                shardNames.add(s.getName());
+            }
+        }
+        return shardNames;
     }
 
 
