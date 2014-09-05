@@ -13,30 +13,48 @@ import org.opendaylight.controller.protobuff.messages.transaction.ShardTransacti
 
 
 public class CreateTransaction implements SerializableMessage {
-  public static final Class SERIALIZABLE_CLASS = ShardTransactionMessages.CreateTransaction.class;
-  private final String transactionId;
-  private final int transactionType;
+    public static final Class SERIALIZABLE_CLASS = ShardTransactionMessages.CreateTransaction.class;
+    private final String transactionId;
+    private final int transactionType;
+    private final String transactionChainId;
 
-  public CreateTransaction(String transactionId, int transactionType){
+    public CreateTransaction(String transactionId, int transactionType) {
+        this(transactionId, transactionType, "");
+    }
 
-    this.transactionId = transactionId;
-    this.transactionType = transactionType;
-  }
+    public CreateTransaction(String transactionId, int transactionType, String transactionChainId) {
 
-  public String getTransactionId() {
-    return transactionId;
-  }
+        this.transactionId = transactionId;
+        this.transactionType = transactionType;
+        this.transactionChainId = transactionChainId;
 
-  public int getTransactionType() { return transactionType;}
+    }
 
-  @Override
-  public Object toSerializable() {
-    return  ShardTransactionMessages.CreateTransaction.newBuilder().setTransactionId(transactionId).setTransactionType(transactionType).build();
-  }
 
-  public static CreateTransaction fromSerializable(Object message){
-    ShardTransactionMessages.CreateTransaction createTransaction = (ShardTransactionMessages.CreateTransaction)message;
-    return new CreateTransaction(createTransaction.getTransactionId(),createTransaction.getTransactionType() );
-  }
+    public String getTransactionId() {
+        return transactionId;
+    }
 
+    public int getTransactionType() {
+        return transactionType;
+    }
+
+    @Override
+    public Object toSerializable() {
+        return ShardTransactionMessages.CreateTransaction.newBuilder()
+            .setTransactionId(transactionId)
+            .setTransactionType(transactionType)
+            .setTransactionChainId(transactionChainId).build();
+    }
+
+    public static CreateTransaction fromSerializable(Object message) {
+        ShardTransactionMessages.CreateTransaction createTransaction =
+            (ShardTransactionMessages.CreateTransaction) message;
+        return new CreateTransaction(createTransaction.getTransactionId(),
+            createTransaction.getTransactionType(), createTransaction.getTransactionChainId());
+    }
+
+    public String getTransactionChainId() {
+        return transactionChainId;
+    }
 }
