@@ -8,43 +8,72 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
+import akka.actor.ActorPath;
+import akka.dispatch.Futures;
+import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChain;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * TransactionChainProxy acts as a proxy for a DOMStoreTransactionChain created on a remote shard
  */
 public class TransactionChainProxy implements DOMStoreTransactionChain{
     private final ActorContext actorContext;
+    private final String transactionChainId;
+    private List<Future<ActorPath>> cohortPathFutures = new ArrayList<>();
 
     public TransactionChainProxy(ActorContext actorContext) {
         this.actorContext = actorContext;
+        transactionChainId = actorContext.getCurrentMemberName() + "-" + System.currentTimeMillis();
     }
 
     @Override
     public DOMStoreReadTransaction newReadOnlyTransaction() {
         return new TransactionProxy(actorContext,
-            TransactionProxy.TransactionType.READ_ONLY);
+            TransactionProxy.TransactionType.READ_ONLY, this);
     }
 
     @Override
     public DOMStoreReadWriteTransaction newReadWriteTransaction() {
         return new TransactionProxy(actorContext,
-            TransactionProxy.TransactionType.READ_WRITE);
+            TransactionProxy.TransactionType.READ_WRITE, this);
     }
 
     @Override
     public DOMStoreWriteTransaction newWriteOnlyTransaction() {
         return new TransactionProxy(actorContext,
-            TransactionProxy.TransactionType.WRITE_ONLY);
+            TransactionProxy.TransactionType.WRITE_ONLY, this);
     }
 
     @Override
     public void close() {
-        // FIXME : The problem here is don't know which shard the transaction chain is to be created on ???
-        throw new UnsupportedOperationException("close - not sure what to do here?");
+        // Send a close transaction chain request to each and every shard
+        actorContext.broadcast(new CloseTransactionChain(transactionChainId));
+    }
+
+    public String getTransactionChainId() {
+        return transactionChainId;
+    }
+
+    public void onTransactionReady(List<Future<ActorPath>> cohortPathFutures){
+        this.cohortPathFutures = cohortPathFutures;
+    }
+
+    public void waitTillCurrentTransactionReady(){
+        try {
+            Await.result(Futures
+                .sequence(this.cohortPathFutures, actorContext.getActorSystem().dispatcher()),
+                actorContext.getOperationDuration());
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed when waiting for transaction on a chain to become ready");
+        }
     }
 }
