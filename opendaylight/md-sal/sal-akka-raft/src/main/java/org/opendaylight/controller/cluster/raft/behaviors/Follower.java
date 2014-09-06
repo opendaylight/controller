@@ -40,7 +40,6 @@ public class Follower extends AbstractRaftActorBehavior {
 
     public Follower(RaftActorContext context) {
         super(context);
-
         scheduleElection(electionDuration());
     }
 
