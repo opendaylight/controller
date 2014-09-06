@@ -126,6 +126,27 @@
       <artifactId>sal-clustering-config</artifactId>
       <version>${mdsal.version}</version>
       <type>xml</type>
+      <classifier>moduleshardconf</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-clustering-config</artifactId>
+      <version>${mdsal.version}</version>
+      <type>xml</type>
+      <classifier>moduleconf</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-clustering-config</artifactId>
+      <version>${mdsal.version}</version>
+      <type>xml</type>
+      <classifier>akkaconf</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-clustering-config</artifactId>
+      <version>${mdsal.version}</version>
+      <type>xml</type>
       <classifier>config</classifier>
     </dependency>
     <dependency>
