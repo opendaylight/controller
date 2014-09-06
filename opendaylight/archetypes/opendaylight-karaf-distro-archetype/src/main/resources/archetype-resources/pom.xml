@@ -245,6 +245,22 @@
              <ignorePermissions>false</ignorePermissions>
             </configuration>
           </execution>
+          <execution>
+            <id>copy-dependencies</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/assembly/system</outputDirectory>
+              <overWriteReleases>false</overWriteReleases>
+              <overWriteSnapshots>true</overWriteSnapshots>
+              <overWriteIfNewer>true</overWriteIfNewer>
+              <useRepositoryLayout>true</useRepositoryLayout>
+              <addParentPoms>true</addParentPoms>
+              <copyPom>true</copyPom>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
       <plugin>
