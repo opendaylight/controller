@@ -10,7 +10,6 @@
     <repository>mvn:org.opendaylight.controller/features-akka/${commons.opendaylight.version}/xml/features</repository>
     <feature name='odl-mdsal-all' version='${project.version}' description="OpenDaylight :: MDSAL :: All">
         <feature version='${project.version}'>odl-mdsal-broker</feature>
-        <feature version='${project.version}'>odl-mdsal-netconf-connector</feature>
         <feature version='${project.version}'>odl-restconf</feature>
         <feature version='${project.version}'>odl-mdsal-xsql</feature>
         <feature version='${project.version}'>odl-mdsal-clustering</feature>
@@ -32,20 +31,6 @@
         <bundle>mvn:org.opendaylight.controller/sal-connector-api/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-inmemory-datastore/${project.version}</bundle>
         <configfile finalname="${config.configfile.directory}/${config.mdsal.configfile}">mvn:org.opendaylight.controller/md-sal-config/${mdsal.version}/xml/config</configfile>
-    </feature>
-    <feature name='odl-mdsal-netconf-connector' version='${project.version}' description="OpenDaylight :: MDSAL :: Netconf Connector">
-        <feature version='${project.version}'>odl-mdsal-broker</feature>
-        <feature version='${netconf.version}'>odl-netconf-client</feature>
-        <feature version='${yangtools.version}'>odl-yangtools-models</feature>
-        <bundle>mvn:org.opendaylight.controller/sal-netconf-connector/${project.version}</bundle>
-        <bundle>mvn:org.opendaylight.controller.model/model-inventory/${project.version}</bundle>
-        <bundle>mvn:org.opendaylight.controller/netconf-config-dispatcher/${config.version}</bundle>
-        <configfile finalname='${config.configfile.directory}/${config.netconf.client.configfile}'>mvn:org.opendaylight.controller/netconf-config/${netconf.version}/xml/config</configfile>
-    </feature>
-    <feature name='odl-mdsal-netconf-connector-ssh' version='${project.version}' description="OpenDaylight :: MDSAL :: Netconf Connector + Netconf SSH Server + loopback connection configuration">
-        <feature version='${netconf.version}'>odl-netconf-ssh</feature>
-        <feature version='${project.version}'>odl-mdsal-netconf-connector</feature>
-        <configfile finalname="${config.configfile.directory}/${config.netconf.connector.configfile}">mvn:org.opendaylight.controller/netconf-connector-config/${netconf.version}/xml/config</configfile>
     </feature>
     <feature name='odl-restconf' version='${project.version}' description="OpenDaylight :: Restconf">
         <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
