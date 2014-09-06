@@ -38,6 +38,15 @@ import java.util.ArrayList;
 public class Follower extends AbstractRaftActorBehavior {
     private ByteString snapshotChunksCollected = ByteString.EMPTY;
 
+    public void setSnapshotChunksCollected(ByteString snapshotChunksCollected) {
+        this.snapshotChunksCollected = snapshotChunksCollected;
+    }
+
+    public ByteString getSnapshotChunksCollected() {
+        return snapshotChunksCollected;
+    }
+
+
     public Follower(RaftActorContext context) {
         super(context);
 
