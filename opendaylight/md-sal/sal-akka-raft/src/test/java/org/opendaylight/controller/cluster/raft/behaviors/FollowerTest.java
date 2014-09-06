@@ -3,6 +3,7 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.testkit.JavaTestKit;
+import com.google.protobuf.ByteString;
 import junit.framework.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
@@ -10,16 +11,24 @@ import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
+import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
+import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -34,8 +43,12 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         return new Follower(actorContext);
     }
 
-    @Override protected RaftActorContext createActorContext() {
-        return new MockRaftActorContext("test", getSystem(), followerActor);
+    @Override protected  RaftActorContext createActorContext() {
+        return createActorContext(followerActor);
+    }
+
+    protected  RaftActorContext createActorContext(ActorRef actorRef){
+        return new MockRaftActorContext("test", getSystem(), actorRef);
     }
 
     @Test
@@ -163,8 +176,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
 
             List<ReplicatedLogEntry> entries =
                 Arrays.asList(
-                    (ReplicatedLogEntry) new MockRaftActorContext.MockReplicatedLogEntry(2, 101,
-                        new MockRaftActorContext.MockPayload("foo"))
+                        (ReplicatedLogEntry) new MockRaftActorContext.MockReplicatedLogEntry(2, 101,
+                                new MockRaftActorContext.MockPayload("foo"))
                 );
 
             // The new commitIndex is 101
@@ -409,4 +422,132 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         }};
     }
 
+
+    /**
+     * This test verifies that when InstallSnapshot is received by
+     * the follower its applied correctly.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testHandleInstallSnapshot() throws Exception {
+        JavaTestKit javaTestKit = new JavaTestKit(getSystem()) {{
+
+            ActorRef leaderActor = getTestActor();
+            MockRaftActorContext context = (MockRaftActorContext)
+                    createActorContext(getRef());
+
+            Follower follower = (Follower)createBehavior(context);
+
+            HashMap<String, String> followerSnapshot = new HashMap<>();
+            followerSnapshot.put("1", "A");
+            followerSnapshot.put("2", "B");
+            followerSnapshot.put("3", "C");
+
+            ByteString bsSnapshot  = toByteString(followerSnapshot);
+
+            ByteString lastChunkData = lastSnapshot(bsSnapshot, follower);
+
+            final InstallSnapshot installSnapshot = new InstallSnapshot(1, "leader-1", 3, 1, lastChunkData, 3, 3);
+
+            follower.handleMessage(leaderActor, installSnapshot);
+            String[] matches = new ReceiveWhile<String>(String.class, duration("2 seconds")) {
+                @Override
+                protected String match(Object o) throws Exception {
+                    if (o instanceof ApplySnapshot) {
+                        ApplySnapshot as = (ApplySnapshot)o;
+                        if (as.getSnapshot().getLastIndex() != installSnapshot.getLastIncludedIndex()) {
+                            return "applySnapshot-lastIndex-mismatch";
+                        }
+                        if (as.getSnapshot().getLastAppliedTerm() != installSnapshot.getLastIncludedTerm()) {
+                            return "applySnapshot-lastAppliedTerm-mismatch";
+                        }
+                        if (as.getSnapshot().getLastAppliedIndex() != installSnapshot.getLastIncludedIndex()) {
+                            return "applySnapshot-lastAppliedIndex-mismatch";
+                        }
+                        if (as.getSnapshot().getLastTerm() != installSnapshot.getLastIncludedTerm()) {
+                            return "applySnapshot-lastTerm-mismatch";
+                        }
+                       return "applySnapshot";
+                    } else
+                    if (o instanceof InstallSnapshotReply) {
+                        InstallSnapshotReply isr = (InstallSnapshotReply)o;
+                        if (isr.getChunkIndex() != installSnapshot.getChunkIndex()) {
+                            return "installSnapshotReply-chunkIndex-mismatch";
+                        }
+                       return "installSnapshotReply";
+                    }
+                    return "ignoreCase";
+                }
+            }.get();
+
+            String applySnapshotMatch = "";
+            String installSnapshotReplyMatch = "";
+            for (String reply: matches) {
+                if (reply.startsWith("applySnapshot")) {
+                    applySnapshotMatch = reply;
+                } else if (reply.startsWith("installSnapshotReply")) {
+                    installSnapshotReplyMatch = reply;
+               }
+            }
+
+            assertEquals("applySnapshot", applySnapshotMatch);
+            assertEquals("installSnapshotReply", installSnapshotReplyMatch);
+        }};
+    }
+
+    public ByteString getNextChunk (ByteString bs, int offset){
+        int snapshotLength = bs.size();
+        int start = offset;
+        int size = 50;
+        if (50 > snapshotLength) {
+            size = snapshotLength;
+        } else {
+            if ((start + 50) > snapshotLength) {
+                size = snapshotLength - start;
+            }
+        }
+        return bs.substring(start, start + size);
+    }
+
+    public ByteString lastSnapshot (ByteString bs, Follower followerObj) {
+        int offset = 0;
+        int snapshotLength = bs.size();
+        ByteString chunkData = ByteString.EMPTY;
+        ByteString tempChunkCollected = ByteString.EMPTY;
+
+        while ((offset+50) < snapshotLength ) {
+            chunkData = getNextChunk(bs, offset);
+            tempChunkCollected = followerObj.getSnapshotChunksCollected();
+            followerObj.setSnapshotChunksCollected(tempChunkCollected.concat(chunkData));
+            offset = offset + 50;
+        }
+        ByteString lastChunkData = getNextChunk(bs, offset);
+        return lastChunkData;
+    }
+
+    private ByteString toByteString(Map<String, String> state) {
+        ByteArrayOutputStream b = null;
+        ObjectOutputStream o = null;
+        try {
+            try {
+                b = new ByteArrayOutputStream();
+                o = new ObjectOutputStream(b);
+                o.writeObject(state);
+                byte[] snapshotBytes = b.toByteArray();
+                return ByteString.copyFrom(snapshotBytes);
+            } finally {
+                if (o != null) {
+                    o.flush();
+                    o.close();
+                }
+                if (b != null) {
+                    b.close();
+                }
+            }
+        } catch (IOException e) {
+            org.junit.Assert.fail("IOException in converting Hashmap to Bytestring:" + e);
+        }
+        return null;
+    }
 }
