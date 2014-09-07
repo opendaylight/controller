@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_a44cd877",
+        "filename": "features/mdsal/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-07T09:42:56Z",
+      "side": 1,
+      "message": "Hi Ed, how are these changes related to this fix? These seem to be adding a dependency sal-clustering-config which does not seem to do with the fix.",
+      "revId": "f22888fa49f1a2e0d113734d5879f9444b9e1f1a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
