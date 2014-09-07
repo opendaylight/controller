@@ -16,6 +16,40 @@
       "revId": "f22888fa49f1a2e0d113734d5879f9444b9e1f1a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e4498061",
+        "filename": "features/netconf-connector/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-09-07T11:51:42Z",
+      "side": 1,
+      "message": "\\r - assuming that is not intentional?\n\nAlso - it looks like the copy right is missing.",
+      "revId": "f22888fa49f1a2e0d113734d5879f9444b9e1f1a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0447c44c",
+        "filename": "features/netconf-connector/src/main/resources/features.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-09-07T11:51:42Z",
+      "side": 1,
+      "message": "Copy right",
+      "revId": "f22888fa49f1a2e0d113734d5879f9444b9e1f1a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
