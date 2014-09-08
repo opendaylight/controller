@@ -5,7 +5,7 @@
     <parent>
         <artifactId>sal-parent</artifactId>
         <groupId>org.opendaylight.controller</groupId>
-        <version>1.2.0-SNAPSHOT</version>
+        <version>1.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <packaging>bundle</packaging>
@@ -19,9 +19,25 @@
             <groupId>org.opendaylight.yangtools.model</groupId>
             <artifactId>yang-ext</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>yang-data-impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>sal-binding-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>sal-core-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>sal-test-model</artifactId>
+        </dependency>
     </dependencies>
 
-    <artifactId>sal-test-model</artifactId>
+    <artifactId>sal-test-app</artifactId>
     <build>
         <plugins>
             <plugin>
@@ -47,6 +63,17 @@
                         <phase>test</phase>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+              <groupId>org.apache.felix</groupId>
+              <artifactId>maven-bundle-plugin</artifactId>
+              <extensions>true</extensions>
+              <configuration>
+                <instructions>
+                  <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
+                  <Bundle-Activator>org.opendaylight.controller.md.sal.test.benchmark.Activator</Bundle-Activator>
+                </instructions>
+              </configuration>
             </plugin>
             <plugin>
                 <groupId>org.opendaylight.yangtools</groupId>
