@@ -1,0 +1,80 @@
+module opendaylight-mdsal-test-benchmark {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:test:benchmark";
+    prefix "rpc";
+
+    import opendaylight-mdsal-test-base {
+        prefix base;
+    }
+
+    description
+        "Model which provides various benchmark as RPCs, which are available for MD-SAL.";
+
+    revision "2014-07-01" {
+        description
+            "Initial revision";
+    }
+
+
+    grouping duration-statistics {
+        leaf shortest-duration {
+            type string;
+        }
+        leaf average-duration {
+            type string;
+        }
+        leaf longest-duration {
+            type string;
+        }
+    }
+
+    grouping write-statistics {
+
+        container data-construction {
+            uses duration-statistics;
+        }
+
+        container write-to-transaction {
+            uses duration-statistics;
+        }
+    }
+
+
+    grouping transaction-statistics {
+        leaf total-transaction-count {
+            type uint32;
+        }
+        container transaction-construction {
+            uses duration-statistics;
+        }
+        container successful-commits {
+            leaf count {
+               type uint32;
+            }
+            uses duration-statistics;
+        }
+        container failed-commits {
+            leaf count {
+                type uint32;
+            }
+            uses duration-statistics;
+        }
+    }
+
+    rpc data-broker-performance {
+        input {
+            uses base:data-format-aware;
+            uses base:two-level-list-properties;
+            leaf write-operation {
+                type base:data-operation;
+            }
+            leaf outer-writes-per-transaction {
+                type uint32;
+            }
+        }
+        output {
+            uses write-statistics;
+            uses transaction-statistics;
+        }
+    }
+}

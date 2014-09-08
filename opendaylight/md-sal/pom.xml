@@ -82,6 +82,7 @@
 
     <!-- Yang Test Models for MD-SAL -->
     <module>sal-test-model</module>
+    <module>sal-test-app</module>
 
     <!-- Clustering -->
     <module>sal-remoterpc-connector</module>
