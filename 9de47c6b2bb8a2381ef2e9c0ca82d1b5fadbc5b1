@@ -16,6 +16,24 @@
       "revId": "9de47c6b2bb8a2381ef2e9c0ca82d1b5fadbc5b1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_dfe3e9a2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataChangeListenerRegistrationProxy.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-08T19:49:02Z",
+      "side": 1,
+      "message": "I can fix this but the build cycle would be long. What do you say? -I\u0027d like to get this fix in for RC0 if possible.",
+      "parentUuid": "fa82b9bf_7fd5fdb7",
+      "revId": "9de47c6b2bb8a2381ef2e9c0ca82d1b5fadbc5b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
