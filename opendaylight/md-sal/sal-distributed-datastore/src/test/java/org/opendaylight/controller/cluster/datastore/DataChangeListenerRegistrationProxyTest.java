@@ -17,6 +17,10 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 import java.util.List;
 
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertNotNull;
+import static junit.framework.TestCase.assertTrue;
+
 public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest{
 
     private ActorRef dataChangeListenerActor = getSystem().actorOf(Props.create(DoNothingActor.class));
@@ -64,14 +68,41 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest{
         Object messages = testContext
             .executeLocalOperation(actorRef, "messages");
 
-        Assert.assertNotNull(messages);
+        assertNotNull(messages);
 
-        Assert.assertTrue(messages instanceof List);
+        assertTrue(messages instanceof List);
 
         List<Object> listMessages = (List<Object>) messages;
 
-        Assert.assertEquals(1, listMessages.size());
+        assertEquals(1, listMessages.size());
 
-        Assert.assertTrue(listMessages.get(0).getClass().equals(CloseDataChangeListenerRegistration.SERIALIZABLE_CLASS));
+        assertTrue(listMessages.get(0).getClass()
+            .equals(CloseDataChangeListenerRegistration.SERIALIZABLE_CLASS));
+    }
+
+    @Test
+    public void testCloseWhenRegistrationIsNull() throws Exception {
+        final Props props = Props.create(MessageCollectorActor.class);
+        final ActorRef actorRef = getSystem().actorOf(props);
+
+        DataChangeListenerRegistrationProxy proxy =
+            new DataChangeListenerRegistrationProxy(
+                new MockDataChangeListener(), dataChangeListenerActor);
+
+        proxy.close();
+
+        //Check if it was received by the remote actor
+        ActorContext
+            testContext = new ActorContext(getSystem(), getSystem().actorOf(Props.create(DoNothingActor.class)),new MockClusterWrapper(), new MockConfiguration());
+        Object messages = testContext
+            .executeLocalOperation(actorRef, "messages");
+
+        assertNotNull(messages);
+
+        assertTrue(messages instanceof List);
+
+        List<Object> listMessages = (List<Object>) messages;
+
+        assertEquals(0, listMessages.size());
     }
 }
