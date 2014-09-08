@@ -113,6 +113,8 @@ public class Shard extends RaftActor {
 
     private final Map<String, DOMStoreTransactionChain> transactionChains = new HashMap<>();
 
+    private int recoveryMessageCount = 0;
+
     private Shard(ShardIdentifier name, Map<ShardIdentifier, String> peerAddresses,
             DatastoreContext datastoreContext, SchemaContext schemaContext) {
         super(name.toString(), mapPeerAddresses(peerAddresses), Optional.of(configParams));
@@ -204,6 +206,8 @@ public class Shard extends RaftActor {
                 createTransaction(CreateTransaction.fromSerializable(message));
             } else if (getLeader() != null) {
                 getLeader().forward(message, getContext());
+            } else {
+                LOG.error("Could not find leader so transaction cannot be created");
             }
         } else if (message instanceof PeerAddressResolved) {
             PeerAddressResolved resolved = (PeerAddressResolved) message;
@@ -320,6 +324,9 @@ public class Shard extends RaftActor {
                 modification);
             DOMStoreWriteTransaction transaction =
                 store.newWriteOnlyTransaction();
+
+            LOG.debug("Created new transaction {}", transaction.getIdentifier().toString());
+
             modification.apply(transaction);
             try {
                 syncCommitTransaction(transaction);
@@ -330,6 +337,12 @@ public class Shard extends RaftActor {
             }
             //we want to just apply the recovery commit and return
             shardMBean.incrementCommittedTransactionCount();
+            return;
+        }
+
+
+        if(sender == null){
+            LOG.error("Commit failed. Sender cannot be null");
             return;
         }
 
