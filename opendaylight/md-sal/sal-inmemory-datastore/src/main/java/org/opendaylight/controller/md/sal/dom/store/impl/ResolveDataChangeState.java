@@ -103,8 +103,19 @@ final class ResolveDataChangeState {
      * @return State handle
      */
     public ResolveDataChangeState child(final PathArgument childId) {
-        return new ResolveDataChangeState(nodeId.node(childId),
-            Iterables.concat(inheritedSub, subBuilders.values()),
+        /*
+         * We instantiate a concatenation only when needed, otherwise
+         * we reuse the collection. This speeds up Iterables.isEmpty()
+         * in needsProcessing().
+         */
+        final Iterable<Builder> sb;
+        if (subBuilders.isEmpty()) {
+            sb = inheritedSub;
+        } else {
+            sb = Iterables.concat(inheritedSub, subBuilders.values());
+        }
+
+        return new ResolveDataChangeState(nodeId.node(childId), sb,
             oneBuilders.values(), getListenerChildrenWildcarded(nodes, childId));
     }
 
