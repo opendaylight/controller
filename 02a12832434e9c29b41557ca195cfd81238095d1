@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_1f407134",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataChangeListenerRegistrationProxy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-08T13:48:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_c4355cf8",
+      "revId": "02a12832434e9c29b41557ca195cfd81238095d1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_44214cb3",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStore.java",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_df49a961",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStore.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-08T13:48:12Z",
+      "side": 1,
+      "message": "Do not want to add another setting. How about I make this a multiple of the regular ASK_TIMEOUT for now?",
+      "parentUuid": "fa82b9bf_44214cb3",
+      "revId": "02a12832434e9c29b41557ca195cfd81238095d1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_84167454",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
         "patchSetId": 2
@@ -47,6 +83,24 @@
       "writtenOn": "2014-09-08T12:53:26Z",
       "side": 1,
       "message": "Can you fill out javadoc comments?",
+      "revId": "02a12832434e9c29b41557ca195cfd81238095d1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ff46ed4e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-08T13:48:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_84167454",
       "revId": "02a12832434e9c29b41557ca195cfd81238095d1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
