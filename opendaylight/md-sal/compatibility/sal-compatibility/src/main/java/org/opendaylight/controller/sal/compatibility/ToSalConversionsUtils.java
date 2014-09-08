@@ -287,7 +287,8 @@ public class ToSalConversionsUtils {
             } else if (sourceAction instanceof SetNwTosActionCase) {
                 Integer tos = ((SetNwTosActionCase) sourceAction).getSetNwTosAction().getTos();
                 if (tos != null) {
-                    targetAction.add(new SetNwTos(tos));
+                    int dscp = tos.intValue() >>> SetNwTos.ECN_FIELD_SIZE;
+                    targetAction.add(new SetNwTos(dscp));
                 }
             } else if (sourceAction instanceof SetTpDstActionCase) {
                 PortNumber port = ((SetTpDstActionCase) sourceAction).getSetTpDstAction().getPort();
