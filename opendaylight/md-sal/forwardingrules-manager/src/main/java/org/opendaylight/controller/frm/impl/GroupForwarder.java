@@ -50,7 +50,7 @@ public class GroupForwarder extends AbstractListeningCommiter<Group> {
         super(manager, Group.class);
         Preconditions.checkNotNull(db, "DataBroker can not be null!");
         this.listenerRegistration = db.registerDataChangeListener(LogicalDatastoreType.CONFIGURATION,
-                getWildCardPath(), GroupForwarder.this, DataChangeScope.BASE);
+                getWildCardPath(), GroupForwarder.this, DataChangeScope.SUBTREE);
     }
 
     @Override
