@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_c4355cf8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataChangeListenerRegistrationProxy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-08T12:53:26Z",
+      "side": 1,
+      "message": "It looks like read and writes of listenerRegistrationActor be done on multiple threads so listenerRegistrationActor should be declared volatile to ensure visibility.",
+      "revId": "02a12832434e9c29b41557ca195cfd81238095d1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_44214cb3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStore.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-08T12:53:26Z",
+      "side": 1,
+      "message": "Can we make this timeout configurable via the config system?",
+      "revId": "02a12832434e9c29b41557ca195cfd81238095d1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_84167454",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-08T12:53:26Z",
+      "side": 1,
+      "message": "Can you fill out javadoc comments?",
+      "revId": "02a12832434e9c29b41557ca195cfd81238095d1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
