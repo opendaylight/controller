@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_9f032176",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/FollowerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 501,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-08T17:52:51Z",
+      "side": 1,
+      "message": "It looks like the MockFollower class was created simply to add utility methods to it. Since Follower is the subject under test and it is not \"abstract\" ideally we should not need to extend it to test it. I think it would be better if these utility methods are moved out.",
+      "revId": "c19420a98856ea00885782481405d997ac660968",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
