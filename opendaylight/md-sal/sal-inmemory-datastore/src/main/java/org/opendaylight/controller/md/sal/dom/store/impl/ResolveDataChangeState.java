@@ -118,15 +118,34 @@ final class ResolveDataChangeState {
      */
     public ResolveDataChangeState child(final PathArgument childId) {
         /*
-         * We instantiate a concatenation only when needed, otherwise
-         * we reuse the collection. This speeds up Iterables.isEmpty()
-         * in needsProcessing().
+         * We instantiate a concatenation only when needed:
+         *
+         * 1) If our collection is empty, we reuse the parent's. This is typically the case
+         *    for intermediate node, which should be the vast majority.
+         * 2) If the parent's iterable is a Collection and it is empty, reuse our collection.
+         *    This is the case for the first node which defines a subtree listener in a
+         *    particular subtree.
+         * 3) Concatenate the two collections. This happens when we already have some
+         *    subtree listeners and we encounter a node which adds a few more.
+         *
+         * This allows us to lower number of objects allocated and also
+         * speeds up Iterables.isEmpty() in needsProcessing().
+         *
+         * Note that the check for Collection in 2) relies on precisely this logic, which
+         * ensures that we simply cannot see an empty concatenation, but rather start off with
+         * an empty collection, then switch to a non-empty collection and finally switch to
+         * a concatenation. This saves us from instantiating iterators, which a trivial
+         * Iterables.isEmpty() would do as soon as we cross case 3).
          */
         final Iterable<Builder> sb;
-        if (subBuilders.isEmpty()) {
-            sb = inheritedSub;
+        if (!subBuilders.isEmpty()) {
+            if (inheritedSub instanceof Collection && ((Collection<?>) inheritedSub).isEmpty()) {
+                sb = subBuilders.values();
+            } else {
+                sb = Iterables.concat(inheritedSub, subBuilders.values());
+            }
         } else {
-            sb = Iterables.concat(inheritedSub, subBuilders.values());
+            sb = inheritedSub;
         }
 
         return new ResolveDataChangeState(nodeId.node(childId), sb,
