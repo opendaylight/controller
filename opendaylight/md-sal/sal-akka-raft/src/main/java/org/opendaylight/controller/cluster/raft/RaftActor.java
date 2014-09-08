@@ -144,7 +144,13 @@ public abstract class RaftActor extends UntypedPersistentActor {
             applySnapshot(ByteString.copyFrom(snapshot.getState()));
 
         } else if (message instanceof ReplicatedLogEntry) {
-            replicatedLog.append((ReplicatedLogEntry) message);
+            ReplicatedLogEntry logEntry = (ReplicatedLogEntry) message;
+
+            // Apply State immediately
+            replicatedLog.append(logEntry);
+            applyState(null, "recovery", logEntry.getData());
+            context.setLastApplied(logEntry.getIndex());
+            context.setCommitIndex(logEntry.getIndex());
         } else if (message instanceof DeleteEntries) {
             replicatedLog.removeFrom(((DeleteEntries) message).getFromIndex());
         } else if (message instanceof UpdateElectionTerm) {
@@ -152,7 +158,8 @@ public abstract class RaftActor extends UntypedPersistentActor {
         } else if (message instanceof RecoveryCompleted) {
             LOG.debug(
                 "RecoveryCompleted - Switching actor to Follower - " +
-                    "Last index in log:{}, snapshotIndex={}, snapshotTerm={}, " +
+                    "Persistence Id =  " + persistenceId() +
+                    " Last index in log:{}, snapshotIndex={}, snapshotTerm={}, " +
                     "journal-size={}",
                 replicatedLog.lastIndex(), replicatedLog.snapshotIndex,
                 replicatedLog.snapshotTerm, replicatedLog.size());
