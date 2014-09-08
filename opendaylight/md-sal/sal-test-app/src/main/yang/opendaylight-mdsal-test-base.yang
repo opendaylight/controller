@@ -1,0 +1,61 @@
+module opendaylight-mdsal-test-base {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:test:base";
+    prefix "rpc";
+
+    description
+        "Test model for runtime testing of MD-SAL.";
+
+    revision "2014-07-01" {
+        description
+            "Initial revision";
+    }
+
+    identity data-format {
+    
+    }
+
+
+    identity normalized-node {
+        base data-format;
+    }
+
+    identity binding-v1 {
+        base data-format;
+    }
+    
+    typedef data-operation {
+        type enumeration {
+            enum PUT;
+            enum MERGE;
+            enum DELETE;
+        }
+    }
+
+    grouping data-format-aware {
+        leaf data-format {
+            type identityref {
+                base data-format;
+            }
+        }
+    }
+
+    grouping two-level-list-properties {
+
+        leaf outer-list-items {
+            type uint32;
+        }
+
+        leaf inner-list-items {
+            type uint32;
+        }
+
+    }
+    
+    grouping listener-properties {
+        leaf count-events {
+            type boolean;
+        }
+    }
+
+}
