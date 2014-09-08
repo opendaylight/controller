@@ -47,7 +47,7 @@ final class ResolveDataChangeState {
     /**
      * Inherited from immediate parent
      */
-    private final Iterable<Builder> inheritedOne;
+    private final Collection<Builder> inheritedOne;
     private final YangInstanceIdentifier nodeId;
     private final Collection<Node> nodes;
 
@@ -56,7 +56,7 @@ final class ResolveDataChangeState {
     private final Map<DataChangeListenerRegistration<?>, Builder> baseBuilders = new HashMap<>();
 
     private ResolveDataChangeState(final YangInstanceIdentifier nodeId,
-            final Iterable<Builder> inheritedSub, final Iterable<Builder> inheritedOne,
+            final Iterable<Builder> inheritedSub, final Collection<Builder> inheritedOne,
             final Collection<Node> nodes) {
         this.nodeId = Preconditions.checkNotNull(nodeId);
         this.nodes = Preconditions.checkNotNull(nodes);
@@ -138,12 +138,12 @@ final class ResolveDataChangeState {
         if (!nodes.isEmpty()) {
             return true;
         }
-        // Have SUBTREE listeners
-        if (!Iterables.isEmpty(inheritedSub)) {
+        // Have ONE listeners
+        if (!inheritedOne.isEmpty()) {
             return true;
         }
-        // Have ONE listeners
-        if (!Iterables.isEmpty(inheritedOne)) {
+        // Have SUBTREE listeners
+        if (!Iterables.isEmpty(inheritedSub)) {
             return true;
         }
 
