@@ -51,9 +51,9 @@ final class ResolveDataChangeState {
     private final YangInstanceIdentifier nodeId;
     private final Collection<Node> nodes;
 
-    private final Map<DataChangeListenerRegistration<?>, Builder> subBuilders = new HashMap<>();
-    private final Map<DataChangeListenerRegistration<?>, Builder> oneBuilders = new HashMap<>();
-    private final Map<DataChangeListenerRegistration<?>, Builder> baseBuilders = new HashMap<>();
+    private final Map<DataChangeListenerRegistration<?>, Builder> subBuilders;
+    private final Map<DataChangeListenerRegistration<?>, Builder> oneBuilders;
+    private final Map<DataChangeListenerRegistration<?>, Builder> baseBuilders;
 
     private ResolveDataChangeState(final YangInstanceIdentifier nodeId,
             final Iterable<Builder> inheritedSub, final Iterable<Builder> inheritedOne,
@@ -66,22 +66,36 @@ final class ResolveDataChangeState {
         /*
          * Collect the nodes which need to be propagated from us to the child.
          */
+        final Map<DataChangeListenerRegistration<?>, Builder> sub = new HashMap<>();
+        final Map<DataChangeListenerRegistration<?>, Builder> one = new HashMap<>();
+        final Map<DataChangeListenerRegistration<?>, Builder> base = new HashMap<>();
         for (Node n : nodes) {
             for (DataChangeListenerRegistration<?> l : n.getListeners()) {
                 final Builder b = DOMImmutableDataChangeEvent.builder(DataChangeScope.BASE);
                 switch (l.getScope()) {
                 case BASE:
-                    baseBuilders.put(l, b);
+                    base.put(l, b);
                     break;
                 case ONE:
-                    oneBuilders.put(l, b);
+                    one.put(l, b);
                     break;
                 case SUBTREE:
-                    subBuilders.put(l, b);
+                    sub.put(l, b);
                     break;
                 }
             }
         }
+
+        baseBuilders = maybeEmpty(base);
+        oneBuilders = maybeEmpty(one);
+        subBuilders = maybeEmpty(sub);
+    }
+
+    private static <K, V> Map<K, V> maybeEmpty(final Map<K, V> map) {
+        if (map.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        return map;
     }
 
     /**
