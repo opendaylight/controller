@@ -16,6 +16,24 @@
       "revId": "c19420a98856ea00885782481405d997ac660968",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9f5fa175",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/FollowerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 501,
+      "author": {
+        "id": 1695
+      },
+      "writtenOn": "2014-09-08T19:11:11Z",
+      "side": 1,
+      "message": "The only reason of adding this MockFollower class is that, the \u0027snapshotChunksCollected\u0027 in Follower is a private variable, so I m unable to modify it. To modify it, I need to add getter and setter in the Follower.java. To avoid that, I created this MockFollower.java and made the variable public so that it can be easily modified and tested out. If you still want me to remove MockFollower, I have to change Follower.java. Let me know.",
+      "parentUuid": "fa82b9bf_9f032176",
+      "revId": "c19420a98856ea00885782481405d997ac660968",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
