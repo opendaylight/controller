@@ -25,7 +25,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * </p>
  */
 public class DataChangeListenerRegistrationProxy implements ListenerRegistration {
-    private final ActorSelection listenerRegistrationActor;
+    private ActorSelection listenerRegistrationActor;
     private final AsyncDataChangeListener listener;
     private final ActorRef dataChangeListenerActor;
 
@@ -38,14 +38,31 @@ public class DataChangeListenerRegistrationProxy implements ListenerRegistration
         this.dataChangeListenerActor = dataChangeListenerActor;
     }
 
+    public <L extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>
+    DataChangeListenerRegistrationProxy(
+        L listener, ActorRef dataChangeListenerActor) {
+        this(null, listener, dataChangeListenerActor);
+    }
+
     @Override
     public Object getInstance() {
         return listener;
     }
 
+    public void setListenerRegistrationActor(ActorSelection listenerRegistrationActor) {
+        this.listenerRegistrationActor = listenerRegistrationActor;
+    }
+
+    public ActorSelection getListenerRegistrationActor() {
+        return listenerRegistrationActor;
+    }
+
     @Override
     public void close() {
-        listenerRegistrationActor.tell(new CloseDataChangeListenerRegistration().toSerializable(), null);
+        if(listenerRegistrationActor != null) {
+            listenerRegistrationActor
+                .tell(new CloseDataChangeListenerRegistration().toSerializable(), null);
+        }
         dataChangeListenerActor.tell(PoisonPill.getInstance(), null);
     }
 }

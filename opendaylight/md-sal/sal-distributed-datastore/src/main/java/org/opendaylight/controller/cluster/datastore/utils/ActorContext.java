@@ -13,8 +13,8 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
+import akka.pattern.Patterns;
 import akka.util.Timeout;
-
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.Configuration;
 import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
@@ -27,7 +27,6 @@ import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContex
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
@@ -264,6 +263,23 @@ public class ActorContext {
 
         return null;
     }
+
+
+    /**
+     *
+     * @param shardName
+     * @param message
+     * @param timeout
+     * @return
+     */
+    public Future executeLocalShardOperationAsync(String shardName, Object message, Timeout timeout) {
+        ActorRef local = findLocalShard(shardName);
+        if(local == null){
+            return null;
+        }
+        return Patterns.ask(local, message, timeout);
+    }
+
 
 
     public void shutdown() {
