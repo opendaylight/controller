@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_247688d9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-08T12:30:33Z",
+      "side": 1,
+      "message": "Could multiple shards close the same tx chain? If so, could that cause any issues?",
+      "revId": "15428d591b21a5a053c6c44fa843ee4e02a70a48",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_24af682d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionChainProxy.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-08T12:30:33Z",
+      "side": 1,
+      "message": "Can we initialize to Collections.\u003cFuture\u003cActorPath\u003e\u003eemptyList() here since we replace entire list?\n\nAlso this field should be declared volatile since it could be read and written from multiple threads.",
+      "revId": "15428d591b21a5a053c6c44fa843ee4e02a70a48",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a4bb7874",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionChainProxy.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-08T12:30:33Z",
+      "side": 1,
+      "message": "Let\u0027s not lose the original exception, i.e. please propagate the original as the cause.",
+      "revId": "15428d591b21a5a053c6c44fa843ee4e02a70a48",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
