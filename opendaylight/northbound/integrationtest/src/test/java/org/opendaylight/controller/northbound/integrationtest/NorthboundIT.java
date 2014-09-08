@@ -827,7 +827,7 @@ public class NorthboundIT {
             Assert.assertTrue(tag == 0x8100);
         }
         if (act.getString("type").equals("SET_NW_TOS")) {
-            Assert.assertTrue(act.getInt("tos") == 16);
+            Assert.assertTrue(act.getInt("tos") == 64);
         }
         if (act.getString("type").equals("SET_TP_SRC")) {
             Assert.assertTrue(act.getInt("port") == 4201);

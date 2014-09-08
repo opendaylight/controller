@@ -348,7 +348,7 @@ public class TestToSalConversionsUtils {
             InetAddress inetAddress = ((SetNwSrc) action).getAddress();
             checkIpAddresses(inetAddress, "192.168.100.102", "2001:db8:85a3::8a2e:370:7336");
         } else if (action instanceof SetNwTos) {
-            assertEquals("Wrong value for action SetNwTos for tos.", 63, ((SetNwTos) action).getNwTos());
+            assertEquals("Wrong value for action SetNwTos for tos.", 0x30, ((SetNwTos) action).getNwTos());
         } else if (action instanceof SetTpDst) {
             assertEquals("Wrong value for action SetTpDst for port.", 65535, ((SetTpDst) action).getPort());
         } else if (action instanceof SetTpSrc) {
@@ -499,7 +499,7 @@ public class TestToSalConversionsUtils {
 
     private void prepareActionSetNwTos(SetNwTosActionCaseBuilder wrapper) {
         SetNwTosActionBuilder setNwTosActionBuilder = new SetNwTosActionBuilder();
-        setNwTosActionBuilder.setTos(63);
+        setNwTosActionBuilder.setTos(0x30);
         wrapper.setSetNwTosAction(setNwTosActionBuilder.build());
     }
 

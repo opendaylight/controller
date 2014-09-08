@@ -293,7 +293,9 @@ public class TestFromSalConversionsUtils {
                     }
                     assertTrue("Ipv4 address wasn't found.", ipv4AddressFound);
                 } else if (innerAction instanceof SetNwTosActionCase) {
-                    assertEquals("Wrong TOS in SetNwTosAction.", (Integer) 63, ((SetNwTosActionCase) innerAction).getSetNwTosAction().getTos());
+                    assertEquals("Wrong TOS in SetNwTosAction.", 63,
+                            ((SetNwTosActionCase) innerAction)
+                            .getSetNwTosAction().getTos() >>> SetNwTos.ECN_FIELD_SIZE);
                 } else if (innerAction instanceof SetNwDstActionCase) {
                     Address address = ((SetNwDstActionCase) innerAction).getSetNwDstAction().getAddress();
                     boolean ipv4AddressFound = false;

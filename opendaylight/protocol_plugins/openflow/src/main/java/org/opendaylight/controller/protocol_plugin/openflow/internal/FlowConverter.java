@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013-2014 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -738,9 +738,10 @@ public class FlowConverter {
                         }
                         salAction = new SetNwDst(ip);
                     } else if (ofAction instanceof OFActionNetworkTypeOfService) {
-                        salAction = new SetNwTos(
+                        int dscp = NetUtils.getUnsignedByte(
                                 ((OFActionNetworkTypeOfService) ofAction)
-                                        .getNetworkTypeOfService());
+                                .getNetworkTypeOfService()) >>> SetNwTos.ECN_FIELD_SIZE;
+                        salAction = new SetNwTos(dscp);
                     } else if (ofAction instanceof OFActionTransportLayerSource) {
                         Short port = ((OFActionTransportLayerSource) ofAction)
                                 .getTransportPort();
