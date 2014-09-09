@@ -69,7 +69,7 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
         }
 
         boolean isDataRoot = false;
-        URI initialNs = null;
+
         outputWriter.write('{');
         if (SchemaPath.ROOT.equals(path)) {
             isDataRoot = true;
@@ -77,8 +77,11 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
             path = path.getParent();
             // FIXME: Add proper handling of reading root.
         }
+        final URI initialNs;
         if(!schema.isAugmenting() && !(schema instanceof SchemaContext)) {
             initialNs = schema.getQName().getNamespace();
+        } else {
+            initialNs = SchemaContext.NAME.getNamespace();
         }
         NormalizedNodeStreamWriter jsonWriter = JSONNormalizedNodeStreamWriter.create(context.getSchemaContext(),path,initialNs,outputWriter);
         NormalizedNodeWriter nnWriter = NormalizedNodeWriter.forStreamWriter(jsonWriter);
