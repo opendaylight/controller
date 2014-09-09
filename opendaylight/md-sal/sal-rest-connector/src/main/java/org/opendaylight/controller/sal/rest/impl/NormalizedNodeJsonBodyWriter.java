@@ -101,9 +101,6 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
             DataContainerChild<? extends PathArgument, ?> child = iterator.next();
             nnWriter.write(child);
             nnWriter.flush();
-            if(iterator.hasNext()) {
-                outputWriter.write(",");
-            }
         }
     }
 
