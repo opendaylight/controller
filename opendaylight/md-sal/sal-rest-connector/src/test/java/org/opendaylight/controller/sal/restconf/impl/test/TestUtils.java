@@ -25,10 +25,10 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -217,10 +217,12 @@ public final class TestUtils {
             URI u = new URI(uri);
             Date dt = null;
             if (date != null) {
-                dt = Date.valueOf(date);
+                dt = new SimpleDateFormat("yyyy-MM-dd").parse(date);
             }
             return new QName(u, dt, prefix, name);
         } catch (URISyntaxException e) {
+            return null;
+        } catch (ParseException e) {
             return null;
         }
     }

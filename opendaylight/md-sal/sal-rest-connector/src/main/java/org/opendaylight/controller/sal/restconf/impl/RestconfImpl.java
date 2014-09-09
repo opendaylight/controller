@@ -15,6 +15,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.eventbus.AsyncEventBus;
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -29,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executors;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
@@ -513,7 +515,7 @@ public class RestconfImpl implements RestconfService {
                 null, output, null, null);
 
         if (!Notificator.existListenerFor(streamName)) {
-            Notificator.createListener(pathIdentifier, streamName);
+            Notificator.createListener(pathIdentifier, streamName, new AsyncEventBus(Executors.newSingleThreadExecutor()));
         }
 
         return new StructuredData(responseData, rpc.getOutput(), null, prettyPrint);
