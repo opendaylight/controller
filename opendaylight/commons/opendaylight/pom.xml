@@ -211,7 +211,8 @@
     <yang-ext.version>2013.09.07.4-SNAPSHOT</yang-ext.version>
     <yang-jmx-generator.version>1.0.0-SNAPSHOT</yang-jmx-generator.version>
     <yangtools.version>0.6.2-SNAPSHOT</yangtools.version>
-      <sshd-core.version>0.12.0</sshd-core.version>
+    <sshd-core.version>0.12.0</sshd-core.version>
+    <jmh.version>0.9.7</jmh.version>
   </properties>
 
   <dependencyManagement>
@@ -2020,6 +2021,17 @@
         <classifier>features</classifier>
         <type>xml</type>
         <scope>runtime</scope>
+      </dependency>
+      <!-- JMH Benchmark dependencies -->
+      <dependency>
+        <groupId>org.openjdk.jmh</groupId>
+        <artifactId>jmh-core</artifactId>
+        <version>${jmh.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.openjdk.jmh</groupId>
+        <artifactId>jmh-generator-annprocess</artifactId>
+        <version>${jmh.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
