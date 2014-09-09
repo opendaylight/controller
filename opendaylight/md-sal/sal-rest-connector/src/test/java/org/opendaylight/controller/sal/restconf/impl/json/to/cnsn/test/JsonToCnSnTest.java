@@ -18,7 +18,6 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
@@ -296,7 +295,6 @@ public class JsonToCnSnTest {
         assertEquals("identity:module", ((QName) lf14.getValue()).getNamespace().toString());
     }
 
-    @Ignore
     @Test
     public void loadDataAugmentedSchemaMoreEqualNamesTest() {
         loadAndNormalizeData("/common/augment/json/dataa.json", "/common/augment/yang", "cont", "main");

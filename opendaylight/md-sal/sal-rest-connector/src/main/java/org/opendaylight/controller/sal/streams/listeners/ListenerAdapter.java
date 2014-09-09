@@ -9,7 +9,6 @@ package org.opendaylight.controller.sal.streams.listeners;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
-import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import io.netty.channel.Channel;
@@ -23,10 +22,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 import javax.activation.UnsupportedDataTypeException;
 import javax.xml.parsers.DocumentBuilder;
@@ -85,12 +82,12 @@ public class ListenerAdapter implements DOMDataChangeListener {
      * @param streamName
      *            The name of the stream.
      */
-    ListenerAdapter(final YangInstanceIdentifier path, final String streamName) {
+    ListenerAdapter(final YangInstanceIdentifier path, final String streamName, final EventBus eventBus) {
         Preconditions.checkNotNull(path);
         Preconditions.checkArgument(streamName != null && !streamName.isEmpty());
         this.path = path;
         this.streamName = streamName;
-        eventBus = new AsyncEventBus(Executors.newSingleThreadExecutor());
+        this.eventBus = eventBus;
         eventBusChangeRecorder = new EventBusChangeRecorder();
         eventBus.register(eventBusChangeRecorder);
     }
@@ -320,31 +317,6 @@ public class ListenerAdapter implements DOMDataChangeListener {
         }
         for (YangInstanceIdentifier path : data) {
             Node node = createDataChangeEventElement(doc, path, null, operation);
-            element.appendChild(node);
-        }
-    }
-
-    /**
-     * Adds values from data to element.
-     *
-     * @param doc
-     *            {@link Document}
-     * @param data
-     *            Map of {@link YangInstanceIdentifier} and {@link CompositeNode}.
-     * @param element
-     *            {@link Element}
-     * @param store
-     *            {@link Store}
-     * @param operation
-     *            {@link Operation}
-     */
-    private void addValuesFromDataToElement(Document doc, Map<YangInstanceIdentifier, CompositeNode> data, Element element,
-            Operation operation) {
-        if (data == null || data.isEmpty()) {
-            return;
-        }
-        for (Entry<YangInstanceIdentifier, CompositeNode> entry : data.entrySet()) {
-            Node node = createDataChangeEventElement(doc, entry.getKey(), entry.getValue(), operation);
             element.appendChild(node);
         }
     }
