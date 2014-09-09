@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.netconf.persist.impl;
 
+import com.google.common.collect.Lists;
+
 import org.junit.Test;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
@@ -85,6 +87,22 @@ public class PersisterAggregatorTest {
         assertEquals(2, DummyAdapter.persist);
         assertEquals(2, DummyAdapter.load);
         assertEquals(1, DummyAdapter.props);
+    }
+
+    @Test
+    public void testNoopAdapter() throws Exception {
+        final NoOpStorageAdapter noOpStorageAdapter = new NoOpStorageAdapter();
+        final PersisterAggregator persisterAggregator =
+                new PersisterAggregator(Lists.newArrayList(new PersisterWithConfiguration(noOpStorageAdapter, false)));
+
+        noOpStorageAdapter.instantiate(null);
+
+        persisterAggregator.persistConfig(null);
+        persisterAggregator.loadLastConfigs();
+        persisterAggregator.persistConfig(null);
+        persisterAggregator.loadLastConfigs();
+
+        noOpStorageAdapter.close();
     }
 
     @Test
