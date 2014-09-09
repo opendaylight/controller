@@ -34,15 +34,15 @@ final class BindingTranslatedTransactionChain implements BindingTransactionChain
 
     private final DOMTransactionChain delegate;
     private final BindingToNormalizedNodeCodec codec;
-    private final DelegateChainListener delegatingListener;
-    private final TransactionChainListener listener;
+    private final DelegateChainListener domListener;
+    private final TransactionChainListener bindingListener;
 
     public BindingTranslatedTransactionChain(final DOMDataBroker chainFactory,
             final BindingToNormalizedNodeCodec codec, final TransactionChainListener listener) {
         Preconditions.checkNotNull(chainFactory, "DOM Transaction chain factory must not be null");
-        this.delegatingListener = new DelegateChainListener();
-        this.listener = listener;
-        this.delegate = chainFactory.createTransactionChain(listener);
+        this.domListener = new DelegateChainListener();
+        this.bindingListener = listener;
+        this.delegate = chainFactory.createTransactionChain(domListener);
         this.codec = codec;
     }
 
@@ -110,7 +110,7 @@ final class BindingTranslatedTransactionChain implements BindingTransactionChain
          * chain, so we are not changing any of our internal state
          * to mark that we failed.
          */
-        this.delegatingListener.onTransactionChainFailed(this, tx, t);
+        this.bindingListener.onTransactionChainFailed(this, tx, t);
     }
 
     @Override
@@ -141,7 +141,7 @@ final class BindingTranslatedTransactionChain implements BindingTransactionChain
         public void onTransactionChainSuccessful(final TransactionChain<?, ?> chain) {
             Preconditions.checkState(delegate.equals(chain),
                     "Illegal state - listener for %s was invoked for incorrect chain %s.", delegate, chain);
-            listener.onTransactionChainSuccessful(BindingTranslatedTransactionChain.this);
+            bindingListener.onTransactionChainSuccessful(BindingTranslatedTransactionChain.this);
         }
     }
 
