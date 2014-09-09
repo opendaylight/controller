@@ -1,0 +1,19 @@
+module controller-context-test {
+    namespace "ns:cont:cont";
+    prefix "contcont";
+
+    revision 2014-07-24 {
+    }
+
+    list lst {
+        choice choi {
+            case ca {
+                container cont {
+                }
+            }
+        }
+        container cont1 {
+            
+        }
+    }
+}
