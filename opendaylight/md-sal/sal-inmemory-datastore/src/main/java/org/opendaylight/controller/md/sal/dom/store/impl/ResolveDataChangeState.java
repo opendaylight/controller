@@ -175,12 +175,25 @@ final class ResolveDataChangeState {
         if (!inheritedOne.isEmpty()) {
             return true;
         }
-        // Have SUBTREE listeners
-        if (!Iterables.isEmpty(inheritedSub)) {
-            return true;
+
+        /*
+         * Have SUBTREE listeners
+         *
+         * This is slightly magical replacement for !Iterables.isEmpty(inheritedSub).
+         * It relies on the logic in child(), which gives us the guarantee that when
+         * inheritedSub is not a Collection, it is guaranteed to be non-empty (which
+         * means we need to process). If it is a collection, we still need to check
+         * it for emptiness.
+         *
+         * Unlike Iterables.isEmpty() this code does not instantiate any temporary
+         * objects and is thus more efficient.
+         */
+        if (inheritedSub instanceof Collection) {
+            return !((Collection<?>) inheritedSub).isEmpty();
         }
 
-        return false;
+        // Non-Collection => non-empty => have to process
+        return true;
     }
 
     /**
