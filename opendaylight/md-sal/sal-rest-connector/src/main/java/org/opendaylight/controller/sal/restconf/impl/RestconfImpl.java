@@ -12,9 +12,9 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.eventbus.AsyncEventBus;
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executors;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
@@ -64,7 +65,6 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.composite.node.schema.cnsn.parser.CnSnToNormalizedNodeParserFactory;
-import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
@@ -513,7 +513,7 @@ public class RestconfImpl implements RestconfService {
                 null, output, null, null);
 
         if (!Notificator.existListenerFor(streamName)) {
-            Notificator.createListener(pathIdentifier, streamName);
+            Notificator.createListener(pathIdentifier, streamName, new AsyncEventBus(Executors.newSingleThreadExecutor()));
         }
 
         return new StructuredData(responseData, rpc.getOutput(), null, prettyPrint);
@@ -643,48 +643,6 @@ public class RestconfImpl implements RestconfService {
             data = broker.readConfigurationData(normalizedII);
         }
         return new NormalizedNodeContext(iiWithData, data);
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T extends Node<?>> T pruneDataAtDepth(final T node, final Integer depth) {
-        if (depth == null) {
-            return node;
-        }
-
-        if (node instanceof CompositeNode) {
-            ImmutableList.Builder<Node<?>> newChildNodes = ImmutableList.<Node<?>> builder();
-            if (depth > 1) {
-                for (Node<?> childNode : ((CompositeNode) node).getValue()) {
-                    newChildNodes.add(pruneDataAtDepth(childNode, depth - 1));
-                }
-            }
-
-            return (T) ImmutableCompositeNode.create(node.getNodeType(), newChildNodes.build());
-        } else { // SimpleNode
-            return node;
-        }
-    }
-
-    private Integer parseDepthParameter(final UriInfo info) {
-        String param = info.getQueryParameters(false).getFirst(UriParameters.DEPTH.toString());
-        if (Strings.isNullOrEmpty(param) || "unbounded".equals(param)) {
-            return null;
-        }
-
-        try {
-            Integer depth = Integer.valueOf(param);
-            if (depth < 1) {
-                throw new RestconfDocumentedException(new RestconfError(ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE,
-                        "Invalid depth parameter: " + depth, null,
-                        "The depth parameter must be an integer > 1 or \"unbounded\""));
-            }
-
-            return depth;
-        } catch (NumberFormatException e) {
-            throw new RestconfDocumentedException(new RestconfError(ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE,
-                    "Invalid depth parameter: " + e.getMessage(), null,
-                    "The depth parameter must be an integer > 1 or \"unbounded\""));
-        }
     }
 
     @Override
@@ -1505,28 +1463,6 @@ public class RestconfImpl implements RestconfService {
         }
     }
 
-    private CompositeNode datastoreNormalizedNodeToCompositeNode(final NormalizedNode<?, ?> dataNode, final DataSchemaNode schema) {
-        Node<?> nodes = null;
-        if (dataNode == null) {
-            throw new RestconfDocumentedException(new RestconfError(ErrorType.APPLICATION, ErrorTag.DATA_MISSING,
-                    "No data was found."));
-        }
-        nodes = DataNormalizer.toLegacy(dataNode);
-        if (nodes != null) {
-            if (nodes instanceof CompositeNode) {
-                return (CompositeNode) nodes;
-            } else {
-                LOG.error("The node " + dataNode.getNodeType() + " couldn't be transformed to compositenode.");
-            }
-        } else {
-            LOG.error("Top level node isn't of type Container or List schema node but "
-                    + schema.getClass().getSimpleName());
-        }
-
-        throw new RestconfDocumentedException(new RestconfError(ErrorType.APPLICATION, ErrorTag.INVALID_VALUE,
-                "It wasn't possible to correctly interpret data."));
-    }
-
     private NormalizedNode<?, ?> compositeNodeToDatastoreNormalizedNode(final CompositeNode compNode,
             final DataSchemaNode schema) {
         List<Node<?>> lst = new ArrayList<Node<?>>();
@@ -1543,33 +1479,6 @@ public class RestconfImpl implements RestconfService {
 
         throw new RestconfDocumentedException(new RestconfError(ErrorType.APPLICATION, ErrorTag.INVALID_VALUE,
                 "It wasn't possible to translate specified data to datastore readable form."));
-    }
-
-    private InstanceIdentifierContext normalizeInstanceIdentifierWithSchemaNode(
-            final InstanceIdentifierContext iiWithSchemaNode) {
-        return normalizeInstanceIdentifierWithSchemaNode(iiWithSchemaNode, false);
-    }
-
-    private InstanceIdentifierContext normalizeInstanceIdentifierWithSchemaNode(
-            final InstanceIdentifierContext iiWithSchemaNode, final boolean unwrapLastListNode) {
-        return new InstanceIdentifierContext(instanceIdentifierToReadableFormForNormalizeNode(
-                iiWithSchemaNode.getInstanceIdentifier(), unwrapLastListNode), iiWithSchemaNode.getSchemaNode(),
-                iiWithSchemaNode.getMountPoint(),iiWithSchemaNode.getSchemaContext());
-    }
-
-    private YangInstanceIdentifier instanceIdentifierToReadableFormForNormalizeNode(
-            final YangInstanceIdentifier instIdentifier, final boolean unwrapLastListNode) {
-        Preconditions.checkNotNull(instIdentifier, "Instance identifier can't be null");
-        final List<PathArgument> result = new ArrayList<PathArgument>();
-        final Iterator<PathArgument> iter = instIdentifier.getPathArguments().iterator();
-        while (iter.hasNext()) {
-            final PathArgument pathArgument = iter.next();
-            if (pathArgument instanceof NodeIdentifierWithPredicates && (iter.hasNext() || unwrapLastListNode)) {
-                result.add(new YangInstanceIdentifier.NodeIdentifier(pathArgument.getNodeType()));
-            }
-            result.add(pathArgument);
-        }
-        return YangInstanceIdentifier.create(result);
     }
 
     private CompositeNodeWrapper topLevelElementAsCompositeNodeWrapper(final NodeWrapper<?> node,
