@@ -506,9 +506,6 @@ public class Shard extends RaftActor {
                 .tell(new EnableNotification(isLeader()), getSelf());
         }
 
-        if (getLeaderId() != null) {
-            shardMBean.setLeader(getLeaderId());
-        }
 
         shardMBean.setRaftState(getRaftState().name());
         shardMBean.setCurrentTerm(getCurrentTerm());
@@ -521,6 +518,14 @@ public class Shard extends RaftActor {
 
             transactionChains.clear();
         }
+    }
+
+    @Override protected void onLeaderChanged(String oldLeader, String newLeader) {
+        if((oldLeader == null && newLeader == null) || (newLeader != null && newLeader.equals(oldLeader)) ){
+            return;
+        }
+        LOG.info("Current state = {}, Leader = {}", getRaftState().name(), newLeader);
+        shardMBean.setLeader(newLeader);
     }
 
     @Override public String persistenceId() {
