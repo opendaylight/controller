@@ -27,7 +27,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.ws.rs.core.Response.Status;
@@ -41,13 +40,11 @@ import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 import org.opendaylight.yangtools.concepts.Codec;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.InstanceIdentifierBuilder;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceNode;
@@ -68,6 +65,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ControllerContext implements SchemaContextListener {
+
     private final static Logger LOG = LoggerFactory.getLogger(ControllerContext.class);
 
     private final static ControllerContext INSTANCE = new ControllerContext();
@@ -84,8 +82,12 @@ public class ControllerContext implements SchemaContextListener {
 
     private static final Splitter SLASH_SPLITTER = Splitter.on('/');
 
-    private final AtomicReference<Map<QName, RpcDefinition>> qnameToRpc =
-            new AtomicReference<>(Collections.<QName, RpcDefinition>emptyMap());
+    static final String REST_ONLY_ONE_MOUNT_POINT = "Restconf supports just one mount point in URI.";
+    static final String REST_MOUNT_POINT_DOES_NOT_EXIST = "Mount point does not exist.";
+    static final String REST_MODULE_NAME_BEHIND_MOUNT_POINT = "First node after mount point in URI has to be in format \"moduleName:nodeName\"";
+
+    private final AtomicReference<Map<QName, RpcDefinition>> qnameToRpc = new AtomicReference<>(
+            Collections.<QName, RpcDefinition> emptyMap());
 
     private volatile SchemaContext globalSchema;
     private volatile DOMMountPointService mountService;
@@ -526,7 +528,7 @@ public class ControllerContext implements SchemaContextListener {
                 final String moduleNameBehindMountPoint = toModuleName(strings.get(1));
                 if (moduleNameBehindMountPoint == null) {
                     throw new RestconfDocumentedException(
-                            "First node after mount point in URI has to be in format \"moduleName:nodeName\"",
+                            REST_MODULE_NAME_BEHIND_MOUNT_POINT,
                             ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
                 }
 
@@ -888,27 +890,9 @@ public class ControllerContext implements SchemaContextListener {
         }
     }
 
-    public Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> toNormalized(final YangInstanceIdentifier legacy,
-            final CompositeNode compositeNode) {
-        try {
-            return dataNormalizer.toNormalized(legacy, compositeNode);
-        } catch (NullPointerException e) {
-            throw new RestconfDocumentedException("Data normalizer isn't set. Normalization isn't possible", e);
-        }
-    }
-
     public YangInstanceIdentifier toNormalized(final YangInstanceIdentifier legacy) {
         try {
             return dataNormalizer.toNormalized(legacy);
-        } catch (NullPointerException e) {
-            throw new RestconfDocumentedException("Data normalizer isn't set. Normalization isn't possible", e);
-        }
-    }
-
-    public CompositeNode toLegacy(final YangInstanceIdentifier instanceIdentifier,
-            final NormalizedNode<?,?> normalizedNode) {
-        try {
-            return dataNormalizer.toLegacy(instanceIdentifier, normalizedNode);
         } catch (NullPointerException e) {
             throw new RestconfDocumentedException("Data normalizer isn't set. Normalization isn't possible", e);
         }
