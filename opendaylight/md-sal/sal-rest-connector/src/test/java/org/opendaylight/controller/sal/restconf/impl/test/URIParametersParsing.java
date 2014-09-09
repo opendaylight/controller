@@ -12,7 +12,9 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.common.eventbus.AsyncEventBus;
 import java.io.FileNotFoundException;
+import java.util.concurrent.Executors;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
@@ -66,7 +68,7 @@ public class URIParametersParsing {
         final String datastoreValue = datastore == null ? "CONFIGURATION" : datastore;
         final String scopeValue = scope == null ? "BASE" : scope + "";
         Notificator.createListener(iiBuilder.build(), "dummyStreamName/datastore=" + datastoreValue + "/scope="
-                + scopeValue);
+                + scopeValue, new AsyncEventBus(Executors.newSingleThreadExecutor()));
 
         UriInfo mockedUriInfo = mock(UriInfo.class);
         MultivaluedMap<String, String> mockedMultivaluedMap = mock(MultivaluedMap.class);

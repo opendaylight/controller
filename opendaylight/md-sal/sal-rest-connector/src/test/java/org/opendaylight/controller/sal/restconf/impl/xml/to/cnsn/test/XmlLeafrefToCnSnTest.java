@@ -13,7 +13,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Set;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
@@ -203,7 +202,7 @@ public class XmlLeafrefToCnSnTest {
     @Test
     public void testIdentityrefNmspcInElement() {
         testIdentityrefToCnSn("/xml-to-cnsn/identityref/xml/data-nmspc-in-element.xml", "/xml-to-cnsn/identityref",
-                "identityref-module", "cont", 2, "iden", "identity:module");
+                "identityref-module", "cont", 3, "iden", "identity:module");
     }
 
     /**
@@ -224,18 +223,18 @@ public class XmlLeafrefToCnSnTest {
     @Test
     public void testIdentityrefDefaultNmspcInParrentElement() {
         testIdentityrefToCnSn("/xml-to-cnsn/identityref/xml/data-default-nmspc-in-parrent-element.xml",
-                "/xml-to-cnsn/identityref", "identityref-module", "cont", 2, "iden", "identityref:module");
+                "/xml-to-cnsn/identityref", "identityref-module", "cont", 3, "iden", "identityref:module");
     }
 
     /**
      *
      * Test case like <cont1 xmlns="namespace1" xmlns:x="namespace"> <lf11>x:identity</lf11> </cont1>
      */
-    @Ignore
+
     @Test
     public void testIdentityrefNmspcInParrentElement() {
         testIdentityrefToCnSn("/xml-to-cnsn/identityref/xml/data-nmspc-in-parrent-element.xml",
-                "/xml-to-cnsn/identityref", "identityref-module", "cont", 2, "iden", "z:namespace");
+                "/xml-to-cnsn/identityref", "identityref-module", "cont", 3, "iden", "z:namespace");
     }
 
     /**
@@ -245,7 +244,7 @@ public class XmlLeafrefToCnSnTest {
     @Test
     public void testIdentityrefNoNmspcValueWithPrefix() {
         testIdentityrefToCnSn("/xml-to-cnsn/identityref/xml/data-no-nmspc-value-with-prefix.xml",
-                "/xml-to-cnsn/identityref", "identityref-module", "cont", 2, "x:iden", "identityref:module");
+                "/xml-to-cnsn/identityref", "identityref-module", "cont", 3, "x:iden", "identityref:module");
     }
 
     /**
@@ -255,7 +254,7 @@ public class XmlLeafrefToCnSnTest {
     @Test
     public void testIdentityrefNoNmspcValueWithoutPrefix() {
         testIdentityrefToCnSn("/xml-to-cnsn/identityref/xml/data-no-nmspc-value-without-prefix.xml",
-                "/xml-to-cnsn/identityref", "identityref-module", "cont", 2, "iden", "identityref:module");
+                "/xml-to-cnsn/identityref", "identityref-module", "cont", 3, "iden", "identityref:module");
     }
 
     private void verifyCommonPartAOfXml(final CompositeNode compNode, final String suf, final String nameSpace) {
