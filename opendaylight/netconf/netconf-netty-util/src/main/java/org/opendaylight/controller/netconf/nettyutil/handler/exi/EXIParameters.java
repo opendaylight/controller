@@ -7,18 +7,21 @@
  */
 package org.opendaylight.controller.netconf.nettyutil.handler.exi;
 
-import com.google.common.base.Preconditions;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.openexi.proc.common.AlignmentType;
 import org.openexi.proc.common.EXIOptions;
 import org.openexi.proc.common.EXIOptionsException;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+import com.google.common.base.Preconditions;
 
 public final class EXIParameters {
     private static final String EXI_PARAMETER_ALIGNMENT = "alignment";
-    private static final String EXI_PARAMETER_BYTE_ALIGNED = "byte-aligned";
-    private static final String EXI_PARAMETER_BIT_PACKED = "bit-packed";
-    private static final String EXI_PARAMETER_COMPRESSED = "compressed";
-    private static final String EXI_PARAMETER_PRE_COMPRESSION = "pre-compression";
+    static final String EXI_PARAMETER_BYTE_ALIGNED = "byte-aligned";
+    static final String EXI_PARAMETER_BIT_PACKED = "bit-packed";
+    static final String EXI_PARAMETER_COMPRESSED = "compressed";
+    static final String EXI_PARAMETER_PRE_COMPRESSION = "pre-compression";
 
     private static final String EXI_PARAMETER_FIDELITY = "fidelity";
     private static final String EXI_FIDELITY_DTD = "dtd";
@@ -38,15 +41,25 @@ public final class EXIParameters {
         final EXIOptions options =  new EXIOptions();
 
         options.setAlignmentType(AlignmentType.bitPacked);
-        if (root.getElementsByTagName(EXI_PARAMETER_ALIGNMENT).getLength() > 0) {
-            if (root.getElementsByTagName(EXI_PARAMETER_BIT_PACKED).getLength() > 0) {
-                options.setAlignmentType(AlignmentType.bitPacked);
-            } else if (root.getElementsByTagName(EXI_PARAMETER_BYTE_ALIGNED).getLength() > 0) {
-                options.setAlignmentType(AlignmentType.byteAligned);
-            } else if (root.getElementsByTagName(EXI_PARAMETER_COMPRESSED).getLength() > 0) {
-                options.setAlignmentType(AlignmentType.compress);
-            } else if (root.getElementsByTagName(EXI_PARAMETER_PRE_COMPRESSION).getLength() > 0) {
-                options.setAlignmentType(AlignmentType.preCompress);
+
+        final NodeList alignmentElements = root.getElementsByTagName(EXI_PARAMETER_ALIGNMENT);
+        if (alignmentElements.getLength() > 0) {
+            final Element alignmentElement = (Element) alignmentElements.item(0);
+            final String alignmentTextContent = alignmentElement.getTextContent().trim();
+
+            switch (alignmentTextContent) {
+                case EXI_PARAMETER_BIT_PACKED:
+                    options.setAlignmentType(AlignmentType.bitPacked);
+                    break;
+                case EXI_PARAMETER_BYTE_ALIGNED:
+                    options.setAlignmentType(AlignmentType.byteAligned);
+                    break;
+                case EXI_PARAMETER_COMPRESSED:
+                    options.setAlignmentType(AlignmentType.compress);
+                    break;
+                case EXI_PARAMETER_PRE_COMPRESSION:
+                    options.setAlignmentType(AlignmentType.preCompress);
+                    break;
             }
         }
 
