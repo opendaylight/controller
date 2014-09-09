@@ -36,7 +36,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-public class RestStream extends JerseyTest {
+public class RestStreamTest extends JerseyTest {
 
     private static BrokerFacade brokerFacade;
     private static RestconfImpl restconfImpl;

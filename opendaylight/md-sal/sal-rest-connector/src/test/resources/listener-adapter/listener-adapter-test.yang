@@ -1,0 +1,29 @@
+module listener-adapter-test {
+    namespace "ns:listener:adapter";
+    prefix "listadapt";
+
+    revision 2014-07-25 {
+    }
+
+    container cont {
+        leaf lf1 {
+            type string;
+        }
+        leaf lf2 {
+            type string;
+        }
+        leaf lf3 {
+            type string;
+        }
+        leaf lf4 {
+            type string;
+        }
+        leaf lf5 {
+            type string;
+        }
+        leaf lf6 {
+            type string;
+        }
+    }
+    
+}
