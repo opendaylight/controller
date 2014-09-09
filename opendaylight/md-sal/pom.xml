@@ -216,5 +216,14 @@
         <module>sal-binding-dom-it</module>
       </modules>
     </profile>
+    <profile>
+      <id>benchmarks</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <modules>
+        <module>benchmark-data-store</module>
+      </modules>
+    </profile>
   </profiles>
 </project>
