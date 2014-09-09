@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_653a4ae9",
+        "filename": "opendaylight/md-sal/benchmark-data-store/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-09-09T16:32:49Z",
+      "side": 1,
+      "message": "missing copyright, here and elsewhere",
+      "revId": "2a4420d96db3afe15154c760d2fad5a707b913d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_853f4ed6",
+        "filename": "opendaylight/md-sal/benchmark-data-store/src/main/java/org/opendaylight/controller/md/sal/dom/store/benchmark/BenchmarkModel.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-09-09T16:32:49Z",
+      "side": 1,
+      "message": "invalid characters -- \u0026lt;",
+      "revId": "2a4420d96db3afe15154c760d2fad5a707b913d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_252442c5",
+        "filename": "opendaylight/md-sal/benchmark-data-store/src/main/resources/odl-datastore-test.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-09-09T16:32:49Z",
+      "side": 1,
+      "message": "trailing whitespace and missing copyright.",
+      "revId": "2a4420d96db3afe15154c760d2fad5a707b913d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
