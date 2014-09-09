@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_8aaf5d94",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 343,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-09-09T01:55:27Z",
+      "side": 1,
+      "message": "In case of synchronous apply, wouldnt sender be null.",
+      "revId": "3b487156386a555fb1e675b252b534f521d35b4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_aaa021a6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 446,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-09-09T01:55:27Z",
+      "side": 1,
+      "message": "clientActor could be null here",
+      "revId": "3b487156386a555fb1e675b252b534f521d35b4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
