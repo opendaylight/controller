@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.raft.messages;
 
 import com.google.protobuf.GeneratedMessage;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationPayload;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogImplEntry;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
@@ -132,7 +133,12 @@ public class AppendEntries extends AbstractRaftRPC {
             try {
                 if(leProtoBuff.getData() != null && leProtoBuff.getData().getClientPayloadClassName() != null) {
                     String clientPayloadClassName = leProtoBuff.getData().getClientPayloadClassName();
-                    payload = (Payload)Class.forName(clientPayloadClassName).newInstance();
+                    // TODO : Special casing this for now. This may not be needed but the code has been tested with this check in
+                    if(clientPayloadClassName.equals(CompositeModificationPayload.class.getName())){
+                        payload = new CompositeModificationPayload();
+                    } else {
+                        payload = (Payload) Class.forName(clientPayloadClassName).newInstance();
+                    }
                     payload = payload.decode(leProtoBuff.getData());
                     payload.setClientPayloadClassName(clientPayloadClassName);
                 } else {
