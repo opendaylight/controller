@@ -28,7 +28,7 @@ import org.opendaylight.yangtools.yang.data.api.Node;
  *
  */
 
-public class CnSnToJsonLeafrefType extends YangAndXmlAndDataSchemaLoader {
+public class CnSnToJsonLeafrefTypeTest extends YangAndXmlAndDataSchemaLoader {
 
     @BeforeClass
     public static void initialization() {
