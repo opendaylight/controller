@@ -262,6 +262,8 @@ public abstract class RaftActor extends UntypedPersistentActor {
             if(oldBehavior != currentBehavior){
                 onStateChanged();
             }
+
+            onLeaderChanged(oldBehavior.getLeaderId(), currentBehavior.getLeaderId());
         }
     }
 
@@ -425,6 +427,8 @@ public abstract class RaftActor extends UntypedPersistentActor {
      * isLeader or getLeader to do something useful
      */
     protected abstract void onStateChanged();
+
+    protected void onLeaderChanged(String oldLeader, String newLeader){};
 
     private RaftActorBehavior switchBehavior(RaftState state) {
         if (currentBehavior != null) {
