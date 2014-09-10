@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_ed62c0ac",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AppendEntries.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-09-10T17:32:51Z",
+      "side": 1,
+      "message": "Lets add a bug to track removal of this.",
+      "revId": "99fa3e733eaeb6068d6dfb020fb4ed784a200202",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
