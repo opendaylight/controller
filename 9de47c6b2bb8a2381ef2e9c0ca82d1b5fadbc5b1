@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_9a7b2c7b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataChangeListenerRegistrationProxy.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-10T14:03:36Z",
+      "side": 1,
+      "message": "I\u0027m fixing this since this did not make RC0",
+      "parentUuid": "fa82b9bf_1f015139",
+      "revId": "9de47c6b2bb8a2381ef2e9c0ca82d1b5fadbc5b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_1f8871c5",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
         "patchSetId": 3
@@ -66,6 +84,24 @@
       "writtenOn": "2014-09-08T20:09:35Z",
       "side": 1,
       "message": "This seems risky. Potential for NPE. \n\nEither make this function stateless by passing it a valid shard actor\n\nOR, return a failed future.",
+      "revId": "9de47c6b2bb8a2381ef2e9c0ca82d1b5fadbc5b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_fad4b848",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-10T14:03:36Z",
+      "side": 1,
+      "message": "So Abhishek I can return a failed Future or an Optional here. For now I am choosing to keep it as null for a couple of reasons. (1) To be consistent with other code in here which also returns null for such cases (2) because a null return value actually does have some significance to the consumer. If I returned a failed future the consumer would need to first check if the future is completed to take the same action that it takes today when I return null. (see DistributedDataStore implementation to understand why)",
+      "parentUuid": "fa82b9bf_1f8871c5",
       "revId": "9de47c6b2bb8a2381ef2e9c0ca82d1b5fadbc5b1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
