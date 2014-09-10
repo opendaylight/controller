@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_dae8d418",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/resources/ShardTransactionChain.proto",
+        "patchSetId": 7
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-10T10:51:51Z",
+      "side": 1,
+      "message": "It seem the following 2 messages are no longer in use and can be removed?",
+      "revId": "a72e9eb3191a3fb374d4b4b72492727bf4d706c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
