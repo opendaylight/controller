@@ -69,6 +69,24 @@
       "revId": "6e743f5afe088d9116d161f34655cf1bb28bc1d9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2dc4285e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataChangeListenerRegistrationProxy.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-09-10T17:51:56Z",
+      "side": 1,
+      "message": "Do you think it would be better to use AtomicBoolean? Then we wont need to synchronized. \nIts a minor thing and I wont block the commit for it.",
+      "parentUuid": "fa82b9bf_0dbda402",
+      "revId": "6e743f5afe088d9116d161f34655cf1bb28bc1d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
