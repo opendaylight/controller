@@ -32,9 +32,9 @@ import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardTransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardMBeanFactory;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
+import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChain;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
-import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionChain;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionChainReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
@@ -61,6 +61,7 @@ import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessa
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionFactory;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -109,10 +110,11 @@ public class Shard extends RaftActor {
 
     private final DatastoreContext datastoreContext;
 
-
     private SchemaContext schemaContext;
 
     private ActorRef createSnapshotTransaction;
+
+    private final Map<String, DOMStoreTransactionChain> transactionChains = new HashMap<>();
 
     private Shard(ShardIdentifier name, Map<ShardIdentifier, String> peerAddresses,
             DatastoreContext datastoreContext, SchemaContext schemaContext) {
@@ -183,22 +185,19 @@ public class Shard extends RaftActor {
         LOG.debug("onReceiveCommand: Received message {} from {}", message.getClass().toString(),
             getSender());
 
-        if (message.getClass()
-            .equals(CreateTransactionChain.SERIALIZABLE_CLASS)) {
-            if (isLeader()) {
-                createTransactionChain();
-            } else if (getLeader() != null) {
-                getLeader().forward(message, getContext());
-            }
-        } else if(message.getClass().equals(ReadDataReply.SERIALIZABLE_CLASS)) {
+        if(message.getClass().equals(ReadDataReply.SERIALIZABLE_CLASS)) {
             // This must be for install snapshot. Don't want to open this up and trigger
             // deSerialization
-            self().tell(new CaptureSnapshotReply(ReadDataReply.getNormalizedNodeByteString(message)), self());
+            self()
+                .tell(new CaptureSnapshotReply(ReadDataReply.getNormalizedNodeByteString(message)),
+                    self());
 
             // Send a PoisonPill instead of sending close transaction because we do not really need
             // a response
             getSender().tell(PoisonPill.getInstance(), self());
 
+        } else if (message.getClass().equals(CloseTransactionChain.SERIALIZABLE_CLASS)){
+            closeTransactionChain(CloseTransactionChain.fromSerializable(message));
         } else if (message instanceof RegisterChangeListener) {
             registerChangeListener((RegisterChangeListener) message);
         } else if (message instanceof UpdateSchemaContext) {
@@ -221,9 +220,30 @@ public class Shard extends RaftActor {
         }
     }
 
+    private void closeTransactionChain(CloseTransactionChain closeTransactionChain) {
+        DOMStoreTransactionChain chain =
+            transactionChains.remove(closeTransactionChain.getTransactionChainId());
+
+        if(chain != null) {
+            chain.close();
+        }
+    }
+
     private ActorRef createTypedTransactionActor(
         int transactionType,
-        ShardTransactionIdentifier transactionId) {
+        ShardTransactionIdentifier transactionId,
+        String transactionChainId ) {
+
+        DOMStoreTransactionFactory factory = store;
+
+        if(!transactionChainId.isEmpty()) {
+            factory = transactionChains.get(transactionChainId);
+            if(factory == null){
+                DOMStoreTransactionChain transactionChain = store.createTransactionChain();
+                transactionChains.put(transactionChainId, transactionChain);
+                factory = transactionChain;
+            }
+        }
 
         if(this.schemaContext == null){
             throw new NullPointerException("schemaContext should not be null");
@@ -235,7 +255,7 @@ public class Shard extends RaftActor {
             shardMBean.incrementReadOnlyTransactionCount();
 
             return getContext().actorOf(
-                ShardTransaction.props(store.newReadOnlyTransaction(), getSelf(),
+                ShardTransaction.props(factory.newReadOnlyTransaction(), getSelf(),
                         schemaContext,datastoreContext, shardMBean), transactionId.toString());
 
         } else if (transactionType
@@ -244,7 +264,7 @@ public class Shard extends RaftActor {
             shardMBean.incrementReadWriteTransactionCount();
 
             return getContext().actorOf(
-                ShardTransaction.props(store.newReadWriteTransaction(), getSelf(),
+                ShardTransaction.props(factory.newReadWriteTransaction(), getSelf(),
                         schemaContext, datastoreContext, shardMBean), transactionId.toString());
 
 
@@ -254,7 +274,7 @@ public class Shard extends RaftActor {
             shardMBean.incrementWriteOnlyTransactionCount();
 
             return getContext().actorOf(
-                ShardTransaction.props(store.newWriteOnlyTransaction(), getSelf(),
+                ShardTransaction.props(factory.newWriteOnlyTransaction(), getSelf(),
                         schemaContext, datastoreContext, shardMBean), transactionId.toString());
         } else {
             throw new IllegalArgumentException(
@@ -265,10 +285,10 @@ public class Shard extends RaftActor {
 
     private void createTransaction(CreateTransaction createTransaction) {
         createTransaction(createTransaction.getTransactionType(),
-            createTransaction.getTransactionId());
+            createTransaction.getTransactionId(), createTransaction.getTransactionChainId());
     }
 
-    private ActorRef createTransaction(int transactionType, String remoteTransactionId) {
+    private ActorRef createTransaction(int transactionType, String remoteTransactionId, String transactionChainId) {
 
         ShardTransactionIdentifier transactionId =
             ShardTransactionIdentifier.builder()
@@ -276,7 +296,7 @@ public class Shard extends RaftActor {
                 .build();
         LOG.debug("Creating transaction : {} ", transactionId);
         ActorRef transactionActor =
-            createTypedTransactionActor(transactionType, transactionId);
+            createTypedTransactionActor(transactionType, transactionId, transactionChainId);
 
         getSender()
             .tell(new CreateTransactionReply(
@@ -458,7 +478,7 @@ public class Shard extends RaftActor {
             // so that this actor does not get block building the snapshot
             createSnapshotTransaction = createTransaction(
                 TransactionProxy.TransactionType.READ_ONLY.ordinal(),
-                "createSnapshot");
+                "createSnapshot", "");
 
             createSnapshotTransaction.tell(
                 new ReadData(YangInstanceIdentifier.builder().build()).toSerializable(), self());
@@ -499,6 +519,16 @@ public class Shard extends RaftActor {
 
         shardMBean.setRaftState(getRaftState().name());
         shardMBean.setCurrentTerm(getCurrentTerm());
+
+        // If this actor is no longer the leader close all the transaction chains
+        if(!isLeader()){
+            for(Map.Entry<String, DOMStoreTransactionChain> entry : transactionChains.entrySet()){
+                LOG.debug("onStateChanged: Closing transaction chain {} because shard {} is no longer the leader", entry.getKey(), getId());
+                entry.getValue().close();
+            }
+
+            transactionChains.clear();
+        }
     }
 
     @Override public String persistenceId() {

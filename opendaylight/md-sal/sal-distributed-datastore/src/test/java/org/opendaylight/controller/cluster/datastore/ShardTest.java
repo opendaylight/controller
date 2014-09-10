@@ -14,8 +14,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
-import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionChain;
-import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionChainReply;
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
 import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolved;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
@@ -52,65 +50,6 @@ import static org.junit.Assert.assertTrue;
 public class ShardTest extends AbstractActorTest {
 
     private static final DatastoreContext DATA_STORE_CONTEXT = new DatastoreContext();
-
-    @Test
-    public void testOnReceiveCreateTransactionChain() throws Exception {
-        new JavaTestKit(getSystem()) {{
-            final ShardIdentifier identifier =
-                ShardIdentifier.builder().memberName("member-1")
-                    .shardName("inventory").type("config").build();
-
-            final Props props = Shard.props(identifier, Collections.EMPTY_MAP, DATA_STORE_CONTEXT, TestModel.createTestContext());
-            final ActorRef subject =
-                getSystem().actorOf(props, "testCreateTransactionChain");
-
-
-            // Wait for a specific log message to show up
-            final boolean result =
-                new JavaTestKit.EventFilter<Boolean>(Logging.Info.class
-                ) {
-                    @Override
-                    protected Boolean run() {
-                        return true;
-                    }
-                }.from(subject.path().toString())
-                    .message("Switching from state Candidate to Leader")
-                    .occurrences(1).exec();
-
-            Assert.assertEquals(true, result);
-
-            new Within(duration("3 seconds")) {
-                @Override
-                protected void run() {
-
-                    subject.tell(new CreateTransactionChain().toSerializable(), getRef());
-
-                    final String out = new ExpectMsg<String>(duration("3 seconds"), "match hint") {
-                        // do not put code outside this method, will run afterwards
-                        @Override
-                        protected String match(Object in) {
-                            if (in.getClass().equals(CreateTransactionChainReply.SERIALIZABLE_CLASS)){
-                                CreateTransactionChainReply reply =
-                                    CreateTransactionChainReply.fromSerializable(getSystem(),in);
-                                return reply.getTransactionChainPath()
-                                    .toString();
-                            } else {
-                                throw noMatch();
-                            }
-                        }
-                    }.get(); // this extracts the received message
-
-                    assertEquals("Unexpected transaction path " + out,
-                        "akka://test/user/testCreateTransactionChain/$a",
-                        out);
-
-                    expectNoMsg();
-                }
-
-
-            };
-        }};
-    }
 
     @Test
     public void testOnReceiveRegisterListener() throws Exception {
@@ -227,6 +166,65 @@ public class ShardTest extends AbstractActorTest {
 
                     assertTrue("Unexpected transaction path " + out,
                         out.contains("akka://test/user/testCreateTransaction/shard-txn-1"));
+                    expectNoMsg();
+                }
+            };
+        }};
+    }
+
+    @Test
+    public void testCreateTransactionOnChain(){
+        new JavaTestKit(getSystem()) {{
+            final ShardIdentifier identifier =
+                ShardIdentifier.builder().memberName("member-1")
+                    .shardName("inventory").type("config").build();
+
+            final Props props = Shard.props(identifier, Collections.EMPTY_MAP, DATA_STORE_CONTEXT, TestModel.createTestContext());
+            final ActorRef subject =
+                getSystem().actorOf(props, "testCreateTransactionOnChain");
+
+            // Wait for a specific log message to show up
+            final boolean result =
+                new JavaTestKit.EventFilter<Boolean>(Logging.Info.class
+                ) {
+                    @Override
+                    protected Boolean run() {
+                        return true;
+                    }
+                }.from(subject.path().toString())
+                    .message("Switching from state Candidate to Leader")
+                    .occurrences(1).exec();
+
+            Assert.assertEquals(true, result);
+
+            new Within(duration("3 seconds")) {
+                @Override
+                protected void run() {
+
+                    subject.tell(
+                        new UpdateSchemaContext(TestModel.createTestContext()),
+                        getRef());
+
+                    subject.tell(new CreateTransaction("txn-1", TransactionProxy.TransactionType.READ_ONLY.ordinal() , "foobar").toSerializable(),
+                        getRef());
+
+                    final String out = new ExpectMsg<String>(duration("3 seconds"), "match hint") {
+                        // do not put code outside this method, will run afterwards
+                        @Override
+                        protected String match(Object in) {
+                            if (in instanceof CreateTransactionReply) {
+                                CreateTransactionReply reply =
+                                    (CreateTransactionReply) in;
+                                return reply.getTransactionActorPath()
+                                    .toString();
+                            } else {
+                                throw noMatch();
+                            }
+                        }
+                    }.get(); // this extracts the received message
+
+                    assertTrue("Unexpected transaction path " + out,
+                        out.contains("akka://test/user/testCreateTransactionOnChain/shard-txn-1"));
                     expectNoMsg();
                 }
             };

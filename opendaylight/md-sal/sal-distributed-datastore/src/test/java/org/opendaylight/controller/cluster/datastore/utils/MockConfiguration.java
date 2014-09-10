@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class MockConfiguration implements Configuration{
     @Override public List<String> getMemberShardNames(String memberName) {
@@ -45,5 +46,9 @@ public class MockConfiguration implements Configuration{
         }
 
         return Collections.EMPTY_LIST;
+    }
+
+    @Override public Set<String> getAllShardNames() {
+        return Collections.emptySet();
     }
 }
