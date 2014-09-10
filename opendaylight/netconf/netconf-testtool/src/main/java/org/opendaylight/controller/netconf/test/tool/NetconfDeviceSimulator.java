@@ -93,7 +93,7 @@ public class NetconfDeviceSimulator implements Closeable {
         this.hashedWheelTimer = hashedWheelTimer;
     }
 
-    private NetconfServerDispatcher createDispatcher(final Map<ModuleBuilder, String> moduleBuilders, final boolean exi) {
+    private NetconfServerDispatcher createDispatcher(final Map<ModuleBuilder, String> moduleBuilders, final boolean exi, final int generateConfigsTimeout) {
 
         final Set<Capability> capabilities = Sets.newHashSet(Collections2.transform(moduleBuilders.keySet(), new Function<ModuleBuilder, Capability>() {
             @Override
@@ -115,7 +115,7 @@ public class NetconfDeviceSimulator implements Closeable {
                 : Sets.newHashSet(XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_BASE_1_0, XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_BASE_1_1);
 
         final NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new NetconfServerSessionNegotiatorFactory(
-                hashedWheelTimer, simulatedOperationProvider, idProvider, CONNECTION_TIMEOUT_MILLIS, commitNotifier, new LoggingMonitoringService(), serverCapabilities);
+                hashedWheelTimer, simulatedOperationProvider, idProvider, generateConfigsTimeout, commitNotifier, new LoggingMonitoringService(), serverCapabilities);
 
         final NetconfServerDispatcher.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerChannelInitializer(
                 serverNegotiatorFactory);
@@ -153,7 +153,7 @@ public class NetconfDeviceSimulator implements Closeable {
     public List<Integer> start(final Main.Params params) {
         final Map<ModuleBuilder, String> moduleBuilders = parseSchemasToModuleBuilders(params);
 
-        final NetconfServerDispatcher dispatcher = createDispatcher(moduleBuilders, params.exi);
+        final NetconfServerDispatcher dispatcher = createDispatcher(moduleBuilders, params.exi, params.generateConfigsTimeout);
 
         int currentPort = params.startingPort;
 
