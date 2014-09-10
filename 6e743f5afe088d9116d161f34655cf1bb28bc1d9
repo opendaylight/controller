@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_8df21405",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataChangeListenerRegistrationProxy.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-10T17:18:42Z",
+      "side": 1,
+      "message": "I think we need to check closed flag here and send the close message. Also this method should be synchronized with the close method to be complete, then closed doesn\u0027t really need to be volatile. Ie:\n\nboolean sendCloseMessage \u003d false;\nsynchronized(this) {\n    if(closed) {\n        sendCloseMessage \u003d true;\n    } else {\n        this.listenerRegistrationActor \u003d listenerRegistrationActor;\n    }\n}\n\nif(sendCloseMessage) {\n    listenerRegistrationActor.tell(new   \n                CloseDataChangeListenerRegistration().toSerializable(), null);\n}",
+      "revId": "6e743f5afe088d9116d161f34655cf1bb28bc1d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0dbda402",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataChangeListenerRegistrationProxy.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-10T17:18:42Z",
+      "side": 1,
+      "message": "Synchronize with setListenerRegistrationActor, i.e.:\n\nboolean sendCloseMessage;\nsynchronized(this) {\n    sendCloseMessage \u003d !closed \u0026\u0026 listenerRegistrationActor !\u003d null;\n    closed \u003d true;\n}\n\nif(sendCloseMessage) {\n    listenerRegistrationActor.tell(new   \n                CloseDataChangeListenerRegistration().toSerializable(), null);\n}",
+      "revId": "6e743f5afe088d9116d161f34655cf1bb28bc1d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
