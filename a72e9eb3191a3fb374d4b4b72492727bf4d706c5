@@ -16,6 +16,24 @@
       "revId": "a72e9eb3191a3fb374d4b4b72492727bf4d706c5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_1abddc02",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/resources/ShardTransactionChain.proto",
+        "patchSetId": 7
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-10T11:34:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_dae8d418",
+      "revId": "a72e9eb3191a3fb374d4b4b72492727bf4d706c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
