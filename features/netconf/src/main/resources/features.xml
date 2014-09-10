@@ -11,8 +11,6 @@
     <feature version='${project.version}'>odl-netconf-mapping-api</feature>
     <feature version='${project.version}'>odl-netconf-util</feature>
     <feature version='${project.version}'>odl-netconf-impl</feature>
-    <feature version='${project.version}'>odl-netconf-tcp</feature>
-    <feature version='${project.version}'>odl-netconf-ssh</feature>
     <feature version='${project.version}'>odl-config-netconf-connector</feature>
     <feature version='${project.version}'>odl-netconf-netty-util</feature>
     <feature version='${project.version}'>odl-netconf-client</feature>
