@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_6de31006",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataChangeListenerRegistrationProxy.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-10T17:47:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_8df21405",
+      "revId": "6e743f5afe088d9116d161f34655cf1bb28bc1d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_0dbda402",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataChangeListenerRegistrationProxy.java",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2014-09-10T17:18:42Z",
       "side": 1,
       "message": "Synchronize with setListenerRegistrationActor, i.e.:\n\nboolean sendCloseMessage;\nsynchronized(this) {\n    sendCloseMessage \u003d !closed \u0026\u0026 listenerRegistrationActor !\u003d null;\n    closed \u003d true;\n}\n\nif(sendCloseMessage) {\n    listenerRegistrationActor.tell(new   \n                CloseDataChangeListenerRegistration().toSerializable(), null);\n}",
+      "revId": "6e743f5afe088d9116d161f34655cf1bb28bc1d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0df044c8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataChangeListenerRegistrationProxy.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-10T17:47:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_0dbda402",
       "revId": "6e743f5afe088d9116d161f34655cf1bb28bc1d9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
