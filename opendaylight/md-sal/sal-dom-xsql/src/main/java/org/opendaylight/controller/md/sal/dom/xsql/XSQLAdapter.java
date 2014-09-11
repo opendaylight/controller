@@ -126,7 +126,7 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
         return this.bluePrint;
     }
 
-    public List<Object> collectModuleRoots(XSQLBluePrintNode table) {
+    public List<Object> collectModuleRoots(XSQLBluePrintNode table,LogicalDatastoreType type) {
         if (table.getParent().isModule()) {
             try {
                 List<Object> result = new LinkedList<Object>();
@@ -136,8 +136,9 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
                         .toInstance();
                 DOMDataReadTransaction t = this.domDataBroker
                         .newReadOnlyTransaction();
-                Object node = t.read(LogicalDatastoreType.OPERATIONAL,
+                Object node = t.read(type,
                         instanceIdentifier).get();
+
                 node = XSQLODLUtils.get(node, "reference");
                 if (node == null) {
                     return result;
@@ -157,14 +158,18 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
                 XSQLAdapter.log(err);
             }
         } else {
-            return collectModuleRoots(table.getParent());
+            return collectModuleRoots(table.getParent(),type);
         }
         return null;
     }
 
     public void execute(JDBCResultSet rs) {
         List<XSQLBluePrintNode> tables = rs.getTables();
-        List<Object> roots = collectModuleRoots(tables.get(0));
+        List<Object> roots = collectModuleRoots(tables.get(0),LogicalDatastoreType.OPERATIONAL);
+        roots.addAll(collectModuleRoots(tables.get(0),LogicalDatastoreType.CONFIGURATION));
+        if(roots.isEmpty()){
+            rs.setFinished(true);
+        }
         XSQLBluePrintNode main = rs.getMainTable();
         List<NETask> tasks = new LinkedList<XSQLAdapter.NETask>();
 
