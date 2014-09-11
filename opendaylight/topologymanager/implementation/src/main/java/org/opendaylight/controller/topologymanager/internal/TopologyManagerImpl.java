@@ -8,25 +8,6 @@
 
 package org.opendaylight.controller.topologymanager.internal;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.LinkedBlockingQueue;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.felix.dm.Component;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
@@ -63,6 +44,25 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * The class describes TopologyManager which is the central repository of the
@@ -654,12 +654,14 @@ public class TopologyManagerImpl implements
             // all except the creation time stamp because that should
             // be set only when the edge is created
             TimeStamp timeStamp = null;
-            for (Property prop : oldProps) {
-                if (prop instanceof TimeStamp) {
-                    TimeStamp tsProp = (TimeStamp) prop;
-                    if (tsProp.getTimeStampName().equals("creation")) {
-                        timeStamp = tsProp;
-                        break;
+            if (oldProps != null) {
+                for (Property prop : oldProps) {
+                    if (prop instanceof TimeStamp) {
+                        TimeStamp tsProp = (TimeStamp) prop;
+                        if (tsProp.getTimeStampName().equals("creation")) {
+                            timeStamp = tsProp;
+                            break;
+                        }
                     }
                 }
             }
@@ -679,7 +681,9 @@ public class TopologyManagerImpl implements
                 if (prop instanceof TimeStamp) {
                     TimeStamp t = (TimeStamp) prop;
                     if (t.getTimeStampName().equals("creation")) {
-                        i.remove();
+                        if (timeStamp != null) {
+                            i.remove();
+                        }
                         break;
                     }
                 }
