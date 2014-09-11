@@ -8,21 +8,11 @@
 
 package org.opendaylight.controller.topologymanager.internal;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Bandwidth;
 import org.opendaylight.controller.sal.core.ConstructionException;
+import org.opendaylight.controller.sal.core.Description;
 import org.opendaylight.controller.sal.core.Edge;
 import org.opendaylight.controller.sal.core.Host;
 import org.opendaylight.controller.sal.core.Latency;
@@ -32,6 +22,7 @@ import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.NodeConnector.NodeConnectorIDType;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.State;
+import org.opendaylight.controller.sal.core.TimeStamp;
 import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.packet.address.EthernetAddress;
 import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
@@ -46,6 +37,17 @@ import org.opendaylight.controller.switchmanager.SubnetConfig;
 import org.opendaylight.controller.switchmanager.Switch;
 import org.opendaylight.controller.switchmanager.SwitchConfig;
 import org.opendaylight.controller.topologymanager.TopologyUserLinkConfig;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
 
 public class TopologyManagerImplTest {
     /**
@@ -732,5 +734,36 @@ public class TopologyManagerImplTest {
         }
 
         Assert.assertTrue(nodeNCmap.isEmpty());
+    }
+
+    @Test
+    public void bug1348FixTest() throws ConstructionException {
+        TopologyManagerImpl topoManagerImpl = new TopologyManagerImpl();
+        TestSwitchManager swMgr = new TestSwitchManager();
+        topoManagerImpl.setSwitchManager(swMgr);
+        topoManagerImpl.nonClusterObjectCreate();
+
+        NodeConnector headnc1 = NodeConnectorCreator.createOFNodeConnector(
+                (short) 1, NodeCreator.createOFNode(1000L));
+        NodeConnector tailnc1 = NodeConnectorCreator.createOFNodeConnector(
+                (short) 2, NodeCreator.createOFNode(2000L));
+        Edge edge = new Edge(headnc1, tailnc1);
+        List<TopoEdgeUpdate> updatedEdges = new ArrayList<>();
+        Set<Property> edgeProps = new HashSet<>();
+        edgeProps.add(new TimeStamp(System.currentTimeMillis(), "creation"));
+        edgeProps.add(new Latency(Latency.LATENCY100ns));
+        edgeProps.add(new State(State.EDGE_UP));
+        edgeProps.add(new Bandwidth(Bandwidth.BW100Gbps));
+        edgeProps.add(new Description("Test edge"));
+        updatedEdges.add(new TopoEdgeUpdate(edge, edgeProps, UpdateType.CHANGED));
+
+        try {
+            topoManagerImpl.edgeUpdate(updatedEdges);
+        } catch (Exception e) {
+            Assert.fail("Exception was raised when trying to update edge properties: " + e.getMessage());
+        }
+
+        Assert.assertEquals(1, topoManagerImpl.getEdges().size());
+        Assert.assertNotNull(topoManagerImpl.getEdges().get(edge));
     }
 }
