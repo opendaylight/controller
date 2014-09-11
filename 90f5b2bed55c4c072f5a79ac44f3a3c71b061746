@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_0bc34c39",
+        "filename": "opendaylight/netconf/netconf-client/src/main/java/org/opendaylight/controller/netconf/client/NetconfClientSessionNegotiator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-09-11T13:23:16Z",
+      "side": 1,
+      "message": "This can be replaced by Preconditions.checkNotNull, or Preconditions.checkState to shrink just to 1 line",
+      "revId": "90f5b2bed55c4c072f5a79ac44f3a3c71b061746",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_cbdc841b",
+        "filename": "opendaylight/netconf/netconf-client/src/test/java/org/opendaylight/controller/netconf/client/NetconfClientConfigurationTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-09-11T13:23:16Z",
+      "side": 1,
+      "message": "I forgot to tell you, that all new files need to contain a copyright header: Please see https://wiki.opendaylight.org/view/OpenDaylight_Controller:Developing_With_Intellij#Copyright_headers and set your IDE to add these headers. Also please add header to all new Tests.",
+      "revId": "90f5b2bed55c4c072f5a79ac44f3a3c71b061746",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8bfd1c71",
+        "filename": "opendaylight/netconf/netconf-client/src/test/java/org/opendaylight/controller/netconf/client/SimpleNetconfClientSessionListenerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-09-11T13:23:16Z",
+      "side": 1,
+      "message": "Forgotten System.out.println. This whole test might be removed, since testOnMessage also calls sendRequest",
+      "revId": "90f5b2bed55c4c072f5a79ac44f3a3c71b061746",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
