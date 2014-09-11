@@ -119,6 +119,10 @@ public final class NetconfSessionCapabilities {
         return fromStrings(session.getServerCapabilities());
     }
 
+    private static final QName cachedQName(String namespace, String revision, String moduleName) {
+        return QName.cachedReference(QName.create(namespace, revision, moduleName));
+    }
+
     public static NetconfSessionCapabilities fromStrings(final Collection<String> capabilities) {
         final Set<QName> moduleBasedCaps = new HashSet<>();
         final Set<String> nonModuleCaps = Sets.newHashSet(capabilities);
@@ -138,7 +142,7 @@ public final class NetconfSessionCapabilities {
 
             String revision = REVISION_PARAM.from(queryParams);
             if (revision != null) {
-                moduleBasedCaps.add(QName.create(namespace, revision, moduleName));
+                moduleBasedCaps.add(cachedQName(namespace, revision, moduleName));
                 nonModuleCaps.remove(capability);
                 continue;
             }
@@ -158,7 +162,7 @@ public final class NetconfSessionCapabilities {
             }
 
             // FIXME: do we really want to continue here?
-            moduleBasedCaps.add(QName.cachedReference(QName.create(namespace, revision, moduleName)));
+            moduleBasedCaps.add(cachedQName(namespace, revision, moduleName));
             nonModuleCaps.remove(capability);
         }
 
