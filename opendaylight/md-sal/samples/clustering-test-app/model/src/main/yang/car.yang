@@ -1,0 +1,64 @@
+module car {
+
+    yang-version 1;
+
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:sal-clustering-it:car";
+
+    prefix car;
+
+	import ietf-inet-types { prefix "inet"; revision-date 2010-09-24; }
+	
+    organization "Netconf Central";
+
+    contact
+      "Harman Singh <harmasin@cisco.com>";
+
+    description
+      "YANG model for car for test application";
+
+    revision "2014-08-18" {
+      description
+        "Clustering sample app";
+    }
+    
+    typedef car-id {
+      type inet:uri;
+      description "An identifier for car entry.";
+    }
+
+    grouping car-entry {
+      description "Describes the contents of a car entry -
+                       Details of the car manufacturer, model etc";
+      leaf id {
+        type car-id;
+        description "identifier of single list of entries.";
+      }
+
+      leaf model {
+        type string;
+      }
+      leaf manufacturer {
+        type string;
+      }
+
+      leaf year {
+        type uint32;
+      }
+
+      leaf category {
+        type string;
+      }
+    }
+    
+    container cars {
+      description
+        "Top-level container for all car objects.";
+      list car-entry {
+      	key "id";
+      	description "A list of cars (as defined by the 'grouping car-entry').";
+      	uses car-entry;
+      }
+    }
+
+    
+}
