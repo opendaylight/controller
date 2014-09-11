@@ -67,7 +67,9 @@ public class SSHTest {
         netconfSSHServer.setAuthProvider(authProvider);
 
         InetSocketAddress address = netconfSSHServer.getLocalSocketAddress();
-        final EchoClientHandler echoClientHandler = connectClient(address);
+
+        final EchoClientHandler echoClientHandler = connectClient(new InetSocketAddress("localhost", address.getPort()));
+
         Stopwatch stopwatch = new Stopwatch().start();
         while(echoClientHandler.isConnected() == false && stopwatch.elapsed(TimeUnit.SECONDS) < 5) {
             Thread.sleep(100);
