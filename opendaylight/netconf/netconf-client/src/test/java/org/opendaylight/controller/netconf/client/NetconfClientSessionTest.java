@@ -1,0 +1,61 @@
+package org.opendaylight.controller.netconf.client;
+
+import com.google.common.collect.Lists;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelPipeline;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.opendaylight.controller.netconf.client.NetconfClientSession;
+import org.opendaylight.controller.netconf.client.NetconfClientSessionListener;
+import org.opendaylight.controller.netconf.nettyutil.handler.NetconfEXICodec;
+import org.openexi.proc.common.EXIOptions;
+
+import java.util.ArrayList;
+import java.util.Collection;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+
+public class NetconfClientSessionTest {
+
+    @Mock
+    ChannelHandler channelHandler;
+
+    @Mock
+    Channel channel;
+
+    @Before
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+    }
+
+    @Test
+    public void testNetconfClientSession() throws Exception {
+        NetconfClientSessionListener sessionListener = mock(NetconfClientSessionListener.class);
+        long sessId = 20L;
+        Collection<String> caps = Lists.newArrayList("cap1", "cap2");
+
+        NetconfEXICodec codec = new NetconfEXICodec(new EXIOptions());
+        ChannelPipeline pipeline = mock(ChannelPipeline.class);
+
+        Mockito.doReturn(pipeline).when(channel).pipeline();
+        Mockito.doReturn(channelHandler).when(pipeline).replace(anyString(), anyString(), any(ChannelHandler.class));
+        Mockito.doReturn("").when(channelHandler).toString();
+
+        NetconfClientSession session = new NetconfClientSession(sessionListener, channel, sessId, caps);
+        session.addExiHandlers(codec);
+        session.stopExiCommunication();
+
+        assertEquals(caps, session.getServerCapabilities());
+        assertEquals(session, session.thisInstance());
+
+        Mockito.verify(pipeline, Mockito.times(4)).replace(anyString(), anyString(), Mockito.any(ChannelHandler.class));
+    }
+}

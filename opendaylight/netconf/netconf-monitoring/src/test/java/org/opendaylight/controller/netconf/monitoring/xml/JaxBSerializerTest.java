@@ -38,7 +38,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.
 public class JaxBSerializerTest {
 
     @Test
-    public void testName() throws Exception {
+    public void testSerialization() throws Exception {
 
         final NetconfMonitoringService service = new NetconfMonitoringService() {
 
@@ -53,29 +53,29 @@ public class JaxBSerializerTest {
             }
         };
         final NetconfState model = new NetconfState(service);
-        final String xml = XmlUtil.toString(new JaxBSerializer().toXml(model));
+        final String xml = XmlUtil.toString(new JaxBSerializer().toXml(model)).replaceAll("\\s", "");
 
         assertThat(xml, CoreMatchers.containsString(
-                "<schema>\n" +
-                "<format>yang</format>\n" +
-                "<identifier>id</identifier>\n" +
-                "<location>NETCONF</location>\n" +
-                "<namespace>localhost</namespace>\n" +
-                "<version>v1</version>\n" +
-                "</schema>\n"));
+                "<schema>" +
+                "<format>yang</format>" +
+                "<identifier>id</identifier>" +
+                "<location>NETCONF</location>" +
+                "<namespace>localhost</namespace>" +
+                "<version>v1</version>" +
+                "</schema>"));
 
         assertThat(xml, CoreMatchers.containsString(
-                "<session>\n" +
-                "<session-id>1</session-id>\n" +
-                "<in-bad-rpcs>0</in-bad-rpcs>\n" +
-                "<in-rpcs>0</in-rpcs>\n" +
-                "<login-time>loginTime</login-time>\n" +
-                "<out-notifications>0</out-notifications>\n" +
-                "<out-rpc-errors>0</out-rpc-errors>\n" +
-                "<ncme:session-identifier>client</ncme:session-identifier>\n" +
-                "<source-host>address/port</source-host>\n" +
-                "<transport>ncme:netconf-tcp</transport>\n" +
-                "<username>username</username>\n" +
+                "<session>" +
+                "<session-id>1</session-id>" +
+                "<in-bad-rpcs>0</in-bad-rpcs>" +
+                "<in-rpcs>0</in-rpcs>" +
+                "<login-time>loginTime</login-time>" +
+                "<out-notifications>0</out-notifications>" +
+                "<out-rpc-errors>0</out-rpc-errors>" +
+                "<ncme:session-identifier>client</ncme:session-identifier>" +
+                "<source-host>address/port</source-host>" +
+                "<transport>ncme:netconf-tcp</transport>" +
+                "<username>username</username>" +
                 "</session>"));
     }
 

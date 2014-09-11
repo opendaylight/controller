@@ -36,7 +36,7 @@ public class NetconfXMLToHelloMessageDecoderTest {
         assertThat(out.get(0), CoreMatchers.instanceOf(NetconfHelloMessage.class));
         final NetconfHelloMessage hello = (NetconfHelloMessage) out.get(0);
         assertTrue(hello.getAdditionalHeader().isPresent());
-        assertEquals("[tomas;10.0.0.0:10000;tcp;client;]\n", hello.getAdditionalHeader().get().toFormattedString());
+        assertEquals("[tomas;10.0.0.0:10000;tcp;client;]" + System.lineSeparator(), hello.getAdditionalHeader().get().toFormattedString());
         assertThat(XmlUtil.toString(hello.getDocument()), CoreMatchers.containsString("<hello xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\""));
     }
 

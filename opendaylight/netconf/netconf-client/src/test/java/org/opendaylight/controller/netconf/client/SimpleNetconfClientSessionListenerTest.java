@@ -1,0 +1,72 @@
+package org.opendaylight.controller.netconf.client;
+
+import io.netty.channel.*;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.Promise;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.internal.util.collections.Sets;
+import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessage;
+
+import java.util.Set;
+
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.*;
+
+public class SimpleNetconfClientSessionListenerTest {
+
+    private Channel channel;
+    private ChannelFuture channelFuture;
+    Set caps;
+    private NetconfHelloMessage helloMessage;
+    private NetconfMessage message;
+    private NetconfClientSessionListener sessionListener;
+    private NetconfClientSession clientSession;
+
+    @Before
+    public void setUp() throws Exception {
+        channel = mock(Channel.class);
+        channelFuture = mock(ChannelFuture.class);
+        doReturn(channelFuture).when(channel).writeAndFlush(anyObject());
+        caps = Sets.newSet("a", "b");
+        helloMessage = NetconfHelloMessage.createServerHello(caps, 10);
+        message = new NetconfMessage(helloMessage.getDocument());
+        sessionListener = mock(NetconfClientSessionListener.class);
+        clientSession = new NetconfClientSession(sessionListener, channel, 20L, caps);
+    }
+
+    @Test
+    public void testSessionDown() throws Exception {
+        SimpleNetconfClientSessionListener simpleListener = new SimpleNetconfClientSessionListener();
+        Future<NetconfMessage> promise = simpleListener.sendRequest(message);
+        simpleListener.onSessionUp(clientSession);
+        verify(channel, times(1)).writeAndFlush(anyObject());
+
+        simpleListener.onSessionDown(clientSession, new Exception());
+        assertFalse(promise.isSuccess());
+    }
+
+    @Test
+    public void testSendRequest() throws Exception {
+        SimpleNetconfClientSessionListener simpleListener = new SimpleNetconfClientSessionListener();
+        Future<NetconfMessage> promise = simpleListener.sendRequest(message);
+        simpleListener.onSessionUp(clientSession);
+        verify(channel, times(1)).writeAndFlush(anyObject());
+
+        simpleListener.sendRequest(message);
+        System.out.println(promise.isSuccess());
+    }
+
+    @Test
+    public void testOnMessage() throws Exception {
+        SimpleNetconfClientSessionListener simpleListener = new SimpleNetconfClientSessionListener();
+        Future<NetconfMessage> promise = simpleListener.sendRequest(message);
+        simpleListener.onSessionUp(clientSession);
+        verify(channel, times(1)).writeAndFlush(anyObject());
+
+        simpleListener.onMessage(clientSession, message);
+        assertTrue(promise.isSuccess());
+    }
+}
