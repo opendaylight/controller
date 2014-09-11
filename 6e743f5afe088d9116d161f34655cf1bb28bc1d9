@@ -105,6 +105,24 @@
       "revId": "6e743f5afe088d9116d161f34655cf1bb28bc1d9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2dd748ef",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataChangeListenerRegistrationProxy.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-11T10:49:26Z",
+      "side": 1,
+      "message": "We have 2 variables in play here, closed and listenerRegistrationActor. The sync block is needed for atomicity to guarantee we only send one close message to the actor. I don\u0027t think we would be able to do that with just an AtomicBoolean and CAS.",
+      "parentUuid": "fa82b9bf_2dc4285e",
+      "revId": "6e743f5afe088d9116d161f34655cf1bb28bc1d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
