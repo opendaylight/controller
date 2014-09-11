@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.netconf.client;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 
 import io.netty.channel.Channel;
@@ -70,8 +71,8 @@ public class NetconfClientSessionNegotiator extends
             logger.debug("Netconf session {} should use exi.", session);
             NetconfStartExiMessage startExiMessage = (NetconfStartExiMessage) sessionPreferences.getStartExiMessage();
             tryToInitiateExi(session, startExiMessage);
-        // Exi is not supported, release session immediately
         } else {
+            // Exi is not supported, release session immediately
             logger.debug("Netconf session {} isn't capable of using exi.", session);
             negotiationSuccessful(session);
         }
@@ -117,6 +118,7 @@ public class NetconfClientSessionNegotiator extends
 
     private long extractSessionId(final Document doc) {
         final Node sessionIdNode = (Node) XmlUtil.evaluateXPath(sessionIdXPath, doc, XPathConstants.NODE);
+        Preconditions.checkState(sessionIdNode != null, "");
         String textContent = sessionIdNode.getTextContent();
         if (textContent == null || textContent.equals("")) {
             throw new IllegalStateException("Session id not received from server");
