@@ -18,6 +18,7 @@
     <feature name='odl-mdsal-broker' version='${project.version}' description="OpenDaylight :: MDSAL :: Broker">
         <feature version='${yangtools.version}'>odl-yangtools-common</feature>
         <feature version='${yangtools.version}'>odl-yangtools-binding</feature>
+        <feature version='${yangtools.version}'>odl-yangtools-models</feature>
         <feature version='${mdsal.version}'>odl-mdsal-common</feature>
         <feature version='${config.version}'>odl-config-startup</feature>
         <feature version='${config.version}'>odl-config-netty</feature>
