@@ -18,6 +18,7 @@
     <feature name='odl-mdsal-broker' version='${project.version}' description="OpenDaylight :: MDSAL :: Broker">
         <feature version='${yangtools.version}'>odl-yangtools-common</feature>
         <feature version='${yangtools.version}'>odl-yangtools-binding</feature>
+        <feature version='${yangtools.version}'>odl-yangtools-models</feature>
         <feature version='${mdsal.version}'>odl-mdsal-common</feature>
         <feature version='${config.version}'>odl-config-startup</feature>
         <feature version='${config.version}'>odl-config-netty</feature>
@@ -50,6 +51,7 @@
         <bundle>mvn:io.netty/netty-common/${netty.version}</bundle>
         <bundle>mvn:io.netty/netty-handler/${netty.version}</bundle>
         <bundle>mvn:io.netty/netty-transport/${netty.version}</bundle>
+        <bundle>mvn:org.opendaylight.yangtools.model/ietf-restconf/2013.10.19.1-SNAPSHOT</bundle>
         <configfile finalname="${config.configfile.directory}/${config.restconf.configfile}">mvn:org.opendaylight.controller/sal-rest-connector-config/${mdsal.version}/xml/config</configfile>
     </feature>
     <feature name='odl-toaster' version='${project.version}' description="OpenDaylight :: Toaster">
