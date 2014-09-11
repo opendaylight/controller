@@ -6,13 +6,22 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
+import com.google.common.collect.Iterables;
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.RejectedExecutionException;
-
 import javax.annotation.concurrent.GuardedBy;
-
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
@@ -20,17 +29,6 @@ import org.opendaylight.yangtools.util.DurationStatsTracker;
 import org.opendaylight.yangtools.util.concurrent.MappingCheckedFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
-import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
 
 /**
  *
@@ -49,28 +47,8 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
 
     private static final Logger LOG = LoggerFactory.getLogger(DOMDataCommitCoordinatorImpl.class);
-
-    /**
-     * Runs AND binary operation between all booleans in supplied iteration of booleans.
-     *
-     * This method will stop evaluating iterables if first found is false.
-     */
-    private static final Function<Iterable<Boolean>, Boolean> AND_FUNCTION = new Function<Iterable<Boolean>, Boolean>() {
-
-        @Override
-        public Boolean apply(final Iterable<Boolean> input) {
-            for(boolean value : input) {
-               if(!value) {
-                   return Boolean.FALSE;
-               }
-            }
-            return Boolean.TRUE;
-        }
-    };
-
-    private final ListeningExecutorService executor;
-
     private final DurationStatsTracker commitStatsTracker = new DurationStatsTracker();
+    private final ListeningExecutorService executor;
 
     /**
      *
@@ -163,6 +141,7 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
         private final DOMDataWriteTransaction tx;
         private final Iterable<DOMStoreThreePhaseCommitCohort> cohorts;
         private final DurationStatsTracker commitStatTracker;
+        private final int cohortSize;
 
         @GuardedBy("this")
         private CommitPhase currentPhase;
@@ -175,6 +154,7 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
             this.cohorts = Preconditions.checkNotNull(cohorts, "cohorts must not be null");
             this.currentPhase = CommitPhase.SUBMITTED;
             this.commitStatTracker = commitStatTracker;
+            this.cohortSize = Iterables.size(cohorts);
         }
 
         @Override
@@ -210,10 +190,38 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
          *
          */
         private void canCommitBlocking() throws TransactionCommitFailedException {
-            final Boolean canCommitResult = canCommitAll().checkedGet();
-            if (!canCommitResult) {
-                throw new TransactionCommitFailedException("Can Commit failed, no detailed cause available.");
+            for (ListenableFuture<Boolean> canCommit : canCommitAll()) {
+                Boolean result;
+                try {
+                    result = canCommit.get();
+                    if(result == null || !result) {
+                        throw new TransactionCommitFailedException("Can Commit failed, no detailed cause available.");
+                    }
+                } catch (InterruptedException | ExecutionException e) {
+                    throw TransactionCommitFailedExceptionMapper.CAN_COMMIT_ERROR_MAPPER.apply(e);
+                }
             }
+        }
+
+        /**
+         *
+         * Invokes canCommit on underlying cohorts and returns composite future
+         * which will contains {@link Boolean#TRUE} only and only if
+         * all cohorts returned true.
+         *
+         * Valid state transition is from SUBMITTED to CAN_COMMIT,
+         * if currentPhase is not SUBMITTED throws IllegalStateException.
+         *
+         * @return List of all cohorts futures from can commit phase.
+         *
+         */
+        private Iterable<ListenableFuture<Boolean>> canCommitAll() {
+            changeStateFrom(CommitPhase.SUBMITTED, CommitPhase.CAN_COMMIT);
+            ArrayList<ListenableFuture<Boolean>> canCommitOperations = new ArrayList<>(cohortSize);
+            for (DOMStoreThreePhaseCommitCohort cohort : cohorts) {
+                canCommitOperations.add(cohort.canCommit());
+            }
+            return canCommitOperations;
         }
 
         /**
@@ -230,7 +238,37 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
          *
          */
         private void preCommitBlocking() throws TransactionCommitFailedException {
-            preCommitAll().checkedGet();
+            List<ListenableFuture<Void>> preCommitFutures = preCommitAll();
+            try {
+                for(ListenableFuture<Void> future : preCommitFutures) {
+                    future.get();
+                }
+            } catch (InterruptedException | ExecutionException e) {
+                throw TransactionCommitFailedExceptionMapper.PRE_COMMIT_MAPPER.apply(e);
+            }
+        }
+
+        /**
+         *
+         * Invokes preCommit on underlying cohorts and returns future
+         * which will complete once all preCommit on cohorts completed or
+         * failed.
+         *
+         *
+         * Valid state transition is from CAN_COMMIT to PRE_COMMIT, if current
+         * state is not CAN_COMMIT
+         * throws IllegalStateException.
+         *
+         * @return List of all cohorts futures from can commit phase.
+         *
+         */
+        private List<ListenableFuture<Void>> preCommitAll() {
+            changeStateFrom(CommitPhase.CAN_COMMIT, CommitPhase.PRE_COMMIT);
+            ArrayList<ListenableFuture<Void>> ops = new ArrayList<>(cohortSize);
+            for (DOMStoreThreePhaseCommitCohort cohort : cohorts) {
+                ops.add(cohort.preCommit());
+            }
+            return ops;
         }
 
         /**
@@ -246,7 +284,35 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
          *
          */
         private void commitBlocking() throws TransactionCommitFailedException {
-            commitAll().checkedGet();
+            List<ListenableFuture<Void>> commitFutures = commitAll();
+            try {
+                for(ListenableFuture<Void> future : commitFutures) {
+                    future.get();
+                }
+            } catch (InterruptedException | ExecutionException e) {
+                throw TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER.apply(e);
+            }
+        }
+
+        /**
+         *
+         * Invokes commit on underlying cohorts and returns future which
+         * completes
+         * once all commits on cohorts are completed.
+         *
+         * Valid state transition is from PRE_COMMIT to COMMIT, if not throws
+         * IllegalStateException
+         *
+         * @return List of all cohorts futures from can commit phase.
+         *
+         */
+        private List<ListenableFuture<Void>> commitAll() {
+            changeStateFrom(CommitPhase.PRE_COMMIT, CommitPhase.COMMIT);
+            ArrayList<ListenableFuture<Void>> ops = new ArrayList<>(cohortSize);
+            for (DOMStoreThreePhaseCommitCohort cohort : cohorts) {
+                ops.add(cohort.commit());
+            }
+            return ops;
         }
 
         /**
@@ -282,100 +348,6 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
                 cause.addSuppressed(e);
             }
             Throwables.propagateIfPossible(cause, TransactionCommitFailedException.class);
-        }
-
-        /**
-         *
-         * Invokes preCommit on underlying cohorts and returns future
-         * which will complete once all preCommit on cohorts completed or
-         * failed.
-         *
-         *
-         * Valid state transition is from CAN_COMMIT to PRE_COMMIT, if current
-         * state is not CAN_COMMIT
-         * throws IllegalStateException.
-         *
-         * @return Future which will complete once all cohorts completed
-         *         preCommit.
-         *         Future throws TransactionCommitFailedException
-         *         If any of cohorts failed preCommit
-         *
-         */
-        private CheckedFuture<Void, TransactionCommitFailedException> preCommitAll() {
-            changeStateFrom(CommitPhase.CAN_COMMIT, CommitPhase.PRE_COMMIT);
-            Builder<ListenableFuture<Void>> ops = ImmutableList.builder();
-            for (DOMStoreThreePhaseCommitCohort cohort : cohorts) {
-                ops.add(cohort.preCommit());
-            }
-            /*
-             * We are returing all futures as list, not only succeeded ones in
-             * order to fail composite future if any of them failed.
-             * See Futures.allAsList for this description.
-             */
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            ListenableFuture<Void> compositeResult = (ListenableFuture) Futures.allAsList(ops.build());
-            return MappingCheckedFuture.create(compositeResult,
-                                         TransactionCommitFailedExceptionMapper.PRE_COMMIT_MAPPER);
-        }
-
-        /**
-         *
-         * Invokes commit on underlying cohorts and returns future which
-         * completes
-         * once all commits on cohorts are completed.
-         *
-         * Valid state transition is from PRE_COMMIT to COMMIT, if not throws
-         * IllegalStateException
-         *
-         * @return Future which will complete once all cohorts completed
-         *         commit.
-         *         Future throws TransactionCommitFailedException
-         *         If any of cohorts failed preCommit
-         *
-         */
-        private CheckedFuture<Void, TransactionCommitFailedException> commitAll() {
-            changeStateFrom(CommitPhase.PRE_COMMIT, CommitPhase.COMMIT);
-            Builder<ListenableFuture<Void>> ops = ImmutableList.builder();
-            for (DOMStoreThreePhaseCommitCohort cohort : cohorts) {
-                ops.add(cohort.commit());
-            }
-            /*
-             * We are returing all futures as list, not only succeeded ones in
-             * order to fail composite future if any of them failed.
-             * See Futures.allAsList for this description.
-             */
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            ListenableFuture<Void> compositeResult = (ListenableFuture) Futures.allAsList(ops.build());
-            return MappingCheckedFuture.create(compositeResult,
-                                     TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER);
-        }
-
-        /**
-         *
-         * Invokes canCommit on underlying cohorts and returns composite future
-         * which will contains {@link Boolean#TRUE} only and only if
-         * all cohorts returned true.
-         *
-         * Valid state transition is from SUBMITTED to CAN_COMMIT,
-         * if currentPhase is not SUBMITTED throws IllegalStateException.
-         *
-         * @return Future which will complete once all cohorts completed
-         *         preCommit.
-         *         Future throws TransactionCommitFailedException
-         *         If any of cohorts failed preCommit
-         *
-         */
-        private CheckedFuture<Boolean, TransactionCommitFailedException> canCommitAll() {
-            changeStateFrom(CommitPhase.SUBMITTED, CommitPhase.CAN_COMMIT);
-            Builder<ListenableFuture<Boolean>> canCommitOperations = ImmutableList.builder();
-            for (DOMStoreThreePhaseCommitCohort cohort : cohorts) {
-                canCommitOperations.add(cohort.canCommit());
-            }
-            ListenableFuture<List<Boolean>> allCanCommits = Futures.allAsList(canCommitOperations.build());
-            ListenableFuture<Boolean> allSuccessFuture = Futures.transform(allCanCommits, AND_FUNCTION);
-            return MappingCheckedFuture.create(allSuccessFuture,
-                                       TransactionCommitFailedExceptionMapper.CAN_COMMIT_ERROR_MAPPER);
-
         }
 
         /**
