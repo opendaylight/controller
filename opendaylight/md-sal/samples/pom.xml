@@ -17,6 +17,7 @@
     <module>toaster-provider</module>
     <module>toaster-config</module>
     <module>l2switch</module>
+    <module>clustering-test-app</module>
   </modules>
   <scm>
     <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
