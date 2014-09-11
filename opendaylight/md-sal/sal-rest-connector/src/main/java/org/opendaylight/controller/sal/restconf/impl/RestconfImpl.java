@@ -17,6 +17,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import java.math.BigInteger;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -137,12 +138,23 @@ public class RestconfImpl implements RestconfService {
 
     private static final String SCOPE_PARAM_NAME = "scope";
 
+    private static final String NETCONF_BASE = "urn:ietf:params:xml:ns:netconf:base:1.0";
+
+    private static final String NETCONF_BASE_PAYLOAD_NAME = "data";
+
+    private static final QName NETCONF_BASE_QNAME;
+
     static {
         try {
             EVENT_SUBSCRIPTION_AUGMENT_REVISION = new SimpleDateFormat("yyyy-MM-dd").parse("2014-07-08");
+            NETCONF_BASE_QNAME = QName.create(QNameModule.create(new URI(NETCONF_BASE), null), NETCONF_BASE_PAYLOAD_NAME );
         } catch (ParseException e) {
             throw new RestconfDocumentedException(
                     "It wasn't possible to convert revision date of sal-remote-augment to date", ErrorType.APPLICATION,
+                    ErrorTag.OPERATION_FAILED);
+        } catch (URISyntaxException e) {
+            throw new RestconfDocumentedException(
+                    "It wasn't possible to create instance of URI class with "+NETCONF_BASE+" URI", ErrorType.APPLICATION,
                     ErrorTag.OPERATION_FAILED);
         }
     }
@@ -705,10 +717,12 @@ public class RestconfImpl implements RestconfService {
         validateInput(iiWithData.getSchemaNode(), payload);
 
         DOMMountPoint mountPoint = iiWithData.getMountPoint();
+        validateTopLevelNodeName(payload, iiWithData.getInstanceIdentifier());
         final CompositeNode value = this.normalizeNode(payload, iiWithData.getSchemaNode(), mountPoint);
         validateListKeysEqualityInPayloadAndUri(iiWithData, value);
         final NormalizedNode<?, ?> datastoreNormalizedNode = compositeNodeToDatastoreNormalizedNode(value,
                 iiWithData.getSchemaNode());
+
 
         YangInstanceIdentifier normalizedII;
         if (mountPoint != null) {
@@ -758,6 +772,29 @@ public class RestconfImpl implements RestconfService {
         }
 
         return Response.status(Status.OK).build();
+    }
+
+    private void validateTopLevelNodeName(final Node<?> node,
+            final YangInstanceIdentifier identifier) {
+        final String payloadName = getName(node);
+        final Iterator<PathArgument> pathArguments = identifier.getReversePathArguments().iterator();
+
+        //no arguments
+        if (!pathArguments.hasNext()) {
+            //no "data" payload
+            if (!node.getNodeType().equals(NETCONF_BASE_QNAME)) {
+                throw new RestconfDocumentedException("Instance identifier has to contain at least one path argument",
+                        ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE);
+            }
+        //any arguments
+        } else {
+            final String identifierName = pathArguments.next().getNodeType().getLocalName();
+            if (!payloadName.equals(identifierName)) {
+                throw new RestconfDocumentedException("Payload name (" + payloadName
+                        + ") is different from identifier name (" + identifierName + ")", ErrorType.PROTOCOL,
+                        ErrorTag.MALFORMED_MESSAGE);
+            }
+        }
     }
 
     /**
