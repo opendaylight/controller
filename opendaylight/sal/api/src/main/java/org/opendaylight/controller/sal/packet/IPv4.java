@@ -260,7 +260,17 @@ public class IPv4 extends Packet {
      */
     public void setHeaderField(String headerField, byte[] readValue) {
         if (headerField.equals(PROTOCOL)) {
-            payloadClass = protocolClassMap.get(readValue[0]);
+            // Don't set payloadClass if framgment offset is not zero.
+            byte[] fragoff = hdrFieldsMap.get(FRAGOFFSET);
+            if (fragoff == null || BitBufferHelper.getShort(fragoff) == 0) {
+                payloadClass = protocolClassMap.get(readValue[0]);
+            }
+        } else if (headerField.equals(FRAGOFFSET)) {
+            if (readValue != null && BitBufferHelper.getShort(readValue) != 0) {
+                // Clear payloadClass because protocol header is not present
+                // in this packet.
+                payloadClass = null;
+            }
         } else if (headerField.equals(OPTIONS) &&
                    (readValue == null || readValue.length == 0)) {
             hdrFieldsMap.remove(headerField);
