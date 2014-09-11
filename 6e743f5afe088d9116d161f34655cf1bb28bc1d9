@@ -87,6 +87,24 @@
       "revId": "6e743f5afe088d9116d161f34655cf1bb28bc1d9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ad391843",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataChangeListenerRegistrationProxy.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-11T04:57:38Z",
+      "side": 1,
+      "message": "https://bugs.opendaylight.org/show_bug.cgi?id\u003d1795",
+      "parentUuid": "fa82b9bf_2dc4285e",
+      "revId": "6e743f5afe088d9116d161f34655cf1bb28bc1d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
