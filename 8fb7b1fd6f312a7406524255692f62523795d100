@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_cb7324b3",
+        "filename": "opendaylight/md-sal/benchmark-data-store/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-09-11T10:56:32Z",
+      "side": 1,
+      "message": "missing copyright",
+      "revId": "8fb7b1fd6f312a7406524255692f62523795d100",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_eb786891",
+        "filename": "opendaylight/md-sal/benchmark-data-store/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-09-11T10:56:32Z",
+      "side": 1,
+      "message": "should be in commons/opendaylight/parent/pom.xml, along with a pluginManagement dependency declaration",
+      "revId": "8fb7b1fd6f312a7406524255692f62523795d100",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8b6d1ccf",
+        "filename": "opendaylight/md-sal/benchmark-data-store/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-09-11T10:56:32Z",
+      "side": 1,
+      "message": "no versions here, please",
+      "revId": "8fb7b1fd6f312a7406524255692f62523795d100",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ab7260ab",
+        "filename": "opendaylight/md-sal/benchmark-data-store/src/main/java/org/opendaylight/controller/md/sal/dom/store/benchmark/InMemoryDataStoreWithSameThreadedExecutorBenchmark.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-09-11T10:56:32Z",
+      "side": 1,
+      "message": "Brocade?",
+      "revId": "8fb7b1fd6f312a7406524255692f62523795d100",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4b6714eb",
+        "filename": "opendaylight/md-sal/benchmark-data-store/src/main/resources/odl-datastore-test.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-09-11T10:56:32Z",
+      "side": 1,
+      "message": "trailing whitespace",
+      "revId": "8fb7b1fd6f312a7406524255692f62523795d100",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
