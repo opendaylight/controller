@@ -36,7 +36,7 @@ import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
 import org.opendaylight.controller.netconf.client.SimpleNetconfClientSessionListener;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfigurationBuilder;
-import org.opendaylight.controller.netconf.client.test.TestingNetconfClient;
+import org.opendaylight.controller.netconf.client.TestingNetconfClient;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.NetconfOperationServiceFactoryImpl;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreException;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
