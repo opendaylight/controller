@@ -13,8 +13,8 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
+import akka.pattern.Patterns;
 import akka.util.Timeout;
-
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.Configuration;
 import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
@@ -27,7 +27,6 @@ import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContex
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
@@ -264,6 +263,30 @@ public class ActorContext {
 
         return null;
     }
+
+
+    /**
+     * Execute an operation on the the local shard only asynchronously
+     *
+     * <p>
+     *     This method first finds the address of the local shard if any. It then
+     *     executes the operation on it.
+     * </p>
+     *
+     * @param shardName the name of the shard on which the operation needs to be executed
+     * @param message the message that needs to be sent to the shard
+     * @param timeout the amount of time that this method should wait for a response before timing out
+     * @return null if the shard could not be located else a future on which the caller can wait
+     *
+     */
+    public Future executeLocalShardOperationAsync(String shardName, Object message, Timeout timeout) {
+        ActorRef local = findLocalShard(shardName);
+        if(local == null){
+            return null;
+        }
+        return Patterns.ask(local, message, timeout);
+    }
+
 
 
     public void shutdown() {
