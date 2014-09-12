@@ -8,10 +8,14 @@
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
 import static com.google.common.base.Preconditions.checkState;
-
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicLong;
-
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
@@ -27,11 +31,6 @@ import org.opendaylight.yangtools.util.DurationStatsTracker;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
 
 public class DOMDataBrokerImpl extends AbstractDOMForwardedTransactionFactory<DOMStore> implements DOMDataBroker,
         AutoCloseable {
@@ -49,7 +48,7 @@ public class DOMDataBrokerImpl extends AbstractDOMForwardedTransactionFactory<DO
         this.coordinator = new DOMDataCommitCoordinatorImpl(executor);
     }
 
-    public void setCloseable(AutoCloseable closeable) {
+    public void setCloseable(final AutoCloseable closeable) {
         this.closeable = closeable;
     }
 
@@ -86,13 +85,14 @@ public class DOMDataBrokerImpl extends AbstractDOMForwardedTransactionFactory<DO
 
     @Override
     public DOMTransactionChain createTransactionChain(final TransactionChainListener listener) {
-        ImmutableMap.Builder<LogicalDatastoreType, DOMStoreTransactionChain> backingChainsBuilder = ImmutableMap
-                .builder();
+        checkNotClosed();
+
+        final Map<LogicalDatastoreType, DOMStoreTransactionChain> backingChains = new EnumMap<>(LogicalDatastoreType.class);
         for (Entry<LogicalDatastoreType, DOMStore> entry : getTxFactories().entrySet()) {
-            backingChainsBuilder.put(entry.getKey(), entry.getValue().createTransactionChain());
+            backingChains.put(entry.getKey(), entry.getValue().createTransactionChain());
         }
-        long chainId = chainNum.getAndIncrement();
-        ImmutableMap<LogicalDatastoreType, DOMStoreTransactionChain> backingChains = backingChainsBuilder.build();
+
+        final long chainId = chainNum.getAndIncrement();
         LOG.debug("Transactoin chain {} created with listener {}, backing store chains {}", chainId, listener,
                 backingChains);
         return new DOMDataBrokerTransactionChainImpl(chainId, backingChains, coordinator, listener);

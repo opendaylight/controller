@@ -6,10 +6,12 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.CheckedFuture;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
-
 import javax.annotation.concurrent.GuardedBy;
-
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
@@ -19,11 +21,6 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCoh
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.CheckedFuture;
 
 /**
  * NormalizedNode implementation of {@link org.opendaylight.controller.md.sal.common.api.data.TransactionChain} which is backed
@@ -58,7 +55,7 @@ public class DOMDataBrokerTransactionChainImpl extends AbstractDOMForwardedTrans
      *             If any of arguments is null.
      */
     public DOMDataBrokerTransactionChainImpl(final long chainId,
-            final ImmutableMap<LogicalDatastoreType, DOMStoreTransactionChain> chains,
+            final Map<LogicalDatastoreType, DOMStoreTransactionChain> chains,
             final DOMDataCommitExecutor coordinator, final TransactionChainListener listener) {
         super(chains);
         this.chainId = chainId;
