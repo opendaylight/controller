@@ -11,7 +11,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
-import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
@@ -32,12 +31,12 @@ public class DOMDataBrokerTransactionChainImpl extends AbstractDOMForwardedTrans
         implements DOMTransactionChain, DOMDataCommitErrorListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(DOMDataBrokerTransactionChainImpl.class);
+    private final AtomicLong txNum = new AtomicLong();
     private final DOMDataCommitExecutor coordinator;
     private final TransactionChainListener listener;
     private final long chainId;
-    private final AtomicLong txNum = new AtomicLong();
-    @GuardedBy("this")
-    private boolean failed = false;
+
+    private volatile boolean failed = false;
 
     /**
      *
@@ -69,26 +68,30 @@ public class DOMDataBrokerTransactionChainImpl extends AbstractDOMForwardedTrans
     }
 
     @Override
-    public synchronized CheckedFuture<Void,TransactionCommitFailedException> submit(
+    public CheckedFuture<Void,TransactionCommitFailedException> submit(
             final DOMDataWriteTransaction transaction, final Iterable<DOMStoreThreePhaseCommitCohort> cohorts) {
+        checkNotClosed();
+
         return coordinator.submit(transaction, cohorts, Optional.<DOMDataCommitErrorListener> of(this));
     }
 
     @Override
-    public synchronized void close() {
+    public void close() {
         super.close();
+
         for (DOMStoreTransactionChain subChain : getTxFactories().values()) {
             subChain.close();
         }
 
         if (!failed) {
             LOG.debug("Transaction chain {} successfully finished.", this);
+            // FIXME: this event should be emitted once all operations complete
             listener.onTransactionChainSuccessful(this);
         }
     }
 
     @Override
-    public synchronized void onCommitFailed(final DOMDataWriteTransaction tx, final Throwable cause) {
+    public void onCommitFailed(final DOMDataWriteTransaction tx, final Throwable cause) {
         failed = true;
         LOG.debug("Transaction chain {} failed.", this, cause);
         listener.onTransactionChainFailed(this, tx, cause);
