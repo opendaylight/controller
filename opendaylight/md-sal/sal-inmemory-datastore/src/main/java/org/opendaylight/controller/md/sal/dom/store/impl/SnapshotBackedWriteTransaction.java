@@ -35,8 +35,10 @@ class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction impleme
     private static final AtomicReferenceFieldUpdater<SnapshotBackedWriteTransaction, DataTreeModification> TREE_UPDATER =
             AtomicReferenceFieldUpdater.newUpdater(SnapshotBackedWriteTransaction.class, DataTreeModification.class, "mutableTree");
 
-    private volatile TransactionReadyPrototype readyImpl;        // non-null when not ready
-    private volatile DataTreeModification mutableTree;           // non-null when not committed/closed
+    // non-null when not ready
+    private volatile TransactionReadyPrototype readyImpl;
+    // non-null when not committed/closed
+    private volatile DataTreeModification mutableTree;
 
     /**
      * Creates new write-only transaction.
@@ -137,8 +139,11 @@ class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction impleme
         checkState(wasReady != null, "Transaction %s is no longer open", getIdentifier());
 
         LOG.debug("Store transaction: {} : Ready", getIdentifier());
-        mutableTree.ready();
-        return wasReady.ready(this);
+
+        final DataTreeModification tree = mutableTree;
+        TREE_UPDATER.lazySet(this, null);
+        tree.ready();
+        return wasReady.transactionReady(this, tree);
     }
 
     @Override
@@ -147,6 +152,7 @@ class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction impleme
         if (wasReady != null) {
             LOG.debug("Store transaction: {} : Closed", getIdentifier());
             TREE_UPDATER.lazySet(this, null);
+            wasReady.transactionAborted(this);
         } else {
             LOG.debug("Store transaction: {} : Closed after submit", getIdentifier());
         }
@@ -155,15 +161,6 @@ class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction impleme
     @Override
     protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
         return toStringHelper.add("ready", readyImpl == null);
-    }
-
-    // FIXME: used by chaining on, which really wants an mutated view with a precondition
-    final boolean isReady() {
-        return readyImpl == null;
-    }
-
-    protected DataTreeModification getMutatedView() {
-        return mutableTree;
     }
 
     /**
@@ -175,8 +172,15 @@ class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction impleme
      * providing underlying logic for applying implementation.
      *
      */
-    // FIXME: needs access to local stuff, so make it an abstract class
-    public static interface TransactionReadyPrototype {
+    abstract static class TransactionReadyPrototype {
+        /**
+         * Called when a transaction is closed without being readied. This is not invoked for
+         * transactions which are ready.
+         *
+         * @param tx Transaction which got aborted.
+         */
+        protected abstract void transactionAborted(final SnapshotBackedWriteTransaction tx);
+
         /**
          * Returns a commit coordinator associated with supplied transactions.
          *
@@ -184,8 +188,10 @@ class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction impleme
          *
          * @param tx
          *            Transaction on which ready was invoked.
+         * @param tree
+         *            Modified data tree which has been constructed.
          * @return DOMStoreThreePhaseCommitCohort associated with transaction
          */
-        DOMStoreThreePhaseCommitCohort ready(SnapshotBackedWriteTransaction tx);
+        protected abstract DOMStoreThreePhaseCommitCohort transactionReady(SnapshotBackedWriteTransaction tx, DataTreeModification tree);
     }
 }
