@@ -8,11 +8,11 @@
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
 import static com.google.common.base.Preconditions.checkState;
-
 import com.google.common.base.Objects.ToStringHelper;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
-
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -29,11 +29,14 @@ import org.slf4j.LoggerFactory;
  *
  */
 class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction implements DOMStoreWriteTransaction {
-
     private static final Logger LOG = LoggerFactory.getLogger(SnapshotBackedWriteTransaction.class);
-    private DataTreeModification mutableTree;
-    private boolean ready = false;
-    private TransactionReadyPrototype readyImpl;
+    private static final AtomicReferenceFieldUpdater<SnapshotBackedWriteTransaction, TransactionReadyPrototype> READY_UPDATER =
+            AtomicReferenceFieldUpdater.newUpdater(SnapshotBackedWriteTransaction.class, TransactionReadyPrototype.class, "readyImpl");
+    private static final AtomicReferenceFieldUpdater<SnapshotBackedWriteTransaction, DataTreeModification> TREE_UPDATER =
+            AtomicReferenceFieldUpdater.newUpdater(SnapshotBackedWriteTransaction.class, DataTreeModification.class, "mutableTree");
+
+    private volatile TransactionReadyPrototype readyImpl;        // non-null when not ready
+    private volatile DataTreeModification mutableTree;           // non-null when not committed/closed
 
     /**
      * Creates new write-only transaction.
@@ -48,27 +51,23 @@ class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction impleme
     public SnapshotBackedWriteTransaction(final Object identifier, final boolean debug,
             final DataTreeSnapshot snapshot, final TransactionReadyPrototype readyImpl) {
         super(identifier, debug);
-        mutableTree = snapshot.newModification();
         this.readyImpl = Preconditions.checkNotNull(readyImpl, "readyImpl must not be null.");
+        mutableTree = snapshot.newModification();
         LOG.debug("Write Tx: {} allocated with snapshot {}", identifier, snapshot);
-    }
-
-    @Override
-    public void close() {
-        LOG.debug("Store transaction: {} : Closed", getIdentifier());
-        this.mutableTree = null;
-        this.readyImpl = null;
     }
 
     @Override
     public void write(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
         checkNotReady();
+
+        final DataTreeModification tree = mutableTree;
+        LOG.debug("Tx: {} Write: {}:{}", getIdentifier(), path, data);
+
         try {
-            LOG.debug("Tx: {} Write: {}:{}", getIdentifier(), path, data);
-            mutableTree.write(path, data);
+            tree.write(path, data);
             // FIXME: Add checked exception
         } catch (Exception e) {
-            LOG.error("Tx: {}, failed to write {}:{} in {}", getIdentifier(), path, data, mutableTree, e);
+            LOG.error("Tx: {}, failed to write {}:{} in {}", getIdentifier(), path, data, tree, e);
             // Rethrow original ones if they are subclasses of RuntimeException
             // or Error
             Throwables.propagateIfPossible(e);
@@ -80,12 +79,15 @@ class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction impleme
     @Override
     public void merge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
         checkNotReady();
+
+        final DataTreeModification tree = mutableTree;
+        LOG.debug("Tx: {} Merge: {}:{}", getIdentifier(), path, data);
+
         try {
-            LOG.debug("Tx: {} Merge: {}:{}", getIdentifier(), path, data);
-            mutableTree.merge(path, data);
+            tree.merge(path, data);
             // FIXME: Add checked exception
         } catch (Exception e) {
-            LOG.error("Tx: {}, failed to write {}:{} in {}", getIdentifier(), path, data, mutableTree, e);
+            LOG.error("Tx: {}, failed to write {}:{} in {}", getIdentifier(), path, data, tree, e);
             // Rethrow original ones if they are subclasses of RuntimeException
             // or Error
             Throwables.propagateIfPossible(e);
@@ -97,12 +99,15 @@ class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction impleme
     @Override
     public void delete(final YangInstanceIdentifier path) {
         checkNotReady();
+
+        final DataTreeModification tree = mutableTree;
+        LOG.debug("Tx: {} Delete: {}", getIdentifier(), path);
+
         try {
-            LOG.debug("Tx: {} Delete: {}", getIdentifier(), path);
-            mutableTree.delete(path);
+            tree.delete(path);
             // FIXME: Add checked exception
         } catch (Exception e) {
-            LOG.error("Tx: {}, failed to delete {} in {}", getIdentifier(), path, mutableTree, e);
+            LOG.error("Tx: {}, failed to delete {} in {}", getIdentifier(), path, tree, e);
             // Rethrow original ones if they are subclasses of RuntimeException
             // or Error
             Throwables.propagateIfPossible(e);
@@ -111,30 +116,54 @@ class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction impleme
         }
     }
 
-    protected final boolean isReady() {
-        return ready;
+    /**
+     * Exposed for {@link SnapshotBackedReadWriteTransaction}'s sake only. The contract does
+     * not allow data access after the transaction has been closed or readied.
+     *
+     * @param path Path to read
+     * @return null if the the transaction has been closed;
+     */
+    protected final Optional<NormalizedNode<?, ?>> readSnapshotNode(final YangInstanceIdentifier path) {
+        return readyImpl == null ? null : mutableTree.readNode(path);
     }
 
-    protected final void checkNotReady() {
-        checkState(!ready, "Transaction %s is ready. No further modifications allowed.", getIdentifier());
+    private final void checkNotReady() {
+        checkState(readyImpl != null, "Transaction %s is no longer open. No further modifications allowed.", getIdentifier());
     }
 
     @Override
-    public synchronized DOMStoreThreePhaseCommitCohort ready() {
-        checkState(!ready, "Transaction %s is already ready.", getIdentifier());
-        ready = true;
+    public DOMStoreThreePhaseCommitCohort ready() {
+        final TransactionReadyPrototype wasReady = READY_UPDATER.getAndSet(this, null);
+        checkState(wasReady != null, "Transaction %s is no longer open", getIdentifier());
+
         LOG.debug("Store transaction: {} : Ready", getIdentifier());
         mutableTree.ready();
-        return readyImpl.ready(this);
+        return wasReady.ready(this);
     }
 
-    protected DataTreeModification getMutatedView() {
-        return mutableTree;
+    @Override
+    public void close() {
+        final TransactionReadyPrototype wasReady = READY_UPDATER.getAndSet(this, null);
+        if (wasReady != null) {
+            LOG.debug("Store transaction: {} : Closed", getIdentifier());
+            TREE_UPDATER.lazySet(this, null);
+        } else {
+            LOG.debug("Store transaction: {} : Closed after submit", getIdentifier());
+        }
     }
 
     @Override
     protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
-        return toStringHelper.add("ready", isReady());
+        return toStringHelper.add("ready", readyImpl == null);
+    }
+
+    // FIXME: used by chaining on, which really wants an mutated view with a precondition
+    final boolean isReady() {
+        return readyImpl == null;
+    }
+
+    protected DataTreeModification getMutatedView() {
+        return mutableTree;
     }
 
     /**
@@ -146,8 +175,8 @@ class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction impleme
      * providing underlying logic for applying implementation.
      *
      */
+    // FIXME: needs access to local stuff, so make it an abstract class
     public static interface TransactionReadyPrototype {
-
         /**
          * Returns a commit coordinator associated with supplied transactions.
          *
