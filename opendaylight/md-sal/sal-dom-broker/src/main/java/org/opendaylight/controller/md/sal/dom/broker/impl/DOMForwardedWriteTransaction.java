@@ -7,10 +7,15 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
-import static com.google.common.base.Preconditions.checkState;
-
-import javax.annotation.concurrent.GuardedBy;
-
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
@@ -21,18 +26,12 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.ListenableFuture;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- *
- *
  * Read-Write Transaction, which is composed of several
- * {@link DOMStoreWriteTransaction} transactions. Subtransaction is selected by
+ * {@link DOMStoreWriteTransaction} transactions. A sub-transaction is selected by
  * {@link LogicalDatastoreType} type parameter in:
  *
  * <ul>
@@ -46,38 +45,38 @@ import com.google.common.util.concurrent.ListenableFuture;
  * invocation with all {@link org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort} for underlying
  * transactions.
  *
- * @param <T>
- *            Subtype of {@link DOMStoreWriteTransaction} which is used as
+ * @param <T> Subtype of {@link DOMStoreWriteTransaction} which is used as
  *            subtransaction.
  */
 class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
         AbstractDOMForwardedCompositeTransaction<LogicalDatastoreType, T> implements DOMDataWriteTransaction {
+    @SuppressWarnings("rawtypes")
+    private static final AtomicReferenceFieldUpdater<DOMForwardedWriteTransaction, DOMDataCommitImplementation> IMPL_UPDATER =
+            AtomicReferenceFieldUpdater.newUpdater(DOMForwardedWriteTransaction.class, DOMDataCommitImplementation.class, "commitImpl");
+    @SuppressWarnings("rawtypes")
+    private static final AtomicReferenceFieldUpdater<DOMForwardedWriteTransaction, Future> FUTURE_UPDATER =
+            AtomicReferenceFieldUpdater.newUpdater(DOMForwardedWriteTransaction.class, Future.class, "commitFuture");
+    private static final Logger LOG = LoggerFactory.getLogger(DOMForwardedWriteTransaction.class);
+    private static final Future<?> CANCELLED_FUTURE = Futures.immediateCancelledFuture();
 
     /**
-     *  Implementation of real commit.
-     *
-     *  Transaction can not be commited if commitImpl is null,
-     *  so this seting this property to null is also used to
-     *  prevent write to
-     *  already commited / canceled transaction {@link #checkNotCanceled()
-     *
-     *
+     * Implementation of real commit. It also acts as an indication that
+     * the transaction is running -- which we flip atomically using
+     * {@link #IMPL_UPDATER}.
      */
-    @GuardedBy("this")
     private volatile DOMDataCommitImplementation commitImpl;
 
     /**
+     * Future task of transaction commit. It starts off as null, but is
+     * set appropriately on {@link #submit()} and {@link #cancel()} via
+     * {@link AtomicReferenceFieldUpdater#lazySet(Object, Object)}.
      *
-     * Future task of transaction commit.
-     *
-     * This value is initially null, and is once updated if transaction
-     * is commited {@link #commit()}.
-     * If this future exists, transaction MUST not be commited again
-     * and all modifications should fail. See {@link #checkNotCommited()}.
-     *
+     * Lazy set is safe for use because it is only referenced to in the
+     * {@link #cancel()} slow path, where we will busy-wait for it. The
+     * fast path gets the benefit of a store-store barrier instead of the
+     * usual store-load barrier.
      */
-    @GuardedBy("this")
-    private volatile CheckedFuture<Void, TransactionCommitFailedException> commitFuture;
+    private volatile Future<?> commitFuture;
 
     protected DOMForwardedWriteTransaction(final Object identifier,
             final ImmutableMap<LogicalDatastoreType, T> backingTxs, final DOMDataCommitImplementation commitImpl) {
@@ -87,73 +86,65 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
 
     @Override
     public void put(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
-        checkNotReady();
+        checkRunning(commitImpl);
         getSubtransaction(store).write(path, data);
     }
 
     @Override
     public void delete(final LogicalDatastoreType store, final YangInstanceIdentifier path) {
-        checkNotReady();
+        checkRunning(commitImpl);
         getSubtransaction(store).delete(path);
     }
 
     @Override
     public void merge(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
-        checkNotReady();
+        checkRunning(commitImpl);
         getSubtransaction(store).merge(path, data);
     }
 
     @Override
-    public synchronized boolean cancel() {
-        // Transaction is already canceled, we are safe to return true
-        final boolean cancelationResult;
-        if (commitImpl == null && commitFuture != null) {
-            // Transaction is submitted, we try to cancel future.
-            cancelationResult = commitFuture.cancel(false);
-        } else if(commitImpl == null) {
+    public boolean cancel() {
+        final DOMDataCommitImplementation impl = IMPL_UPDATER.getAndSet(this, null);
+        if (impl != null) {
+            LOG.trace("Transaction {} cancelled before submit", getIdentifier());
+            FUTURE_UPDATER.lazySet(this, CANCELLED_FUTURE);
             return true;
-        } else {
-            cancelationResult = true;
-            commitImpl = null;
         }
-        return cancelationResult;
 
+        // The transaction is in process of being submitted or cancelled. Busy-wait
+        // for the corresponding future.
+        Future<?> future;
+        do {
+            future = commitFuture;
+        } while (future == null);
+
+        return future.cancel(false);
     }
 
     @Override
-    public synchronized ListenableFuture<RpcResult<TransactionStatus>> commit() {
+    public ListenableFuture<RpcResult<TransactionStatus>> commit() {
         return AbstractDataTransaction.convertToLegacyCommitFuture(submit());
     }
 
     @Override
-    public CheckedFuture<Void,TransactionCommitFailedException> submit() {
-        checkNotReady();
+    public CheckedFuture<Void, TransactionCommitFailedException> submit() {
+        final DOMDataCommitImplementation impl = IMPL_UPDATER.getAndSet(this, null);
+        checkRunning(impl);
 
-        ImmutableList.Builder<DOMStoreThreePhaseCommitCohort> cohortsBuilder = ImmutableList.builder();
-        for (DOMStoreWriteTransaction subTx : getSubtransactions()) {
-            cohortsBuilder.add(subTx.ready());
+        final Collection<T> txns = getSubtransactions();
+        final Collection<DOMStoreThreePhaseCommitCohort> cohorts = new ArrayList<>(txns.size());
+
+        // FIXME: deal with errors thrown by backed (ready and submit can fail in theory)
+        for (DOMStoreWriteTransaction txn : txns) {
+            cohorts.add(txn.ready());
         }
-        ImmutableList<DOMStoreThreePhaseCommitCohort> cohorts = cohortsBuilder.build();
-        commitFuture = commitImpl.submit(this, cohorts);
 
-        /*
-         *We remove reference to Commit Implementation in order
-         *to prevent memory leak
-         */
-        commitImpl = null;
-        return commitFuture;
+        final CheckedFuture<Void, TransactionCommitFailedException> ret = impl.submit(this, cohorts);
+        FUTURE_UPDATER.lazySet(this, ret);
+        return ret;
     }
 
-    private void checkNotReady() {
-        checkNotCommited();
-        checkNotCanceled();
-    }
-
-    private void checkNotCanceled() {
-        Preconditions.checkState(commitImpl != null, "Transaction was canceled.");
-    }
-
-    private void checkNotCommited() {
-        checkState(commitFuture == null, "Transaction was already submited.");
+    private void checkRunning(final DOMDataCommitImplementation impl) {
+        Preconditions.checkState(impl != null, "Transaction %s is no longer running", getIdentifier());
     }
 }

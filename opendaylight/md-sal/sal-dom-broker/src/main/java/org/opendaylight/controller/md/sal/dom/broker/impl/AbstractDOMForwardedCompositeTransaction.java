@@ -6,13 +6,15 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
+
+import java.util.Collection;
+
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 
 /**
  * Composite DOM Transaction backed by {@link DOMStoreTransaction}.
@@ -66,7 +68,7 @@ abstract class AbstractDOMForwardedCompositeTransaction<K, T extends DOMStoreTra
      * Returns immutable Iterable of all subtransactions.
      *
      */
-    protected Iterable<T> getSubtransactions() {
+    protected Collection<T> getSubtransactions() {
         return backingTxs.values();
     }
 
