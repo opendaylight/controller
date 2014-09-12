@@ -8,9 +8,7 @@ package org.opendaylight.controller.md.sal.dom.broker.impl;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
-
 import java.util.Collection;
-
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -60,8 +58,10 @@ abstract class AbstractDOMForwardedCompositeTransaction<K, T extends DOMStoreTra
      */
     protected final T getSubtransaction(final K key) {
         Preconditions.checkNotNull(key, "key must not be null.");
-        Preconditions.checkArgument(backingTxs.containsKey(key), "No subtransaction associated with %s", key);
-        return backingTxs.get(key);
+
+        final T ret = backingTxs.get(key);
+        Preconditions.checkArgument(ret != null, "No subtransaction associated with %s", key);
+        return ret;
     }
 
     /**
@@ -79,9 +79,8 @@ abstract class AbstractDOMForwardedCompositeTransaction<K, T extends DOMStoreTra
 
     protected void closeSubtransactions() {
         /*
-         *  We share one exception for all failures, which are added
-         *  as supressedExceptions to it.
-         *
+         * We share one exception for all failures, which are added
+         * as supressedExceptions to it.
          */
         IllegalStateException failure = null;
         for (T subtransaction : backingTxs.values()) {
@@ -89,16 +88,16 @@ abstract class AbstractDOMForwardedCompositeTransaction<K, T extends DOMStoreTra
                 subtransaction.close();
             } catch (Exception e) {
                 // If we did not allocated failure we allocate it
-                if(failure == null) {
-                    failure = new IllegalStateException("Uncaught exception occured during closing transaction.", e);
+                if (failure == null) {
+                    failure = new IllegalStateException("Uncaught exception occured during closing transaction", e);
                 } else {
-                    // We update it with addotional exceptions, which occured during error.
+                    // We update it with additional exceptions, which occurred during error.
                     failure.addSuppressed(e);
                 }
             }
         }
         // If we have failure, we throw it at after all attempts to close.
-        if(failure != null) {
+        if (failure != null) {
             throw failure;
         }
     }
