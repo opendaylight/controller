@@ -7,11 +7,12 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import javax.annotation.concurrent.GuardedBy;
-
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
@@ -20,9 +21,6 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionFactory;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
-
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 
 /**
  *
@@ -42,7 +40,7 @@ import com.google.common.collect.ImmutableMap;
  */
 public abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreTransactionFactory> implements DOMDataCommitImplementation, AutoCloseable {
 
-    private final ImmutableMap<LogicalDatastoreType, T> storeTxFactories;
+    private final Map<LogicalDatastoreType, T> storeTxFactories;
 
     private boolean closed;
 
@@ -76,11 +74,12 @@ public abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreT
      */
     public DOMDataReadOnlyTransaction newReadOnlyTransaction() {
         checkNotClosed();
-        ImmutableMap.Builder<LogicalDatastoreType, DOMStoreReadTransaction> builder = ImmutableMap.builder();
+
+        final Map<LogicalDatastoreType, DOMStoreReadTransaction> txns = new EnumMap<>(LogicalDatastoreType.class);
         for (Entry<LogicalDatastoreType, T> store : storeTxFactories.entrySet()) {
-            builder.put(store.getKey(), store.getValue().newReadOnlyTransaction());
+            txns.put(store.getKey(), store.getValue().newReadOnlyTransaction());
         }
-        return new DOMForwardedReadOnlyTransaction(newTransactionIdentifier(), builder.build());
+        return new DOMForwardedReadOnlyTransaction(newTransactionIdentifier(), txns);
     }
 
 
@@ -126,12 +125,12 @@ public abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreT
      */
     public DOMDataWriteTransaction newWriteOnlyTransaction() {
         checkNotClosed();
-        ImmutableMap.Builder<LogicalDatastoreType, DOMStoreWriteTransaction> builder = ImmutableMap.builder();
+
+        final Map<LogicalDatastoreType, DOMStoreWriteTransaction> txns = new EnumMap<>(LogicalDatastoreType.class);
         for (Entry<LogicalDatastoreType, T> store : storeTxFactories.entrySet()) {
-            builder.put(store.getKey(), store.getValue().newWriteOnlyTransaction());
+            txns.put(store.getKey(), store.getValue().newWriteOnlyTransaction());
         }
-        return new DOMForwardedWriteTransaction<DOMStoreWriteTransaction>(newTransactionIdentifier(), builder.build(),
-                this);
+        return new DOMForwardedWriteTransaction<DOMStoreWriteTransaction>(newTransactionIdentifier(), txns, this);
     }
 
     /**
@@ -181,11 +180,12 @@ public abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreT
      */
     public DOMDataReadWriteTransaction newReadWriteTransaction() {
         checkNotClosed();
-        ImmutableMap.Builder<LogicalDatastoreType, DOMStoreReadWriteTransaction> builder = ImmutableMap.builder();
+
+        final Map<LogicalDatastoreType, DOMStoreReadWriteTransaction> txns = new EnumMap<>(LogicalDatastoreType.class);
         for (Entry<LogicalDatastoreType, T> store : storeTxFactories.entrySet()) {
-            builder.put(store.getKey(), store.getValue().newReadWriteTransaction());
+            txns.put(store.getKey(), store.getValue().newReadWriteTransaction());
         }
-        return new DOMForwardedReadWriteTransaction(newTransactionIdentifier(), builder.build(), this);
+        return new DOMForwardedReadWriteTransaction(newTransactionIdentifier(), txns, this);
     }
 
     /**

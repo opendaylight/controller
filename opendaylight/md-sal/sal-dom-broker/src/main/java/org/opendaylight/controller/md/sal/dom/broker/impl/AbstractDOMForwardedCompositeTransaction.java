@@ -7,8 +7,8 @@
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import java.util.Collection;
+import java.util.Map;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -29,7 +29,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 abstract class AbstractDOMForwardedCompositeTransaction<K, T extends DOMStoreTransaction> implements
         AsyncTransaction<YangInstanceIdentifier, NormalizedNode<?, ?>> {
 
-    private final ImmutableMap<K, T> backingTxs;
+    private final Map<K, T> backingTxs;
     private final Object identifier;
 
     /**
@@ -41,7 +41,7 @@ abstract class AbstractDOMForwardedCompositeTransaction<K, T extends DOMStoreTra
      * @param backingTxs
      *            Key,value map of backing transactions.
      */
-    protected AbstractDOMForwardedCompositeTransaction(final Object identifier, final ImmutableMap<K, T> backingTxs) {
+    protected AbstractDOMForwardedCompositeTransaction(final Object identifier, final Map<K, T> backingTxs) {
         this.identifier = Preconditions.checkNotNull(identifier, "Identifier should not be null");
         this.backingTxs = Preconditions.checkNotNull(backingTxs, "Backing transactions should not be null");
     }

@@ -7,6 +7,9 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
+import java.util.Map;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
@@ -14,12 +17,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.CheckedFuture;
-
 /**
- *
  * Read Only Transaction, which is composed of several
  * {@link DOMStoreReadTransaction} transactions. Subtransaction is selected by
  * {@link LogicalDatastoreType} type parameter in
@@ -30,7 +28,7 @@ class DOMForwardedReadOnlyTransaction extends
         DOMDataReadOnlyTransaction {
 
     protected DOMForwardedReadOnlyTransaction(final Object identifier,
-            final ImmutableMap<LogicalDatastoreType, DOMStoreReadTransaction> backingTxs) {
+            final Map<LogicalDatastoreType, DOMStoreReadTransaction> backingTxs) {
         super(identifier, backingTxs);
     }
 
@@ -41,8 +39,8 @@ class DOMForwardedReadOnlyTransaction extends
     }
 
     @Override public CheckedFuture<Boolean, ReadFailedException> exists(
-        LogicalDatastoreType store,
-        YangInstanceIdentifier path) {
+        final LogicalDatastoreType store,
+        final YangInstanceIdentifier path) {
         return getSubtransaction(store).exists(path);
     }
 
@@ -50,5 +48,4 @@ class DOMForwardedReadOnlyTransaction extends
     public void close() {
         closeSubtransactions();
     }
-
 }

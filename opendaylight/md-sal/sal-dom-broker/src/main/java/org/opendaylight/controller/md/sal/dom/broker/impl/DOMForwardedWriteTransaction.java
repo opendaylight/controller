@@ -8,12 +8,12 @@
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
@@ -79,7 +79,7 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
     private volatile Future<?> commitFuture;
 
     protected DOMForwardedWriteTransaction(final Object identifier,
-            final ImmutableMap<LogicalDatastoreType, T> backingTxs, final DOMDataCommitImplementation commitImpl) {
+            final Map<LogicalDatastoreType, T> backingTxs, final DOMDataCommitImplementation commitImpl) {
         super(identifier, backingTxs);
         this.commitImpl = Preconditions.checkNotNull(commitImpl, "commitImpl must not be null.");
     }
