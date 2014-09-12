@@ -212,8 +212,8 @@ abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreTransact
 
     @Override
     public void close() {
-        final int wasClosed = UPDATER.getAndSet(this, 1);
-        Preconditions.checkState(wasClosed == 0, "Transaction factory was already closed");
+        final boolean wasClosed = !UPDATER.compareAndSet(this, 0, 1);
+        Preconditions.checkState(wasClosed, "Transaction factory was already closed");
     }
-
 }
+
