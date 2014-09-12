@@ -1,0 +1,60 @@
+module car-purchase {
+
+    yang-version 1;
+
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:sal-clustering-it:car-purchase";
+
+    prefix cp;
+
+	  import ietf-inet-types { prefix "inet"; revision-date 2010-09-24; }
+	  import car { prefix "car"; revision-date 2014-08-18; }
+	  import people { prefix "person"; revision-date 2014-08-18; }
+	  import yang-ext {prefix "ext"; revision-date "2013-07-09";}
+
+    organization "Netconf Central";
+
+    contact
+      "Harman Singh <harmasin@cisco.com>";
+
+    description
+      "YANG model for car purchase for test application";
+
+    revision "2014-08-18" {
+      description
+        "Clustering sample app";
+    }
+
+    rpc buy-car {
+          description
+            "buy a new car";
+          input {
+            leaf person {
+              ext:context-reference "person:person-context";
+              type person:person-ref;
+              description "A reference to a particular person.";
+            }
+
+            leaf car-id {
+              type car:car-id;
+              description "identifier of car.";
+            }
+            leaf person-id {
+              type person:person-id;
+              description "identifier of person.";
+            }
+          }
+        }
+
+        notification carBought {
+          description
+            "Indicates that a person bought a car.";
+          leaf car-id {
+            type car:car-id;
+            description "identifier of car.";
+          }
+          leaf person-id {
+            type person:person-id;
+            description "identifier of person.";
+          }
+        }
+}
