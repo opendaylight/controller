@@ -7,9 +7,13 @@
  */
 package org.opendaylight.controller.md.sal.common.impl.service;
 
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.AsyncFunction;
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.common.impl.AbstractDataModification;
@@ -19,15 +23,11 @@ import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.AsyncFunction;
-import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-
 public abstract class AbstractDataTransaction<P extends Path<P>, D extends Object> extends
         AbstractDataModification<P, D> {
-    private final static Logger LOG = LoggerFactory.getLogger(AbstractDataTransaction.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractDataTransaction.class);
+    private static final ListenableFuture<RpcResult<TransactionStatus>> SUCCESS_FUTURE =
+            Futures.immediateFuture(RpcResultBuilder.success(TransactionStatus.COMMITED).build());
 
     private final Object identifier;
     private final long allocationTime;
@@ -55,9 +55,10 @@ public abstract class AbstractDataTransaction<P extends Path<P>, D extends Objec
     @Override
     public Future<RpcResult<TransactionStatus>> commit() {
         readyTime = System.nanoTime();
-        LOG.debug("Transaction {} Ready after {}ms.", identifier, TimeUnit.NANOSECONDS.toMillis(readyTime - allocationTime));
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Transaction {} Ready after {}ms.", identifier, TimeUnit.NANOSECONDS.toMillis(readyTime - allocationTime));
+        }
         changeStatus(TransactionStatus.SUBMITED);
-
         return this.broker.commit(this);
     }
 
@@ -88,7 +89,7 @@ public abstract class AbstractDataTransaction<P extends Path<P>, D extends Objec
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
@@ -118,13 +119,18 @@ public abstract class AbstractDataTransaction<P extends Path<P>, D extends Objec
 
     public void succeeded() {
         this.completeTime = System.nanoTime();
-        LOG.debug("Transaction {} Committed after {}ms.", identifier, TimeUnit.NANOSECONDS.toMillis(completeTime - readyTime));
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Transaction {} Committed after {}ms.", identifier, TimeUnit.NANOSECONDS.toMillis(completeTime - readyTime));
+        }
         changeStatus(TransactionStatus.COMMITED);
     }
 
     public void failed() {
         this.completeTime = System.nanoTime();
-        LOG.debug("Transaction {} Failed after {}ms.", identifier, TimeUnit.NANOSECONDS.toMillis(completeTime - readyTime));
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Transaction {} Failed after {}ms.", identifier, TimeUnit.NANOSECONDS.toMillis(completeTime - readyTime));
+        }
         changeStatus(TransactionStatus.FAILED);
     }
 
@@ -134,14 +140,12 @@ public abstract class AbstractDataTransaction<P extends Path<P>, D extends Objec
         this.onStatusChange(status);
     }
 
-    public static ListenableFuture<RpcResult<TransactionStatus>> convertToLegacyCommitFuture(
-                                        CheckedFuture<Void,TransactionCommitFailedException> from ) {
+    public static ListenableFuture<RpcResult<TransactionStatus>> convertToLegacyCommitFuture(final CheckedFuture<Void,TransactionCommitFailedException> from) {
         return Futures.transform(from, new AsyncFunction<Void, RpcResult<TransactionStatus>>() {
             @Override
-            public ListenableFuture<RpcResult<TransactionStatus>> apply(Void input) throws Exception {
-                return Futures.immediateFuture(RpcResultBuilder.<TransactionStatus>
-                                                              success(TransactionStatus.COMMITED).build());
+            public ListenableFuture<RpcResult<TransactionStatus>> apply(final Void input) {
+                return SUCCESS_FUTURE;
             }
-        } );
+        });
     }
 }
