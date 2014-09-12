@@ -6,16 +6,15 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */package org.opendaylight.controller.md.sal.dom.broker.impl;
 
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
+import java.util.Map;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.CheckedFuture;
 
 /**
  *
@@ -40,7 +39,7 @@ class DOMForwardedReadWriteTransaction extends DOMForwardedWriteTransaction<DOMS
         DOMDataReadWriteTransaction {
 
     protected DOMForwardedReadWriteTransaction(final Object identifier,
-            final ImmutableMap<LogicalDatastoreType, DOMStoreReadWriteTransaction> backingTxs,
+            final Map<LogicalDatastoreType, DOMStoreReadWriteTransaction> backingTxs,
             final DOMDataCommitImplementation commitImpl) {
         super(identifier, backingTxs, commitImpl);
     }
@@ -52,8 +51,8 @@ class DOMForwardedReadWriteTransaction extends DOMForwardedWriteTransaction<DOMS
     }
 
     @Override public CheckedFuture<Boolean, ReadFailedException> exists(
-        LogicalDatastoreType store,
-        YangInstanceIdentifier path) {
+        final LogicalDatastoreType store,
+        final YangInstanceIdentifier path) {
         return getSubtransaction(store).exists(path);
     }
 }
