@@ -32,7 +32,7 @@ public enum ActionType {
     SET_DL_TYPE("setDlType", 0, 0xffff), // Set ethertype/length field
     SET_NW_SRC("setNwSrc", 0, 0),
     SET_NW_DST("setNwDst", 0, 0),
-    SET_NW_TOS("setNwTos", 0, 0x3f),
+    SET_NW_TOS("setNwTos", 0, 0xff),
     SET_TP_SRC("setTpSrc", 0, 0xffff), // Set transport source port
     SET_TP_DST("setTpDst", 0, 0xffff), // Set transport destination port
     SET_NEXT_HOP("setNextHop", 0, 0);

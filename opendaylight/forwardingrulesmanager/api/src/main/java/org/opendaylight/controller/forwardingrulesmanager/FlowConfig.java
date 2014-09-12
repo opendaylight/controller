@@ -615,7 +615,7 @@ public class FlowConfig extends ConfigurationObject implements Serializable {
 
     public boolean isTOSBitsValid(String tosBits) {
         int tos = Integer.decode(tosBits);
-        return ((tos >= 0) && (tos < 64));
+        return ((tos >= 0) && (tos < 256));
     }
 
     public boolean isTpPortValid(String tpPort) {
@@ -1158,7 +1158,7 @@ public class FlowConfig extends ConfigurationObject implements Serializable {
 
                 sstr = Pattern.compile(ActionType.SET_NW_TOS.toString() + "=(.*)").matcher(actiongrp);
                 if (sstr.matches()) {
-                    actionList.add(new SetNwTos(Byte.parseByte(sstr.group(1))));
+                    actionList.add(new SetNwTos(Short.parseShort(sstr.group(1))));
                     continue;
                 }
 

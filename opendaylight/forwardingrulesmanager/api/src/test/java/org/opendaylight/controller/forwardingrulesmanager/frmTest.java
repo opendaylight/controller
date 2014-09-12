@@ -593,12 +593,12 @@ public class frmTest {
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("IP ToS bits"));
 
-        fc.setTosBits("65");
+        fc.setTosBits("256");
         status = fc.validate();
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("IP ToS bits"));
 
-        fc.setTosBits("60");
+        fc.setTosBits("255");
         Assert.assertTrue(fc.validate().isSuccess());
 
         fc.setSrcPort("-1");
