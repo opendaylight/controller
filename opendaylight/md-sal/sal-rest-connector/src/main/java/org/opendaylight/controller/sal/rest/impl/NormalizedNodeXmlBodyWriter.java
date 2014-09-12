@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.sal.rest.impl;
 
+import static javax.xml.XMLConstants.DEFAULT_NS_PREFIX;
+
 import com.google.common.base.Throwables;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -50,7 +52,7 @@ public class NormalizedNodeXmlBodyWriter implements MessageBodyWriter<Normalized
 
     static {
         XML_FACTORY = XMLOutputFactory.newFactory();
-        XML_FACTORY.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES, true);
+        XML_FACTORY.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES, false);
     }
 
     @Override
@@ -113,7 +115,8 @@ public class NormalizedNodeXmlBodyWriter implements MessageBodyWriter<Normalized
             throws IOException {
         try {
             QName name = SchemaContext.NAME;
-            xmlWriter.writeStartElement(name.getNamespace().toString(), name.getLocalName());
+            xmlWriter.writeStartElement(DEFAULT_NS_PREFIX,name.getLocalName(),name.getNamespace().toString());
+            xmlWriter.writeDefaultNamespace(name.getNamespace().toString());
             for (DataContainerChild<? extends PathArgument, ?> child : data.getValue()) {
                 nnWriter.write(child);
             }
