@@ -8,7 +8,6 @@
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
 import static com.google.common.base.Preconditions.checkState;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FutureCallback;
@@ -62,8 +61,7 @@ import org.slf4j.LoggerFactory;
  * to implement {@link DOMStore} contract.
  *
  */
-public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, SchemaContextListener,
-        TransactionReadyPrototype,AutoCloseable {
+public class InMemoryDOMDataStore extends TransactionReadyPrototype implements DOMStore, Identifiable<String>, SchemaContextListener, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(InMemoryDOMDataStore.class);
     private static final ListenableFuture<Void> SUCCESSFUL_FUTURE = Futures.immediateFuture(null);
 
@@ -114,7 +112,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
                         "DataChangeListenerQueueMgr");
     }
 
-    public void setCloseable(AutoCloseable closeable) {
+    public void setCloseable(final AutoCloseable closeable) {
         this.closeable = closeable;
     }
 
@@ -215,80 +213,95 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
     }
 
     @Override
-    public DOMStoreThreePhaseCommitCohort ready(final SnapshotBackedWriteTransaction writeTx) {
-        LOG.debug("Tx: {} is submitted. Modifications: {}", writeTx.getIdentifier(), writeTx.getMutatedView());
-        return new ThreePhaseCommitImpl(writeTx);
+    protected void transactionAborted(final SnapshotBackedWriteTransaction tx) {
+        LOG.debug("Tx: {} is closed.", tx.getIdentifier());
+    }
+
+    @Override
+    protected DOMStoreThreePhaseCommitCohort transactionReady(final SnapshotBackedWriteTransaction tx, final DataTreeModification tree) {
+        LOG.debug("Tx: {} is submitted. Modifications: {}", tx.getIdentifier(), tree);
+        return new ThreePhaseCommitImpl(tx, tree);
     }
 
     private Object nextIdentifier() {
         return name + "-" + txCounter.getAndIncrement();
     }
 
-    private class DOMStoreTransactionChainImpl implements DOMStoreTransactionChain, TransactionReadyPrototype {
-
+    private class DOMStoreTransactionChainImpl extends TransactionReadyPrototype implements DOMStoreTransactionChain {
         @GuardedBy("this")
-        private SnapshotBackedWriteTransaction latestOutstandingTx;
-
+        private SnapshotBackedWriteTransaction allocatedTransaction;
+        @GuardedBy("this")
+        private DataTreeSnapshot readySnapshot;
+        @GuardedBy("this")
         private boolean chainFailed = false;
 
+        @GuardedBy("this")
         private void checkFailed() {
             Preconditions.checkState(!chainFailed, "Transaction chain is failed.");
         }
 
+        @GuardedBy("this")
+        private DataTreeSnapshot getSnapshot() {
+            checkFailed();
+
+            if (allocatedTransaction != null) {
+                Preconditions.checkState(readySnapshot != null, "Previous transaction %s is not ready yet", allocatedTransaction.getIdentifier());
+                return readySnapshot;
+            } else {
+                return dataTree.takeSnapshot();
+            }
+        }
+
+        @GuardedBy("this")
+        private <T extends SnapshotBackedWriteTransaction> T recordTransaction(final T transaction) {
+            allocatedTransaction = transaction;
+            readySnapshot = null;
+            return transaction;
+        }
+
         @Override
         public synchronized DOMStoreReadTransaction newReadOnlyTransaction() {
-            final DataTreeSnapshot snapshot;
-            checkFailed();
-            if (latestOutstandingTx != null) {
-                checkState(latestOutstandingTx.isReady(), "Previous transaction in chain must be ready.");
-                snapshot = latestOutstandingTx.getMutatedView();
-            } else {
-                snapshot = dataTree.takeSnapshot();
-            }
+            final DataTreeSnapshot snapshot = getSnapshot();
             return new SnapshotBackedReadTransaction(nextIdentifier(), getDebugTransactions(), snapshot);
         }
 
         @Override
         public synchronized DOMStoreReadWriteTransaction newReadWriteTransaction() {
-            final DataTreeSnapshot snapshot;
-            checkFailed();
-            if (latestOutstandingTx != null) {
-                checkState(latestOutstandingTx.isReady(), "Previous transaction in chain must be ready.");
-                snapshot = latestOutstandingTx.getMutatedView();
-            } else {
-                snapshot = dataTree.takeSnapshot();
-            }
-            final SnapshotBackedReadWriteTransaction ret = new SnapshotBackedReadWriteTransaction(nextIdentifier(),
-                    getDebugTransactions(), snapshot, this);
-            latestOutstandingTx = ret;
-            return ret;
+            final DataTreeSnapshot snapshot = getSnapshot();
+            return recordTransaction(new SnapshotBackedReadWriteTransaction(nextIdentifier(),
+                    getDebugTransactions(), snapshot, this));
         }
 
         @Override
         public synchronized DOMStoreWriteTransaction newWriteOnlyTransaction() {
-            final DataTreeSnapshot snapshot;
-            checkFailed();
-            if (latestOutstandingTx != null) {
-                checkState(latestOutstandingTx.isReady(), "Previous transaction in chain must be ready.");
-                snapshot = latestOutstandingTx.getMutatedView();
-            } else {
-                snapshot = dataTree.takeSnapshot();
-            }
-            final SnapshotBackedWriteTransaction ret = new SnapshotBackedWriteTransaction(nextIdentifier(),
-                    getDebugTransactions(), snapshot, this);
-            latestOutstandingTx = ret;
-            return ret;
+            final DataTreeSnapshot snapshot = getSnapshot();
+            return recordTransaction(new SnapshotBackedWriteTransaction(nextIdentifier(),
+                    getDebugTransactions(), snapshot, this));
         }
 
         @Override
-        public DOMStoreThreePhaseCommitCohort ready(final SnapshotBackedWriteTransaction tx) {
-            DOMStoreThreePhaseCommitCohort storeCohort = InMemoryDOMDataStore.this.ready(tx);
-            return new ChainedTransactionCommitImpl(tx, storeCohort, this);
+        protected synchronized void transactionAborted(final SnapshotBackedWriteTransaction tx) {
+            if (tx.equals(allocatedTransaction)) {
+                Preconditions.checkState(readySnapshot == null, "Unexpected abort of transaction %s with ready snapshot %s", tx, readySnapshot);
+                allocatedTransaction = null;
+            }
+        }
+
+        @Override
+        protected synchronized DOMStoreThreePhaseCommitCohort transactionReady(final SnapshotBackedWriteTransaction tx, final DataTreeModification tree) {
+            Preconditions.checkState(tx.equals(allocatedTransaction), "Mis-ordered ready transaction %s last allocated was %s", tx, allocatedTransaction);
+            if (readySnapshot != null) {
+                // The snapshot should have been cleared
+                LOG.warn("Uncleared snapshot {} encountered, overwritten with transaction {} snapshot {}", readySnapshot, tx, tree);
+            }
+
+            final DOMStoreThreePhaseCommitCohort cohort = InMemoryDOMDataStore.this.transactionReady(tx, tree);
+            readySnapshot = tree;
+            return new ChainedTransactionCommitImpl(tx, cohort, this);
         }
 
         @Override
         public void close() {
-
             // FIXME: this call doesn't look right here - listeningExecutor is shared and owned
             // by the outer class.
             //listeningExecutor.shutdownNow();
@@ -297,31 +310,30 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         protected synchronized void onTransactionFailed(final SnapshotBackedWriteTransaction transaction,
                 final Throwable t) {
             chainFailed = true;
-
         }
 
         public synchronized void onTransactionCommited(final SnapshotBackedWriteTransaction transaction) {
-            // If committed transaction is latestOutstandingTx we clear
-            // latestOutstandingTx
-            // field in order to base new transactions on Datastore Data Tree
-            // directly.
-            if (transaction.equals(latestOutstandingTx)) {
-                latestOutstandingTx = null;
+            // If the committed transaction was the one we allocated last,
+            // we clear it and the ready snapshot, so the next transaction
+            // allocated refers to the data tree directly.
+            if (transaction.equals(allocatedTransaction)) {
+                if (readySnapshot == null) {
+                    LOG.warn("Transaction {} committed while no ready snapshot present", transaction);
+                }
+
+                allocatedTransaction = null;
+                readySnapshot = null;
             }
         }
-
     }
 
     private static class ChainedTransactionCommitImpl implements DOMStoreThreePhaseCommitCohort {
-
         private final SnapshotBackedWriteTransaction transaction;
         private final DOMStoreThreePhaseCommitCohort delegate;
-
         private final DOMStoreTransactionChainImpl txChain;
 
         protected ChainedTransactionCommitImpl(final SnapshotBackedWriteTransaction transaction,
                 final DOMStoreThreePhaseCommitCohort delegate, final DOMStoreTransactionChainImpl txChain) {
-            super();
             this.transaction = transaction;
             this.delegate = delegate;
             this.txChain = txChain;
@@ -355,24 +367,21 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
                 public void onSuccess(final Void result) {
                     txChain.onTransactionCommited(transaction);
                 }
-
             });
             return commitFuture;
         }
-
     }
 
     private class ThreePhaseCommitImpl implements DOMStoreThreePhaseCommitCohort {
-
         private final SnapshotBackedWriteTransaction transaction;
         private final DataTreeModification modification;
 
         private ResolveDataChangeEventsTask listenerResolver;
         private DataTreeCandidate candidate;
 
-        public ThreePhaseCommitImpl(final SnapshotBackedWriteTransaction writeTransaction) {
+        public ThreePhaseCommitImpl(final SnapshotBackedWriteTransaction writeTransaction, final DataTreeModification modification) {
             this.transaction = writeTransaction;
-            this.modification = transaction.getMutatedView();
+            this.modification = modification;
         }
 
         @Override
@@ -425,7 +434,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
              * The commit has to occur atomically with regard to listener
              * registrations.
              */
-            synchronized (this) {
+            synchronized (InMemoryDOMDataStore.this) {
                 dataTree.commit(candidate);
                 listenerResolver.resolve(dataChangeListenerNotificationManager);
             }
