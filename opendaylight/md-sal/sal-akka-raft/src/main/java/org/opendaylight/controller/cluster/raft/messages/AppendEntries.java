@@ -132,7 +132,7 @@ public class AppendEntries extends AbstractRaftRPC {
             try {
                 if(leProtoBuff.getData() != null && leProtoBuff.getData().getClientPayloadClassName() != null) {
                     String clientPayloadClassName = leProtoBuff.getData().getClientPayloadClassName();
-                    payload = (Payload)Class.forName(clientPayloadClassName).newInstance();
+                    payload = (Payload) Class.forName(clientPayloadClassName).newInstance();
                     payload = payload.decode(leProtoBuff.getData());
                     payload.setClientPayloadClassName(clientPayloadClassName);
                 } else {

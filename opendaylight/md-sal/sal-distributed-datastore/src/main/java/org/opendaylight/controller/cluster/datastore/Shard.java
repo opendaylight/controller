@@ -53,6 +53,7 @@ import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationPayload;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
@@ -467,7 +468,7 @@ public class Shard extends RaftActor {
             }
 
         } else {
-            LOG.error("Unknown state received {}", data);
+            LOG.error("Unknown state received {} Class loader = {} CompositeNodeMod.ClassLoader = {}", data, data.getClass().getClassLoader(), CompositeModificationPayload.class.getClassLoader());
         }
 
         // Update stats
@@ -525,9 +526,6 @@ public class Shard extends RaftActor {
                 .tell(new EnableNotification(isLeader()), getSelf());
         }
 
-        if (getLeaderId() != null) {
-            shardMBean.setLeader(getLeaderId());
-        }
 
         shardMBean.setRaftState(getRaftState().name());
         shardMBean.setCurrentTerm(getCurrentTerm());
@@ -541,6 +539,14 @@ public class Shard extends RaftActor {
 
             transactionChains.clear();
         }
+    }
+
+    @Override protected void onLeaderChanged(String oldLeader, String newLeader) {
+        if((oldLeader == null && newLeader == null) || (newLeader != null && newLeader.equals(oldLeader)) ){
+            return;
+        }
+        LOG.info("Current state = {}, Leader = {}", getRaftState().name(), newLeader);
+        shardMBean.setLeader(newLeader);
     }
 
     @Override public String persistenceId() {
