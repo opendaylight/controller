@@ -12,7 +12,6 @@ import com.google.common.collect.ImmutableMap;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
@@ -38,11 +37,10 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
  * @param <T>
  *            Type of {@link DOMStoreTransactionFactory} factory.
  */
-public abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreTransactionFactory> implements DOMDataCommitImplementation, AutoCloseable {
+abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreTransactionFactory> implements DOMDataCommitImplementation, AutoCloseable {
 
     private final Map<LogicalDatastoreType, T> storeTxFactories;
-
-    private boolean closed;
+    private volatile boolean closed;
 
     protected AbstractDOMForwardedTransactionFactory(final Map<LogicalDatastoreType, ? extends T> txFactories) {
         this.storeTxFactories = ImmutableMap.copyOf(txFactories);
@@ -72,7 +70,7 @@ public abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreT
      *
      * @return New composite read-only transaction.
      */
-    public DOMDataReadOnlyTransaction newReadOnlyTransaction() {
+    public final DOMDataReadOnlyTransaction newReadOnlyTransaction() {
         checkNotClosed();
 
         final Map<LogicalDatastoreType, DOMStoreReadTransaction> txns = new EnumMap<>(LogicalDatastoreType.class);
@@ -81,8 +79,6 @@ public abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreT
         }
         return new DOMForwardedReadOnlyTransaction(newTransactionIdentifier(), txns);
     }
-
-
 
     /**
      * Creates a new composite write-only transaction
@@ -123,7 +119,7 @@ public abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreT
      * @return New composite write-only transaction associated with this
      *         factory.
      */
-    public DOMDataWriteTransaction newWriteOnlyTransaction() {
+    public final DOMDataWriteTransaction newWriteOnlyTransaction() {
         checkNotClosed();
 
         final Map<LogicalDatastoreType, DOMStoreWriteTransaction> txns = new EnumMap<>(LogicalDatastoreType.class);
@@ -176,9 +172,8 @@ public abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreT
      *
      * @return New composite read-write transaction associated with this
      *         factory.
-     *
      */
-    public DOMDataReadWriteTransaction newReadWriteTransaction() {
+    public final DOMDataReadWriteTransaction newReadWriteTransaction() {
         checkNotClosed();
 
         final Map<LogicalDatastoreType, DOMStoreReadWriteTransaction> txns = new EnumMap<>(LogicalDatastoreType.class);
@@ -203,20 +198,17 @@ public abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreT
     }
 
     /**
-     *
      * Checks if instance is not closed.
      *
      * @throws IllegalStateException If instance of this class was closed.
      *
      */
-    @GuardedBy("this")
-    protected synchronized void checkNotClosed() {
-        Preconditions.checkState(!closed,"Transaction factory was closed. No further operations allowed.");
+    protected final void checkNotClosed() {
+        Preconditions.checkState(!closed, "Transaction factory was closed. No further operations allowed.");
     }
 
     @Override
-    @GuardedBy("this")
-    public synchronized void close() {
+    public void close() {
         closed = true;
     }
 

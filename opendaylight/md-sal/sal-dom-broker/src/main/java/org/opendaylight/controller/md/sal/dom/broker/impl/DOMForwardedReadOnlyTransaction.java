@@ -38,7 +38,8 @@ class DOMForwardedReadOnlyTransaction extends
         return getSubtransaction(store).read(path);
     }
 
-    @Override public CheckedFuture<Boolean, ReadFailedException> exists(
+    @Override
+    public CheckedFuture<Boolean, ReadFailedException> exists(
         final LogicalDatastoreType store,
         final YangInstanceIdentifier path) {
         return getSubtransaction(store).exists(path);
