@@ -12,7 +12,7 @@ import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancerPool
 import javax.xml.bind.annotation.XmlElement;
 import java.util.List;
 
-public class INeutronLoadBalancerPoolMemberRequest {
+public class NeutronLoadBalancerPoolMemberRequest {
 
     /**
      * See OpenStack Network API v2.0 Reference for description of
@@ -25,15 +25,15 @@ public class INeutronLoadBalancerPoolMemberRequest {
     @XmlElement(name="members")
     List<NeutronLoadBalancerPoolMember> bulkRequest;
 
-    INeutronLoadBalancerPoolMemberRequest() {
+    NeutronLoadBalancerPoolMemberRequest() {
     }
 
-    INeutronLoadBalancerPoolMemberRequest(List<NeutronLoadBalancerPoolMember> bulk) {
+    NeutronLoadBalancerPoolMemberRequest(List<NeutronLoadBalancerPoolMember> bulk) {
         bulkRequest = bulk;
         singletonLoadBalancerPoolMember = null;
     }
 
-    INeutronLoadBalancerPoolMemberRequest(NeutronLoadBalancerPoolMember group) {
+    NeutronLoadBalancerPoolMemberRequest(NeutronLoadBalancerPoolMember group) {
         singletonLoadBalancerPoolMember = group;
     }
 
