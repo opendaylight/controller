@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class DefaultConfigParamsImpl implements ConfigParams {
 
-    private static final int SNAPSHOT_BATCH_COUNT = 100000;
+    private static final int SNAPSHOT_BATCH_COUNT = 20000;
 
     /**
      * The maximum election time variance

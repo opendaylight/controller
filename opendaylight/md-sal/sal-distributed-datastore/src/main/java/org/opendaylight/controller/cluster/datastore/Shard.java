@@ -193,6 +193,7 @@ public class Shard extends RaftActor {
                 .tell(new CaptureSnapshotReply(ReadDataReply.getNormalizedNodeByteString(message)),
                     self());
 
+            createSnapshotTransaction = null;
             // Send a PoisonPill instead of sending close transaction because we do not really need
             // a response
             getSender().tell(PoisonPill.getInstance(), self());
@@ -503,6 +504,8 @@ public class Shard extends RaftActor {
         // Since this will be done only on Recovery or when this actor is a Follower
         // we can safely commit everything in here. We not need to worry about event notifications
         // as they would have already been disabled on the follower
+
+        LOG.info("Applying snapshot");
         try {
             DOMStoreWriteTransaction transaction = store.newWriteOnlyTransaction();
             NormalizedNodeMessages.Node serializedNode = NormalizedNodeMessages.Node.parseFrom(snapshot);
@@ -517,6 +520,8 @@ public class Shard extends RaftActor {
             syncCommitTransaction(transaction);
         } catch (InvalidProtocolBufferException | InterruptedException | ExecutionException e) {
             LOG.error(e, "An exception occurred when applying snapshot");
+        } finally {
+            LOG.info("Done applying snapshot");
         }
     }
 

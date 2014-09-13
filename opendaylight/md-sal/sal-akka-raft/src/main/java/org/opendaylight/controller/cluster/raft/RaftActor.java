@@ -123,7 +123,7 @@ public abstract class RaftActor extends UntypedPersistentActor {
 
     @Override public void onReceiveRecover(Object message) {
         if (message instanceof SnapshotOffer) {
-            LOG.debug("SnapshotOffer called..");
+            LOG.info("SnapshotOffer called..");
             SnapshotOffer offer = (SnapshotOffer) message;
             Snapshot snapshot = (Snapshot) offer.snapshot();
 
@@ -135,10 +135,11 @@ public abstract class RaftActor extends UntypedPersistentActor {
             context.setReplicatedLog(replicatedLog);
             context.setLastApplied(snapshot.getLastAppliedIndex());
 
-            LOG.debug("Applied snapshot to replicatedLog. " +
-                "snapshotIndex={}, snapshotTerm={}, journal-size={}",
+            LOG.info("Applied snapshot to replicatedLog. " +
+                    "snapshotIndex={}, snapshotTerm={}, journal-size={}",
                 replicatedLog.snapshotIndex, replicatedLog.snapshotTerm,
-                replicatedLog.size());
+                replicatedLog.size()
+            );
 
             // Apply the snapshot to the actors state
             applySnapshot(ByteString.copyFrom(snapshot.getState()));
@@ -236,17 +237,17 @@ public abstract class RaftActor extends UntypedPersistentActor {
             context.removePeer(rrp.getName());
 
         } else if (message instanceof CaptureSnapshot) {
-            LOG.debug("CaptureSnapshot received by actor");
+            LOG.info("CaptureSnapshot received by actor");
             CaptureSnapshot cs = (CaptureSnapshot)message;
             captureSnapshot = cs;
             createSnapshot();
 
         } else if (message instanceof CaptureSnapshotReply){
-            LOG.debug("CaptureSnapshotReply received by actor");
+            LOG.info("CaptureSnapshotReply received by actor");
             CaptureSnapshotReply csr = (CaptureSnapshotReply) message;
 
             ByteString stateInBytes = csr.getSnapshot();
-            LOG.debug("CaptureSnapshotReply stateInBytes size:{}", stateInBytes.size());
+            LOG.info("CaptureSnapshotReply stateInBytes size:{}", stateInBytes.size());
             handleCaptureSnapshotReply(stateInBytes);
 
         } else {
