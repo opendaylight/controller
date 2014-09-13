@@ -13,8 +13,10 @@ import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
 import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolMemberCRUD;
 import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
 import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancerPool;
+import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancerPoolMember;
 import org.opendaylight.controller.northbound.commons.RestMessages;
 import org.opendaylight.controller.northbound.commons.exception.BadRequestException;
 import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
@@ -22,6 +24,7 @@ import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailab
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -31,6 +34,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -53,6 +57,13 @@ import java.util.List;
  * http://tomcat.apache.org/tomcat-7.0-doc/ssl-howto.html#Configuration
  *
  */
+
+/**
+ * For now, the LB pool member data is maintained with the INeutronLoadBalancerPoolCRUD,
+ * although there may be an overlap with INeutronLoadBalancerPoolMemberCRUD's cache.
+ * TODO: Consolidate and maintain a single copy
+ */
+
 @Path("/pools")
 public class NeutronLoadBalancerPoolNorthbound {
 
@@ -83,7 +94,7 @@ public class NeutronLoadBalancerPoolNorthbound {
             @QueryParam("healthmonitor_id") String queryLoadBalancerPoolHealthMonitorID,
             @QueryParam("admin_state_up") String queryLoadBalancerIsAdminStateUp,
             @QueryParam("status") String queryLoadBalancerPoolStatus,
-            @QueryParam("members") List queryLoadBalancerPoolMembers,
+            @QueryParam("members") List<NeutronLoadBalancerPoolMember> queryLoadBalancerPoolMembers,
             // pagination
             @QueryParam("limit") String limit,
             @QueryParam("marker") String marker,
@@ -217,7 +228,7 @@ public class NeutronLoadBalancerPoolNorthbound {
                 NeutronLoadBalancerPool test = i.next();
 
                 /*
-                 *  Verify that the firewall doesn't already exist
+                 *  Verify that the loadBalancerPool doesn't already exist
                  */
 
                 if (loadBalancerPoolInterface.neutronLoadBalancerPoolExists(test.getLoadBalancerPoolID())) {
@@ -327,5 +338,74 @@ public class NeutronLoadBalancerPoolNorthbound {
             }
         }
         return Response.status(200).entity(new NeutronLoadBalancerPoolRequest(loadBalancerPoolInterface.getNeutronLoadBalancerPool(loadBalancerPoolID))).build();
+    }
+
+    /**
+     * Deletes a LoadBalancerPool
+     */
+
+    @Path("{loadBalancerPoolUUID}")
+    @DELETE
+    @StatusCodes({
+            @ResponseCode(code = 204, condition = "No Content"),
+            @ResponseCode(code = 401, condition = "Unauthorized"),
+            @ResponseCode(code = 404, condition = "Not Found"),
+            @ResponseCode(code = 409, condition = "Conflict"),
+            @ResponseCode(code = 501, condition = "Not Implemented") })
+    public Response deleteLoadBalancerPool(
+            @PathParam("loadBalancerPoolUUID") String loadBalancerPoolUUID) {
+        INeutronLoadBalancerPoolCRUD loadBalancerPoolInterface = NeutronCRUDInterfaces.getINeutronLoadBalancerPoolCRUD(this);
+        if (loadBalancerPoolInterface == null) {
+            throw new ServiceUnavailableException("LoadBalancerPool CRUD Interface "
+                    + RestMessages.SERVICEUNAVAILABLE.toString());
+        }
+
+        /*
+         * verify the LoadBalancerPool exists and it isn't currently in use
+         */
+        if (!loadBalancerPoolInterface.neutronLoadBalancerPoolExists(loadBalancerPoolUUID)) {
+            throw new ResourceNotFoundException("LoadBalancerPool UUID does not exist.");
+        }
+        if (loadBalancerPoolInterface.neutronLoadBalancerPoolInUse(loadBalancerPoolUUID)) {
+            return Response.status(409).build();
+        }
+        NeutronLoadBalancerPool singleton = loadBalancerPoolInterface.getNeutronLoadBalancerPool(loadBalancerPoolUUID);
+        Object[] instances = ServiceHelper.getGlobalInstances(INeutronLoadBalancerPoolAware.class, this, null);
+        if (instances != null) {
+            for (Object instance : instances) {
+                INeutronLoadBalancerPoolAware service = (INeutronLoadBalancerPoolAware) instance;
+                int status = service.canDeleteNeutronLoadBalancerPool(singleton);
+                if (status < 200 || status > 299) {
+                    return Response.status(status).build();
+                }
+            }
+        }
+
+        /*
+         * remove it and return 204 status
+         */
+        loadBalancerPoolInterface.removeNeutronLoadBalancerPool(loadBalancerPoolUUID);
+        if (instances != null) {
+            for (Object instance : instances) {
+                INeutronLoadBalancerPoolAware service = (INeutronLoadBalancerPoolAware) instance;
+                service.neutronLoadBalancerPoolDeleted(singleton);
+            }
+        }
+
+        /*
+         * remove corresponding members from the member cache too
+         */
+        INeutronLoadBalancerPoolMemberCRUD loadBalancerPoolMemberInterface = NeutronCRUDInterfaces.getINeutronLoadBalancerPoolMemberCRUD(this);
+        if (loadBalancerPoolMemberInterface != null) {
+            List<NeutronLoadBalancerPoolMember> allLoadBalancerPoolMembers = new
+                ArrayList<NeutronLoadBalancerPoolMember>(loadBalancerPoolMemberInterface.getAllNeutronLoadBalancerPoolMembers());
+            Iterator<NeutronLoadBalancerPoolMember> i = allLoadBalancerPoolMembers.iterator();
+            while (i.hasNext()) {
+                NeutronLoadBalancerPoolMember member = i.next();
+                if (member.getPoolID() == loadBalancerPoolUUID)
+                    loadBalancerPoolMemberInterface.removeNeutronLoadBalancerPoolMember(member.getPoolMemberID());
+            }
+        }
+        return Response.status(204).build();
     }
 }
