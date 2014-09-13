@@ -499,7 +499,7 @@ public class TestToSalConversionsUtils {
 
     private void prepareActionSetNwTos(SetNwTosActionCaseBuilder wrapper) {
         SetNwTosActionBuilder setNwTosActionBuilder = new SetNwTosActionBuilder();
-        setNwTosActionBuilder.setTos(63);
+        setNwTosActionBuilder.setTos(252);
         wrapper.setSetNwTosAction(setNwTosActionBuilder.build());
     }
 

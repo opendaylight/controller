@@ -128,7 +128,7 @@ public class ToSalConversionsUtils {
     private static final Logger LOG = LoggerFactory.getLogger(ToSalConversionsUtils.class);
 
     private ToSalConversionsUtils() {
-
+        throw new IllegalAccessError("forcing no instance for factory");
     }
 
     public static Flow toFlow(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.Flow source, Node node) {
@@ -287,7 +287,7 @@ public class ToSalConversionsUtils {
             } else if (sourceAction instanceof SetNwTosActionCase) {
                 Integer tos = ((SetNwTosActionCase) sourceAction).getSetNwTosAction().getTos();
                 if (tos != null) {
-                    targetAction.add(new SetNwTos(tos));
+                    targetAction.add(new SetNwTos(ToSalConversionsUtils.tosToNwDscp(tos)));
                 }
             } else if (sourceAction instanceof SetTpDstActionCase) {
                 PortNumber port = ((SetTpDstActionCase) sourceAction).getSetTpDstAction().getPort();
@@ -642,5 +642,13 @@ public class ToSalConversionsUtils {
         }
 
         return mac;
+    }
+
+    /**
+     * @param nwTos NW-TOS
+     * @return shifted to NW-DSCP
+     */
+    public static int tosToNwDscp(int nwTos) {
+        return (short) (nwTos >>> FromSalConversionsUtils.ENC_FIELD_BIT_SIZE);
     }
 }
