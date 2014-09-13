@@ -38,8 +38,8 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Neutron Northbound REST APIs for LoadBalancer Policies.<br>
- * This class provides REST APIs for managing neutron LoadBalancer Policies
+ * Neutron Northbound REST APIs for LoadBalancers.<br>
+ * This class provides REST APIs for managing neutron LoadBalancers
  *
  * <br>
  * <br>
@@ -87,15 +87,13 @@ public class NeutronLoadBalancerNorthbound {
             @QueryParam("page_reverse") String pageReverse
             // sorting not supported
     ) {
-        INeutronLoadBalancerCRUD loadBalancerPoolInterface = NeutronCRUDInterfaces.getINeutronLoadBalancerCRUD(
-                this);
-        //        INeutronLoadBalancerRuleCRUD firewallRuleInterface = NeutronCRUDInterfaces.getINeutronLoadBalancerRuleCRUD(this);
+        INeutronLoadBalancerCRUD loadBalancerInterface = NeutronCRUDInterfaces.getINeutronLoadBalancerCRUD(this);
 
-        if (loadBalancerPoolInterface == null) {
+        if (loadBalancerInterface == null) {
             throw new ServiceUnavailableException("LoadBalancer CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        List<NeutronLoadBalancer> allLoadBalancers = loadBalancerPoolInterface.getAllNeutronLoadBalancers();
+        List<NeutronLoadBalancer> allLoadBalancers = loadBalancerInterface.getAllNeutronLoadBalancers();
         //        List<NeutronLoadBalancerRule> allLoadBalancerRules = firewallRuleInterface.getAllNeutronLoadBalancerRules();
         List<NeutronLoadBalancer> ans = new ArrayList<NeutronLoadBalancer>();
         //        List<NeutronLoadBalancerRule> rules = new ArrayList<NeutronLoadBalancerRule>();
@@ -128,7 +126,7 @@ public class NeutronLoadBalancerNorthbound {
     /**
      * Returns a specific LoadBalancer */
 
-    @Path("{loadBalancerPoolID}")
+    @Path("{loadBalancerID}")
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
 
@@ -137,25 +135,25 @@ public class NeutronLoadBalancerNorthbound {
             @ResponseCode(code = 401, condition = "Unauthorized"),
             @ResponseCode(code = 404, condition = "Not Found"),
             @ResponseCode(code = 501, condition = "Not Implemented") })
-    public Response showLoadBalancer(@PathParam("loadBalancerPoolID") String loadBalancerPoolID,
+    public Response showLoadBalancer(@PathParam("loadBalancerID") String loadBalancerID,
             // return fields
             @QueryParam("fields") List<String> fields) {
-        INeutronLoadBalancerCRUD loadBalancerPoolInterface = NeutronCRUDInterfaces.getINeutronLoadBalancerCRUD(
+        INeutronLoadBalancerCRUD loadBalancerInterface = NeutronCRUDInterfaces.getINeutronLoadBalancerCRUD(
                 this);
-        if (loadBalancerPoolInterface == null) {
+        if (loadBalancerInterface == null) {
             throw new ServiceUnavailableException("LoadBalancer CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        if (!loadBalancerPoolInterface.neutronLoadBalancerExists(loadBalancerPoolID)) {
+        if (!loadBalancerInterface.neutronLoadBalancerExists(loadBalancerID)) {
             throw new ResourceNotFoundException("LoadBalancer UUID does not exist.");
         }
         if (fields.size() > 0) {
-            NeutronLoadBalancer ans = loadBalancerPoolInterface.getNeutronLoadBalancer(loadBalancerPoolID);
+            NeutronLoadBalancer ans = loadBalancerInterface.getNeutronLoadBalancer(loadBalancerID);
             return Response.status(200).entity(
                     new NeutronLoadBalancerRequest(extractFields(ans, fields))).build();
         } else {
-            return Response.status(200).entity(new NeutronLoadBalancerRequest(loadBalancerPoolInterface.getNeutronLoadBalancer(
-                    loadBalancerPoolID))).build();
+            return Response.status(200).entity(new NeutronLoadBalancerRequest(loadBalancerInterface.getNeutronLoadBalancer(
+                    loadBalancerID))).build();
         }
     }
 
@@ -175,9 +173,9 @@ public class NeutronLoadBalancerNorthbound {
             @ResponseCode(code = 409, condition = "Conflict"),
             @ResponseCode(code = 501, condition = "Not Implemented") })
     public Response createLoadBalancers(final NeutronLoadBalancerRequest input) {
-        INeutronLoadBalancerCRUD loadBalancerPoolInterface = NeutronCRUDInterfaces.getINeutronLoadBalancerCRUD(
+        INeutronLoadBalancerCRUD loadBalancerInterface = NeutronCRUDInterfaces.getINeutronLoadBalancerCRUD(
                 this);
-        if (loadBalancerPoolInterface == null) {
+        if (loadBalancerInterface == null) {
             throw new ServiceUnavailableException("LoadBalancer CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
@@ -187,10 +185,10 @@ public class NeutronLoadBalancerNorthbound {
             /*
              *  Verify that the LoadBalancer doesn't already exist.
              */
-            if (loadBalancerPoolInterface.neutronLoadBalancerExists(singleton.getLoadBalancerID())) {
+            if (loadBalancerInterface.neutronLoadBalancerExists(singleton.getLoadBalancerID())) {
                 throw new BadRequestException("LoadBalancer UUID already exists");
             }
-            loadBalancerPoolInterface.addNeutronLoadBalancer(singleton);
+            loadBalancerInterface.addNeutronLoadBalancer(singleton);
 
             Object[] instances = ServiceHelper.getGlobalInstances(INeutronLoadBalancerAware.class, this, null);
             if (instances != null) {
@@ -202,7 +200,7 @@ public class NeutronLoadBalancerNorthbound {
                     }
                 }
             }
-            loadBalancerPoolInterface.addNeutronLoadBalancer(singleton);
+            loadBalancerInterface.addNeutronLoadBalancer(singleton);
             if (instances != null) {
                 for (Object instance : instances) {
                     INeutronLoadBalancerAware service = (INeutronLoadBalancerAware) instance;
@@ -221,7 +219,7 @@ public class NeutronLoadBalancerNorthbound {
                  *  Verify that the firewall policy doesn't already exist
                  */
 
-                if (loadBalancerPoolInterface.neutronLoadBalancerExists(test.getLoadBalancerID())) {
+                if (loadBalancerInterface.neutronLoadBalancerExists(test.getLoadBalancerID())) {
                     throw new BadRequestException("Load Balancer Pool UUID already is already created");
                 }
                 if (testMap.containsKey(test.getLoadBalancerID())) {
@@ -243,7 +241,7 @@ public class NeutronLoadBalancerNorthbound {
             i = bulk.iterator();
             while (i.hasNext()) {
                 NeutronLoadBalancer test = i.next();
-                loadBalancerPoolInterface.addNeutronLoadBalancer(test);
+                loadBalancerInterface.addNeutronLoadBalancer(test);
                 if (instances != null) {
                     for (Object instance : instances) {
                         INeutronLoadBalancerAware service = (INeutronLoadBalancerAware) instance;
@@ -258,7 +256,7 @@ public class NeutronLoadBalancerNorthbound {
     /**
      * Updates a LoadBalancer Policy
      */
-    @Path("{loadBalancerPoolID}")
+    @Path("{loadBalancerID}")
     @PUT
     @Produces({ MediaType.APPLICATION_JSON })
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -271,10 +269,10 @@ public class NeutronLoadBalancerNorthbound {
             @ResponseCode(code = 404, condition = "Not Found"),
             @ResponseCode(code = 501, condition = "Not Implemented") })
     public Response updateLoadBalancer(
-            @PathParam("loadBalancerPoolID") String loadBalancerPoolID, final NeutronLoadBalancerRequest input) {
-        INeutronLoadBalancerCRUD loadBalancerPoolInterface = NeutronCRUDInterfaces.getINeutronLoadBalancerCRUD(
+            @PathParam("loadBalancerID") String loadBalancerID, final NeutronLoadBalancerRequest input) {
+        INeutronLoadBalancerCRUD loadBalancerInterface = NeutronCRUDInterfaces.getINeutronLoadBalancerCRUD(
                 this);
-        if (loadBalancerPoolInterface == null) {
+        if (loadBalancerInterface == null) {
             throw new ServiceUnavailableException("LoadBalancer CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
@@ -282,14 +280,14 @@ public class NeutronLoadBalancerNorthbound {
         /*
          * verify the LoadBalancer exists and there is only one delta provided
          */
-        if (!loadBalancerPoolInterface.neutronLoadBalancerExists(loadBalancerPoolID)) {
+        if (!loadBalancerInterface.neutronLoadBalancerExists(loadBalancerID)) {
             throw new ResourceNotFoundException("LoadBalancer UUID does not exist.");
         }
         if (!input.isSingleton()) {
             throw new BadRequestException("Only singleton edit supported");
         }
         NeutronLoadBalancer delta = input.getSingleton();
-        NeutronLoadBalancer original = loadBalancerPoolInterface.getNeutronLoadBalancer(loadBalancerPoolID);
+        NeutronLoadBalancer original = loadBalancerInterface.getNeutronLoadBalancer(loadBalancerID);
 
         /*
          * updates restricted by Neutron
@@ -318,23 +316,23 @@ public class NeutronLoadBalancerNorthbound {
         /*
          * update the object and return it
          */
-        loadBalancerPoolInterface.updateNeutronLoadBalancer(loadBalancerPoolID, delta);
-        NeutronLoadBalancer updatedLoadBalancer = loadBalancerPoolInterface.getNeutronLoadBalancer(
-                loadBalancerPoolID);
+        loadBalancerInterface.updateNeutronLoadBalancer(loadBalancerID, delta);
+        NeutronLoadBalancer updatedLoadBalancer = loadBalancerInterface.getNeutronLoadBalancer(
+                loadBalancerID);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronLoadBalancerAware service = (INeutronLoadBalancerAware) instance;
                 service.neutronLoadBalancerUpdated(updatedLoadBalancer);
             }
         }
-        return Response.status(200).entity(new NeutronLoadBalancerRequest(loadBalancerPoolInterface.getNeutronLoadBalancer(
-                loadBalancerPoolID))).build();
+        return Response.status(200).entity(new NeutronLoadBalancerRequest(loadBalancerInterface.getNeutronLoadBalancer(
+                loadBalancerID))).build();
     }
 
     /**
      * Deletes a LoadBalancer */
 
-    @Path("{loadBalancerPoolID}")
+    @Path("{loadBalancerID}")
     @DELETE
     @StatusCodes({
             @ResponseCode(code = 204, condition = "No Content"),
@@ -343,10 +341,10 @@ public class NeutronLoadBalancerNorthbound {
             @ResponseCode(code = 409, condition = "Conflict"),
             @ResponseCode(code = 501, condition = "Not Implemented") })
     public Response deleteLoadBalancer(
-            @PathParam("loadBalancerPoolID") String loadBalancerPoolID) {
-        INeutronLoadBalancerCRUD loadBalancerPoolInterface = NeutronCRUDInterfaces.getINeutronLoadBalancerCRUD(
+            @PathParam("loadBalancerID") String loadBalancerID) {
+        INeutronLoadBalancerCRUD loadBalancerInterface = NeutronCRUDInterfaces.getINeutronLoadBalancerCRUD(
                 this);
-        if (loadBalancerPoolInterface == null) {
+        if (loadBalancerInterface == null) {
             throw new ServiceUnavailableException("LoadBalancer CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
@@ -354,13 +352,13 @@ public class NeutronLoadBalancerNorthbound {
         /*
          * verify the LoadBalancer exists and it isn't currently in use
          */
-        if (!loadBalancerPoolInterface.neutronLoadBalancerExists(loadBalancerPoolID)) {
+        if (!loadBalancerInterface.neutronLoadBalancerExists(loadBalancerID)) {
             throw new ResourceNotFoundException("LoadBalancer UUID does not exist.");
         }
-        if (loadBalancerPoolInterface.neutronLoadBalancerInUse(loadBalancerPoolID)) {
+        if (loadBalancerInterface.neutronLoadBalancerInUse(loadBalancerID)) {
             return Response.status(409).build();
         }
-        NeutronLoadBalancer singleton = loadBalancerPoolInterface.getNeutronLoadBalancer(loadBalancerPoolID);
+        NeutronLoadBalancer singleton = loadBalancerInterface.getNeutronLoadBalancer(loadBalancerID);
         Object[] instances = ServiceHelper.getGlobalInstances(INeutronLoadBalancerAware.class, this, null);
         if (instances != null) {
             for (Object instance : instances) {
@@ -372,7 +370,7 @@ public class NeutronLoadBalancerNorthbound {
             }
         }
 
-        loadBalancerPoolInterface.removeNeutronLoadBalancer(loadBalancerPoolID);
+        loadBalancerInterface.removeNeutronLoadBalancer(loadBalancerID);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronLoadBalancerAware service = (INeutronLoadBalancerAware) instance;
