@@ -494,9 +494,10 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
                             inputString.append(c);
                         } catch (Exception err) {
                             err.printStackTrace(out);
+                            stopped = true;
+                            break;
                         }
                     }
-
                     processCommand(inputString, out);
                     inputString = new StringBuffer();
                 }
@@ -504,6 +505,7 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
                 try {
                     socket.close();
                 } catch (Exception err2) {
+                    err2.printStackTrace();
                 }
             }
         }
