@@ -315,7 +315,7 @@ public final class MDFlowMapping {
 
     private static SetNwTosActionCase _toAction(final SetNwTos sourceAction) {
         return new SetNwTosActionCaseBuilder()
-        .setSetNwTosAction(new SetNwTosActionBuilder().setTos(sourceAction.getNwTos()).build())
+        .setSetNwTosAction(new SetNwTosActionBuilder().setTos(FromSalConversionsUtils.dscpToTos(sourceAction.getNwTos())).build())
         .build();
     }
 

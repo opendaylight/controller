@@ -61,10 +61,16 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 
 import com.google.common.net.InetAddresses;
 
-public class FromSalConversionsUtils {
+/**
+ * MD-SAL to AD-SAL conversions collection
+ */
+public final class FromSalConversionsUtils {
+
+    /** http://en.wikipedia.org/wiki/IPv4#Packet_structure (end of octet number 1, bit 14.+15.) */
+    public static final int ENC_FIELD_BIT_SIZE = 2;
 
     private FromSalConversionsUtils() {
-
+        throw new IllegalAccessError("forcing no instance for factory");
     }
 
     @SuppressWarnings("unused")
@@ -469,5 +475,12 @@ public class FromSalConversionsUtils {
         return true;
     }
 
+    /**
+     * @param nwDscp NW-DSCP
+     * @return shifted to NW-TOS (with empty ECN part)
+     */
+    public static int dscpToTos(int nwDscp) {
+        return (short) (nwDscp << ENC_FIELD_BIT_SIZE);
+    }
 
 }
