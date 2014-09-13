@@ -188,8 +188,6 @@ public class NeutronLoadBalancerNorthbound {
             if (loadBalancerInterface.neutronLoadBalancerExists(singleton.getLoadBalancerID())) {
                 throw new BadRequestException("LoadBalancer UUID already exists");
             }
-            loadBalancerInterface.addNeutronLoadBalancer(singleton);
-
             Object[] instances = ServiceHelper.getGlobalInstances(INeutronLoadBalancerAware.class, this, null);
             if (instances != null) {
                 for (Object instance : instances) {
@@ -216,7 +214,7 @@ public class NeutronLoadBalancerNorthbound {
                 NeutronLoadBalancer test = i.next();
 
                 /*
-                 *  Verify that the firewall policy doesn't already exist
+                 *  Verify that the loadbalancer doesn't already exist
                  */
 
                 if (loadBalancerInterface.neutronLoadBalancerExists(test.getLoadBalancerID())) {
