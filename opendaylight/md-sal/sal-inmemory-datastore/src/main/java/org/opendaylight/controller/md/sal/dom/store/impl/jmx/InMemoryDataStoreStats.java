@@ -9,7 +9,7 @@
 package org.opendaylight.controller.md.sal.dom.store.impl.jmx;
 
 import java.util.concurrent.ExecutorService;
-
+import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 import org.opendaylight.controller.md.sal.common.util.jmx.QueuedNotificationManagerMXBeanImpl;
 import org.opendaylight.controller.md.sal.common.util.jmx.ThreadExecutorStatsMXBeanImpl;
 import org.opendaylight.yangtools.util.concurrent.QueuedNotificationManager;
@@ -21,24 +21,28 @@ import org.opendaylight.yangtools.util.concurrent.QueuedNotificationManager;
  */
 public class InMemoryDataStoreStats implements AutoCloseable {
 
-    private final ThreadExecutorStatsMXBeanImpl notificationExecutorStatsBean;
-    private final ThreadExecutorStatsMXBeanImpl dataStoreExecutorStatsBean;
+    private final AbstractMXBean notificationExecutorStatsBean;
+    private final AbstractMXBean dataStoreExecutorStatsBean;
     private final QueuedNotificationManagerMXBeanImpl notificationManagerStatsBean;
 
-    public InMemoryDataStoreStats(String mBeanType, QueuedNotificationManager<?, ?> manager,
-            ExecutorService dataStoreExecutor) {
+    public InMemoryDataStoreStats(final String mBeanType, final QueuedNotificationManager<?, ?> manager,
+            final ExecutorService dataStoreExecutor) {
 
-        this.notificationManagerStatsBean = new QueuedNotificationManagerMXBeanImpl(manager,
+        notificationManagerStatsBean = new QueuedNotificationManagerMXBeanImpl(manager,
                 "notification-manager", mBeanType, null);
         notificationManagerStatsBean.registerMBean();
 
-        this.notificationExecutorStatsBean = new ThreadExecutorStatsMXBeanImpl(manager.getExecutor(),
+        notificationExecutorStatsBean = ThreadExecutorStatsMXBeanImpl.create(manager.getExecutor(),
                 "notification-executor", mBeanType, null);
-        this.notificationExecutorStatsBean.registerMBean();
+        if (notificationExecutorStatsBean != null) {
+            notificationExecutorStatsBean.registerMBean();
+        }
 
-        this.dataStoreExecutorStatsBean = new ThreadExecutorStatsMXBeanImpl(dataStoreExecutor,
+        dataStoreExecutorStatsBean = ThreadExecutorStatsMXBeanImpl.create(dataStoreExecutor,
                 "data-store-executor", mBeanType, null);
-        this.dataStoreExecutorStatsBean.registerMBean();
+        if (dataStoreExecutorStatsBean != null) {
+            dataStoreExecutorStatsBean.registerMBean();
+        }
     }
 
     @Override

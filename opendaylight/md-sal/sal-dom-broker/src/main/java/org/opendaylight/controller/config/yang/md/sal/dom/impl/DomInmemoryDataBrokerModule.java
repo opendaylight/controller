@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitDeadlockException;
+import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 import org.opendaylight.controller.md.sal.common.util.jmx.ThreadExecutorStatsMXBeanImpl;
 import org.opendaylight.controller.md.sal.dom.broker.impl.DOMDataBrokerImpl;
 import org.opendaylight.controller.md.sal.dom.broker.impl.jmx.CommitStatsMXBeanImpl;
@@ -96,22 +97,23 @@ public final class DomInmemoryDataBrokerModule extends
                 newDataBroker.getCommitStatsTracker(), JMX_BEAN_TYPE);
         commitStatsMXBean.registerMBean();
 
-        final ThreadExecutorStatsMXBeanImpl commitExecutorStatsMXBean =
-                new ThreadExecutorStatsMXBeanImpl(commitExecutor, "CommitExecutorStats",
+        final AbstractMXBean commitExecutorStatsMXBean =
+                ThreadExecutorStatsMXBeanImpl.create(commitExecutor, "CommitExecutorStats",
                         JMX_BEAN_TYPE, null);
-        commitExecutorStatsMXBean.registerMBean();
-
-        final ThreadExecutorStatsMXBeanImpl commitFutureStatsMXBean =
-                new ThreadExecutorStatsMXBeanImpl(listenableFutureExecutor,
+        final AbstractMXBean commitFutureStatsMXBean =
+                ThreadExecutorStatsMXBeanImpl.create(listenableFutureExecutor,
                         "CommitFutureExecutorStats", JMX_BEAN_TYPE, null);
-        commitFutureStatsMXBean.registerMBean();
 
         newDataBroker.setCloseable(new AutoCloseable() {
             @Override
             public void close() {
                 commitStatsMXBean.unregisterMBean();
-                commitExecutorStatsMXBean.unregisterMBean();
-                commitFutureStatsMXBean.unregisterMBean();
+                if (commitExecutorStatsMXBean != null) {
+                    commitExecutorStatsMXBean.unregisterMBean();
+                }
+                if (commitFutureStatsMXBean != null) {
+                    commitFutureStatsMXBean.unregisterMBean();
+                }
             }
         });
 
