@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.dom.impl;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.concurrent.ExecutorService;
-
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitDeadlockException;
 import org.opendaylight.controller.md.sal.common.util.jmx.ThreadExecutorStatsMXBeanImpl;
@@ -18,7 +18,6 @@ import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreFac
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.yangtools.util.concurrent.DeadlockDetectingListeningExecutorService;
 import org.opendaylight.yangtools.util.concurrent.SpecialExecutors;
-import com.google.common.collect.ImmutableMap;
 
 /**
 *
@@ -88,7 +87,7 @@ public final class DomInmemoryDataBrokerModule extends
 
         DOMDataBrokerImpl newDataBroker = new DOMDataBrokerImpl(datastores,
                 new DeadlockDetectingListeningExecutorService(commitExecutor,
-                    TransactionCommitDeadlockException.DEADLOCK_EXECUTOR_FUNCTION,
+                    TransactionCommitDeadlockException.DEADLOCK_EXCEPTION_SUPPLIER,
                     listenableFutureExecutor));
 
         final CommitStatsMXBeanImpl commitStatsMXBean = new CommitStatsMXBeanImpl(

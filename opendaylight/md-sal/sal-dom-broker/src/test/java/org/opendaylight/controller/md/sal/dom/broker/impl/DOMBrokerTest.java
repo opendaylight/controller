@@ -1,12 +1,19 @@
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
-
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.util.concurrent.ForwardingExecutorService;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -15,7 +22,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,15 +44,6 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.ForwardingExecutorService;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
 
 public class DOMBrokerTest {
 
@@ -76,7 +73,7 @@ public class DOMBrokerTest {
         commitExecutor = new CommitExecutorService(Executors.newSingleThreadExecutor());
         futureExecutor = SpecialExecutors.newBlockingBoundedCachedThreadPool(1, 5, "FCB");
         executor = new DeadlockDetectingListeningExecutorService(commitExecutor,
-                TransactionCommitDeadlockException.DEADLOCK_EXECUTOR_FUNCTION, futureExecutor);
+                TransactionCommitDeadlockException.DEADLOCK_EXCEPTION_SUPPLIER, futureExecutor);
         domBroker = new DOMDataBrokerImpl(stores, executor);
     }
 
@@ -215,19 +212,19 @@ public class DOMBrokerTest {
 
         TestDOMDataChangeListener dcListener = new TestDOMDataChangeListener() {
             @Override
-            public void onDataChanged( AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change ) {
+            public void onDataChanged( final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change ) {
 
                 DOMDataWriteTransaction writeTx = domBroker.newWriteOnlyTransaction();
                 writeTx.put( OPERATIONAL, TestModel.TEST2_PATH,
                              ImmutableNodes.containerNode( TestModel.TEST2_QNAME ) );
                 Futures.addCallback( writeTx.submit(), new FutureCallback<Void>() {
                     @Override
-                    public void onSuccess( Void result ) {
+                    public void onSuccess( final Void result ) {
                         commitCompletedLatch.countDown();
                     }
 
                     @Override
-                    public void onFailure( Throwable t ) {
+                    public void onFailure( final Throwable t ) {
                         caughtCommitEx.set( t );
                         commitCompletedLatch.countDown();
                     }
@@ -271,7 +268,7 @@ public class DOMBrokerTest {
 
         TestDOMDataChangeListener dcListener = new TestDOMDataChangeListener() {
             @Override
-            public void onDataChanged( AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change ) {
+            public void onDataChanged( final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change ) {
                 DOMDataWriteTransaction writeTx = domBroker.newWriteOnlyTransaction();
                 writeTx.put( OPERATIONAL, TestModel.TEST2_PATH,
                              ImmutableNodes.containerNode( TestModel.TEST2_QNAME ) );
@@ -333,7 +330,7 @@ public class DOMBrokerTest {
         private final CountDownLatch latch = new CountDownLatch( 1 );
 
         @Override
-        public void onDataChanged( AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change ) {
+        public void onDataChanged( final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change ) {
             this.change = change;
             latch.countDown();
         }
@@ -347,7 +344,7 @@ public class DOMBrokerTest {
 
         ExecutorService delegate;
 
-        public CommitExecutorService( ExecutorService delegate ) {
+        public CommitExecutorService( final ExecutorService delegate ) {
             this.delegate = delegate;
         }
 

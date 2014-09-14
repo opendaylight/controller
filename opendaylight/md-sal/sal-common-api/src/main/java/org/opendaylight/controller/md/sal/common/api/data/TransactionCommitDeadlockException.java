@@ -8,11 +8,10 @@
 
 package org.opendaylight.controller.md.sal.common.api.data;
 
+import com.google.common.base.Supplier;
 import org.opendaylight.yangtools.yang.common.RpcError;
-import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
-
-import com.google.common.base.Function;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 
 /**
  * A type of TransactionCommitFailedException that indicates a situation that would result in a
@@ -24,23 +23,21 @@ import com.google.common.base.Function;
  * @author Thomas Pantelis
  */
 public class TransactionCommitDeadlockException extends TransactionCommitFailedException {
-
     private static final long serialVersionUID = 1L;
-
     private static final String DEADLOCK_MESSAGE =
             "An attempt to block on a ListenableFuture via a get method from a write " +
             "transaction submit was detected that would result in deadlock. The commit " +
             "result must be obtained asynchronously, e.g. via Futures#addCallback, to avoid deadlock.";
+    private static final RpcError DEADLOCK_RPCERROR = RpcResultBuilder.newError(ErrorType.APPLICATION, "lock-denied", DEADLOCK_MESSAGE);
 
-    public static Function<Void, Exception> DEADLOCK_EXECUTOR_FUNCTION = new Function<Void, Exception>() {
+    public static final Supplier<Exception> DEADLOCK_EXCEPTION_SUPPLIER = new Supplier<Exception>() {
         @Override
-        public Exception apply(Void notUsed) {
-            return new TransactionCommitDeadlockException( DEADLOCK_MESSAGE,
-                    RpcResultBuilder.newError(ErrorType.APPLICATION, "lock-denied", DEADLOCK_MESSAGE));
+        public Exception get() {
+            return new TransactionCommitDeadlockException(DEADLOCK_MESSAGE, DEADLOCK_RPCERROR);
         }
     };
 
-    public TransactionCommitDeadlockException(String message, final RpcError... errors) {
+    public TransactionCommitDeadlockException(final String message, final RpcError... errors) {
         super(message, errors);
     }
 }
