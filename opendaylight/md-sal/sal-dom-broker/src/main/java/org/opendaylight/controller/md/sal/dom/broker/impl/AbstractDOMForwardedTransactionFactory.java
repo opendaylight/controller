@@ -8,7 +8,6 @@
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -46,7 +45,7 @@ abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreTransact
     private volatile int closed = 0;
 
     protected AbstractDOMForwardedTransactionFactory(final Map<LogicalDatastoreType, ? extends T> txFactories) {
-        this.storeTxFactories = ImmutableMap.copyOf(txFactories);
+        this.storeTxFactories = new EnumMap<>(txFactories);
     }
 
     /**

@@ -9,7 +9,6 @@ package org.opendaylight.controller.md.sal.dom.broker.impl;
 
 import static com.google.common.base.Preconditions.checkState;
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import java.util.EnumMap;
@@ -42,7 +41,7 @@ public class DOMDataBrokerImpl extends AbstractDOMForwardedTransactionFactory<DO
     private final AtomicLong chainNum = new AtomicLong();
     private volatile AutoCloseable closeable;
 
-    public DOMDataBrokerImpl(final ImmutableMap<LogicalDatastoreType, DOMStore> datastores,
+    public DOMDataBrokerImpl(final Map<LogicalDatastoreType, DOMStore> datastores,
             final ListeningExecutorService executor) {
         super(datastores);
         this.coordinator = new DOMDataCommitCoordinatorImpl(executor);

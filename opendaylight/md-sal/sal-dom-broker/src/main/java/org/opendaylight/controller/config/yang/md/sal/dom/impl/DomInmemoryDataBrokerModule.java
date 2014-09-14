@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.dom.impl;
 
-import com.google.common.collect.ImmutableMap;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitDeadlockException;
@@ -58,9 +59,10 @@ public final class DomInmemoryDataBrokerModule extends
            //we will default to InMemoryDOMDataStore creation
            configStore = InMemoryDOMDataStoreFactory.create("DOM-CFG", getSchemaServiceDependency());
         }
-        ImmutableMap<LogicalDatastoreType, DOMStore> datastores = ImmutableMap
-                .<LogicalDatastoreType, DOMStore> builder().put(LogicalDatastoreType.OPERATIONAL, operStore)
-                .put(LogicalDatastoreType.CONFIGURATION, configStore).build();
+
+        final Map<LogicalDatastoreType, DOMStore> datastores = new EnumMap<>(LogicalDatastoreType.class);
+        datastores.put(LogicalDatastoreType.OPERATIONAL, operStore);
+        datastores.put(LogicalDatastoreType.CONFIGURATION, configStore);
 
         /*
          * We use a single-threaded executor for commits with a bounded queue capacity. If the
