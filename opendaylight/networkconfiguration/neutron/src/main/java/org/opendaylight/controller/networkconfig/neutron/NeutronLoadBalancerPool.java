@@ -14,8 +14,8 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+//import javax.xml.bind.annotation.XmlElementWrapper;
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -34,7 +34,7 @@ import java.util.List;
  * healthmonitor_id   String
  * admin_state_up     Bool
  * status             String
- * members            List <String>
+ * members            List <NeutronLoadBalancerPoolMember>
  * http://docs.openstack.org/api/openstack-network/2.0/openstack-network.pdf
  */
 
@@ -71,13 +71,10 @@ public class NeutronLoadBalancerPool extends ConfigurationObject implements Seri
     @XmlElement (name="status")
     String loadBalancerPoolStatus;
 
-    @XmlElement (name="members")
-    List loadBalancerPoolMembers;
-
-    HashMap<String, NeutronLoadBalancerPoolMember> member;
+    @XmlElement(name="members")
+    List<NeutronLoadBalancerPoolMember> loadBalancerPoolMembers;
 
     public NeutronLoadBalancerPool() {
-        member = new HashMap<String, NeutronLoadBalancerPoolMember>();
     }
 
     public String getLoadBalancerPoolID() {
@@ -152,12 +149,25 @@ public class NeutronLoadBalancerPool extends ConfigurationObject implements Seri
         this.loadBalancerPoolStatus = loadBalancerPoolStatus;
     }
 
-    public List getLoadBalancerPoolMembers() {
+    public List<NeutronLoadBalancerPoolMember> getLoadBalancerPoolMembers() {
+        /*
+         * Update the pool_id of the member to that this.loadBalancerPoolID
+         */
+        for (NeutronLoadBalancerPoolMember member: loadBalancerPoolMembers)
+            member.setPoolID(loadBalancerPoolID);
         return loadBalancerPoolMembers;
     }
 
-    public void setLoadBalancerPoolMembers(List loadBalancerPoolMembers) {
+    public void setLoadBalancerPoolMembers(List<NeutronLoadBalancerPoolMember> loadBalancerPoolMembers) {
         this.loadBalancerPoolMembers = loadBalancerPoolMembers;
+    }
+
+    public void addLoadBalancerPoolMember(NeutronLoadBalancerPoolMember loadBalancerPoolMember) {
+        this.loadBalancerPoolMembers.add(loadBalancerPoolMember);
+    }
+
+    public void removeLoadBalancerPoolMember(NeutronLoadBalancerPoolMember loadBalancerPoolMember) {
+        this.loadBalancerPoolMembers.remove(loadBalancerPoolMember);
     }
 
     public NeutronLoadBalancerPool extractFields(List<String> fields) {
