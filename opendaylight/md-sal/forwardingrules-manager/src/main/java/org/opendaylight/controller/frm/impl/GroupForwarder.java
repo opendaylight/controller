@@ -78,7 +78,7 @@ public class GroupForwarder extends AbstractListeningCommiter<Group> {
         final Group group = (removeDataObj);
         final RemoveGroupInputBuilder builder = new RemoveGroupInputBuilder(group);
 
-        builder.setNode(new NodeRef(nodeIdent));
+        builder.setNode(new NodeRef(nodeIdent.firstIdentifierOf(Node.class)));
         builder.setGroupRef(new GroupRef(identifier));
         builder.setTransactionUri(new Uri(provider.getNewTransactionId()));
         this.provider.getSalGroupService().removeGroup(builder.build());
@@ -93,7 +93,7 @@ public class GroupForwarder extends AbstractListeningCommiter<Group> {
         final Group updatedGroup = (update);
         final UpdateGroupInputBuilder builder = new UpdateGroupInputBuilder();
 
-        builder.setNode(new NodeRef(nodeIdent));
+        builder.setNode(new NodeRef(nodeIdent.firstIdentifierOf(Node.class)));
         builder.setGroupRef(new GroupRef(identifier));
         builder.setTransactionUri(new Uri(provider.getNewTransactionId()));
         builder.setUpdatedGroup((new UpdatedGroupBuilder(updatedGroup)).build());
@@ -109,7 +109,7 @@ public class GroupForwarder extends AbstractListeningCommiter<Group> {
         final Group group = (addDataObj);
         final AddGroupInputBuilder builder = new AddGroupInputBuilder(group);
 
-        builder.setNode(new NodeRef(nodeIdent));
+        builder.setNode(new NodeRef(nodeIdent.firstIdentifierOf(Node.class)));
         builder.setGroupRef(new GroupRef(identifier));
         builder.setTransactionUri(new Uri(provider.getNewTransactionId()));
         this.provider.getSalGroupService().addGroup(builder.build());
