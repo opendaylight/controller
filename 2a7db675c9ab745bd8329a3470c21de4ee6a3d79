@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_c408ee2a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/FollowerTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 438,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-14T13:55:58Z",
+      "side": 1,
+      "message": "We are using the same actor reference for follower and leader. I can see that you\u0027re probably doing this because you want to know if Applysnapshot was called on the follower. However to make this test really clean you should probably have a actor which just collects messages be sent as the follower. As an example look for MessageCollectorActor in sal-distributed-datastore which does something similar.",
+      "revId": "2a7db675c9ab745bd8329a3470c21de4ee6a3d79",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
