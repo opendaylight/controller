@@ -32,12 +32,6 @@ module opendaylight-sal-dom-broker-impl {
         config:provided-service sal:dom-async-data-broker;
     }
     
-    identity hash-map-data-store {
-        base config:module-type;
-        config:provided-service sal:dom-data-store;
-        config:java-name-prefix HashMapDataStore;
-    }
-    
     identity schema-service-singleton {
         base config:module-type;
         config:provided-service sal:schema-service;
@@ -126,12 +120,6 @@ module opendaylight-sal-dom-broker-impl {
                 type uint16;
                 description "The maximum queue size for the data broker's commit executor.";
             }
-        }
-    }
-    
-    augment "/config:modules/config:module/config:state" {
-        case hash-map-data-store {
-            when "/config:modules/config:module/config:type = 'hash-map-data-store'";
         }
     }
     
