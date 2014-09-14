@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.concurrent.ExecutorService;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
@@ -57,7 +59,7 @@ public final class InMemoryDOMDataStoreFactory {
             @Nullable final InMemoryDOMDataStoreConfigProperties properties) {
 
         InMemoryDOMDataStoreConfigProperties actualProperties = properties;
-        if(actualProperties == null) {
+        if (actualProperties == null) {
             actualProperties = InMemoryDOMDataStoreConfigProperties.getDefault();
         }
 
@@ -65,21 +67,18 @@ public final class InMemoryDOMDataStoreFactory {
         // task execution time to get higher throughput as DataChangeListeners typically provide
         // much of the business logic for a data model. If the executor queue size limit is reached,
         // subsequent submitted notifications will block the calling thread.
-
         int dclExecutorMaxQueueSize = actualProperties.getMaxDataChangeExecutorQueueSize();
         int dclExecutorMaxPoolSize = actualProperties.getMaxDataChangeExecutorPoolSize();
 
         ExecutorService dataChangeListenerExecutor = SpecialExecutors.newBlockingBoundedFastThreadPool(
                 dclExecutorMaxPoolSize, dclExecutorMaxQueueSize, name + "-DCL" );
 
-        ExecutorService domStoreExecutor = SpecialExecutors.newBoundedSingleThreadExecutor(
-                actualProperties.getMaxDataStoreExecutorQueueSize(), "DOMStore-" + name );
-
-        InMemoryDOMDataStore dataStore = new InMemoryDOMDataStore(name,
-                domStoreExecutor, dataChangeListenerExecutor,
+        final ListeningExecutorService commitExecutor = MoreExecutors.sameThreadExecutor();
+        final InMemoryDOMDataStore dataStore = new InMemoryDOMDataStore(name,
+            commitExecutor, dataChangeListenerExecutor,
                 actualProperties.getMaxDataChangeListenerQueueSize(), debugTransactions);
 
-        if(schemaService != null) {
+        if (schemaService != null) {
             schemaService.registerSchemaContextListener(dataStore);
         }
 
