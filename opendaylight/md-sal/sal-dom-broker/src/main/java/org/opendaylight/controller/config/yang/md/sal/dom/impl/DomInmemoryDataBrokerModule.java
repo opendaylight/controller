@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.dom.impl;
 
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -66,15 +68,10 @@ public final class DomInmemoryDataBrokerModule extends
         datastores.put(LogicalDatastoreType.CONFIGURATION, configStore);
 
         /*
-         * We use a single-threaded executor for commits with a bounded queue capacity. If the
-         * queue capacity is reached, subsequent commit tasks will be rejected and the commits will
-         * fail. This is done to relieve back pressure. This should be an extreme scenario - either
-         * there's deadlock(s) somewhere and the controller is unstable or some rogue component is
-         * continuously hammering commits too fast or the controller is just over-capacity for the
-         * system it's running on.
+         * Rather than having dedicated threads, we use the coordinator thread to perform
+         * the work. Turns out to be about twice as fast as a single-threaded executor.
          */
-        ExecutorService commitExecutor = SpecialExecutors.newBoundedSingleThreadExecutor(
-                getMaxDataBrokerCommitQueueSize(), "WriteTxCommit");
+        final ListeningExecutorService commitExecutor = MoreExecutors.sameThreadExecutor();
 
         /*
          * We use an executor for commit ListenableFuture callbacks that favors reusing available
