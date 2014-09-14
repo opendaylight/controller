@@ -77,7 +77,7 @@ public class MeterForwarder extends AbstractListeningCommiter<Meter> {
 
         final RemoveMeterInputBuilder builder = new RemoveMeterInputBuilder(removeDataObj);
 
-        builder.setNode(new NodeRef(nodeIdent));
+        builder.setNode(new NodeRef(nodeIdent.firstIdentifierOf(Node.class)));
         builder.setMeterRef(new MeterRef(identifier));
         builder.setTransactionUri(new Uri(provider.getNewTransactionId()));
         this.provider.getSalMeterService().removeMeter(builder.build());
@@ -90,7 +90,7 @@ public class MeterForwarder extends AbstractListeningCommiter<Meter> {
 
         final UpdateMeterInputBuilder builder = new UpdateMeterInputBuilder();
 
-        builder.setNode(new NodeRef(nodeIdent));
+        builder.setNode(new NodeRef(nodeIdent.firstIdentifierOf(Node.class)));
         builder.setMeterRef(new MeterRef(identifier));
         builder.setTransactionUri(new Uri(provider.getNewTransactionId()));
         builder.setUpdatedMeter((new UpdatedMeterBuilder(update)).build());
@@ -105,7 +105,7 @@ public class MeterForwarder extends AbstractListeningCommiter<Meter> {
 
         final AddMeterInputBuilder builder = new AddMeterInputBuilder(addDataObj);
 
-        builder.setNode(new NodeRef(nodeIdent));
+        builder.setNode(new NodeRef(nodeIdent.firstIdentifierOf(Node.class)));
         builder.setMeterRef(new MeterRef(identifier));
         builder.setTransactionUri(new Uri(provider.getNewTransactionId()));
         this.provider.getSalMeterService().addMeter(builder.build());
