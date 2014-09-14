@@ -74,7 +74,7 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
     }
 
     public void setDataStoreExecutor(ExecutorService dsExecutor) {
-        this.dataStoreExecutorStatsBean = new ThreadExecutorStatsMXBeanImpl(dsExecutor,
+        this.dataStoreExecutorStatsBean = ThreadExecutorStatsMXBeanImpl.create(dsExecutor,
                 "notification-executor", getMBeanType(), getMBeanCategory());
     }
 
@@ -82,7 +82,7 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
         this.notificationManagerStatsBean = new QueuedNotificationManagerMXBeanImpl(manager,
                 "notification-manager", getMBeanType(), getMBeanCategory());
 
-        this.notificationExecutorStatsBean = new ThreadExecutorStatsMXBeanImpl(manager.getExecutor(),
+        this.notificationExecutorStatsBean = ThreadExecutorStatsMXBeanImpl.create(manager.getExecutor(),
                 "data-store-executor", getMBeanType(), getMBeanCategory());
     }
 

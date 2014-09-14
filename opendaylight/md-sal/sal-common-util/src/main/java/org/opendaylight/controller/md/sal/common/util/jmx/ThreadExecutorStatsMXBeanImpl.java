@@ -16,6 +16,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import javax.annotation.Nullable;
 import org.opendaylight.yangtools.util.concurrent.CountingRejectedExecutionHandler;
 import org.opendaylight.yangtools.util.concurrent.TrackingLinkedBlockingQueue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * MXBean implementation of the ThreadExecutorStatsMXBean interface that retrieves statistics
@@ -25,7 +27,7 @@ import org.opendaylight.yangtools.util.concurrent.TrackingLinkedBlockingQueue;
  */
 public class ThreadExecutorStatsMXBeanImpl extends AbstractMXBean
                                            implements ThreadExecutorStatsMXBean {
-
+    private static final Logger LOG = LoggerFactory.getLogger(ThreadExecutorStatsMXBeanImpl.class);
     private final ThreadPoolExecutor executor;
 
     /**
@@ -36,14 +38,31 @@ public class ThreadExecutorStatsMXBeanImpl extends AbstractMXBean
      * @param mBeanType Used as the <code>type</code> property in the bean's ObjectName.
      * @param mBeanCategory Used as the <code>Category</code> property in the bean's ObjectName.
      */
-    public ThreadExecutorStatsMXBeanImpl(Executor executor, String mBeanName,
-            String mBeanType, @Nullable String mBeanCategory) {
+    public ThreadExecutorStatsMXBeanImpl(final ThreadPoolExecutor executor, final String mBeanName,
+            final String mBeanType, @Nullable final String mBeanCategory) {
         super(mBeanName, mBeanType, mBeanCategory);
+        this.executor = Preconditions.checkNotNull(executor);
+    }
 
-        Preconditions.checkArgument(executor instanceof ThreadPoolExecutor,
-                "The ExecutorService of type {} is not an instanceof ThreadPoolExecutor",
-                executor.getClass());
-        this.executor = (ThreadPoolExecutor)executor;
+    /**
+     * Create a new bean for the statistics, which is already registered.
+     *
+     * @param executor
+     * @param mBeanName
+     * @param mBeanType
+     * @param mBeanCategory
+     * @return
+     */
+    public static ThreadExecutorStatsMXBeanImpl create(final Executor executor, final String mBeanName,
+            final String mBeanType, @Nullable final String mBeanCategory) {
+        if (executor instanceof ThreadPoolExecutor) {
+            final ThreadExecutorStatsMXBeanImpl ret = new ThreadExecutorStatsMXBeanImpl((ThreadPoolExecutor) executor, mBeanName, mBeanType, mBeanCategory);
+            ret.registerMBean();
+            return ret;
+        }
+
+        LOG.info("Executor {} is not supported", executor);
+        return null;
     }
 
     @Override
