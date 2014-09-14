@@ -14,7 +14,6 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -80,29 +79,26 @@ public class InMemoryDOMDataStore extends TransactionReadyPrototype implements D
     private final DataTree dataTree = InMemoryDataTreeFactory.getInstance().create();
     private final ListenerTree listenerTree = ListenerTree.create();
     private final AtomicLong txCounter = new AtomicLong(0);
-    private final ListeningExecutorService listeningExecutor;
 
     private final QueuedNotificationManager<DataChangeListenerRegistration<?>, DOMImmutableDataChangeEvent> dataChangeListenerNotificationManager;
     private final ExecutorService dataChangeListenerExecutor;
-
-    private final ExecutorService domStoreExecutor;
+    private final ListeningExecutorService commitExecutor;
     private final boolean debugTransactions;
     private final String name;
 
     private volatile AutoCloseable closeable;
 
-    public InMemoryDOMDataStore(final String name, final ExecutorService domStoreExecutor,
+    public InMemoryDOMDataStore(final String name, final ListeningExecutorService commitExecutor,
             final ExecutorService dataChangeListenerExecutor) {
-        this(name, domStoreExecutor, dataChangeListenerExecutor,
+        this(name, commitExecutor, dataChangeListenerExecutor,
              InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_CHANGE_LISTENER_QUEUE_SIZE, false);
     }
 
-    public InMemoryDOMDataStore(final String name, final ExecutorService domStoreExecutor,
+    public InMemoryDOMDataStore(final String name, final ListeningExecutorService commitExecutor,
             final ExecutorService dataChangeListenerExecutor, final int maxDataChangeListenerQueueSize,
             final boolean debugTransactions) {
         this.name = Preconditions.checkNotNull(name);
-        this.domStoreExecutor = Preconditions.checkNotNull(domStoreExecutor);
-        this.listeningExecutor = MoreExecutors.listeningDecorator(this.domStoreExecutor);
+        this.commitExecutor = Preconditions.checkNotNull(commitExecutor);
         this.dataChangeListenerExecutor = Preconditions.checkNotNull(dataChangeListenerExecutor);
         this.debugTransactions = debugTransactions;
 
@@ -121,7 +117,7 @@ public class InMemoryDOMDataStore extends TransactionReadyPrototype implements D
     }
 
     public ExecutorService getDomStoreExecutor() {
-        return domStoreExecutor;
+        return commitExecutor;
     }
 
     @Override
@@ -156,7 +152,7 @@ public class InMemoryDOMDataStore extends TransactionReadyPrototype implements D
 
     @Override
     public void close() {
-        ExecutorServiceUtil.tryGracefulShutdown(listeningExecutor, 30, TimeUnit.SECONDS);
+        ExecutorServiceUtil.tryGracefulShutdown(commitExecutor, 30, TimeUnit.SECONDS);
         ExecutorServiceUtil.tryGracefulShutdown(dataChangeListenerExecutor, 30, TimeUnit.SECONDS);
 
         if(closeable != null) {
@@ -386,7 +382,7 @@ public class InMemoryDOMDataStore extends TransactionReadyPrototype implements D
 
         @Override
         public ListenableFuture<Boolean> canCommit() {
-            return listeningExecutor.submit(new Callable<Boolean>() {
+            return commitExecutor.submit(new Callable<Boolean>() {
                 @Override
                 public Boolean call() throws TransactionCommitFailedException {
                     try {
@@ -410,7 +406,7 @@ public class InMemoryDOMDataStore extends TransactionReadyPrototype implements D
 
         @Override
         public ListenableFuture<Void> preCommit() {
-            return listeningExecutor.submit(new Callable<Void>() {
+            return commitExecutor.submit(new Callable<Void>() {
                 @Override
                 public Void call() {
                     candidate = dataTree.prepare(modification);
