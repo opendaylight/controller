@@ -10,10 +10,17 @@ package org.opendaylight.controller.networkconfig.neutron;
 
 import org.opendaylight.controller.configuration.ConfigurationObject;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
+
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.NONE)
 
 public class NeutronLoadBalancerPoolMember  extends ConfigurationObject implements Serializable {
 
@@ -46,7 +53,18 @@ public class NeutronLoadBalancerPoolMember  extends ConfigurationObject implemen
     @XmlElement (name="status")
     String poolMemberStatus;
 
+    String poolID;
+
     public NeutronLoadBalancerPoolMember() {
+    }
+
+    @XmlTransient
+    public String getPoolID() {
+        return poolID;
+    }
+
+    public void setPoolID(String poolID) {
+        this.poolID = poolID;
     }
 
     public String getPoolMemberID() {
@@ -121,6 +139,9 @@ public class NeutronLoadBalancerPoolMember  extends ConfigurationObject implemen
             if (s.equals("id")) {
                 ans.setPoolMemberID(this.getPoolMemberID());
             }
+            if (s.equals("pool_id")) {
+                ans.setPoolID(this.getPoolID());
+            }
             if (s.equals("tenant_id")) {
                 ans.setPoolMemberTenantID(this.getPoolMemberTenantID());
             }
@@ -148,6 +169,7 @@ public class NeutronLoadBalancerPoolMember  extends ConfigurationObject implemen
     @Override public String toString() {
         return "NeutronLoadBalancerPoolMember{" +
                 "poolMemberID='" + poolMemberID + '\'' +
+                ", poolID='" + poolID + '\'' +
                 ", poolMemberTenantID='" + poolMemberTenantID + '\'' +
                 ", poolMemberAddress='" + poolMemberAddress + '\'' +
                 ", poolMemberProtoPort=" + poolMemberProtoPort +
