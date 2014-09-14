@@ -53,7 +53,7 @@ public class ThreadExecutorStatsMXBeanImpl extends AbstractMXBean
      * @param mBeanCategory
      * @return
      */
-    public static AbstractMXBean create(final Executor executor, final String mBeanName,
+    public static ThreadExecutorStatsMXBeanImpl create(final Executor executor, final String mBeanName,
             final String mBeanType, @Nullable final String mBeanCategory) {
         if (executor instanceof ThreadPoolExecutor) {
             final ThreadExecutorStatsMXBeanImpl ret = new ThreadExecutorStatsMXBeanImpl((ThreadPoolExecutor) executor, mBeanName, mBeanType, mBeanCategory);
