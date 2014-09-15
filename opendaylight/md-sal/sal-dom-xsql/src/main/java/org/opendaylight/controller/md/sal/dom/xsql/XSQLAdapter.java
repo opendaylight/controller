@@ -492,13 +492,15 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
                     out.print(prompt);
                     char c = 0;
                     byte data[] = new byte[1];
-                    while (c != '\n') {
+                    while (!socket.isClosed() && socket.isConnected() && !socket.isInputShutdown() && c != '\n') {
                         try {
                             in.read(data);
                             c = (char) data[0];
                             inputString.append(c);
                         } catch (Exception err) {
                             err.printStackTrace(out);
+                            stopped = true;
+                            break;
                         }
                     }
 
