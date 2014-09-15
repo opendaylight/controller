@@ -46,10 +46,10 @@
 # export KARAF_ETC  # Karaf etc  folder
 # export KARAF_OPTS # Additional available Karaf options
 # export KARAF_DEBUG # Enable debug mode
-if [ "x$JAVA_MAX_PERM_MEM" == "x" ]; then
+if [ "x$JAVA_MAX_PERM_MEM" = "x" ]; then
     export JAVA_MAX_PERM_MEM="512m"
 fi
-if [ "x$JAVA_MAX_MEM" == "x" ]; then
+if [ "x$JAVA_MAX_MEM" = "x" ]; then
     export JAVA_MAX_MEM="2048m"
 fi
 
