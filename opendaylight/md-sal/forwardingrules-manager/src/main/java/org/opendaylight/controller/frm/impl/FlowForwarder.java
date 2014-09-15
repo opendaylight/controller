@@ -77,7 +77,7 @@ public class FlowForwarder extends AbstractListeningCommiter<Flow> {
         if (tableIdValidationPrecondition(tableKey, removeDataObj)) {
             final RemoveFlowInputBuilder builder = new RemoveFlowInputBuilder(removeDataObj);
             builder.setFlowRef(new FlowRef(identifier));
-            builder.setNode(new NodeRef(nodeIdent));
+            builder.setNode(new NodeRef(nodeIdent.firstIdentifierOf(Node.class)));
             builder.setFlowTable(new FlowTableRef(nodeIdent.child(Table.class, tableKey)));
             builder.setTransactionUri(new Uri(provider.getNewTransactionId()));
             this.provider.getSalFlowService().removeFlow(builder.build());
@@ -93,7 +93,7 @@ public class FlowForwarder extends AbstractListeningCommiter<Flow> {
         if (tableIdValidationPrecondition(tableKey, update)) {
             final UpdateFlowInputBuilder builder = new UpdateFlowInputBuilder();
 
-            builder.setNode(new NodeRef(nodeIdent));
+            builder.setNode(new NodeRef(nodeIdent.firstIdentifierOf(Node.class)));
             builder.setFlowRef(new FlowRef(identifier));
             builder.setTransactionUri(new Uri(provider.getNewTransactionId()));
             builder.setUpdatedFlow((new UpdatedFlowBuilder(update)).build());
@@ -112,7 +112,7 @@ public class FlowForwarder extends AbstractListeningCommiter<Flow> {
         if (tableIdValidationPrecondition(tableKey, addDataObj)) {
             final AddFlowInputBuilder builder = new AddFlowInputBuilder(addDataObj);
 
-            builder.setNode(new NodeRef(nodeIdent));
+            builder.setNode(new NodeRef(nodeIdent.firstIdentifierOf(Node.class)));
             builder.setFlowRef(new FlowRef(identifier));
             builder.setFlowTable(new FlowTableRef(nodeIdent.child(Table.class, tableKey)));
             builder.setTransactionUri(new Uri(provider.getNewTransactionId()));
