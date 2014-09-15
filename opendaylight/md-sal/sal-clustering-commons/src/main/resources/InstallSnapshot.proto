@@ -1,6 +1,6 @@
 package org.opendaylight.controller.cluster.raft;
 
-option java_package = "org.opendaylight.controller.cluster.raft.protobuff.messages";
+option java_package = "org.opendaylight.controller.protobuff.messages.cluster.raft";
 option java_outer_classname = "InstallSnapshotMessages";
 option optimize_for = SPEED;
 
