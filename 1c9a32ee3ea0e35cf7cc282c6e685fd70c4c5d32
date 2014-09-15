@@ -16,6 +16,24 @@
       "revId": "1c9a32ee3ea0e35cf7cc282c6e685fd70c4c5d32",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a7f4cc87",
+        "filename": "features/mdsal/src/main/resources/features.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-09-15T13:36:09Z",
+      "side": 1,
+      "message": "If you look at the models defined in odl-yangtools-models there are a number of seemingly \"core\" yang models such as inet-type, yang-types, yang-ext etc. Since the broker (MD-SAL) is based on yang it seems only fitting to pull these in with the broker and not require each application that depends on these core models (i.e. which is most everything) to have to pull them in separately.",
+      "parentUuid": "fa82b9bf_e7ce54b4",
+      "revId": "1c9a32ee3ea0e35cf7cc282c6e685fd70c4c5d32",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
