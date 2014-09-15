@@ -321,19 +321,19 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
                 context.getReplicatedLog().get(i);
 
             if (replicatedLogEntry != null) {
+                // Send a local message to the local RaftActor (it's derived class to be
+                // specific to apply the log to it's index)
                 actor().tell(new ApplyState(clientActor, identifier,
                     replicatedLogEntry), actor());
                 newLastApplied = i;
             } else {
                 //if one index is not present in the log, no point in looping
                 // around as the rest wont be present either
-                context.getLogger().error(
+                context.getLogger().warning(
                     "Missing index {} from log. Cannot apply state. Ignoring {} to {}", i, i, index );
                 break;
             }
         }
-        // Send a local message to the local RaftActor (it's derived class to be
-        // specific to apply the log to it's index)
         context.getLogger().debug("Setting last applied to {}", newLastApplied);
         context.setLastApplied(newLastApplied);
     }
