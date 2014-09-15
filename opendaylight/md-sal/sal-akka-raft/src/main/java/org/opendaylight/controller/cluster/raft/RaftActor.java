@@ -123,7 +123,7 @@ public abstract class RaftActor extends UntypedPersistentActor {
 
     @Override public void onReceiveRecover(Object message) {
         if (message instanceof SnapshotOffer) {
-            LOG.debug("SnapshotOffer called..");
+            LOG.info("SnapshotOffer called..");
             SnapshotOffer offer = (SnapshotOffer) message;
             Snapshot snapshot = (Snapshot) offer.snapshot();
 
@@ -134,8 +134,9 @@ public abstract class RaftActor extends UntypedPersistentActor {
 
             context.setReplicatedLog(replicatedLog);
             context.setLastApplied(snapshot.getLastAppliedIndex());
+            context.setCommitIndex(snapshot.getLastAppliedIndex());
 
-            LOG.debug("Applied snapshot to replicatedLog. " +
+            LOG.info("Applied snapshot to replicatedLog. " +
                 "snapshotIndex={}, snapshotTerm={}, journal-size={}",
                 replicatedLog.snapshotIndex, replicatedLog.snapshotTerm,
                 replicatedLog.size());
@@ -151,12 +152,16 @@ public abstract class RaftActor extends UntypedPersistentActor {
             applyState(null, "recovery", logEntry.getData());
             context.setLastApplied(logEntry.getIndex());
             context.setCommitIndex(logEntry.getIndex());
+
         } else if (message instanceof DeleteEntries) {
             replicatedLog.removeFrom(((DeleteEntries) message).getFromIndex());
+
         } else if (message instanceof UpdateElectionTerm) {
-            context.getTermInformation().update(((UpdateElectionTerm) message).getCurrentTerm(), ((UpdateElectionTerm) message).getVotedFor());
+            context.getTermInformation().update(((UpdateElectionTerm) message).getCurrentTerm(),
+                ((UpdateElectionTerm) message).getVotedFor());
+
         } else if (message instanceof RecoveryCompleted) {
-            LOG.debug(
+            LOG.info(
                 "RecoveryCompleted - Switching actor to Follower - " +
                     "Persistence Id =  " + persistenceId() +
                     " Last index in log:{}, snapshotIndex={}, snapshotTerm={}, " +
