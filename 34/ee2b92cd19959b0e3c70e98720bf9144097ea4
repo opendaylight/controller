@@ -1,0 +1,8 @@
+Verified+1: jenkins-controller <jenkins-controller@opendaylight.org>
+Code-Review+2: Giovanni Meo <gmeo@cisco.com>
+Code-Review+1: Brent Salisbury <brent.salisbury@gmail.com>
+Submitted-by: Giovanni Meo <gmeo@cisco.com>
+Submitted-at: Mon, 15 Sep 2014 06:32:12 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/11149
+Project: controller
+Branch: refs/heads/master
