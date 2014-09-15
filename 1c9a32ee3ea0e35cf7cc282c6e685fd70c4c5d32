@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_e7ce54b4",
+        "filename": "features/mdsal/src/main/resources/features.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-09-15T09:58:47Z",
+      "side": 1,
+      "message": "Could you help me understand why this was added to odl-mdsal-broker rather than odl-restconf?  As I understand the bug the issue was that the model was missing in odl-restconf feature... but I could just be confused ;)",
+      "revId": "1c9a32ee3ea0e35cf7cc282c6e685fd70c4c5d32",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
