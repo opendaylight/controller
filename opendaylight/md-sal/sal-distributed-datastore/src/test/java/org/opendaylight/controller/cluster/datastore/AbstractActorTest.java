@@ -25,12 +25,16 @@ public abstract class AbstractActorTest {
 
         System.setProperty("shard.persistent", "false");
         system = ActorSystem.create("test");
+
+        deletePersistenceFiles();
     }
 
     @AfterClass
     public static void tearDownClass() throws IOException {
         JavaTestKit.shutdownActorSystem(system);
         system = null;
+
+        deletePersistenceFiles();
     }
 
     protected static void deletePersistenceFiles() throws IOException {

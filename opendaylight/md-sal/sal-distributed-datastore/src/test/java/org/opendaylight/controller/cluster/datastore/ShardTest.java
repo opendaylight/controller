@@ -343,11 +343,16 @@ public class ShardTest extends AbstractActorTest {
                     subject.tell(new CaptureSnapshot(-1,-1,-1,-1),
                         getRef());
 
-                    waitForLogMessage(Logging.Debug.class, subject, "CaptureSnapshotReply received by actor");
+                    waitForLogMessage(Logging.Info.class, subject, "CaptureSnapshotReply received by actor");
+
+                    subject.tell(new CaptureSnapshot(-1,-1,-1,-1),
+                        getRef());
+
+                    waitForLogMessage(Logging.Info.class, subject, "CaptureSnapshotReply received by actor");
+
                 }
             };
 
-            Thread.sleep(2000);
             deletePersistenceFiles();
         }};
     }
