@@ -64,10 +64,12 @@ public final class NetconfHelloMessage extends NetconfMessage {
         Document doc = XmlUtil.newDocument();
         Element helloElement = doc.createElementNS(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0,
                 HELLO_TAG);
-        Element capabilitiesElement = doc.createElement(XmlNetconfConstants.CAPABILITIES);
+        Element capabilitiesElement = doc.createElementNS(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0,
+                XmlNetconfConstants.CAPABILITIES);
 
         for (String capability : Sets.newHashSet(capabilities)) {
-            Element capElement = doc.createElement(XmlNetconfConstants.CAPABILITY);
+            Element capElement = doc.createElementNS(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0,
+                    XmlNetconfConstants.CAPABILITY);
             capElement.setTextContent(capability);
             capabilitiesElement.appendChild(capElement);
         }
@@ -80,7 +82,8 @@ public final class NetconfHelloMessage extends NetconfMessage {
 
     public static NetconfHelloMessage createServerHello(Set<String> capabilities, long sessionId) throws NetconfDocumentedException {
         Document doc = createHelloMessageDoc(capabilities);
-        Element sessionIdElement = doc.createElement(XmlNetconfConstants.SESSION_ID);
+        Element sessionIdElement = doc.createElementNS(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0,
+                XmlNetconfConstants.SESSION_ID);
         sessionIdElement.setTextContent(Long.toString(sessionId));
         doc.getDocumentElement().appendChild(sessionIdElement);
         return new NetconfHelloMessage(doc);

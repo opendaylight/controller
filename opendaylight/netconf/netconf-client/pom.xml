@@ -24,6 +24,12 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>netconf-util</artifactId>
     </dependency>
+      <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>netconf-util</artifactId>
+          <type>test-jar</type>
+          <scope>test</scope>
+      </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
@@ -36,6 +42,10 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
+      <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>mockito-configuration</artifactId>
+      </dependency>
   </dependencies>
 
   <build>
