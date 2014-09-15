@@ -9,7 +9,7 @@
 package org.opendaylight.controller.cluster.raft.messages;
 
 import com.google.protobuf.ByteString;
-import org.opendaylight.controller.cluster.raft.protobuff.messages.InstallSnapshotMessages;
+import org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages;
 
 public class InstallSnapshot extends AbstractRaftRPC {
 
