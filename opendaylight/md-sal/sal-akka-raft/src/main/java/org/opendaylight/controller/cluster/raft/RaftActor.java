@@ -96,7 +96,7 @@ public abstract class RaftActor extends UntypedPersistentActor {
      * This context should NOT be passed directly to any other actor it is
      * only to be consumed by the RaftActorBehaviors
      */
-    private RaftActorContext context;
+    protected RaftActorContext context;
 
     /**
      * The in-memory journal
@@ -134,6 +134,7 @@ public abstract class RaftActor extends UntypedPersistentActor {
 
             context.setReplicatedLog(replicatedLog);
             context.setLastApplied(snapshot.getLastAppliedIndex());
+            context.setCommitIndex(snapshot.getLastAppliedIndex());
 
             LOG.info("Applied snapshot to replicatedLog. " +
                     "snapshotIndex={}, snapshotTerm={}, journal-size={}",
@@ -152,12 +153,16 @@ public abstract class RaftActor extends UntypedPersistentActor {
             applyState(null, "recovery", logEntry.getData());
             context.setLastApplied(logEntry.getIndex());
             context.setCommitIndex(logEntry.getIndex());
+
         } else if (message instanceof DeleteEntries) {
             replicatedLog.removeFrom(((DeleteEntries) message).getFromIndex());
+
         } else if (message instanceof UpdateElectionTerm) {
-            context.getTermInformation().update(((UpdateElectionTerm) message).getCurrentTerm(), ((UpdateElectionTerm) message).getVotedFor());
+            context.getTermInformation().update(((UpdateElectionTerm) message).getCurrentTerm(),
+                ((UpdateElectionTerm) message).getVotedFor());
+
         } else if (message instanceof RecoveryCompleted) {
-            LOG.debug(
+            LOG.info(
                 "RecoveryCompleted - Switching actor to Follower - " +
                     "Persistence Id =  " + persistenceId() +
                     " Last index in log:{}, snapshotIndex={}, snapshotTerm={}, " +
