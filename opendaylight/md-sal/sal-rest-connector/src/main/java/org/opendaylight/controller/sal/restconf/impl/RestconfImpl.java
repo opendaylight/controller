@@ -63,6 +63,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.InstanceI
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.ModifiedNodeDoesNotExistException;
 import org.opendaylight.yangtools.yang.data.composite.node.schema.cnsn.parser.CnSnToNormalizedNodeParserFactory;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
@@ -966,6 +967,8 @@ public class RestconfImpl implements RestconfService {
         DOMMountPoint mountPoint = iiWithData.getMountPoint();
         YangInstanceIdentifier normalizedII;
 
+        Response result = Response.status(Status.OK).build();
+
         try {
             if (mountPoint != null) {
                 normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData
@@ -976,10 +979,15 @@ public class RestconfImpl implements RestconfService {
                 broker.commitConfigurationDataDelete(normalizedII).get();
             }
         } catch (Exception e) {
-            throw new RestconfDocumentedException("Error creating data", e);
+            if (e.getCause()!= null) {
+                Throwable rootCause = e.getCause().getCause();
+                if (rootCause instanceof ModifiedNodeDoesNotExistException) {
+                    return result;
+                }
+            }
+            throw new RestconfDocumentedException("Error while deleting data", e);
         }
-
-        return Response.status(Status.OK).build();
+        return result;
     }
 
     /**
