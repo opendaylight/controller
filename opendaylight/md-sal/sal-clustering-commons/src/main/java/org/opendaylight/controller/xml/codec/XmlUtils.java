@@ -74,7 +74,9 @@ public class XmlUtils {
    * @return xml String
    */
   public static String inputCompositeNodeToXml(CompositeNode cNode, SchemaContext schemaContext){
-    LOG.debug("Converting input composite node to xml {}", cNode);
+    if(LOG.isDebugEnabled()) {
+        LOG.debug("Converting input composite node to xml {}", cNode);
+    }
     if (cNode == null) {
         return BLANK;
     }
@@ -88,12 +90,14 @@ public class XmlUtils {
       Set<RpcDefinition> rpcs =  schemaContext.getOperations();
       for(RpcDefinition rpc : rpcs) {
         if(rpc.getQName().equals(cNode.getNodeType())){
-          LOG.debug("Found the rpc definition from schema context matching with input composite node  {}", rpc.getQName());
-
+          if(LOG.isDebugEnabled()) {
+              LOG.debug("Found the rpc definition from schema context matching with input composite node  {}", rpc.getQName());
+          }
           CompositeNode inputContainer = cNode.getFirstCompositeByName(QName.create(cNode.getNodeType(), "input"));
           domTree = XmlDocumentUtils.toDocument(inputContainer, rpc.getInput(), XmlDocumentUtils.defaultValueCodecProvider());
-
-          LOG.debug("input composite node to document conversion complete, document is   {}", domTree);
+          if(LOG.isDebugEnabled()) {
+              LOG.debug("input composite node to document conversion complete, document is   {}", domTree);
+          }
           break;
         }
       }
@@ -111,7 +115,9 @@ public class XmlUtils {
    * @return xml string
    */
   public static String outputCompositeNodeToXml(CompositeNode cNode, SchemaContext schemaContext){
-    LOG.debug("Converting output composite node to xml {}", cNode);
+    if(LOG.isDebugEnabled()) {
+        LOG.debug("Converting output composite node to xml {}", cNode);
+    }
     if (cNode == null) {
         return BLANK;
     }
@@ -125,12 +131,14 @@ public class XmlUtils {
       Set<RpcDefinition> rpcs =  schemaContext.getOperations();
       for(RpcDefinition rpc : rpcs) {
         if(rpc.getQName().equals(cNode.getNodeType())){
-          LOG.debug("Found the rpc definition from schema context matching with output composite node  {}", rpc.getQName());
-
+          if(LOG.isDebugEnabled()) {
+              LOG.debug("Found the rpc definition from schema context matching with output composite node  {}", rpc.getQName());
+          }
           CompositeNode outputContainer = cNode.getFirstCompositeByName(QName.create(cNode.getNodeType(), "output"));
           domTree = XmlDocumentUtils.toDocument(outputContainer, rpc.getOutput(), XmlDocumentUtils.defaultValueCodecProvider());
-
-          LOG.debug("output composite node to document conversion complete, document is   {}", domTree);
+          if(LOG.isDebugEnabled()) {
+              LOG.debug("output composite node to document conversion complete, document is   {}", domTree);
+          }
           break;
         }
       }
@@ -152,8 +160,9 @@ public class XmlUtils {
 
       LOG.error("Error during translation of Document to OutputStream", e);
     }
-    LOG.debug("Document to string conversion complete, xml string is  {} ",  writer.toString());
-
+    if(LOG.isDebugEnabled()) {
+        LOG.debug("Document to string conversion complete, xml string is  {} ", writer.toString());
+    }
     return writer.toString();
   }
 
@@ -188,7 +197,9 @@ public class XmlUtils {
    * @return CompositeNode object based on the input, if any of the input parameter is null, a null object is returned
    */
   public static CompositeNode inputXmlToCompositeNode(QName rpc, String xml,  SchemaContext schemaContext){
-    LOG.debug("Converting input xml to composite node {}", xml);
+    if(LOG.isDebugEnabled()) {
+        LOG.debug("Converting input xml to composite node {}", xml);
+    }
     if (xml==null || xml.length()==0) {
         return null;
     }
@@ -208,8 +219,9 @@ public class XmlUtils {
       Set<RpcDefinition> rpcs =  schemaContext.getOperations();
       for(RpcDefinition rpcDef : rpcs) {
         if(rpcDef.getQName().equals(rpc)){
-          LOG.debug("found the rpc definition from schema context matching rpc  {}", rpc);
-
+          if(LOG.isDebugEnabled()) {
+              LOG.debug("found the rpc definition from schema context matching rpc  {}", rpc);
+          }
           if(rpcDef.getInput() == null) {
             LOG.warn("found rpc definition's input is null");
             return null;
@@ -225,9 +237,9 @@ public class XmlUtils {
 
           List<Node<?>> dataNodes = XmlDocumentUtils.toDomNodes(xmlData,
               Optional.of(rpcDef.getInput().getChildNodes()), schemaContext);
-
-          LOG.debug("Converted xml input to list of nodes  {}", dataNodes);
-
+          if(LOG.isDebugEnabled()) {
+              LOG.debug("Converted xml input to list of nodes  {}", dataNodes);
+          }
           final CompositeNodeBuilder<ImmutableCompositeNode> it = ImmutableCompositeNode.builder();
           it.setQName(rpc);
           it.add(ImmutableCompositeNode.create(input, dataNodes));
@@ -240,8 +252,9 @@ public class XmlUtils {
     } catch (IOException e) {
       LOG.error("Error during building data tree from XML", e);
     }
-
-    LOG.debug("Xml to composite node conversion complete {} ", compositeNode);
+    if(LOG.isDebugEnabled()) {
+        LOG.debug("Xml to composite node conversion complete {} ", compositeNode);
+    }
     return compositeNode;
   }
 

@@ -105,7 +105,9 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
             getSender().tell(new GetCompositeModificationReply(
                     new ImmutableCompositeModification(modification)), getSelf());
         } else if (message instanceof ReceiveTimeout) {
-            LOG.debug("Got ReceiveTimeout for inactivity - closing Tx");
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Got ReceiveTimeout for inactivity - closing Tx");
+            }
             closeTransaction(false);
         } else {
             throw new UnknownMessageException(message);
@@ -163,8 +165,9 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
     protected void writeData(DOMStoreWriteTransaction transaction, WriteData message) {
         modification.addModification(
                 new WriteModification(message.getPath(), message.getData(),schemaContext));
-        LOG.debug("writeData at path : " + message.getPath().toString());
-
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("writeData at path : " + message.getPath().toString());
+        }
         try {
             transaction.write(message.getPath(), message.getData());
             getSender().tell(new WriteDataReply().toSerializable(), getSelf());
@@ -176,7 +179,9 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
     protected void mergeData(DOMStoreWriteTransaction transaction, MergeData message) {
         modification.addModification(
                 new MergeModification(message.getPath(), message.getData(), schemaContext));
-        LOG.debug("mergeData at path : " + message.getPath().toString());
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("mergeData at path : " + message.getPath().toString());
+        }
         try {
             transaction.merge(message.getPath(), message.getData());
             getSender().tell(new MergeDataReply().toSerializable(), getSelf());
@@ -186,7 +191,9 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
     }
 
     protected void deleteData(DOMStoreWriteTransaction transaction, DeleteData message) {
-        LOG.debug("deleteData at path : " + message.getPath().toString());
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("deleteData at path : " + message.getPath().toString());
+        }
         modification.addModification(new DeleteModification(message.getPath()));
         try {
             transaction.delete(message.getPath());

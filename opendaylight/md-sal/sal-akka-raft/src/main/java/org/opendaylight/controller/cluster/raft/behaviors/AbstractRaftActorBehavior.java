@@ -273,6 +273,17 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     }
 
     /**
+     * Find the client request tracker for a specific logIndex
+     *
+     * @param logIndex
+     * @return
+     */
+    protected ClientRequestTracker removeClientRequestTracker(long logIndex) {
+        return null;
+    }
+
+
+    /**
      * Find the log index from the previous to last entry in the log
      *
      * @return
@@ -311,7 +322,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
              i < index + 1; i++) {
             ActorRef clientActor = null;
             String identifier = null;
-            ClientRequestTracker tracker = findClientRequestTracker(i);
+            ClientRequestTracker tracker = removeClientRequestTracker(i);
 
             if (tracker != null) {
                 clientActor = tracker.getClientActor();

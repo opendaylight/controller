@@ -76,9 +76,9 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
 
         Preconditions.checkNotNull(path, "path should not be null");
         Preconditions.checkNotNull(listener, "listener should not be null");
-
-        LOG.debug("Registering listener: {} for path: {} scope: {}", listener, path, scope);
-
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Registering listener: {} for path: {} scope: {}", listener, path, scope);
+        }
         ActorRef dataChangeListenerActor = actorContext.getActorSystem().actorOf(
             DataChangeListener.props(listener ));
 
@@ -108,11 +108,11 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
             }, actorContext.getActorSystem().dispatcher());
             return listenerRegistrationProxy;
         }
-
-        LOG.debug(
-            "No local shard for shardName {} was found so returning a noop registration",
-            shardName);
-
+        if(LOG.isDebugEnabled()) {
+            LOG.debug(
+                "No local shard for shardName {} was found so returning a noop registration",
+                shardName);
+        }
         return new NoOpDataChangeListenerRegistration(listener);
     }
 

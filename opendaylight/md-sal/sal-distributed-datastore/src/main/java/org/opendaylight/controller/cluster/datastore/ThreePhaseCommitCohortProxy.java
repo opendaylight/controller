@@ -65,9 +65,10 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
             @Override
             public Void apply(Iterable<ActorPath> paths) {
                 cohortPaths = Lists.newArrayList(paths);
-
-                LOG.debug("Tx {} successfully built cohort path list: {}",
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("Tx {} successfully built cohort path list: {}",
                         transactionId, cohortPaths);
+                }
                 return null;
             }
         }, TransactionProxy.SAME_FAILURE_TRANSFORMER, actorContext.getActorSystem().dispatcher());
@@ -75,8 +76,9 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
 
     @Override
     public ListenableFuture<Boolean> canCommit() {
-        LOG.debug("Tx {} canCommit", transactionId);
-
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Tx {} canCommit", transactionId);
+        }
         final SettableFuture<Boolean> returnFuture = SettableFuture.create();
 
         // The first phase of canCommit is to gather the list of cohort actor paths that will
@@ -89,7 +91,9 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
             @Override
             public void onComplete(Throwable failure, Void notUsed) throws Throwable {
                 if(failure != null) {
-                    LOG.debug("Tx {}: a cohort path Future failed: {}", transactionId, failure);
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("Tx {}: a cohort path Future failed: {}", transactionId, failure);
+                    }
                     returnFuture.setException(failure);
                 } else {
                     finishCanCommit(returnFuture);
@@ -101,9 +105,9 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
     }
 
     private void finishCanCommit(final SettableFuture<Boolean> returnFuture) {
-
-        LOG.debug("Tx {} finishCanCommit", transactionId);
-
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Tx {} finishCanCommit", transactionId);
+        }
         // The last phase of canCommit is to invoke all the cohort actors asynchronously to perform
         // their canCommit processing. If any one fails then we'll fail canCommit.
 
@@ -114,7 +118,9 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
             @Override
             public void onComplete(Throwable failure, Iterable<Object> responses) throws Throwable {
                 if(failure != null) {
-                    LOG.debug("Tx {}: a canCommit cohort Future failed: {}", transactionId, failure);
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("Tx {}: a canCommit cohort Future failed: {}", transactionId, failure);
+                    }
                     returnFuture.setException(failure);
                     return;
                 }
@@ -135,9 +141,9 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
                         return;
                     }
                 }
-
-                LOG.debug("Tx {}: canCommit returning result: {}", transactionId, result);
-
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("Tx {}: canCommit returning result: {}", transactionId, result);
+                }
                 returnFuture.set(Boolean.valueOf(result));
             }
         }, actorContext.getActorSystem().dispatcher());
@@ -146,9 +152,9 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
     private Future<Iterable<Object>> invokeCohorts(Object message) {
         List<Future<Object>> futureList = Lists.newArrayListWithCapacity(cohortPaths.size());
         for(ActorPath actorPath : cohortPaths) {
-
-            LOG.debug("Tx {}: Sending {} to cohort {}", transactionId, message, actorPath);
-
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Tx {}: Sending {} to cohort {}", transactionId, message, actorPath);
+            }
             ActorSelection cohort = actorContext.actorSelection(actorPath);
 
             futureList.add(actorContext.executeRemoteOperationAsync(cohort, message));
@@ -184,8 +190,9 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
     private ListenableFuture<Void> voidOperation(final String operationName, final Object message,
             final Class<?> expectedResponseClass, final boolean propagateException) {
 
-        LOG.debug("Tx {} {}", transactionId, operationName);
-
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Tx {} {}", transactionId, operationName);
+        }
         final SettableFuture<Void> returnFuture = SettableFuture.create();
 
         // The cohort actor list should already be built at this point by the canCommit phase but,
@@ -199,9 +206,10 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
                 @Override
                 public void onComplete(Throwable failure, Void notUsed) throws Throwable {
                     if(failure != null) {
-                        LOG.debug("Tx {}: a {} cohort path Future failed: {}", transactionId,
+                        if(LOG.isDebugEnabled()) {
+                            LOG.debug("Tx {}: a {} cohort path Future failed: {}", transactionId,
                                 operationName, failure);
-
+                        }
                         if(propagateException) {
                             returnFuture.setException(failure);
                         } else {
@@ -221,9 +229,9 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
     private void finishVoidOperation(final String operationName, final Object message,
             final Class<?> expectedResponseClass, final boolean propagateException,
             final SettableFuture<Void> returnFuture) {
-
-        LOG.debug("Tx {} finish {}", transactionId, operationName);
-
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Tx {} finish {}", transactionId, operationName);
+        }
         Future<Iterable<Object>> combinedFuture = invokeCohorts(message);
 
         combinedFuture.onComplete(new OnComplete<Iterable<Object>>() {
@@ -243,9 +251,10 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
                 }
 
                 if(exceptionToPropagate != null) {
-                    LOG.debug("Tx {}: a {} cohort Future failed: {}", transactionId,
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("Tx {}: a {} cohort Future failed: {}", transactionId,
                             operationName, exceptionToPropagate);
-
+                    }
                     if(propagateException) {
                         // We don't log the exception here to avoid redundant logging since we're
                         // propagating to the caller in MD-SAL core who will log it.
@@ -254,12 +263,16 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
                         // Since the caller doesn't want us to propagate the exception we'll also
                         // not log it normally. But it's usually not good to totally silence
                         // exceptions so we'll log it to debug level.
-                        LOG.debug(String.format("%s failed",  message.getClass().getSimpleName()),
+                        if(LOG.isDebugEnabled()) {
+                            LOG.debug(String.format("%s failed", message.getClass().getSimpleName()),
                                 exceptionToPropagate);
+                        }
                         returnFuture.set(null);
                     }
                 } else {
-                    LOG.debug("Tx {}: {} succeeded", transactionId, operationName);
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("Tx {}: {} succeeded", transactionId, operationName);
+                    }
                     returnFuture.set(null);
                 }
             }
