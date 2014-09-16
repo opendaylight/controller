@@ -44,25 +44,47 @@ public class ThreadExecutorStatsMXBeanImpl extends AbstractMXBean
         this.executor = Preconditions.checkNotNull(executor);
     }
 
-    /**
-     * Create a new bean for the statistics, which is already registered.
-     *
-     * @param executor
-     * @param mBeanName
-     * @param mBeanType
-     * @param mBeanCategory
-     * @return
-     */
-    public static ThreadExecutorStatsMXBeanImpl create(final Executor executor, final String mBeanName,
-            final String mBeanType, @Nullable final String mBeanCategory) {
+    private static ThreadExecutorStatsMXBeanImpl createInternal(final Executor executor,
+            final String mBeanName, final String mBeanType, final String mBeanCategory) {
         if (executor instanceof ThreadPoolExecutor) {
-            final ThreadExecutorStatsMXBeanImpl ret = new ThreadExecutorStatsMXBeanImpl((ThreadPoolExecutor) executor, mBeanName, mBeanType, mBeanCategory);
-            ret.registerMBean();
+            final ThreadExecutorStatsMXBeanImpl ret = new ThreadExecutorStatsMXBeanImpl(
+                    (ThreadPoolExecutor) executor, mBeanName, mBeanType, mBeanCategory);
             return ret;
         }
 
         LOG.info("Executor {} is not supported", executor);
         return null;
+    }
+
+    /**
+     * Creates a new bean if the backing executor is a ThreadPoolExecutor and registers it.
+     *
+     * @param executor the backing {@link Executor}
+     * @param mBeanName Used as the <code>name</code> property in the bean's ObjectName.
+     * @param mBeanType Used as the <code>type</code> property in the bean's ObjectName.
+     * @param mBeanCategory Used as the <code>Category</code> property in the bean's ObjectName.
+     * @return a registered ThreadExecutorStatsMXBeanImpl instance if the backing executor
+     *         is a ThreadPoolExecutor, otherwise null.
+     */
+    public static ThreadExecutorStatsMXBeanImpl create(final Executor executor, final String mBeanName,
+            final String mBeanType, @Nullable final String mBeanCategory) {
+        ThreadExecutorStatsMXBeanImpl ret = createInternal(executor, mBeanName, mBeanType, mBeanCategory);
+        if(ret != null) {
+            ret.registerMBean();
+        }
+
+        return ret;
+    }
+
+    /**
+     * Creates a new bean if the backing executor is a ThreadPoolExecutor.
+     *
+     * @param executor the backing {@link Executor}
+     * @return a ThreadExecutorStatsMXBeanImpl instance if the backing executor
+     *         is a ThreadPoolExecutor, otherwise null.
+     */
+    public static ThreadExecutorStatsMXBeanImpl create(final Executor executor) {
+        return createInternal(executor, "", "", null);
     }
 
     @Override
