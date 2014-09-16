@@ -11,14 +11,17 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+
 import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,9 +53,9 @@ final class OperationProcessor implements AutoCloseable, Runnable, TransactionCh
             for (; ; ) {
                 TopologyOperation op = queue.take();
 
-                LOG.debug("New operations available, starting transaction");
-                final ReadWriteTransaction tx = transactionChain.newReadWriteTransaction();
+                LOG.debug("New {} operation available, starting transaction", op);
 
+                final ReadWriteTransaction tx = transactionChain.newReadWriteTransaction();
 
                 int ops = 0;
                 do {
@@ -64,14 +67,16 @@ final class OperationProcessor implements AutoCloseable, Runnable, TransactionCh
                     } else {
                         op = null;
                     }
+
+                    LOG.debug("Next operation {}", op);
                 } while (op != null);
 
                 LOG.debug("Processed {} operations, submitting transaction", ops);
 
-                final CheckedFuture txResultFuture = tx.submit();
-                Futures.addCallback(txResultFuture, new FutureCallback() {
+                CheckedFuture<Void, TransactionCommitFailedException> txResultFuture = tx.submit();
+                Futures.addCallback(txResultFuture, new FutureCallback<Void>() {
                     @Override
-                    public void onSuccess(Object o) {
+                    public void onSuccess(Void notUsed) {
                         LOG.debug("Topology export successful for tx :{}", tx.getIdentifier());
                     }
 
