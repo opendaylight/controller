@@ -25,7 +25,9 @@ public class TerminationMonitor extends UntypedActor{
     @Override public void onReceive(Object message) throws Exception {
         if(message instanceof Terminated){
             Terminated terminated = (Terminated) message;
-            LOG.debug("Actor terminated : {}", terminated.actor());
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Actor terminated : {}", terminated.actor());
+            }
         } else if(message instanceof Monitor){
             Monitor monitor = (Monitor) message;
             getContext().watch(monitor.getActorRef());

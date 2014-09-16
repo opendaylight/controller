@@ -337,11 +337,11 @@ public class ShardManager extends AbstractUntypedActorWithMetering {
                 peerAddress);
             if(peerAddresses.containsKey(peerId)){
                 peerAddresses.put(peerId, peerAddress);
-
-                LOG.debug(
-                    "Sending PeerAddressResolved for peer {} with address {} to {}",
-                    peerId, peerAddress, actor.path());
-
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug(
+                        "Sending PeerAddressResolved for peer {} with address {} to {}",
+                        peerId, peerAddress, actor.path());
+                }
                 actor
                     .tell(new PeerAddressResolved(peerId, peerAddress),
                         getSelf());

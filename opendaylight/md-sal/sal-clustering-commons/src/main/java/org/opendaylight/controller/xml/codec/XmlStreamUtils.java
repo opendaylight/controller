@@ -100,7 +100,9 @@ public class XmlStreamUtils {
     for (Entry<URI, String> e: prefixes.getPrefixes()) {
       writer.writeNamespace(e.getValue(), e.getKey().toString());
     }
-    LOG.debug("Instance identifier with Random prefix is now {}", str);
+    if(LOG.isDebugEnabled()) {
+        LOG.debug("Instance identifier with Random prefix is now {}", str);
+    }
     writer.writeCharacters(str);
   }
 
@@ -169,7 +171,7 @@ public class XmlStreamUtils {
         DataSchemaNode childSchema = null;
         if (schema instanceof DataNodeContainer) {
           childSchema = SchemaUtils.findFirstSchema(child.getNodeType(), ((DataNodeContainer) schema).getChildNodes()).orNull();
-          if (childSchema == null) {
+          if (childSchema == null && LOG.isDebugEnabled()) {
             LOG.debug("Probably the data node \"{}\" does not conform to schema", child == null ? "" : child.getNodeType().getLocalName());
           }
         }
@@ -192,7 +194,9 @@ public class XmlStreamUtils {
    */
   public void writeValue(final @Nonnull XMLStreamWriter writer, final @Nonnull TypeDefinition<?> type, final Object value) throws XMLStreamException {
     if (value == null) {
-      LOG.debug("Value of {}:{} is null, not encoding it", type.getQName().getNamespace(), type.getQName().getLocalName());
+      if(LOG.isDebugEnabled()){
+        LOG.debug("Value of {}:{} is null, not encoding it", type.getQName().getNamespace(), type.getQName().getLocalName());
+      }
       return;
     }
 
@@ -232,18 +236,24 @@ public class XmlStreamUtils {
       writer.writeNamespace(prefix, qname.getNamespace().toString());
       writer.writeCharacters(prefix + ':' + qname.getLocalName());
     } else {
-      LOG.debug("Value of {}:{} is not a QName but {}", type.getQName().getNamespace(), type.getQName().getLocalName(), value.getClass());
+      if(LOG.isDebugEnabled()) {
+        LOG.debug("Value of {}:{} is not a QName but {}", type.getQName().getNamespace(), type.getQName().getLocalName(), value.getClass());
+      }
       writer.writeCharacters(String.valueOf(value));
     }
   }
 
   private static void write(final @Nonnull XMLStreamWriter writer, final @Nonnull InstanceIdentifierTypeDefinition type, final @Nonnull Object value) throws XMLStreamException {
     if (value instanceof YangInstanceIdentifier) {
-      LOG.debug("Writing InstanceIdentifier object {}", value);
+      if(LOG.isDebugEnabled()) {
+          LOG.debug("Writing InstanceIdentifier object {}", value);
+      }
       write(writer, (YangInstanceIdentifier)value);
     } else {
-      LOG.debug("Value of {}:{} is not an InstanceIdentifier but {}", type.getQName().getNamespace(), type.getQName().getLocalName(), value.getClass());
-      writer.writeCharacters(String.valueOf(value));
+      if(LOG.isDebugEnabled()) {
+          LOG.debug("Value of {}:{} is not an InstanceIdentifier but {}", type.getQName().getNamespace(), type.getQName().getLocalName(), value.getClass());
+      }
+        writer.writeCharacters(String.valueOf(value));
     }
   }
 }

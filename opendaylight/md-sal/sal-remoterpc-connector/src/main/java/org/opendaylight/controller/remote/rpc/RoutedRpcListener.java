@@ -53,7 +53,9 @@ public class RoutedRpcListener implements RouteChangeListener<RpcRoutingContext,
    * @param announcements
    */
   private void announce(Set<RpcRouter.RouteIdentifier<?, ?, ?>> announcements) {
-    LOG.debug("Announcing [{}]", announcements);
+    if(LOG.isDebugEnabled()) {
+        LOG.debug("Announcing [{}]", announcements);
+    }
     RpcRegistry.Messages.AddOrUpdateRoutes addRpcMsg = new RpcRegistry.Messages.AddOrUpdateRoutes(new ArrayList<>(announcements));
     rpcRegistry.tell(addRpcMsg, ActorRef.noSender());
   }
@@ -63,7 +65,9 @@ public class RoutedRpcListener implements RouteChangeListener<RpcRoutingContext,
    * @param removals
    */
   private void remove(Set<RpcRouter.RouteIdentifier<?, ?, ?>> removals){
-    LOG.debug("Removing [{}]", removals);
+    if(LOG.isDebugEnabled()) {
+        LOG.debug("Removing [{}]", removals);
+    }
     RpcRegistry.Messages.RemoveRoutes removeRpcMsg = new RpcRegistry.Messages.RemoveRoutes(new ArrayList<>(removals));
     rpcRegistry.tell(removeRpcMsg, ActorRef.noSender());
   }

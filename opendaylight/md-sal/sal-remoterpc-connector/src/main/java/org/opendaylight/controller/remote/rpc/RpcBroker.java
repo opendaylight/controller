@@ -79,8 +79,9 @@ public class RpcBroker extends AbstractUntypedActor {
     }
 
     private void invokeRemoteRpc(final InvokeRpc msg) {
-        LOG.debug("Looking up the remote actor for rpc {}", msg.getRpc());
-
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Looking up the remote actor for rpc {}", msg.getRpc());
+        }
         RpcRouter.RouteIdentifier<?,?,?> routeId = new RouteIdentifierImpl(
                 null, msg.getRpc(), msg.getIdentifier());
         RpcRegistry.Messages.FindRouters findMsg = new RpcRegistry.Messages.FindRouters(routeId);
@@ -147,8 +148,9 @@ public class RpcBroker extends AbstractUntypedActor {
     }
 
     private void executeRpc(final ExecuteRpc msg) {
-        LOG.debug("Executing rpc {}", msg.getRpc());
-
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Executing rpc {}", msg.getRpc());
+        }
         Future<RpcResult<CompositeNode>> future = brokerSession.rpc(msg.getRpc(),
                 XmlUtils.inputXmlToCompositeNode(msg.getRpc(), msg.getInputCompositeNode(),
                         schemaContext));

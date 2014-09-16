@@ -111,7 +111,9 @@ public class BucketStore extends AbstractUntypedActorWithMetering {
             receiveUpdateRemoteBuckets(
                     ((UpdateRemoteBuckets) message).getBuckets());
         } else {
-            log.debug("Unhandled message [{}]", message);
+            if(log.isDebugEnabled()) {
+                log.debug("Unhandled message [{}]", message);
+            }
             unhandled(message);
         }
     }
@@ -236,8 +238,9 @@ public class BucketStore extends AbstractUntypedActorWithMetering {
                 versions.put(entry.getKey(), remoteVersion);
             }
         }
-
-        log.debug("State after update - Local Bucket [{}], Remote Buckets [{}]", localBucket, remoteBuckets);
+        if(log.isDebugEnabled()) {
+            log.debug("State after update - Local Bucket [{}], Remote Buckets [{}]", localBucket, remoteBuckets);
+        }
     }
 
     ///

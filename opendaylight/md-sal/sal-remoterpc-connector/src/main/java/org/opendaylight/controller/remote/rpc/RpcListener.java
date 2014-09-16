@@ -31,7 +31,9 @@ public class RpcListener implements RpcRegistrationListener{
 
   @Override
   public void onRpcImplementationAdded(QName rpc) {
-    LOG.debug("Adding registration for [{}]", rpc);
+    if(LOG.isDebugEnabled()) {
+        LOG.debug("Adding registration for [{}]", rpc);
+    }
     RpcRouter.RouteIdentifier<?,?,?> routeId = new RouteIdentifierImpl(null, rpc, null);
     List<RpcRouter.RouteIdentifier<?,?,?>> routeIds = new ArrayList<>();
     routeIds.add(routeId);
@@ -41,7 +43,9 @@ public class RpcListener implements RpcRegistrationListener{
 
   @Override
   public void onRpcImplementationRemoved(QName rpc) {
-    LOG.debug("Removing registration for [{}]", rpc);
+    if(LOG.isDebugEnabled()) {
+        LOG.debug("Removing registration for [{}]", rpc);
+    }
     RpcRouter.RouteIdentifier<?,?,?> routeId = new RouteIdentifierImpl(null, rpc, null);
     List<RpcRouter.RouteIdentifier<?,?,?>> routeIds = new ArrayList<>();
     routeIds.add(routeId);
