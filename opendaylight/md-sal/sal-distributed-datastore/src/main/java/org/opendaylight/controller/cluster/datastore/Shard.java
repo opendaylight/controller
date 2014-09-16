@@ -547,10 +547,6 @@ public class Shard extends RaftActor {
     }
 
     @Override protected void onLeaderChanged(String oldLeader, String newLeader) {
-        if((oldLeader == null && newLeader == null) || (newLeader != null && newLeader.equals(oldLeader)) ){
-            return;
-        }
-        LOG.info("Current state = {}, Leader = {}", getRaftState().name(), newLeader);
         shardMBean.setLeader(newLeader);
     }
 
