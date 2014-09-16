@@ -15,7 +15,6 @@ import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
 import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolCRUD;
-import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolMemberCRUD;
 import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
 import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancerPool;
 import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancerPoolMember;
@@ -62,8 +61,7 @@ import java.util.List;
 
 /**
  * For now, the LB pool member data is maintained with the INeutronLoadBalancerPoolCRUD,
- * although there may be an overlap with INeutronLoadBalancerPoolMemberCRUD's cache.
- * TODO: Consolidate and maintain a single copy
+ * and not duplicated within the INeutronLoadBalancerPoolMemberCRUD's cache.
  */
 
 @Path("/pools")
@@ -391,21 +389,6 @@ public class NeutronLoadBalancerPoolNorthbound {
             for (Object instance : instances) {
                 INeutronLoadBalancerPoolAware service = (INeutronLoadBalancerPoolAware) instance;
                 service.neutronLoadBalancerPoolDeleted(singleton);
-            }
-        }
-
-        /*
-         * remove corresponding members from the member cache too
-         */
-        INeutronLoadBalancerPoolMemberCRUD loadBalancerPoolMemberInterface = NeutronCRUDInterfaces.getINeutronLoadBalancerPoolMemberCRUD(this);
-        if (loadBalancerPoolMemberInterface != null) {
-            List<NeutronLoadBalancerPoolMember> allLoadBalancerPoolMembers = new
-                ArrayList<NeutronLoadBalancerPoolMember>(loadBalancerPoolMemberInterface.getAllNeutronLoadBalancerPoolMembers());
-            Iterator<NeutronLoadBalancerPoolMember> i = allLoadBalancerPoolMembers.iterator();
-            while (i.hasNext()) {
-                NeutronLoadBalancerPoolMember member = i.next();
-                if (member.getPoolID() == loadBalancerPoolUUID)
-                    loadBalancerPoolMemberInterface.removeNeutronLoadBalancerPoolMember(member.getPoolMemberID());
             }
         }
         return Response.status(204).build();
