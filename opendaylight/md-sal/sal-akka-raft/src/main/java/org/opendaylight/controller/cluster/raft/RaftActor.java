@@ -173,9 +173,11 @@ public abstract class RaftActor extends UntypedPersistentActor {
         if (message instanceof ApplyState){
             ApplyState applyState = (ApplyState) message;
 
-            LOG.debug("Applying state for log index {} data {}",
-                applyState.getReplicatedLogEntry().getIndex(),
-                applyState.getReplicatedLogEntry().getData());
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Applying state for log index {} data {}",
+                    applyState.getReplicatedLogEntry().getIndex(),
+                    applyState.getReplicatedLogEntry().getData());
+            }
 
             applyState(applyState.getClientActor(), applyState.getIdentifier(),
                 applyState.getReplicatedLogEntry().getData());
@@ -183,9 +185,12 @@ public abstract class RaftActor extends UntypedPersistentActor {
         } else if(message instanceof ApplySnapshot ) {
             Snapshot snapshot = ((ApplySnapshot) message).getSnapshot();
 
-            LOG.debug("ApplySnapshot called on Follower Actor " +
-                "snapshotIndex:{}, snapshotTerm:{}", snapshot.getLastAppliedIndex(),
-                snapshot.getLastAppliedTerm());
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("ApplySnapshot called on Follower Actor " +
+                        "snapshotIndex:{}, snapshotTerm:{}", snapshot.getLastAppliedIndex(),
+                    snapshot.getLastAppliedTerm()
+                );
+            }
             applySnapshot(ByteString.copyFrom(snapshot.getState()));
 
             //clears the followers log, sets the snapshot index to ensure adjusted-index works
@@ -253,7 +258,9 @@ public abstract class RaftActor extends UntypedPersistentActor {
         } else {
             if (!(message instanceof AppendEntriesMessages.AppendEntries)
                 && !(message instanceof AppendEntriesReply) && !(message instanceof SendHeartBeat)) {
-                LOG.debug("onReceiveCommand: message:" + message.getClass());
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("onReceiveCommand: message:" + message.getClass());
+                }
             }
 
             RaftState state =
@@ -294,7 +301,9 @@ public abstract class RaftActor extends UntypedPersistentActor {
             context.getReplicatedLog().lastIndex() + 1,
             context.getTermInformation().getCurrentTerm(), data);
 
-        LOG.debug("Persist data {}", replicatedLogEntry);
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Persist data {}", replicatedLogEntry);
+        }
 
         replicatedLog
             .appendAndPersist(clientActor, identifier, replicatedLogEntry);
@@ -483,8 +492,10 @@ public abstract class RaftActor extends UntypedPersistentActor {
             return null;
         }
         String peerAddress = context.getPeerAddress(leaderId);
-        LOG.debug("getLeaderAddress leaderId = " + leaderId + " peerAddress = "
-            + peerAddress);
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("getLeaderAddress leaderId = " + leaderId + " peerAddress = "
+                + peerAddress);
+        }
 
         return peerAddress;
     }
@@ -584,10 +595,13 @@ public abstract class RaftActor extends UntypedPersistentActor {
                                 lastAppliedTerm = lastAppliedEntry.getTerm();
                             }
 
-                            LOG.debug("Snapshot Capture logSize: {}", journal.size());
-                            LOG.debug("Snapshot Capture lastApplied:{} ", context.getLastApplied());
-                            LOG.debug("Snapshot Capture lastAppliedIndex:{}", lastAppliedIndex);
-                            LOG.debug("Snapshot Capture lastAppliedTerm:{}", lastAppliedTerm);
+                            if(LOG.isDebugEnabled()) {
+                                LOG.debug("Snapshot Capture logSize: {}", journal.size());
+                                LOG.debug("Snapshot Capture lastApplied:{} ",
+                                    context.getLastApplied());
+                                LOG.debug("Snapshot Capture lastAppliedIndex:{}", lastAppliedIndex);
+                                LOG.debug("Snapshot Capture lastAppliedTerm:{}", lastAppliedTerm);
+                            }
 
                             // send a CaptureSnapshot to self to make the expensive operation async.
                             getSelf().tell(new CaptureSnapshot(

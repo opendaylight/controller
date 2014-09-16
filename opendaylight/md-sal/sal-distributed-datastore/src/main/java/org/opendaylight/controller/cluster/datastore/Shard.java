@@ -35,7 +35,6 @@ import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChain;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
-import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionChainReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
 import org.opendaylight.controller.cluster.datastore.messages.ForwardedCommitTransaction;
@@ -172,8 +171,11 @@ public class Shard extends RaftActor {
     }
 
     @Override public void onReceiveRecover(Object message) {
-        LOG.debug("onReceiveRecover: Received message {} from {}", message.getClass().toString(),
-            getSender());
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("onReceiveRecover: Received message {} from {}",
+                message.getClass().toString(),
+                getSender());
+        }
 
         if (message instanceof RecoveryFailure){
             LOG.error(((RecoveryFailure) message).cause(), "Recovery failed because of this cause");
@@ -183,8 +185,11 @@ public class Shard extends RaftActor {
     }
 
     @Override public void onReceiveCommand(Object message) {
-        LOG.debug("onReceiveCommand: Received message {} from {}", message.getClass().toString(),
-            getSender());
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("onReceiveCommand: Received message {} from {}",
+                message.getClass().toString(),
+                getSender());
+        }
 
         if(message.getClass().equals(ReadDataReply.SERIALIZABLE_CLASS)) {
             // This must be for install snapshot. Don't want to open this up and trigger
@@ -299,7 +304,9 @@ public class Shard extends RaftActor {
             ShardTransactionIdentifier.builder()
                 .remoteTransactionId(remoteTransactionId)
                 .build();
-        LOG.debug("Creating transaction : {} ", transactionId);
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Creating transaction : {} ", transactionId);
+        }
         ActorRef transactionActor =
             createTypedTransactionActor(transactionType, transactionId, transactionChainId);
 
@@ -326,13 +333,19 @@ public class Shard extends RaftActor {
         DOMStoreThreePhaseCommitCohort cohort =
             modificationToCohort.remove(serialized);
         if (cohort == null) {
-            LOG.debug(
-                "Could not find cohort for modification : {}. Writing modification using a new transaction",
-                modification);
+
+            if(LOG.isDebugEnabled()) {
+                LOG.debug(
+                    "Could not find cohort for modification : {}. Writing modification using a new transaction",
+                    modification);
+            }
+
             DOMStoreWriteTransaction transaction =
                 store.newWriteOnlyTransaction();
 
-            LOG.debug("Created new transaction {}", transaction.getIdentifier().toString());
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Created new transaction {}", transaction.getIdentifier().toString());
+            }
 
             modification.apply(transaction);
             try {
@@ -353,13 +366,12 @@ public class Shard extends RaftActor {
             return;
         }
 
-        final ListenableFuture<Void> future = cohort.commit();
-        final ActorRef self = getSelf();
+        ListenableFuture<Void> future = cohort.commit();
 
         Futures.addCallback(future, new FutureCallback<Void>() {
             @Override
             public void onSuccess(Void v) {
-                sender.tell(new CommitTransactionReply().toSerializable(), self);
+                sender.tell(new CommitTransactionReply().toSerializable(), getSelf());
                 shardMBean.incrementCommittedTransactionCount();
                 shardMBean.setLastCommittedTransactionTime(System.currentTimeMillis());
             }
@@ -368,7 +380,7 @@ public class Shard extends RaftActor {
             public void onFailure(Throwable t) {
                 LOG.error(t, "An exception happened during commit");
                 shardMBean.incrementFailedTransactionsCount();
-                sender.tell(new akka.actor.Status.Failure(t), self);
+                sender.tell(new akka.actor.Status.Failure(t), getSelf());
             }
         });
 
@@ -402,8 +414,10 @@ public class Shard extends RaftActor {
     private void registerChangeListener(
         RegisterChangeListener registerChangeListener) {
 
-        LOG.debug("registerDataChangeListener for {}", registerChangeListener
-            .getPath());
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("registerDataChangeListener for {}", registerChangeListener
+                .getPath());
+        }
 
 
         ActorSelection dataChangeListenerPath = getContext()
@@ -431,20 +445,14 @@ public class Shard extends RaftActor {
             getContext().actorOf(
                 DataChangeListenerRegistration.props(registration));
 
-        LOG.debug(
-            "registerDataChangeListener sending reply, listenerRegistrationPath = {} "
-            , listenerRegistration.path().toString());
+        if(LOG.isDebugEnabled()) {
+            LOG.debug(
+                "registerDataChangeListener sending reply, listenerRegistrationPath = {} "
+                , listenerRegistration.path().toString());
+        }
 
         getSender()
             .tell(new RegisterChangeListenerReply(listenerRegistration.path()),
-                getSelf());
-    }
-
-    private void createTransactionChain() {
-        DOMStoreTransactionChain chain = store.createTransactionChain();
-        ActorRef transactionChain = getContext().actorOf(
-                ShardTransactionChain.props(chain, schemaContext, datastoreContext, shardMBean));
-        getSender().tell(new CreateTransactionChainReply(transactionChain.path()).toSerializable(),
                 getSelf());
     }
 
@@ -531,14 +539,17 @@ public class Shard extends RaftActor {
                 .tell(new EnableNotification(isLeader()), getSelf());
         }
 
-
         shardMBean.setRaftState(getRaftState().name());
         shardMBean.setCurrentTerm(getCurrentTerm());
 
         // If this actor is no longer the leader close all the transaction chains
         if(!isLeader()){
             for(Map.Entry<String, DOMStoreTransactionChain> entry : transactionChains.entrySet()){
-                LOG.debug("onStateChanged: Closing transaction chain {} because shard {} is no longer the leader", entry.getKey(), getId());
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug(
+                        "onStateChanged: Closing transaction chain {} because shard {} is no longer the leader",
+                        entry.getKey(), getId());
+                }
                 entry.getValue().close();
             }
 
@@ -547,10 +558,6 @@ public class Shard extends RaftActor {
     }
 
     @Override protected void onLeaderChanged(String oldLeader, String newLeader) {
-        if((oldLeader == null && newLeader == null) || (newLeader != null && newLeader.equals(oldLeader)) ){
-            return;
-        }
-        LOG.info("Current state = {}, Leader = {}", getRaftState().name(), newLeader);
         shardMBean.setLeader(newLeader);
     }
 
