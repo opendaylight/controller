@@ -67,11 +67,15 @@ public class ExampleActor extends RaftActor {
             }
 
         } else if (message instanceof PrintState) {
-            LOG.debug("State of the node:{} has entries={}, {}",
-                getId(), state.size(), getReplicatedLogState());
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("State of the node:{} has entries={}, {}",
+                    getId(), state.size(), getReplicatedLogState());
+            }
 
         } else if (message instanceof PrintRole) {
-            LOG.debug("{} = {}, Peers={}", getId(), getRaftState(),getPeers());
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("{} = {}, Peers={}", getId(), getRaftState(), getPeers());
+            }
 
         } else {
             super.onReceiveCommand(message);
@@ -106,7 +110,9 @@ public class ExampleActor extends RaftActor {
         } catch (Exception e) {
            LOG.error("Exception in applying snapshot", e);
         }
-        LOG.debug("Snapshot applied to state :" + ((HashMap) state).size());
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Snapshot applied to state :" + ((HashMap) state).size());
+        }
     }
 
     private ByteString fromObject(Object snapshot) throws Exception {

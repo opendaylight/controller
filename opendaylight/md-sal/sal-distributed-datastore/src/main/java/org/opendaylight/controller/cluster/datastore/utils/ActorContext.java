@@ -125,8 +125,9 @@ public class ActorContext {
         if (result instanceof LocalShardFound) {
             LocalShardFound found = (LocalShardFound) result;
 
-            LOG.debug("Local shard found {}", found.getPath());
-
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Local shard found {}", found.getPath());
+            }
             return found.getPath();
         }
 
@@ -141,8 +142,9 @@ public class ActorContext {
         if (result.getClass().equals(PrimaryFound.SERIALIZABLE_CLASS)) {
             PrimaryFound found = PrimaryFound.fromSerializable(result);
 
-            LOG.debug("Primary found {}", found.getPrimaryPath());
-
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Primary found {}", found.getPrimaryPath());
+            }
             return found.getPrimaryPath();
         }
         throw new PrimaryNotFoundException("Could not find primary for shardName " + shardName);
@@ -175,9 +177,10 @@ public class ActorContext {
      */
     public Object executeRemoteOperation(ActorSelection actor, Object message) {
 
-        LOG.debug("Sending remote message {} to {}", message.getClass().toString(),
-            actor.toString());
-
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Sending remote message {} to {}", message.getClass().toString(),
+                actor.toString());
+        }
         Future<Object> future = ask(actor, message, operationTimeout);
 
         try {
@@ -197,8 +200,9 @@ public class ActorContext {
      */
     public Future<Object> executeRemoteOperationAsync(ActorSelection actor, Object message) {
 
-        LOG.debug("Sending remote message {} to {}", message.getClass().toString(), actor.toString());
-
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Sending remote message {} to {}", message.getClass().toString(), actor.toString());
+        }
         return ask(actor, message, operationTimeout);
     }
 

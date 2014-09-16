@@ -17,7 +17,9 @@ public abstract class AbstractUntypedActor extends UntypedActor {
         Logging.getLogger(getContext().system(), this);
 
     public AbstractUntypedActor() {
-        LOG.debug("Actor created {}", getSelf());
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Actor created {}", getSelf());
+        }
         getContext().
             system().
             actorSelection("user/termination-monitor").
@@ -27,11 +29,13 @@ public abstract class AbstractUntypedActor extends UntypedActor {
 
     @Override public void onReceive(Object message) throws Exception {
         final String messageType = message.getClass().getSimpleName();
-        LOG.debug("Received message {}", messageType);
-
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Received message {}", messageType);
+        }
         handleReceive(message);
-
-        LOG.debug("Done handling message {}", messageType);
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Done handling message {}", messageType);
+        }
     }
 
     protected abstract void handleReceive(Object message) throws Exception;
@@ -41,7 +45,9 @@ public abstract class AbstractUntypedActor extends UntypedActor {
     }
 
     protected void unknownMessage(Object message) throws Exception {
-        LOG.debug("Received unhandled message {}", message);
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Received unhandled message {}", message);
+        }
         unhandled(message);
     }
 }
