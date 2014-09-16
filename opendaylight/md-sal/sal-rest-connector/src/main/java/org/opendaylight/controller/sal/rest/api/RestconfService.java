@@ -60,31 +60,31 @@ public interface RestconfService {
 
     @GET
     @Path("/modules")
-    @Produces({ Draft02.MediaTypes.API + XML, Draft02.MediaTypes.API + JSON, MediaType.APPLICATION_JSON,
+    @Produces({ Draft02.MediaTypes.API + JSON, Draft02.MediaTypes.API + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public StructuredData getModules(@Context UriInfo uriInfo);
 
     @GET
     @Path("/modules/{identifier:.+}")
-    @Produces({ Draft02.MediaTypes.API + XML, Draft02.MediaTypes.API + JSON, MediaType.APPLICATION_JSON,
+    @Produces({ Draft02.MediaTypes.API + JSON, Draft02.MediaTypes.API + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public StructuredData getModules(@PathParam("identifier") String identifier, @Context UriInfo uriInfo);
 
     @GET
     @Path("/modules/module/{identifier:.+}")
-    @Produces({ Draft02.MediaTypes.API + XML, Draft02.MediaTypes.API + JSON, MediaType.APPLICATION_JSON,
+    @Produces({ Draft02.MediaTypes.API + JSON, Draft02.MediaTypes.API + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public StructuredData getModule(@PathParam("identifier") String identifier, @Context UriInfo uriInfo);
 
     @GET
     @Path("/operations")
-    @Produces({ Draft02.MediaTypes.API + XML, Draft02.MediaTypes.API + JSON, MediaType.APPLICATION_JSON,
+    @Produces({ Draft02.MediaTypes.API + JSON, Draft02.MediaTypes.API + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public StructuredData getOperations(@Context UriInfo uriInfo);
 
     @GET
     @Path("/operations/{identifier:.+}")
-    @Produces({ Draft02.MediaTypes.API + XML, Draft02.MediaTypes.API + JSON, MediaType.APPLICATION_JSON,
+    @Produces({ Draft02.MediaTypes.API + JSON, Draft02.MediaTypes.API + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public StructuredData getOperations(@PathParam("identifier") String identifier, @Context UriInfo uriInfo);
 
@@ -149,7 +149,7 @@ public interface RestconfService {
 
     @GET
     @Path("/streams")
-    @Produces({ Draft02.MediaTypes.API + XML, Draft02.MediaTypes.API + JSON, MediaType.APPLICATION_JSON,
+    @Produces({ Draft02.MediaTypes.API + JSON, Draft02.MediaTypes.API + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public StructuredData getAvailableStreams(@Context UriInfo uriInfo);
 
