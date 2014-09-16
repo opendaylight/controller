@@ -68,20 +68,11 @@ class FlowCapableTopologyExporter implements FlowTopologyDiscoveryListener, Open
         final NodeId nodeId = toTopologyNodeId(getNodeKey(notification.getNodeRef()).getId());
         final InstanceIdentifier<Node> nodeInstance = toNodeIdentifier(notification.getNodeRef());
 
-
         processor.enqueueOperation(new TopologyOperation() {
             @Override
             public void applyOperation(ReadWriteTransaction transaction) {
-                Optional<Node> nodeOptional = Optional.absent();
-                try {
-                    nodeOptional = transaction.read(LogicalDatastoreType.OPERATIONAL, nodeInstance).checkedGet();
-                } catch (ReadFailedException e) {
-                    LOG.error("Error occured when trying to read Node ", e);
-                }
-                if (nodeOptional.isPresent()) {
                     removeAffectedLinks(nodeId, transaction);
                     transaction.delete(LogicalDatastoreType.OPERATIONAL, nodeInstance);
-                }
             }
 
             @Override
@@ -117,19 +108,21 @@ class FlowCapableTopologyExporter implements FlowTopologyDiscoveryListener, Open
         final InstanceIdentifier<TerminationPoint> tpInstance = toTerminationPointIdentifier(
                 notification.getNodeConnectorRef());
 
+        final InstanceIdentifier<Node> node = tpInstance.firstIdentifierOf(Node.class);
+
         final TpId tpId = toTerminationPointId(getNodeConnectorKey(
                 notification.getNodeConnectorRef()).getId());
 
         processor.enqueueOperation(new TopologyOperation() {
             @Override
             public void applyOperation(ReadWriteTransaction transaction) {
-                Optional<TerminationPoint> terminationPointOptional = Optional.absent();
+                Optional<Node> nodeOptional = Optional.absent();
                 try {
-                    terminationPointOptional = transaction.read(LogicalDatastoreType.OPERATIONAL, tpInstance).checkedGet();
+                    nodeOptional = transaction.read(LogicalDatastoreType.OPERATIONAL, node).checkedGet();
                 } catch (ReadFailedException e) {
                     LOG.error("Error occured when trying to read NodeConnector ", e);
                 }
-                if (terminationPointOptional.isPresent()) {
+                if (nodeOptional.isPresent()) {
                     removeAffectedLinks(tpId, transaction);
                     transaction.delete(LogicalDatastoreType.OPERATIONAL, tpInstance);
                 }
@@ -215,7 +208,6 @@ class FlowCapableTopologyExporter implements FlowTopologyDiscoveryListener, Open
             }
         });
     }
-
 
     @Override
     public void onLinkUtilizationNormal(final LinkUtilizationNormal notification) {
