@@ -38,8 +38,9 @@ public class RemoteRpcProviderFactory {
                         Thread.currentThread().getContextClassLoader());
 
         Config actorSystemConfig = config.get();
-        LOG.debug("Actor system configuration\n{}", actorSystemConfig.root().render());
-
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Actor system configuration\n{}", actorSystemConfig.root().render());
+        }
         if (config.isMetricCaptureEnabled()) {
             LOG.info("Instrumentation is enabled in actor system {}. Metrics can be viewed in JMX console.",
                     config.getActorSystemName());

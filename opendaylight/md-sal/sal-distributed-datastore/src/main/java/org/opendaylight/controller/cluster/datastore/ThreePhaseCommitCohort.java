@@ -101,7 +101,9 @@ public class ThreePhaseCommitCohort extends AbstractUntypedActor {
 
     private void commit(CommitTransaction message) {
         // Forward the commit to the shard
-        log.debug("Forward commit transaction to Shard {} ", shardActor);
+        if(log.isDebugEnabled()) {
+            log.debug("Forward commit transaction to Shard {} ", shardActor);
+        }
         shardActor.forward(new ForwardedCommitTransaction(cohort, modification),
             getContext());
 
