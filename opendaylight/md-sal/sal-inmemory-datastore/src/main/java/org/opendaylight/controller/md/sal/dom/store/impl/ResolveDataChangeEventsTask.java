@@ -11,10 +11,8 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-
 import java.util.Collection;
 import java.util.Map.Entry;
-
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent.Builder;
 import org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent.SimpleEventFactory;
@@ -120,7 +118,9 @@ final class ResolveDataChangeEventsTask {
             Preconditions.checkArgument(node.getDataAfter().isPresent(),
                     "Modification at {} has type {} but no after-data", state.getPath(), node.getModificationType());
             if (!node.getDataBefore().isPresent()) {
-                resolveCreateEvent(state, node.getDataAfter().get());
+                @SuppressWarnings({ "unchecked", "rawtypes" })
+                final NormalizedNode<PathArgument, ?> afterNode = (NormalizedNode)node.getDataAfter().get();
+                resolveSameEventRecursivelly(state, afterNode, DOMImmutableDataChangeEvent.getCreateEventFactory());
                 return true;
             }
 
@@ -128,7 +128,10 @@ final class ResolveDataChangeEventsTask {
         case DELETE:
             Preconditions.checkArgument(node.getDataBefore().isPresent(),
                     "Modification at {} has type {} but no before-data", state.getPath(), node.getModificationType());
-            resolveDeleteEvent(state, node.getDataBefore().get());
+
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+            final NormalizedNode<PathArgument, ?> beforeNode = (NormalizedNode)node.getDataBefore().get();
+            resolveSameEventRecursivelly(state, beforeNode, DOMImmutableDataChangeEvent.getRemoveEventFactory());
             return true;
         case UNMODIFIED:
             return false;
@@ -223,26 +226,6 @@ final class ResolveDataChangeEventsTask {
         return true;
     }
 
-    /**
-     * Resolves create events deep down the interest listener tree.
-     *
-     * @param path
-     * @param listeners
-     * @param afterState
-     * @return
-     */
-    private void resolveCreateEvent(final ResolveDataChangeState state, final NormalizedNode<?, ?> afterState) {
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        final NormalizedNode<PathArgument, ?> node = (NormalizedNode) afterState;
-        resolveSameEventRecursivelly(state, node, DOMImmutableDataChangeEvent.getCreateEventFactory());
-    }
-
-    private void resolveDeleteEvent(final ResolveDataChangeState state, final NormalizedNode<?, ?> beforeState) {
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        final NormalizedNode<PathArgument, ?> node = (NormalizedNode) beforeState;
-        resolveSameEventRecursivelly(state, node, DOMImmutableDataChangeEvent.getRemoveEventFactory());
-    }
-
     private void resolveSameEventRecursivelly(final ResolveDataChangeState state,
             final NormalizedNode<PathArgument, ?> node, final SimpleEventFactory eventFactory) {
         if (!state.needsProcessing()) {
@@ -276,6 +259,11 @@ final class ResolveDataChangeEventsTask {
     private boolean resolveSubtreeChangeEvent(final ResolveDataChangeState state, final DataTreeCandidateNode modification) {
         Preconditions.checkArgument(modification.getDataBefore().isPresent(), "Subtree change with before-data not present at path %s", state.getPath());
         Preconditions.checkArgument(modification.getDataAfter().isPresent(), "Subtree change with after-data not present at path %s", state.getPath());
+
+        if (!state.needsProcessing()) {
+            LOG.trace("Not processing modified subtree {}", state.getPath());
+            return true;
+        }
 
         DataChangeScope scope = null;
         for (DataTreeCandidateNode childMod : modification.getChildNodes()) {
