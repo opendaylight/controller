@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_3830dd55",
+        "filename": "opendaylight/md-sal/topology-manager/src/main/java/org/opendaylight/md/controller/topology/manager/FlowCapableTopologyExporter.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-09-17T01:16:35Z",
+      "side": 1,
+      "message": "Presumably, we want indentation to be right here.",
+      "revId": "a76b3d2a35144222964fa255def08b1f9369ea5a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d834514c",
+        "filename": "opendaylight/md-sal/topology-manager/src/main/java/org/opendaylight/md/controller/topology/manager/FlowCapableTopologyExporter.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-09-17T01:16:35Z",
+      "side": 1,
+      "message": "And here.",
+      "revId": "a76b3d2a35144222964fa255def08b1f9369ea5a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
