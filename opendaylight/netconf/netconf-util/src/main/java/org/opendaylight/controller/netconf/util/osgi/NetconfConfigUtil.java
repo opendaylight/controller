@@ -53,29 +53,6 @@ public final class NetconfConfigUtil {
         }
     }
 
-    /**
-     * Get extracted address or default.
-     *
-     * @throws java.lang.IllegalStateException if neither address is present.
-     */
-    private static InetSocketAddress getNetconfAddress(final InetSocketAddress defaultAddress, Optional<InetSocketAddress> extractedAddress, InfixProp infix) {
-        InetSocketAddress inetSocketAddress;
-
-        if (extractedAddress.isPresent() == false) {
-            logger.debug("Netconf {} address not found, falling back to default {}", infix, defaultAddress);
-
-            if (defaultAddress == null) {
-                logger.warn("Netconf {} address not found, default address not provided", infix);
-                throw new IllegalStateException("Netconf " + infix + " address not found, default address not provided");
-            }
-            inetSocketAddress = defaultAddress;
-        } else {
-            inetSocketAddress = extractedAddress.get();
-        }
-
-        return inetSocketAddress;
-    }
-
     public static String getPrivateKeyPath(final BundleContext context) {
         return getPropertyValue(context, getPrivateKeyKey());
     }
