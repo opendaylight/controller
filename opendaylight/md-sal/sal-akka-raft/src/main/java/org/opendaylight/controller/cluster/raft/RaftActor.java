@@ -21,6 +21,7 @@ import akka.persistence.SnapshotSelectionCriteria;
 import akka.persistence.UntypedPersistentActor;
 import com.google.common.base.Optional;
 import com.google.protobuf.ByteString;
+import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
@@ -147,12 +148,26 @@ public abstract class RaftActor extends UntypedPersistentActor {
 
         } else if (message instanceof ReplicatedLogEntry) {
             ReplicatedLogEntry logEntry = (ReplicatedLogEntry) message;
+            LOG.info("Received ReplicatedLogEntry for recovery:{}", logEntry.getIndex());
+            if (!replicatedLog.isPresent(logEntry.getIndex())) {
+                // its possible that a subset of the persisted journal might have
+                // got appended to in-mem log when the snapshot is offered, hence the check.
+                replicatedLog.append(logEntry);
+            }
 
-            // Apply State immediately
-            replicatedLog.append(logEntry);
-            applyState(null, "recovery", logEntry.getData());
-            context.setLastApplied(logEntry.getIndex());
-            context.setCommitIndex(logEntry.getIndex());
+
+        } else if (message instanceof ApplyLogEntries) {
+            ApplyLogEntries ale = (ApplyLogEntries) message;
+
+            LOG.info("Received ApplyLogEntries for recovery, applying to state:{} to {}",
+                context.getLastApplied() + 1, ale.getTillIndex());
+
+            for (long i = context.getLastApplied() + 1; i <= ale.getTillIndex(); i++) {
+                applyState(null, "recovery", replicatedLog.get(i).getData());
+            }
+            context.setLastApplied(ale.getTillIndex());
+            context.setCommitIndex(ale.getTillIndex());
+
 
         } else if (message instanceof DeleteEntries) {
             replicatedLog.removeFrom(((DeleteEntries) message).getFromIndex());
@@ -186,6 +201,14 @@ public abstract class RaftActor extends UntypedPersistentActor {
 
             applyState(applyState.getClientActor(), applyState.getIdentifier(),
                 applyState.getReplicatedLogEntry().getData());
+
+        } else if (message instanceof ApplyLogEntries){
+            ApplyLogEntries ale = (ApplyLogEntries) message;
+            LOG.info("Persisting ApplyLogEntries with index={}", ale.getTillIndex());
+            persist(new ApplyLogEntries(ale.getTillIndex()), new Procedure<ApplyLogEntries>(){
+                @Override public void apply(ApplyLogEntries param) throws Exception {
+                }
+            });
 
         } else if(message instanceof ApplySnapshot ) {
             Snapshot snapshot = ((ApplySnapshot) message).getSnapshot();
