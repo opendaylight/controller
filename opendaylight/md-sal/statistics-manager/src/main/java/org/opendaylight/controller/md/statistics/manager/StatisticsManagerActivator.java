@@ -8,29 +8,64 @@
 
 package org.opendaylight.controller.md.statistics.manager;
 
+import com.google.common.annotations.VisibleForTesting;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.statistics.manager.impl.StatisticsManagerImpl;
 import org.opendaylight.controller.sal.binding.api.AbstractBindingAwareProvider;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
-import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+/**
+ * Statistics Manager Activator
+ *
+ * OSGi bundle activator
+ *
+ */
 public class StatisticsManagerActivator extends AbstractBindingAwareProvider {
-    private StatisticsProvider statsProvider;
+
+    private final static Logger LOG = LoggerFactory.getLogger(StatisticsManagerActivator.class);
+
+    /* TODO move it to ConfigSubsystem */
+    private static final long DEFAULT_MIN_REQUEST_NET_MONITOR_INTERVAL = 15000L;
+
+    private StatisticsManager statsProvider;
 
     @Override
-    public void onSessionInitiated(ProviderContext session) {
-        final DataProviderService dps = session.getSALService(DataProviderService.class);
-        final NotificationProviderService nps = session.getSALService(NotificationProviderService.class);
+    public void onSessionInitiated(final ProviderContext session) {
+        LOG.info("StatisticsManagerActivator initialization.");
+        try {
+            final DataBroker dataBroker = session.getSALService(DataBroker.class);
+            final NotificationProviderService notifService =
+                    session.getSALService(NotificationProviderService.class);
+            statsProvider = new StatisticsManagerImpl(dataBroker);
+            statsProvider.start(notifService, session, DEFAULT_MIN_REQUEST_NET_MONITOR_INTERVAL);
+            LOG.info("StatisticsManagerActivator started successfully.");
+        }
+        catch (final Exception e) {
+            LOG.error("Unexpected error by initialization of StatisticsManagerActivator", e);
+            stopImpl(null);
+        }
+    }
 
-        statsProvider = new StatisticsProvider(dps);
-        statsProvider.start(nps, session);
+    @VisibleForTesting
+    StatisticsManager getStatisticManager() {
+        return statsProvider;
     }
 
     @Override
-    protected void stopImpl(BundleContext context) {
+    protected void stopImpl(final BundleContext context) {
         if (statsProvider != null) {
-            statsProvider.close();
+            try {
+                statsProvider.close();
+            }
+            catch (final Exception e) {
+                LOG.error("Unexpected error by stopping StatisticsManagerActivator", e);
+            }
             statsProvider = null;
         }
+        LOG.info("StatisticsManagerActivator stoped.");
     }
 }
