@@ -485,7 +485,7 @@ public class RestconfImpl implements RestconfService {
         final YangInstanceIdentifier pathIdentifier = ((YangInstanceIdentifier) pathValue);
         String streamName = null;
         if (!Iterables.isEmpty(pathIdentifier.getPathArguments())) {
-            String fullRestconfIdentifier = this.controllerContext.toFullRestconfIdentifier(pathIdentifier);
+            String fullRestconfIdentifier = this.controllerContext.toFullRestconfIdentifier(pathIdentifier, null);
 
             LogicalDatastoreType datastore = parseEnumTypeParameter(value, LogicalDatastoreType.class,
                     DATASTORE_PARAM_NAME);
@@ -843,7 +843,7 @@ public class RestconfImpl implements RestconfService {
     }
 
     @Override
-    public Response createConfigurationData(final String identifier, final Node<?> payload) {
+    public Response createConfigurationData(final String identifier, final Node<?> payload, final UriInfo uriInfo) {
         if (payload == null) {
             throw new RestconfDocumentedException("Input is required.", ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE);
         }
@@ -909,11 +909,15 @@ public class RestconfImpl implements RestconfService {
             throw new RestconfDocumentedException("Error creating data", e);
         }
 
-        return Response.status(Status.NO_CONTENT).build();
+
+        UriBuilder uriBuilder = uriInfo.getBaseUriBuilder();
+        uriBuilder.path("config");
+        uriBuilder.path(controllerContext.toFullRestconfIdentifier(normalizedII, mountPoint));
+        return Response.status(Status.NO_CONTENT).location(uriBuilder.build()).build();
     }
 
     @Override
-    public Response createConfigurationData(final Node<?> payload) {
+    public Response createConfigurationData(final Node<?> payload, final UriInfo uriInfo) {
         if (payload == null) {
             throw new RestconfDocumentedException("Input is required.", ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE);
         }
@@ -957,7 +961,9 @@ public class RestconfImpl implements RestconfService {
             throw new RestconfDocumentedException("Error creating data", e);
         }
 
-        return Response.status(Status.NO_CONTENT).build();
+        UriBuilder uriBuilder = uriInfo.getBaseUriBuilder();
+        uriBuilder.path(controllerContext.toFullRestconfIdentifier(normalizedII, mountPoint));
+        return Response.status(Status.NO_CONTENT).location(uriBuilder.build()).build();
     }
 
     @Override
