@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013-2014 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -190,8 +190,9 @@ public class ICMP extends Packet {
             end += rawPayload.length;
         }
         int checksumStartByte = start + getfieldOffset(CHECKSUM) / NetUtils.NumBitsInAByte;
+        int even = end & ~1;
 
-        for (int i = start; i <= (end - 1); i = i + 2) {
+        for (int i = start; i < even; i = i + 2) {
             // Skip, if the current bytes are checkSum bytes
             if (i == checksumStartByte) {
                 continue;
@@ -199,7 +200,13 @@ public class ICMP extends Packet {
             wordData = ((data[i] << 8) & 0xFF00) + (data[i + 1] & 0xFF);
             sum = sum + wordData;
         }
-        carry = (sum >> 16) & 0xFF;
+        if (even < end) {
+            // Add the last octet with zero padding.
+            wordData = (data[even] << 8) & 0xFF00;
+            sum = sum + wordData;
+        }
+
+        carry = sum >>> 16;
         finalSum = (sum & 0xFFFF) + carry;
         return (short) ~((short) finalSum & 0xFFFF);
     }
