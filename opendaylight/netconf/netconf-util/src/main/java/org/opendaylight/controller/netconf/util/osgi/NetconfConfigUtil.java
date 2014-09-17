@@ -41,6 +41,7 @@ public final class NetconfConfigUtil {
 
     public static long extractTimeoutMillis(final BundleContext bundleContext) {
         final String key = PREFIX_PROP + CONNECTION_TIMEOUT_MILLIS_PROP;
+        System.out.println(key);
         final String timeoutString = bundleContext.getProperty(key);
         if (timeoutString == null || timeoutString.length() == 0) {
             return DEFAULT_TIMEOUT_MILLIS;
@@ -51,29 +52,6 @@ public final class NetconfConfigUtil {
             logger.warn("Cannot parse {} property: {}, using defaults", key, timeoutString, e);
             return DEFAULT_TIMEOUT_MILLIS;
         }
-    }
-
-    /**
-     * Get extracted address or default.
-     *
-     * @throws java.lang.IllegalStateException if neither address is present.
-     */
-    private static InetSocketAddress getNetconfAddress(final InetSocketAddress defaultAddress, Optional<InetSocketAddress> extractedAddress, InfixProp infix) {
-        InetSocketAddress inetSocketAddress;
-
-        if (extractedAddress.isPresent() == false) {
-            logger.debug("Netconf {} address not found, falling back to default {}", infix, defaultAddress);
-
-            if (defaultAddress == null) {
-                logger.warn("Netconf {} address not found, default address not provided", infix);
-                throw new IllegalStateException("Netconf " + infix + " address not found, default address not provided");
-            }
-            inetSocketAddress = defaultAddress;
-        } else {
-            inetSocketAddress = extractedAddress.get();
-        }
-
-        return inetSocketAddress;
     }
 
     public static String getPrivateKeyPath(final BundleContext context) {
