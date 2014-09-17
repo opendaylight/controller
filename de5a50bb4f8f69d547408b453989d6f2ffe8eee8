@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_f32a962b",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 913,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-09-17T11:20:10Z",
+      "side": 1,
+      "message": "I believe we have access to DataSchemaNode here, so we could pass it to locationInfo method to capture key information and key types.",
+      "revId": "de5a50bb4f8f69d547408b453989d6f2ffe8eee8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d325125d",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 980,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-09-17T11:20:10Z",
+      "side": 1,
+      "message": "Could we use RestconfCodec here for key types?\nOtherwise we may create incorrect URI.",
+      "revId": "de5a50bb4f8f69d547408b453989d6f2ffe8eee8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
