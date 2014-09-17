@@ -54,13 +54,13 @@ public class Get extends AbstractConfigNetconfOperation {
             Map<String, Map<String, ModuleMXBeanEntry>> mBeanEntries) {
         Map<String, Map<String, ModuleRuntime>> retVal = Maps.newHashMap();
 
-        for (String namespace : mBeanEntries.keySet()) {
+        for (Map.Entry<String, Map<String, ModuleMXBeanEntry>> namespaceToModuleEntry : mBeanEntries.entrySet()) {
 
             Map<String, ModuleRuntime> innerMap = Maps.newHashMap();
-            Map<String, ModuleMXBeanEntry> entriesFromNamespace = mBeanEntries.get(namespace);
-            for (String module : entriesFromNamespace.keySet()) {
+            Map<String, ModuleMXBeanEntry> entriesFromNamespace = namespaceToModuleEntry.getValue();
+            for (Map.Entry<String, ModuleMXBeanEntry> moduleToMXEntry : entriesFromNamespace.entrySet()) {
 
-                ModuleMXBeanEntry mbe = entriesFromNamespace.get(module);
+                ModuleMXBeanEntry mbe = moduleToMXEntry.getValue();
 
                 Map<RuntimeBeanEntry, InstanceConfig> cache = Maps.newHashMap();
                 RuntimeBeanEntry root = null;
@@ -77,10 +77,10 @@ public class Get extends AbstractConfigNetconfOperation {
 
                 InstanceRuntime rootInstanceRuntime = createInstanceRuntime(root, cache);
                 ModuleRuntime moduleRuntime = new ModuleRuntime(rootInstanceRuntime);
-                innerMap.put(module, moduleRuntime);
+                innerMap.put(moduleToMXEntry.getKey(), moduleRuntime);
             }
 
-            retVal.put(namespace, innerMap);
+            retVal.put(namespaceToModuleEntry.getKey(), innerMap);
         }
         return retVal;
     }

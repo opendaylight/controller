@@ -47,11 +47,11 @@ public class SimpleIdentityRefAttributeReadingStrategy extends SimpleAttributeRe
         Date revision = null;
         Map<Date, EditConfig.IdentityMapping> revisions = identityMap.get(namespace);
         if(revisions.keySet().size() > 1) {
-            for (Date date : revisions.keySet()) {
-                if(revisions.get(date).containsIdName(localName)) {
+            for (Map.Entry<Date, EditConfig.IdentityMapping> revisionToIdentityEntry : revisions.entrySet()) {
+                if(revisionToIdentityEntry.getValue().containsIdName(localName)) {
                     Preconditions.checkState(revision == null, "Duplicate identity %s, in namespace %s, with revisions: %s, %s detected. Cannot map attribute",
-                            localName, namespace, revision, date);
-                    revision = date;
+                            localName, namespace, revision, revisionToIdentityEntry.getKey());
+                    revision = revisionToIdentityEntry.getKey();
                 }
             }
         } else {

@@ -116,8 +116,8 @@ public abstract class AbstractNetconfOperation implements NetconfOperation {
             rpcReply.appendChild(responseNS);
         }
 
-        for (String attrName : attributes.keySet()) {
-            rpcReply.setAttributeNode((Attr) document.importNode(attributes.get(attrName), true));
+        for (Attr attribute : attributes.values()) {
+            rpcReply.setAttributeNode((Attr) document.importNode(attribute, true));
         }
         document.appendChild(rpcReply);
         return document;

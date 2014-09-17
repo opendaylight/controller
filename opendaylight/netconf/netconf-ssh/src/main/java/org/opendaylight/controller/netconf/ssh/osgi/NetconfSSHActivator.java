@@ -123,6 +123,7 @@ public class NetconfSSHActivator implements BundleActivator {
             final AuthProvider authService = bundleContext.getService(reference);
             final Integer newServicePreference = getPreference(reference);
             if(isBetter(newServicePreference)) {
+                maxPreference = newServicePreference;
                 server.setAuthProvider(authService);
                 if(sshThread == null) {
                     sshThread = runNetconfSshThread(server);

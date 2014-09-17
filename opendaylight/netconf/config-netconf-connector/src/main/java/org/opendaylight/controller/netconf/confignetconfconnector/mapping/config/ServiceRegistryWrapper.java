@@ -24,7 +24,6 @@ public class ServiceRegistryWrapper {
         this.configServiceRefRegistry = configServiceRefRegistry;
     }
 
-
     public ObjectName getByServiceAndRefName(String namespace, String serviceName, String refName) {
         Map<String, Map<String, String>> serviceNameToRefNameToInstance = getMappedServices().get(namespace);
 
@@ -61,13 +60,13 @@ public class ServiceRegistryWrapper {
         Map<String, Map<String, Map<String, String>>> retVal = Maps.newHashMap();
 
         Map<String, Map<String, ObjectName>> serviceMapping = configServiceRefRegistry.getServiceMapping();
-        for (String serviceQName : serviceMapping.keySet()){
-            for (String refName : serviceMapping.get(serviceQName).keySet()) {
+        for (Map.Entry<String, Map<String, ObjectName>> qNameToRefNameEntry : serviceMapping.entrySet()){
+            for (String refName : qNameToRefNameEntry.getValue().keySet()) {
 
-                ObjectName on = serviceMapping.get(serviceQName).get(refName);
+                ObjectName on = qNameToRefNameEntry.getValue().get(refName);
                 Services.ServiceInstance si = Services.ServiceInstance.fromObjectName(on);
 
-                QName qname = QName.create(serviceQName);
+                QName qname = QName.create(qNameToRefNameEntry.getKey());
                 String namespace = qname.getNamespace().toString();
                 Map<String, Map<String, String>> serviceToRefs = retVal.get(namespace);
                 if(serviceToRefs==null) {

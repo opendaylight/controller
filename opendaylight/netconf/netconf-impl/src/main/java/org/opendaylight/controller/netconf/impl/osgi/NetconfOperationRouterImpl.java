@@ -48,7 +48,7 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
         this.netconfOperationServiceSnapshot = netconfOperationServiceSnapshot;
     }
 
-    private void initNetconfOperations(Set<NetconfOperation> allOperations) {
+    private synchronized void initNetconfOperations(Set<NetconfOperation> allOperations) {
         allNetconfOperations = allOperations;
     }
 
