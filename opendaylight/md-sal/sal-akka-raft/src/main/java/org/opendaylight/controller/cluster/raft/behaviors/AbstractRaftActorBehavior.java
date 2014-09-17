@@ -15,6 +15,7 @@ import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.SerializationUtils;
+import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
@@ -347,6 +348,12 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         }
         context.getLogger().debug("Setting last applied to {}", newLastApplied);
         context.setLastApplied(newLastApplied);
+
+        // send a message to persist a ApplyLogEntries marker message into akka's persistent journal
+        // will be used during recovery
+        //in case if the above code throws an error and this message is not sent, it would be fine
+        // as the  append entries received later would initiate add this message to the journal
+        actor().tell(new ApplyLogEntries((int) context.getLastApplied()), actor());
     }
 
     protected Object fromSerializableMessage(Object serializable){
