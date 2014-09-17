@@ -7,7 +7,6 @@ import org.opendaylight.controller.cluster.example.messages.PrintRole;
 import org.opendaylight.controller.cluster.example.messages.PrintState;
 import org.opendaylight.controller.cluster.raft.ConfigParams;
 import org.opendaylight.controller.cluster.raft.client.messages.AddRaftPeer;
-import org.opendaylight.controller.cluster.raft.client.messages.RemoveRaftPeer;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -196,11 +195,6 @@ public class TestDriver {
 
         actorSystem.stop(actorRef);
         actorRefs.remove(actorName);
-
-        for (ActorRef actor : actorRefs.values()) {
-            actor.tell(new RemoveRaftPeer(actorName), null);
-        }
-
         allPeers.remove(actorName);
     }
 
@@ -209,11 +203,6 @@ public class TestDriver {
         allPeers.put(actorName, address);
 
         ActorRef exampleActor = createExampleActor(actorName);
-
-        for (ActorRef actor : actorRefs.values()) {
-            actor.tell(new AddRaftPeer(actorName, address), null);
-        }
-
         actorRefs.put(actorName, exampleActor);
 
         addClientsToNode(actorName, 1);
