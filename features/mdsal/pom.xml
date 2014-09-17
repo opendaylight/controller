@@ -13,6 +13,7 @@
 
   <properties>
     <features.file>features.xml</features.file>
+    <org.json.version>20131018</org.json.version>
   </properties>
 
   <dependencies>
@@ -258,6 +259,20 @@
       <version>${mdsal.version}</version>
       <type>xml</type>
       <classifier>config</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller.samples</groupId>
+      <artifactId>clustering-it-config</artifactId>
+      <version>${mdsal.version}</version>
+      <type>xml</type>
+      <classifier>testmoduleshardconf</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller.samples</groupId>
+      <artifactId>clustering-it-config</artifactId>
+      <version>${mdsal.version}</version>
+      <type>xml</type>
+      <classifier>testmoduleconf</classifier>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
