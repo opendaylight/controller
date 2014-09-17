@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_d3dc3249",
+        "filename": "opendaylight/netconf/netconf-util/src/main/java/org/opendaylight/controller/netconf/util/osgi/NetconfConfigUtil.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-09-17T11:33:23Z",
+      "side": 1,
+      "message": "Please remove Sysout.",
+      "revId": "4a44dfaff335b25d4e80727f652f12429df5bca1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f3e136ff",
+        "filename": "opendaylight/netconf/netconf-util/src/test/java/org/opendaylight/controller/netconf/util/mapping/AbstractLastNetconfOperationTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-09-17T11:33:23Z",
+      "side": 1,
+      "message": "Could you merge these 2 classes ? AbstractLastNetconfOperationTest and LastNetconfOperationImplTest ? I think one would be sufficient. If no make AbstractLastNetconfOperationTest main class and LastNetconfOperationImplTest its inner class.",
+      "revId": "4a44dfaff335b25d4e80727f652f12429df5bca1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_93e6aa15",
+        "filename": "opendaylight/netconf/netconf-util/src/test/java/org/opendaylight/controller/netconf/util/mapping/AbstractNetconfOperationTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-09-17T11:33:23Z",
+      "side": 1,
+      "message": "Same as before, try to merge classes.",
+      "revId": "4a44dfaff335b25d4e80727f652f12429df5bca1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b3e3ae04",
+        "filename": "opendaylight/netconf/netconf-util/src/test/java/org/opendaylight/controller/netconf/util/mapping/AbstractSingletonNetconfOperationTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-09-17T11:33:23Z",
+      "side": 1,
+      "message": "2 classes again",
+      "revId": "4a44dfaff335b25d4e80727f652f12429df5bca1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_73ed26ef",
+        "filename": "opendaylight/netconf/netconf-util/src/test/java/org/opendaylight/controller/netconf/util/messages/NetconfMessageHeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-09-17T11:33:23Z",
+      "side": 1,
+      "message": "There should be a comparison against concrete value, since we are comparing result of toBytes with result of toBytes.",
+      "revId": "4a44dfaff335b25d4e80727f652f12429df5bca1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_13ba9ae1",
+        "filename": "opendaylight/netconf/netconf-util/src/test/java/org/opendaylight/controller/netconf/util/messages/SendErrorExceptionUtilTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-09-17T11:33:23Z",
+      "side": 1,
+      "message": "Also sendMessage invocation should be verified",
+      "revId": "4a44dfaff335b25d4e80727f652f12429df5bca1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
