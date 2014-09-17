@@ -55,7 +55,7 @@ public class TransactionProvider implements AutoCloseable {
         allOpenedTransactions.clear();
     }
 
-    public Optional<ObjectName> getTransaction() {
+    public synchronized Optional<ObjectName> getTransaction() {
 
         if (transaction == null){
             return Optional.absent();

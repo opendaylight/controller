@@ -10,6 +10,9 @@ package org.opendaylight.controller.netconf.persist.impl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Function;
+import com.google.common.base.Stopwatch;
+import com.google.common.collect.Collections2;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
@@ -23,10 +26,9 @@ import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-
+import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 import javax.management.MBeanServerConnection;
-
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.persist.api.ConfigPusher;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
@@ -48,10 +50,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
-
-import com.google.common.base.Function;
-import com.google.common.base.Stopwatch;
-import com.google.common.collect.Collections2;
 
 @Immutable
 public class ConfigPusherImpl implements ConfigPusher {
@@ -200,7 +198,7 @@ public class ConfigPusherImpl implements ConfigPusher {
     private static Set<String> computeNotFoundCapabilities(Set<String> expectedCapabilities, NetconfOperationService serviceCandidate) {
         Collection<String> actual = Collections2.transform(serviceCandidate.getCapabilities(), new Function<Capability, String>() {
             @Override
-            public String apply(Capability input) {
+            public String apply(@Nonnull final Capability input) {
                 return input.getCapabilityUri();
             }
         });

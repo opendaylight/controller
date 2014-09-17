@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Nullable;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
 import org.opendaylight.controller.netconf.util.exception.UnexpectedElementException;
@@ -204,7 +203,7 @@ public final class XmlElement {
         return Lists.newArrayList(Collections2.filter(getChildElementsWithinNamespace(namespace),
                 new Predicate<XmlElement>() {
                     @Override
-                    public boolean apply(@Nullable XmlElement xmlElement) {
+                    public boolean apply(XmlElement xmlElement) {
                         return xmlElement.getName().equals(childName);
                     }
                 }));
@@ -298,7 +297,7 @@ public final class XmlElement {
         List<XmlElement> children = getChildElementsWithinNamespace(namespace);
         children = Lists.newArrayList(Collections2.filter(children, new Predicate<XmlElement>() {
             @Override
-            public boolean apply(@Nullable XmlElement xmlElement) {
+            public boolean apply(XmlElement xmlElement) {
                 return xmlElement.getName().equals(childName);
             }
         }));
@@ -436,7 +435,7 @@ public final class XmlElement {
         List<XmlElement> children = getChildElementsWithinNamespace(getNamespace());
         return Lists.newArrayList(Collections2.filter(children, new Predicate<XmlElement>() {
             @Override
-            public boolean apply(@Nullable XmlElement xmlElement) {
+            public boolean apply(XmlElement xmlElement) {
                 return xmlElement.getName().equals(childName);
             }
         }));

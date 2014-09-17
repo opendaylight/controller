@@ -13,6 +13,10 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.netty.util.internal.ConcurrentSet;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfManagementSession;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.mapping.api.Capability;
@@ -31,11 +35,6 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.mon
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.sessions.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
 
 public class NetconfMonitoringServiceImpl implements NetconfMonitoringService, SessionMonitoringService {
 
@@ -134,9 +133,8 @@ public class NetconfMonitoringServiceImpl implements NetconfMonitoringService, S
 
     private List<Session> transformSessions(Set<NetconfManagementSession> sessions) {
         return Lists.newArrayList(Collections2.transform(sessions, new Function<NetconfManagementSession, Session>() {
-            @Nullable
             @Override
-            public Session apply(@Nullable NetconfManagementSession input) {
+            public Session apply(@Nonnull NetconfManagementSession input) {
                 return input.toManagementSession();
             }
         }));

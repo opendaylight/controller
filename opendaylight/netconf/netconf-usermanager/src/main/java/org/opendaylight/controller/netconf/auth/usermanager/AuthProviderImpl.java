@@ -71,7 +71,7 @@ public class AuthProviderImpl implements AuthProvider {
     }
 
     @VisibleForTesting
-    void setNullableUserManager(final IUserManager nullableUserManager) {
+    synchronized void setNullableUserManager(final IUserManager nullableUserManager) {
         this.nullableUserManager = nullableUserManager;
     }
 }
