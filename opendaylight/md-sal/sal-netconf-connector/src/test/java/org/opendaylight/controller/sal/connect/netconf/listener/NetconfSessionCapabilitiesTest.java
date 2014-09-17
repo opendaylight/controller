@@ -43,6 +43,19 @@ public class NetconfSessionCapabilitiesTest {
         assertThat(merged.getNonModuleCaps(), JUnitMatchers.hasItem("urn:ietf:params:netconf:capability:rollback-on-error:1.0"));
     }
 
+    @Test
+    public void testCapabilityNoRevision() throws Exception {
+        final List<String> caps1 = Lists.newArrayList(
+                "namespace:2?module=module2",
+                "namespace:2?module=module2&amp;revision=2012-12-12",
+                "namespace:2?module=module1&amp;RANDOMSTRING;revision=2013-12-12",
+                "namespace:2?module=module2&amp;RANDOMSTRING;revision=2013-12-12" // This one should be ignored(same as first), since revision is in wrong format
+        );
+
+        final NetconfSessionCapabilities sessionCaps1 = NetconfSessionCapabilities.fromStrings(caps1);
+        assertCaps(sessionCaps1, 0, 3);
+    }
+
     private void assertCaps(final NetconfSessionCapabilities sessionCaps1, final int nonModuleCaps, final int moduleCaps) {
         assertEquals(nonModuleCaps, sessionCaps1.getNonModuleCaps().size());
         assertEquals(moduleCaps, sessionCaps1.getModuleBasedCaps().size());

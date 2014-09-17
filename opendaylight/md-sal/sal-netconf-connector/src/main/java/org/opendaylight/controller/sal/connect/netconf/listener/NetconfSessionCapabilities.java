@@ -8,11 +8,10 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
-
+import java.net.URI;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.opendaylight.controller.netconf.client.NetconfClientSession;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -119,8 +118,12 @@ public final class NetconfSessionCapabilities {
         return fromStrings(session.getServerCapabilities());
     }
 
-    private static final QName cachedQName(String namespace, String revision, String moduleName) {
+    private static QName cachedQName(final String namespace, final String revision, final String moduleName) {
         return QName.cachedReference(QName.create(namespace, revision, moduleName));
+    }
+
+    private static QName cachedQName(final String namespace, final String moduleName) {
+        return QName.cachedReference(QName.create(URI.create(namespace), null, moduleName).withoutRevision());
     }
 
     public static NetconfSessionCapabilities fromStrings(final Collection<String> capabilities) {
@@ -142,8 +145,7 @@ public final class NetconfSessionCapabilities {
 
             String revision = REVISION_PARAM.from(queryParams);
             if (revision != null) {
-                moduleBasedCaps.add(cachedQName(namespace, revision, moduleName));
-                nonModuleCaps.remove(capability);
+                addModuleQName(moduleBasedCaps, nonModuleCaps, capability, cachedQName(namespace, revision, moduleName));
                 continue;
             }
 
@@ -151,21 +153,29 @@ public final class NetconfSessionCapabilities {
              * We have seen devices which mis-escape revision, but the revision may not
              * even be there. First check if there is a substring that matches revision.
              */
-            if (!Iterables.any(queryParams, CONTAINS_REVISION)) {
+            if (Iterables.any(queryParams, CONTAINS_REVISION)) {
+
+                LOG.debug("Netconf device was not reporting revision correctly, trying to get amp;revision=");
+                revision = BROKEN_REVISON_PARAM.from(queryParams);
+                if (revision == null) {
+                    LOG.warn("Netconf device returned revision incorrectly escaped for {}, ignoring it", capability);
+                    addModuleQName(moduleBasedCaps, nonModuleCaps, capability, cachedQName(namespace, moduleName));
+                } else {
+                    addModuleQName(moduleBasedCaps, nonModuleCaps, capability, cachedQName(namespace, revision, moduleName));
+                }
                 continue;
             }
 
-            LOG.debug("Netconf device was not reporting revision correctly, trying to get amp;revision=");
-            revision = BROKEN_REVISON_PARAM.from(queryParams);
-            if (revision == null) {
-                LOG.warn("Netconf device returned revision incorrectly escaped for {}, ignoring it", capability);
-            }
-
-            // FIXME: do we really want to continue here?
-            moduleBasedCaps.add(cachedQName(namespace, revision, moduleName));
-            nonModuleCaps.remove(capability);
+            // Fallback, no revision provided for module
+            addModuleQName(moduleBasedCaps, nonModuleCaps, capability, cachedQName(namespace, moduleName));
         }
 
         return new NetconfSessionCapabilities(ImmutableSet.copyOf(nonModuleCaps), ImmutableSet.copyOf(moduleBasedCaps));
+    }
+
+
+    private static void addModuleQName(final Set<QName> moduleBasedCaps, final Set<String> nonModuleCaps, final String capability, final QName qName) {
+        moduleBasedCaps.add(qName);
+        nonModuleCaps.remove(capability);
     }
 }
