@@ -59,6 +59,7 @@ import org.opendaylight.yangtools.yang.data.api.MutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.InstanceIdentifierBuilder;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
@@ -843,7 +844,7 @@ public class RestconfImpl implements RestconfService {
     }
 
     @Override
-    public Response createConfigurationData(final String identifier, final Node<?> payload) {
+    public Response createConfigurationData(final String identifier, final Node<?> payload, final UriInfo uriInfo) {
         if (payload == null) {
             throw new RestconfDocumentedException("Input is required.", ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE);
         }
@@ -909,11 +910,12 @@ public class RestconfImpl implements RestconfService {
             throw new RestconfDocumentedException("Error creating data", e);
         }
 
-        return Response.status(Status.NO_CONTENT).build();
+        URI location = prepareLocationInfo(uriInfo.getBaseUriBuilder(), "config", normalizedII);
+        return Response.status(Status.NO_CONTENT).location(location).build();
     }
 
     @Override
-    public Response createConfigurationData(final Node<?> payload) {
+    public Response createConfigurationData(final Node<?> payload, final UriInfo uriInfo) {
         if (payload == null) {
             throw new RestconfDocumentedException("Input is required.", ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE);
         }
@@ -957,7 +959,34 @@ public class RestconfImpl implements RestconfService {
             throw new RestconfDocumentedException("Error creating data", e);
         }
 
-        return Response.status(Status.NO_CONTENT).build();
+        URI location = prepareLocationInfo(uriInfo.getRequestUriBuilder(), "", normalizedII);
+        return Response.status(Status.NO_CONTENT).location(location).build();
+    }
+
+    private URI prepareLocationInfo(final UriBuilder uriBuilder, final String uriBehindBase, final YangInstanceIdentifier instanceIdentifier) {
+        uriBuilder.path(uriBehindBase);
+        URI previousNamespace = null;
+        String moduleName = "";
+        for (PathArgument pathArgument : instanceIdentifier.getPathArguments()) {
+            if (!(pathArgument instanceof AugmentationIdentifier)) {
+                if (!pathArgument.getNodeType().getNamespace().equals(previousNamespace)) {
+                    Module module = controllerContext.findModuleByNamespace(pathArgument.getNodeType().getNamespace());
+                    if (module != null) {
+                        moduleName = module.getName() + ":";
+                    }
+                }
+                if (pathArgument instanceof NodeIdentifierWithPredicates) {
+                    for (Object value : ((NodeIdentifierWithPredicates) pathArgument).getKeyValues().values()) {
+                        uriBuilder.path(value.toString());
+                    }
+                } else {
+                    uriBuilder.path(moduleName + pathArgument.getNodeType().getLocalName());
+                    moduleName = "";
+                }
+                previousNamespace = pathArgument.getNodeType().getNamespace();
+            }
+        }
+        return uriBuilder.build();
     }
 
     @Override
