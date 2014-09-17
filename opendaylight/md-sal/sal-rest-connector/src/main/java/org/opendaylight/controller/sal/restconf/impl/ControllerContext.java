@@ -43,6 +43,7 @@ import org.opendaylight.yangtools.concepts.Codec;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.InstanceIdentifierBuilder;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
@@ -251,24 +252,34 @@ public class ControllerContext implements SchemaContextListener {
         return node;
     }
 
-    public String toFullRestconfIdentifier(final YangInstanceIdentifier path) {
+    public String toFullRestconfIdentifier(final YangInstanceIdentifier path, final DOMMountPoint mount) {
         this.checkPreconditions();
 
         final Iterable<PathArgument> elements = path.getPathArguments();
         final StringBuilder builder = new StringBuilder();
         PathArgument head = elements.iterator().next();
         final QName startQName = head.getNodeType();
-        final Module initialModule = globalSchema.findModuleByNamespaceAndRevision(startQName.getNamespace(),
+        final SchemaContext schemaContext;
+        if (mount != null) {
+            schemaContext = mount.getSchemaContext();
+        } else {
+            schemaContext = globalSchema;
+        }
+        final Module initialModule = schemaContext.findModuleByNamespaceAndRevision(startQName.getNamespace(),
                 startQName.getRevision());
         DataNodeContainer node = initialModule;
         for (final PathArgument element : elements) {
-            QName _nodeType = element.getNodeType();
-            final DataSchemaNode potentialNode = ControllerContext.childByQName(node, _nodeType);
-            if (!ControllerContext.isListOrContainer(potentialNode)) {
-                return null;
+            if (!(element instanceof AugmentationIdentifier)) {
+                QName _nodeType = element.getNodeType();
+                final DataSchemaNode potentialNode = ControllerContext.childByQName(node, _nodeType);
+                if (!(element instanceof NodeIdentifier && potentialNode instanceof ListSchemaNode)) {
+                    if (!ControllerContext.isListOrContainer(potentialNode)) {
+                        return null;
+                    }
+                    builder.append(convertToRestconfIdentifier(element, (DataNodeContainer) potentialNode, mount));
+                    node = (DataNodeContainer) potentialNode;
+                }
             }
-            node = ((DataNodeContainer) potentialNode);
-            builder.append(this.convertToRestconfIdentifier(element, node));
         }
 
         return builder.toString();
@@ -311,6 +322,18 @@ public class ControllerContext implements SchemaContextListener {
     private static final CharSequence toRestconfIdentifier(final SchemaContext context, final QName qname) {
         final Module schema = context.findModuleByNamespaceAndRevision(qname.getNamespace(), qname.getRevision());
         return schema == null ? null : schema.getName() + ':' + qname.getLocalName();
+    }
+
+    public CharSequence toRestconfIdentifier(final QName qname, final DOMMountPoint mount) {
+        final SchemaContext schema;
+        if (mount != null) {
+            schema = mount.getSchemaContext();
+        } else {
+            checkPreconditions();
+            schema = globalSchema;
+        }
+
+        return toRestconfIdentifier(schema, qname);
     }
 
     public CharSequence toRestconfIdentifier(final QName qname) {
@@ -462,8 +485,9 @@ public class ControllerContext implements SchemaContextListener {
         return ret;
     }
 
-    private String toUriString(final Object object) throws UnsupportedEncodingException {
-        return object == null ? "" : URLEncoder.encode(object.toString(), ControllerContext.URI_ENCODING_CHAR_SET);
+    private String toUriString(final Object object, final LeafSchemaNode leafNode, final DOMMountPoint mount) throws UnsupportedEncodingException {
+        final Codec<Object, Object> codec = RestCodec.from(leafNode.getType(), mount);
+        return object == null ? "" : URLEncoder.encode(codec.serialize(object).toString(), ControllerContext.URI_ENCODING_CHAR_SET);
     }
 
     private InstanceIdentifierContext collectPathArguments(final InstanceIdentifierBuilder builder,
@@ -821,11 +845,11 @@ public class ControllerContext implements SchemaContextListener {
         return null;
     }
 
-    private CharSequence convertToRestconfIdentifier(final PathArgument argument, final DataNodeContainer node) {
+    private CharSequence convertToRestconfIdentifier(final PathArgument argument, final DataNodeContainer node, final DOMMountPoint mount) {
         if (argument instanceof NodeIdentifier && node instanceof ContainerSchemaNode) {
-            return convertToRestconfIdentifier((NodeIdentifier) argument, (ContainerSchemaNode) node);
+            return convertToRestconfIdentifier((NodeIdentifier) argument, mount);
         } else if (argument instanceof NodeIdentifierWithPredicates && node instanceof ListSchemaNode) {
-            return convertToRestconfIdentifier((NodeIdentifierWithPredicates) argument, (ListSchemaNode) node);
+            return convertToRestconfIdentifier((NodeIdentifierWithPredicates) argument, (ListSchemaNode) node, mount);
         } else if (argument != null && node != null) {
             throw new IllegalArgumentException("Conversion of generic path argument is not supported");
         } else {
@@ -834,14 +858,14 @@ public class ControllerContext implements SchemaContextListener {
         }
     }
 
-    private CharSequence convertToRestconfIdentifier(final NodeIdentifier argument, final ContainerSchemaNode node) {
-        return "/" + this.toRestconfIdentifier(argument.getNodeType());
+    private CharSequence convertToRestconfIdentifier(final NodeIdentifier argument, final DOMMountPoint mount) {
+        return "/" + this.toRestconfIdentifier(argument.getNodeType(), mount);
     }
 
     private CharSequence convertToRestconfIdentifier(final NodeIdentifierWithPredicates argument,
-            final ListSchemaNode node) {
+            final ListSchemaNode node, final DOMMountPoint mount) {
         QName nodeType = argument.getNodeType();
-        final CharSequence nodeIdentifier = this.toRestconfIdentifier(nodeType);
+        final CharSequence nodeIdentifier = this.toRestconfIdentifier(nodeType, mount);
         final Map<QName, Object> keyValues = argument.getKeyValues();
 
         StringBuilder builder = new StringBuilder();
@@ -852,17 +876,23 @@ public class ControllerContext implements SchemaContextListener {
         List<QName> keyDefinition = node.getKeyDefinition();
         boolean hasElements = false;
         for (final QName key : keyDefinition) {
-            if (!hasElements) {
-                hasElements = true;
-            } else {
-                builder.append('/');
-            }
+            for (DataSchemaNode listChild : node.getChildNodes()) {
+                if (listChild.getQName().equals(key)) {
+                    if (!hasElements) {
+                        hasElements = true;
+                    } else {
+                        builder.append('/');
+                    }
 
-            try {
-                builder.append(this.toUriString(keyValues.get(key)));
-            } catch (UnsupportedEncodingException e) {
-                LOG.error("Error parsing URI: {}", keyValues.get(key), e);
-                return null;
+                    try {
+                        Preconditions.checkState(listChild instanceof LeafSchemaNode, "List key has to consist of leaves");
+                        builder.append(this.toUriString(keyValues.get(key), (LeafSchemaNode)listChild, mount));
+                    } catch (UnsupportedEncodingException e) {
+                        LOG.error("Error parsing URI: {}", keyValues.get(key), e);
+                        return null;
+                    }
+                    break;
+                }
             }
         }
 

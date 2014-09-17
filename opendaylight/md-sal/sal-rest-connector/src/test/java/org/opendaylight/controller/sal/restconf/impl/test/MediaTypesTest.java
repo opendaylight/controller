@@ -159,38 +159,38 @@ public class MediaTypesTest extends JerseyTest {
         String uriPrefix = "/config/";
         String uriPath = "ietf-interfaces:interfaces";
         String uri = uriPrefix + uriPath;
-        when(restconfService.createConfigurationData(eq(uriPath), any(CompositeNode.class))).thenReturn(null);
+        when(restconfService.createConfigurationData(eq(uriPath), any(CompositeNode.class), any(UriInfo.class))).thenReturn(null);
         post(uri, null, Draft02.MediaTypes.DATA + JSON, jsonData);
-        verify(restconfService, times(1)).createConfigurationData(eq(uriPath), any(CompositeNode.class));
+        verify(restconfService, times(1)).createConfigurationData(eq(uriPath), any(CompositeNode.class), any(UriInfo.class));
         post(uri, null, Draft02.MediaTypes.DATA + XML, xmlData);
-        verify(restconfService, times(2)).createConfigurationData(eq(uriPath), any(CompositeNode.class));
+        verify(restconfService, times(2)).createConfigurationData(eq(uriPath), any(CompositeNode.class), any(UriInfo.class));
         post(uri, null, MediaType.APPLICATION_JSON, jsonData);
-        verify(restconfService, times(3)).createConfigurationData(eq(uriPath), any(CompositeNode.class));
+        verify(restconfService, times(3)).createConfigurationData(eq(uriPath), any(CompositeNode.class), any(UriInfo.class));
         post(uri, null, MediaType.APPLICATION_XML, xmlData);
-        verify(restconfService, times(4)).createConfigurationData(eq(uriPath), any(CompositeNode.class));
+        verify(restconfService, times(4)).createConfigurationData(eq(uriPath), any(CompositeNode.class), any(UriInfo.class));
         post(uri, null, MediaType.TEXT_XML, xmlData);
-        verify(restconfService, times(5)).createConfigurationData(eq(uriPath), any(CompositeNode.class));
+        verify(restconfService, times(5)).createConfigurationData(eq(uriPath), any(CompositeNode.class), any(UriInfo.class));
         post(uri, "fooMediaType", MediaType.TEXT_XML, xmlData);
-        verify(restconfService, times(6)).createConfigurationData(eq(uriPath), any(CompositeNode.class));
+        verify(restconfService, times(6)).createConfigurationData(eq(uriPath), any(CompositeNode.class), any(UriInfo.class));
     }
 
     @Test
     public void testPostConfigMediaTypes() throws UnsupportedEncodingException {
         String uriPrefix = "/config/";
         String uri = uriPrefix;
-        when(restconfService.createConfigurationData(any(CompositeNode.class))).thenReturn(null);
+        when(restconfService.createConfigurationData(any(CompositeNode.class), any(UriInfo.class))).thenReturn(null);
         post(uri, null, Draft02.MediaTypes.DATA + JSON, jsonData);
-        verify(restconfService, times(1)).createConfigurationData(any(CompositeNode.class));
+        verify(restconfService, times(1)).createConfigurationData(any(CompositeNode.class), any(UriInfo.class));
         post(uri, null, Draft02.MediaTypes.DATA + XML, xmlData);
-        verify(restconfService, times(2)).createConfigurationData(any(CompositeNode.class));
+        verify(restconfService, times(2)).createConfigurationData(any(CompositeNode.class), any(UriInfo.class));
         post(uri, null, MediaType.APPLICATION_JSON, jsonData);
-        verify(restconfService, times(3)).createConfigurationData(any(CompositeNode.class));
+        verify(restconfService, times(3)).createConfigurationData(any(CompositeNode.class), any(UriInfo.class));
         post(uri, null, MediaType.APPLICATION_XML, xmlData);
-        verify(restconfService, times(4)).createConfigurationData(any(CompositeNode.class));
+        verify(restconfService, times(4)).createConfigurationData(any(CompositeNode.class), any(UriInfo.class));
         post(uri, null, MediaType.TEXT_XML, xmlData);
-        verify(restconfService, times(5)).createConfigurationData(any(CompositeNode.class));
+        verify(restconfService, times(5)).createConfigurationData(any(CompositeNode.class), any(UriInfo.class));
         post(uri, "fooMediaType", MediaType.TEXT_XML, xmlData);
-        verify(restconfService, times(6)).createConfigurationData(any(CompositeNode.class));
+        verify(restconfService, times(6)).createConfigurationData(any(CompositeNode.class), any(UriInfo.class));
     }
 
     @Test
