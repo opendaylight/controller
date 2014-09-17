@@ -328,6 +328,8 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
                             ", remote window is not getting read or is too small"));
                 }
 
+                // We need to reset buffer read index, since we've already read it when we tried to write it the first time
+                ((ByteBuf) msg).resetReaderIndex();
                 logger.debug("Write pending to SSH remote on channel: {}, current pending count: {}", ctx.channel(), pendingWriteCounter);
 
                 // In case of pending, re-invoke write after pending is finished
@@ -335,12 +337,15 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
                 lastWriteFuture.addListener(new SshFutureListener<IoWriteFuture>() {
                     @Override
                     public void operationComplete(final IoWriteFuture future) {
+                        // FIXME possible minor race condition, we cannot guarantee that this callback when pending is finished will be executed first
+                        // External thread could trigger write on this instance while we are on this line
+                        // Verify
                         if (future.isWritten()) {
                             synchronized (SshWriteAsyncHandler.this) {
                                 // Pending done, decrease counter
                                 pendingWriteCounter--;
+                                write(ctx, msg, promise);
                             }
-                            write(ctx, msg, promise);
                         } else {
                             // Cannot reschedule pending, fail
                             handlePendingFailed(ctx, e);
