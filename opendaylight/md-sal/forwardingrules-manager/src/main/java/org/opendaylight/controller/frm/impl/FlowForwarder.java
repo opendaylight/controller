@@ -129,7 +129,7 @@ public class FlowForwarder extends AbstractListeningCommiter<Flow> {
     private boolean tableIdValidationPrecondition (final TableKey tableKey, final Flow flow) {
         Preconditions.checkNotNull(tableKey, "TableKey can not be null or empty!");
         Preconditions.checkNotNull(flow, "Flow can not be null or empty!");
-        if (flow.getTableId() != tableKey.getId()) {
+        if (! tableKey.getId().equals(flow.getTableId())) {
             LOG.error("TableID in URI tableId={} and in palyload tableId={} is not same.",
                     flow.getTableId(), tableKey.getId());
             return false;
