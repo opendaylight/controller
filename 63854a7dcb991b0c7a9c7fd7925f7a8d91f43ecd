@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_b3088e2e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-17T18:56:52Z",
+      "side": 1,
+      "message": "Remove the check for isPresent",
+      "revId": "63854a7dcb991b0c7a9c7fd7925f7a8d91f43ecd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_53058212",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/base/messages/ApplyLogEntries.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-17T18:56:52Z",
+      "side": 1,
+      "message": "change name to toIndex",
+      "revId": "63854a7dcb991b0c7a9c7fd7925f7a8d91f43ecd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7302060d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-17T18:56:52Z",
+      "side": 1,
+      "message": "Add  a message here explaining how this would be fine in the event an ApplyState went through but an ApplyLogEntries did not",
+      "revId": "63854a7dcb991b0c7a9c7fd7925f7a8d91f43ecd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
