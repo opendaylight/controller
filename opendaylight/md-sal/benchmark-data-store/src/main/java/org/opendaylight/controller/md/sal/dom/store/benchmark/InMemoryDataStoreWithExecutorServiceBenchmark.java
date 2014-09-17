@@ -7,19 +7,21 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.benchmark;
 
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.yangtools.util.concurrent.SpecialExecutors;
-import org.openjdk.jmh.annotations.Level;
-import org.openjdk.jmh.annotations.Setup;
-import org.openjdk.jmh.annotations.TearDown;
-import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Fork;
+import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
+import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.TearDown;
 
 /**
  * Benchmark for testing of performance of write operations for InMemoryDataStore. The instance
@@ -41,14 +43,15 @@ public class InMemoryDataStoreWithExecutorServiceBenchmark extends AbstractInMem
     private static final int MAX_DATA_CHANGE_EXECUTOR_QUEUE_SIZE = 1000;
     private static final int MAX_DATA_STORE_EXECUTOR_QUEUE_SIZE = 5000;
 
+    @Override
     @Setup(Level.Trial)
     public void setUp() throws Exception {
         final String name = "DS_BENCHMARK";
         final ExecutorService dataChangeListenerExecutor = SpecialExecutors.newBlockingBoundedFastThreadPool(
             MAX_DATA_CHANGE_EXECUTOR_POOL_SIZE, MAX_DATA_CHANGE_EXECUTOR_QUEUE_SIZE, name + "-DCL");
 
-        final ExecutorService domStoreExecutor = SpecialExecutors.newBoundedSingleThreadExecutor(
-            MAX_DATA_STORE_EXECUTOR_QUEUE_SIZE, "DOMStore-" + name );
+        final ListeningExecutorService domStoreExecutor = MoreExecutors.listeningDecorator(SpecialExecutors.newBoundedSingleThreadExecutor(
+            MAX_DATA_STORE_EXECUTOR_QUEUE_SIZE, "DOMStore-" + name ));
 
         domStore = new InMemoryDOMDataStore(name, domStoreExecutor,
             dataChangeListenerExecutor);
@@ -57,6 +60,7 @@ public class InMemoryDataStoreWithExecutorServiceBenchmark extends AbstractInMem
         initTestNode();
     }
 
+    @Override
     @TearDown
     public void tearDown() {
         schemaContext = null;
