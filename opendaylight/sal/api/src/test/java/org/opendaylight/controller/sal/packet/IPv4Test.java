@@ -12,9 +12,9 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
+
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchType;
 import org.opendaylight.controller.sal.utils.EtherTypes;
@@ -480,5 +480,201 @@ public class IPv4Test {
         Assert.assertEquals(destintationAddress, match.getField(MatchType.NW_DST).getValue());
         Assert.assertEquals(protocol, (byte) match.getField(MatchType.NW_PROTO).getValue());
         Assert.assertEquals(tos, (byte) match.getField(MatchType.NW_TOS).getValue());
+    }
+
+    @Test
+    public void testFragment() throws Exception {
+        byte[] payload1 = new byte[0];
+        byte[] payload2 = {
+            (byte)0x61, (byte)0xd1, (byte)0x3d, (byte)0x51,
+            (byte)0x1b, (byte)0x75, (byte)0xa7, (byte)0x83,
+        };
+        byte[] payload3 = {
+            (byte)0xe7, (byte)0x0f, (byte)0x2d, (byte)0x7e,
+            (byte)0x15, (byte)0xba, (byte)0xe7, (byte)0x6d,
+            (byte)0xb5, (byte)0xc5, (byte)0xb5, (byte)0x37,
+            (byte)0x59, (byte)0xbc, (byte)0x91, (byte)0x43,
+            (byte)0xb5, (byte)0xb7, (byte)0xe4, (byte)0x28,
+            (byte)0xec, (byte)0x62, (byte)0x6b, (byte)0x6a,
+            (byte)0xd1, (byte)0xcb, (byte)0x79, (byte)0x1e,
+            (byte)0xfc, (byte)0x82, (byte)0xf5, (byte)0xb4,
+        };
+
+        // Ensure that the payload is not deserialized if the fragment offset
+        // is not zero.
+        byte proto = IPProtocols.TCP.byteValue();
+        fragmentTest(payload1, proto, (short)0xf250);
+        fragmentTest(payload2, proto, (short)0xf248);
+        fragmentTest(payload3, proto, (short)0xf230);
+
+        proto = IPProtocols.UDP.byteValue();
+        fragmentTest(payload1, proto, (short)0xf245);
+        fragmentTest(payload2, proto, (short)0xf23d);
+        fragmentTest(payload3, proto, (short)0xf225);
+
+        proto = IPProtocols.ICMP.byteValue();
+        fragmentTest(payload1, proto, (short)0xf255);
+        fragmentTest(payload2, proto, (short)0xf24d);
+        fragmentTest(payload3, proto, (short)0xf235);
+
+        // Ensure that the protocol header in the first fragment is
+        // deserialized.
+        proto = IPProtocols.TCP.byteValue();
+        TCP tcp = new TCP();
+        tcp.setSourcePort((short)1234).setDestinationPort((short)32000).
+            setSequenceNumber((int)0xd541f5f8).setAckNumber((int)0x58da787d).
+            setDataOffset((byte)5).setReserved((byte)0).
+            setHeaderLenFlags((short)0x18).setWindowSize((short)0x40e8).
+            setUrgentPointer((short)0x15f7).setChecksum((short)0x0d4e);
+        firstFragmentTest(tcp, payload1, proto, (short)0xdfe6);
+        tcp.setChecksum((short)0xab2a);
+        firstFragmentTest(tcp, payload2, proto, (short)0xdfde);
+        tcp.setChecksum((short)0x1c75);
+        firstFragmentTest(tcp, payload3, proto, (short)0xdfc6);
+
+        proto = IPProtocols.UDP.byteValue();
+        UDP udp = new UDP();
+        udp.setSourcePort((short)53).setDestinationPort((short)45383).
+            setLength((short)(payload1.length + 8)).setChecksum((short)0);
+        firstFragmentTest(udp, payload1, proto, (short)0xdfe7);
+        udp.setLength((short)(payload2.length + 8));
+        firstFragmentTest(udp, payload2, proto, (short)0xdfdf);
+        udp.setLength((short)(payload3.length + 8));
+        firstFragmentTest(udp, payload3, proto, (short)0xdfc7);
+
+        proto = IPProtocols.ICMP.byteValue();
+        ICMP icmp = new ICMP();
+        icmp.setType((byte)8).setCode((byte)0).setIdentifier((short)0x3d1e).
+            setSequenceNumber((short)1);
+        firstFragmentTest(icmp, payload1, proto, (short)0xdff7);
+        firstFragmentTest(icmp, payload2, proto, (short)0xdfef);
+        firstFragmentTest(icmp, payload3, proto, (short)0xdfd7);
+    }
+
+    private void fragmentTest(byte[] payload, byte proto, short checksum)
+        throws Exception {
+        // Construct a fragmented raw IPv4 packet.
+        int ipv4Len = 20;
+        byte[] rawIp = new byte[ipv4Len + payload.length];
+
+        byte ipVersion = 4;
+        byte dscp = 35;
+        byte ecn = 2;
+        byte tos = (byte)((dscp << 2) | ecn);
+        short totalLen = (short)rawIp.length;
+        short id = 22143;
+        short offset = 0xb9;
+        byte ttl = 64;
+        byte[] srcIp = {(byte)0x0a, (byte)0x00, (byte)0x00, (byte)0x01};
+        byte[] dstIp = {(byte)0xc0, (byte)0xa9, (byte)0x66, (byte)0x23};
+
+        rawIp[0] = (byte)((ipVersion << 4) | (ipv4Len >> 2));
+        rawIp[1] = tos;
+        rawIp[2] = (byte)(totalLen >>> Byte.SIZE);
+        rawIp[3] = (byte)totalLen;
+        rawIp[4] = (byte)(id >>> Byte.SIZE);
+        rawIp[5] = (byte)id;
+        rawIp[6] = (byte)(offset >>> Byte.SIZE);
+        rawIp[7] = (byte)offset;
+        rawIp[8] = ttl;
+        rawIp[9] = proto;
+        rawIp[10] = (byte)(checksum >>> Byte.SIZE);
+        rawIp[11] = (byte)checksum;
+        System.arraycopy(srcIp, 0, rawIp, 12, srcIp.length);
+        System.arraycopy(dstIp, 0, rawIp, 16, srcIp.length);
+        System.arraycopy(payload, 0, rawIp, ipv4Len, payload.length);
+
+        // Deserialize.
+        IPv4 ipv4 = new IPv4();
+        ipv4.deserialize(rawIp, 0, rawIp.length * Byte.SIZE);
+
+        Assert.assertEquals(ipVersion, ipv4.getVersion());
+        Assert.assertEquals(ipv4Len, ipv4.getHeaderLen());
+        Assert.assertEquals(dscp, ipv4.getDiffServ());
+        Assert.assertEquals(ecn, ipv4.getECN());
+        Assert.assertEquals(totalLen, ipv4.getTotalLength());
+        Assert.assertEquals(id, ipv4.getIdentification());
+        Assert.assertEquals((byte)0, ipv4.getFlags());
+        Assert.assertEquals(offset, ipv4.getFragmentOffset());
+        Assert.assertEquals(ttl, ipv4.getTtl());
+        Assert.assertEquals(proto, ipv4.getProtocol());
+        Assert.assertEquals(checksum, ipv4.getChecksum());
+        Assert.assertEquals(NetUtils.byteArray4ToInt(srcIp),
+                            ipv4.getSourceAddress());
+        Assert.assertEquals(NetUtils.byteArray4ToInt(dstIp),
+                            ipv4.getDestinationAddress());
+        Assert.assertFalse(ipv4.isCorrupted());
+
+        // payloadClass should not be set if fragment offset is not zero.
+        Assert.assertEquals(null, ipv4.getPayload());
+        Assert.assertArrayEquals(payload, ipv4.getRawPayload());
+    }
+
+    private void firstFragmentTest(Packet payload, byte[] rawPayload,
+                                   byte proto, short checksum)
+        throws Exception {
+        // Construct a raw IPv4 packet with MF flag.
+        int ipv4Len = 20;
+        payload.setRawPayload(rawPayload);
+        byte[] payloadBytes = payload.serialize();
+        byte[] rawIp = new byte[ipv4Len + payloadBytes.length];
+
+        byte ipVersion = 4;
+        byte dscp = 13;
+        byte ecn = 1;
+        byte tos = (byte)((dscp << 2) | ecn);
+        short totalLen = (short)rawIp.length;
+        short id = 19834;
+        byte flags = 0x1;
+        short offset = 0;
+        short off = (short)(((short)flags << 13) | offset);
+        byte ttl = 64;
+        byte[] srcIp = {(byte)0xac, (byte)0x23, (byte)0x5b, (byte)0xfd};
+        byte[] dstIp = {(byte)0xc0, (byte)0xa8, (byte)0x64, (byte)0x71};
+
+        rawIp[0] = (byte)((ipVersion << 4) | (ipv4Len >> 2));
+        rawIp[1] = tos;
+        rawIp[2] = (byte)(totalLen >>> Byte.SIZE);
+        rawIp[3] = (byte)totalLen;
+        rawIp[4] = (byte)(id >>> Byte.SIZE);
+        rawIp[5] = (byte)id;
+        rawIp[6] = (byte)(off >>> Byte.SIZE);
+        rawIp[7] = (byte)off;
+        rawIp[8] = ttl;
+        rawIp[9] = proto;
+        rawIp[10] = (byte)(checksum >>> Byte.SIZE);
+        rawIp[11] = (byte)checksum;
+        System.arraycopy(srcIp, 0, rawIp, 12, srcIp.length);
+        System.arraycopy(dstIp, 0, rawIp, 16, srcIp.length);
+        System.arraycopy(payloadBytes, 0, rawIp, ipv4Len, payloadBytes.length);
+
+        // Deserialize.
+        IPv4 ipv4 = new IPv4();
+        ipv4.deserialize(rawIp, 0, rawIp.length * Byte.SIZE);
+
+        Assert.assertEquals(ipVersion, ipv4.getVersion());
+        Assert.assertEquals(ipv4Len, ipv4.getHeaderLen());
+        Assert.assertEquals(dscp, ipv4.getDiffServ());
+        Assert.assertEquals(ecn, ipv4.getECN());
+        Assert.assertEquals(totalLen, ipv4.getTotalLength());
+        Assert.assertEquals(id, ipv4.getIdentification());
+        Assert.assertEquals(flags, ipv4.getFlags());
+        Assert.assertEquals(offset, ipv4.getFragmentOffset());
+        Assert.assertEquals(ttl, ipv4.getTtl());
+        Assert.assertEquals(proto, ipv4.getProtocol());
+        Assert.assertEquals(checksum, ipv4.getChecksum());
+        Assert.assertEquals(NetUtils.byteArray4ToInt(srcIp),
+                            ipv4.getSourceAddress());
+        Assert.assertEquals(NetUtils.byteArray4ToInt(dstIp),
+                            ipv4.getDestinationAddress());
+        Assert.assertFalse(ipv4.isCorrupted());
+
+        // Protocol header in the first fragment should be deserialized.
+        Assert.assertEquals(null, ipv4.getRawPayload());
+
+        Packet desPayload = ipv4.getPayload();
+        Assert.assertEquals(payload, desPayload);
+        Assert.assertFalse(desPayload.isCorrupted());
+        Assert.assertArrayEquals(rawPayload, desPayload.getRawPayload());
     }
 }
