@@ -9,9 +9,9 @@
 package org.opendaylight.controller.cluster.datastore.node.utils.serialization;
 
 import com.google.common.base.Preconditions;
-
+import org.opendaylight.controller.cluster.datastore.util.InstanceIdentifierUtils;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
-import org.opendaylight.yangtools.yang.common.SimpleDateFormatUtil;
+import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.AnyXmlNode;
@@ -33,15 +33,8 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContaine
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.ListNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeAttrBuilder;
-
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
 import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.ANY_XML_NODE_TYPE;
 import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.AUGMENTATION_NODE_TYPE;
 import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.CHOICE_NODE_TYPE;
@@ -93,6 +86,10 @@ public class NormalizedNodeSerializer {
         return new Serializer(node).serialize();
     }
 
+    public static Serializer newSerializer(NormalizedNode node) {
+        Preconditions.checkNotNull(node, "node should not be null");
+        return new Serializer(node);
+    }
 
     /**
      * DeSerialize a protocol buffer message back into a NormalizedNode
@@ -100,8 +97,15 @@ public class NormalizedNodeSerializer {
      * @param node
      * @return
      */
-    public static NormalizedNode deSerialize(NormalizedNodeMessages.Node node){
-        return new DeSerializer(node).deSerialize();
+    public static NormalizedNode deSerialize(NormalizedNodeMessages.Node node) {
+        Preconditions.checkNotNull(node, "node should not be null");
+        return new DeSerializer(null, node).deSerialize();
+    }
+
+    public static DeSerializer newDeSerializer(NormalizedNodeMessages.InstanceIdentifier path,
+            NormalizedNodeMessages.Node node) {
+        Preconditions.checkNotNull(node, "node should not be null");
+        return new DeSerializer(path, node);
     }
 
     /**
@@ -117,25 +121,36 @@ public class NormalizedNodeSerializer {
      * @param pathArgument
      * @return
      */
-    public static YangInstanceIdentifier.PathArgument deSerialize(NormalizedNodeMessages.Node node, NormalizedNodeMessages.PathArgument pathArgument){
+    public static YangInstanceIdentifier.PathArgument deSerialize(NormalizedNodeMessages.Node node,
+            NormalizedNodeMessages.PathArgument pathArgument){
         Preconditions.checkNotNull(node, "node should not be null");
         Preconditions.checkNotNull(pathArgument, "pathArgument should not be null");
-        return new DeSerializer(node).deSerialize(pathArgument);
+        return new DeSerializer(null, node).deSerialize(pathArgument);
     }
 
-    private static class Serializer implements NormalizedNodeSerializationContext {
+    public static class Serializer extends QNameSerializationContextImpl
+                                   implements NormalizedNodeSerializationContext {
 
         private final NormalizedNode node;
 
-        private final Map<Object, Integer> codeMap = new HashMap<>();
-        private final List<String> codes = new ArrayList<>();
+        private NormalizedNodeMessages.InstanceIdentifier serializedPath;
 
         private Serializer(NormalizedNode node) {
             this.node = node;
         }
 
-        private NormalizedNodeMessages.Node serialize() {
-            return this.serialize(node).addAllCode(codes).build();
+        public NormalizedNodeMessages.InstanceIdentifier getSerializedPath() {
+            return serializedPath;
+        }
+
+        public NormalizedNodeMessages.Node serialize() {
+            return this.serialize(node).addAllCode(getCodes()).build();
+        }
+
+        public NormalizedNodeMessages.Node serialize(YangInstanceIdentifier path) {
+            Builder builder = serialize(node);
+            serializedPath = InstanceIdentifierUtils.toSerializable(path, this);
+            return builder.addAllCode(getCodes()).build();
         }
 
         private NormalizedNodeMessages.Node.Builder serialize(
@@ -183,56 +198,10 @@ public class NormalizedNodeSerializer {
 
             return builder;
         }
-
-
-        @Override public int addNamespace(URI namespace) {
-            int namespaceInt = getCode(namespace);
-
-            if(namespaceInt == -1) {
-                namespaceInt = addCode(namespace, namespace.toString());
-            }
-            return namespaceInt;
-        }
-
-        @Override public int addRevision(Date revision) {
-            if(revision == null){
-                return -1;
-            }
-
-            int revisionInt = getCode(revision);
-            if(revisionInt == -1) {
-                String formattedRevision =
-                    SimpleDateFormatUtil.getRevisionFormat().format(revision);
-                revisionInt = addCode(revision, formattedRevision);
-            }
-            return revisionInt;
-        }
-
-        @Override public int addLocalName(String localName) {
-            int localNameInt = getCode(localName);
-            if(localNameInt == -1) {
-                localNameInt = addCode(localName, localName.toString());
-            }
-            return localNameInt;
-
-        }
-
-        public int addCode(Object code, String codeStr){
-            int count = codes.size();
-            codes.add(codeStr);
-            codeMap.put(code, Integer.valueOf(count));
-            return count;
-        }
-
-        public int getCode(Object code){
-            if(codeMap.containsKey(code)){
-                return codeMap.get(code);
-            }
-            return -1;
-        }
     }
 
-    private static class DeSerializer implements NormalizedNodeDeSerializationContext {
+    public static class DeSerializer extends QNameDeSerializationContextImpl
+                                     implements NormalizedNodeDeSerializationContext {
         private static Map<NormalizedNodeType, DeSerializationFunction>
             deSerializationFunctions = new EnumMap<>(NormalizedNodeType.class);
 
@@ -438,13 +407,27 @@ public class NormalizedNodeSerializer {
         }
 
         private final NormalizedNodeMessages.Node node;
+        private final NormalizedNodeMessages.InstanceIdentifier path;
+        private YangInstanceIdentifier deserializedPath;
 
-        public DeSerializer(NormalizedNodeMessages.Node node){
+        public DeSerializer(NormalizedNodeMessages.InstanceIdentifier path,
+                NormalizedNodeMessages.Node node) {
+            super(node.getCodeList());
+            this.path = path;
             this.node = node;
         }
 
-        public NormalizedNode deSerialize(){
-            return deSerialize(node);
+        public YangInstanceIdentifier getDeserializedPath() {
+            return deserializedPath;
+        }
+
+        public NormalizedNode deSerialize() {
+            NormalizedNode deserializedNode = deSerialize(node);
+            if(path != null) {
+                deserializedPath = InstanceIdentifierUtils.fromSerializable(path, this);
+            }
+
+            return deserializedNode;
         }
 
         private NormalizedNode deSerialize(NormalizedNodeMessages.Node node){
@@ -524,18 +507,6 @@ public class NormalizedNodeSerializer {
         private YangInstanceIdentifier.NodeIdentifier toNodeIdentifier(NormalizedNodeMessages.PathArgument path){
             return (YangInstanceIdentifier.NodeIdentifier) PathArgumentSerializer.deSerialize(
                 this, path);
-        }
-
-        @Override public String getNamespace(int namespace) {
-            return node.getCode(namespace);
-        }
-
-        @Override public String getRevision(int revision) {
-            return node.getCode(revision);
-        }
-
-        @Override public String getLocalName(int localName) {
-            return node.getCode(localName);
         }
 
         public YangInstanceIdentifier.PathArgument deSerialize(

@@ -20,12 +20,12 @@ import java.util.Set;
 
 public class ValueSerializer {
     public static void serialize(NormalizedNodeMessages.Node.Builder builder,
-        NormalizedNodeSerializationContext context, Object value){
+            QNameSerializationContext context, Object value) {
         builder.setIntValueType(ValueType.getSerializableType(value).ordinal());
 
         if(value instanceof YangInstanceIdentifier) {
             builder.setInstanceIdentifierValue(
-                InstanceIdentifierUtils.toSerializable((YangInstanceIdentifier) value));
+                InstanceIdentifierUtils.toSerializable((YangInstanceIdentifier) value, context));
         } else if(value instanceof Set) {
             Set set = (Set) value;
             if(!set.isEmpty()){
@@ -44,26 +44,25 @@ public class ValueSerializer {
     }
 
     public static void serialize(NormalizedNodeMessages.PathArgumentAttribute.Builder builder,
-        NormalizedNodeSerializationContext context, Object value){
+            QNameSerializationContext context, Object value){
 
         builder.setType(ValueType.getSerializableType(value).ordinal());
         builder.setValue(value.toString());
     }
 
-    public static Object deSerialize(
-        NormalizedNodeDeSerializationContext context, NormalizedNodeMessages.Node node) {
+    public static Object deSerialize(QNameDeSerializationContext context,
+            NormalizedNodeMessages.Node node) {
         if(node.getIntValueType() == ValueType.YANG_IDENTIFIER_TYPE.ordinal()){
             return InstanceIdentifierUtils.fromSerializable(
-                node.getInstanceIdentifierValue());
+                    node.getInstanceIdentifierValue(), context);
         } else if(node.getIntValueType() == ValueType.BITS_TYPE.ordinal()){
             return new HashSet(node.getBitsValueList());
         }
         return deSerializeBasicTypes(node.getIntValueType(), node.getValue());
     }
 
-    public static Object deSerialize(
-        NormalizedNodeDeSerializationContext context,
-        NormalizedNodeMessages.PathArgumentAttribute attribute) {
+    public static Object deSerialize(QNameDeSerializationContext context,
+            NormalizedNodeMessages.PathArgumentAttribute attribute) {
         return deSerializeBasicTypes(attribute.getType(), attribute.getValue());
     }
 

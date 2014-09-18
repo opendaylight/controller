@@ -9,8 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.modification;
 
 import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
-import org.opendaylight.controller.cluster.datastore.utils.InstanceIdentifierUtils;
-import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
+import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec.Decoded;
 import org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -20,16 +19,11 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 /**
  * MergeModification stores all the parameters required to merge data into the specified path
  */
-public class MergeModification extends AbstractModification {
-    private final NormalizedNode data;
-    private final SchemaContext schemaContext;
-
+public class MergeModification extends WriteModification {
 
     public MergeModification(YangInstanceIdentifier path, NormalizedNode data,
         SchemaContext schemaContext) {
-        super(path);
-        this.data = data;
-        this.schemaContext = schemaContext;
+        super(path, data, schemaContext);
     }
 
     @Override
@@ -37,29 +31,9 @@ public class MergeModification extends AbstractModification {
         transaction.merge(path, data);
     }
 
-    @Override public Object toSerializable() {
-        NormalizedNodeMessages.Container encode =
-            new NormalizedNodeToNodeCodec(schemaContext).encode(
-                path, data);
-
-        return PersistentMessages.Modification.newBuilder()
-            .setType(this.getClass().toString())
-            .setPath(InstanceIdentifierUtils.toSerializable(this.path))
-            .setData(encode.getNormalizedNode())
-            .build();
-
-    }
-
-    public static MergeModification fromSerializable(
-        Object serializable,
-        SchemaContext schemaContext) {
+    public static MergeModification fromSerializable(Object serializable, SchemaContext schemaContext) {
         PersistentMessages.Modification o = (PersistentMessages.Modification) serializable;
-
-        YangInstanceIdentifier path = InstanceIdentifierUtils.fromSerializable(o.getPath());
-        NormalizedNode data = new NormalizedNodeToNodeCodec(schemaContext).decode(
-            path, o.getData());
-
-        return new MergeModification(path, data, schemaContext);
+        Decoded decoded = new NormalizedNodeToNodeCodec(schemaContext).decode(o.getPath(), o.getData());
+        return new MergeModification(decoded.getDecodedPath(), decoded.getDecodedNode(), schemaContext);
     }
-
 }

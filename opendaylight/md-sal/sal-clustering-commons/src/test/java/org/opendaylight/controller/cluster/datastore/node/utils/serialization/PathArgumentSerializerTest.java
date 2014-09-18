@@ -40,8 +40,7 @@ public class PathArgumentSerializerTest{
         expectedException.expect(NullPointerException.class);
         expectedException.expectMessage("pathArgument should not be null");
 
-        PathArgumentSerializer.serialize(mock(
-            NormalizedNodeSerializationContext.class), null);
+        PathArgumentSerializer.serialize(mock(QNameSerializationContext.class), null);
 
     }
 
@@ -59,14 +58,13 @@ public class PathArgumentSerializerTest{
         expectedException.expect(NullPointerException.class);
         expectedException.expectMessage("pathArgument should not be null");
 
-        PathArgumentSerializer.deSerialize(mock(NormalizedNodeDeSerializationContext.class), null);
+        PathArgumentSerializer.deSerialize(mock(QNameDeSerializationContext.class), null);
 
     }
 
     @Test
     public void testSerializeNodeIdentifier(){
-        NormalizedNodeSerializationContext serializationContext =
-            mock(NormalizedNodeSerializationContext.class);
+        QNameSerializationContext serializationContext = mock(QNameSerializationContext.class);
 
         when(serializationContext.addLocalName(anyString())).thenReturn(5);
         when(serializationContext.addNamespace(any(URI.class))).thenReturn(10);
@@ -87,8 +85,7 @@ public class PathArgumentSerializerTest{
 
     @Test
     public void testSerializeNodeIdentifierWithValue(){
-        NormalizedNodeSerializationContext serializationContext =
-            mock(NormalizedNodeSerializationContext.class);
+        QNameSerializationContext serializationContext = mock(QNameSerializationContext.class);
 
         when(serializationContext.addLocalName(anyString())).thenReturn(5);
         when(serializationContext.addNamespace(any(URI.class))).thenReturn(10);
@@ -110,9 +107,7 @@ public class PathArgumentSerializerTest{
 
     @Test
     public void testSerializeNodeIdentifierWithPredicates(){
-        NormalizedNodeSerializationContext serializationContext =
-            mock(NormalizedNodeSerializationContext.class);
-
+        QNameSerializationContext serializationContext = mock(QNameSerializationContext.class);
 
         when(serializationContext.addLocalName("test")).thenReturn(5);
         when(serializationContext.addLocalName("child-name")).thenReturn(55);
@@ -150,8 +145,7 @@ public class PathArgumentSerializerTest{
 
     @Test
     public void testSerializeAugmentationIdentifier(){
-        NormalizedNodeSerializationContext serializationContext =
-            mock(NormalizedNodeSerializationContext.class);
+        QNameSerializationContext serializationContext = mock(QNameSerializationContext.class);
 
         when(serializationContext.addLocalName(anyString())).thenReturn(55);
         when(serializationContext.addNamespace(any(URI.class))).thenReturn(66);

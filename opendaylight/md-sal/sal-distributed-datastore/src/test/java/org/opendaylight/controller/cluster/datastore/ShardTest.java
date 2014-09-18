@@ -208,7 +208,7 @@ public class ShardTest extends AbstractActorTest {
         YangInstanceIdentifier root = YangInstanceIdentifier.builder().build();
         NormalizedNode<?,?> expected = ref.underlyingActor().readStore(root);
 
-        NormalizedNodeMessages.Container encode = codec.encode(root, expected);
+        NormalizedNodeMessages.Container encode = codec.encode(expected);
 
         ApplySnapshot applySnapshot = new ApplySnapshot(Snapshot.create(
                 encode.getNormalizedNode().toByteString().toByteArray(),
@@ -260,7 +260,7 @@ public class ShardTest extends AbstractActorTest {
 
         InMemorySnapshotStore.addSnapshot(IDENTIFIER.toString(), Snapshot.create(
                 new NormalizedNodeToNodeCodec(SCHEMA_CONTEXT).encode(
-                        YangInstanceIdentifier.builder().build(), root).
+                        root).
                                 getNormalizedNode().toByteString().toByteArray(),
                                 Collections.<ReplicatedLogEntry>emptyList(), 0, 1, -1, -1));
 
