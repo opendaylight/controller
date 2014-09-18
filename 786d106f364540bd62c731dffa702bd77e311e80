@@ -1,0 +1,208 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_889f5450",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/AbstractDOMForwardedCompositeTransaction.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-09-18T18:34:25Z",
+      "side": 1,
+      "message": "final?",
+      "revId": "786d106f364540bd62c731dffa702bd77e311e80",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_68a2109c",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/AbstractDOMForwardedTransactionFactory.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-09-18T18:34:25Z",
+      "side": 1,
+      "message": "who is using this method, and since if a valid user exists, why can\u0027t the write transactions below just get the reference from here?",
+      "revId": "786d106f364540bd62c731dffa702bd77e311e80",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e88e2027",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataCommitCoordinatorImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-09-18T18:34:25Z",
+      "side": 1,
+      "message": "seems to be required now, so add a precondition",
+      "revId": "786d106f364540bd62c731dffa702bd77e311e80",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e8b5c0d0",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMForwardedReadOnlyTransaction.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-09-18T18:34:25Z",
+      "side": 1,
+      "message": "as far as I know we are not inserting empty lines, please update your editor settings",
+      "revId": "786d106f364540bd62c731dffa702bd77e311e80",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_28ac088c",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMForwardedWriteTransaction.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-09-18T18:34:25Z",
+      "side": 1,
+      "message": "anonymous implementation retains a reference to \u0027this\u0027. so either create a static class, or expose the counters through getter methods.",
+      "revId": "786d106f364540bd62c731dffa702bd77e311e80",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4872ac4a",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/jmx/NoopTransactionStatsTracker.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-09-18T18:34:25Z",
+      "side": 1,
+      "message": "Is this used anywhere? I guess the intent is to have it switchable, but I do not see the corresponding code.",
+      "revId": "786d106f364540bd62c731dffa702bd77e311e80",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e8dce01a",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/jmx/TransactionStatsMXBean.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-09-18T18:34:25Z",
+      "side": 1,
+      "message": "this list looks like three distinct things:\n\n- details about how many user operations were performed\n- details about what the general datastore performance is\n- details about coordinator failures (phases are really implementation-internal)\n\nI think I can envision a reasonable need to track some of them and not others (the above list is ordered in the order of increasing importance).\n\nCan we perhaps split these?",
+      "revId": "786d106f364540bd62c731dffa702bd77e311e80",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c8eb1caf",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/jmx/TransactionStatsMXBean.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-09-18T18:34:25Z",
+      "side": 1,
+      "message": "none of the methods use abbreviations, so this should be clearStatistics(), clear(), reset() or similar.",
+      "revId": "786d106f364540bd62c731dffa702bd77e311e80",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_88c67448",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/jmx/TransactionStatsMXBeanImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-09-18T18:34:25Z",
+      "side": 1,
+      "message": "please explain why is this particular suppressing required.",
+      "revId": "786d106f364540bd62c731dffa702bd77e311e80",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_28c3a839",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/jmx/TransactionStatsMXBeanImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-09-18T18:34:25Z",
+      "side": 1,
+      "message": "why is this suppression needed?",
+      "revId": "786d106f364540bd62c731dffa702bd77e311e80",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_68c9b059",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/jmx/TransactionStatsMXBeanImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-09-18T18:34:25Z",
+      "side": 1,
+      "message": "I think this needs a description",
+      "revId": "786d106f364540bd62c731dffa702bd77e311e80",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_48a94c7a",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/jmx/TransactionStatsTracker.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-09-18T18:34:25Z",
+      "side": 1,
+      "message": "a link to the mbean which gives a desription of the counters would be useful. Actually each method should explictly say what the implementation is supposed to do.",
+      "revId": "786d106f364540bd62c731dffa702bd77e311e80",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
