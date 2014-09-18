@@ -107,10 +107,9 @@ public class NetconfITSecureTest extends AbstractNetconfConfigTest {
     /**
      * Test all requests are handled properly and no mismatch occurs in listener
      */
-    /* Disabled until fixed
-    @Test(timeout = 5*60*1000)
+    @Test(timeout = 6*60*1000)
     public void testSecureStress() throws Exception {
-        final int requests = 10000;
+        final int requests = 4000;
 
         final NetconfClientDispatcher dispatch = new NetconfClientDispatcherImpl(getNettyThreadgroup(), getNettyThreadgroup(), getHashedWheelTimer());
         final NetconfDeviceCommunicator sessionListener = getSessionListener();
@@ -152,7 +151,7 @@ public class NetconfITSecureTest extends AbstractNetconfConfigTest {
             assertEquals(requests, responseCounter.get());
         }
     }
-    */
+
     private NetconfMessage changeMessageId(final NetconfMessage getConfig, final int i) throws IOException, SAXException {
         String s = XmlUtil.toString(getConfig.getDocument(), false);
         s = s.replace("101", Integer.toString(i));
