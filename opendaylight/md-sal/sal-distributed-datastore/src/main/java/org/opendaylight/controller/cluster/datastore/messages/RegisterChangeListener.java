@@ -10,13 +10,15 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 import akka.actor.ActorPath;
 import akka.actor.ActorSystem;
-import org.opendaylight.controller.cluster.datastore.utils.InstanceIdentifierUtils;
+import org.opendaylight.controller.cluster.datastore.util.InstanceIdentifierUtils;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public class RegisterChangeListener implements SerializableMessage {
-  public static final Class SERIALIZABLE_CLASS = ListenerRegistrationMessages.RegisterChangeListener.class;
+    public static final Class<ListenerRegistrationMessages.RegisterChangeListener> SERIALIZABLE_CLASS =
+            ListenerRegistrationMessages.RegisterChangeListener.class;
+
     private final YangInstanceIdentifier path;
     private final ActorPath dataChangeListenerPath;
     private final AsyncDataBroker.DataChangeScope scope;

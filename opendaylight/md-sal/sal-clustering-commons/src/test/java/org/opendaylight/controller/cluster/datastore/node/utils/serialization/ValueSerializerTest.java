@@ -5,15 +5,14 @@ import com.google.common.collect.ImmutableSet;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.datastore.util.TestModel;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Set;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -27,14 +26,15 @@ public class ValueSerializerTest{
     public void testSerializeShort(){
         short v1 = 5;
         NormalizedNodeMessages.Node.Builder builder = NormalizedNodeMessages.Node.newBuilder();
-        ValueSerializer.serialize(builder, mock(NormalizedNodeSerializationContext.class), v1);
+        ValueSerializer.serialize(builder, mock(QNameSerializationContext.class), v1);
 
         assertEquals(ValueType.SHORT_TYPE.ordinal(), builder.getIntValueType());
         assertEquals("5", builder.getValue());
 
-        NormalizedNodeMessages.PathArgumentAttribute.Builder builder1 = NormalizedNodeMessages.PathArgumentAttribute.newBuilder();
+        NormalizedNodeMessages.PathArgumentAttribute.Builder builder1 =
+                NormalizedNodeMessages.PathArgumentAttribute.newBuilder();
 
-        ValueSerializer.serialize(builder1, mock(NormalizedNodeSerializationContext.class), v1);
+        ValueSerializer.serialize(builder1, mock(QNameSerializationContext.class), v1);
 
         assertEquals(ValueType.SHORT_TYPE.ordinal(), builder1.getType());
         assertEquals("5", builder.getValue());
@@ -49,16 +49,15 @@ public class ValueSerializerTest{
 
 
         NormalizedNodeMessages.Node.Builder builder = NormalizedNodeMessages.Node.newBuilder();
-        ValueSerializer.serialize(builder, mock(
-            NormalizedNodeSerializationContext.class), expected);
+        ValueSerializer.serialize(builder, mock(QNameSerializationContext.class), expected);
 
         assertEquals(ValueType.INT_TYPE.ordinal(), builder.getIntValueType());
         assertEquals("243", builder.getValue());
 
-        NormalizedNodeMessages.PathArgumentAttribute.Builder builder1 = NormalizedNodeMessages.PathArgumentAttribute.newBuilder();
+        NormalizedNodeMessages.PathArgumentAttribute.Builder builder1 =
+                NormalizedNodeMessages.PathArgumentAttribute.newBuilder();
 
-        ValueSerializer.serialize(builder1, mock(
-            NormalizedNodeSerializationContext.class), expected);
+        ValueSerializer.serialize(builder1, mock(QNameSerializationContext.class), expected);
 
         assertEquals(ValueType.INT_TYPE.ordinal(), builder1.getType());
         assertEquals("243", builder1.getValue());
@@ -71,16 +70,14 @@ public class ValueSerializerTest{
     public void testSerializeLong(){
         long v1 = 5;
         NormalizedNodeMessages.Node.Builder builder = NormalizedNodeMessages.Node.newBuilder();
-        ValueSerializer.serialize(builder, mock(
-            NormalizedNodeSerializationContext.class), v1);
+        ValueSerializer.serialize(builder, mock(QNameSerializationContext.class), v1);
 
         assertEquals(ValueType.LONG_TYPE.ordinal(), builder.getIntValueType());
         assertEquals("5", builder.getValue());
 
         NormalizedNodeMessages.PathArgumentAttribute.Builder builder1 = NormalizedNodeMessages.PathArgumentAttribute.newBuilder();
 
-        ValueSerializer.serialize(builder1, mock(
-            NormalizedNodeSerializationContext.class), v1);
+        ValueSerializer.serialize(builder1, mock(QNameSerializationContext.class), v1);
 
         assertEquals(ValueType.LONG_TYPE.ordinal(), builder1.getType());
         assertEquals("5", builder1.getValue());
@@ -91,16 +88,14 @@ public class ValueSerializerTest{
     public void testSerializeByte(){
         byte v1 = 5;
         NormalizedNodeMessages.Node.Builder builder = NormalizedNodeMessages.Node.newBuilder();
-        ValueSerializer.serialize(builder, mock(
-            NormalizedNodeSerializationContext.class), v1);
+        ValueSerializer.serialize(builder, mock(QNameSerializationContext.class), v1);
 
         assertEquals(ValueType.BYTE_TYPE.ordinal(), builder.getIntValueType());
         assertEquals("5", builder.getValue());
 
         NormalizedNodeMessages.PathArgumentAttribute.Builder builder1 = NormalizedNodeMessages.PathArgumentAttribute.newBuilder();
 
-        ValueSerializer.serialize(builder1, mock(
-            NormalizedNodeSerializationContext.class), v1);
+        ValueSerializer.serialize(builder1, mock(QNameSerializationContext.class), v1);
 
         assertEquals(ValueType.BYTE_TYPE.ordinal(), builder1.getType());
         assertEquals("5", builder1.getValue());
@@ -110,8 +105,7 @@ public class ValueSerializerTest{
     @Test
     public void testSerializeBits(){
         NormalizedNodeMessages.Node.Builder builder = NormalizedNodeMessages.Node.newBuilder();
-        ValueSerializer.serialize(builder, mock(
-            NormalizedNodeSerializationContext.class),
+        ValueSerializer.serialize(builder, mock(QNameSerializationContext.class),
             ImmutableSet.of("foo", "bar"));
 
         assertEquals(ValueType.BITS_TYPE.ordinal(), builder.getIntValueType());
@@ -120,8 +114,7 @@ public class ValueSerializerTest{
 
         NormalizedNodeMessages.PathArgumentAttribute.Builder builder1 = NormalizedNodeMessages.PathArgumentAttribute.newBuilder();
 
-        ValueSerializer.serialize(builder1, mock(
-            NormalizedNodeSerializationContext.class),
+        ValueSerializer.serialize(builder1, mock(QNameSerializationContext.class),
             ImmutableSet.of("foo", "bar"));
 
         assertEquals(ValueType.BITS_TYPE.ordinal(), builder1.getType());
@@ -134,8 +127,7 @@ public class ValueSerializerTest{
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("Expected value type to be Bits but was :");
         NormalizedNodeMessages.Node.Builder builder = NormalizedNodeMessages.Node.newBuilder();
-        ValueSerializer.serialize(builder, mock(
-                NormalizedNodeSerializationContext.class),
+        ValueSerializer.serialize(builder, mock(QNameSerializationContext.class),
             ImmutableSet.of(1, 2));
 
     }
@@ -143,16 +135,14 @@ public class ValueSerializerTest{
     @Test
     public void testSerializeEmptyString(){
         NormalizedNodeMessages.Node.Builder builder = NormalizedNodeMessages.Node.newBuilder();
-        ValueSerializer.serialize(builder, mock(
-            NormalizedNodeSerializationContext.class),"");
+        ValueSerializer.serialize(builder, mock(QNameSerializationContext.class),"");
 
         assertEquals(ValueType.STRING_TYPE.ordinal(), builder.getIntValueType());
         assertEquals("", builder.getValue());
 
         NormalizedNodeMessages.PathArgumentAttribute.Builder builder1 = NormalizedNodeMessages.PathArgumentAttribute.newBuilder();
 
-        ValueSerializer.serialize(builder1, mock(
-            NormalizedNodeSerializationContext.class),"");
+        ValueSerializer.serialize(builder1, mock(QNameSerializationContext.class),"");
 
         assertEquals(ValueType.STRING_TYPE.ordinal(), builder1.getType());
         assertEquals("", builder1.getValue());
@@ -162,16 +152,15 @@ public class ValueSerializerTest{
     @Test
     public void testSerializeString(){
         NormalizedNodeMessages.Node.Builder builder = NormalizedNodeMessages.Node.newBuilder();
-        ValueSerializer.serialize(builder, mock(
-            NormalizedNodeSerializationContext.class),"foo");
+        ValueSerializer.serialize(builder, mock(QNameSerializationContext.class),"foo");
 
         assertEquals(ValueType.STRING_TYPE.ordinal(), builder.getIntValueType());
         assertEquals("foo", builder.getValue());
 
-        NormalizedNodeMessages.PathArgumentAttribute.Builder builder1 = NormalizedNodeMessages.PathArgumentAttribute.newBuilder();
+        NormalizedNodeMessages.PathArgumentAttribute.Builder builder1 =
+                NormalizedNodeMessages.PathArgumentAttribute.newBuilder();
 
-        ValueSerializer.serialize(builder1, mock(
-            NormalizedNodeSerializationContext.class),"foo");
+        ValueSerializer.serialize(builder1, mock(QNameSerializationContext.class),"foo");
 
         assertEquals(ValueType.STRING_TYPE.ordinal(), builder1.getType());
         assertEquals("foo", builder1.getValue());
@@ -183,15 +172,14 @@ public class ValueSerializerTest{
     public void testSerializeBoolean(){
         boolean v1 = true;
         NormalizedNodeMessages.Node.Builder builder = NormalizedNodeMessages.Node.newBuilder();
-        ValueSerializer.serialize(builder, mock(
-            NormalizedNodeSerializationContext.class), v1);
+        ValueSerializer.serialize(builder, mock(QNameSerializationContext.class), v1);
 
         assertEquals(ValueType.BOOL_TYPE.ordinal(), builder.getIntValueType());
         assertEquals("true", builder.getValue());
 
-        NormalizedNodeMessages.PathArgumentAttribute.Builder builder1 = NormalizedNodeMessages.PathArgumentAttribute.newBuilder();
-        ValueSerializer.serialize(builder1, mock(
-            NormalizedNodeSerializationContext.class), v1);
+        NormalizedNodeMessages.PathArgumentAttribute.Builder builder1 =
+                NormalizedNodeMessages.PathArgumentAttribute.newBuilder();
+        ValueSerializer.serialize(builder1, mock(QNameSerializationContext.class), v1);
 
         assertEquals(ValueType.BOOL_TYPE.ordinal(), builder1.getType());
         assertEquals("true", builder1.getValue());
@@ -201,16 +189,14 @@ public class ValueSerializerTest{
     public void testSerializeQName(){
         QName v1 = TestModel.TEST_QNAME;
         NormalizedNodeMessages.Node.Builder builder = NormalizedNodeMessages.Node.newBuilder();
-        ValueSerializer.serialize(builder, mock(
-            NormalizedNodeSerializationContext.class), v1);
+        ValueSerializer.serialize(builder, mock(QNameSerializationContext.class), v1);
 
         assertEquals(ValueType.QNAME_TYPE.ordinal(), builder.getIntValueType());
         assertEquals("(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test", builder.getValue());
 
         NormalizedNodeMessages.PathArgumentAttribute.Builder builder1 = NormalizedNodeMessages.PathArgumentAttribute.newBuilder();
 
-        ValueSerializer.serialize(builder1, mock(
-            NormalizedNodeSerializationContext.class), v1);
+        ValueSerializer.serialize(builder1, mock(QNameSerializationContext.class), v1);
 
         assertEquals(ValueType.QNAME_TYPE.ordinal(), builder1.getType());
         assertEquals("(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test", builder1.getValue());
@@ -222,32 +208,30 @@ public class ValueSerializerTest{
         YangInstanceIdentifier v1 = TestModel.TEST_PATH;
 
         NormalizedNodeMessages.Node.Builder builder = NormalizedNodeMessages.Node.newBuilder();
-        ValueSerializer.serialize(builder, mock(
-            NormalizedNodeSerializationContext.class), v1);
-
+        QNameSerializationContext mockContext = mock(QNameSerializationContext.class);
+        ValueSerializer.serialize(builder, mockContext, v1);
 
         assertEquals(ValueType.YANG_IDENTIFIER_TYPE.ordinal(), builder.getIntValueType());
         NormalizedNodeMessages.InstanceIdentifier serializedYangInstanceIdentifier =
             builder.getInstanceIdentifierValue();
 
         assertEquals(1, serializedYangInstanceIdentifier.getArgumentsCount());
-        assertEquals(TestModel.TEST_QNAME.toString(), serializedYangInstanceIdentifier.getArguments(0).getNodeType().getValue());
+        Mockito.verify(mockContext).addLocalName(TestModel.TEST_QNAME.getLocalName());
+        Mockito.verify(mockContext).addNamespace(TestModel.TEST_QNAME.getNamespace());
     }
 
     @Test
     public void testSerializeBigInteger(){
         BigInteger v1 = new BigInteger("1000000000000000000000000");
         NormalizedNodeMessages.Node.Builder builder = NormalizedNodeMessages.Node.newBuilder();
-        ValueSerializer.serialize(builder, mock(
-            NormalizedNodeSerializationContext.class), v1);
+        ValueSerializer.serialize(builder, mock(QNameSerializationContext.class), v1);
 
         assertEquals(ValueType.BIG_INTEGER_TYPE.ordinal(), builder.getIntValueType());
         assertEquals("1000000000000000000000000", builder.getValue());
 
         NormalizedNodeMessages.PathArgumentAttribute.Builder builder1 = NormalizedNodeMessages.PathArgumentAttribute.newBuilder();
 
-        ValueSerializer.serialize(builder1, mock(
-            NormalizedNodeSerializationContext.class), v1);
+        ValueSerializer.serialize(builder1, mock(QNameSerializationContext.class), v1);
 
         assertEquals(ValueType.BIG_INTEGER_TYPE.ordinal(), builder1.getType());
         assertEquals("1000000000000000000000000", builder1.getValue());
@@ -258,15 +242,13 @@ public class ValueSerializerTest{
     public void testSerializeBigDecimal(){
         BigDecimal v1 = new BigDecimal("1000000000000000000000000.51616");
         NormalizedNodeMessages.Node.Builder builder = NormalizedNodeMessages.Node.newBuilder();
-        ValueSerializer.serialize(builder, mock(
-            NormalizedNodeSerializationContext.class), v1);
+        ValueSerializer.serialize(builder, mock(QNameSerializationContext.class), v1);
 
         assertEquals(ValueType.BIG_DECIMAL_TYPE.ordinal(), builder.getIntValueType());
         assertEquals("1000000000000000000000000.51616", builder.getValue());
 
         NormalizedNodeMessages.PathArgumentAttribute.Builder builder1 = NormalizedNodeMessages.PathArgumentAttribute.newBuilder();
-        ValueSerializer.serialize(builder1, mock(
-            NormalizedNodeSerializationContext.class), v1);
+        ValueSerializer.serialize(builder1, mock(QNameSerializationContext.class), v1);
 
         assertEquals(ValueType.BIG_DECIMAL_TYPE.ordinal(), builder1.getType());
         assertEquals("1000000000000000000000000.51616", builder1.getValue());
@@ -280,7 +262,7 @@ public class ValueSerializerTest{
         nodeBuilder.setValue("25");
 
         Object o = ValueSerializer
-            .deSerialize(mock(NormalizedNodeDeSerializationContext.class),
+            .deSerialize(mock(QNameDeSerializationContext.class),
                 nodeBuilder.build());
 
         assertTrue(o instanceof Short);
@@ -294,7 +276,7 @@ public class ValueSerializerTest{
         nodeBuilder.setValue("25");
 
         Object o = ValueSerializer
-            .deSerialize(mock(NormalizedNodeDeSerializationContext.class),
+            .deSerialize(mock(QNameDeSerializationContext.class),
                 nodeBuilder.build());
 
         assertTrue(o instanceof Byte);
@@ -309,7 +291,7 @@ public class ValueSerializerTest{
         nodeBuilder.setValue("25");
 
         Object o = ValueSerializer
-            .deSerialize(mock(NormalizedNodeDeSerializationContext.class),
+            .deSerialize(mock(QNameDeSerializationContext.class),
                 nodeBuilder.build());
 
         assertTrue(o instanceof Integer);
@@ -324,7 +306,7 @@ public class ValueSerializerTest{
         nodeBuilder.setValue("25");
 
         Object o = ValueSerializer
-            .deSerialize(mock(NormalizedNodeDeSerializationContext.class),
+            .deSerialize(mock(QNameDeSerializationContext.class),
                 nodeBuilder.build());
 
         assertTrue(o instanceof Long);
@@ -339,7 +321,7 @@ public class ValueSerializerTest{
         nodeBuilder.setValue("false");
 
         Object o = ValueSerializer
-            .deSerialize(mock(NormalizedNodeDeSerializationContext.class),
+            .deSerialize(mock(QNameDeSerializationContext.class),
                 nodeBuilder.build());
 
         assertTrue(o instanceof Boolean);
@@ -354,7 +336,7 @@ public class ValueSerializerTest{
         nodeBuilder.setValue(TestModel.TEST_QNAME.toString());
 
         Object o = ValueSerializer
-            .deSerialize(mock(NormalizedNodeDeSerializationContext.class),
+            .deSerialize(mock(QNameDeSerializationContext.class),
                 nodeBuilder.build());
 
         assertTrue(o instanceof QName);
@@ -369,7 +351,7 @@ public class ValueSerializerTest{
         nodeBuilder.addAllBitsValue(ImmutableList.of("foo", "bar"));
 
         Object o = ValueSerializer
-            .deSerialize(mock(NormalizedNodeDeSerializationContext.class),
+            .deSerialize(mock(QNameDeSerializationContext.class),
                 nodeBuilder.build());
 
         assertTrue(o instanceof Set);
@@ -384,7 +366,6 @@ public class ValueSerializerTest{
         NormalizedNodeMessages.InstanceIdentifier.Builder idBuilder = NormalizedNodeMessages.InstanceIdentifier.newBuilder();
         NormalizedNodeMessages.PathArgument.Builder pathBuilder = NormalizedNodeMessages.PathArgument.newBuilder();
 
-        pathBuilder.setValue(TestModel.TEST_QNAME.toString());
         pathBuilder.setIntType(PathArgumentType.NODE_IDENTIFIER.ordinal());
 
         idBuilder.addArguments(pathBuilder);
@@ -392,9 +373,15 @@ public class ValueSerializerTest{
         nodeBuilder.setIntValueType(ValueType.YANG_IDENTIFIER_TYPE.ordinal());
         nodeBuilder.setInstanceIdentifierValue(idBuilder);
 
-        Object o = ValueSerializer
-            .deSerialize(mock(NormalizedNodeDeSerializationContext.class),
-                nodeBuilder.build());
+        QNameDeSerializationContext mockContext = mock(QNameDeSerializationContext.class);
+        Mockito.doReturn(TestModel.TEST_QNAME.getNamespace().toString()).when(mockContext).
+                getNamespace(Mockito.anyInt());
+        Mockito.doReturn(TestModel.TEST_QNAME.getLocalName()).when(mockContext).
+                getLocalName(Mockito.anyInt());
+        Mockito.doReturn(TestModel.TEST_QNAME.getFormattedRevision()).when(mockContext).
+                getRevision(Mockito.anyInt());
+
+        Object o = ValueSerializer.deSerialize(mockContext, nodeBuilder.build());
 
         assertTrue(o instanceof YangInstanceIdentifier);
         assertEquals(TestModel.TEST_PATH, o);
@@ -407,8 +394,7 @@ public class ValueSerializerTest{
         nodeBuilder.setIntValueType(ValueType.STRING_TYPE.ordinal());
         nodeBuilder.setValue("25");
 
-        Object o = ValueSerializer
-            .deSerialize(mock(NormalizedNodeDeSerializationContext.class),
+        Object o = ValueSerializer.deSerialize(mock(QNameDeSerializationContext.class),
                 nodeBuilder.build());
 
         assertTrue(o instanceof String);
@@ -423,7 +409,7 @@ public class ValueSerializerTest{
         nodeBuilder.setValue("25");
 
         Object o = ValueSerializer
-            .deSerialize(mock(NormalizedNodeDeSerializationContext.class),
+            .deSerialize(mock(QNameDeSerializationContext.class),
                 nodeBuilder.build());
 
         assertTrue(o instanceof BigInteger);
@@ -438,7 +424,7 @@ public class ValueSerializerTest{
         nodeBuilder.setValue("25");
 
         Object o = ValueSerializer
-            .deSerialize(mock(NormalizedNodeDeSerializationContext.class),
+            .deSerialize(mock(QNameDeSerializationContext.class),
                 nodeBuilder.build());
 
         assertTrue(o instanceof BigDecimal);

@@ -12,12 +12,17 @@ package org.opendaylight.controller.cluster.datastore.util;
 
 import org.opendaylight.controller.cluster.datastore.node.utils.NodeIdentifierFactory;
 import org.opendaylight.controller.cluster.datastore.node.utils.QNameFactory;
+import org.opendaylight.controller.cluster.datastore.node.utils.serialization.PathArgumentSerializer;
+import org.opendaylight.controller.cluster.datastore.node.utils.serialization.QNameDeSerializationContext;
+import org.opendaylight.controller.cluster.datastore.node.utils.serialization.QNameDeSerializationContextImpl;
+import org.opendaylight.controller.cluster.datastore.node.utils.serialization.QNameSerializationContext;
+import org.opendaylight.controller.cluster.datastore.node.utils.serialization.QNameSerializationContextImpl;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
+import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,61 +46,54 @@ public class InstanceIdentifierUtils {
     protected static final Logger logger = LoggerFactory
         .getLogger(InstanceIdentifierUtils.class);
 
-    @Deprecated
-    public static YangInstanceIdentifier from(String path) {
-        String[] ids = path.split("/");
-
-        List<YangInstanceIdentifier.PathArgument> pathArguments =
-            new ArrayList<>();
-        for (String nodeId : ids) {
-            if (!"".equals(nodeId)) {
-                pathArguments
-                    .add(NodeIdentifierFactory.getArgument(nodeId));
-            }
-        }
-        final YangInstanceIdentifier instanceIdentifier =
-            YangInstanceIdentifier.create(pathArguments);
-        return instanceIdentifier;
-    }
-
-
     /**
      * Convert an MD-SAL YangInstanceIdentifier into a protocol buffer version of it
      *
      * @param path an MD-SAL YangInstanceIdentifier
      * @return a protocol buffer version of the MD-SAL YangInstanceIdentifier
      */
-    public static NormalizedNodeMessages.InstanceIdentifier toSerializable(YangInstanceIdentifier path){
+    public static NormalizedNodeMessages.InstanceIdentifier toSerializable(YangInstanceIdentifier path) {
+        QNameSerializationContextImpl context = new QNameSerializationContextImpl();
+        Builder builder = toSerializableBuilder(path, context);
+        return builder.addAllCode(context.getCodes()).build();
+    }
+
+    public static NormalizedNodeMessages.InstanceIdentifier toSerializable(
+            YangInstanceIdentifier path, QNameSerializationContext context) {
+        return toSerializableBuilder(path, context).build();
+    }
+
+    private static NormalizedNodeMessages.InstanceIdentifier.Builder toSerializableBuilder(
+            YangInstanceIdentifier path, QNameSerializationContext context) {
         NormalizedNodeMessages.InstanceIdentifier.Builder builder =
             NormalizedNodeMessages.InstanceIdentifier.newBuilder();
 
         try {
+            for (org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.
+                                            PathArgument pathArgument : path.getPathArguments()) {
+                NormalizedNodeMessages.PathArgument serializablePathArgument;
+                if(context == null) {
+                    String nodeType = "";
+                    if(!(pathArgument instanceof YangInstanceIdentifier.AugmentationIdentifier)){
+                        nodeType = pathArgument.getNodeType().toString();
+                    }
 
-            for (org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument pathArgument : path
-                .getPathArguments()) {
-
-                String nodeType = "";
-                if(!(pathArgument instanceof YangInstanceIdentifier.AugmentationIdentifier)){
-                    nodeType = pathArgument.getNodeType().toString();
+                    serializablePathArgument = NormalizedNodeMessages.PathArgument.newBuilder()
+                            .setValue(pathArgument.toString())
+                            .setType(pathArgument.getClass().getSimpleName())
+                            .setNodeType(NormalizedNodeMessages.QName.newBuilder().setValue(nodeType))
+                            .addAllAttributes(getPathArgumentAttributes(pathArgument)).build();
+                } else {
+                    serializablePathArgument = PathArgumentSerializer.serialize(context, pathArgument);
                 }
-
-                NormalizedNodeMessages.PathArgument serializablePathArgument =
-                    NormalizedNodeMessages.PathArgument.newBuilder()
-                        .setValue(pathArgument.toString())
-                        .setType(pathArgument.getClass().getSimpleName())
-                        .setNodeType(NormalizedNodeMessages.QName.newBuilder()
-                            .setValue(nodeType))
-                        .addAllAttributes(getPathArgumentAttributes(
-                            pathArgument))
-                        .build();
 
                 builder.addArguments(serializablePathArgument);
             }
-
         } catch(Exception e){
             logger.error("An exception occurred", e);
         }
-        return builder.build();
+
+        return builder;
     }
 
 
@@ -106,21 +104,24 @@ public class InstanceIdentifierUtils {
      * @param path a protocol buffer version of the MD-SAL YangInstanceIdentifier
      * @return  an MD-SAL YangInstanceIdentifier
      */
-    public static YangInstanceIdentifier fromSerializable(NormalizedNodeMessages.InstanceIdentifier path){
+    public static YangInstanceIdentifier fromSerializable(NormalizedNodeMessages.InstanceIdentifier path) {
+        return fromSerializable(path, new QNameDeSerializationContextImpl(path.getCodeList()));
+    }
 
-        List<YangInstanceIdentifier.PathArgument> pathArguments =
-            new ArrayList<>();
+    public static YangInstanceIdentifier fromSerializable(NormalizedNodeMessages.InstanceIdentifier path,
+            QNameDeSerializationContext context) {
 
-        for(NormalizedNodeMessages.PathArgument pathArgument : path.getArgumentsList()){
+        List<YangInstanceIdentifier.PathArgument> pathArguments = new ArrayList<>();
 
-            pathArguments
-                .add(parsePathArgument(pathArgument));
-
+        for(NormalizedNodeMessages.PathArgument pathArgument : path.getArgumentsList()) {
+            if(context == null || pathArgument.hasType()) {
+                pathArguments.add(parsePathArgument(pathArgument));
+            } else {
+                pathArguments.add(PathArgumentSerializer.deSerialize(context, pathArgument));
+            }
         }
 
-        final YangInstanceIdentifier instanceIdentifier = YangInstanceIdentifier.create(pathArguments);
-
-        return instanceIdentifier;
+        return YangInstanceIdentifier.create(pathArguments);
     }
 
     /**
@@ -218,7 +219,8 @@ public class InstanceIdentifierUtils {
      * @param pathArgument protocol buffer PathArgument
      * @return MD-SAL PathArgument
      */
-    private static YangInstanceIdentifier.PathArgument parsePathArgument(NormalizedNodeMessages.PathArgument pathArgument) {
+    private static YangInstanceIdentifier.PathArgument parsePathArgument(
+            NormalizedNodeMessages.PathArgument pathArgument) {
         if (YangInstanceIdentifier.NodeWithValue.class.getSimpleName().equals(pathArgument.getType())) {
 
             YangInstanceIdentifier.NodeWithValue nodeWithValue =
