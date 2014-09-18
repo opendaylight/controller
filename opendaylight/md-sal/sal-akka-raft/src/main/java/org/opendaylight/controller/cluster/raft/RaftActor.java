@@ -148,14 +148,18 @@ public abstract class RaftActor extends UntypedPersistentActor {
 
         } else if (message instanceof ReplicatedLogEntry) {
             ReplicatedLogEntry logEntry = (ReplicatedLogEntry) message;
-            LOG.info("Received ReplicatedLogEntry for recovery:{}", logEntry.getIndex());
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Received ReplicatedLogEntry for recovery:{}", logEntry.getIndex());
+            }
             replicatedLog.append(logEntry);
 
         } else if (message instanceof ApplyLogEntries) {
             ApplyLogEntries ale = (ApplyLogEntries) message;
 
-            LOG.info("Received ApplyLogEntries for recovery, applying to state:{} to {}",
-                context.getLastApplied() + 1, ale.getToIndex());
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Received ApplyLogEntries for recovery, applying to state:{} to {}",
+                    context.getLastApplied() + 1, ale.getToIndex());
+            }
 
             for (long i = context.getLastApplied() + 1; i <= ale.getToIndex(); i++) {
                 applyState(null, "recovery", replicatedLog.get(i).getData());
@@ -198,7 +202,9 @@ public abstract class RaftActor extends UntypedPersistentActor {
 
         } else if (message instanceof ApplyLogEntries){
             ApplyLogEntries ale = (ApplyLogEntries) message;
-            LOG.info("Persisting ApplyLogEntries with index={}", ale.getToIndex());
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Persisting ApplyLogEntries with index={}", ale.getToIndex());
+            }
             persist(new ApplyLogEntries(ale.getToIndex()), new Procedure<ApplyLogEntries>() {
                 @Override
                 public void apply(ApplyLogEntries param) throws Exception {
