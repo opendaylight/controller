@@ -7,11 +7,10 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
+import com.google.common.util.concurrent.CheckedFuture;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
 
 /**
  * Executor of Three Phase Commit coordination for
@@ -35,15 +34,13 @@ interface DOMDataCommitExecutor {
      *            Transaction to be used as context for reporting
      * @param cohort
      *            DOM Store cohorts representing provided transaction, its
-     *            subtransactoins.
-     * @param listener
-     *            Error listener which should be notified if transaction failed.
+     *            subtransactions.
      * @return a CheckedFuture. if commit coordination on cohorts finished successfully,
      *         nothing is returned from the Future, On failure,
      *         the Future fails with a {@link TransactionCommitFailedException}.
      *
      */
     CheckedFuture<Void,TransactionCommitFailedException> submit(DOMDataWriteTransaction tx,
-            Iterable<DOMStoreThreePhaseCommitCohort> cohort, Optional<DOMDataCommitErrorListener> listener);
+            Iterable<DOMStoreThreePhaseCommitCohort> cohort);
 
 }
