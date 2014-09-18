@@ -20,23 +20,6 @@ import java.util.Set;
 
 public class PathUtils {
 
-    public static String getParentPath(String currentElementPath){
-        StringBuilder parentPath = new StringBuilder();
-
-        if(currentElementPath != null){
-            String[] parentPaths = currentElementPath.split("/");
-            if(parentPaths.length > 2){
-                for(int i=0;i<parentPaths.length-1;i++){
-                    if(parentPaths[i].length() > 0){
-                        parentPath.append("/");
-                        parentPath.append(parentPaths[i]);
-                    }
-                }
-            }
-        }
-        return parentPath.toString();
-    }
-
     /**
      * Given a YangInstanceIdentifier return a serialized version of the same
      * as a String

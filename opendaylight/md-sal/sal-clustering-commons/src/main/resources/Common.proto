@@ -37,6 +37,11 @@ message PathArgument {
 
 message InstanceIdentifier {
   repeated PathArgument arguments=1;
+  
+  // A list of string codes which can be used for any repeated strings in the path args. This is
+  // optional - an InstanceIdentifier may be encoded as part of another message, eg NormalizedNode,
+  // that contains the codes. 
+  repeated string code = 2;
 }
 
 message Node{

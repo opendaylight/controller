@@ -42,20 +42,20 @@ public enum NormalizedNodeType {
     public static NormalizedNodeType getSerializableNodeType(NormalizedNode node){
         Preconditions.checkNotNull(node, "node should not be null");
 
-        if(node instanceof ContainerNode){
-            return CONTAINER_NODE_TYPE;
-        } else if(node instanceof LeafNode){
+        if(node instanceof LeafNode){
             return LEAF_NODE_TYPE;
-        } else if(node instanceof MapNode){
-            return MAP_NODE_TYPE;
+        } else if(node instanceof LeafSetEntryNode){
+            return LEAF_SET_ENTRY_NODE_TYPE;
         } else if(node instanceof MapEntryNode){
             return MAP_ENTRY_NODE_TYPE;
+        } else if(node instanceof ContainerNode){
+            return CONTAINER_NODE_TYPE;
+        } else if(node instanceof MapNode){
+            return MAP_NODE_TYPE;
         } else if(node instanceof AugmentationNode){
             return AUGMENTATION_NODE_TYPE;
         } else if(node instanceof LeafSetNode){
             return LEAF_SET_NODE_TYPE;
-        } else if(node instanceof LeafSetEntryNode){
-            return LEAF_SET_ENTRY_NODE_TYPE;
         } else if(node instanceof ChoiceNode){
             return CHOICE_NODE_TYPE;
         } else if(node instanceof OrderedLeafSetNode){
@@ -69,6 +69,7 @@ public enum NormalizedNodeType {
         } else if(node instanceof AnyXmlNode){
             return ANY_XML_NODE_TYPE;
         }
+
         throw new IllegalArgumentException("Node type unknown : " + node.getClass().getSimpleName());
     }
 

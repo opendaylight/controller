@@ -26,4 +26,8 @@ public abstract class AbstractModification implements Modification,
     protected AbstractModification(YangInstanceIdentifier path) {
         this.path = path;
     }
+
+    public YangInstanceIdentifier getPath() {
+        return path;
+    }
 }
