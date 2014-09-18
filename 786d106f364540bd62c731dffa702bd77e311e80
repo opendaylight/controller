@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_e8bb8073",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/AbstractDOMForwardedCompositeTransaction.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-18T21:57:40Z",
+      "side": 1,
+      "message": "Why does this need to be final?",
+      "parentUuid": "fa82b9bf_889f5450",
+      "revId": "786d106f364540bd62c731dffa702bd77e311e80",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_68a2109c",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/AbstractDOMForwardedTransactionFactory.java",
         "patchSetId": 11
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_08c104e4",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/AbstractDOMForwardedTransactionFactory.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-18T21:57:40Z",
+      "side": 1,
+      "message": "Derived classes use it. I can make it protected.",
+      "parentUuid": "fa82b9bf_68a2109c",
+      "revId": "786d106f364540bd62c731dffa702bd77e311e80",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_e88e2027",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataCommitCoordinatorImpl.java",
         "patchSetId": 11
@@ -47,6 +83,24 @@
       "writtenOn": "2014-09-18T18:34:25Z",
       "side": 1,
       "message": "seems to be required now, so add a precondition",
+      "revId": "786d106f364540bd62c731dffa702bd77e311e80",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_68af702c",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataCommitCoordinatorImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-18T21:57:40Z",
+      "side": 1,
+      "message": "Fine but it doesn\u0027t need it as this is a private class and instances are only created by the enclosing class which already validates it.",
+      "parentUuid": "fa82b9bf_e88e2027",
       "revId": "786d106f364540bd62c731dffa702bd77e311e80",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -104,6 +158,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_2880888a",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/jmx/NoopTransactionStatsTracker.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-18T21:57:40Z",
+      "side": 1,
+      "message": "It\u0027s used by DOMDataBrokerImpl. I added a second ctor that takes no tracker instance so I didn\u0027t have to change all the unit tests that don\u0027t care about the stats to have to pass an instance.",
+      "parentUuid": "fa82b9bf_4872ac4a",
+      "revId": "786d106f364540bd62c731dffa702bd77e311e80",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_e8dce01a",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/jmx/TransactionStatsMXBean.java",
         "patchSetId": 11
@@ -115,6 +187,24 @@
       "writtenOn": "2014-09-18T18:34:25Z",
       "side": 1,
       "message": "this list looks like three distinct things:\n\n- details about how many user operations were performed\n- details about what the general datastore performance is\n- details about coordinator failures (phases are really implementation-internal)\n\nI think I can envision a reasonable need to track some of them and not others (the above list is ordered in the order of increasing importance).\n\nCan we perhaps split these?",
+      "revId": "786d106f364540bd62c731dffa702bd77e311e80",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_88fe7437",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/jmx/TransactionStatsMXBean.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-18T21:57:40Z",
+      "side": 1,
+      "message": "I put them all in the same MBean for convenience. Jan preferred having them together when viewing (I do too).  It isn\u0027t a big deal - we can refactor it later if we want. I\u0027d rather not hold up this patch any longer for that.",
+      "parentUuid": "fa82b9bf_e8dce01a",
       "revId": "786d106f364540bd62c731dffa702bd77e311e80",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -138,6 +228,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_48f86c49",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/jmx/TransactionStatsMXBean.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-18T21:57:40Z",
+      "side": 1,
+      "message": "I\u0027ll make it clearStatistics then. This appears as a button in JConsole so I think it needs more context than just clear.",
+      "parentUuid": "fa82b9bf_c8eb1caf",
+      "revId": "786d106f364540bd62c731dffa702bd77e311e80",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_88c67448",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/jmx/TransactionStatsMXBeanImpl.java",
         "patchSetId": 11
@@ -149,6 +257,24 @@
       "writtenOn": "2014-09-18T18:34:25Z",
       "side": 1,
       "message": "please explain why is this particular suppressing required.",
+      "revId": "786d106f364540bd62c731dffa702bd77e311e80",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6888d0c6",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/jmx/TransactionStatsMXBeanImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-18T21:57:40Z",
+      "side": 1,
+      "message": "Because I don\u0027t know what the generic type is in this case - and I\u0027m not using it so I don\u0027t care. I want \"?\" but you can\u0027t do \"new FutureCallback\u003c?\u003e\" so I just eliminated the generic type altogether to make it easier.",
+      "parentUuid": "fa82b9bf_88c67448",
       "revId": "786d106f364540bd62c731dffa702bd77e311e80",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
