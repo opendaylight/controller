@@ -139,7 +139,7 @@ public class NetconfITSecureTest extends AbstractNetconfConfigTest {
             // Wait for every future
             for (final ListenableFuture<RpcResult<NetconfMessage>> future : futures) {
                 try {
-                    future.get(3, TimeUnit.MINUTES);
+                    future.get(5, TimeUnit.MINUTES);
                 } catch (final TimeoutException e) {
                     fail("Request " + futures.indexOf(future) + " is not responding");
                 }
