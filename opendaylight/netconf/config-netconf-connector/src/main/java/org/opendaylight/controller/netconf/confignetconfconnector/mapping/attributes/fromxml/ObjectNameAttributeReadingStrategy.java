@@ -9,6 +9,7 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 
 import com.google.common.base.Preconditions;
 
+import com.google.common.base.Strings;
 import java.util.List;
 import java.util.Map;
 
@@ -52,7 +53,7 @@ public class ObjectNameAttributeReadingStrategy extends AbstractAttributeReading
     public static String checkPrefixAndExtractServiceName(XmlElement typeElement, Map.Entry<String, String> prefixNamespace) throws NetconfDocumentedException {
         String serviceName = typeElement.getTextContent();
         // FIXME: comparing Entry with String:
-        Preconditions.checkState(!prefixNamespace.equals(""), "Service %s value not prefixed with namespace",
+        Preconditions.checkState(!Strings.isNullOrEmpty(prefixNamespace.getKey()), "Service %s value not prefixed with namespace",
                 XmlNetconfConstants.TYPE_KEY);
         String prefix = prefixNamespace.getKey() + PREFIX_SEPARATOR;
         Preconditions.checkState(serviceName.startsWith(prefix),

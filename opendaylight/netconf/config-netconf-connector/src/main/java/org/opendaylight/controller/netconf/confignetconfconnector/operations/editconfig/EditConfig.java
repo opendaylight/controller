@@ -148,21 +148,20 @@ public class EditConfig extends AbstractConfigNetconfOperation {
         Map<String, Map<String, Map<String, Services.ServiceInstance>>> namespaceToServiceNameToRefNameToInstance = services
                 .getNamespaceToServiceNameToRefNameToInstance();
 
-        for (String serviceNamespace : namespaceToServiceNameToRefNameToInstance.keySet()) {
-            for (String serviceName : namespaceToServiceNameToRefNameToInstance.get(serviceNamespace).keySet()) {
+        for (Map.Entry<String, Map<String, Map<String, Services.ServiceInstance>>> namespaceToServiceToRefEntry : namespaceToServiceNameToRefNameToInstance.entrySet()) {
+            for (Map.Entry<String, Map<String, Services.ServiceInstance>> serviceToRefEntry : namespaceToServiceToRefEntry.getValue().entrySet()) {
 
-                String qnameOfService = getQname(ta, serviceNamespace, serviceName);
-                Map<String, Services.ServiceInstance> refNameToInstance = namespaceToServiceNameToRefNameToInstance
-                        .get(serviceNamespace).get(serviceName);
+                String qnameOfService = getQname(ta, namespaceToServiceToRefEntry.getKey(), serviceToRefEntry.getKey());
+                Map<String, Services.ServiceInstance> refNameToInstance = serviceToRefEntry.getValue();
 
-                for (String refName : refNameToInstance.keySet()) {
-                    ObjectName on = refNameToInstance.get(refName).getObjectName(ta.getTransactionName());
+                for (Map.Entry<String, Services.ServiceInstance> refNameToServiceEntry : refNameToInstance.entrySet()) {
+                    ObjectName on = refNameToServiceEntry.getValue().getObjectName(ta.getTransactionName());
                     try {
-                        ObjectName saved = ta.saveServiceReference(qnameOfService, refName, on);
+                        ObjectName saved = ta.saveServiceReference(qnameOfService, refNameToServiceEntry.getKey(), on);
                         logger.debug("Saving service {} with on {} under name {} with service on {}", qnameOfService,
-                                on, refName, saved);
+                                on, refNameToServiceEntry.getKey(), saved);
                     } catch (InstanceNotFoundException e) {
-                        throw new NetconfDocumentedException(String.format("Unable to save ref name " + refName + " for instance " + on, e),
+                        throw new NetconfDocumentedException(String.format("Unable to save ref name " + refNameToServiceEntry.getKey() + " for instance " + on, e),
                                 ErrorType.application,
                                 ErrorTag.operation_failed,
                                 ErrorSeverity.error);
@@ -271,18 +270,18 @@ public class EditConfig extends AbstractConfigNetconfOperation {
 
         Map<String, Map<String, ModuleConfig>> namespaceToModuleNameToModuleConfig = Maps.newHashMap();
 
-        for (String namespace : mBeanEntries.keySet()) {
-            for (Map.Entry<String, ModuleMXBeanEntry> moduleNameToMbe : mBeanEntries.get(namespace).entrySet()) {
+        for (Map.Entry<String, Map<String, ModuleMXBeanEntry>> namespaceToModuleToMbe : mBeanEntries.entrySet()) {
+            for (Map.Entry<String, ModuleMXBeanEntry> moduleNameToMbe : namespaceToModuleToMbe.getValue().entrySet()) {
                 String moduleName = moduleNameToMbe.getKey();
                 ModuleMXBeanEntry moduleMXBeanEntry = moduleNameToMbe.getValue();
 
                 ModuleConfig moduleConfig = new ModuleConfig(moduleName,
                         new InstanceConfig(configRegistryClient,moduleMXBeanEntry.getAttributes(), moduleMXBeanEntry.getNullableDummyContainerName()));
 
-                Map<String, ModuleConfig> moduleNameToModuleConfig = namespaceToModuleNameToModuleConfig.get(namespace);
+                Map<String, ModuleConfig> moduleNameToModuleConfig = namespaceToModuleNameToModuleConfig.get(namespaceToModuleToMbe.getKey());
                 if(moduleNameToModuleConfig == null) {
                     moduleNameToModuleConfig = Maps.newHashMap();
-                    namespaceToModuleNameToModuleConfig.put(namespace, moduleNameToModuleConfig);
+                    namespaceToModuleNameToModuleConfig.put(namespaceToModuleToMbe.getKey(), moduleNameToModuleConfig);
                 }
 
                 moduleNameToModuleConfig.put(moduleName, moduleConfig);

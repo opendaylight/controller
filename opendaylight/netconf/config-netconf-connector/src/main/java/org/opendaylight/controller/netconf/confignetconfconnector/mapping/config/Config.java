@@ -60,11 +60,11 @@ public class Config {
 
         Map<String, Map<String, Collection<ObjectName>>> retVal = Maps.newLinkedHashMap();
 
-        for (String namespace : configs.keySet()) {
+        for (Entry<String, Map<String, ModuleConfig>> namespaceToModuleToConfigEntry : configs.entrySet()) {
 
             Map<String, Collection<ObjectName>> innerRetVal = Maps.newHashMap();
 
-            for (Entry<String, ModuleConfig> mbeEntry : configs.get(namespace).entrySet()) {
+            for (Entry<String, ModuleConfig> mbeEntry : namespaceToModuleToConfigEntry.getValue().entrySet()) {
 
                 String moduleName = mbeEntry.getKey();
                 Collection<ObjectName> instances = moduleToInstances.get(moduleName);
@@ -80,7 +80,7 @@ public class Config {
 
             }
 
-            retVal.put(namespace, innerRetVal);
+            retVal.put(namespaceToModuleToConfigEntry.getKey(), innerRetVal);
         }
         return retVal;
     }
@@ -107,18 +107,18 @@ public class Config {
 
         Element modulesElement = XmlUtil.createElement(document, XmlNetconfConstants.MODULES_KEY, Optional.of(XmlNetconfConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG));
         dataElement.appendChild(modulesElement);
-        for (String moduleNamespace : moduleToInstances.keySet()) {
-            for (Entry<String, Collection<ObjectName>> moduleMappingEntry : moduleToInstances.get(moduleNamespace)
+        for (Entry<String, Map<String, Collection<ObjectName>>> moduleToInstanceEntry : moduleToInstances.entrySet()) {
+            for (Entry<String, Collection<ObjectName>> moduleMappingEntry : moduleToInstanceEntry.getValue()
                     .entrySet()) {
 
-                ModuleConfig mapping = moduleConfigs.get(moduleNamespace).get(moduleMappingEntry.getKey());
+                ModuleConfig mapping = moduleConfigs.get(moduleToInstanceEntry.getKey()).get(moduleMappingEntry.getKey());
 
                 if (moduleMappingEntry.getValue().isEmpty()) {
                     continue;
                 }
 
                 for (ObjectName objectName : moduleMappingEntry.getValue()) {
-                    modulesElement.appendChild(mapping.toXml(objectName, document, moduleNamespace));
+                    modulesElement.appendChild(mapping.toXml(objectName, document, moduleToInstanceEntry.getKey()));
                 }
 
             }

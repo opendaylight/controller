@@ -133,9 +133,9 @@ public final class Services {
         Element root = XmlUtil.createElement(document, XmlNetconfConstants.SERVICES_KEY, Optional.of(XmlNetconfConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG));
 
         Map<String, Map<String, Map<String, String>>> mappedServices = serviceRegistryWrapper.getMappedServices();
-        for (String namespace : mappedServices.keySet()) {
+        for (Entry<String, Map<String, Map<String, String>>> namespaceToRefEntry : mappedServices.entrySet()) {
 
-            for (Entry<String, Map<String, String>> serviceEntry : mappedServices.get(namespace).entrySet()) {
+            for (Entry<String, Map<String, String>> serviceEntry : namespaceToRefEntry.getValue().entrySet()) {
                 // service belongs to config.yang namespace
                 Element serviceElement = XmlUtil.createElement(document, SERVICE_KEY, Optional.<String>absent());
                 root.appendChild(serviceElement);
@@ -143,7 +143,7 @@ public final class Services {
                 // type belongs to config.yang namespace
                 String serviceType = serviceEntry.getKey();
                 Element typeElement = XmlUtil.createTextElementWithNamespacedContent(document, XmlNetconfConstants.TYPE_KEY,
-                        XmlNetconfConstants.PREFIX, namespace, serviceType);
+                        XmlNetconfConstants.PREFIX, namespaceToRefEntry.getKey(), serviceType);
 
                 serviceElement.appendChild(typeElement);
 

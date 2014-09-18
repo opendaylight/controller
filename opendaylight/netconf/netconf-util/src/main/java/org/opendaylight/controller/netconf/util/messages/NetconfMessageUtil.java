@@ -10,7 +10,9 @@ package org.opendaylight.controller.netconf.util.messages;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
-
+import java.util.Collection;
+import java.util.List;
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
@@ -18,11 +20,6 @@ import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-
-import javax.annotation.Nullable;
-
-import java.util.Collection;
-import java.util.List;
 
 public final class NetconfMessageUtil {
 
@@ -67,9 +64,8 @@ public final class NetconfMessageUtil {
         List<XmlElement> caps = capabilitiesElement.getChildElements(XmlNetconfConstants.CAPABILITY);
         return Collections2.transform(caps, new Function<XmlElement, String>() {
 
-            @Nullable
             @Override
-            public String apply(@Nullable XmlElement input) {
+            public String apply(@Nonnull XmlElement input) {
                 // Trim possible leading/tailing whitespace
                 try {
                     return input.getTextContent().trim();

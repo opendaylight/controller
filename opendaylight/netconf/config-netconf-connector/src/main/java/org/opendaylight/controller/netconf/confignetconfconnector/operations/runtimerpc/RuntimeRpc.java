@@ -81,8 +81,7 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
         final String[] signature = new String[attributes.size()];
 
         int i = 0;
-        for (final String attrName : attributes.keySet()) {
-            final AttributeConfigElement attribute = attributes.get(attrName);
+        for (final AttributeConfigElement attribute : attributes.values()) {
             final Optional<?> resolvedValueOpt = attribute.getResolvedValue();
 
             params[i] = resolvedValueOpt.isPresent() ? resolvedValueOpt.get() : attribute.getResolvedDefaultValue();
@@ -248,23 +247,23 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
 
         final Map<String, Map<String, ModuleRpcs>> map = Maps.newHashMap();
 
-        for (final String namespace : mBeanEntries.keySet()) {
+        for (final Map.Entry<String, Map<String, ModuleMXBeanEntry>> namespaceToModuleEntry : mBeanEntries.entrySet()) {
 
-            Map<String, ModuleRpcs> namespaceToModules = map.get(namespace);
+            Map<String, ModuleRpcs> namespaceToModules = map.get(namespaceToModuleEntry.getKey());
             if (namespaceToModules == null) {
                 namespaceToModules = Maps.newHashMap();
-                map.put(namespace, namespaceToModules);
+                map.put(namespaceToModuleEntry.getKey(), namespaceToModules);
             }
 
-            for (final String moduleName : mBeanEntries.get(namespace).keySet()) {
+            for (final Map.Entry<String, ModuleMXBeanEntry> moduleEntry : namespaceToModuleEntry.getValue().entrySet()) {
 
-                ModuleRpcs rpcMapping = namespaceToModules.get(moduleName);
+                ModuleRpcs rpcMapping = namespaceToModules.get(moduleEntry.getKey());
                 if (rpcMapping == null) {
                     rpcMapping = new ModuleRpcs();
-                    namespaceToModules.put(moduleName, rpcMapping);
+                    namespaceToModules.put(moduleEntry.getKey(), rpcMapping);
                 }
 
-                final ModuleMXBeanEntry entry = mBeanEntries.get(namespace).get(moduleName);
+                final ModuleMXBeanEntry entry = moduleEntry.getValue();
 
                 for (final RuntimeBeanEntry runtimeEntry : entry.getRuntimeBeans()) {
                     rpcMapping.addNameMapping(runtimeEntry);
