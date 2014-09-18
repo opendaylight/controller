@@ -65,6 +65,7 @@
     <feature name ='odl-mdsal-xsql' version='${project.version}'>
         <feature version='${project.version}'>odl-mdsal-broker</feature>
         <bundle>mvn:org.opendaylight.controller/sal-dom-xsql/${project.version}</bundle>
+        <bundle>mvn:org.opendaylight.controller/sal-karaf-xsql/${project.version}</bundle>
         <configfile finalname="${config.configfile.directory}/${config.xsql.configfile}">mvn:org.opendaylight.controller/sal-dom-xsql-config/${project.version}/xml/config</configfile>
     </feature>
     <feature name ='odl-mdsal-apidocs' version='${project.version}'>
