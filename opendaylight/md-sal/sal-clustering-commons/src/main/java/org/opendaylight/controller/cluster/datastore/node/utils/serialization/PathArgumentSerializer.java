@@ -9,26 +9,25 @@
 package org.opendaylight.controller.cluster.datastore.node.utils.serialization;
 
 import com.google.common.base.Preconditions;
-
 import org.opendaylight.controller.cluster.datastore.node.utils.NodeIdentifierFactory;
 import org.opendaylight.controller.cluster.datastore.node.utils.QNameFactory;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
-
 import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.PathArgumentType.getSerializablePathArgumentType;
 
 public class PathArgumentSerializer {
     private static final String REVISION_ARG = "?revision=";
-    private static final Map<Class, PathArgumentAttributesGetter> pathArgumentAttributesGetters = new HashMap<>();
+    private static final Map<Class<?>, PathArgumentAttributesGetter> pathArgumentAttributesGetters = new HashMap<>();
 
     public static NormalizedNodeMessages.PathArgument serialize(NormalizedNodeSerializationContext context, YangInstanceIdentifier.PathArgument pathArgument){
         Preconditions.checkNotNull(context, "context should not be null");
@@ -72,8 +71,6 @@ public class PathArgumentSerializer {
             public Iterable<? extends NormalizedNodeMessages.PathArgumentAttribute> get(
                 NormalizedNodeSerializationContext context,
                 YangInstanceIdentifier.PathArgument pathArgument) {
-                List<NormalizedNodeMessages.PathArgumentAttribute> attributes =
-                    new ArrayList<>();
 
                 YangInstanceIdentifier.NodeWithValue identifier
                     = (YangInstanceIdentifier.NodeWithValue) pathArgument;
@@ -81,10 +78,7 @@ public class PathArgumentSerializer {
                 NormalizedNodeMessages.PathArgumentAttribute attribute =
                     buildAttribute(context, null, identifier.getValue());
 
-                attributes.add(attribute);
-
-                return attributes;
-
+                return Arrays.asList(attribute);
             }
         });
 
@@ -94,23 +88,20 @@ public class PathArgumentSerializer {
                 NormalizedNodeSerializationContext context,
                 YangInstanceIdentifier.PathArgument pathArgument) {
 
-                List<NormalizedNodeMessages.PathArgumentAttribute> attributes =
-                    new ArrayList<>();
-
                 YangInstanceIdentifier.NodeIdentifierWithPredicates identifier
                     = (YangInstanceIdentifier.NodeIdentifierWithPredicates) pathArgument;
 
-                for (QName key : identifier.getKeyValues().keySet()) {
-                    Object value = identifier.getKeyValues().get(key);
+                Map<QName, Object> keyValues = identifier.getKeyValues();
+                List<NormalizedNodeMessages.PathArgumentAttribute> attributes =
+                        new ArrayList<>(keyValues.size());
+                for (Entry<QName, Object> e : keyValues.entrySet()) {
                     NormalizedNodeMessages.PathArgumentAttribute attribute =
-                        buildAttribute(context, key, value);
+                        buildAttribute(context, e.getKey(), e.getValue());
 
                     attributes.add(attribute);
-
                 }
 
                 return attributes;
-
             }
         });
 
@@ -120,23 +111,21 @@ public class PathArgumentSerializer {
                 NormalizedNodeSerializationContext context,
                 YangInstanceIdentifier.PathArgument pathArgument) {
 
-                List<NormalizedNodeMessages.PathArgumentAttribute> attributes =
-                    new ArrayList<>();
-
                 YangInstanceIdentifier.AugmentationIdentifier identifier
                     = (YangInstanceIdentifier.AugmentationIdentifier) pathArgument;
 
-                for (QName key : identifier.getPossibleChildNames()) {
+                Set<QName> possibleChildNames = identifier.getPossibleChildNames();
+                List<NormalizedNodeMessages.PathArgumentAttribute> attributes =
+                        new ArrayList<>(possibleChildNames.size());
+                for (QName key : possibleChildNames) {
                     Object value = key;
                     NormalizedNodeMessages.PathArgumentAttribute attribute =
                         buildAttribute(context, key, value);
 
                     attributes.add(attribute);
-
                 }
 
                 return attributes;
-
             }
         });
 
