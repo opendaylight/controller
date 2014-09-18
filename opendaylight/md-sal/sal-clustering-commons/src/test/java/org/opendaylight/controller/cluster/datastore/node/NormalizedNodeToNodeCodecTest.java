@@ -68,15 +68,12 @@ public class NormalizedNodeToNodeCodecTest {
         new NormalizedNodeToNodeCodec(schemaContext);
     long start = System.currentTimeMillis();
     Container container =
-        codec.encode(instanceIdentifierFromString(id), output);
+        codec.encode(output);
     long end = System.currentTimeMillis();
 
     System.out.println("Timetaken to encode :"+(end-start));
 
     assertNotNull(container);
-    assertEquals(id, container.getParentPath() + "/"
-        + NormalizedNodeSerializer.deSerialize(container.getNormalizedNode(),
-        container.getNormalizedNode().getPathArgument()));
 
     // Decode the normalized node from the ProtocolBuffer form
     // first get the node representation of normalized node
@@ -84,7 +81,7 @@ public class NormalizedNodeToNodeCodecTest {
 
     start = System.currentTimeMillis();
     NormalizedNode<?, ?> normalizedNode =
-        codec.decode(instanceIdentifierFromString(id), node);
+        codec.decode(node);
     end = System.currentTimeMillis();
 
     System.out.println("Timetaken to decode :"+(end-start));
@@ -102,26 +99,18 @@ public class NormalizedNodeToNodeCodecTest {
         new NormalizedNodeToNodeCodec(schemaContext);
 
     Container container =
-        normalizedNodeToNodeCodec.encode(YangInstanceIdentifier.builder()
-            .build(), documentOne);
+        normalizedNodeToNodeCodec.encode(documentOne);
 
 
     final NormalizedNode<?, ?> decode =
         normalizedNodeToNodeCodec
             .decode(
-                instanceIdentifierFromString("/(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test"),
                 container.getNormalizedNode());
     assertNotNull(decode);
 
     // let us ensure that the return decode normalized node encode returns same container
     Container containerResult =
-        normalizedNodeToNodeCodec.encode(YangInstanceIdentifier.builder()
-            .build(), decode);
-
-    assertEquals(container.getParentPath(), containerResult.getParentPath());
-
-    assertEquals(containerResult.getNormalizedNode().getChildCount(),
-        container.getNormalizedNode().getChildCount());
+        normalizedNodeToNodeCodec.encode(decode);
 
     // check first level children are proper
     List<Node> childrenResult =
@@ -174,11 +163,11 @@ public class NormalizedNodeToNodeCodecTest {
     NormalizedNodeToNodeCodec codec =
         new NormalizedNodeToNodeCodec(schemaContext);
 
-    Container encode = codec.encode(identifier, uno);
+    Container encode = codec.encode(uno);
 
     System.out.println(encode.getNormalizedNode());
 
-    codec.decode(identifier, encode.getNormalizedNode());
+    codec.decode(encode.getNormalizedNode());
   }
 
 }

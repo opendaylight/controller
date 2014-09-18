@@ -19,6 +19,7 @@ public class PathUtilsTest {
         assertEquals("", PathUtils.getParentPath("foobar"));
         assertEquals("", PathUtils.getParentPath("/a"));
         assertEquals("/a", PathUtils.getParentPath("/a/b"));
+        assertEquals("", PathUtils.getParentPath("a/b"));
         assertEquals("/a/b", PathUtils.getParentPath("/a/b/c"));
         assertEquals("/a/b", PathUtils.getParentPath("a/b/c"));
     }

@@ -588,7 +588,7 @@ public class Shard extends RaftActor {
             DOMStoreWriteTransaction transaction = store.newWriteOnlyTransaction();
             NormalizedNodeMessages.Node serializedNode = NormalizedNodeMessages.Node.parseFrom(snapshot);
             NormalizedNode<?, ?> node = new NormalizedNodeToNodeCodec(schemaContext)
-                .decode(YangInstanceIdentifier.builder().build(), serializedNode);
+                .decode(serializedNode);
 
             // delete everything first
             transaction.delete(YangInstanceIdentifier.builder().build());

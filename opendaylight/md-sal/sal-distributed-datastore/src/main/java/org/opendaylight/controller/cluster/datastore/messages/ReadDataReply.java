@@ -15,41 +15,44 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
-public class ReadDataReply implements SerializableMessage{
+public class ReadDataReply implements SerializableMessage {
+    public static final Class<ShardTransactionMessages.ReadDataReply> SERIALIZABLE_CLASS =
+            ShardTransactionMessages.ReadDataReply.class;
 
-  private final NormalizedNode<?, ?> normalizedNode;
-  private final SchemaContext schemaContext;
-  public static final Class SERIALIZABLE_CLASS = ShardTransactionMessages.ReadDataReply.class;
-  public ReadDataReply(SchemaContext context,NormalizedNode<?, ?> normalizedNode){
+    private final NormalizedNode<?, ?> normalizedNode;
+    private final SchemaContext schemaContext;
 
-    this.normalizedNode = normalizedNode;
-    this.schemaContext = context;
-  }
+    public ReadDataReply(SchemaContext context,NormalizedNode<?, ?> normalizedNode){
 
-  public NormalizedNode<?, ?> getNormalizedNode() {
-    return normalizedNode;
-  }
-
-  public Object toSerializable(){
-    if(normalizedNode != null) {
-      return ShardTransactionMessages.ReadDataReply.newBuilder()
-          .setNormalizedNode(new NormalizedNodeToNodeCodec(schemaContext)
-                  .encode(YangInstanceIdentifier.builder().build(), normalizedNode).getNormalizedNode()
-          ).build();
-    }else{
-      return ShardTransactionMessages.ReadDataReply.newBuilder().build();
-
+        this.normalizedNode = normalizedNode;
+        this.schemaContext = context;
     }
 
-  }
+    public NormalizedNode<?, ?> getNormalizedNode() {
+        return normalizedNode;
+    }
 
-  public static ReadDataReply fromSerializable(SchemaContext schemaContext,YangInstanceIdentifier id,Object serializable){
-    ShardTransactionMessages.ReadDataReply o = (ShardTransactionMessages.ReadDataReply) serializable;
-    return new ReadDataReply(schemaContext,new NormalizedNodeToNodeCodec(schemaContext).decode(id, o.getNormalizedNode()));
-  }
+    @Override
+    public Object toSerializable(){
+        if(normalizedNode != null) {
+            return ShardTransactionMessages.ReadDataReply.newBuilder()
+                    .setNormalizedNode(new NormalizedNodeToNodeCodec(schemaContext)
+                        .encode(normalizedNode).getNormalizedNode()).build();
+        } else {
+            return ShardTransactionMessages.ReadDataReply.newBuilder().build();
 
-  public static ByteString getNormalizedNodeByteString(Object serializable){
-      ShardTransactionMessages.ReadDataReply o = (ShardTransactionMessages.ReadDataReply) serializable;
-      return ((ShardTransactionMessages.ReadDataReply) serializable).getNormalizedNode().toByteString();
-  }
+        }
+    }
+
+    public static ReadDataReply fromSerializable(SchemaContext schemaContext,
+            YangInstanceIdentifier id, Object serializable) {
+        ShardTransactionMessages.ReadDataReply o = (ShardTransactionMessages.ReadDataReply) serializable;
+        return new ReadDataReply(schemaContext, new NormalizedNodeToNodeCodec(schemaContext).decode(
+                o.getNormalizedNode()));
+    }
+
+    public static ByteString getNormalizedNodeByteString(Object serializable){
+        ShardTransactionMessages.ReadDataReply o = (ShardTransactionMessages.ReadDataReply) serializable;
+        return ((ShardTransactionMessages.ReadDataReply) serializable).getNormalizedNode().toByteString();
+    }
 }

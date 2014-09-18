@@ -9,8 +9,9 @@
 package org.opendaylight.controller.cluster.datastore.node.utils.serialization;
 
 import com.google.common.base.Preconditions;
-
+import org.opendaylight.controller.cluster.datastore.util.InstanceIdentifierUtils;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
+import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder;
 import org.opendaylight.yangtools.yang.common.SimpleDateFormatUtil;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -33,7 +34,6 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContaine
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.ListNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeAttrBuilder;
-
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
@@ -41,7 +41,6 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.ANY_XML_NODE_TYPE;
 import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.AUGMENTATION_NODE_TYPE;
 import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.CHOICE_NODE_TYPE;
@@ -93,6 +92,10 @@ public class NormalizedNodeSerializer {
         return new Serializer(node).serialize();
     }
 
+    public static Serializer newSerializer(NormalizedNode node) {
+        Preconditions.checkNotNull(node, "node should not be null");
+        return new Serializer(node);
+    }
 
     /**
      * DeSerialize a protocol buffer message back into a NormalizedNode
@@ -101,7 +104,12 @@ public class NormalizedNodeSerializer {
      * @return
      */
     public static NormalizedNode deSerialize(NormalizedNodeMessages.Node node){
-        return new DeSerializer(node).deSerialize();
+        return new DeSerializer(null, node).deSerialize();
+    }
+
+    public static DeSerializer newDeSerializer(NormalizedNodeMessages.InstanceIdentifier path,
+            NormalizedNodeMessages.Node node) {
+        return new DeSerializer(path, node);
     }
 
     /**
@@ -117,25 +125,38 @@ public class NormalizedNodeSerializer {
      * @param pathArgument
      * @return
      */
-    public static YangInstanceIdentifier.PathArgument deSerialize(NormalizedNodeMessages.Node node, NormalizedNodeMessages.PathArgument pathArgument){
+    public static YangInstanceIdentifier.PathArgument deSerialize(NormalizedNodeMessages.Node node,
+            NormalizedNodeMessages.PathArgument pathArgument){
         Preconditions.checkNotNull(node, "node should not be null");
         Preconditions.checkNotNull(pathArgument, "pathArgument should not be null");
-        return new DeSerializer(node).deSerialize(pathArgument);
+        return new DeSerializer(null, node).deSerialize(pathArgument);
     }
 
-    private static class Serializer implements NormalizedNodeSerializationContext {
+    public static class Serializer implements NormalizedNodeSerializationContext {
 
         private final NormalizedNode node;
 
         private final Map<Object, Integer> codeMap = new HashMap<>();
         private final List<String> codes = new ArrayList<>();
 
+        private NormalizedNodeMessages.InstanceIdentifier serializedPath;
+
         private Serializer(NormalizedNode node) {
             this.node = node;
         }
 
-        private NormalizedNodeMessages.Node serialize() {
+        public NormalizedNodeMessages.InstanceIdentifier getSerializedPath() {
+            return serializedPath;
+        }
+
+        public NormalizedNodeMessages.Node serialize() {
             return this.serialize(node).addAllCode(codes).build();
+        }
+
+        public NormalizedNodeMessages.Node serialize(YangInstanceIdentifier path) {
+            Builder builder = serialize(node);
+            serializedPath = InstanceIdentifierUtils.toSerializable(path, this);
+            return builder.addAllCode(codes).build();
         }
 
         private NormalizedNodeMessages.Node.Builder serialize(
@@ -211,7 +232,7 @@ public class NormalizedNodeSerializer {
         @Override public int addLocalName(String localName) {
             int localNameInt = getCode(localName);
             if(localNameInt == -1) {
-                localNameInt = addCode(localName, localName.toString());
+                localNameInt = addCode(localName, localName);
             }
             return localNameInt;
 
@@ -225,14 +246,12 @@ public class NormalizedNodeSerializer {
         }
 
         public int getCode(Object code){
-            if(codeMap.containsKey(code)){
-                return codeMap.get(code);
-            }
-            return -1;
+            Integer value = codeMap.get(code);
+            return value == null ? -1 : value.intValue();
         }
     }
 
-    private static class DeSerializer implements NormalizedNodeDeSerializationContext {
+    public static class DeSerializer implements NormalizedNodeDeSerializationContext {
         private static Map<NormalizedNodeType, DeSerializationFunction>
             deSerializationFunctions = new EnumMap<>(NormalizedNodeType.class);
 
@@ -438,13 +457,26 @@ public class NormalizedNodeSerializer {
         }
 
         private final NormalizedNodeMessages.Node node;
+        private final NormalizedNodeMessages.InstanceIdentifier path;
+        private YangInstanceIdentifier deserializedPath;
 
-        public DeSerializer(NormalizedNodeMessages.Node node){
+        public DeSerializer(NormalizedNodeMessages.InstanceIdentifier path,
+                NormalizedNodeMessages.Node node) {
+            this.path = path;
             this.node = node;
         }
 
-        public NormalizedNode deSerialize(){
-            return deSerialize(node);
+        public YangInstanceIdentifier getDeserializedPath() {
+            return deserializedPath;
+        }
+
+        public NormalizedNode deSerialize() {
+            NormalizedNode deserializedNode = deSerialize(node);
+            if(path != null) {
+                deserializedPath = InstanceIdentifierUtils.fromSerializable(path, this);
+            }
+
+            return deserializedNode;
         }
 
         private NormalizedNode deSerialize(NormalizedNodeMessages.Node node){

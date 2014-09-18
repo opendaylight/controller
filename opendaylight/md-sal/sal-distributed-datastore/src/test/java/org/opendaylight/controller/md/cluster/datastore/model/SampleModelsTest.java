@@ -12,7 +12,6 @@ import junit.framework.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 public class SampleModelsTest {
@@ -23,14 +22,12 @@ public class SampleModelsTest {
 
         final NormalizedNodeMessages.Container node =
             new NormalizedNodeToNodeCodec(SchemaContextHelper.full())
-                .encode(YangInstanceIdentifier.of(PeopleModel.BASE_QNAME),
-                    expected);
+                .encode(expected);
 
         final NormalizedNodeMessages.Node normalizedNode =
             node.getNormalizedNode();
 
-        final NormalizedNode<?,?> actual = new NormalizedNodeToNodeCodec(SchemaContextHelper.full()).decode(YangInstanceIdentifier.of(PeopleModel.BASE_QNAME),
-            normalizedNode);
+        final NormalizedNode<?,?> actual = new NormalizedNodeToNodeCodec(SchemaContextHelper.full()).decode(normalizedNode);
 
 
         Assert.assertEquals(expected, actual);
@@ -45,14 +42,12 @@ public class SampleModelsTest {
 
         final NormalizedNodeMessages.Container node =
             new NormalizedNodeToNodeCodec(SchemaContextHelper.full())
-                .encode(YangInstanceIdentifier.of(CarsModel.BASE_QNAME),
-                    expected);
+                .encode(expected);
 
         final NormalizedNodeMessages.Node normalizedNode =
             node.getNormalizedNode();
 
         final NormalizedNode<?,?> actual = new NormalizedNodeToNodeCodec(SchemaContextHelper.full()).decode(
-            YangInstanceIdentifier.of(CarsModel.BASE_QNAME),
             normalizedNode);
 
 
