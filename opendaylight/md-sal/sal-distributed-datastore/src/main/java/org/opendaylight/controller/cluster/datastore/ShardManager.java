@@ -15,11 +15,17 @@ import akka.actor.OneForOneStrategy;
 import akka.actor.Props;
 import akka.actor.SupervisorStrategy;
 import akka.cluster.ClusterEvent;
+import akka.event.Logging;
+import akka.event.LoggingAdapter;
 import akka.japi.Creator;
 import akka.japi.Function;
+import akka.japi.Procedure;
+import akka.persistence.RecoveryCompleted;
+import akka.persistence.RecoveryFailure;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;
-
+import com.google.common.collect.Lists;
+import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActor;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shardmanager.ShardManagerInfo;
@@ -33,13 +39,18 @@ import org.opendaylight.controller.cluster.datastore.messages.PrimaryFound;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryNotFound;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.duration.Duration;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * The ShardManager has the following jobs,
@@ -50,7 +61,10 @@ import java.util.Map;
  * <li> Monitor the cluster members and store their addresses
  * <ul>
  */
-public class ShardManager extends AbstractUntypedActorWithMetering {
+public class ShardManager extends AbstractUntypedPersistentActor {
+
+    protected final LoggingAdapter LOG =
+        Logging.getLogger(getContext().system(), this);
 
     // Stores a mapping between a member name and the address of the member
     // Member names look like "member-1", "member-2" etc and are as specified
@@ -73,6 +87,8 @@ public class ShardManager extends AbstractUntypedActorWithMetering {
     private ShardManagerInfoMBean mBean;
 
     private final DatastoreContext datastoreContext;
+
+    private final Collection<String> knownModules = new HashSet<>(128);
 
     /**
      * @param type defines the kind of data that goes into shards created by this shard manager. Examples of type would be
@@ -105,7 +121,7 @@ public class ShardManager extends AbstractUntypedActorWithMetering {
     }
 
     @Override
-    public void handleReceive(Object message) throws Exception {
+    public void handleCommand(Object message) throws Exception {
         if (message.getClass().equals(FindPrimary.SERIALIZABLE_CLASS)) {
             findPrimary(
                 FindPrimary.fromSerializable(message));
@@ -123,6 +139,23 @@ public class ShardManager extends AbstractUntypedActorWithMetering {
             unknownMessage(message);
         }
 
+    }
+
+    @Override protected void handleRecover(Object message) throws Exception {
+
+        if(message instanceof SchemaContextModules){
+            SchemaContextModules msg = (SchemaContextModules) message;
+            knownModules.clear();
+            knownModules.addAll(msg.getModules());
+        } else if(message instanceof RecoveryFailure){
+            RecoveryFailure failure = (RecoveryFailure) message;
+            LOG.error(failure.cause(), "Recovery failed");
+        } else if(message instanceof RecoveryCompleted){
+            RecoveryCompleted completed = (RecoveryCompleted) message;
+            LOG.info("Recovery complete : " + completed.toString());
+
+            deleteMessages(lastSequenceNr() - 1);
+        }
     }
 
     private void findLocalShard(FindLocalShard message) {
@@ -159,16 +192,42 @@ public class ShardManager extends AbstractUntypedActorWithMetering {
      *
      * @param message
      */
-    private void updateSchemaContext(Object message) {
-        SchemaContext schemaContext = ((UpdateSchemaContext) message).getSchemaContext();
+    private void updateSchemaContext(final Object message) {
+        final SchemaContext schemaContext = ((UpdateSchemaContext) message).getSchemaContext();
 
-        if(localShards.size() == 0){
-            createLocalShards(schemaContext);
-        } else {
-            for (ShardInformation info : localShards.values()) {
-                info.getActor().tell(message, getSelf());
-            }
+        Set<ModuleIdentifier> allModuleIdentifiers = schemaContext.getAllModuleIdentifiers();
+        List<String> newModules = Lists.newArrayList();
+
+        for(ModuleIdentifier moduleIdentifier : allModuleIdentifiers){
+            String s = moduleIdentifier.getNamespace().toString();
+            newModules.add(s);
         }
+
+        if(newModules.containsAll(knownModules)) {
+
+            LOG.info("New SchemaContext has a super set of current knownModules - persisting info");
+
+            knownModules.clear();
+            knownModules.addAll(newModules);
+
+            persist(new SchemaContextModules(newModules), new Procedure<SchemaContextModules>() {
+
+                @Override public void apply(SchemaContextModules param) throws Exception {
+                    LOG.info("Sending new SchemaContext to Shards");
+                    if (localShards.size() == 0) {
+                        createLocalShards(schemaContext);
+                    } else {
+                        for (ShardInformation info : localShards.values()) {
+                            info.getActor().tell(message, getSelf());
+                        }
+                    }
+                }
+
+            });
+        } else {
+            LOG.info("Rejecting schema context update because it is not a super set of previously known modules");
+        }
+
     }
 
     private void findPrimary(FindPrimary message) {
@@ -306,6 +365,14 @@ public class ShardManager extends AbstractUntypedActorWithMetering {
 
     }
 
+    @Override public String persistenceId() {
+        return "shard-manager-" + type;
+    }
+
+    @VisibleForTesting public Collection<String> getKnownModules() {
+        return knownModules;
+    }
+
     private class ShardInformation {
         private final String shardName;
         private final ActorRef actor;
@@ -369,6 +436,18 @@ public class ShardManager extends AbstractUntypedActorWithMetering {
         @Override
         public ShardManager create() throws Exception {
             return new ShardManager(type, cluster, configuration, datastoreContext);
+        }
+    }
+
+    static class SchemaContextModules implements Serializable {
+        private final List<String> modules;
+
+        SchemaContextModules(List<String> modules){
+            this.modules = modules;
+        }
+
+        public List<String> getModules() {
+            return modules;
         }
     }
 }
