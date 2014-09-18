@@ -17,6 +17,8 @@ import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.util.LinkedList;
+import java.util.Queue;
 import org.apache.sshd.ClientChannel;
 import org.apache.sshd.ClientSession;
 import org.apache.sshd.SshClient;
@@ -150,7 +152,7 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
         sshReadAsyncListener = new SshReadAsyncListener(this, ctx, channel.getAsyncOut());
         // if readAsyncListener receives immediate close, it will close this handler and closing this handler sets channel variable to null
         if(channel != null) {
-            sshWriteAsyncHandler = new SshWriteAsyncHandler(this, channel.getAsyncIn());
+            sshWriteAsyncHandler = new SshWriteAsyncHandler(channel.getAsyncIn());
             ctx.fireChannelActive();
         }
     }
@@ -273,96 +275,66 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
     }
 
     private static final class SshWriteAsyncHandler implements AutoCloseable {
-        public static final int MAX_PENDING_WRITES = 100;
+        public static final int MAX_PENDING_WRITES = 1000;
 
-        private final ChannelOutboundHandler channelHandler;
         private IoOutputStream asyncIn;
 
-        // Counter that holds the amount of pending write messages
-        // Pending write can occur in case remote window is full
-        // In such case, we need to wait for the pending write to finish
-        private int pendingWriteCounter;
-        // Last write future, that can be pending
-        private IoWriteFuture lastWriteFuture;
+        private final Queue<PendingWriteRequest> pending = new LinkedList<>();
 
-        public SshWriteAsyncHandler(final ChannelOutboundHandler channelHandler, final IoOutputStream asyncIn) {
-            this.channelHandler = channelHandler;
+        public SshWriteAsyncHandler(final IoOutputStream asyncIn) {
             this.asyncIn = asyncIn;
         }
 
-        int c = 0;
+        public synchronized void write(final ChannelHandlerContext ctx,
+                final Object msg, final ChannelPromise promise) {
+            if (pending.isEmpty() == false) {
+                queueRequest(ctx, msg, promise);
+                return;
+            }
 
-        public synchronized void write(final ChannelHandlerContext ctx, final Object msg, final ChannelPromise promise) {
-            try {
-                if(asyncIn == null || asyncIn.isClosed() || asyncIn.isClosing()) {
-                    // If we are closed/closing, set immediate fail
-                    promise.setFailure(new IllegalStateException("Channel closed"));
-                } else {
-                    lastWriteFuture = asyncIn.write(toBuffer(msg));
+            if (asyncIn == null || asyncIn.isClosed() || asyncIn.isClosing()) {
+                // If we are closed/closing, set immediate fail
+                promise.setFailure(new IllegalStateException("Channel closed"));
+            } else {
+                try {
+                    final IoWriteFuture lastWriteFuture = asyncIn.write(toBuffer(msg));
                     lastWriteFuture.addListener(new SshFutureListener<IoWriteFuture>() {
 
-                        @Override
-                        public void operationComplete(final IoWriteFuture future) {
-                            ((ByteBuf) msg).release();
+                                @Override
+                                public void operationComplete(final IoWriteFuture future) {
+                                    ((ByteBuf) msg).release();
 
-                            // Notify success or failure
-                            if (future.isWritten()) {
-                                promise.setSuccess();
-                            } else {
-                                promise.setFailure(future.getException());
-                            }
+                                    // Notify success or failure
+                                    if (future.isWritten()) {
+                                        promise.setSuccess();
+                                    } else {
+                                        promise.setFailure(future.getException());
+                                    }
 
-                            // Reset last pending future
-                            synchronized (SshWriteAsyncHandler.this) {
-                                lastWriteFuture = null;
-                            }
-                        }
-                    });
+                                    synchronized (SshWriteAsyncHandler.this) {
+                                        // In case of pending, reschedule next message from queue
+                                        if (pending.peek() != null) {
+                                            final PendingWriteRequest pendingWrite = pending.poll();
+                                            write(pendingWrite.ctx, pendingWrite.msg, pendingWrite.promise);
+                                        }
+                                    }
+                                }
+                            });
+                } catch (final WritePendingException e) {
+                    // Reset reader index, last write (failed) attempt moved index to the end
+                    ((ByteBuf) msg).resetReaderIndex();
+                    queueRequest(ctx, msg, promise);
                 }
-            } catch (final WritePendingException e) {
-                // Check limit for pending writes
-                pendingWriteCounter++;
-                if(pendingWriteCounter > MAX_PENDING_WRITES) {
-                    promise.setFailure(e);
-                    handlePendingFailed(ctx, new IllegalStateException("Too much pending writes(" + MAX_PENDING_WRITES + ") on channel: " + ctx.channel() +
-                            ", remote window is not getting read or is too small"));
-                }
-
-                // We need to reset buffer read index, since we've already read it when we tried to write it the first time
-                ((ByteBuf) msg).resetReaderIndex();
-                logger.debug("Write pending to SSH remote on channel: {}, current pending count: {}", ctx.channel(), pendingWriteCounter);
-
-                // In case of pending, re-invoke write after pending is finished
-                Preconditions.checkNotNull(lastWriteFuture, "Write is pending, but there was no previous write attempt", e);
-                lastWriteFuture.addListener(new SshFutureListener<IoWriteFuture>() {
-                    @Override
-                    public void operationComplete(final IoWriteFuture future) {
-                        // FIXME possible minor race condition, we cannot guarantee that this callback when pending is finished will be executed first
-                        // External thread could trigger write on this instance while we are on this line
-                        // Verify
-                        if (future.isWritten()) {
-                            synchronized (SshWriteAsyncHandler.this) {
-                                // Pending done, decrease counter
-                                pendingWriteCounter--;
-                                write(ctx, msg, promise);
-                            }
-                        } else {
-                            // Cannot reschedule pending, fail
-                            handlePendingFailed(ctx, e);
-                        }
-                    }
-
-                });
             }
         }
 
-        private void handlePendingFailed(final ChannelHandlerContext ctx, final Exception e) {
-            logger.warn("Exception while writing to SSH remote on channel {}", ctx.channel(), e);
+        private void queueRequest(final ChannelHandlerContext ctx, final Object msg, final ChannelPromise promise) {
             try {
-                channelHandler.disconnect(ctx, ctx.newPromise());
-            } catch (final Exception ex) {
-                // This should not happen
-                throw new IllegalStateException(ex);
+                logger.debug("Write pending to SSH remote on channel: {}, queueing, current queue size: {}", ctx.channel(), pending.size());
+                new PendingWriteRequest(ctx, msg, promise).pend(pending);
+            } catch (final IllegalStateException ex) {
+                logger.warn("Unable to queue write request on channel: {}. Request is failing.", ctx.channel(), ex);
+                promise.setFailure(ex);
             }
         }
 
@@ -380,5 +352,22 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
             return new Buffer(temp);
         }
 
+        private static final class PendingWriteRequest {
+            private final ChannelHandlerContext ctx;
+            private final Object msg;
+            private final ChannelPromise promise;
+
+            public PendingWriteRequest(final ChannelHandlerContext ctx, final Object msg, final ChannelPromise promise) {
+                this.ctx = ctx;
+                this.msg = msg;
+                this.promise = promise;
+            }
+
+            public void pend(final Queue<PendingWriteRequest> pending) {
+                Preconditions.checkState(pending.size() < MAX_PENDING_WRITES,
+                        "Too much pending writes(%s) on channel: %s, remote window is not getting read or is too small", MAX_PENDING_WRITES, ctx.channel());
+                pending.add(this);
+            }
+        }
     }
 }

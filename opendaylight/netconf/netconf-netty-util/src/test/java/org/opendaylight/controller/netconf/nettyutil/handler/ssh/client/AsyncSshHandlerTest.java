@@ -23,12 +23,17 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
 import java.io.IOException;
 import java.net.SocketAddress;
-
-import java.nio.channels.WritePendingException;
 import org.apache.sshd.ClientChannel;
 import org.apache.sshd.ClientSession;
 import org.apache.sshd.SshClient;
@@ -53,15 +58,6 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.AuthenticationHandler;
-
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
-
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
 
 public class AsyncSshHandlerTest {
 
@@ -351,13 +347,9 @@ public class AsyncSshHandlerTest {
 
         // make first write stop pending
         firstWriteListener.operationComplete(ioWriteFuture);
-        // intercept third listener, this is regular listener for second write to determine success or failure
-        final ListenableFuture<SshFutureListener<IoWriteFuture>> afterPendingListener = stubAddListener(ioWriteFuture);
 
         // notify listener for second write that pending has ended
         pendingListener.get().operationComplete(ioWriteFuture);
-        // Notify third listener (regular listener for second write) that second write succeeded
-        afterPendingListener.get().operationComplete(ioWriteFuture);
 
         // verify both write promises successful
         verify(firstWritePromise).setSuccess();
@@ -389,11 +381,11 @@ public class AsyncSshHandlerTest {
         final ChannelPromise secondWritePromise = getMockedPromise();
         // now make write throw pending exception
         doThrow(org.apache.sshd.common.io.WritePendingException.class).when(asyncIn).write(any(Buffer.class));
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 1001; i++) {
             asyncSshHandler.write(ctx, Unpooled.copiedBuffer(new byte[]{0, 1, 2, 3, 4, 5}), secondWritePromise);
         }
 
-        verify(ctx).fireChannelInactive();
+        verify(secondWritePromise, times(1)).setFailure(any(Throwable.class));
     }
 
     @Test

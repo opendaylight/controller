@@ -107,9 +107,9 @@ public class NetconfITSecureTest extends AbstractNetconfConfigTest {
     /**
      * Test all requests are handled properly and no mismatch occurs in listener
      */
-    @Test(timeout = 5*60*1000)
+    @Test(timeout = 6*60*1000)
     public void testSecureStress() throws Exception {
-        final int requests = 10000;
+        final int requests = 4000;
 
         final NetconfClientDispatcher dispatch = new NetconfClientDispatcherImpl(getNettyThreadgroup(), getNettyThreadgroup(), getHashedWheelTimer());
         final NetconfDeviceCommunicator sessionListener = getSessionListener();
