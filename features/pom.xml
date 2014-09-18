@@ -28,5 +28,6 @@
     <module>adsal-compatibility</module>
     <module>akka</module>
     <module>netconf-connector</module>
+    <module>restconf</module>
   </modules>
 </project>
