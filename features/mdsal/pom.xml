@@ -70,6 +70,10 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-karaf-xsql</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-dom-xsql-config</artifactId>
       <classifier>config</classifier>
       <type>xml</type>
