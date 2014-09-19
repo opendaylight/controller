@@ -1300,6 +1300,11 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
+        <artifactId>sal-karaf-xsql</artifactId>
+        <version>${mdsal.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
         <artifactId>sal-dom-xsql-config</artifactId>
         <version>${mdsal.version}</version>
         <classifier>config</classifier>
