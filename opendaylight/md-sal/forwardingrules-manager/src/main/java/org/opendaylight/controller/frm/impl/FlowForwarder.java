@@ -92,7 +92,9 @@ public class FlowForwarder extends AbstractListeningCommiter<Flow> {
     public void remove(final InstanceIdentifier<Flow> identifier,
                        final Flow removeDataObj,
                        final InstanceIdentifier<FlowCapableNode> nodeIdent) {
-
+    	LOG.debug("remove(): identifier ",identifier);
+    	LOG.debug("remove(): addDataObj ",removeDataObj);
+    	LOG.debug("remove(): nodeIdent ",nodeIdent);
         final TableKey tableKey = identifier.firstKeyOf(Table.class, TableKey.class);
         if (tableIdValidationPrecondition(tableKey, removeDataObj)) {
             final RemoveFlowInputBuilder builder = new RemoveFlowInputBuilder(removeDataObj);
@@ -108,7 +110,10 @@ public class FlowForwarder extends AbstractListeningCommiter<Flow> {
     public void update(final InstanceIdentifier<Flow> identifier,
                        final Flow original, final Flow update,
                        final InstanceIdentifier<FlowCapableNode> nodeIdent) {
-
+    	LOG.debug("update(): identifier ",identifier);
+    	LOG.debug("update(): original ",original);
+    	LOG.debug("update(): update ",update);
+    	LOG.debug("update(): nodeIdent ",nodeIdent);
         final TableKey tableKey = identifier.firstKeyOf(Table.class, TableKey.class);
         if (tableIdValidationPrecondition(tableKey, update)) {
             final UpdateFlowInputBuilder builder = new UpdateFlowInputBuilder();
@@ -127,7 +132,9 @@ public class FlowForwarder extends AbstractListeningCommiter<Flow> {
     public void add(final InstanceIdentifier<Flow> identifier,
                     final Flow addDataObj,
                     final InstanceIdentifier<FlowCapableNode> nodeIdent) {
-
+    	LOG.debug("add(): identifier ",identifier);
+    	LOG.debug("add(): addDataObj ",addDataObj);
+    	LOG.debug("add(): nodeIdent ",nodeIdent);
         final TableKey tableKey = identifier.firstKeyOf(Table.class, TableKey.class);
         if (tableIdValidationPrecondition(tableKey, addDataObj)) {
             final AddFlowInputBuilder builder = new AddFlowInputBuilder(addDataObj);

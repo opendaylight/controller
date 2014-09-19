@@ -9,12 +9,15 @@ package org.opendaylight.controller.frm.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+
 import org.opendaylight.controller.frm.ForwardingRulesCommiter;
 import org.opendaylight.controller.frm.ForwardingRulesManager;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.Map;
@@ -28,7 +31,8 @@ import java.util.Set;
  *
  */
 public abstract class AbstractListeningCommiter <T extends DataObject> implements ForwardingRulesCommiter<T> {
-
+	private static final Logger LOG = LoggerFactory.getLogger(AbstractListeningCommiter.class);
+	
     protected ForwardingRulesManager provider;
 
     protected final Class<T> clazz;
@@ -40,6 +44,7 @@ public abstract class AbstractListeningCommiter <T extends DataObject> implement
 
     @Override
     public void onDataChanged(final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changeEvent) {
+    	LOG.debug("Received AsyncDataChangeEvent: ",changeEvent);
         Preconditions.checkNotNull(changeEvent,"Async ChangeEvent can not be null!");
 
         /* All DataObjects for create */
@@ -70,6 +75,7 @@ public abstract class AbstractListeningCommiter <T extends DataObject> implement
 
     @SuppressWarnings("unchecked")
     private void createData(final Map<InstanceIdentifier<?>, DataObject> createdData) {
+    	LOG.debug("createData(): ", createdData);
         final Set<InstanceIdentifier<?>> keys = createdData.keySet() != null
                 ? createdData.keySet() : Collections.<InstanceIdentifier<?>> emptySet();
         for (InstanceIdentifier<?> key : keys) {
@@ -90,7 +96,8 @@ public abstract class AbstractListeningCommiter <T extends DataObject> implement
     @SuppressWarnings("unchecked")
     private void updateData(final Map<InstanceIdentifier<?>, DataObject> updateData,
             final Map<InstanceIdentifier<?>, DataObject> originalData) {
-
+    	LOG.debug("updateData(): updateData", updateData);
+    	LOG.debug("updateData(): originalData", originalData);
         final Set<InstanceIdentifier<?>> keys = updateData.keySet() != null
                 ? updateData.keySet() : Collections.<InstanceIdentifier<?>> emptySet();
         for (InstanceIdentifier<?> key : keys) {
@@ -112,7 +119,8 @@ public abstract class AbstractListeningCommiter <T extends DataObject> implement
     @SuppressWarnings("unchecked")
     private void removeData(final Set<InstanceIdentifier<?>> removeData,
             final Map<InstanceIdentifier<?>, DataObject> originalData) {
-
+    		LOG.debug("removeData(): removeData", removeData);
+    		LOG.debug("removeData(): originalData", originalData);
         for (InstanceIdentifier<?> key : removeData) {
             if (clazz.equals(key.getTargetType())) {
                 final InstanceIdentifier<FlowCapableNode> nodeIdent =
