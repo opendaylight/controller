@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_7bcdfc5c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-19T12:36:36Z",
+      "side": 1,
+      "message": "I made the same change when I rebased my patch set. This would fill up the karaf log and rollover a few times pretty quickly at scale.",
+      "revId": "d46738bcee7351f3593b7943fed7601d637b9ad5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
