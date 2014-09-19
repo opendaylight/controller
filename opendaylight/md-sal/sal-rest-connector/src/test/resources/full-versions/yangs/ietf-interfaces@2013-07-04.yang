@@ -98,11 +98,21 @@ module ietf-interfaces {
       "RFC 2863: The Interfaces Group MIB";
   }
 
+
+  /* added for testing purposes */
+  leaf no-data-container {
+    type string;
+  }
+
   /* Data nodes */
 
   container interfaces {
     description
       "Interface configuration parameters.";
+
+    leaf namesake {
+        type string;
+    }  
 
     list interface {
       key "name";
