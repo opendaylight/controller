@@ -2,6 +2,24 @@
   "comments": [
     {
       "key": {
+        "uuid": "fa82b9bf_3eee82b5",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-19T19:54:36Z",
+      "side": 1,
+      "message": "In most places we are checking. It\u0027s just a rule of thumb to save us from doing expensive stuff when logging.",
+      "parentUuid": "fa82b9bf_5baef8e8",
+      "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_9b0ec0e4",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 1
@@ -160,6 +178,42 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_9e346e4b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-19T19:54:36Z",
+      "side": 1,
+      "message": "Tom, that is done intentionally. I don\u0027t want to create the shards if I knew that at some point there might have been data from a module that no longer exists in the context. So yes if a module is removed then the only alternative is to delete the akka journal and restart - which seems fine to me as you just changed the way your app works.",
+      "parentUuid": "fa82b9bf_5bd038f7",
+      "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_fef25a6e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 442,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-19T19:54:36Z",
+      "side": 1,
+      "message": "I see this as a local \"message\" no else needs to know about so kept it local",
+      "parentUuid": "fa82b9bf_fe933a4d",
+      "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_5b4a7828",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
         "patchSetId": 1
@@ -260,6 +314,24 @@
       "side": 1,
       "message": "I ran into the same problem doing the shard recovery test. I let akka do its recovery thing on actor startup (with mock journal so essentially a noop) and then manually sent the recovery messages via calling onReceiveRecover. I think you could do the same thing here. i.e. don\u0027t setup MyJournal and manually call the actor with the recovery messages. I think this is valid as the previous test does do the real recovery.",
       "parentUuid": "fa82b9bf_3bed34f0",
+      "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_1efb7e48",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-19T19:54:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_fbe10cd1",
       "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
