@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_de9af6c4",
+        "filename": "opendaylight/netconf/netconf-netty-util/src/main/java/org/opendaylight/controller/netconf/nettyutil/handler/ssh/client/AsyncSshHandlerWriter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-09-19T14:28:02Z",
+      "side": 1,
+      "message": "asyncIn is not volatile. Thus this method needs to be synchronized to ensure that other threads that are running pick up the changes.\n\nalso, it seems like we may want to do something to clean up outstanding requests etc here instead of just setting this to null and forgetting it. I haven\u0027t followed the logic all of the way through so this is just something to think about. If we can gracefully handle things instead of dumping exceptions that is better.",
+      "revId": "b74a292dc4c116b37f2ba1fee64036157007a189",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
