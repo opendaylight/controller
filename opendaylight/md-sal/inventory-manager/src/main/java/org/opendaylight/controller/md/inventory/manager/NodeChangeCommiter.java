@@ -7,14 +7,11 @@
  */
 package org.opendaylight.controller.md.inventory.manager;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnectorUpdated;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeUpdated;
@@ -32,11 +29,12 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.No
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.InstanceIdentifierBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
 class NodeChangeCommiter implements OpendaylightInventoryListener {
     private static final Logger LOG = LoggerFactory.getLogger(NodeChangeCommiter.class);
@@ -73,13 +71,17 @@ class NodeChangeCommiter implements OpendaylightInventoryListener {
                 final FlowCapableNodeConnectorUpdated flowConnector = connector
                         .getAugmentation(FlowCapableNodeConnectorUpdated.class);
                 if (flowConnector != null) {
-                    final FlowCapableNodeConnector augment = InventoryMapping.toInventoryAugment(flowConnector);
-                    data.addAugmentation(FlowCapableNodeConnector.class, augment);
+                    /* we'd like to work with OF only */
+                    return;
                 }
-                InstanceIdentifier<NodeConnector> value = (InstanceIdentifier<NodeConnector>) ref.getValue();
-                LOG.debug("updating node connector : {}.", value);
-                NodeConnector build = data.build();
-                tx.merge(LogicalDatastoreType.OPERATIONAL, value, build, true);
+                final FlowCapableNodeConnector augment =
+                        InventoryMapping.toInventoryAugment(flowConnector);
+                data.addAugmentation(FlowCapableNodeConnector.class, augment);
+                final InstanceIdentifier<NodeConnector> nConnectIdent =
+                        ref.getValue().firstIdentifierOf(NodeConnector.class);
+                LOG.debug("updating node connector : {}.", nConnectIdent);
+                final NodeConnector build = data.build();
+                tx.put(LogicalDatastoreType.OPERATIONAL, nConnectIdent, build, true);
             }
         });
     }
@@ -103,59 +105,65 @@ class NodeChangeCommiter implements OpendaylightInventoryListener {
         if (flowNode == null) {
             return;
         }
-        LOG.debug("Node updated notification received.");
-        manager.enqueue(new InventoryOperation() {
-            @Override
-            public void applyOperation(ReadWriteTransaction tx) {
-                final NodeRef ref = node.getNodeRef();
-                @SuppressWarnings("unchecked")
-                InstanceIdentifierBuilder<Node> builder = ((InstanceIdentifier<Node>) ref.getValue()).builder();
-                InstanceIdentifierBuilder<FlowCapableNode> augmentation = builder.augmentation(FlowCapableNode.class);
-                final InstanceIdentifier<FlowCapableNode> path = augmentation.build();
-                CheckedFuture readFuture = tx.read(LogicalDatastoreType.OPERATIONAL, path);
-                Futures.addCallback(readFuture, new FutureCallback<Optional<? extends DataObject>>() {
-                    @Override
-                    public void onSuccess(Optional<? extends DataObject> optional) {
-                        enqueueWriteNodeDataTx(node, flowNode, path);
-                        if (!optional.isPresent()) {
-                            enqueuePutTable0Tx(ref);
-                        }
-                    }
+        final NodeRef ref = node.getNodeRef();
+        final InstanceIdentifier<Node> nodeIdent = ref.getValue().firstIdentifierOf(Node.class);
+        final InstanceIdentifier<FlowCapableNode> flowNodeIdent = nodeIdent.augmentation(FlowCapableNode.class);
 
-                    @Override
-                    public void onFailure(Throwable throwable) {
-                        LOG.debug(String.format("Can't retrieve node data for node %s. Writing node data with table0.", node));
-                        enqueueWriteNodeDataTx(node, flowNode, path);
-                        enqueuePutTable0Tx(ref);
-                    }
-                });
-            }
-        });
+        if (flowNode.getSwitchFeatures() != null
+                && flowNode.getSwitchFeatures().getMaxTables() != null) {
+            createFlowCapableNode(flowNodeIdent, flowNode);
+        } else {
+            updateFlowCapableNode(flowNodeIdent, flowNode);
+        }
     }
 
-    private void enqueueWriteNodeDataTx(final NodeUpdated node, final FlowCapableNodeUpdated flowNode, final InstanceIdentifier<FlowCapableNode> path) {
+    private void createTables(final Short maxTables, final InstanceIdentifier<FlowCapableNode> fNodeIdent,
+            final ReadWriteTransaction tx) {
+        for (short tId = 0; tId < maxTables.shortValue(); tId++) {
+            final TableKey tKey = new TableKey(tId);
+            final InstanceIdentifier<Table> tableIdent = fNodeIdent.child(Table.class, tKey);
+            final TableBuilder tableBuild = new TableBuilder();
+            tableBuild.setId(tId);
+            tableBuild.setKey(tKey);
+            tx.put(LogicalDatastoreType.OPERATIONAL, tableIdent, tableBuild.build());
+        }
+    }
+
+    private void updateFlowCapableNode(final InstanceIdentifier<FlowCapableNode> flowNodeIdent,
+            final FlowCapableNodeUpdated flowNode) {
         manager.enqueue(new InventoryOperation() {
             @Override
             public void applyOperation(final ReadWriteTransaction tx) {
-                final FlowCapableNode augment = InventoryMapping.toInventoryAugment(flowNode);
-                LOG.debug("updating node :{} ", path);
-                tx.merge(LogicalDatastoreType.OPERATIONAL, path, augment, true);
+                Optional<FlowCapableNode> fNodeIdentExist;
+                try {
+                    fNodeIdentExist = tx.read(LogicalDatastoreType.OPERATIONAL, flowNodeIdent).checkedGet();
+                }
+                catch (final ReadFailedException e) {
+                    LOG.warn("Update FlowCapableNode {} fail!", flowNodeIdent, e);
+                    return;
+                }
+                if ( ! fNodeIdentExist.isPresent()) {
+                    LOG.warn("Update FlowCapableNode {} fail, Node is not presented!", flowNodeIdent);
+                    return;
+                }
+                LOG.debug("updating FlowCapableNode :{} ", flowNodeIdent);
+                final FlowCapableNode fNode = new FlowCapableNodeBuilder(flowNode).build();
+                tx.merge(LogicalDatastoreType.OPERATIONAL, flowNodeIdent, fNode);
             }
         });
     }
 
-    private void enqueuePutTable0Tx(final NodeRef ref) {
+    private void createFlowCapableNode(final InstanceIdentifier<FlowCapableNode> flowNodeIdent,
+            final FlowCapableNodeUpdated flowNode) {
         manager.enqueue(new InventoryOperation() {
             @Override
-            public void applyOperation(ReadWriteTransaction tx) {
-                final TableKey tKey = new TableKey((short) 0);
-                final InstanceIdentifier<Table> tableIdentifier =
-                        ((InstanceIdentifier<Node>) ref.getValue()).augmentation(FlowCapableNode.class).child(Table.class, new TableKey(tKey));
-                TableBuilder tableBuilder = new TableBuilder();
-                Table table0 = tableBuilder.setId((short) 0).build();
-                LOG.debug("writing table :{} ", tableIdentifier);
-                tx.put(LogicalDatastoreType.OPERATIONAL, tableIdentifier, table0, true);
+            public void applyOperation(final ReadWriteTransaction tx) {
+                LOG.debug("creating FlowCapableNode :{} ", flowNodeIdent);
+                final FlowCapableNode fNode = new FlowCapableNodeBuilder(flowNode).build();
+                tx.put(LogicalDatastoreType.OPERATIONAL, flowNodeIdent, fNode);
+                createTables(flowNode.getSwitchFeatures().getMaxTables(), flowNodeIdent, tx);
             }
         });
     }
 }
+
