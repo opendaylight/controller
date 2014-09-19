@@ -9,24 +9,62 @@ package org.opendaylight.controller.sal.restconf.impl.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import com.google.common.base.Optional;
+import com.google.common.eventbus.AsyncEventBus;
+import com.google.common.util.concurrent.CheckedFuture;
 import java.io.FileNotFoundException;
-import java.text.ParseException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriInfo;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
+import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
+import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
+import org.opendaylight.controller.sal.core.api.Broker.ConsumerSession;
+import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
+import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
+import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
+import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
+import org.opendaylight.controller.sal.restconf.impl.SimpleNodeWrapper;
+import org.opendaylight.controller.sal.streams.listeners.ListenerAdapter;
+import org.opendaylight.controller.sal.streams.listeners.Notificator;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+
+//import java.awt.List;
 
 /**
  * @See {@link InvokeRpcMethodTest}
@@ -35,7 +73,10 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 public class RestconfImplTest {
 
     private RestconfImpl restconfImpl = null;
+    private RestconfService restconfImplInterface = null;
     private static ControllerContext controllerContext = null;
+    private static SchemaContext schemaContext;
+    private static BrokerFacade brokerFacade;
 
     @BeforeClass
     public static void init() throws FileNotFoundException {
@@ -45,21 +86,333 @@ public class RestconfImplTest {
         controllerContext = spy(ControllerContext.getInstance());
         controllerContext.setSchemas(schemaContext);
 
+        brokerFacade = mock(BrokerFacade.class);
+
+        DOMMountPoint mockedMountPoint = mock(DOMMountPoint.class);
+        when(mockedMountPoint.getSchemaContext()).thenReturn(schemaContext);
+        DOMMountPointService mockedMountService = mock(DOMMountPointService.class);
+        when(mockedMountService.getMountPoint(any(YangInstanceIdentifier.class))).thenReturn(
+                Optional.of(mockedMountPoint));
+        controllerContext.setMountService(mockedMountService);
     }
 
     @Before
     public void initMethod() {
         restconfImpl = RestconfImpl.getInstance();
         restconfImpl.setControllerContext(controllerContext);
+        restconfImpl.setBroker(brokerFacade);
+    }
+
+    /**
+     * It tests error case when method subscribeToStream can't find stream name for specified identifier
+     */
+    @Test
+    public void testSubscribeToStreamWithoutListener() throws Exception {
+        try {
+            restconfImpl.subscribeToStream("identifier", null);
+        } catch (RestconfDocumentedException e) {
+            verifyException(e, ErrorTag.UNKNOWN_ELEMENT, ErrorType.PROTOCOL, null);
+        }
+    }
+
+    /**
+     *
+     * It tests error case when subscribeToStream method input parameter identifier isn't specified (=null)
+     */
+    @Test
+    public void testSubscribeToStreamWithNullListener() throws Exception {
+        try {
+            restconfImpl.subscribeToStream(null, null);
+        } catch (RestconfDocumentedException e) {
+            verifyException(e, ErrorTag.INVALID_VALUE, ErrorType.PROTOCOL, null);
+        }
+    }
+
+    /**
+     * It tests error case when subscribeToStream method when datastore URI parameter is missing in identifier
+     */
+    @Test
+    public void testSubscribeToStreamWithMissingDatastoreInUri() throws Exception {
+        String identifier = "streamName";
+        Notificator.createListener(YangInstanceIdentifier.builder().node(QName.create("arg0")).build(), identifier,
+                new AsyncEventBus(Executors.newSingleThreadExecutor()));
+        try {
+            restconfImpl.subscribeToStream(identifier, null);
+        } catch (RestconfDocumentedException e) {
+            List<RestconfError> errValues = e.getErrors();
+            assertEquals(ErrorType.APPLICATION, errValues.get(0).getErrorType());
+            assertEquals(ErrorTag.MISSING_ATTRIBUTE, errValues.get(0).getErrorTag());
+            assertEquals("Stream name doesn't contains datastore value (pattern /datastore=)", errValues.get(0)
+                    .getErrorMessage());
+        }
+    }
+
+    /**
+     * It tests error case when subscribeToStream method when scope URI parameter is missing in identifier
+     */
+    @Test
+    public void testSubscribeToStreamWithMissingScope() throws Exception {
+        String identifier = "streamName/datastore=OPERATIONAL";
+        Notificator.createListener(YangInstanceIdentifier.builder().node(QName.create("arg0")).build(), identifier,
+                new AsyncEventBus(Executors.newSingleThreadExecutor()));
+        try {
+            restconfImpl.subscribeToStream(identifier, null);
+        } catch (RestconfDocumentedException e) {
+            List<RestconfError> errValues = e.getErrors();
+            assertEquals(ErrorType.APPLICATION, errValues.get(0).getErrorType());
+            assertEquals(ErrorTag.MISSING_ATTRIBUTE, errValues.get(0).getErrorTag());
+            assertEquals("Stream name doesn't contains datastore value (pattern /scope=)", errValues.get(0)
+                    .getErrorMessage());
+        }
     }
 
     @Test
-    public void testExample() throws FileNotFoundException, ParseException {
-        NormalizedNode normalizedNodeData = TestUtils.prepareNormalizedNodeWithIetfInterfacesInterfacesData();
-        BrokerFacade brokerFacade = mock(BrokerFacade.class);
-        when(brokerFacade.readOperationalData(any(YangInstanceIdentifier.class))).thenReturn(normalizedNodeData);
-        assertEquals(normalizedNodeData,
-                brokerFacade.readOperationalData(null));
+    public void testSubscribeToStreamRegisterToLDC() throws Exception {
+        String identifier = "streamName/datastore=OPERATIONAL/scope=SUBTREE";
+        BrokerFacade brokerFacade = BrokerFacade.getInstance();
+        Notificator.createListener(YangInstanceIdentifier.builder().node(QName.create("arg0")).build(), identifier,
+                new AsyncEventBus(Executors.newSingleThreadExecutor()));
+        restconfImpl.setBroker(brokerFacade);
+        brokerFacade.setContext(mock(ConsumerSession.class));
+        DOMDataBroker domDBMock = mock(DOMDataBroker.class);
+        brokerFacade.setDomDataBroker(domDBMock);
+
+        UriInfo ui = mock(UriInfo.class);
+        UriBuilder uiPathBuilder = UriBuilder.fromUri(URI.create("http://example.org:4242"));
+        when(ui.getAbsolutePathBuilder()).thenReturn(uiPathBuilder);
+
+        Response response = restconfImpl.subscribeToStream(identifier, ui);
+
+        Mockito.verify(domDBMock, Mockito.times(1)).registerDataChangeListener(any(LogicalDatastoreType.class),
+                any(YangInstanceIdentifier.class), any(ListenerAdapter.class), any(DataChangeScope.class));
+
+        Assert.assertEquals(200, response.getStatus());
+        Assert.assertEquals("http://example.org:8181/streamName/datastore=OPERATIONAL/scope=SUBTREE", response
+                .getLocation().toString());
+    }
+
+    /**
+     * tests error case in deleteConfigurationData when deleting from data isn't successfull
+     */
+    @Test
+    public void testDeleteConfigurationDataWithIncorrectInstanceIdentifier() throws Exception {
+        String identifier = "incorrect-instance-identifier";
+        ControllerContext ctrlContext = mock(ControllerContext.class);
+
+        InstanceIdentifierContext mockedInstIdContext = mock(InstanceIdentifierContext.class);
+        when(mockedInstIdContext.getMountPoint()).thenReturn(null);
+        when(mockedInstIdContext.getInstanceIdentifier()).thenReturn(null);
+
+        when(ctrlContext.toInstanceIdentifier(eq(identifier))).thenReturn(mockedInstIdContext);
+        restconfImpl.setControllerContext(ctrlContext);
+        try {
+            restconfImpl.deleteConfigurationData(identifier);
+        } catch (RestconfDocumentedException e) {
+            verifyException(e, ErrorTag.OPERATION_FAILED, ErrorType.APPLICATION, "Error while deleting data");
+        }
+    }
+
+    @Test
+    public void testGetOperationalReceived() throws Exception {
+        assertNull(restconfImpl.getOperationalReceived());
+    }
+
+    /**
+     * Not existing node is references in input data
+     *
+     */
+    @Test
+    public void normalizeNodeWithNotExistingNode() throws URISyntaxException {
+        try {
+            restconfImpl.createConfigurationData(prepareData("non-existing"));
+            fail("Call of createConfigurationData can't be sucessfull");
+        } catch (RestconfDocumentedException e) {
+            verifyException(e, ErrorTag.INVALID_VALUE, ErrorType.PROTOCOL, null);
+        }
+    }
+
+    /**
+     * Data contains node which exists but isn't of type Data node container
+     *
+     */
+    @Test
+    public void normalizeNodeWithNoDataNodeContainer() throws URISyntaxException {
+        try {
+            restconfImpl.createConfigurationData(prepareData("no-data-container"));
+            fail("Call of createConfigurationData can't be sucessfull");
+        } catch (RestconfDocumentedException e) {
+            verifyException(e, ErrorTag.INVALID_VALUE, ErrorType.PROTOCOL,
+                    "Root element has to be container or list yang datatype.");
+        }
+    }
+
+    /**
+     * Data contains top level data as simple node wrapper
+     *
+     */
+    @Test
+    public void normalizeNodeWithTopElementAsSimpleNodeWrapper() throws URISyntaxException {
+        BrokerFacade mockBrokerFacade = mock(BrokerFacade.class);
+        mockBrokerFacade.commitConfigurationDataPost(any(YangInstanceIdentifier.class), any(NormalizedNode.class));
+        restconfImpl.setBroker(mockBrokerFacade);
+        Response response = restconfImpl.createConfigurationData(prepareDataTopElementAsSimpleNode(true));
+        assertEquals(204, response.getStatus());
+    }
+
+    /**
+     * Data contains top level data as simple node (but not wrapper)
+     *
+     */
+    @Test
+    public void normalizeNodeWithTopElementAsSimpleNode() throws URISyntaxException {
+        try {
+            restconfImpl.createConfigurationData(prepareDataTopElementAsSimpleNode(false));
+        } catch (RestconfDocumentedException e) {
+            verifyException(e, ErrorTag.INVALID_VALUE, ErrorType.APPLICATION,
+                    "Top level element is not interpreted as composite node.");
+        }
+    }
+
+    /**
+     * Data contains namesake nodes without specified namespace (exception awaited)
+     *
+     */
+    @Test
+    public void normalizeNodeWithNamesakesInData() throws URISyntaxException {
+        try {
+            restconfImpl.createConfigurationData(prepareNamesakeData());
+        } catch (RestconfDocumentedException e) {
+            verifyException(e, ErrorTag.INVALID_VALUE, ErrorType.PROTOCOL,
+                    "is added as augment from more than one module");
+        }
+    }
+
+    private CompositeNode prepareData(final String topElementName) throws URISyntaxException {
+        SimpleNodeWrapper nameNode = new SimpleNodeWrapper("name", "inf1");
+        CompositeNodeWrapper interfaceNode = new CompositeNodeWrapper("interface");
+        interfaceNode.addValue(nameNode);
+        CompositeNodeWrapper interfacesNode = new CompositeNodeWrapper(new URI(
+                "urn:ietf:params:xml:ns:yang:ietf-interfaces"), topElementName);
+        interfacesNode.addValue(interfaceNode);
+        return interfacesNode;
+    }
+
+    private CompositeNode prepareNamesakeData() throws URISyntaxException {
+        SimpleNodeWrapper nameNode = new SimpleNodeWrapper("namesake", "namesake value");
+        CompositeNodeWrapper interfacesNode = new CompositeNodeWrapper(new URI(
+                "urn:ietf:params:xml:ns:yang:ietf-interfaces"), "interfaces");
+        interfacesNode.addValue(nameNode);
+        return interfacesNode;
+    }
+
+    private SimpleNode<?> prepareDataTopElementAsSimpleNode(final boolean wrapper) throws URISyntaxException {
+        if (wrapper) {
+            return new SimpleNodeWrapper(new URI("urn:ietf:params:xml:ns:yang:ietf-interfaces"), "interfaces", null);
+        } else {
+            return NodeFactory.createImmutableSimpleNode(
+                    QName.create("urn:ietf:params:xml:ns:yang:ietf-interfaces", "2013-07-04", "interfaces"), null,
+                    null, null);
+        }
+    }
+
+    private void verifyException(final RestconfDocumentedException e, final ErrorTag errorTag,
+            final ErrorType errorType, final String message) {
+        List<RestconfError> errors = e.getErrors();
+        assertEquals(1, errors.size());
+        assertEquals(errorTag, errors.get(0).getErrorTag());
+        assertEquals(errorType, errors.get(0).getErrorType());
+        if (message != null) {
+            assertTrue(errors.get(0).getErrorMessage().contains(message));
+        }
+    }
+
+    @Test(expected = RestconfDocumentedException.class)
+    public void testSubscribeToStreamWithNullOrEmptySreamName() throws Exception {
+        restconfImpl.subscribeToStream("identifier", null);
+    }
+
+    @Test(expected = RestconfDocumentedException.class)
+    public void testDeleteConfigurationDataErrorCreatingData() throws Exception {
+        String identifier = "ietf-yang-types:interfaces-state";
+        ControllerContext ctrlContext = mock(ControllerContext.class);
+        InstanceIdentifierContext instIdContext = mock(InstanceIdentifierContext.class);
+        when(ctrlContext.toInstanceIdentifier(identifier)).thenReturn(instIdContext);
+        restconfImpl.setControllerContext(ctrlContext);
+        try {
+            restconfImpl.deleteConfigurationData(identifier);
+        } catch (RestconfDocumentedException e) {
+            List<RestconfError> errValues = e.getErrors();
+            assertEquals("Error while deleting data", errValues.get(0).getErrorMessage());
+            throw e;
+        }
+    }
+
+    /**
+     * Tests case when input data for {@link RestconfImpl#createConfigurationData(Node)} is null.
+     */
+    @Test(expected = RestconfDocumentedException.class)
+    public void testCreateConfigurationDataPayloadNull() throws Exception {
+        Node<?> actualNode = null;
+        try {
+            restconfImpl.createConfigurationData(actualNode);
+        } catch (RestconfDocumentedException e) {
+            List<RestconfError> errValues = e.getErrors();
+            assertEquals("Input is required.", errValues.get(0).getErrorMessage());
+            throw e;
+        }
+    }
+
+    /**
+     * Tests case when namespace for top level node isn't specified in method
+     * {@link RestconfImpl#createConfigurationData(Node)}.
+     */
+    @Test(expected = RestconfDocumentedException.class)
+    public void testCreateConfigurationDataPayloadNSNull() throws Exception {
+        SimpleNodeWrapper dummySimpleNode = new SimpleNodeWrapper("dummy local name", "dummy value");
+        try {
+            restconfImpl.createConfigurationData(dummySimpleNode);
+        } catch (RestconfDocumentedException e) {
+            List<RestconfError> errValues = e.getErrors();
+            assertEquals(
+                    "Data has bad format. Root element node must have namespace (XML format) or module name(JSON format)",
+                    errValues.get(0).getErrorMessage());
+            throw e;
+        }
+    }
+
+    /**
+     * Tests case when namespace for top level node is incorrect {@link RestconfImpl#createConfigurationData(Node)}.
+     */
+    @Test(expected = RestconfDocumentedException.class)
+    public void testCreateConfigurationDataModuleIsNull() throws Exception {
+        URI uri = new URI("http://no.com/vlan");
+        SimpleNodeWrapper dummySimpleNode = new SimpleNodeWrapper(uri, "dummy local name", "dummy value");
+        try {
+            restconfImpl.createConfigurationData(dummySimpleNode);
+        } catch (RestconfDocumentedException e) {
+            List<RestconfError> errValues = e.getErrors();
+            assertEquals(
+                    "Data has bad format. Root element node has incorrect namespace (XML format) or module name(JSON format)",
+                    errValues.get(0).getErrorMessage());
+            throw e;
+        }
+    }
+
+    /**
+     * Tests method {@link RestconfImpl#createConfigurationData(String, Node)} for case when data are created behind
+     * mount point
+     */
+    @Test
+    public void testCreateConfigurationDataWithIdentifier() throws Exception {
+        String uriIdentifier = "/ietf-interfaces:interfaces/interface/name/yang-ext:mount/ietf-interfaces:interfaces";
+        when(brokerFacade.commitConfigurationDataPost(any(YangInstanceIdentifier.class), any(NormalizedNode.class)))
+                .thenReturn(mock(CheckedFuture.class));
+        URI uri = new URI("urn:ietf:params:xml:ns:yang:ietf-interfaces");
+        CompositeNodeWrapper compositeNW = new CompositeNodeWrapper(uri, "interface");
+        SimpleNodeWrapper simpleNode = new SimpleNodeWrapper("name", "some name");
+        compositeNW.addValue(simpleNode);
+        Response resp = restconfImpl.createConfigurationData(uriIdentifier, compositeNW);
+        assertEquals(204, resp.getStatus());
     }
 
 }

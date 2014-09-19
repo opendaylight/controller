@@ -1164,7 +1164,7 @@ public class RestconfImpl implements RestconfService {
          * || MOUNT_POINT_MODULE_NAME .equals( namespace .
          * toString( ) )
          */)
-         && SchemaContext.NAME.getLocalName().equals(this.localName(data));
+         && SchemaContext.NAME.getLocalName().equals(getName(data));
     }
 
     private String addMountPointIdentifier(final String identifier) {
@@ -1421,16 +1421,6 @@ public class RestconfImpl implements RestconfService {
         }
     }
 
-    private String localName(final Node<?> data) {
-        if (data instanceof NodeWrapper) {
-            return ((NodeWrapper<?>) data).getLocalName();
-        } else if (data != null) {
-            return data.getNodeType().getLocalName();
-        } else {
-            throw new IllegalArgumentException("Unhandled parameter types: " + Arrays.<Object> asList(data).toString());
-        }
-    }
-
     private String getName(final Node<?> data) {
         if (data instanceof NodeWrapper) {
             return ((NodeWrapper<?>) data).getLocalName();
@@ -1495,7 +1485,7 @@ public class RestconfImpl implements RestconfService {
             return (CompositeNodeWrapper) node;
         } else if (node instanceof SimpleNodeWrapper && isDataContainerNode(schemaNode)) {
             final SimpleNodeWrapper simpleNodeWrapper = (SimpleNodeWrapper) node;
-            return new CompositeNodeWrapper(namespace(simpleNodeWrapper), localName(simpleNodeWrapper));
+            return new CompositeNodeWrapper(namespace(simpleNodeWrapper), getName(simpleNodeWrapper));
         }
 
         throw new RestconfDocumentedException(new RestconfError(ErrorType.APPLICATION, ErrorTag.INVALID_VALUE,

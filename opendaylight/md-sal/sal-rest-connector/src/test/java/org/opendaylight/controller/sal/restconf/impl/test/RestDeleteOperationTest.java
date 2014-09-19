@@ -14,6 +14,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
@@ -25,6 +26,8 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
+import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
@@ -41,17 +44,25 @@ public class RestDeleteOperationTest extends JerseyTest {
     private static BrokerFacade brokerFacade;
     private static RestconfImpl restconfImpl;
 
+    private static SchemaContext schemaContext;
+
     @BeforeClass
     public static void init() throws FileNotFoundException {
         Set<Module> allModules = TestUtils.loadModulesFrom("/test-config-data/yang1");
         assertNotNull(allModules);
-        SchemaContext schemaContext = TestUtils.loadSchemaContext(allModules);
+        schemaContext = TestUtils.loadSchemaContext(allModules);
         controllerContext = ControllerContext.getInstance();
         controllerContext.setSchemas(schemaContext);
         brokerFacade = mock(BrokerFacade.class);
         restconfImpl = RestconfImpl.getInstance();
         restconfImpl.setBroker(brokerFacade);
         restconfImpl.setControllerContext(controllerContext);
+
+        DOMMountPoint mockedMountPoint = mock(DOMMountPoint.class);
+        when(mockedMountPoint.getSchemaContext()).thenReturn(schemaContext);
+        DOMMountPointService mockedMountService = mock(DOMMountPointService.class);
+        when(mockedMountService.getMountPoint(any(YangInstanceIdentifier.class))).thenReturn(Optional.of(mockedMountPoint));
+        controllerContext.setMountService(mockedMountService);
     }
 
     @Override
@@ -79,5 +90,17 @@ public class RestDeleteOperationTest extends JerseyTest {
                 any(YangInstanceIdentifier.class));
         response = target(uri).request(MediaType.APPLICATION_XML).delete();
         assertEquals(500, response.getStatus());
+    }
+
+    /**
+     * Tests branch with mount point in {@link RestconfImpl#deleteConfigurationData(String)}
+     */
+    @Test
+    public void testDeleteConfigurationDataMountPointNotNull() throws Exception {
+        String uriIdentifier = "/config/test-interface:interfaces/interface/name/yang-ext:mount/test-interface:interfaces";
+        when(brokerFacade.commitConfigurationDataDelete(any(DOMMountPoint.class), any(YangInstanceIdentifier.class))).thenReturn(
+                mock(CheckedFuture.class));
+        Response response = target(uriIdentifier).request(MediaType.APPLICATION_XML).delete();
+        assertEquals(200, response.getStatus());
     }
 }
