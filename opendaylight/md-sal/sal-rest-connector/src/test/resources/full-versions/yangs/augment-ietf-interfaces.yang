@@ -1,0 +1,19 @@
+module augmented-ietf-interfaces {
+
+  namespace "augmented:ietf-interfaces";
+  prefix augif;
+
+  import ietf-interfaces {
+    prefix if;
+  }
+
+  revision 2014-09-22 {
+  }
+
+  augment "/if:interfaces" {
+    leaf namesake {
+        type string;
+    }
+  }
+
+}
