@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_fba58cb5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-19T04:36:42Z",
+      "side": 1,
+      "message": "~100 power of 2. I reckoned we may have about 100 modules to fit in - may as well size the capacity to fit them in.",
+      "parentUuid": "fa82b9bf_9b0ec0e4",
+      "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_bb13840c",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-09-19T02:31:11Z",
       "side": 1,
       "message": "Can we add persistentId() to this message, e.g. \"{}: Recovery complete.\". Also avoid String concat here, please use \u0027{}\u0027 substitution.",
+      "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_1b195022",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-19T04:36:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_bb13840c",
       "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_3b1694f2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-19T04:36:42Z",
+      "side": 1,
+      "message": "This line basically deletes all messages from the journal except the last one. We only ever need the last entry.",
+      "parentUuid": "fa82b9bf_5bf838c4",
+      "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_3bff74ac",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2014-09-19T02:31:11Z",
       "side": 1,
       "message": "On initial bootstrap, it seems knownModules would be empty so we would never persist and create the shards. So need to check if knownModules  is empty? Unless I\u0027m missing something?\n\nAlso similar issue would occur if a module was removed. However, that wouldn\u0027t very common so we can let it ride for now.",
+      "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_dbd20834",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-19T04:36:42Z",
+      "side": 1,
+      "message": "This is essentially what I am doing \n\n    @Test\n    public void testContains(){\n        List\u003cString\u003e newModules \u003d new ArrayList\u003c\u003e();\n        newModules.add(\"foo\");\n\n        assertTrue(newModules.containsAll(Collections.\u003cString\u003eemptySet()));\n    }\n\nand it does the right thing\n\nIf a module was removed I will have a problem because I may have created data for that module in my Shard. So I believe I am doing the right thing by not allowing that SchemaContext in.",
+      "parentUuid": "fa82b9bf_3bff74ac",
       "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_dba0c8a7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-19T04:36:42Z",
+      "side": 1,
+      "message": "Should have gotten rid of the within\u0027s when I got rid of the expectNoMsg",
+      "parentUuid": "fa82b9bf_5b4a7828",
+      "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_db5d28ee",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
         "patchSetId": 1
@@ -98,6 +188,24 @@
       "writtenOn": "2014-09-19T02:31:11Z",
       "side": 1,
       "message": "Artificial sleep is fragile. How about creating the SchemaContextModules message and calling onReceiveRecovery yourself via underlyingActor() as akka would? Or send a normal message as you did in  testOnRecoveryJournalIsEmptied. I\u0027m just afraid using sleep will intermittently fail on jenkins when it\u0027s busy (seen this before).",
+      "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3bed34f0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-19T04:36:42Z",
+      "side": 1,
+      "message": "This is a tricky one :) When I create the actor it is going to do recovery first before it becomes available. So while here I want to program this synchronously akka-persistence forces me to work with async recovery and thus the fragile sleep. I need to think harder on how to avoid the sleeps.",
+      "parentUuid": "fa82b9bf_db5d28ee",
       "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_dbb9a8ed",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-19T04:36:42Z",
+      "side": 1,
+      "message": "Like it? :) As they say \"This name is long because I didn\u0027t have time to think of a shorter one\"",
+      "parentUuid": "fa82b9bf_3b51b4d8",
+      "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_bb5ce4ee",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
         "patchSetId": 1
@@ -132,6 +258,24 @@
       "writtenOn": "2014-09-19T02:31:11Z",
       "side": 1,
       "message": "What is the purpose of this sleep?",
+      "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_fbbeecd3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 326,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-19T04:36:42Z",
+      "side": 1,
+      "message": "It\u0027s misplaced - should be before he assert for knownModules",
+      "parentUuid": "fa82b9bf_bb5ce4ee",
       "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_9bb3200a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 340,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-19T04:36:42Z",
+      "side": 1,
+      "message": "Yes we could",
+      "parentUuid": "fa82b9bf_5b711876",
+      "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_7b6e5c98",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
         "patchSetId": 1
@@ -166,6 +328,24 @@
       "writtenOn": "2014-09-19T02:31:11Z",
       "side": 1,
       "message": "See above.",
+      "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_bbb864e6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 353,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-19T04:36:42Z",
+      "side": 1,
+      "message": "Ditto",
+      "parentUuid": "fa82b9bf_7b6e5c98",
       "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_5bcd9885",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 378,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-19T04:36:42Z",
+      "side": 1,
+      "message": "Misplaced",
+      "parentUuid": "fa82b9bf_1b6b9086",
+      "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_3b68d486",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
         "patchSetId": 1
@@ -200,6 +398,24 @@
       "writtenOn": "2014-09-19T02:31:11Z",
       "side": 1,
       "message": "See above.",
+      "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7bcadc6f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 392,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-19T04:36:42Z",
+      "side": 1,
+      "message": "Yes",
+      "parentUuid": "fa82b9bf_3b68d486",
       "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_1bc71066",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 408,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-19T04:36:42Z",
+      "side": 1,
+      "message": "Yes",
+      "parentUuid": "fa82b9bf_db0448c8",
+      "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_fb090cde",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
         "patchSetId": 1
@@ -234,6 +468,24 @@
       "writtenOn": "2014-09-19T02:31:11Z",
       "side": 1,
       "message": "BTW - you can use google\u0027s Uninterruptibles.sleepUninterruptibly instead",
+      "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3bc4545e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 425,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-19T04:36:42Z",
+      "side": 1,
+      "message": "ok - will do",
+      "parentUuid": "fa82b9bf_fb090cde",
       "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
