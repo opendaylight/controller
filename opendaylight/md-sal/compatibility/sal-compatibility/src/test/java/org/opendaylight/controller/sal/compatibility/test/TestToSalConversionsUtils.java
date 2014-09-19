@@ -566,7 +566,7 @@ public class TestToSalConversionsUtils {
 
     private Address prapareIpv4Address(String ipv4Address) {
         Ipv4Builder ipv4Builder = new Ipv4Builder();
-        ipv4Builder.setIpv4Address(new Ipv4Prefix(ipv4Address));
+        ipv4Builder.setIpv4Address(new Ipv4Prefix(ipv4Address + "/32"));
         return ipv4Builder.build();
     }
 
@@ -671,8 +671,8 @@ public class TestToSalConversionsUtils {
 
     private Layer3Match prepLayer3MatchIpv4() {
         Ipv4MatchBuilder ipv4MatchBuilder = new Ipv4MatchBuilder();
-        ipv4MatchBuilder.setIpv4Source(new Ipv4Prefix("192.168.1.104"));
-        ipv4MatchBuilder.setIpv4Destination(new Ipv4Prefix("192.168.1.105"));
+        ipv4MatchBuilder.setIpv4Source(new Ipv4Prefix("192.168.1.104/32"));
+        ipv4MatchBuilder.setIpv4Destination(new Ipv4Prefix("192.168.1.105/32"));
         return ipv4MatchBuilder.build();
     }
 
@@ -685,8 +685,8 @@ public class TestToSalConversionsUtils {
 
     private Layer3Match prepLayer3MatchArp() {
         ArpMatchBuilder arpMatchBuilder = new ArpMatchBuilder();
-        arpMatchBuilder.setArpSourceTransportAddress(new Ipv4Prefix("192.168.1.101"));
-        arpMatchBuilder.setArpTargetTransportAddress(new Ipv4Prefix("192.168.1.102"));
+        arpMatchBuilder.setArpSourceTransportAddress(new Ipv4Prefix("192.168.1.101/32"));
+        arpMatchBuilder.setArpTargetTransportAddress(new Ipv4Prefix("192.168.1.102/32"));
 
         ArpSourceHardwareAddressBuilder arpSourAddressBuild = new ArpSourceHardwareAddressBuilder();
         arpSourAddressBuild.setAddress(new MacAddress("22:44:66:88:AA:CC"));

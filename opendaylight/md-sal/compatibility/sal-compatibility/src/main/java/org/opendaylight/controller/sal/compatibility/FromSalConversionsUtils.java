@@ -331,11 +331,11 @@ public final class FromSalConversionsUtils {
             final Inet4Address inetDestAddress) {
         String inetSourceAddressStr = InetAddresses
                 .toAddrString(inetSourceAddress);
-        Ipv4Prefix ipv4SourcePrefix = new Ipv4Prefix(inetSourceAddressStr);
+        Ipv4Prefix ipv4SourcePrefix = new Ipv4Prefix(inetSourceAddressStr + "/32");
 
         String inetDestAddressValue = InetAddresses
                 .toAddrString(inetDestAddress);
-        Ipv4Prefix ipv4DestPrefix = new Ipv4Prefix(inetDestAddressValue);
+        Ipv4Prefix ipv4DestPrefix = new Ipv4Prefix(inetDestAddressValue + "/32");
 
         ArpMatchBuilder arpMatchBuilder = new ArpMatchBuilder();
 
@@ -375,13 +375,13 @@ public final class FromSalConversionsUtils {
         if(inetSourceAddress != null) {
             String inetSrcAddressString = InetAddresses
                     .toAddrString(inetSourceAddress);
-            layer4MatchBuild.setIpv4Source(new Ipv4Prefix(inetSrcAddressString));
+            layer4MatchBuild.setIpv4Source(new Ipv4Prefix(inetSrcAddressString + "/32"));
         }
         if(inetDestAddress != null) {
             String inetDstAddressString = InetAddresses
                     .toAddrString(inetDestAddress);
             layer4MatchBuild
-            .setIpv4Destination(new Ipv4Prefix(inetDstAddressString));
+            .setIpv4Destination(new Ipv4Prefix(inetDstAddressString + "/32"));
         }
         return layer4MatchBuild.build();
 
@@ -394,13 +394,13 @@ public final class FromSalConversionsUtils {
         if(inetSourceAddress != null) {
             String inetSrcAddressString = InetAddresses
                     .toAddrString(inetSourceAddress);
-            layer6MatchBuild.setIpv6Source(new Ipv6Prefix(inetSrcAddressString));
+            layer6MatchBuild.setIpv6Source(new Ipv6Prefix(inetSrcAddressString + "/128"));
         }
         if(inetDestAddress != null) {
             String inetDstAddressString = InetAddresses
                     .toAddrString(inetDestAddress);
             layer6MatchBuild
-                    .setIpv6Destination(new Ipv6Prefix(inetDstAddressString));
+                    .setIpv6Destination(new Ipv6Prefix(inetDstAddressString + "/128"));
         }
         return layer6MatchBuild.build();
     }

@@ -129,9 +129,9 @@ public class TestFromSalConversionsUtils {
             Layer3Match layer3Match = match.getLayer3Match();
             boolean arpFound = false;
             if (layer3Match instanceof ArpMatch) {
-                assertEquals("Source IP address is wrong.", "192.168.100.100", ((ArpMatch) layer3Match)
+                assertEquals("Source IP address is wrong.", "192.168.100.100/32", ((ArpMatch) layer3Match)
                         .getArpSourceTransportAddress().getValue());
-                assertEquals("Destination IP address is wrong.", "192.168.100.101", ((ArpMatch) layer3Match)
+                assertEquals("Destination IP address is wrong.", "192.168.100.101/32", ((ArpMatch) layer3Match)
                         .getArpTargetTransportAddress().getValue());
                 assertEquals("Source MAC address is wrong.", "ff:ee:dd:cc:bb:aa", ((ArpMatch) layer3Match)
                         .getArpSourceHardwareAddress().getAddress().getValue());
@@ -147,9 +147,9 @@ public class TestFromSalConversionsUtils {
             boolean ipv4Found = false;
             layer3Match = match.getLayer3Match();
             if (layer3Match instanceof Ipv4Match) {
-                assertEquals("Source IP address is wrong.", "192.168.100.102", ((Ipv4Match) layer3Match)
+                assertEquals("Source IP address is wrong.", "192.168.100.102/32", ((Ipv4Match) layer3Match)
                         .getIpv4Source().getValue());
-                assertEquals("Destination IP address is wrong.", "192.168.100.103", ((Ipv4Match) layer3Match)
+                assertEquals("Destination IP address is wrong.", "192.168.100.103/32", ((Ipv4Match) layer3Match)
                         .getIpv4Destination().getValue());
             }
             assertNotNull("Ipv4 wasn't found", ipv4Found);
@@ -160,9 +160,9 @@ public class TestFromSalConversionsUtils {
             boolean ipv6Found = false;
             layer3Match = match.getLayer3Match();
             if (layer3Match instanceof Ipv6Match) {
-                assertEquals("Source IP address is wrong.", "2001:db8:85a3::8a2e:370:7335", ((Ipv6Match) layer3Match)
+                assertEquals("Source IP address is wrong.", "2001:db8:85a3::8a2e:370:7335/128", ((Ipv6Match) layer3Match)
                         .getIpv6Source().getValue());
-                assertEquals("Destination IP address is wrong.", "2001:db8:85a3::8a2e:370:7336",
+                assertEquals("Destination IP address is wrong.", "2001:db8:85a3::8a2e:370:7336/128",
                         ((Ipv6Match) layer3Match).getIpv6Destination().getValue());
             }
             assertNotNull("Ipv6 wasn't found", ipv6Found);
@@ -288,7 +288,7 @@ public class TestFromSalConversionsUtils {
                     boolean ipv4AddressFound = false;
                     if (address instanceof Ipv4) {
                         ipv4AddressFound = true;
-                        assertEquals("Wrong IP address type in SetNextHopAction.", "192.168.100.100", ((Ipv4) address)
+                        assertEquals("Wrong IP address type in SetNextHopAction.", "192.168.100.100/32", ((Ipv4) address)
                                 .getIpv4Address().getValue());
                     }
                     assertTrue("Ipv4 address wasn't found.", ipv4AddressFound);
@@ -299,7 +299,7 @@ public class TestFromSalConversionsUtils {
                     boolean ipv4AddressFound = false;
                     if (address instanceof Ipv4) {
                         ipv4AddressFound = true;
-                        assertEquals("Wrong IP address type in SetNwDstAction.", "192.168.100.101", ((Ipv4) address)
+                        assertEquals("Wrong IP address type in SetNwDstAction.", "192.168.100.101/32", ((Ipv4) address)
                                 .getIpv4Address().getValue());
                     }
                     assertTrue("Ipv4 address wasn't found.", ipv4AddressFound);
@@ -308,7 +308,7 @@ public class TestFromSalConversionsUtils {
                     boolean ipv4AddressFound = false;
                     if (address instanceof Ipv4) {
                         ipv4AddressFound = true;
-                        assertEquals("Wrong IP address type in SetNwSrcAction.", "192.168.100.102", ((Ipv4) address)
+                        assertEquals("Wrong IP address type in SetNwSrcAction.", "192.168.100.102/32", ((Ipv4) address)
                                 .getIpv4Address().getValue());
                     }
                     assertTrue("Ipv4 address wasn't found.", ipv4AddressFound);

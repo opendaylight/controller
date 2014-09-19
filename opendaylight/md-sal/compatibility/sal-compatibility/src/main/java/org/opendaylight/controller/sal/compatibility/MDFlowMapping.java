@@ -429,12 +429,12 @@ public final class MDFlowMapping {
     public static Address toInetAddress(final InetAddress address) {
         if (address instanceof Inet4Address) {
             return new Ipv4Builder()
-            .setIpv4Address(new Ipv4Prefix(InetAddresses.toAddrString(address)))
+            .setIpv4Address(new Ipv4Prefix(InetAddresses.toAddrString(address) + "/32"))
             .build();
         }
         if (address instanceof Inet6Address) {
             return new Ipv6Builder()
-            .setIpv6Address(new Ipv6Prefix(InetAddresses.toAddrString(address)))
+            .setIpv6Address(new Ipv6Prefix(InetAddresses.toAddrString(address) + "/128"))
             .build();
         }
 
