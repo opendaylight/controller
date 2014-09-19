@@ -17,9 +17,12 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.Fl
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowTableRef;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.RemoveFlowInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.RemoveFlowInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.UpdateFlowInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.UpdateFlowInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.flow.update.OriginalFlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.flow.update.UpdatedFlowBuilder;
@@ -92,7 +95,9 @@ public class FlowForwarder extends AbstractListeningCommiter<Flow> {
     public void remove(final InstanceIdentifier<Flow> identifier,
                        final Flow removeDataObj,
                        final InstanceIdentifier<FlowCapableNode> nodeIdent) {
-
+        LOG.debug("remove(): identifier ",identifier);
+        LOG.debug("remove(): addDataObj ",removeDataObj);
+        LOG.debug("remove(): nodeIdent ",nodeIdent);
         final TableKey tableKey = identifier.firstKeyOf(Table.class, TableKey.class);
         if (tableIdValidationPrecondition(tableKey, removeDataObj)) {
             final RemoveFlowInputBuilder builder = new RemoveFlowInputBuilder(removeDataObj);
@@ -100,7 +105,9 @@ public class FlowForwarder extends AbstractListeningCommiter<Flow> {
             builder.setNode(new NodeRef(nodeIdent.firstIdentifierOf(Node.class)));
             builder.setFlowTable(new FlowTableRef(nodeIdent.child(Table.class, tableKey)));
             builder.setTransactionUri(new Uri(provider.getNewTransactionId()));
-            provider.getSalFlowService().removeFlow(builder.build());
+            RemoveFlowInput b = builder.build();
+            LOG.debug("Calling removeFlow() ",b);
+            provider.getSalFlowService().removeFlow(b);
         }
     }
 
@@ -108,7 +115,10 @@ public class FlowForwarder extends AbstractListeningCommiter<Flow> {
     public void update(final InstanceIdentifier<Flow> identifier,
                        final Flow original, final Flow update,
                        final InstanceIdentifier<FlowCapableNode> nodeIdent) {
-
+        LOG.debug("update(): identifier ",identifier);
+        LOG.debug("update(): original ",original);
+        LOG.debug("update(): update ",update);
+        LOG.debug("update(): nodeIdent ",nodeIdent);
         final TableKey tableKey = identifier.firstKeyOf(Table.class, TableKey.class);
         if (tableIdValidationPrecondition(tableKey, update)) {
             final UpdateFlowInputBuilder builder = new UpdateFlowInputBuilder();
@@ -118,8 +128,9 @@ public class FlowForwarder extends AbstractListeningCommiter<Flow> {
             builder.setTransactionUri(new Uri(provider.getNewTransactionId()));
             builder.setUpdatedFlow((new UpdatedFlowBuilder(update)).build());
             builder.setOriginalFlow((new OriginalFlowBuilder(original)).build());
-
-            provider.getSalFlowService().updateFlow(builder.build());
+            UpdateFlowInput b = builder.build();
+            LOG.debug("Calling updateFlow() ",b);
+            provider.getSalFlowService().updateFlow(b);
         }
     }
 
@@ -127,7 +138,9 @@ public class FlowForwarder extends AbstractListeningCommiter<Flow> {
     public void add(final InstanceIdentifier<Flow> identifier,
                     final Flow addDataObj,
                     final InstanceIdentifier<FlowCapableNode> nodeIdent) {
-
+        LOG.debug("add(): identifier ",identifier);
+        LOG.debug("add(): addDataObj ",addDataObj);
+        LOG.debug("add(): nodeIdent ",nodeIdent);
         final TableKey tableKey = identifier.firstKeyOf(Table.class, TableKey.class);
         if (tableIdValidationPrecondition(tableKey, addDataObj)) {
             final AddFlowInputBuilder builder = new AddFlowInputBuilder(addDataObj);
@@ -136,7 +149,9 @@ public class FlowForwarder extends AbstractListeningCommiter<Flow> {
             builder.setFlowRef(new FlowRef(identifier));
             builder.setFlowTable(new FlowTableRef(nodeIdent.child(Table.class, tableKey)));
             builder.setTransactionUri(new Uri(provider.getNewTransactionId()));
-            provider.getSalFlowService().addFlow(builder.build());
+            AddFlowInput b = builder.build();
+            LOG.debug("Calling addFlow() ",b);
+            provider.getSalFlowService().addFlow(b);
         }
     }
 
