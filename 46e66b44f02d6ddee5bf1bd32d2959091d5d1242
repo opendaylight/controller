@@ -142,6 +142,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_5bd038f7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-19T18:30:43Z",
+      "side": 1,
+      "message": "Ok - so containsAll handles empty - makes sense.\n\nFor removal, if knowModules contains a stale entry, newModules won\u0027t have it so it seems we wouldn\u0027t create any shards. Or am I missing something again...",
+      "parentUuid": "fa82b9bf_dbd20834",
+      "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_5b4a7828",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
         "patchSetId": 1
@@ -171,6 +189,24 @@
       "side": 1,
       "message": "Should have gotten rid of the within\u0027s when I got rid of the expectNoMsg",
       "parentUuid": "fa82b9bf_5b4a7828",
+      "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5bc91859",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-19T18:30:43Z",
+      "side": 1,
+      "message": "Ahh, so that\u0027s the reason for using Within - good to know.",
+      "parentUuid": "fa82b9bf_dba0c8a7",
       "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -212,6 +248,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_fbe10cd1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-19T18:30:43Z",
+      "side": 1,
+      "message": "I ran into the same problem doing the shard recovery test. I let akka do its recovery thing on actor startup (with mock journal so essentially a noop) and then manually sent the recovery messages via calling onReceiveRecover. I think you could do the same thing here. i.e. don\u0027t setup MyJournal and manually call the actor with the recovery messages. I think this is valid as the previous test does do the real recovery.",
+      "parentUuid": "fa82b9bf_3bed34f0",
+      "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_3b51b4d8",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
         "patchSetId": 1
@@ -241,6 +295,24 @@
       "side": 1,
       "message": "Like it? :) As they say \"This name is long because I didn\u0027t have time to think of a shorter one\"",
       "parentUuid": "fa82b9bf_3b51b4d8",
+      "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9be6c0e7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-19T18:30:43Z",
+      "side": 1,
+      "message": "it\u0027s a keeper",
+      "parentUuid": "fa82b9bf_dbb9a8ed",
       "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
