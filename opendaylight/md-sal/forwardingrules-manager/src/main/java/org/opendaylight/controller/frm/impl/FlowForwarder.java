@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.frm.impl;
 
-import com.google.common.base.Preconditions;
 import org.opendaylight.controller.frm.ForwardingRulesManager;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
@@ -33,6 +32,8 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
  * GroupForwarder
  * It implements {@link org.opendaylight.controller.md.sal.binding.api.DataChangeListener}}
@@ -52,8 +53,27 @@ public class FlowForwarder extends AbstractListeningCommiter<Flow> {
     public FlowForwarder (final ForwardingRulesManager manager, final DataBroker db) {
         super(manager, Flow.class);
         Preconditions.checkNotNull(db, "DataBroker can not be null!");
-        this.listenerRegistration = db.registerDataChangeListener(LogicalDatastoreType.CONFIGURATION,
-                getWildCardPath(), FlowForwarder.this, DataChangeScope.SUBTREE);
+        registrationListener(db, 5);
+    }
+
+    private void registrationListener(final DataBroker db, int i) {
+        try {
+            listenerRegistration = db.registerDataChangeListener(LogicalDatastoreType.CONFIGURATION,
+                    getWildCardPath(), FlowForwarder.this, DataChangeScope.SUBTREE);
+        } catch (final Exception e) {
+            if (i >= 1) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e1) {
+                    LOG.error("Thread interrupted '{}'", e1);
+                    Thread.currentThread().interrupt();
+                }
+                registrationListener(db, --i);
+            } else {
+                LOG.error("FRM Flow DataChange listener registration fail!", e);
+                throw new IllegalStateException("FlowForwarder registration Listener fail! System needs restart.", e);
+            }
+        }
     }
 
     @Override
@@ -61,7 +81,7 @@ public class FlowForwarder extends AbstractListeningCommiter<Flow> {
         if (listenerRegistration != null) {
             try {
                 listenerRegistration.close();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LOG.error("Error by stop FRM FlowChangeListener.", e);
             }
             listenerRegistration = null;
@@ -80,7 +100,7 @@ public class FlowForwarder extends AbstractListeningCommiter<Flow> {
             builder.setNode(new NodeRef(nodeIdent.firstIdentifierOf(Node.class)));
             builder.setFlowTable(new FlowTableRef(nodeIdent.child(Table.class, tableKey)));
             builder.setTransactionUri(new Uri(provider.getNewTransactionId()));
-            this.provider.getSalFlowService().removeFlow(builder.build());
+            provider.getSalFlowService().removeFlow(builder.build());
         }
     }
 
@@ -99,7 +119,7 @@ public class FlowForwarder extends AbstractListeningCommiter<Flow> {
             builder.setUpdatedFlow((new UpdatedFlowBuilder(update)).build());
             builder.setOriginalFlow((new OriginalFlowBuilder(original)).build());
 
-            this.provider.getSalFlowService().updateFlow(builder.build());
+            provider.getSalFlowService().updateFlow(builder.build());
         }
     }
 
@@ -116,7 +136,7 @@ public class FlowForwarder extends AbstractListeningCommiter<Flow> {
             builder.setFlowRef(new FlowRef(identifier));
             builder.setFlowTable(new FlowTableRef(nodeIdent.child(Table.class, tableKey)));
             builder.setTransactionUri(new Uri(provider.getNewTransactionId()));
-            this.provider.getSalFlowService().addFlow(builder.build());
+            provider.getSalFlowService().addFlow(builder.build());
         }
     }
 
