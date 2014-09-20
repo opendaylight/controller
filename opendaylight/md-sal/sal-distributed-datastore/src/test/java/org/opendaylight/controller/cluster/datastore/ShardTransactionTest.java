@@ -1,14 +1,15 @@
 package org.opendaylight.controller.cluster.datastore;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.Terminated;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
-
-import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
-
+import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.exceptions.UnknownMessageException;
@@ -39,21 +40,11 @@ import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreCon
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-
 import scala.concurrent.duration.Duration;
 
-import java.util.Collections;
-import java.util.concurrent.TimeUnit;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 public class ShardTransactionTest extends AbstractActorTest {
-    private static ListeningExecutorService storeExecutor =
-        MoreExecutors.listeningDecorator(MoreExecutors.sameThreadExecutor());
-
     private static final InMemoryDOMDataStore store =
-        new InMemoryDOMDataStore("OPER", storeExecutor, MoreExecutors.sameThreadExecutor());
+        new InMemoryDOMDataStore("OPER", MoreExecutors.sameThreadExecutor());
 
     private static final SchemaContext testSchemaContext = TestModel.createTestContext();
 
@@ -94,7 +85,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                     final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
                         // do not put code outside this method, will run afterwards
                         @Override
-                        protected String match(Object in) {
+                        protected String match(final Object in) {
                             if (in.getClass().equals(ReadDataReply.SERIALIZABLE_CLASS)) {
                               if (ReadDataReply.fromSerializable(testSchemaContext,YangInstanceIdentifier.builder().build(), in)
                                   .getNormalizedNode()!= null) {
@@ -136,7 +127,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                     final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
                         // do not put code outside this method, will run afterwards
                         @Override
-                        protected String match(Object in) {
+                        protected String match(final Object in) {
                             if (in.getClass().equals(ReadDataReply.SERIALIZABLE_CLASS)) {
                                 if (ReadDataReply.fromSerializable(testSchemaContext,TestModel.TEST_PATH, in)
                                     .getNormalizedNode()
@@ -179,7 +170,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                     final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
                         // do not put code outside this method, will run afterwards
                         @Override
-                        protected String match(Object in) {
+                        protected String match(final Object in) {
                             if (in.getClass().equals(DataExistsReply.SERIALIZABLE_CLASS)) {
                                 if (DataExistsReply.fromSerializable(in)
                                     .exists()) {
@@ -221,7 +212,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                     final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
                         // do not put code outside this method, will run afterwards
                         @Override
-                        protected String match(Object in) {
+                        protected String match(final Object in) {
                             if (in.getClass().equals(DataExistsReply.SERIALIZABLE_CLASS)) {
                                 if (!DataExistsReply.fromSerializable(in)
                                     .exists()) {
@@ -258,7 +249,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                         new ExpectMsg<CompositeModification>(duration("1 seconds"), "match hint") {
                             // do not put code outside this method, will run afterwards
                             @Override
-                            protected CompositeModification match(Object in) {
+                            protected CompositeModification match(final Object in) {
                                 if (in instanceof ShardTransaction.GetCompositeModificationReply) {
                                     return ((ShardTransaction.GetCompositeModificationReply) in)
                                         .getModification();
@@ -299,7 +290,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                     final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
                         // do not put code outside this method, will run afterwards
                         @Override
-                        protected String match(Object in) {
+                        protected String match(final Object in) {
                             if (in.getClass().equals(WriteDataReply.SERIALIZABLE_CLASS)) {
                                 return "match";
                             } else {
@@ -339,7 +330,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                     final String out = new ExpectMsg<String>(duration("500 milliseconds"), "match hint") {
                         // do not put code outside this method, will run afterwards
                         @Override
-                        protected String match(Object in) {
+                        protected String match(final Object in) {
                             if (in.getClass().equals(MergeDataReply.SERIALIZABLE_CLASS)) {
                                 return "match";
                             } else {
@@ -378,7 +369,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                     final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
                         // do not put code outside this method, will run afterwards
                         @Override
-                        protected String match(Object in) {
+                        protected String match(final Object in) {
                             if (in.getClass().equals(DeleteDataReply.SERIALIZABLE_CLASS)) {
                                 return "match";
                             } else {
@@ -417,7 +408,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                     final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
                         // do not put code outside this method, will run afterwards
                         @Override
-                        protected String match(Object in) {
+                        protected String match(final Object in) {
                             if (in.getClass().equals(ReadyTransactionReply.SERIALIZABLE_CLASS)) {
                                 return "match";
                             } else {
@@ -457,7 +448,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                     final String out = new ExpectMsg<String>(duration("3 seconds"), "match hint") {
                         // do not put code outside this method, will run afterwards
                         @Override
-                        protected String match(Object in) {
+                        protected String match(final Object in) {
                             System.out.println("!!!IN match 1: "+(in!=null?in.getClass():"NULL"));
                             if (in.getClass().equals(CloseTransactionReply.SERIALIZABLE_CLASS)) {
                                 return "match";
@@ -472,7 +463,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                     final String termination = new ExpectMsg<String>(duration("3 seconds"), "match hint") {
                         // do not put code outside this method, will run afterwards
                         @Override
-                        protected String match(Object in) {
+                        protected String match(final Object in) {
                             System.out.println("!!!IN match 2: "+(in!=null?in.getClass():"NULL"));
                             if (in instanceof Terminated) {
                                 return "match";
@@ -519,7 +510,7 @@ public class ShardTransactionTest extends AbstractActorTest {
             final String termination = new ExpectMsg<String>(duration("3 seconds"), "match hint") {
                 // do not put code outside this method, will run afterwards
                 @Override
-                protected String match(Object in) {
+                protected String match(final Object in) {
                     if (in instanceof Terminated) {
                         return "match";
                     } else {
