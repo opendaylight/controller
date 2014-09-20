@@ -168,7 +168,22 @@ public final class NodeMapping {
      * @return
      */
     private static NodeId toNodeId(org.opendaylight.controller.sal.core.Node aDNode) {
-        return new NodeId(aDNode.getType() + ":" + String.valueOf(aDNode.getID()));
+        String targetPrefix = null;
+        if (NodeIDType.OPENFLOW.equals(aDNode.getType())) {
+                targetPrefix = OPENFLOW_ID_PREFIX;
+        } else {
+            targetPrefix = aDNode.getType() + ":";
+        }
+
+        return new NodeId(targetPrefix + String.valueOf(aDNode.getID()));
+    }
+
+    /**
+     * @param aDNode
+     * @return md-sal {@link NodeKey}
+     */
+    public static NodeKey toNodeKey(org.opendaylight.controller.sal.core.Node aDNode) {
+        return new NodeKey(toNodeId(aDNode));
     }
 
     public static String toNodeConnectorType(final NodeConnectorId ncId, final NodeId nodeId) {

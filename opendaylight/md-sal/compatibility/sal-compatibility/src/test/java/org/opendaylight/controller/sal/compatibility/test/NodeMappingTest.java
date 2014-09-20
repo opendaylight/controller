@@ -197,6 +197,19 @@ public class NodeMappingTest {
     }
 
     /**
+     * Test method for
+     * {@link org.opendaylight.controller.sal.compatibility.NodeMapping#toNodeKey(org.opendaylight.controller.sal.core.Node)}
+     * .
+     * @throws ConstructionException
+     */
+    @Test
+    public void testToNodeKey() throws ConstructionException {
+        org.opendaylight.controller.sal.core.Node aDNode = new org.opendaylight.controller.sal.core.Node(NodeIDType.OPENFLOW, 42L);
+        NodeKey nodeKey = NodeMapping.toNodeKey(aDNode);
+        Assert.assertEquals("openflow:42", nodeKey.getId().getValue());
+    }
+
+    /**
      * @param nodeId
      * @param portId
      * @return nodeConnectorId
