@@ -3,7 +3,6 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.testkit.JavaTestKit;
-import akka.util.Timeout;
 import com.google.protobuf.ByteString;
 import junit.framework.Assert;
 import org.junit.Test;
@@ -22,10 +21,6 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
-import scala.concurrent.Await;
-import scala.concurrent.Future;
-import scala.concurrent.duration.Duration;
-import scala.concurrent.duration.FiniteDuration;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -35,9 +30,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
-import static akka.pattern.Patterns.ask;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -527,15 +520,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
     }
 
     public Object executeLocalOperation(ActorRef actor, Object message) throws Exception {
-        FiniteDuration operationDuration = Duration.create(5, TimeUnit.SECONDS);
-        Timeout operationTimeout = new Timeout(operationDuration);
-        Future<Object> future = ask(actor, message, operationTimeout);
-
-        try {
-            return Await.result(future, operationDuration);
-        } catch (Exception e) {
-            throw e;
-        }
+        return MessageCollectorActor.getAllMessages(actor);
     }
 
     public ByteString getNextChunk (ByteString bs, int offset){
