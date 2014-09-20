@@ -14,7 +14,6 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -63,6 +62,7 @@ import org.slf4j.LoggerFactory;
 public class InMemoryDOMDataStore extends TransactionReadyPrototype implements DOMStore, Identifiable<String>, SchemaContextListener, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(InMemoryDOMDataStore.class);
     private static final ListenableFuture<Void> SUCCESSFUL_FUTURE = Futures.immediateFuture(null);
+    private static final ListenableFuture<Boolean> CAN_COMMIT_FUTURE = Futures.immediateFuture(Boolean.TRUE);
 
     private static final Invoker<DataChangeListenerRegistration<?>, DOMImmutableDataChangeEvent> DCL_NOTIFICATION_MGR_INVOKER =
             new Invoker<DataChangeListenerRegistration<?>, DOMImmutableDataChangeEvent>() {
@@ -382,38 +382,36 @@ public class InMemoryDOMDataStore extends TransactionReadyPrototype implements D
 
         @Override
         public ListenableFuture<Boolean> canCommit() {
-            return commitExecutor.submit(new Callable<Boolean>() {
-                @Override
-                public Boolean call() throws TransactionCommitFailedException {
-                    try {
-                        dataTree.validate(modification);
-                        LOG.debug("Store Transaction: {} can be committed", transaction.getIdentifier());
-                        return true;
-                    } catch (ConflictingModificationAppliedException e) {
-                        LOG.warn("Store Tx: {} Conflicting modification for {}.", transaction.getIdentifier(),
-                                e.getPath());
-                        transaction.warnDebugContext(LOG);
-                        throw new OptimisticLockFailedException("Optimistic lock failed.",e);
-                    } catch (DataValidationFailedException e) {
-                        LOG.warn("Store Tx: {} Data Precondition failed for {}.", transaction.getIdentifier(),
-                                e.getPath(), e);
-                        transaction.warnDebugContext(LOG);
-                        throw new TransactionCommitFailedException("Data did not pass validation.",e);
-                    }
-                }
-            });
+            try {
+                dataTree.validate(modification);
+                LOG.debug("Store Transaction: {} can be committed", transaction.getIdentifier());
+                return CAN_COMMIT_FUTURE;
+            } catch (ConflictingModificationAppliedException e) {
+                LOG.warn("Store Tx: {} Conflicting modification for {}.", transaction.getIdentifier(),
+                        e.getPath());
+                transaction.warnDebugContext(LOG);
+                return Futures.immediateFailedFuture(new OptimisticLockFailedException("Optimistic lock failed.", e));
+            } catch (DataValidationFailedException e) {
+                LOG.warn("Store Tx: {} Data Precondition failed for {}.", transaction.getIdentifier(),
+                        e.getPath(), e);
+                transaction.warnDebugContext(LOG);
+                return Futures.immediateFailedFuture(new TransactionCommitFailedException("Data did not pass validation.", e));
+            } catch (Exception e) {
+                LOG.warn("Unexpected failure in validation phase", e);
+                return Futures.immediateFailedFuture(e);
+            }
         }
 
         @Override
         public ListenableFuture<Void> preCommit() {
-            return commitExecutor.submit(new Callable<Void>() {
-                @Override
-                public Void call() {
-                    candidate = dataTree.prepare(modification);
-                    listenerResolver = ResolveDataChangeEventsTask.create(candidate, listenerTree);
-                    return null;
-                }
-            });
+            try {
+                candidate = dataTree.prepare(modification);
+                listenerResolver = ResolveDataChangeEventsTask.create(candidate, listenerTree);
+                return SUCCESSFUL_FUTURE;
+            } catch (Exception e) {
+                LOG.warn("Unexpected failure in pre-commit phase", e);
+                return Futures.immediateFailedFuture(e);
+            }
         }
 
         @Override
