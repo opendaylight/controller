@@ -88,16 +88,12 @@ public class Leader extends AbstractRaftActorBehavior {
 
         LOG = context.getLogger();
 
-        if (lastIndex() >= 0) {
-            context.setCommitIndex(lastIndex());
-        }
-
         followers = context.getPeerAddresses().keySet();
 
         for (String followerId : followers) {
             FollowerLogInformation followerLogInformation =
                 new FollowerLogInformationImpl(followerId,
-                    new AtomicLong(lastIndex()),
+                    new AtomicLong(context.getCommitIndex()),
                     new AtomicLong(-1));
 
             followerToLog.put(followerId, followerLogInformation);
