@@ -22,6 +22,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
+import org.opendaylight.controller.cluster.datastore.messages.ActorInitialized;
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
@@ -29,6 +31,7 @@ import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryFound;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryNotFound;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
+import org.opendaylight.controller.cluster.datastore.utils.DoNothingActor;
 import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.utils.MockConfiguration;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
@@ -53,6 +56,8 @@ import static org.mockito.Mockito.when;
 
 public class ShardManagerTest {
     private static ActorSystem system;
+    Configuration mockConfig = new MockConfiguration();
+    private static ActorRef defaultShardMockActor;
 
     @BeforeClass
     public static void setUpClass() {
@@ -60,13 +65,18 @@ public class ShardManagerTest {
         myJournal.put("class", "org.opendaylight.controller.cluster.datastore.ShardManagerTest$MyJournal");
         myJournal.put("plugin-dispatcher", "akka.actor.default-dispatcher");
         Config config = ConfigFactory.load()
-            .withValue("akka.persistence.journal.plugin",
-                ConfigValueFactory.fromAnyRef("my-journal"))
-            .withValue("my-journal", ConfigValueFactory.fromMap(myJournal));
+                .withValue("akka.persistence.journal.plugin",
+                        ConfigValueFactory.fromAnyRef("my-journal"))
+                .withValue("my-journal", ConfigValueFactory.fromMap(myJournal));
 
         MyJournal.clear();
 
         system = ActorSystem.create("test", config);
+
+        String name = new ShardIdentifier(Shard.DEFAULT_NAME, "member-1","config").toString();
+        defaultShardMockActor = system.actorOf(Props.create(DoNothingActor.class), name);
+
+
     }
 
     @AfterClass
@@ -86,15 +96,15 @@ public class ShardManagerTest {
         new JavaTestKit(system) {
             {
                 final Props props = ShardManager
-                    .props("config", new MockClusterWrapper(),
-                        new MockConfiguration(), new DatastoreContext());
+                        .props("config", new MockClusterWrapper(),
+                                new MockConfiguration(), new DatastoreContext());
 
                 final ActorRef subject = getSystem().actorOf(props);
 
                 subject.tell(new FindPrimary("inventory").toSerializable(), getRef());
 
                 expectMsgEquals(duration("2 seconds"),
-                    new PrimaryNotFound("inventory").toSerializable());
+                        new PrimaryNotFound("inventory").toSerializable());
             }};
     }
 
@@ -103,17 +113,19 @@ public class ShardManagerTest {
 
         new JavaTestKit(system) {{
             final Props props = ShardManager
-                .props("config", new MockClusterWrapper(),
-                    new MockConfiguration(), new DatastoreContext());
+                    .props("config", new MockClusterWrapper(),
+                            new MockConfiguration(), new DatastoreContext());
 
             final ActorRef subject = getSystem().actorOf(props);
 
             subject.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
+            subject.tell(new ActorInitialized(), defaultShardMockActor);
 
             subject.tell(new FindPrimary(Shard.DEFAULT_NAME).toSerializable(), getRef());
 
             expectMsgClass(duration("1 seconds"), PrimaryFound.SERIALIZABLE_CLASS);
-        }};
+        }
+        };
     }
 
     @Test
@@ -121,8 +133,8 @@ public class ShardManagerTest {
 
         new JavaTestKit(system) {{
             final Props props = ShardManager
-                .props("config", new MockClusterWrapper(),
-                    new MockConfiguration(), new DatastoreContext());
+                    .props("config", new MockClusterWrapper(),
+                            new MockConfiguration(), new DatastoreContext());
 
             final ActorRef subject = getSystem().actorOf(props);
 
@@ -150,12 +162,13 @@ public class ShardManagerTest {
 
         new JavaTestKit(system) {{
             final Props props = ShardManager
-                .props("config", mockClusterWrapper,
-                    new MockConfiguration(), new DatastoreContext());
+                    .props("config", mockClusterWrapper,
+                            new MockConfiguration(), new DatastoreContext());
 
             final ActorRef subject = getSystem().actorOf(props);
 
             subject.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
+            subject.tell(new ActorInitialized(), defaultShardMockActor);
 
             subject.tell(new FindLocalShard(Shard.DEFAULT_NAME), getRef());
 
@@ -171,7 +184,7 @@ public class ShardManagerTest {
             }.get(); // this extracts the received message
 
             assertTrue(out.path().toString(),
-                out.path().toString().contains("member-1-shard-default-config"));
+                    out.path().toString().contains("member-1-shard-default-config"));
         }};
     }
 
@@ -180,8 +193,8 @@ public class ShardManagerTest {
 
         new JavaTestKit(system) {{
             final Props props = ShardManager
-                .props("config", new MockClusterWrapper(),
-                    new MockConfiguration(), new DatastoreContext());
+                    .props("config", new MockClusterWrapper(),
+                            new MockConfiguration(), new DatastoreContext());
 
             final ActorRef subject = getSystem().actorOf(props);
 
@@ -211,8 +224,8 @@ public class ShardManagerTest {
 
         new JavaTestKit(system) {{
             final Props props = ShardManager
-                .props("config", new MockClusterWrapper(),
-                    new MockConfiguration(), new DatastoreContext());
+                    .props("config", new MockClusterWrapper(),
+                            new MockConfiguration(), new DatastoreContext());
 
             final ActorRef subject = getSystem().actorOf(props);
 
@@ -233,14 +246,14 @@ public class ShardManagerTest {
     @Test
     public void testOnRecoveryJournalIsEmptied(){
         MyJournal.addToJournal(1L, new ShardManager.SchemaContextModules(
-            ImmutableSet.of("foo")));
+                ImmutableSet.of("foo")));
 
         assertEquals(1, MyJournal.get().size());
 
         new JavaTestKit(system) {{
             final Props props = ShardManager
-                .props("config", new MockClusterWrapper(),
-                    new MockConfiguration(), new DatastoreContext());
+                    .props("config", new MockClusterWrapper(),
+                            new MockConfiguration(), new DatastoreContext());
 
             final ActorRef subject = getSystem().actorOf(props);
 
@@ -257,10 +270,10 @@ public class ShardManagerTest {
     public void testOnRecoveryPreviouslyKnownModulesAreDiscovered() throws Exception {
         new JavaTestKit(system) {{
             final Props props = ShardManager
-                .props("config", new MockClusterWrapper(),
-                    new MockConfiguration(), new DatastoreContext());
+                    .props("config", new MockClusterWrapper(),
+                            new MockConfiguration(), new DatastoreContext());
             final TestActorRef<ShardManager> subject =
-                TestActorRef.create(system, props);
+                    TestActorRef.create(system, props);
 
             subject.underlyingActor().onReceiveRecover(new ShardManager.SchemaContextModules(ImmutableSet.of("foo")));
 
@@ -272,13 +285,13 @@ public class ShardManagerTest {
 
     @Test
     public void testOnUpdateSchemaContextUpdateKnownModulesIfTheyContainASuperSetOfTheKnownModules()
-        throws Exception {
+            throws Exception {
         new JavaTestKit(system) {{
             final Props props = ShardManager
-                .props("config", new MockClusterWrapper(),
-                    new MockConfiguration(), new DatastoreContext());
+                    .props("config", new MockClusterWrapper(),
+                            new MockConfiguration(), new DatastoreContext());
             final TestActorRef<ShardManager> subject =
-                TestActorRef.create(system, props);
+                    TestActorRef.create(system, props);
 
             Collection<String> knownModules = subject.underlyingActor().getKnownModules();
 
@@ -318,13 +331,13 @@ public class ShardManagerTest {
 
     @Test
     public void testOnUpdateSchemaContextDoNotUpdateKnownModulesIfTheyDoNotContainASuperSetOfKnownModules()
-        throws Exception {
+            throws Exception {
         new JavaTestKit(system) {{
             final Props props = ShardManager
-                .props("config", new MockClusterWrapper(),
-                    new MockConfiguration(), new DatastoreContext());
+                    .props("config", new MockClusterWrapper(),
+                            new MockConfiguration(), new DatastoreContext());
             final TestActorRef<ShardManager> subject =
-                TestActorRef.create(system, props);
+                    TestActorRef.create(system, props);
 
             Collection<String> knownModules = subject.underlyingActor().getKnownModules();
 
@@ -386,7 +399,7 @@ public class ShardManagerTest {
         }
 
         @Override public Future<Void> doAsyncReplayMessages(final String persistenceId, long fromSequenceNr, long toSequenceNr, long max,
-            final Procedure<PersistentRepr> replayCallback) {
+                                                            final Procedure<PersistentRepr> replayCallback) {
             if(journal.size() == 0){
                 return Futures.successful(null);
             }
@@ -395,8 +408,8 @@ public class ShardManagerTest {
                 public Void call() throws Exception {
                     for (Map.Entry<Long, Object> entry : journal.entrySet()) {
                         PersistentRepr persistentMessage =
-                            new PersistentImpl(entry.getValue(), entry.getKey(), persistenceId,
-                                false, null, null);
+                                new PersistentImpl(entry.getValue(), entry.getKey(), persistenceId,
+                                        false, null, null);
                         replayCallback.apply(persistentMessage);
                     }
                     return null;
@@ -409,7 +422,7 @@ public class ShardManagerTest {
         }
 
         @Override public Future<Void> doAsyncWriteMessages(
-            final Iterable<PersistentRepr> persistentReprs) {
+                final Iterable<PersistentRepr> persistentReprs) {
             return Futures.future(new Callable<Void>() {
                 @Override
                 public Void call() throws Exception {
@@ -424,12 +437,12 @@ public class ShardManagerTest {
         }
 
         @Override public Future<Void> doAsyncWriteConfirmations(
-            Iterable<PersistentConfirmation> persistentConfirmations) {
+                Iterable<PersistentConfirmation> persistentConfirmations) {
             return Futures.successful(null);
         }
 
         @Override public Future<Void> doAsyncDeleteMessages(Iterable<PersistentId> persistentIds,
-            boolean b) {
+                                                            boolean b) {
             clear();
             return Futures.successful(null);
         }

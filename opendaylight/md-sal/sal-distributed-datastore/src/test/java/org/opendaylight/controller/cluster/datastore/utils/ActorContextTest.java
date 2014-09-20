@@ -1,6 +1,5 @@
 package org.opendaylight.controller.cluster.datastore.utils;
 
-import java.util.concurrent.TimeUnit;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
@@ -8,7 +7,7 @@ import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.japi.Creator;
 import akka.testkit.JavaTestKit;
-
+import com.google.common.base.Optional;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
@@ -16,12 +15,14 @@ import org.opendaylight.controller.cluster.datastore.Configuration;
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound;
-
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
+
+import java.util.concurrent.TimeUnit;
+
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 public class ActorContextTest extends AbstractActorTest{
@@ -101,63 +102,6 @@ public class ActorContextTest extends AbstractActorTest{
     }
 
     @Test
-    public void testExecuteLocalShardOperationWithShardFound(){
-        new JavaTestKit(getSystem()) {{
-
-            new Within(duration("1 seconds")) {
-                @Override
-                protected void run() {
-
-                    ActorRef shardActorRef = getSystem().actorOf(Props.create(EchoActor.class));
-
-                    ActorRef shardManagerActorRef = getSystem()
-                        .actorOf(MockShardManager.props(true, shardActorRef));
-
-                    ActorContext actorContext =
-                        new ActorContext(getSystem(), shardManagerActorRef , mock(ClusterWrapper.class),
-                            mock(Configuration.class));
-
-                    Object out = actorContext.executeLocalShardOperation("default", "hello");
-
-                    assertEquals("hello", out);
-
-
-                    expectNoMsg();
-                }
-            };
-        }};
-
-    }
-
-    @Test
-    public void testExecuteLocalShardOperationWithShardNotFound(){
-        new JavaTestKit(getSystem()) {{
-
-            new Within(duration("1 seconds")) {
-                @Override
-                protected void run() {
-
-                    ActorRef shardManagerActorRef = getSystem()
-                        .actorOf(MockShardManager.props(false, null));
-
-                    ActorContext actorContext =
-                        new ActorContext(getSystem(), shardManagerActorRef , mock(ClusterWrapper.class),
-                            mock(Configuration.class));
-
-                    Object out = actorContext.executeLocalShardOperation("default", "hello");
-
-                    assertNull(out);
-
-
-                    expectNoMsg();
-                }
-            };
-        }};
-
-    }
-
-
-    @Test
     public void testFindLocalShardWithShardFound(){
         new JavaTestKit(getSystem()) {{
 
@@ -174,9 +118,9 @@ public class ActorContextTest extends AbstractActorTest{
                         new ActorContext(getSystem(), shardManagerActorRef , mock(ClusterWrapper.class),
                             mock(Configuration.class));
 
-                    Object out = actorContext.findLocalShard("default");
+                    Optional<ActorRef> out = actorContext.findLocalShard("default");
 
-                    assertEquals(shardActorRef, out);
+                    assertEquals(shardActorRef, out.get());
 
 
                     expectNoMsg();
@@ -201,11 +145,8 @@ public class ActorContextTest extends AbstractActorTest{
                         new ActorContext(getSystem(), shardManagerActorRef , mock(ClusterWrapper.class),
                             mock(Configuration.class));
 
-                    Object out = actorContext.findLocalShard("default");
-
-                    assertNull(out);
-
-
+                    Optional<ActorRef> out = actorContext.findLocalShard("default");
+                    assertTrue(!out.isPresent());
                     expectNoMsg();
                 }
             };
@@ -232,7 +173,7 @@ public class ActorContextTest extends AbstractActorTest{
 
                     ActorSelection actor = actorContext.actorSelection(shardActorRef.path());
 
-                    Object out = actorContext.executeRemoteOperation(actor, "hello");
+                    Object out = actorContext.executeOperation(actor, "hello");
 
                     assertEquals("hello", out);
 
@@ -261,7 +202,7 @@ public class ActorContextTest extends AbstractActorTest{
 
                     ActorSelection actor = actorContext.actorSelection(shardActorRef.path());
 
-                    Future<Object> future = actorContext.executeRemoteOperationAsync(actor, "hello");
+                    Future<Object> future = actorContext.executeOperationAsync(actor, "hello");
 
                     try {
                         Object result = Await.result(future, Duration.create(3, TimeUnit.SECONDS));

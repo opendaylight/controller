@@ -10,11 +10,17 @@ package org.opendaylight.controller.cluster.datastore.identifiers;
 
 import com.google.common.base.Preconditions;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class ShardIdentifier {
     private final String shardName;
     private final String memberName;
     private final String type;
 
+    //format and pattern should be in sync
+    private final String format = "%s-shard-%s-%s";
+    private static final Pattern pattern = Pattern.compile("(\\S+)-shard-(\\S+)-(\\S+)");
 
     public ShardIdentifier(String shardName, String memberName, String type) {
 
@@ -60,13 +66,23 @@ public class ShardIdentifier {
     }
 
     @Override public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append(memberName).append("-shard-").append(shardName).append("-").append(type);
-        return builder.toString();
+         return String.format(format, memberName, shardName, type);
     }
 
     public static Builder builder(){
         return new Builder();
+    }
+
+    public String getShardName() {
+        return shardName;
+    }
+
+    public String getMemberName() {
+        return memberName;
+    }
+
+    public String getType() {
+        return type;
     }
 
     public static class Builder {
@@ -93,5 +109,15 @@ public class ShardIdentifier {
             return this;
         }
 
+        public Builder fromShardIdString(String shardId){
+            Matcher matcher = pattern.matcher(shardId);
+
+            if (matcher.matches()) {
+                memberName = matcher.group(1);
+                shardName = matcher.group(2);
+                type = matcher.group(3);
+            }
+            return this;
+        }
     }
 }
