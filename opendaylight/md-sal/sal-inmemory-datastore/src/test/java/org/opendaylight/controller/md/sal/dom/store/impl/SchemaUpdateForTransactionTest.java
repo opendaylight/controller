@@ -8,9 +8,9 @@
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
 import static org.junit.Assert.assertNotNull;
-
+import com.google.common.base.Throwables;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.concurrent.ExecutionException;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
@@ -23,9 +23,6 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
-import com.google.common.base.Throwables;
-import com.google.common.util.concurrent.MoreExecutors;
-
 public class SchemaUpdateForTransactionTest {
 
     private static final YangInstanceIdentifier TOP_PATH = YangInstanceIdentifier.of(Top.QNAME);
@@ -34,8 +31,7 @@ public class SchemaUpdateForTransactionTest {
 
     @Before
     public void setupStore() {
-        domStore = new InMemoryDOMDataStore("TEST", MoreExecutors.sameThreadExecutor(),
-                MoreExecutors.sameThreadExecutor());
+        domStore = new InMemoryDOMDataStore("TEST", MoreExecutors.sameThreadExecutor());
         loadSchemas(RockTheHouseInput.class);
     }
 

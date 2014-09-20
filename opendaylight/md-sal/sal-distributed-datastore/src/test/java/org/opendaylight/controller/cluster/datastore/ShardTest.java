@@ -1,5 +1,12 @@
 package org.opendaylight.controller.cluster.datastore;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
@@ -12,6 +19,13 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -62,20 +76,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.duration.Duration;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verify;
 
 public class ShardTest extends AbstractActorTest {
 
@@ -344,7 +344,7 @@ public class ShardTest extends AbstractActorTest {
                 shard.underlyingActor().getShardMBean().getLastApplied());
     }
 
-    private CompositeModificationPayload newPayload(Modification... mods) {
+    private CompositeModificationPayload newPayload(final Modification... mods) {
         MutableCompositeModification compMod = new MutableCompositeModification();
         for(Modification mod: mods) {
             compMod.addModification(mod);
@@ -405,8 +405,7 @@ public class ShardTest extends AbstractActorTest {
      */
     @Test
     public void testInMemoryDataStoreRestore() throws ReadFailedException {
-        InMemoryDOMDataStore store = new InMemoryDOMDataStore("test", MoreExecutors.listeningDecorator(
-            MoreExecutors.sameThreadExecutor()), MoreExecutors.sameThreadExecutor());
+        InMemoryDOMDataStore store = new InMemoryDOMDataStore("test", MoreExecutors.sameThreadExecutor());
 
         store.onGlobalContextUpdated(SCHEMA_CONTEXT);
 
@@ -416,7 +415,7 @@ public class ShardTest extends AbstractActorTest {
         commitTransaction(putTransaction);
 
 
-        NormalizedNode expected = readStore(store);
+        NormalizedNode<?, ?> expected = readStore(store);
 
         DOMStoreWriteTransaction writeTransaction = store.newWriteOnlyTransaction();
 
@@ -425,13 +424,13 @@ public class ShardTest extends AbstractActorTest {
 
         commitTransaction(writeTransaction);
 
-        NormalizedNode actual = readStore(store);
+        NormalizedNode<?, ?> actual = readStore(store);
 
         assertEquals(expected, actual);
 
     }
 
-    private NormalizedNode readStore(InMemoryDOMDataStore store) throws ReadFailedException {
+    private NormalizedNode<?, ?> readStore(final InMemoryDOMDataStore store) throws ReadFailedException {
         DOMStoreReadTransaction transaction = store.newReadOnlyTransaction();
         CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read =
             transaction.read(YangInstanceIdentifier.builder().build());
@@ -445,7 +444,7 @@ public class ShardTest extends AbstractActorTest {
         return normalizedNode;
     }
 
-    private void commitTransaction(DOMStoreWriteTransaction transaction) {
+    private void commitTransaction(final DOMStoreWriteTransaction transaction) {
         DOMStoreThreePhaseCommitCohort commitCohort = transaction.ready();
         ListenableFuture<Void> future =
             commitCohort.preCommit();
@@ -461,16 +460,17 @@ public class ShardTest extends AbstractActorTest {
         return new AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>() {
             @Override
             public void onDataChanged(
-                AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
+                final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
 
             }
         };
     }
 
     private static final class DelegatingShardCreator implements Creator<Shard> {
+        private static final long serialVersionUID = 1L;
         private final Creator<Shard> delegate;
 
-        DelegatingShardCreator(Creator<Shard> delegate) {
+        DelegatingShardCreator(final Creator<Shard> delegate) {
             this.delegate = delegate;
         }
 
@@ -482,11 +482,11 @@ public class ShardTest extends AbstractActorTest {
 
     private static class ShardTestKit extends JavaTestKit {
 
-        private ShardTestKit(ActorSystem actorSystem) {
+        private ShardTestKit(final ActorSystem actorSystem) {
             super(actorSystem);
         }
 
-        protected void waitForLogMessage(final Class logLevel, ActorRef subject, String logMessage){
+        protected void waitForLogMessage(final Class<?> logLevel, final ActorRef subject, final String logMessage){
             // Wait for a specific log message to show up
             final boolean result =
                 new JavaTestKit.EventFilter<Boolean>(logLevel
@@ -503,7 +503,7 @@ public class ShardTest extends AbstractActorTest {
 
         }
 
-        protected void waitUntilLeader(ActorRef subject) {
+        protected void waitUntilLeader(final ActorRef subject) {
             waitForLogMessage(Logging.Info.class, subject,
                     "Switching from state Candidate to Leader");
         }
