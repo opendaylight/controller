@@ -8,19 +8,17 @@
 
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
-
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 import org.opendaylight.controller.md.sal.common.util.jmx.QueuedNotificationManagerMXBeanImpl;
 import org.opendaylight.controller.md.sal.common.util.jmx.ThreadExecutorStats;
 import org.opendaylight.controller.md.sal.common.util.jmx.ThreadExecutorStatsMXBeanImpl;
+import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.yangtools.util.concurrent.ListenerNotificationQueueStats;
 import org.opendaylight.yangtools.util.concurrent.QueuedNotificationManager;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
  * Maintains statistics for a shard.
@@ -62,22 +60,16 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     private ThreadExecutorStatsMXBeanImpl notificationExecutorStatsBean;
 
-    private ThreadExecutorStatsMXBeanImpl dataStoreExecutorStatsBean;
-
     private QueuedNotificationManagerMXBeanImpl notificationManagerStatsBean;
 
     private final SimpleDateFormat sdf =
         new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
-    public ShardStats(String shardName, String mxBeanType) {
+    public ShardStats(final String shardName, final String mxBeanType) {
         super(shardName, mxBeanType, JMX_CATEGORY_SHARD);
     }
 
-    public void setDataStoreExecutor(ExecutorService dsExecutor) {
-        this.dataStoreExecutorStatsBean = ThreadExecutorStatsMXBeanImpl.create(dsExecutor);
-    }
-
-    public void setNotificationManager(QueuedNotificationManager<?, ?> manager) {
+    public void setNotificationManager(final QueuedNotificationManager<?, ?> manager) {
         this.notificationManagerStatsBean = new QueuedNotificationManagerMXBeanImpl(manager,
                 "notification-manager", getMBeanType(), getMBeanCategory());
 
@@ -194,42 +186,42 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
         return abortTransactionsCount.incrementAndGet();
     }
 
-    public void setLeader(String leader) {
+    public void setLeader(final String leader) {
         this.leader = leader;
     }
 
-    public void setRaftState(String raftState) {
+    public void setRaftState(final String raftState) {
         this.raftState = raftState;
     }
 
-    public void setLastLogTerm(long lastLogTerm) {
+    public void setLastLogTerm(final long lastLogTerm) {
         this.lastLogTerm = lastLogTerm;
     }
 
-    public void setLastLogIndex(long lastLogIndex) {
+    public void setLastLogIndex(final long lastLogIndex) {
         this.lastLogIndex = lastLogIndex;
     }
 
-    public void setCurrentTerm(long currentTerm) {
+    public void setCurrentTerm(final long currentTerm) {
         this.currentTerm = currentTerm;
     }
 
-    public void setCommitIndex(long commitIndex) {
+    public void setCommitIndex(final long commitIndex) {
         this.commitIndex = commitIndex;
     }
 
-    public void setLastApplied(long lastApplied) {
+    public void setLastApplied(final long lastApplied) {
         this.lastApplied = lastApplied;
     }
 
-    public void setLastCommittedTransactionTime(long lastCommittedTransactionTime) {
+    public void setLastCommittedTransactionTime(final long lastCommittedTransactionTime) {
         this.lastCommittedTransactionTime = lastCommittedTransactionTime;
     }
 
     @Override
     public ThreadExecutorStats getDataStoreExecutorStats() {
-        return dataStoreExecutorStatsBean == null ? null :
-                                        dataStoreExecutorStatsBean.toThreadExecutorStats();
+        // FIXME: this particular thing does not work, as it really is DS-specific
+        return null;
     }
 
     @Override
@@ -268,5 +260,9 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
         abortTransactionsCount.set(0);
 
+    }
+
+    public void setDataStore(final InMemoryDOMDataStore store) {
+        setNotificationManager(store.getDataChangeListenerNotificationManager());
     }
 }
