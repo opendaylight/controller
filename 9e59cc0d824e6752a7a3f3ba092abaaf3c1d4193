@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_3961bcd3",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/PathArgumentSerializer.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 2246
+      },
+      "writtenOn": "2014-09-20T08:35:24Z",
+      "side": 1,
+      "message": "move // to be the same indent as above.",
+      "revId": "9e59cc0d824e6752a7a3f3ba092abaaf3c1d4193",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_595e0014",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/PathArgumentSerializer.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 2246
+      },
+      "writtenOn": "2014-09-20T08:35:24Z",
+      "side": 1,
+      "message": "save //",
+      "revId": "9e59cc0d824e6752a7a3f3ba092abaaf3c1d4193",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
