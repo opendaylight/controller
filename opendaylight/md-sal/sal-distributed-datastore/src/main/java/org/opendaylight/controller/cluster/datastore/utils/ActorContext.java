@@ -13,12 +13,14 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
-import akka.pattern.Patterns;
 import akka.util.Timeout;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.Configuration;
-import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
+import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
 import org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException;
+import org.opendaylight.controller.cluster.datastore.messages.ActorNotInitialized;
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
@@ -101,14 +103,17 @@ public class ActorContext {
     }
 
     /**
-     * Finds the primary for a given shard
+     * Finds the primary shard for the given shard name
      *
      * @param shardName
      * @return
      */
-    public ActorSelection findPrimary(String shardName) {
-        String path = findPrimaryPath(shardName);
-        return actorSystem.actorSelection(path);
+    public Optional<ActorSelection> findPrimaryShard(String shardName) {
+        String path = findPrimaryPathOrNull(shardName);
+        if (path == null){
+            return Optional.absent();
+        }
+        return Optional.of(actorSystem.actorSelection(path));
     }
 
     /**
@@ -118,36 +123,36 @@ public class ActorContext {
      * @return a reference to a local shard actor which represents the shard
      *         specified by the shardName
      */
-    public ActorRef findLocalShard(String shardName) {
-        Object result = executeLocalOperation(shardManager,
-            new FindLocalShard(shardName));
+    public Optional<ActorRef> findLocalShard(String shardName) {
+        Object result = executeOperation(shardManager, new FindLocalShard(shardName));
 
         if (result instanceof LocalShardFound) {
             LocalShardFound found = (LocalShardFound) result;
-
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("Local shard found {}", found.getPath());
-            }
-            return found.getPath();
+            LOG.debug("Local shard found {}", found.getPath());
+            return Optional.of(found.getPath());
         }
 
-        return null;
+        return Optional.absent();
     }
 
 
-    public String findPrimaryPath(String shardName) {
-        Object result = executeLocalOperation(shardManager,
-            new FindPrimary(shardName).toSerializable());
+    private String findPrimaryPathOrNull(String shardName) {
+        Object result = executeOperation(shardManager, new FindPrimary(shardName).toSerializable());
 
         if (result.getClass().equals(PrimaryFound.SERIALIZABLE_CLASS)) {
             PrimaryFound found = PrimaryFound.fromSerializable(result);
 
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("Primary found {}", found.getPrimaryPath());
-            }
+            LOG.debug("Primary found {}", found.getPrimaryPath());
             return found.getPrimaryPath();
+
+        } else if (result.getClass().equals(ActorNotInitialized.class)){
+            throw new NotInitializedException(
+                String.format("Found primary shard[%s] but its not initialized yet. Please try again later", shardName)
+            );
+
+        } else {
+            return null;
         }
-        throw new PrimaryNotFoundException("Could not find primary for shardName " + shardName);
     }
 
 
@@ -158,14 +163,23 @@ public class ActorContext {
      * @param message
      * @return The response of the operation
      */
-    public Object executeLocalOperation(ActorRef actor, Object message) {
-        Future<Object> future = ask(actor, message, operationTimeout);
+    public Object executeOperation(ActorRef actor, Object message) {
+        Future<Object> future = executeOperationAsync(actor, message, operationTimeout);
 
         try {
             return Await.result(future, operationDuration);
         } catch (Exception e) {
-            throw new TimeoutException("Sending message " + message.getClass().toString() + " to actor " + actor.toString() + " failed" , e);
+            throw new TimeoutException("Sending message " + message.getClass().toString() +
+                    " to actor " + actor.toString() + " failed. Try again later.", e);
         }
+    }
+
+    public Future<Object> executeOperationAsync(ActorRef actor, Object message, Timeout timeout) {
+        Preconditions.checkArgument(actor != null, "actor must not be null");
+        Preconditions.checkArgument(message != null, "message must not be null");
+
+        LOG.debug("Sending message {} to {}", message.getClass().toString(), actor.toString());
+        return ask(actor, message, timeout);
     }
 
     /**
@@ -175,19 +189,14 @@ public class ActorContext {
      * @param message
      * @return
      */
-    public Object executeRemoteOperation(ActorSelection actor, Object message) {
-
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Sending remote message {} to {}", message.getClass().toString(),
-                actor.toString());
-        }
-        Future<Object> future = ask(actor, message, operationTimeout);
+    public Object executeOperation(ActorSelection actor, Object message) {
+        Future<Object> future = executeOperationAsync(actor, message);
 
         try {
             return Await.result(future, operationDuration);
         } catch (Exception e) {
             throw new TimeoutException("Sending message " + message.getClass().toString() +
-                    " to actor " + actor.toString() + " failed" , e);
+                    " to actor " + actor.toString() + " failed. Try again later.", e);
         }
     }
 
@@ -198,11 +207,12 @@ public class ActorContext {
      * @param message the message to send
      * @return a Future containing the eventual result
      */
-    public Future<Object> executeRemoteOperationAsync(ActorSelection actor, Object message) {
+    public Future<Object> executeOperationAsync(ActorSelection actor, Object message) {
+        Preconditions.checkArgument(actor != null, "actor must not be null");
+        Preconditions.checkArgument(message != null, "message must not be null");
 
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Sending remote message {} to {}", message.getClass().toString(), actor.toString());
-        }
+        LOG.debug("Sending message {} to {}", message.getClass().toString(), actor.toString());
+
         return ask(actor, message, operationTimeout);
     }
 
@@ -213,85 +223,14 @@ public class ActorContext {
      * @param actor the ActorSelection
      * @param message the message to send
      */
-    public void sendRemoteOperationAsync(ActorSelection actor, Object message) {
+    public void sendOperationAsync(ActorSelection actor, Object message) {
+        Preconditions.checkArgument(actor != null, "actor must not be null");
+        Preconditions.checkArgument(message != null, "message must not be null");
+
+        LOG.debug("Sending message {} to {}", message.getClass().toString(), actor.toString());
+
         actor.tell(message, ActorRef.noSender());
     }
-
-    public void sendShardOperationAsync(String shardName, Object message) {
-        ActorSelection primary = findPrimary(shardName);
-
-        primary.tell(message, ActorRef.noSender());
-    }
-
-
-    /**
-     * Execute an operation on the primary for a given shard
-     * <p>
-     * This method first finds the primary for a given shard ,then sends
-     * the message to the remote shard and waits for a response
-     * </p>
-     *
-     * @param shardName
-     * @param message
-     * @return
-     * @throws org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException         if the message to the remote shard times out
-     * @throws org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException if the primary shard is not found
-     */
-    public Object executeShardOperation(String shardName, Object message) {
-        ActorSelection primary = findPrimary(shardName);
-
-        return executeRemoteOperation(primary, message);
-    }
-
-    /**
-     * Execute an operation on the the local shard only
-     * <p>
-     *     This method first finds the address of the local shard if any. It then
-     *     executes the operation on it.
-     * </p>
-     *
-     * @param shardName the name of the shard on which the operation needs to be executed
-     * @param message the message that needs to be sent to the shard
-     * @return the message that was returned by the local actor on which the
-     *         the operation was executed. If a local shard was not found then
-     *         null is returned
-     * @throws org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException
-     *         if the operation does not complete in a specified time duration
-     */
-    public Object executeLocalShardOperation(String shardName, Object message) {
-        ActorRef local = findLocalShard(shardName);
-
-        if(local != null) {
-            return executeLocalOperation(local, message);
-        }
-
-        return null;
-    }
-
-
-    /**
-     * Execute an operation on the the local shard only asynchronously
-     *
-     * <p>
-     *     This method first finds the address of the local shard if any. It then
-     *     executes the operation on it.
-     * </p>
-     *
-     * @param shardName the name of the shard on which the operation needs to be executed
-     * @param message the message that needs to be sent to the shard
-     * @param timeout the amount of time that this method should wait for a response before timing out
-     * @return null if the shard could not be located else a future on which the caller can wait
-     *
-     */
-    public Future executeLocalShardOperationAsync(String shardName, Object message, Timeout timeout) {
-        ActorRef local = findLocalShard(shardName);
-        if(local == null){
-            return null;
-        }
-        return Patterns.ask(local, message, timeout);
-    }
-
-
 
     public void shutdown() {
         shardManager.tell(PoisonPill.getInstance(), null);
@@ -337,10 +276,13 @@ public class ActorContext {
      */
     public void broadcast(Object message){
         for(String shardName : configuration.getAllShardNames()){
-            try {
-                sendShardOperationAsync(shardName, message);
-            } catch(Exception e){
-                LOG.warn("broadcast failed to send message " +  message.getClass().getSimpleName() + " to shard " + shardName, e);
+
+            Optional<ActorSelection> primary = findPrimaryShard(shardName);
+            if (primary.isPresent()) {
+                primary.get().tell(message, ActorRef.noSender());
+            } else {
+                LOG.warn("broadcast failed to send message {} to shard {}. Primary not found",
+                        message.getClass().getSimpleName(), shardName);
             }
         }
     }

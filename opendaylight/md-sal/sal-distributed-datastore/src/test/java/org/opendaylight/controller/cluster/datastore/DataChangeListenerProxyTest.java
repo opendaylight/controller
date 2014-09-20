@@ -82,7 +82,7 @@ public class DataChangeListenerProxyTest extends AbstractActorTest {
         ActorContext
             testContext = new ActorContext(getSystem(), getSystem().actorOf(Props.create(DoNothingActor.class)), new MockClusterWrapper(), new MockConfiguration());
         Object messages = testContext
-            .executeLocalOperation(actorRef, "messages");
+            .executeOperation(actorRef, "messages");
 
         Assert.assertNotNull(messages);
 
