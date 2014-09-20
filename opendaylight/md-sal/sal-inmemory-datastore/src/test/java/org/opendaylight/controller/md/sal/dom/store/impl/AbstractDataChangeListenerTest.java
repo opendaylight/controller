@@ -7,11 +7,8 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
-import com.google.common.util.concurrent.MoreExecutors;
-
 import java.util.Collection;
 import java.util.Map;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -63,8 +60,7 @@ public abstract class AbstractDataChangeListenerTest {
         dclExecutorService = new TestDCLExecutorService(
                 SpecialExecutors.newBlockingBoundedFastThreadPool(1, 10, "DCL" ));
 
-        datastore = new InMemoryDOMDataStore("TEST",
-                MoreExecutors.sameThreadExecutor(), dclExecutorService );
+        datastore = new InMemoryDOMDataStore("TEST", dclExecutorService);
         datastore.onGlobalContextUpdated(schemaContext);
     }
 
