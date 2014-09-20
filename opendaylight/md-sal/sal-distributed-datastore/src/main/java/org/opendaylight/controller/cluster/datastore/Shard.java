@@ -27,6 +27,13 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
 import org.opendaylight.controller.cluster.common.actor.MeteringBehavior;
@@ -77,14 +84,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
-
-import javax.annotation.Nonnull;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * A Shard represents a portion of the logical data tree <br/>
@@ -140,8 +139,8 @@ public class Shard extends RaftActor {
 
     private final Map<String, DOMStoreTransactionChain> transactionChains = new HashMap<>();
 
-    protected Shard(ShardIdentifier name, Map<ShardIdentifier, String> peerAddresses,
-            DatastoreContext datastoreContext, SchemaContext schemaContext) {
+    protected Shard(final ShardIdentifier name, final Map<ShardIdentifier, String> peerAddresses,
+            final DatastoreContext datastoreContext, final SchemaContext schemaContext) {
         super(name.toString(), mapPeerAddresses(peerAddresses),
                 Optional.of(datastoreContext.getShardRaftConfig()));
 
@@ -161,7 +160,6 @@ public class Shard extends RaftActor {
 
         shardMBean = ShardMBeanFactory.getShardStatsMBean(name.toString(),
                 datastoreContext.getDataStoreMXBeanType());
-        shardMBean.setDataStoreExecutor(store.getDomStoreExecutor());
         shardMBean.setNotificationManager(store.getDataChangeListenerNotificationManager());
 
         if (isMetricsCaptureEnabled()) {
@@ -176,7 +174,7 @@ public class Shard extends RaftActor {
     }
 
     private static Map<String, String> mapPeerAddresses(
-        Map<ShardIdentifier, String> peerAddresses) {
+        final Map<ShardIdentifier, String> peerAddresses) {
         Map<String, String> map = new HashMap<>();
 
         for (Map.Entry<ShardIdentifier, String> entry : peerAddresses
@@ -189,7 +187,7 @@ public class Shard extends RaftActor {
 
     public static Props props(final ShardIdentifier name,
         final Map<ShardIdentifier, String> peerAddresses,
-        DatastoreContext datastoreContext, SchemaContext schemaContext) {
+        final DatastoreContext datastoreContext, final SchemaContext schemaContext) {
         Preconditions.checkNotNull(name, "name should not be null");
         Preconditions.checkNotNull(peerAddresses, "peerAddresses should not be null");
         Preconditions.checkNotNull(datastoreContext, "dataStoreContext should not be null");
@@ -208,7 +206,7 @@ public class Shard extends RaftActor {
     }
 
     @Override
-    public void onReceiveRecover(Object message) throws Exception {
+    public void onReceiveRecover(final Object message) throws Exception {
         if(LOG.isDebugEnabled()) {
             LOG.debug("onReceiveRecover: Received message {} from {}",
                 message.getClass().toString(),
@@ -227,7 +225,7 @@ public class Shard extends RaftActor {
     }
 
     @Override
-    public void onReceiveCommand(Object message) throws Exception {
+    public void onReceiveCommand(final Object message) throws Exception {
         if(LOG.isDebugEnabled()) {
             LOG.debug("onReceiveCommand: Received message {} from {}", message, getSender());
         }
@@ -274,7 +272,7 @@ public class Shard extends RaftActor {
         }
     }
 
-    private void handleCommitTransaction(CommitTransaction commit) {
+    private void handleCommitTransaction(final CommitTransaction commit) {
         final String transactionID = commit.getTransactionID();
 
         LOG.debug("Committing transaction {}", transactionID);
@@ -369,7 +367,7 @@ public class Shard extends RaftActor {
         commitCoordinator.currentTransactionComplete(transactionID, true);
     }
 
-    private void handleCanCommitTransaction(CanCommitTransaction canCommit) {
+    private void handleCanCommitTransaction(final CanCommitTransaction canCommit) {
         LOG.debug("Can committing transaction {}", canCommit.getTransactionID());
         commitCoordinator.handleCanCommit(canCommit, getSender(), self());
     }
@@ -402,11 +400,11 @@ public class Shard extends RaftActor {
                 readyTransactionReply, getSelf());
     }
 
-    private void handleAbortTransaction(AbortTransaction abort) {
+    private void handleAbortTransaction(final AbortTransaction abort) {
         doAbortTransaction(abort.getTransactionID(), getSender());
     }
 
-    private void doAbortTransaction(String transactionID, final ActorRef sender) {
+    private void doAbortTransaction(final String transactionID, final ActorRef sender) {
         final CohortEntry cohortEntry = commitCoordinator.getCohortEntryIfCurrent(transactionID);
         if(cohortEntry != null) {
             LOG.debug("Aborting transaction {}", transactionID);
@@ -421,7 +419,7 @@ public class Shard extends RaftActor {
 
             Futures.addCallback(future, new FutureCallback<Void>() {
                 @Override
-                public void onSuccess(Void v) {
+                public void onSuccess(final Void v) {
                     shardMBean.incrementAbortTransactionsCount();
 
                     if(sender != null) {
@@ -430,7 +428,7 @@ public class Shard extends RaftActor {
                 }
 
                 @Override
-                public void onFailure(Throwable t) {
+                public void onFailure(final Throwable t) {
                     LOG.error(t, "An exception happened during abort");
 
                     if(sender != null) {
@@ -441,7 +439,7 @@ public class Shard extends RaftActor {
         }
     }
 
-    private void handleCreateTransaction(Object message) {
+    private void handleCreateTransaction(final Object message) {
         if (isLeader()) {
             createTransaction(CreateTransaction.fromSerializable(message));
         } else if (getLeader() != null) {
@@ -454,7 +452,7 @@ public class Shard extends RaftActor {
         }
     }
 
-    private void handleReadDataReply(Object message) {
+    private void handleReadDataReply(final Object message) {
         // This must be for install snapshot. Don't want to open this up and trigger
         // deSerialization
 
@@ -468,7 +466,7 @@ public class Shard extends RaftActor {
         getSender().tell(PoisonPill.getInstance(), self());
     }
 
-    private void closeTransactionChain(CloseTransactionChain closeTransactionChain) {
+    private void closeTransactionChain(final CloseTransactionChain closeTransactionChain) {
         DOMStoreTransactionChain chain =
             transactionChains.remove(closeTransactionChain.getTransactionChainId());
 
@@ -532,7 +530,7 @@ public class Shard extends RaftActor {
         }
     }
 
-    private void createTransaction(CreateTransaction createTransaction) {
+    private void createTransaction(final CreateTransaction createTransaction) {
         createTransaction(createTransaction.getTransactionType(),
             createTransaction.getTransactionId(), createTransaction.getTransactionChainId(),
             createTransaction.getVersion());
@@ -560,14 +558,14 @@ public class Shard extends RaftActor {
         return transactionActor;
     }
 
-    private void syncCommitTransaction(DOMStoreWriteTransaction transaction)
+    private void syncCommitTransaction(final DOMStoreWriteTransaction transaction)
         throws ExecutionException, InterruptedException {
         DOMStoreThreePhaseCommitCohort commitCohort = transaction.ready();
         commitCohort.preCommit().get();
         commitCohort.commit().get();
     }
 
-    private void commitWithNewTransaction(Modification modification) {
+    private void commitWithNewTransaction(final Modification modification) {
         DOMStoreWriteTransaction tx = store.newWriteOnlyTransaction();
         modification.apply(tx);
         try {
@@ -580,18 +578,18 @@ public class Shard extends RaftActor {
         }
     }
 
-    private void updateSchemaContext(UpdateSchemaContext message) {
+    private void updateSchemaContext(final UpdateSchemaContext message) {
         this.schemaContext = message.getSchemaContext();
         updateSchemaContext(message.getSchemaContext());
         store.onGlobalContextUpdated(message.getSchemaContext());
     }
 
     @VisibleForTesting
-    void updateSchemaContext(SchemaContext schemaContext) {
+    void updateSchemaContext(final SchemaContext schemaContext) {
         store.onGlobalContextUpdated(schemaContext);
     }
 
-    private void registerChangeListener(RegisterChangeListener registerChangeListener) {
+    private void registerChangeListener(final RegisterChangeListener registerChangeListener) {
 
         LOG.debug("registerDataChangeListener for {}", registerChangeListener.getPath());
 
@@ -619,7 +617,7 @@ public class Shard extends RaftActor {
 
     private ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
                                                NormalizedNode<?, ?>>> doChangeListenerRegistration(
-            RegisterChangeListener registerChangeListener) {
+            final RegisterChangeListener registerChangeListener) {
 
         ActorSelection dataChangeListenerPath = getContext().system().actorSelection(
                 registerChangeListener.getDataChangeListenerPath());
@@ -649,7 +647,7 @@ public class Shard extends RaftActor {
 
     @Override
     protected
-    void startLogRecoveryBatch(int maxBatchSize) {
+    void startLogRecoveryBatch(final int maxBatchSize) {
         currentLogRecoveryBatch = Lists.newArrayListWithCapacity(maxBatchSize);
 
         if(LOG.isDebugEnabled()) {
@@ -658,7 +656,7 @@ public class Shard extends RaftActor {
     }
 
     @Override
-    protected void appendRecoveredLogEntry(Payload data) {
+    protected void appendRecoveredLogEntry(final Payload data) {
         if (data instanceof CompositeModificationPayload) {
             currentLogRecoveryBatch.add(((CompositeModificationPayload) data).getModification());
         } else {
@@ -667,7 +665,7 @@ public class Shard extends RaftActor {
     }
 
     @Override
-    protected void applyRecoverySnapshot(ByteString snapshot) {
+    protected void applyRecoverySnapshot(final ByteString snapshot) {
         if(recoveryCoordinator == null) {
             recoveryCoordinator = new ShardRecoveryCoordinator(persistenceId(), schemaContext);
         }
@@ -732,7 +730,7 @@ public class Shard extends RaftActor {
     }
 
     @Override
-    protected void applyState(ActorRef clientActor, String identifier, Object data) {
+    protected void applyState(final ActorRef clientActor, final String identifier, final Object data) {
 
         if (data instanceof CompositeModificationPayload) {
             Object modification = ((CompositeModificationPayload) data).getModification();
@@ -791,7 +789,7 @@ public class Shard extends RaftActor {
 
     @VisibleForTesting
     @Override
-    protected void applySnapshot(ByteString snapshot) {
+    protected void applySnapshot(final ByteString snapshot) {
         // Since this will be done only on Recovery or when this actor is a Follower
         // we can safely commit everything in here. We not need to worry about event notifications
         // as they would have already been disabled on the follower
@@ -856,7 +854,7 @@ public class Shard extends RaftActor {
         return dataPersistenceProvider;
     }
 
-    @Override protected void onLeaderChanged(String oldLeader, String newLeader) {
+    @Override protected void onLeaderChanged(final String oldLeader, final String newLeader) {
         shardMBean.setLeader(newLeader);
     }
 
@@ -878,8 +876,8 @@ public class Shard extends RaftActor {
         final DatastoreContext datastoreContext;
         final SchemaContext schemaContext;
 
-        ShardCreator(ShardIdentifier name, Map<ShardIdentifier, String> peerAddresses,
-                DatastoreContext datastoreContext, SchemaContext schemaContext) {
+        ShardCreator(final ShardIdentifier name, final Map<ShardIdentifier, String> peerAddresses,
+                final DatastoreContext datastoreContext, final SchemaContext schemaContext) {
             this.name = name;
             this.peerAddresses = peerAddresses;
             this.datastoreContext = datastoreContext;
@@ -912,11 +910,11 @@ public class Shard extends RaftActor {
         private volatile ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
                                                              NormalizedNode<?, ?>>> delegate;
 
-        DelayedListenerRegistration(RegisterChangeListener registerChangeListener) {
+        DelayedListenerRegistration(final RegisterChangeListener registerChangeListener) {
             this.registerChangeListener = registerChangeListener;
         }
 
-        void setDelegate( ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
+        void setDelegate( final ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
                                             NormalizedNode<?, ?>>> registration) {
             this.delegate = registration;
         }
