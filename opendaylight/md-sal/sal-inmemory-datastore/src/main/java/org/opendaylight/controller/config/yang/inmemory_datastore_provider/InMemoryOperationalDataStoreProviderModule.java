@@ -28,8 +28,7 @@ public class InMemoryOperationalDataStoreProviderModule extends org.opendaylight
                         getMaxDataStoreExecutorQueueSize()));
 
 
-        InMemoryDataStoreStats statsBean = new InMemoryDataStoreStats("InMemoryOperationalDataStore",
-                dataStore.getDataChangeListenerNotificationManager(), dataStore.getDomStoreExecutor());
+        InMemoryDataStoreStats statsBean = new InMemoryDataStoreStats("InMemoryOperationalDataStore", dataStore);
 
         dataStore.setCloseable(statsBean);
 

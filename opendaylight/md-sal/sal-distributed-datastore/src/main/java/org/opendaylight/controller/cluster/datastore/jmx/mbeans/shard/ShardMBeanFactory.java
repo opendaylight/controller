@@ -7,14 +7,12 @@
  */
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Basheeruddin syedbahm@cisco.com
@@ -24,7 +22,7 @@ public class ShardMBeanFactory {
 
     private static final Logger LOG = LoggerFactory.getLogger(ShardMBeanFactory.class);
 
-    private static Cache<String,ShardStats> shardMBeansCache =
+    private static final Cache<String,ShardStats> shardMBeansCache =
                                       CacheBuilder.newBuilder().weakValues().build();
 
     public static ShardStats getShardStatsMBean(final String shardName, final String mxBeanType) {

@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.benchmark;
 
-import com.google.common.util.concurrent.MoreExecutors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
@@ -44,8 +43,7 @@ public class InMemoryDataStoreWithSameThreadedExecutorBenchmark extends Abstract
         final ExecutorService dataChangeListenerExecutor = SpecialExecutors.newBlockingBoundedFastThreadPool(
             MAX_DATA_CHANGE_EXECUTOR_POOL_SIZE, MAX_DATA_CHANGE_EXECUTOR_QUEUE_SIZE, name + "-DCL");
 
-        domStore = new InMemoryDOMDataStore("SINGLE_THREADED_DS_BENCHMARK", MoreExecutors.sameThreadExecutor(),
-            dataChangeListenerExecutor);
+        domStore = new InMemoryDOMDataStore("SINGLE_THREADED_DS_BENCHMARK", dataChangeListenerExecutor);
         schemaContext = BenchmarkModel.createTestContext();
         domStore.onGlobalContextUpdated(schemaContext);
         initTestNode();

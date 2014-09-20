@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
 import java.util.concurrent.ExecutorService;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
@@ -73,9 +71,7 @@ public final class InMemoryDOMDataStoreFactory {
         ExecutorService dataChangeListenerExecutor = SpecialExecutors.newBlockingBoundedFastThreadPool(
                 dclExecutorMaxPoolSize, dclExecutorMaxQueueSize, name + "-DCL" );
 
-        final ListeningExecutorService commitExecutor = MoreExecutors.sameThreadExecutor();
-        final InMemoryDOMDataStore dataStore = new InMemoryDOMDataStore(name,
-            commitExecutor, dataChangeListenerExecutor,
+        final InMemoryDOMDataStore dataStore = new InMemoryDOMDataStore(name, dataChangeListenerExecutor,
                 actualProperties.getMaxDataChangeListenerQueueSize(), debugTransactions);
 
         if (schemaService != null) {
