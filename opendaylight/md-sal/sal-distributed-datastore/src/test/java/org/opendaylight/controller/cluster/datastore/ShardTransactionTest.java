@@ -9,7 +9,6 @@ import akka.actor.Props;
 import akka.actor.Terminated;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
-import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
@@ -48,11 +47,8 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.duration.Duration;
 
 public class ShardTransactionTest extends AbstractActorTest {
-    private static ListeningExecutorService storeExecutor =
-        MoreExecutors.listeningDecorator(MoreExecutors.sameThreadExecutor());
-
     private static final InMemoryDOMDataStore store =
-        new InMemoryDOMDataStore("OPER", storeExecutor, MoreExecutors.sameThreadExecutor());
+        new InMemoryDOMDataStore("OPER", MoreExecutors.sameThreadExecutor());
 
     private static final SchemaContext testSchemaContext = TestModel.createTestContext();
 

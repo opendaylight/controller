@@ -1,9 +1,9 @@
 package org.opendaylight.controller.cluster.datastore;
 
+import static org.junit.Assert.assertEquals;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.testkit.JavaTestKit;
-import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataChangeListenerRegistration;
@@ -16,13 +16,8 @@ import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-import static org.junit.Assert.assertEquals;
-
 public class DataChangeListenerRegistrationTest extends AbstractActorTest {
-  private static ListeningExecutorService storeExecutor = MoreExecutors.listeningDecorator(MoreExecutors.sameThreadExecutor());
-
-  private static final InMemoryDOMDataStore store = new InMemoryDOMDataStore("OPER", storeExecutor,
-          MoreExecutors.sameThreadExecutor());
+  private static final InMemoryDOMDataStore store = new InMemoryDOMDataStore("OPER", MoreExecutors.sameThreadExecutor());
 
   static {
     store.onGlobalContextUpdated(TestModel.createTestContext());
@@ -46,7 +41,7 @@ public class DataChangeListenerRegistrationTest extends AbstractActorTest {
           final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
             // do not put code outside this method, will run afterwards
             @Override
-            protected String match(Object in) {
+            protected String match(final Object in) {
               if (in.getClass().equals(CloseDataChangeListenerRegistrationReply.SERIALIZABLE_CLASS)) {
                 return "match";
               } else {
@@ -68,7 +63,7 @@ public class DataChangeListenerRegistrationTest extends AbstractActorTest {
   private  AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> noOpDataChangeListener(){
     return new AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>() {
       @Override
-      public void onDataChanged(AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
+      public void onDataChanged(final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
 
       }
     };
