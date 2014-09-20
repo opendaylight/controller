@@ -8,10 +8,12 @@ import akka.actor.Props;
 import akka.dispatch.ExecutionContexts;
 import akka.dispatch.Futures;
 import akka.util.Timeout;
+import com.google.common.base.Optional;
 import com.google.common.util.concurrent.MoreExecutors;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
@@ -119,8 +121,9 @@ public class DistributedDataStoreTest extends AbstractActorTest{
         Future future = mock(Future.class);
         when(actorContext.getOperationDuration()).thenReturn(FiniteDuration.apply(5, TimeUnit.SECONDS));
         when(actorContext.getActorSystem()).thenReturn(getSystem());
+        when(actorContext.findLocalShard(anyString())).thenReturn(Optional.of(doNothingActorRef));
         when(actorContext
-            .executeLocalShardOperationAsync(anyString(), anyObject(), any(Timeout.class))).thenReturn(future);
+                .executeOperationAsync(eq(doNothingActorRef), anyObject(), any(Timeout.class))).thenReturn(future);
 
         ListenerRegistration registration =
             distributedDataStore.registerChangeListener(TestModel.TEST_PATH,
@@ -130,6 +133,23 @@ public class DistributedDataStoreTest extends AbstractActorTest{
         assertNotNull(registration);
 
         assertEquals(DataChangeListenerRegistrationProxy.class, registration.getClass());
+    }
+
+    @Test(expected = NotInitializedException.class)
+    public void testRegisterChangeListenerWhenShardIsNotInitialized() throws Exception {
+        ActorContext actorContext = mock(ActorContext.class);
+
+        distributedDataStore = new DistributedDataStore(actorContext);
+        distributedDataStore.onGlobalContextUpdated(TestModel.createTestContext());
+
+        when(actorContext.getOperationDuration()).thenReturn(FiniteDuration.apply(5, TimeUnit.SECONDS));
+        when(actorContext.getActorSystem()).thenReturn(getSystem());
+        when(actorContext.findLocalShard(anyString())).thenThrow(NotInitializedException.class);
+
+        ListenerRegistration registration =
+                distributedDataStore.registerChangeListener(TestModel.TEST_PATH,
+                        mock(AsyncDataChangeListener.class),
+                        AsyncDataBroker.DataChangeScope.BASE);
     }
 
     @Test
@@ -153,8 +173,9 @@ public class DistributedDataStoreTest extends AbstractActorTest{
         when(actorSystem.dispatcher()).thenReturn(executor);
         when(actorSystem.actorOf(any(Props.class))).thenReturn(doNothingActorRef);
         when(actorContext.getActorSystem()).thenReturn(actorSystem);
+        when(actorContext.findLocalShard(anyString())).thenReturn(Optional.of(doNothingActorRef));
         when(actorContext
-            .executeLocalShardOperationAsync(anyString(), anyObject(), any(Timeout.class))).thenReturn(f);
+            .executeOperationAsync(eq(doNothingActorRef), anyObject(), any(Timeout.class))).thenReturn(f);
         when(actorContext.actorSelection(any(ActorPath.class))).thenReturn(actorSelection);
 
         ListenerRegistration registration =
@@ -195,8 +216,9 @@ public class DistributedDataStoreTest extends AbstractActorTest{
         when(actorSystem.dispatcher()).thenReturn(executor);
         when(actorSystem.actorOf(any(Props.class))).thenReturn(doNothingActorRef);
         when(actorContext.getActorSystem()).thenReturn(actorSystem);
+        when(actorContext.findLocalShard(anyString())).thenReturn(Optional.of(doNothingActorRef));
         when(actorContext
-            .executeLocalShardOperationAsync(anyString(), anyObject(), any(Timeout.class))).thenReturn(f);
+            .executeOperationAsync(eq(doNothingActorRef), anyObject(), any(Timeout.class))).thenReturn(f);
         when(actorContext.actorSelection(any(ActorPath.class))).thenReturn(actorSelection);
 
         ListenerRegistration registration =

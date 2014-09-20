@@ -157,7 +157,7 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
             }
             ActorSelection cohort = actorContext.actorSelection(actorPath);
 
-            futureList.add(actorContext.executeRemoteOperationAsync(cohort, message));
+            futureList.add(actorContext.executeOperationAsync(cohort, message));
         }
 
         return Futures.sequence(futureList, actorContext.getActorSystem().dispatcher());
