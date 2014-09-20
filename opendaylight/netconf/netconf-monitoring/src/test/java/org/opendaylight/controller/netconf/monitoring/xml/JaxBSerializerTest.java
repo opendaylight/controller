@@ -69,11 +69,11 @@ public class JaxBSerializerTest {
                 "<session-id>1</session-id>" +
                 "<in-bad-rpcs>0</in-bad-rpcs>" +
                 "<in-rpcs>0</in-rpcs>" +
-                "<login-time>loginTime</login-time>" +
+                "<login-time>2010-10-10T12:32:32Z</login-time>" +
                 "<out-notifications>0</out-notifications>" +
                 "<out-rpc-errors>0</out-rpc-errors>" +
                 "<ncme:session-identifier>client</ncme:session-identifier>" +
-                "<source-host>address/port</source-host>" +
+                "<source-host>192.168.1.1</source-host>" +
                 "<transport>ncme:netconf-tcp</transport>" +
                 "<username>username</username>" +
                 "</session>"));
@@ -96,8 +96,8 @@ public class JaxBSerializerTest {
         final Session1 mockedSession1 = mock(Session1.class);
         doReturn("client").when(mockedSession1).getSessionIdentifier();
         doReturn(1L).when(mocked).getSessionId();
-        doReturn(new DateAndTime("loginTime")).when(mocked).getLoginTime();
-        doReturn(new Host(new DomainName("address/port"))).when(mocked).getSourceHost();
+        doReturn(new DateAndTime("2010-10-10T12:32:32Z")).when(mocked).getLoginTime();
+        doReturn(new Host(new DomainName("192.168.1.1"))).when(mocked).getSourceHost();
         doReturn(new ZeroBasedCounter32(0L)).when(mocked).getInBadRpcs();
         doReturn(new ZeroBasedCounter32(0L)).when(mocked).getInRpcs();
         doReturn(new ZeroBasedCounter32(0L)).when(mocked).getOutNotifications();
