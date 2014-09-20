@@ -101,7 +101,6 @@ import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
-
 public class ShardTest extends AbstractActorTest {
 
     private static final SchemaContext SCHEMA_CONTEXT = TestModel.createTestContext();
@@ -1264,8 +1263,7 @@ public class ShardTest extends AbstractActorTest {
      */
     @Test
     public void testInMemoryDataStoreRestore() throws ReadFailedException {
-        InMemoryDOMDataStore store = new InMemoryDOMDataStore("test", MoreExecutors.listeningDecorator(
-            MoreExecutors.sameThreadExecutor()), MoreExecutors.sameThreadExecutor());
+        InMemoryDOMDataStore store = new InMemoryDOMDataStore("test", MoreExecutors.sameThreadExecutor());
 
         store.onGlobalContextUpdated(SCHEMA_CONTEXT);
 
@@ -1287,7 +1285,6 @@ public class ShardTest extends AbstractActorTest {
         NormalizedNode<?, ?> actual = readStore(store);
 
         assertEquals(expected, actual);
-
     }
 
     @Test
