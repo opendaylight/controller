@@ -249,8 +249,8 @@ public class ShardManager extends AbstractUntypedActorWithMetering {
             ShardIdentifier shardId = getShardIdentifier(memberName, shardName);
             Map<ShardIdentifier, String> peerAddresses = getPeerAddresses(shardName);
             ActorRef actor = getContext()
-                .actorOf(Shard.props(shardId, peerAddresses, datastoreContext, schemaContext).
-                    withMailbox(ActorContext.MAILBOX), shardId.toString());
+                .actorOf(Shard.props(shardId, peerAddresses, datastoreContext, schemaContext),
+                    shardId.toString());
             localShardActorNames.add(shardId.toString());
             localShards.put(shardName, new ShardInformation(shardName, actor, peerAddresses));
         }
