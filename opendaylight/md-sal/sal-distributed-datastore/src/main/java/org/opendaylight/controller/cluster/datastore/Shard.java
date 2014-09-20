@@ -33,6 +33,7 @@ import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardTransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardMBeanFactory;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
+import org.opendaylight.controller.cluster.datastore.messages.ActorInitialized;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChain;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
@@ -222,7 +223,9 @@ public class Shard extends RaftActor {
                 getLeader().forward(message, getContext());
             } else {
                 getSender().tell(new akka.actor.Status.Failure(new IllegalStateException(
-                    "Could not find leader so transaction cannot be created")), getSelf());
+                    "Could not find shard leader so transaction cannot be created. This typically happens" +
+                            " when system is coming up or recovering and a leader is being elected. Try again" +
+                            " later.")), getSelf());
             }
         } else if (message instanceof PeerAddressResolved) {
             PeerAddressResolved resolved = (PeerAddressResolved) message;
@@ -522,6 +525,9 @@ public class Shard extends RaftActor {
         recoveryCoordinator = null;
         currentLogRecoveryBatch = null;
         updateJournalStats();
+
+        //notify shard manager
+        getContext().parent().tell(new ActorInitialized(), getSelf());
     }
 
     @Override
