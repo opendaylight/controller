@@ -41,10 +41,8 @@ public class InMemoryBrokerWriteTransactionBenchmark extends AbstractInMemoryBro
         executor = MoreExecutors.listeningDecorator(
             MoreExecutors.getExitingExecutorService((ThreadPoolExecutor)Executors.newFixedThreadPool(1), 1L, TimeUnit.SECONDS));
 
-        InMemoryDOMDataStore operStore = new InMemoryDOMDataStore("OPER", dsExec,
-            MoreExecutors.sameThreadExecutor());
-        InMemoryDOMDataStore configStore = new InMemoryDOMDataStore("CFG", dsExec,
-            MoreExecutors.sameThreadExecutor());
+        InMemoryDOMDataStore operStore = new InMemoryDOMDataStore("OPER", dsExec);
+        InMemoryDOMDataStore configStore = new InMemoryDOMDataStore("CFG", dsExec);
         Map<LogicalDatastoreType, DOMStore> datastores = ImmutableMap.of(
             LogicalDatastoreType.OPERATIONAL, (DOMStore)operStore,
             LogicalDatastoreType.CONFIGURATION, configStore);
