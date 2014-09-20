@@ -241,20 +241,20 @@ public class InventoryAndReadAdapter implements IPluginInReadService, IPluginInI
      * @param id Table id
      * @return Table contents, or null if not present
      */
-    private Table readConfigTable(final Node node, final short id) {
+    private Table readOperationalTable(final Node node, final short id) {
         final InstanceIdentifier<Table> tableRef = InstanceIdentifier.builder(Nodes.class)
-                .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node.class, InventoryMapping.toNodeKey(node))
+                .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node.class, NodeMapping.toNodeKey(node))
                 .augmentation(FlowCapableNode.class)
                 .child(Table.class, new TableKey(id))
                 .build();
 
-        return (Table) startChange().readConfigurationData(tableRef);
+        return (Table) startChange().readOperationalData(tableRef);
     }
 
     @Override
     public List<FlowOnNode> readAllFlow(final Node node, final boolean cached) {
         final ArrayList<FlowOnNode> output = new ArrayList<>();
-        final Table table = readConfigTable(node, OPENFLOWV10_TABLE_ID);
+        final Table table = readOperationalTable(node, OPENFLOWV10_TABLE_ID);
         if (table != null) {
             final List<Flow> flows = table.getFlow();
             LOG.trace("Number of flows installed in table 0 of node {} : {}", node, flows.size());
@@ -268,12 +268,6 @@ public class InventoryAndReadAdapter implements IPluginInReadService, IPluginInI
             }
         }
 
-        // TODO (main): Shall we send request to the switch? It will make async request to the switch.
-        // Once the plugin receives a response, it will let the adaptor know through onFlowStatisticsUpdate()
-        // If we assume that md-sal statistics manager will always be running, then it is not required
-        // But if not, then sending request will collect the latest data for adaptor at least.
-        getFlowStatisticsService().getAllFlowsStatisticsFromAllFlowTables(
-                new GetAllFlowsStatisticsFromAllFlowTablesInputBuilder().setNode(NodeMapping.toNodeRef(node)).build());
         return output;
     }
 
@@ -334,7 +328,7 @@ public class InventoryAndReadAdapter implements IPluginInReadService, IPluginInI
     @Override
     public FlowOnNode readFlow(final Node node, final org.opendaylight.controller.sal.flowprogrammer.Flow targetFlow, final boolean cached) {
         FlowOnNode ret = null;
-        final Table table = readConfigTable(node, OPENFLOWV10_TABLE_ID);
+        final Table table = readOperationalTable(node, OPENFLOWV10_TABLE_ID);
         if (table != null) {
             final List<Flow> flows = table.getFlow();
             InventoryAndReadAdapter.LOG.trace("Number of flows installed in table 0 of node {} : {}", node, flows.size());
@@ -386,7 +380,7 @@ public class InventoryAndReadAdapter implements IPluginInReadService, IPluginInI
     @Override
     public NodeTableStatistics readNodeTable(final NodeTable nodeTable, final boolean cached) {
         NodeTableStatistics nodeStats = null;
-        final Table table = readConfigTable(nodeTable.getNode(), (short) nodeTable.getID());
+        final Table table = readOperationalTable(nodeTable.getNode(), (short) nodeTable.getID());
         if (table != null) {
             final FlowTableStatisticsData tableStats = table.getAugmentation(FlowTableStatisticsData.class);
             if (tableStats != null) {
