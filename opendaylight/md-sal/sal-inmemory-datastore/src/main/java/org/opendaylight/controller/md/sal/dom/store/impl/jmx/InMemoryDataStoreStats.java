@@ -8,10 +8,10 @@
 
 package org.opendaylight.controller.md.sal.dom.store.impl.jmx;
 
-import java.util.concurrent.ExecutorService;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 import org.opendaylight.controller.md.sal.common.util.jmx.QueuedNotificationManagerMXBeanImpl;
 import org.opendaylight.controller.md.sal.common.util.jmx.ThreadExecutorStatsMXBeanImpl;
+import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.yangtools.util.concurrent.QueuedNotificationManager;
 
 /**
@@ -22,11 +22,9 @@ import org.opendaylight.yangtools.util.concurrent.QueuedNotificationManager;
 public class InMemoryDataStoreStats implements AutoCloseable {
 
     private final AbstractMXBean notificationExecutorStatsBean;
-    private final AbstractMXBean dataStoreExecutorStatsBean;
     private final QueuedNotificationManagerMXBeanImpl notificationManagerStatsBean;
 
-    public InMemoryDataStoreStats(final String mBeanType, final QueuedNotificationManager<?, ?> manager,
-            final ExecutorService dataStoreExecutor) {
+    public InMemoryDataStoreStats(final String mBeanType, final QueuedNotificationManager<?, ?> manager) {
 
         notificationManagerStatsBean = new QueuedNotificationManagerMXBeanImpl(manager,
                 "notification-manager", mBeanType, null);
@@ -37,22 +35,16 @@ public class InMemoryDataStoreStats implements AutoCloseable {
         if (notificationExecutorStatsBean != null) {
             notificationExecutorStatsBean.registerMBean();
         }
+    }
 
-        dataStoreExecutorStatsBean = ThreadExecutorStatsMXBeanImpl.create(dataStoreExecutor,
-                "data-store-executor", mBeanType, null);
-        if (dataStoreExecutorStatsBean != null) {
-            dataStoreExecutorStatsBean.registerMBean();
-        }
+    public InMemoryDataStoreStats(final String name, final InMemoryDOMDataStore dataStore) {
+        this(name, dataStore.getDataChangeListenerNotificationManager());
     }
 
     @Override
     public void close() throws Exception {
         if(notificationExecutorStatsBean != null) {
             notificationExecutorStatsBean.unregisterMBean();
-        }
-
-        if(dataStoreExecutorStatsBean != null) {
-            dataStoreExecutorStatsBean.unregisterMBean();
         }
 
         if(notificationManagerStatsBean != null) {
