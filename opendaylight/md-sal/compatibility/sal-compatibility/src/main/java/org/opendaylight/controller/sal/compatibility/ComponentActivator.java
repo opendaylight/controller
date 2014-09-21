@@ -139,6 +139,7 @@ public class ComponentActivator extends ComponentActivatorAbstractBase {
     protected Object[] getImplementations() {
         return new Object[] {
                 dataPacketService,
+                inventory,
         };
     }
 
@@ -148,6 +149,8 @@ public class ComponentActivator extends ComponentActivatorAbstractBase {
             _instanceConfigure((ComponentActivator)imp, c, containerName);
         } else if (imp instanceof DataPacketServiceAdapter) {
             _instanceConfigure((DataPacketServiceAdapter)imp, c, containerName);
+        } else if (imp instanceof InventoryAndReadAdapter) {
+            _instanceConfigure((InventoryAndReadAdapter)imp, c, containerName);
         } else {
             throw new IllegalArgumentException(String.format("Unhandled implementation class %s", imp.getClass()));
         }
@@ -212,6 +215,22 @@ public class ComponentActivator extends ComponentActivatorAbstractBase {
         it.add(createServiceDependency()
                 .setService(IDiscoveryService.class)
                 .setCallbacks("setDiscoveryPublisher", "setDiscoveryPublisher")
+                .setRequired(false));
+    }
+
+    private void _instanceConfigure(final InventoryAndReadAdapter imp, final Component it, String containerName) {
+        it.setInterface(new String[] {
+                IPluginInInventoryService.class.getName(),
+                IPluginInReadService.class.getName(),
+        }, properties());
+
+        it.add(createServiceDependency()
+                .setService(IPluginOutReadService.class)
+                .setCallbacks("setReadPublisher", "unsetReadPublisher")
+                .setRequired(false));
+        it.add(createServiceDependency()
+                .setService(IPluginOutInventoryService.class)
+                .setCallbacks("setInventoryPublisher", "unsetInventoryPublisher")
                 .setRequired(false));
     }
 
