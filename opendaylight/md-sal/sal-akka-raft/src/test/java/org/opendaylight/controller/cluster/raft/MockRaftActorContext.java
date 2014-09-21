@@ -200,6 +200,10 @@ public class MockRaftActorContext implements RaftActorContext {
     public static class MockPayload extends Payload implements Serializable {
         private String value = "";
 
+        public MockPayload(){
+
+        }
+
         public MockPayload(String s) {
             this.value = s;
         }
@@ -249,6 +253,26 @@ public class MockRaftActorContext implements RaftActorContext {
 
         @Override public long getIndex() {
             return index;
+        }
+    }
+
+    public static class MockReplicatedLogBuilder {
+        private ReplicatedLog mockLog = new SimpleReplicatedLog();
+
+        public  MockReplicatedLogBuilder createEntries(int start, int end, int term) {
+            for (int i=start; i<end; i++) {
+                this.mockLog.append(new ReplicatedLogImplEntry(i, term, new MockRaftActorContext.MockPayload("foo" + i)));
+            }
+            return this;
+        }
+
+        public  MockReplicatedLogBuilder addEntry(int index, int term, MockPayload payload) {
+            this.mockLog.append(new ReplicatedLogImplEntry(index, term, payload));
+            return this;
+        }
+
+        public ReplicatedLog build() {
+            return this.mockLog;
         }
     }
 }
