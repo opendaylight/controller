@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_9450cd5f",
+        "filename": "opendaylight/config/config-persister-feature-adapter/src/main/java/org/opendaylight/controller/configpusherfeature/internal/FeatureConfigPusher.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-09-22T07:20:24Z",
+      "side": 1,
+      "message": "You are not incrementing retry count so this makes loop effectivelly\ninfinite.",
+      "revId": "813114e21c43631e5d8690947d99b3a24e812834",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
