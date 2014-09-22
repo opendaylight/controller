@@ -233,6 +233,9 @@ public class NeutronPortInterface implements INeutronPortCRUD, IConfigurationCon
         portDB.putIfAbsent(input.getID(), input);
         // if there are no fixed IPs, allocate one for each subnet in the network
         INeutronSubnetCRUD systemCRUD = NeutronCRUDInterfaces.getINeutronSubnetCRUD(this);
+        if (input.getFixedIPs() == null){
+           input.setFixedIPs(new ArrayList<Neutron_IPs>());
+        }
         if (input.getFixedIPs().size() == 0) {
             List<Neutron_IPs> list = input.getFixedIPs();
             Iterator<NeutronSubnet> subnetIterator = systemCRUD.getAllSubnets().iterator();
