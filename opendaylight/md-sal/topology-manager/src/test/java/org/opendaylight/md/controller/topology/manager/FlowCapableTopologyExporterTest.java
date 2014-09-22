@@ -8,29 +8,11 @@
 
 package org.opendaylight.md.controller.topology.manager;
 
-import static org.junit.Assert.fail;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.SettableFuture;
+import com.google.common.util.concurrent.Uninterruptibles;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -82,17 +64,36 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.LinkBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.LinkKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.SettableFuture;
-import com.google.common.util.concurrent.Uninterruptibles;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 public class FlowCapableTopologyExporterTest {
 
@@ -135,8 +136,12 @@ public class FlowCapableTopologyExporterTest {
     @Test
     public void testOnNodeRemoved() {
 
+        NodeKey topoNodeKey = new NodeKey(new NodeId("node1"));
+        InstanceIdentifier<Node> topoNodeII = topologyIID.child(Node.class, topoNodeKey);
+        Node topoNode = new NodeBuilder().setKey(topoNodeKey).build();
+
         org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey
-                                                                nodeKey = newInvNodeKey("node1");
+                                                                nodeKey = newInvNodeKey(topoNodeKey.getNodeId().getValue());
         InstanceIdentifier<?> invNodeID = InstanceIdentifier.create(Nodes.class).child(
                 org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node.class,
                 nodeKey);
@@ -154,9 +159,15 @@ public class FlowCapableTopologyExporterTest {
             };
 
         SettableFuture<Optional<Topology>> readFuture = SettableFuture.create();
+        readFuture.set(Optional.of(topology));
         ReadWriteTransaction mockTx1 = mock(ReadWriteTransaction.class);
         doReturn(Futures.makeChecked(readFuture, ReadFailedException.MAPPER)).when(mockTx1)
                 .read(LogicalDatastoreType.OPERATIONAL, topologyIID);
+
+        SettableFuture<Optional<Node>> readFutureNode = SettableFuture.create();
+        readFutureNode.set(Optional.of(topoNode));
+        doReturn(Futures.makeChecked(readFutureNode, ReadFailedException.MAPPER)).when(mockTx1)
+                .read(LogicalDatastoreType.OPERATIONAL, topoNodeII);
 
         CountDownLatch submitLatch1 = setupStubbedSubmit(mockTx1);
 
@@ -166,11 +177,7 @@ public class FlowCapableTopologyExporterTest {
                 ArgumentCaptor.forClass(InstanceIdentifier.class);
         setupStubbedDeletes(mockTx1, deletedLinkIDs, deleteLatch);
 
-        ReadWriteTransaction mockTx2 = mock(ReadWriteTransaction.class);
-        setupStubbedDeletes(mockTx2, deletedLinkIDs, deleteLatch);
-        CountDownLatch submitLatch2 = setupStubbedSubmit(mockTx2);
-
-        doReturn(mockTx1).doReturn(mockTx2).when(mockTxChain).newReadWriteTransaction();
+        doReturn(mockTx1).when(mockTxChain).newReadWriteTransaction();
 
         exporter.onNodeRemoved(new NodeRemovedBuilder().setNodeRef(new NodeRef(invNodeID)).build());
 
@@ -180,20 +187,21 @@ public class FlowCapableTopologyExporterTest {
 
         waitForDeletes(expDeleteCalls, deleteLatch);
 
-        waitForSubmit(submitLatch2);
-
         assertDeletedIDs(expDeletedIIDs, deletedLinkIDs);
 
         verifyMockTx(mockTx1);
-        verifyMockTx(mockTx2);
     }
 
     @SuppressWarnings({ "rawtypes" })
     @Test
     public void testOnNodeRemovedWithNoTopology() {
 
+        NodeKey topoNodeKey = new NodeKey(new NodeId("node1"));
+        InstanceIdentifier<Node> topoNodeII = topologyIID.child(Node.class, topoNodeKey);
+        Node topoNode = new NodeBuilder().setKey(topoNodeKey).build();
+
         org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey
-                                                                nodeKey = newInvNodeKey("node1");
+                nodeKey = newInvNodeKey(topoNodeKey.getNodeId().getValue());
         InstanceIdentifier<?> invNodeID = InstanceIdentifier.create(Nodes.class).child(
                 org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node.class,
                 nodeKey);
@@ -206,6 +214,11 @@ public class FlowCapableTopologyExporterTest {
         doReturn(Futures.immediateCheckedFuture(Optional.absent())).when(mockTx)
                 .read(LogicalDatastoreType.OPERATIONAL, topologyIID);
         CountDownLatch submitLatch = setupStubbedSubmit(mockTx);
+
+        SettableFuture<Optional<Node>> readFutureNode = SettableFuture.create();
+        readFutureNode.set(Optional.of(topoNode));
+        doReturn(Futures.makeChecked(readFutureNode, ReadFailedException.MAPPER)).when(mockTx)
+                .read(LogicalDatastoreType.OPERATIONAL, topoNodeII);
 
         CountDownLatch deleteLatch = new CountDownLatch(1);
         ArgumentCaptor<InstanceIdentifier> deletedLinkIDs =
@@ -227,11 +240,18 @@ public class FlowCapableTopologyExporterTest {
     @Test
     public void testOnNodeConnectorRemoved() {
 
+        NodeKey topoNodeKey = new NodeKey(new NodeId("node1"));
+        TerminationPointKey terminationPointKey = new TerminationPointKey(new TpId("tp1"));
+
+        InstanceIdentifier<TerminationPoint> topoTermPointII = topologyIID.child(Node.class, topoNodeKey)
+                .child(TerminationPoint.class, terminationPointKey);
+        TerminationPoint topoTermPoint = new TerminationPointBuilder().setKey(terminationPointKey).build();
+
         org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey
-                                                                  nodeKey = newInvNodeKey("node1");
+                                                                  nodeKey = newInvNodeKey(topoNodeKey.getNodeId().getValue());
 
         org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey ncKey =
-                newInvNodeConnKey("tp1");
+                newInvNodeConnKey(terminationPointKey.getTpId().getValue());
 
         InstanceIdentifier<?> invNodeConnID = newNodeConnID(nodeKey, ncKey);
 
@@ -249,9 +269,15 @@ public class FlowCapableTopologyExporterTest {
             };
 
         final SettableFuture<Optional<Topology>> readFuture = SettableFuture.create();
+        readFuture.set(Optional.of(topology));
         ReadWriteTransaction mockTx1 = mock(ReadWriteTransaction.class);
         doReturn(Futures.makeChecked(readFuture, ReadFailedException.MAPPER)).when(mockTx1)
                 .read(LogicalDatastoreType.OPERATIONAL, topologyIID);
+
+        SettableFuture<Optional<TerminationPoint>> readFutureNode = SettableFuture.create();
+        readFutureNode.set(Optional.of(topoTermPoint));
+        doReturn(Futures.makeChecked(readFutureNode, ReadFailedException.MAPPER)).when(mockTx1)
+                .read(LogicalDatastoreType.OPERATIONAL, topoTermPointII);
 
         CountDownLatch submitLatch1 = setupStubbedSubmit(mockTx1);
 
@@ -261,11 +287,8 @@ public class FlowCapableTopologyExporterTest {
                 ArgumentCaptor.forClass(InstanceIdentifier.class);
         setupStubbedDeletes(mockTx1, deletedLinkIDs, deleteLatch);
 
-        ReadWriteTransaction mockTx2 = mock(ReadWriteTransaction.class);
-        setupStubbedDeletes(mockTx2, deletedLinkIDs, deleteLatch);
-        CountDownLatch submitLatch2 = setupStubbedSubmit(mockTx2);
 
-        doReturn(mockTx1).doReturn(mockTx2).when(mockTxChain).newReadWriteTransaction();
+        doReturn(mockTx1).when(mockTxChain).newReadWriteTransaction();
 
         exporter.onNodeConnectorRemoved(new NodeConnectorRemovedBuilder().setNodeConnectorRef(
                 new NodeConnectorRef(invNodeConnID)).build());
@@ -276,23 +299,27 @@ public class FlowCapableTopologyExporterTest {
 
         waitForDeletes(expDeleteCalls, deleteLatch);
 
-        waitForSubmit(submitLatch2);
-
         assertDeletedIDs(expDeletedIIDs, deletedLinkIDs);
 
         verifyMockTx(mockTx1);
-        verifyMockTx(mockTx2);
     }
 
     @SuppressWarnings("rawtypes")
     @Test
     public void testOnNodeConnectorRemovedWithNoTopology() {
 
+        NodeKey topoNodeKey = new NodeKey(new NodeId("node1"));
+        TerminationPointKey terminationPointKey = new TerminationPointKey(new TpId("tp1"));
+
+        InstanceIdentifier<TerminationPoint> topoTermPointII = topologyIID.child(Node.class, topoNodeKey)
+                .child(TerminationPoint.class, terminationPointKey);
+        TerminationPoint topoTermPoint = new TerminationPointBuilder().setKey(terminationPointKey).build();
+
         org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey
-                                                                  nodeKey = newInvNodeKey("node1");
+                nodeKey = newInvNodeKey(topoNodeKey.getNodeId().getValue());
 
         org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey ncKey =
-                newInvNodeConnKey("tp1");
+                newInvNodeConnKey(terminationPointKey.getTpId().getValue());
 
         InstanceIdentifier<?> invNodeConnID = newNodeConnID(nodeKey, ncKey);
 
@@ -305,6 +332,11 @@ public class FlowCapableTopologyExporterTest {
         doReturn(Futures.immediateCheckedFuture(Optional.absent())).when(mockTx)
                 .read(LogicalDatastoreType.OPERATIONAL, topologyIID);
         CountDownLatch submitLatch = setupStubbedSubmit(mockTx);
+
+        SettableFuture<Optional<TerminationPoint>> readFutureNode = SettableFuture.create();
+        readFutureNode.set(Optional.of(topoTermPoint));
+        doReturn(Futures.makeChecked(readFutureNode, ReadFailedException.MAPPER)).when(mockTx)
+                .read(LogicalDatastoreType.OPERATIONAL, topoTermPointII);
 
         CountDownLatch deleteLatch = new CountDownLatch(1);
         ArgumentCaptor<InstanceIdentifier> deletedLinkIDs =
@@ -510,8 +542,8 @@ public class FlowCapableTopologyExporterTest {
         waitForSubmit(submitLatch);
 
         ArgumentCaptor<Link> mergedNode = ArgumentCaptor.forClass(Link.class);
-        verify(mockTx).merge(eq(LogicalDatastoreType.OPERATIONAL), eq(topologyIID.child(
-                Link.class, new LinkKey(new LinkId(sourceNodeConnKey.getId())))),
+        verify(mockTx).put(eq(LogicalDatastoreType.OPERATIONAL), eq(topologyIID.child(
+                        Link.class, new LinkKey(new LinkId(sourceNodeConnKey.getId())))),
                 mergedNode.capture(), eq(true));
         assertEquals("Source node ID", "sourceNode",
                 mergedNode.getValue().getSource().getSourceNode().getValue());
@@ -524,7 +556,41 @@ public class FlowCapableTopologyExporterTest {
     }
 
     @Test
-    public void testOnLinkRemoved() {
+    public void testOnLinkRemovedLinkExists() {
+
+        org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey
+                sourceNodeKey = newInvNodeKey("sourceNode");
+        org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey
+                sourceNodeConnKey = newInvNodeConnKey("sourceTP");
+        InstanceIdentifier<?> sourceConnID = newNodeConnID(sourceNodeKey, sourceNodeConnKey);
+
+        org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey
+                destNodeKey = newInvNodeKey("destNode");
+        org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey
+                destNodeConnKey = newInvNodeConnKey("destTP");
+        InstanceIdentifier<?> destConnID = newNodeConnID(destNodeKey, destNodeConnKey);
+
+        Link link = newLink(sourceNodeConnKey.getId().getValue(), newSourceTp(sourceNodeConnKey.getId().getValue()),
+                newDestTp(destNodeConnKey.getId().getValue()));
+
+        ReadWriteTransaction mockTx = mock(ReadWriteTransaction.class);
+        CountDownLatch submitLatch = setupStubbedSubmit(mockTx);
+        doReturn(mockTx).when(mockTxChain).newReadWriteTransaction();
+        doReturn(Futures.immediateCheckedFuture(Optional.of(link))).when(mockTx).read(LogicalDatastoreType.OPERATIONAL, topologyIID.child(
+                Link.class, new LinkKey(new LinkId(sourceNodeConnKey.getId()))));
+
+        exporter.onLinkRemoved(new LinkRemovedBuilder().setSource(
+                new NodeConnectorRef(sourceConnID)).setDestination(
+                new NodeConnectorRef(destConnID)).build());
+
+        waitForSubmit(submitLatch);
+
+        verify(mockTx).delete(LogicalDatastoreType.OPERATIONAL, topologyIID.child(
+                Link.class, new LinkKey(new LinkId(sourceNodeConnKey.getId()))));
+    }
+
+    @Test
+    public void testOnLinkRemovedLinkDoesNotExist() {
 
         org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey
                 sourceNodeKey = newInvNodeKey("sourceNode");
@@ -541,14 +607,16 @@ public class FlowCapableTopologyExporterTest {
         ReadWriteTransaction mockTx = mock(ReadWriteTransaction.class);
         CountDownLatch submitLatch = setupStubbedSubmit(mockTx);
         doReturn(mockTx).when(mockTxChain).newReadWriteTransaction();
+        doReturn(Futures.immediateCheckedFuture(Optional.<Link>absent())).when(mockTx).read(LogicalDatastoreType.OPERATIONAL, topologyIID.child(
+                Link.class, new LinkKey(new LinkId(sourceNodeConnKey.getId()))));
 
         exporter.onLinkRemoved(new LinkRemovedBuilder().setSource(
                 new NodeConnectorRef(sourceConnID)).setDestination(
-                        new NodeConnectorRef(destConnID)).build());
+                new NodeConnectorRef(destConnID)).build());
 
         waitForSubmit(submitLatch);
 
-        verify(mockTx).delete(LogicalDatastoreType.OPERATIONAL, topologyIID.child(
+        verify(mockTx, never()).delete(LogicalDatastoreType.OPERATIONAL, topologyIID.child(
                 Link.class, new LinkKey(new LinkId(sourceNodeConnKey.getId()))));
     }
 
