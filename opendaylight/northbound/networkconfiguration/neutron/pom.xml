@@ -66,6 +66,7 @@
                             org.eclipse.persistence.jaxb.rs,
                             com.sun.jersey.spi.container.servlet,
                             javax.ws.rs,
+                            javax.ws.rs.ext,
                             javax.ws.rs.core,
                             javax.xml.bind.annotation,
                             javax.xml.bind,
