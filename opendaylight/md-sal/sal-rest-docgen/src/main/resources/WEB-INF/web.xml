@@ -55,12 +55,21 @@
     </filter-mapping-->
     <security-constraint>
       <web-resource-collection>
-        <web-resource-name>free access</web-resource-name>
+        <web-resource-name>sal-rest-docgen</web-resource-name>
         <url-pattern>/explorer/css/*</url-pattern>
         <url-pattern>/explorer/images/*</url-pattern>
         <url-pattern>/explorer/lib/*</url-pattern>
         <url-pattern>/explorer/*</url-pattern>
       </web-resource-collection>
+      <auth-constraint>
+        <role-name>admin</role-name>
+      </auth-constraint>
     </security-constraint>
-
+    <login-config>
+        <auth-method>BASIC</auth-method>
+        <realm-name>default</realm-name>
+    </login-config>
+    <security-role>
+       <role-name>admin</role-name>
+    </security-role>
 </web-app>
