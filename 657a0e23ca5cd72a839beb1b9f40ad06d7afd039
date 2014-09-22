@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_4a305ce8",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/NormalizedNodeType.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-22T22:32:10Z",
+      "side": 1,
+      "message": "Moving LeafSetEntryNode up may also be beneficial",
+      "revId": "657a0e23ca5cd72a839beb1b9f40ad06d7afd039",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6a40c035",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/PathArgumentType.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-22T22:32:10Z",
+      "side": 1,
+      "message": "Map is faster than doing instanceof?",
+      "revId": "657a0e23ca5cd72a839beb1b9f40ad06d7afd039",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8aabc4d5",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/test/java/org/opendaylight/controller/cluster/datastore/node/utils/PathUtilsTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-22T22:32:10Z",
+      "side": 1,
+      "message": "Is this a bug in PathUtils? Shouldn\u0027t getParentPath for \"a/b\" be \"/a\"?",
+      "revId": "657a0e23ca5cd72a839beb1b9f40ad06d7afd039",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
