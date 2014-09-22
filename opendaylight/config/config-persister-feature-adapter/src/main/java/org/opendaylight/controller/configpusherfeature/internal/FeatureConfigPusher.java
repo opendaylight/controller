@@ -26,6 +26,7 @@ import com.google.common.collect.LinkedHashMultimap;
  */
 public class FeatureConfigPusher {
     private static final Logger logger = LoggerFactory.getLogger(FeatureConfigPusher.class);
+    private static final int MAX_RETRIES=100;
     private FeaturesService featuresService = null;
     private ConfigPusher pusher = null;
     /*
@@ -82,7 +83,29 @@ public class FeatureConfigPusher {
     }
 
     private boolean isInstalled(Feature feature) {
-        List<Feature> installedFeatures = Arrays.asList(featuresService.listInstalledFeatures());
+        List<Feature> installedFeatures= null;
+        boolean cont = true;
+        int retries = 0;
+        while(cont) {
+            try {
+                installedFeatures = Arrays.asList(featuresService.listInstalledFeatures());
+                break;
+            } catch (Exception e) {
+                if(retries < MAX_RETRIES) {
+                    logger.warn("Karaf featuresService.listInstalledFeatures() has thrown an exception, retry {}, Exception {}", retries,e);
+                    try {
+                        Thread.sleep(1);
+                    } catch (InterruptedException e1) {
+                        throw new IllegalStateException(e1);
+                    }
+                    retries++;
+                    continue;
+                } else {
+                    logger.error("Giving up on Karaf featuresService.listInstalledFeatures() which has thrown an exception, retry {}, Exception {}", retries,e);
+                    throw e;
+                }
+            }
+        }
         return installedFeatures.contains(feature);
     }
 
