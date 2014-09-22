@@ -9,7 +9,7 @@ module sal-remote-augment {
     description
         "Added input parameters to rpc create-data-change-event-subscription";
 
-    revision "2014-7-8" {
+    revision "2014-07-08" {
     }
 
     augment "/salrmt:create-data-change-event-subscription/salrmt:input" {
