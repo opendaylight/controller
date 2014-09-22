@@ -8,7 +8,6 @@
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
 import static com.google.common.base.Preconditions.checkState;
-import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import java.util.EnumMap;
@@ -102,6 +101,6 @@ public class DOMDataBrokerImpl extends AbstractDOMForwardedTransactionFactory<DO
     public CheckedFuture<Void,TransactionCommitFailedException> submit(final DOMDataWriteTransaction transaction,
             final Iterable<DOMStoreThreePhaseCommitCohort> cohorts) {
         LOG.debug("Transaction: {} submitted with cohorts {}.", transaction.getIdentifier(), cohorts);
-        return coordinator.submit(transaction, cohorts, Optional.<DOMDataCommitErrorListener> absent());
+        return coordinator.submit(transaction, cohorts);
     }
 }
