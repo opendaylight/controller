@@ -7,12 +7,8 @@
  */
 package org.opendaylight.controller.sal.compatibility.topology;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
-
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
 import org.opendaylight.controller.md.sal.binding.util.TypeSafeDataReader;
 import org.opendaylight.controller.sal.compatibility.NodeMapping;
 import org.opendaylight.controller.sal.core.ConstructionException;
@@ -33,11 +29,16 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.regex.Pattern;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class TopologyMapping {
     private static final Logger LOG = LoggerFactory.getLogger(TopologyMapping.class);
+    private final static Pattern NUMBERS_ONLY = Pattern.compile("[0-9]+");
 
     private TopologyMapping() {
         throw new UnsupportedOperationException("Utility class. Instantiation is not allowed.");
@@ -100,7 +101,13 @@ public final class TopologyMapping {
 
     public static NodeConnector toADNodeConnector(final TpId source, final NodeId nodeId) throws ConstructionException {
         checkNotNull(source);
-        return new NodeConnector(NodeConnectorIDType.OPENFLOW, Short.valueOf(toADNodeConnectorId(source)), toADNode(nodeId));
+        String nodeConnectorIdStripped = toADNodeConnectorId(source);
+        if (NUMBERS_ONLY.matcher(nodeConnectorIdStripped).matches()) {
+            return new NodeConnector(NodeConnectorIDType.OPENFLOW, Short.valueOf(nodeConnectorIdStripped), toADNode(nodeId));
+        }
+        LOG.debug("NodeConnectorId does not match openflow id type, using " + NodeMapping.MD_SAL_TYPE +  "instead");
+        NodeConnectorIDType.registerIDType(NodeMapping.MD_SAL_TYPE, String.class, NodeMapping.MD_SAL_TYPE);
+        return new NodeConnector(NodeMapping.MD_SAL_TYPE, nodeConnectorIdStripped, toADNode(nodeId));
     }
 
     public static String toADNodeConnectorId(final TpId nodeConnectorId) {
@@ -109,6 +116,12 @@ public final class TopologyMapping {
 
     public static Node toADNode(final NodeId nodeId) throws ConstructionException {
         checkNotNull(nodeId);
-        return new Node(NodeIDType.OPENFLOW, Long.valueOf(toADNodeId(nodeId)));
+        String nodeIdStripped = toADNodeId(nodeId);
+        if (NUMBERS_ONLY.matcher(nodeIdStripped).matches()) {
+            return new Node(NodeIDType.OPENFLOW, Long.valueOf(nodeIdStripped));
+        }
+        LOG.debug("NodeId does not match openflow id type, using " + NodeMapping.MD_SAL_TYPE +  "instead");
+        NodeIDType.registerIDType(NodeMapping.MD_SAL_TYPE, String.class);
+        return new Node(NodeMapping.MD_SAL_TYPE, nodeId.getValue());
     }
 }

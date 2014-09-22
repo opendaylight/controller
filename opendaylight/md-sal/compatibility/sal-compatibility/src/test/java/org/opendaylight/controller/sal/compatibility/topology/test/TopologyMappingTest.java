@@ -69,4 +69,17 @@ public class TopologyMappingTest {
         Assert.assertEquals("OF|00:00:00:00:00:00:00:01", observedNode.toString());
     }
 
+    /**
+     * Test method for {@link org.opendaylight.controller.sal.compatibility.topology.TopologyMapping#toADNodeConnector(org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId, org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId)}.
+     * @throws ConstructionException
+     */
+    @Test
+    public void bug1309ToADNodeConnector() throws ConstructionException {
+        NodeId nodeId = new NodeId("some_unknown_node");
+        TpId source = new TpId("192.168.0.1");
+        NodeConnector observedNodeConnector = TopologyMapping.toADNodeConnector(source, nodeId);
+
+        Assert.assertEquals("MD_SAL_DEPRECATED|192.168.0.1@MD_SAL_DEPRECATED|some_unknown_node", observedNodeConnector.toString());
+    }
+
 }
