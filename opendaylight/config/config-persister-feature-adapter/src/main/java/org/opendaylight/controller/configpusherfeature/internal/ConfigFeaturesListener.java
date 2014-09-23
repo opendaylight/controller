@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 public class ConfigFeaturesListener implements  FeaturesListener,  AutoCloseable {
     private static final Logger logger = LoggerFactory.getLogger(ConfigFeaturesListener.class);
-    private static final int QUEUE_SIZE = 100;
+    private static final int QUEUE_SIZE = 1000;
     private BlockingQueue<FeatureEvent> queue = new LinkedBlockingQueue<FeatureEvent>(QUEUE_SIZE);
     Thread pushingThread = null;
 
