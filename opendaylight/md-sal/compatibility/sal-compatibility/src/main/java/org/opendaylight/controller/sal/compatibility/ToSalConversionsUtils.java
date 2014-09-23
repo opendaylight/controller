@@ -374,8 +374,8 @@ public class ToSalConversionsUtils {
             NodeConnectorId nodeConnectorId = new NodeConnectorId(uri.getValue());
             nodeConnector = NodeMapping.toADNodeConnector(nodeConnectorId, node);
         } catch (ConstructionException e) {
-            LOG.warn("nodeConnector creation failed at node: {} with nodeConnectorUri: {}",
-                    node, uri.getValue());
+            LOG.warn("nodeConnector creation failed at node: {} with nodeConnectorUri: {}, Exception {}",
+                    node, uri.getValue(),e);
         }
         return nodeConnector;
     }
