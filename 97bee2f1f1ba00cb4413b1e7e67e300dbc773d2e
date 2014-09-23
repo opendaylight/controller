@@ -87,6 +87,24 @@
       "revId": "97bee2f1f1ba00cb4413b1e7e67e300dbc773d2e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8c48c1cd",
+        "filename": "opendaylight/config/config-persister-feature-adapter/src/main/java/org/opendaylight/controller/configpusherfeature/internal/FeatureConfigPusher.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-09-23T20:01:31Z",
+      "side": 1,
+      "message": "If the Exception persists it will be thrown within 100ms...",
+      "parentUuid": "fa82b9bf_2c9e5557",
+      "revId": "97bee2f1f1ba00cb4413b1e7e67e300dbc773d2e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
