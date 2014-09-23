@@ -27,6 +27,7 @@ import com.google.common.collect.LinkedHashMultimap;
 public class FeatureConfigPusher {
     private static final Logger logger = LoggerFactory.getLogger(FeatureConfigPusher.class);
     private static final int MAX_RETRIES=100;
+    private static final int RETRY_PAUSE_MILLIS=1;
     private FeaturesService featuresService = null;
     private ConfigPusher pusher = null;
     /*
@@ -83,30 +84,30 @@ public class FeatureConfigPusher {
     }
 
     private boolean isInstalled(Feature feature) {
-        List<Feature> installedFeatures= null;
-        boolean cont = true;
-        int retries = 0;
-        while(cont) {
+        for(int retries=0;retries<MAX_RETRIES;retries++) {
             try {
-                installedFeatures = Arrays.asList(featuresService.listInstalledFeatures());
-                break;
+                List<Feature> installedFeatures = Arrays.asList(featuresService.listInstalledFeatures());
+                if(installedFeatures.contains(feature)) {
+                    return true;
+                } else {
+                    logger.warn("Karaf featuresService.listInstalledFeatures() has not yet finished installing feature (retry {}) {} {}",retries,feature.getName(),feature.getVersion());
+                }
             } catch (Exception e) {
                 if(retries < MAX_RETRIES) {
                     logger.warn("Karaf featuresService.listInstalledFeatures() has thrown an exception, retry {}, Exception {}", retries,e);
-                    try {
-                        Thread.sleep(1);
-                    } catch (InterruptedException e1) {
-                        throw new IllegalStateException(e1);
-                    }
-                    retries++;
-                    continue;
                 } else {
                     logger.error("Giving up on Karaf featuresService.listInstalledFeatures() which has thrown an exception, retry {}, Exception {}", retries,e);
                     throw e;
                 }
             }
+            try {
+                Thread.sleep(RETRY_PAUSE_MILLIS);
+            } catch (InterruptedException e1) {
+                throw new IllegalStateException(e1);
+            }
         }
-        return installedFeatures.contains(feature);
+        logger.error("Giving up (after {} retries) on Karaf featuresService.listInstalledFeatures() which has not yet finished installing feature {} {}",MAX_RETRIES,feature.getName(),feature.getVersion());
+        return false;
     }
 
     private LinkedHashSet<FeatureConfigSnapshotHolder> pushConfig(LinkedHashSet<FeatureConfigSnapshotHolder> configs) throws InterruptedException {
