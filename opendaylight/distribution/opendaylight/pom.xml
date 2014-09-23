@@ -1316,6 +1316,11 @@
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-clustering-config</artifactId>
         </dependency>
+          <dependency>
+              <groupId>org.eclipse.jetty</groupId>
+              <artifactId>jetty-servlets</artifactId>
+              <version>8.1.14.v20131031</version>
+          </dependency>
       </dependencies>
     </profile>
     <profile>
