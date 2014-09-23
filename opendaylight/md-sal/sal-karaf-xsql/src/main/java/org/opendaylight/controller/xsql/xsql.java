@@ -16,6 +16,10 @@ public class xsql extends OsgiCommandSupport {
     private String argument;
 
     protected Object doExecute() throws Exception {
+        if(argument==null){
+            System.out.println("Nothing to do..., please specify a command.");
+            return null;
+        }
         XSQLAdapter.getInstance().processCommand(new StringBuffer(argument),
                 System.out);
         return null;
