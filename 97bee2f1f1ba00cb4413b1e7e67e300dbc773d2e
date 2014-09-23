@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_4c8f1924",
+        "filename": "opendaylight/config/config-persister-feature-adapter/src/main/java/org/opendaylight/controller/configpusherfeature/internal/ConfigFeaturesListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-09-23T18:47:41Z",
+      "side": 1,
+      "message": "One of the possible causes of this bug explored was things falling off the queue due to queue size being to small.",
+      "parentUuid": "fa82b9bf_ec786d2d",
+      "revId": "97bee2f1f1ba00cb4413b1e7e67e300dbc773d2e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_4c887922",
         "filename": "opendaylight/config/config-persister-feature-adapter/src/main/java/org/opendaylight/controller/configpusherfeature/internal/FeatureConfigPusher.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-09-23T18:42:09Z",
       "side": 1,
       "message": "Which Exception does listInstalledFeatures throw?",
+      "revId": "97bee2f1f1ba00cb4413b1e7e67e300dbc773d2e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6c945d37",
+        "filename": "opendaylight/config/config-persister-feature-adapter/src/main/java/org/opendaylight/controller/configpusherfeature/internal/FeatureConfigPusher.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-09-23T18:47:41Z",
+      "side": 1,
+      "message": "That I\u0027ve seen, ConcurrentModificationException... but cannot rule out others.",
+      "parentUuid": "fa82b9bf_4c887922",
       "revId": "97bee2f1f1ba00cb4413b1e7e67e300dbc773d2e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
