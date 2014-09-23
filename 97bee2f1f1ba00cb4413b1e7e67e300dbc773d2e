@@ -69,6 +69,24 @@
       "revId": "97bee2f1f1ba00cb4413b1e7e67e300dbc773d2e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2c9e5557",
+        "filename": "opendaylight/config/config-persister-feature-adapter/src/main/java/org/opendaylight/controller/configpusherfeature/internal/FeatureConfigPusher.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-09-23T18:53:25Z",
+      "side": 1,
+      "message": "I\u0027m nervous when Exception is caught because it will also catch RuntimeException\u0027s due to coding errors. For example here the logging may throw an exception if feature was null and we would just keep retrying that. Anyway, the alternative is to have this commented so we know the reason we had to catch Exception.",
+      "parentUuid": "fa82b9bf_6c945d37",
+      "revId": "97bee2f1f1ba00cb4413b1e7e67e300dbc773d2e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
