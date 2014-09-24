@@ -4,6 +4,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.statistics.manager.StatisticsManager;
+import org.opendaylight.controller.md.statistics.manager.impl.StatisticsManagerImpl;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.Counter32;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.Counter64;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FeatureCapability;
@@ -48,6 +50,9 @@ public abstract class StatisticsManagerTest extends AbstractDataBrokerTest {
     public static final Long MAX_GROUPS_TEST_VALUE = 2000L;
     public static final BigInteger BIG_INTEGER_TEST_VALUE = BigInteger.valueOf(1000);
 
+    private static final long DEFAULT_MIN_REQUEST_NET_MONITOR_INTERVAL = 3000L;
+    private static final int MAX_NODES_FOR_COLLECTOR = 8;
+
     private static Flow flow;
     private static Group group;
     private static Meter meter;
@@ -59,7 +64,6 @@ public abstract class StatisticsManagerTest extends AbstractDataBrokerTest {
     private final NotificationProviderServiceHelper notificationMock = new NotificationProviderServiceHelper();
     protected final NodeKey s1Key = new NodeKey(new NodeId("S1"));
     protected RpcProviderRegistryMock rpcRegistry;
-    protected ProviderContextMock providerContext;
 
     @BeforeClass
     public static void setupTests() {
@@ -75,7 +79,6 @@ public abstract class StatisticsManagerTest extends AbstractDataBrokerTest {
     @Before
     public void init() {
         rpcRegistry = new RpcProviderRegistryMock(notificationMock);
-        providerContext = new ProviderContextMock(rpcRegistry, getDataBroker(), notificationMock.getNotifBroker());
     }
 
     // node with statistics capabilities will enable cyclic statistics collection
@@ -94,7 +97,7 @@ public abstract class StatisticsManagerTest extends AbstractDataBrokerTest {
             capabilitiyList.add(capability);
         }
         sfBuilder.setCapabilities(capabilitiyList);
-        sfBuilder.setMaxTables((short) 2);
+        sfBuilder.setMaxTables((short) 255);
         final NodeBuilder nodeBuilder = new NodeBuilder();
         nodeBuilder.setKey(nodeKey);
         fcnBuilder.setSwitchFeatures(sfBuilder.build());
@@ -137,6 +140,9 @@ public abstract class StatisticsManagerTest extends AbstractDataBrokerTest {
         final FlowCapableNodeBuilder fcnBuilder = new FlowCapableNodeBuilder();
         final NodeBuilder nodeBuilder = new NodeBuilder();
         nodeBuilder.setKey(nodeKey);
+        final SwitchFeaturesBuilder sfBuilder = new SwitchFeaturesBuilder();
+        sfBuilder.setMaxTables((short)255);
+        fcnBuilder.setSwitchFeatures(sfBuilder.build());
         final FlowCapableNode flowCapableNode = fcnBuilder.build();
         nodeBuilder.addAugmentation(FlowCapableNode.class, flowCapableNode);
         final Node node = nodeBuilder.build();
@@ -165,6 +171,12 @@ public abstract class StatisticsManagerTest extends AbstractDataBrokerTest {
         final NodeRemovedBuilder nrBuilder = new NodeRemovedBuilder();
         nrBuilder.setNodeRef(new NodeRef(nodeII));
         notificationMock.pushNotification(nrBuilder.build());
+    }
+
+    public StatisticsManager setupStatisticsManager() {
+        StatisticsManager statsProvider = new StatisticsManagerImpl(getDataBroker(), MAX_NODES_FOR_COLLECTOR);
+        statsProvider.start(notificationMock.getNotifBroker(), rpcRegistry, DEFAULT_MIN_REQUEST_NET_MONITOR_INTERVAL);
+        return statsProvider;
     }
 
     public static Flow getFlow() {

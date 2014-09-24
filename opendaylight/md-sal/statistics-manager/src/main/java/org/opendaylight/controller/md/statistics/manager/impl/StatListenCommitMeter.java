@@ -8,10 +8,7 @@
 
 package org.opendaylight.controller.md.statistics.manager.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+import com.google.common.base.Optional;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -49,7 +46,9 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * statistics-manager
@@ -151,7 +150,7 @@ public class StatListenCommitMeter extends StatAbstractListenCommit<Meter, Opend
                     LOG.debug("Read Operational/DS for Node fail! {}", nodeIdent, e);
                 }
                 if (node.isPresent()) {
-                    tx.put(LogicalDatastoreType.OPERATIONAL, meterFeatureIdent, stats);
+                    tx.put(LogicalDatastoreType.OPERATIONAL, meterFeatureIdent, stats, true);
                 }
             }
         });
@@ -211,7 +210,7 @@ public class StatListenCommitMeter extends StatAbstractListenCommit<Meter, Opend
                 LOG.debug("Read Operational/DS for FlowCapableNode fail! {}", fNodeIdent, e);
             }
             if (fNode.isPresent()) {
-                trans.put(LogicalDatastoreType.OPERATIONAL, msIdent, stats);
+                trans.put(LogicalDatastoreType.OPERATIONAL, msIdent, stats, true);
             }
         }
     }
