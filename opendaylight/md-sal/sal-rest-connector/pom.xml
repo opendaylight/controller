@@ -139,7 +139,7 @@
               org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.rest.connector.rev140724.*,
             </Private-Package>
             <Import-Package>*,
-            com.sun.jersey.spi.container.servlet</Import-Package>
+            com.sun.jersey.spi.container.servlet, org.eclipse.jetty.servlets</Import-Package>
             <Web-ContextPath>/restconf</Web-ContextPath>
           </instructions>
         </configuration>

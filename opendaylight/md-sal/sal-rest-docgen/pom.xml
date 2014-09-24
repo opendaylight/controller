@@ -113,7 +113,7 @@
           <instructions>
             <Bundle-Name>MD SAL Rest Api Doc Generator</Bundle-Name>
             <Import-Package>*,
-              com.sun.jersey.spi.container.servlet</Import-Package>
+              com.sun.jersey.spi.container.servlet, org.eclipse.jetty.servlets</Import-Package>
             <Bundle-Activator>org.opendaylight.controller.sal.rest.doc.DocProvider</Bundle-Activator>
             <Web-ContextPath>/apidoc</Web-ContextPath>
           </instructions>
