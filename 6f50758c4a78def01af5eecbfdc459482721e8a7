@@ -1,0 +1,94 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_720af6d3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStore.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-09-24T16:40:01Z",
+      "side": 1,
+      "message": "Yes, I will revert it.",
+      "parentUuid": "fa82b9bf_0c359145",
+      "revId": "6f50758c4a78def01af5eecbfdc459482721e8a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_32146ef4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-09-24T16:40:01Z",
+      "side": 1,
+      "message": "Another one is overloaded method that takes in ActorSelection as an argument.",
+      "parentUuid": "fa82b9bf_ecf4ed88",
+      "revId": "6f50758c4a78def01af5eecbfdc459482721e8a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d2f8a2c6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-09-24T16:40:01Z",
+      "side": 1,
+      "message": "Same as previous comment. Its an overloaded method.",
+      "parentUuid": "fa82b9bf_ccf7a98b",
+      "revId": "6f50758c4a78def01af5eecbfdc459482721e8a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b2ff1eaa",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-09-24T16:40:01Z",
+      "side": 1,
+      "message": "Earlier the names were executeLocalOperation and executeRemoteOperation. I had just combined them into 1 method removing \"local\" and \"remote\" from them.\nIMO, the names make sense to me as executeOperation implies a synchronous call (just like any other java method call) while executeOperationAsync explicitly states its NOT a synchronous call.\n\nWhat do  you think?",
+      "parentUuid": "fa82b9bf_2c03b574",
+      "revId": "6f50758c4a78def01af5eecbfdc459482721e8a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_522c924a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-09-24T16:40:01Z",
+      "side": 1,
+      "message": "Earlier findPrimary could throw TimeoutException.\nAll exceptions are still caught in catch block.",
+      "parentUuid": "fa82b9bf_0cfef16b",
+      "revId": "6f50758c4a78def01af5eecbfdc459482721e8a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
