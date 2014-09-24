@@ -8,10 +8,7 @@
 
 package org.opendaylight.controller.md.statistics.manager.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+import com.google.common.base.Optional;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -50,7 +47,9 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * statistics-manager
@@ -93,8 +92,8 @@ public class StatListenCommitGroup extends StatAbstractListenCommit<Group, Opend
             LOG.debug("STAT-MANAGER - GroupDescStatsUpdated: unregistred notification detect TransactionId {}", transId);
             return;
         }
+        manager.getRpcMsgManager().addNotification(notification, nodeId);
         if (notification.isMoreReplies()) {
-            manager.getRpcMsgManager().addNotification(notification, nodeId);
             return;
         }
         final List<GroupDescStats> groupStats = notification.getGroupDescStats() != null
@@ -271,10 +270,12 @@ public class StatListenCommitGroup extends StatAbstractListenCommit<Group, Opend
             LOG.trace("Read Operational/DS for FlowCapableNode fail! Node {} doesn't exist.", fNodeIdent);
             return;
         }
-        final List<Group> existGroups = fNode.get().getGroup().isEmpty()
-                ? Collections.<Group> emptyList() : fNode.get().getGroup();
+        List<Group> configGroups = Collections.emptyList();
+        if (fNode.get().getGroup() != null) {
+            configGroups = new ArrayList<>(fNode.get().getGroup());
+        }
         /* Add all existed groups paths - no updated paths has to be removed */
-        for (final Group group : existGroups) {
+        for (final Group group : configGroups) {
             if (deviceGroupKeys.remove(group.getKey())) {
                 break; // group still exist on device
             }

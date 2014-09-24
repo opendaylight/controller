@@ -8,10 +8,7 @@
 
 package org.opendaylight.controller.md.statistics.manager.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+import com.google.common.base.Optional;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -49,7 +46,9 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * statistics-manager
@@ -259,10 +258,12 @@ public class StatListenCommitMeter extends StatAbstractListenCommit<Meter, Opend
             LOG.trace("Read Operational/DS for FlowCapableNode fail! Node {} doesn't exist.", fNodeIdent);
             return;
         }
-        final List<Meter> existMeters = fNode.get().getMeter().isEmpty()
-                ? Collections.<Meter> emptyList() : fNode.get().getMeter();
+        List<Meter> configMeters = Collections.emptyList();
+        if (fNode.get().getGroup() != null) {
+            configMeters = new ArrayList<>(fNode.get().getMeter());
+        }
         /* Add all existed groups paths - no updated paths has to be removed */
-        for (final Meter meter : existMeters) {
+        for (final Meter meter : configMeters) {
             if (deviceMeterKeys.remove(meter.getKey())) {
                 break; // Meter still exist on device
             }

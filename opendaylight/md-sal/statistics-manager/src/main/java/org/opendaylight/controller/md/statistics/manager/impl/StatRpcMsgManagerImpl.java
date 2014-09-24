@@ -8,13 +8,14 @@
 
 package org.opendaylight.controller.md.statistics.manager.impl;
 
-import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.JdkFutureAdapters;
+import com.google.common.util.concurrent.SettableFuture;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.statistics.manager.StatRpcMsgManager;
 import org.opendaylight.controller.md.statistics.manager.StatisticsManager;
@@ -51,14 +52,12 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.JdkFutureAdapters;
-import com.google.common.util.concurrent.SettableFuture;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -249,21 +248,12 @@ public class StatRpcMsgManagerImpl implements StatRpcMsgManager {
     public void addNotification(final TransactionAware notification, final NodeId nodeId) {
         Preconditions.checkArgument(notification != null, "TransactionAware can not be null!");
         Preconditions.checkArgument(nodeId != null, "NodeId can not be null!");
-
-        final RpcJobsQueue addNotification = new RpcJobsQueue() {
-
-            @Override
-            public Void call() throws Exception {
-                final TransactionId txId = notification.getTransactionId();
-                final String key = buildCacheKey(txId, nodeId);
-                final TransactionCacheContainer<? super TransactionAware> container = (txCache.getIfPresent(key));
-                if (container != null) {
-                    container.addNotif(notification);
-                }
-                return null;
-            }
-        };
-        addStatJob(addNotification);
+        final TransactionId txId = notification.getTransactionId();
+        final String key = buildCacheKey(txId, nodeId);
+        final TransactionCacheContainer<? super TransactionAware> container = (txCache.getIfPresent(key));
+        if (container != null) {
+            container.addNotif(notification);
+        }
     }
 
     @Override
