@@ -11,7 +11,6 @@
     <feature name='odl-mdsal-all' version='${project.version}' description="OpenDaylight :: MDSAL :: All">
         <feature version='${project.version}'>odl-mdsal-broker</feature>
         <feature version='${project.version}'>odl-mdsal-clustering</feature>
-        <feature version='${project.version}'>odl-restconf</feature>
         <feature version='${project.version}'>odl-mdsal-xsql</feature>
         <feature version='${project.version}'>odl-toaster</feature>
     </feature>
@@ -33,26 +32,6 @@
         <bundle>mvn:org.opendaylight.controller/sal-inmemory-datastore/${project.version}</bundle>
         <configfile finalname="${config.configfile.directory}/${config.mdsal.configfile}">mvn:org.opendaylight.controller/md-sal-config/${mdsal.version}/xml/config</configfile>
     </feature>
-    <feature name='odl-restconf' version='${project.version}' description="OpenDaylight :: Restconf">
-        <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
-        <feature>war</feature>
-        <!-- presently we need sal-remote to be listed BEFORE sal-rest-connector because sal-rest-connector
-             has a yang file which augments a yang file in sal-remote, and order seems to matter -->
-        <bundle>mvn:org.opendaylight.controller/sal-remote/${project.version}</bundle>
-        <bundle>mvn:org.opendaylight.controller/sal-rest-connector/${project.version}</bundle>
-        <bundle>mvn:com.google.code.gson/gson/${gson.version}</bundle>
-        <bundle>mvn:org.opendaylight.yangtools/yang-data-codec-gson/${yangtools.version}</bundle>
-        <bundle>mvn:com.sun.jersey/jersey-core/${jersey.version}</bundle>
-        <bundle>mvn:com.sun.jersey/jersey-server/${jersey.version}</bundle>
-        <bundle>mvn:com.sun.jersey/jersey-servlet/${jersey.version}</bundle>
-        <bundle>mvn:io.netty/netty-buffer/${netty.version}</bundle>
-        <bundle>mvn:io.netty/netty-codec/${netty.version}</bundle>
-        <bundle>mvn:io.netty/netty-codec-http/${netty.version}</bundle>
-        <bundle>mvn:io.netty/netty-common/${netty.version}</bundle>
-        <bundle>mvn:io.netty/netty-handler/${netty.version}</bundle>
-        <bundle>mvn:io.netty/netty-transport/${netty.version}</bundle>
-        <configfile finalname="${config.configfile.directory}/${config.restconf.configfile}">mvn:org.opendaylight.controller/sal-rest-connector-config/${mdsal.version}/xml/config</configfile>
-    </feature>
     <feature name='odl-toaster' version='${project.version}' description="OpenDaylight :: Toaster">
         <feature version='${yangtools.version}'>odl-yangtools-common</feature>
         <feature version='${yangtools.version}'>odl-yangtools-binding</feature>
@@ -67,21 +46,6 @@
         <bundle>mvn:org.opendaylight.controller/sal-dom-xsql/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-karaf-xsql/${project.version}</bundle>
         <configfile finalname="${config.configfile.directory}/${config.xsql.configfile}">mvn:org.opendaylight.controller/sal-dom-xsql-config/${project.version}/xml/config</configfile>
-    </feature>
-    <feature name ='odl-mdsal-apidocs' version='${project.version}'>
-        <feature version='${project.version}'>odl-restconf</feature>
-        <bundle>mvn:org.opendaylight.controller/sal-rest-docgen/${project.version}</bundle>
-        <bundle>mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
-        <bundle>mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
-        <bundle>mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
-        <bundle>mvn:com.fasterxml.jackson.datatype/jackson-datatype-json-org/${jackson.version}</bundle>
-        <bundle>mvn:com.fasterxml.jackson.module/jackson-module-jaxb-annotations/${jackson.version}</bundle>
-        <bundle>mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/${jackson.version}</bundle>
-        <bundle>mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/${jackson.version}</bundle>
-        <bundle>mvn:com.sun.jersey/jersey-core/${jersey.version}</bundle>
-        <bundle>mvn:com.sun.jersey/jersey-server/${jersey.version}</bundle>
-        <bundle>mvn:com.sun.jersey/jersey-servlet/${jersey.version}</bundle>
-        <bundle>wrap:mvn:org.json/json/${org.json.version}</bundle>
     </feature>
     <feature name ='odl-mdsal-clustering-commons' version='${project.version}'>
         <feature version='${project.version}'>odl-mdsal-broker</feature>
@@ -111,16 +75,5 @@
         <configfile finalname="configuration/initial/akka.conf">mvn:org.opendaylight.controller/sal-clustering-config/${project.version}/xml/akkaconf</configfile>
         <configfile finalname="configuration/initial/module-shards.conf">mvn:org.opendaylight.controller/sal-clustering-config/${project.version}/xml/moduleshardconf</configfile>
         <configfile finalname="configuration/initial/modules.conf">mvn:org.opendaylight.controller/sal-clustering-config/${project.version}/xml/moduleconf</configfile>
-    </feature>
-
-    <feature name='odl-clustering-test-app' version='${project.version}'>
-        <feature version='${project.version}'>odl-mdsal-clustering</feature>
-        <feature version='${project.version}'>odl-restconf</feature>
-        <feature version='${yangtools.version}'>odl-yangtools-models</feature>
-        <bundle>mvn:org.opendaylight.controller.samples/clustering-it-model/${project.version}</bundle>
-        <bundle>mvn:org.opendaylight.controller.samples/clustering-it-provider/${project.version}</bundle>
-        <configfile finalname="${config.configfile.directory}/20-clustering-test-app.xml">mvn:org.opendaylight.controller.samples/clustering-it-config/${project.version}/xml/config</configfile>
-        <configfile finalname="configuration/initial/module-shards.conf" override="true" >mvn:org.opendaylight.controller.samples/clustering-it-config/${project.version}/xml/testmoduleshardconf</configfile>
-        <configfile finalname="configuration/initial/modules.conf" override="true">mvn:org.opendaylight.controller.samples/clustering-it-config/${project.version}/xml/testmoduleconf</configfile>
     </feature>
 </features>
