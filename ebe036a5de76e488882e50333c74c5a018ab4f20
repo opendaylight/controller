@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_d26742e9",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 983,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-09-24T14:52:15Z",
+      "side": 1,
+      "message": "This assumes e.getCause() is non null and nested cause is has cause. In some cases it is possible to get null pointer here.\n\nProbably better extraction is:  \n\nrootCause \u003d Iterables.find(Throwables.getCausalChain(e), Predicates.instanceOf(ModifiedNodeDoesNotExistException.class)));",
+      "revId": "ebe036a5de76e488882e50333c74c5a018ab4f20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
