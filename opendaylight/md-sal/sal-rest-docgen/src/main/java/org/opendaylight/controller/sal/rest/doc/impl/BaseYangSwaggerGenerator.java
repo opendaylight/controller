@@ -173,12 +173,12 @@ public class BaseYangSwaggerGenerator {
                 resourcePath = getDataStorePath("/operational/", context);
                 addApis(node, apis, resourcePath, pathParams, schemaContext, false);
             }
+        }
 
-            Set<RpcDefinition> rpcs = m.getRpcs();
-            for (RpcDefinition rpcDefinition : rpcs) {
-                String resourcePath = getDataStorePath("/operations/", context);
-                addRpcs(rpcDefinition, apis, resourcePath, schemaContext);
-            }
+        Set<RpcDefinition> rpcs = m.getRpcs();
+        for (RpcDefinition rpcDefinition : rpcs) {
+            String resourcePath = getDataStorePath("/operations/", context);
+            addRpcs(rpcDefinition, apis, resourcePath, schemaContext);
         }
 
         _logger.debug("Number of APIs found [{}]", apis.size());
