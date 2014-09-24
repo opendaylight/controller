@@ -12,24 +12,28 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.base.Charsets;
+import com.google.common.collect.Lists;
+import com.google.common.io.CharStreams;
 import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
-
 import java.util.concurrent.TimeUnit;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.annotation.Arg;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
-
+import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Charsets;
-import com.google.common.io.CharStreams;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 public final class Main {
 
@@ -55,6 +59,9 @@ public final class Main {
 
         @Arg(dest = "generate-config-address")
         public String generateConfigsAddress;
+
+        @Arg(dest = "generate-config-feature-file")
+        public File generateConfigsFeatureFile;
 
         @Arg(dest = "generate-configs-dir")
         public File generateConfigsDir;
@@ -124,6 +131,11 @@ public final class Main {
                     .help("Whether to use exi to transport xml content")
                     .dest("exi");
 
+            parser.addArgument("--feature-file")
+                    .type(File.class)
+                    .help("Feature file for netconf-connector features to add config files")
+                    .dest("generate-config-feature-file");
+
             return parser;
         }
 
@@ -147,7 +159,11 @@ public final class Main {
         try {
             final List<Integer> openDevices = netconfDeviceSimulator.start(params);
             if(params.generateConfigsDir != null) {
-                new ConfigGenerator(params.generateConfigsDir, openDevices).generate(params.ssh, params.generateConfigBatchSize, params.generateConfigsTimeout, params.generateConfigsAddress);
+                final ConfigGenerator configGenerator = new ConfigGenerator(params.generateConfigsDir, openDevices);
+                final List<File> generated = configGenerator.generate(params.ssh, params.generateConfigBatchSize, params.generateConfigsTimeout, params.generateConfigsAddress);
+                if(params.generateConfigsFeatureFile != null) {
+                    configGenerator.generateFeatureFile(generated, params.generateConfigsFeatureFile);
+                }
             }
         } catch (final Exception e) {
             LOG.error("Unhandled exception", e);
@@ -187,6 +203,9 @@ public final class Main {
         public static final String NETCONF_USE_SSH = "false";
         public static final String SIM_DEVICE_SUFFIX = "-sim-device";
 
+        public static final String NETCONF_CONNECTOR_ALL_FEATURE = "odl-netconf-connector-all";
+        public static final String FEATURE_END_TAG = "</feature>";
+
         private final File directory;
         private final List<Integer> openDevices;
 
@@ -195,7 +214,7 @@ public final class Main {
             this.openDevices = openDevices;
         }
 
-        public void generate(final boolean useSsh, final int batchSize, final int generateConfigsTimeout, final String address) {
+        public List<File> generate(final boolean useSsh, final int batchSize, final int generateConfigsTimeout, final String address) {
             if(directory.exists() == false) {
                 checkState(directory.mkdirs(), "Unable to create folder %s" + directory);
             }
@@ -223,6 +242,8 @@ public final class Main {
                 StringBuilder b = new StringBuilder();
                 b.append(before);
 
+                final List<File> generatedConfigs = Lists.newArrayList();
+
                 for (final Integer openDevice : openDevices) {
                     if(batchStart == null) {
                         batchStart = openDevice;
@@ -236,7 +257,9 @@ public final class Main {
                     connectorCount++;
                     if(connectorCount == batchSize) {
                         b.append(after);
-                        Files.write(b.toString(), new File(directory, String.format("simulated-devices_%d-%d.xml", batchStart, openDevice)), Charsets.UTF_8);
+                        final File to = new File(directory, String.format("simulated-devices_%d-%d.xml", batchStart, openDevice));
+                        generatedConfigs.add(to);
+                        Files.write(b.toString(), to, Charsets.UTF_8);
                         connectorCount = 0;
                         b = new StringBuilder();
                         b.append(before);
@@ -247,12 +270,51 @@ public final class Main {
                 // Write remaining
                 if(connectorCount != 0) {
                     b.append(after);
-                    Files.write(b.toString(), new File(directory, String.format("simulated-devices_%d-%d.xml", batchStart, openDevices.get(openDevices.size() - 1))), Charsets.UTF_8);
+                    final File to = new File(directory, String.format("simulated-devices_%d-%d.xml", batchStart, openDevices.get(openDevices.size() - 1)));
+                    generatedConfigs.add(to);
+                    Files.write(b.toString(), to, Charsets.UTF_8);
                 }
 
                 LOG.info("Config files generated in {}", directory);
+                return generatedConfigs;
             } catch (final IOException e) {
                 throw new RuntimeException("Unable to generate config files", e);
+            }
+        }
+
+
+        public void generateFeatureFile(final List<File> generated, final File generateConfigsFeatureFile) {
+            try {
+                final Document document = XmlUtil.readXmlToDocument(Files.toString(generateConfigsFeatureFile, Charsets.UTF_8));
+                final NodeList childNodes = document.getDocumentElement().getChildNodes();
+
+                for (int i = 0; i < childNodes.getLength(); i++) {
+                    final Node item = childNodes.item(i);
+                    if(item instanceof Element == false) {
+                        continue;
+                    }
+                    if(item.getLocalName().equals("feature") ==false) {
+                        continue;
+                    }
+
+                    if(NETCONF_CONNECTOR_ALL_FEATURE.equals(((Element) item).getAttribute("name"))) {
+                        final Element item1 = (Element) item;
+                        for (final File file : generated) {
+                            final Element configfile = document.createElement("configfile");
+                            configfile.setTextContent("file:" + file.getName());
+                            configfile.setAttribute("finalname", "etc/opendaylight/karaf/" + file.getName());
+                            item1.appendChild(configfile);
+
+                        }
+
+                    }
+                }
+
+                Files.write(XmlUtil.toString(document), new File(directory, generateConfigsFeatureFile.getName()), Charsets.UTF_8);
+            } catch (final IOException e) {
+                throw new RuntimeException("Unable to load features file as a resource");
+            } catch (final SAXException e) {
+                throw new RuntimeException("Unable to parse features file");
             }
         }
     }
