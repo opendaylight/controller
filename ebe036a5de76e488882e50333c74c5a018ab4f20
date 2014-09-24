@@ -2,6 +2,57 @@
   "comments": [
     {
       "key": {
+        "uuid": "fa82b9bf_5274929b",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/BrokerFacade.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-24T15:00:11Z",
+      "side": 1,
+      "message": "This should be changed back to newWriteOnlyTransaction.",
+      "revId": "ebe036a5de76e488882e50333c74c5a018ab4f20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_72799692",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/BrokerFacade.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-24T15:00:11Z",
+      "side": 1,
+      "message": "This should be changed back to newWriteOnlyTransaction.",
+      "revId": "ebe036a5de76e488882e50333c74c5a018ab4f20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_529b32c9",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 979,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-24T15:00:11Z",
+      "side": 1,
+      "message": "This should call checkedGet() to ensure it won\u0027t throw ExecutionException even though the underlying CheckFuture returned from the DataBroker does handle get() the same as checkedGet().",
+      "revId": "ebe036a5de76e488882e50333c74c5a018ab4f20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_d26742e9",
         "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
         "patchSetId": 3
@@ -13,6 +64,23 @@
       "writtenOn": "2014-09-24T14:52:15Z",
       "side": 1,
       "message": "This assumes e.getCause() is non null and nested cause is has cause. In some cases it is possible to get null pointer here.\n\nProbably better extraction is:  \n\nrootCause \u003d Iterables.find(Throwables.getCausalChain(e), Predicates.instanceOf(ModifiedNodeDoesNotExistException.class)));",
+      "revId": "ebe036a5de76e488882e50333c74c5a018ab4f20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f2ab66d4",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 985,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-09-24T15:00:11Z",
+      "side": 1,
+      "message": "Should we return success here? It seems to me this should return 404 (Not Found) same as read does.",
       "revId": "ebe036a5de76e488882e50333c74c5a018ab4f20",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
