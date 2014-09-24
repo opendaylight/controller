@@ -82,7 +82,7 @@ import com.google.common.collect.HashBiMap;
 public class StatListenCommitFlow extends StatAbstractListenCommit<Flow, OpendaylightFlowStatisticsListener>
                                             implements OpendaylightFlowStatisticsListener {
 
-    private static final Logger LOG = LoggerFactory.getLogger(StatListenCommitFlow.class);
+    protected static final Logger LOG = LoggerFactory.getLogger(StatListenCommitFlow.class);
 
     private static final String ALIEN_SYSTEM_FLOW_ID = "#UF$TABLE*";
 
@@ -302,7 +302,11 @@ public class StatListenCommitFlow extends StatAbstractListenCommit<Flow, Openday
                     final List<FlowHashIdMap>  flowHashMap = flowHashMapping.getFlowHashIdMap() != null
                             ? flowHashMapping.getFlowHashIdMap() : Collections.<FlowHashIdMap> emptyList();
                     for (final FlowHashIdMap flowHashId : flowHashMap) {
-                        flowIdByHash.put(flowHashId.getKey(), flowHashId.getFlowId());
+                        try {
+                            flowIdByHash.put(flowHashId.getKey(), flowHashId.getFlowId());
+                        } catch (Exception e) {
+                            LOG.warn("flow hashing hit a duplicate for {} -> {}", flowHashId.getKey(), flowHashId.getFlowId());
+                        }
                     }
                 }
             }
