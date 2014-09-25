@@ -88,6 +88,12 @@ public interface StatRpcMsgManager extends Runnable, AutoCloseable {
     <T extends TransactionAware> void addNotification(T notification, NodeId nodeId);
 
     /**
+     * Method cleans all transaction's registration. (Future and actual)
+     * Method has to be call for every connect/disconnect Node.
+     */
+    void cleaningRpcRegistry();
+
+    /**
      * The last Multipart should inform code about possibility to take all previous
      * messages for next processing. The method take all msg and possible input object
      * and build all to TransactionCacheContainer Object to return. This process clean

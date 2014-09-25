@@ -84,7 +84,7 @@ public class StatRpcMsgManagerImpl implements StatRpcMsgManager {
 
     private final Cache<String, TransactionCacheContainer<? super TransactionAware>> txCache;
 
-    private final long maxLifeForRequest = 50; /* 50 second */
+    private final long maxLifeForRequest = 300; /* 5 minute */
     private final int queueCapacity = 5000;
     private final StatisticsManager manager;
 
@@ -131,6 +131,14 @@ public class StatRpcMsgManagerImpl implements StatRpcMsgManager {
     public void close() {
         finishing = true;
         statsRpcJobQueue = null;
+    }
+
+    @Override
+    public void cleaningRpcRegistry() {
+        txCache.invalidateAll();
+        while ( ! statsRpcJobQueue.isEmpty()) {
+            statsRpcJobQueue.poll();
+        }
     }
 
     @Override
@@ -249,21 +257,12 @@ public class StatRpcMsgManagerImpl implements StatRpcMsgManager {
     public void addNotification(final TransactionAware notification, final NodeId nodeId) {
         Preconditions.checkArgument(notification != null, "TransactionAware can not be null!");
         Preconditions.checkArgument(nodeId != null, "NodeId can not be null!");
-
-        final RpcJobsQueue addNotification = new RpcJobsQueue() {
-
-            @Override
-            public Void call() throws Exception {
-                final TransactionId txId = notification.getTransactionId();
-                final String key = buildCacheKey(txId, nodeId);
-                final TransactionCacheContainer<? super TransactionAware> container = (txCache.getIfPresent(key));
-                if (container != null) {
-                    container.addNotif(notification);
-                }
-                return null;
-            }
-        };
-        addStatJob(addNotification);
+        final TransactionId txId = notification.getTransactionId();
+        final String key = buildCacheKey(txId, nodeId);
+        final TransactionCacheContainer<? super TransactionAware> container = (txCache.getIfPresent(key));
+        if (container != null) {
+            container.addNotif(notification);
+        }
     }
 
     @Override

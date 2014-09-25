@@ -39,7 +39,7 @@ public class StatPermCollectorImpl implements StatPermCollector {
 
     private final static Logger LOG = LoggerFactory.getLogger(StatPermCollectorImpl.class);
 
-    private final static long STAT_COLLECT_TIME_OUT = 30000L;
+    private final static long STAT_COLLECT_TIME_OUT = 60000L;  // (1 minute)
 
     private final ExecutorService statNetCollectorServ;
     private final StatisticsManager manager;

@@ -68,7 +68,7 @@ public class StatisticsManagerImpl implements StatisticsManager, Runnable {
 
    private final static Logger LOG = LoggerFactory.getLogger(StatisticsManagerImpl.class);
 
-   private static final int QUEUE_DEPTH = 500;
+   private static final int QUEUE_DEPTH = 1000;
    private static final int MAX_BATCH = 1;
 
    private final BlockingQueue<StatDataStoreOperation> dataStoreOperQueue = new LinkedBlockingDeque<>(QUEUE_DEPTH);
@@ -206,6 +206,8 @@ public class StatisticsManagerImpl implements StatisticsManager, Runnable {
                LOG.trace("Processed {} operations, submitting transaction {}", ops, tx.getIdentifier());
 
                try {
+                   // wait for result prevent start next transaction on timeout exception
+                   // by big data set commit
                    tx.submit().checkedGet();
                } catch (final TransactionCommitFailedException e) {
                    LOG.warn("Stat DataStoreOperation unexpected State!", e);
@@ -240,9 +242,6 @@ public class StatisticsManagerImpl implements StatisticsManager, Runnable {
    public void onTransactionChainFailed(final TransactionChain<?, ?> chain, final AsyncTransaction<?, ?> transaction,
            final Throwable cause) {
        LOG.warn("Failed to export Flow Capable Statistics, Transaction {} failed.",transaction.getIdentifier(),cause);
-       txChain.close();
-       txChain = dataBroker.createTransactionChain(StatisticsManagerImpl.this);
-       cleanDataStoreOperQueue();
    }
 
    @Override
@@ -272,6 +271,8 @@ public class StatisticsManagerImpl implements StatisticsManager, Runnable {
    @Override
    public void connectedNodeRegistration(final InstanceIdentifier<Node> nodeIdent,
            final List<StatCapabTypes> statTypes, final Short nrOfSwitchTables) {
+       rpcMsgManager.cleaningRpcRegistry();
+       cleanDataStoreOperQueue();
        for (final StatPermCollector collector : statCollectors) {
            if (collector.connectedNodeRegistration(nodeIdent, statTypes, nrOfSwitchTables)) {
                return;
@@ -294,6 +295,8 @@ public class StatisticsManagerImpl implements StatisticsManager, Runnable {
 
    @Override
    public void disconnectedNodeUnregistration(final InstanceIdentifier<Node> nodeIdent) {
+       rpcMsgManager.cleaningRpcRegistry();
+       cleanDataStoreOperQueue();
        for (final StatPermCollector collector : statCollectors) {
            if (collector.disconnectedNodeUnregistration(nodeIdent)) {
                if ( ! collector.hasActiveNodes()) {
