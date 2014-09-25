@@ -116,11 +116,15 @@ class JsonToCompositeNodeReader {
     private static URI getNamespaceFor(final String jsonElementName) {
         final Iterator<String> it = COLON_SPLITTER.split(jsonElementName).iterator();
 
-        // The string needs to me in form "moduleName:localName"
+        // The string needs to be in form "moduleName:localName"
         if (it.hasNext()) {
             final String maybeURI = it.next();
             if (Iterators.size(it) == 1) {
-                return URI.create(maybeURI);
+                try {
+                    return URI.create(maybeURI);
+                } catch (IllegalArgumentException e) {
+                    LOG.debug("Value "+maybeURI+" couldn't be interpreted as URI.");
+                }
             }
         }
 
