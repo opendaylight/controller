@@ -9,7 +9,9 @@
 package org.opendaylight.controller.md.statistics.manager;
 
 import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
 
 /**
@@ -30,5 +32,13 @@ import org.opendaylight.yangtools.yang.binding.NotificationListener;
 public interface StatListeningCommiter<T extends DataObject, N extends NotificationListener> extends DataChangeListener, StatNotifyCommiter<N> {
 
 
+    /**
+     * All StatListeningCommiter implementer has to clean its actual state
+     * for all cached data related to disconnected node.
+     * Method prevents unwanted dataStore changes.
+     *
+     * @param nodeIdent
+     */
+    void cleanForDisconnect(InstanceIdentifier<Node> nodeIdent);
 }
 

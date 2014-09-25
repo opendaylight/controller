@@ -109,6 +109,11 @@ public abstract class StatAbstractListenCommit<T extends DataObject, N extends N
     }
 
     @Override
+    public void cleanForDisconnect(final InstanceIdentifier<Node> nodeIdent) {
+        mapNodesForDelete.remove(nodeIdent);
+    }
+
+    @Override
     public void close() {
         if (listenerRegistration != null) {
             try {
