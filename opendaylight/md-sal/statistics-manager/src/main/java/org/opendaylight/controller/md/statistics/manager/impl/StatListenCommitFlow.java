@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.md.statistics.manager.impl;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -192,6 +193,17 @@ public class StatListenCommitFlow extends StatAbstractListenCommit<Flow, Openday
                 }
 
                 statsFlowCommitAll(flowStats, nodeIdent, tx);
+                /* cleaning all not cached hash collisions */
+                final Map<InstanceIdentifier<Flow>, Integer> listAliens = mapNodesForDelete.get(nodeIdent);
+                for (final Entry<InstanceIdentifier<Flow>, Integer> nodeForDelete : listAliens.entrySet()) {
+                    final Integer lifeIndex = nodeForDelete.getValue();
+                    if (nodeForDelete.getValue() > 0) {
+                        nodeForDelete.setValue(Integer.valueOf(lifeIndex.intValue() - 1));
+                    } else {
+                        LOG.info("Possible collidation for hashCode for flow {}", nodeForDelete.getKey());
+                        tx.delete(LogicalDatastoreType.OPERATIONAL, nodeForDelete.getKey());
+                    }
+                }
                 /* Notification for continue collecting statistics */
                 notifyToCollectNextStatistics(nodeIdent);
             }
@@ -248,12 +260,11 @@ public class StatListenCommitFlow extends StatAbstractListenCommit<Flow, Openday
      * for future easy identification
      */
     static String buildHashCode(final FlowAndStatisticsMapList deviceFlow) {
-        final FlowBuilder builder = new FlowBuilder();
-        builder.setMatch(deviceFlow.getMatch());
-        builder.setCookie(deviceFlow.getCookie());
-        builder.setPriority(deviceFlow.getPriority());
-        final Flow flowForHashCode = builder.build();
-        return String.valueOf(flowForHashCode.hashCode());
+        /* table-miss flow entry priority = 0 and we need some prime nr. */
+        final BigInteger priority = BigInteger.valueOf(deviceFlow.getPriority() + 9973);
+        final BigInteger match = BigInteger.valueOf(deviceFlow.getMatch().hashCode() + 3);
+        final BigInteger result = deviceFlow.getCookie().getValue().add(priority.multiply(match));
+        return String.valueOf(result);
     }
 
     private class NodeUpdateState {
@@ -304,7 +315,7 @@ public class StatListenCommitFlow extends StatAbstractListenCommit<Flow, Openday
                     for (final FlowHashIdMap flowHashId : flowHashMap) {
                         try {
                             flowIdByHash.put(flowHashId.getKey(), flowHashId.getFlowId());
-                        } catch (Exception e) {
+                        } catch (final Exception e) {
                             LOG.warn("flow hashing hit a duplicate for {} -> {}", flowHashId.getKey(), flowHashId.getFlowId());
                         }
                     }
@@ -338,12 +349,7 @@ public class StatListenCommitFlow extends StatAbstractListenCommit<Flow, Openday
         }
 
         private void initConfigFlows(final ReadWriteTransaction trans) {
-            Optional<Table> table = readLatestConfiguration(tableRef);
-            try {
-                table = trans.read(LogicalDatastoreType.CONFIGURATION, tableRef).checkedGet();
-            } catch (final ReadFailedException e) {
-                table = Optional.absent();
-            }
+            final Optional<Table> table = readLatestConfiguration(tableRef);
             List<Flow> localList = null;
             if(table.isPresent()) {
                 localList = table.get().getFlow();
@@ -394,13 +400,12 @@ public class StatListenCommitFlow extends StatAbstractListenCommit<Flow, Openday
             trans.put(LogicalDatastoreType.OPERATIONAL, flowIdent, flowBuilder.build());
             /* check life for Alien flows */
             if (flowKey.getId().getValue().startsWith(ALIEN_SYSTEM_FLOW_ID)) {
-                removeData(flowIdent, Integer.valueOf(5));
+                removeData(flowIdent, Integer.valueOf(3));
             }
         }
 
         /* Build and deploy new FlowHashId map */
         private void updateHashCache(final ReadWriteTransaction trans, final FlowKey flowKey, final FlowHashIdMapKey hashingKey) {
-            // TODO Auto-generated method stub
             final FlowHashIdMapBuilder flHashIdMap = new FlowHashIdMapBuilder();
             flHashIdMap.setFlowId(flowKey.getId());
             flHashIdMap.setKey(hashingKey);
@@ -411,21 +416,16 @@ public class StatListenCommitFlow extends StatAbstractListenCommit<Flow, Openday
         }
 
         void removeUnreportedFlows(final ReadWriteTransaction tx) {
+            final InstanceIdentifier<Node> nodeIdent = tableRef.firstIdentifierOf(Node.class);
             final Map<FlowHashIdMapKey, FlowId> listForRemove = getRemovalList();
-            final Optional<Table> configTable = readLatestConfiguration(tableRef);
-            List<Flow> configFlows = Collections.emptyList();
-            if (configTable.isPresent() && configTable.get().getFlow() != null) {
-                configFlows = new ArrayList<>(configTable.get().getFlow());
-            }
+            initConfigFlows(tx);
             for (final Entry<FlowHashIdMapKey, FlowId> entryForRemove : listForRemove.entrySet()) {
                 final FlowKey flowKey = new FlowKey(entryForRemove.getValue());
                 final InstanceIdentifier<Flow> flowRef = tableRef.child(Flow.class, flowKey);
                 final InstanceIdentifier<FlowStatisticsData> flowStatIdent = flowRef.augmentation(FlowStatisticsData.class);
                 if (flowKey.getId().getValue().startsWith(ALIEN_SYSTEM_FLOW_ID)) {
-                    final InstanceIdentifier<Node> nodeIdent = tableRef.firstIdentifierOf(Node.class);
                     final Integer lifeIndex = mapNodesForDelete.get(nodeIdent).remove(flowRef);
                     if (lifeIndex > 0) {
-                        mapNodesForDelete.get(nodeIdent).put(flowRef, Integer.valueOf(lifeIndex.intValue() - 1));
                         break;
                     }
                 } else {
