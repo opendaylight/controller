@@ -294,6 +294,7 @@ public class StatisticsManagerImpl implements StatisticsManager, Runnable {
 
    @Override
    public void disconnectedNodeUnregistration(final InstanceIdentifier<Node> nodeIdent) {
+       flowListeningCommiter.cleanForDisconnect(nodeIdent);
        for (final StatPermCollector collector : statCollectors) {
            if (collector.disconnectedNodeUnregistration(nodeIdent)) {
                if ( ! collector.hasActiveNodes()) {
