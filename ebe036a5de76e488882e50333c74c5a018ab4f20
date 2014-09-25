@@ -70,6 +70,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_a0b58432",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 983,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-09-25T07:24:05Z",
+      "side": 1,
+      "message": "I used Iterables.tryFind method",
+      "parentUuid": "fa82b9bf_d26742e9",
+      "revId": "ebe036a5de76e488882e50333c74c5a018ab4f20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_f2ab66d4",
         "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
         "patchSetId": 3
@@ -81,6 +99,24 @@
       "writtenOn": "2014-09-24T15:00:11Z",
       "side": 1,
       "message": "Should we return success here? It seems to me this should return 404 (Not Found) same as read does.",
+      "revId": "ebe036a5de76e488882e50333c74c5a018ab4f20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_006eb0c9",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 985,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-09-25T07:24:05Z",
+      "side": 1,
+      "message": "I was told by Tony that in case of deleting non existing data also success should be returned",
+      "parentUuid": "fa82b9bf_f2ab66d4",
       "revId": "ebe036a5de76e488882e50333c74c5a018ab4f20",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
