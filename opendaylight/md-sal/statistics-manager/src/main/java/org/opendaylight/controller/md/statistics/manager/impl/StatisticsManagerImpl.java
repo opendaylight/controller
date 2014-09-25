@@ -22,7 +22,6 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.statistics.manager.StatListeningCommiter;
 import org.opendaylight.controller.md.statistics.manager.StatNodeRegistration;
 import org.opendaylight.controller.md.statistics.manager.StatNotifyCommiter;
@@ -204,27 +203,17 @@ public class StatisticsManagerImpl implements StatisticsManager, Runnable {
                } while (op != null);
 
                LOG.trace("Processed {} operations, submitting transaction {}", ops, tx.getIdentifier());
-
-               try {
-                   // wait for result prevent start next transaction on timeout exception
-                   // by big data set commit
-                   tx.submit().checkedGet();
-               } catch (final TransactionCommitFailedException e) {
-                   LOG.warn("Stat DataStoreOperation unexpected State!", e);
-                   txChain.close();
-                   txChain = dataBroker.createTransactionChain(StatisticsManagerImpl.this);
-                   cleanDataStoreOperQueue();
-               }
-           }
-           catch (final IllegalStateException e) {
-               LOG.warn("Stat DataStoreOperation unexpected State!", e);
+               tx.submit().checkedGet();
            }
            catch (final InterruptedException e) {
                LOG.warn("Stat Manager DS Operation thread interupted!", e);
                finishing = true;
            }
            catch (final Exception e) {
-               LOG.warn("Stat DataStore Operation executor fail!", e);
+               LOG.warn("Stat  unexpected State!", e);
+               txChain.close();
+               txChain = dataBroker.createTransactionChain(StatisticsManagerImpl.this);
+               cleanDataStoreOperQueue();
            }
        }
        // Drain all events, making sure any blocked threads are unblocked
@@ -295,6 +284,7 @@ public class StatisticsManagerImpl implements StatisticsManager, Runnable {
    public void disconnectedNodeUnregistration(final InstanceIdentifier<Node> nodeIdent) {
        rpcMsgManager.cleaningRpcRegistry();
        cleanDataStoreOperQueue();
+       flowListeningCommiter.cleanForDisconnect(nodeIdent);
        for (final StatPermCollector collector : statCollectors) {
            if (collector.disconnectedNodeUnregistration(nodeIdent)) {
                if ( ! collector.hasActiveNodes()) {
