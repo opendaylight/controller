@@ -1,5 +1,6 @@
 package org.opendaylight.controller.md.statistics.manager.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -39,7 +40,7 @@ public class StatPermCollectorImpl implements StatPermCollector {
 
     private final static Logger LOG = LoggerFactory.getLogger(StatPermCollectorImpl.class);
 
-    private final static long STAT_COLLECT_TIME_OUT = 30000L;
+    private final static long STAT_COLLECT_TIME_OUT = 60000L;  // (1 minute)
 
     private final ExecutorService statNetCollectorServ;
     private final StatisticsManager manager;
@@ -138,6 +139,35 @@ public class StatPermCollectorImpl implements StatPermCollector {
                     return true;
                 }
             }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean addPostRegistrationCapabilities(final InstanceIdentifier<Node> nodeIdent, final StatCapabTypes capabType) {
+        if (statNodeHolder.containsKey(nodeIdent)) {
+            if ( ! statNodeHolder.get(nodeIdent).getStatMarkers().contains(capabType)) {
+                synchronized (statNodeHolderLock) {
+                    if ( ! statNodeHolder.get(nodeIdent).getStatMarkers().contains(capabType)) {
+                        final Map<InstanceIdentifier<Node>, StatNodeInfoHolder> statNode =
+                                new HashMap<>(statNodeHolder);
+
+                        final StatNodeInfoHolder statHolder = statNode.remove(nodeIdent);
+
+                        final List<StatCapabTypes> nodeCapabTypes =
+                                new ArrayList<>(statHolder.getStatMarkers());
+
+                        nodeCapabTypes.add(capabType);
+
+                        final StatNodeInfoHolder newStatHolder = new StatNodeInfoHolder(statHolder.getNodeRef(),
+                                Collections.unmodifiableList(nodeCapabTypes), statHolder.getMaxTables());
+
+                        statNode.put(nodeIdent, newStatHolder);
+                        statNodeHolder = Collections.unmodifiableMap(statNode);
+                    }
+                }
+            }
+            return true;
         }
         return false;
     }

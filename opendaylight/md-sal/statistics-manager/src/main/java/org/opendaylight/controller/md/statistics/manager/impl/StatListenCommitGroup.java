@@ -16,6 +16,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.controller.md.statistics.manager.StatPermCollector.StatCapabTypes;
 import org.opendaylight.controller.md.statistics.manager.StatRpcMsgManager.TransactionCacheContainer;
 import org.opendaylight.controller.md.statistics.manager.StatisticsManager;
 import org.opendaylight.controller.md.statistics.manager.StatisticsManager.StatDataStoreOperation;
@@ -143,6 +144,7 @@ public class StatListenCommitGroup extends StatAbstractListenCommit<Group, Opend
         manager.enqueue(new StatDataStoreOperation() {
             @Override
             public void applyOperation(final ReadWriteTransaction tx) {
+                /* Notification for continue collecting statistics */
                 notifyToCollectNextStatistics(nodeIdent);
                 final GroupFeatures stats = new GroupFeaturesBuilder(notification).build();
                 final InstanceIdentifier<GroupFeatures> groupFeatureIdent = nodeIdent
@@ -157,6 +159,7 @@ public class StatListenCommitGroup extends StatAbstractListenCommit<Group, Opend
                 if (node.isPresent()) {
                     tx.put(LogicalDatastoreType.OPERATIONAL, groupFeatureIdent, stats, true);
                 }
+                manager.addPostRegistrationCapabilities(nodeIdent, StatCapabTypes.GROUP_STATS);
             }
         });
     }

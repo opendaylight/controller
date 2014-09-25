@@ -111,5 +111,17 @@ public interface StatPermCollector extends Runnable, AutoCloseable {
      * @return
      */
     boolean hasActiveNodes();
+
+    /**
+     * Method provides functionality to add additional Statistic Capability to registered node
+     * and return true if the StatisticCapability has been added successful or Node has this capabilities.
+     * False value is returned if the StatPermCollector doesn't contain Node.
+     *
+     * @param nodeIdent
+     * @param capabType
+     * @return
+     */
+    boolean addPostRegistrationCapabilities(InstanceIdentifier<Node> nodeIdent, StatCapabTypes capabType);
+
 }
 

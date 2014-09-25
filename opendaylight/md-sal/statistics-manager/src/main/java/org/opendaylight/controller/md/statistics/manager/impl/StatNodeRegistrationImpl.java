@@ -14,13 +14,9 @@ import java.util.List;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.statistics.manager.StatNodeRegistration;
 import org.opendaylight.controller.md.statistics.manager.StatPermCollector.StatCapabTypes;
 import org.opendaylight.controller.md.statistics.manager.StatisticsManager;
-import org.opendaylight.controller.md.statistics.manager.StatisticsManager.StatDataStoreOperation;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FeatureCapability;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
@@ -37,7 +33,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRemoved;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeUpdated;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.NodeMeterFeatures;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -106,50 +101,40 @@ public class StatNodeRegistrationImpl implements StatNodeRegistration {
         Preconditions.checkNotNull(data, "SwitchFeatures data for {} can not be null!", keyIdent);
         Preconditions.checkArgument(( ! keyIdent.isWildcarded()), "InstanceIdentifier is WildCarded!");
 
-        manager.enqueue(new StatDataStoreOperation() {
-            @Override
-            public void applyOperation(final ReadWriteTransaction tx) {
+        final List<StatCapabTypes> statCapabTypes = new ArrayList<>();
+        Short maxCapTables = Short.valueOf("1");
 
-                final List<StatCapabTypes> statCapabTypes = new ArrayList<>();
-                Short maxCapTables = Short.valueOf("1");
-
-                final List<Class<? extends FeatureCapability>> capabilities = data.getCapabilities() != null
-                        ? data.getCapabilities() : Collections.<Class<? extends FeatureCapability>> emptyList();
-                for (final Class<? extends FeatureCapability> capability : capabilities) {
-                    if (capability == FlowFeatureCapabilityTableStats.class) {
-                        statCapabTypes.add(StatCapabTypes.TABLE_STATS);
-                    } else if (capability == FlowFeatureCapabilityFlowStats.class) {
-                        statCapabTypes.add(StatCapabTypes.FLOW_STATS);
-                    } else if (capability == FlowFeatureCapabilityGroupStats.class) {
-                        statCapabTypes.add(StatCapabTypes.GROUP_STATS);
-                    } else if (capability == FlowFeatureCapabilityPortStats.class) {
-                        statCapabTypes.add(StatCapabTypes.PORT_STATS);
-                    } else if (capability == FlowFeatureCapabilityQueueStats.class) {
-                        statCapabTypes.add(StatCapabTypes.QUEUE_STATS);
-                    }
-                }
-                maxCapTables = data.getMaxTables();
-
-                final Optional<Short> maxTables = Optional.<Short> of(maxCapTables);
-
-                /* Meters management */
-                final InstanceIdentifier<NodeMeterFeatures> meterFeaturesIdent = nodeIdent.augmentation(NodeMeterFeatures.class);
-
-
-                Optional<NodeMeterFeatures> meterFeatures = Optional.absent();
-                try {
-                    meterFeatures = tx.read(LogicalDatastoreType.OPERATIONAL, meterFeaturesIdent).checkedGet();
-                }
-                catch (final ReadFailedException e) {
-                    LOG.warn("Read NodeMeterFeatures {} fail!", meterFeaturesIdent, e);
-                }
-                if (meterFeatures.isPresent()) {
-                    statCapabTypes.add(StatCapabTypes.METER_STATS);
-                }
-                manager.connectedNodeRegistration(nodeIdent,
-                        Collections.unmodifiableList(statCapabTypes), maxTables.get());
+        final List<Class<? extends FeatureCapability>> capabilities = data.getCapabilities() != null
+                ? data.getCapabilities() : Collections.<Class<? extends FeatureCapability>> emptyList();
+        for (final Class<? extends FeatureCapability> capability : capabilities) {
+            if (capability == FlowFeatureCapabilityTableStats.class) {
+                statCapabTypes.add(StatCapabTypes.TABLE_STATS);
+            } else if (capability == FlowFeatureCapabilityFlowStats.class) {
+                statCapabTypes.add(StatCapabTypes.FLOW_STATS);
+            } else if (capability == FlowFeatureCapabilityGroupStats.class) {
+                statCapabTypes.add(StatCapabTypes.GROUP_STATS);
+            } else if (capability == FlowFeatureCapabilityPortStats.class) {
+                statCapabTypes.add(StatCapabTypes.PORT_STATS);
+            } else if (capability == FlowFeatureCapabilityQueueStats.class) {
+                statCapabTypes.add(StatCapabTypes.QUEUE_STATS);
             }
-        });
+        }
+        maxCapTables = data.getMaxTables();
+
+        final Optional<Short> maxTables = Optional.<Short> of(maxCapTables);
+
+        manager.connectedNodeRegistration(nodeIdent,
+                Collections.unmodifiableList(statCapabTypes), maxTables.get());
+
+        /* Meters / Groups / Port additional management */
+        final NodeRef nodeRef = new NodeRef(nodeIdent);
+        if ( ! statCapabTypes.contains(StatCapabTypes.GROUP_STATS)) {
+            manager.getRpcMsgManager().getGroupFeaturesStat(nodeRef);
+        }
+        if ( ! statCapabTypes.contains(StatCapabTypes.PORT_STATS)) {
+            manager.getRpcMsgManager().getAllPortsStat(nodeRef);
+        }
+        manager.getRpcMsgManager().getMeterFeaturesStat(nodeRef);
     }
 
     @Override
@@ -157,12 +142,7 @@ public class StatNodeRegistrationImpl implements StatNodeRegistration {
         Preconditions.checkArgument(nodeIdent != null, "InstanceIdentifier can not be NULL!");
         Preconditions.checkArgument(( ! nodeIdent.isWildcarded()),
                 "InstanceIdentifier {} is WildCarded!", nodeIdent);
-        manager.enqueue(new StatDataStoreOperation() {
-            @Override
-            public void applyOperation(final ReadWriteTransaction tx) {
-                manager.disconnectedNodeUnregistration(nodeIdent);
-            }
-        });
+        manager.disconnectedNodeUnregistration(nodeIdent);
     }
 
 
@@ -196,7 +176,6 @@ public class StatNodeRegistrationImpl implements StatNodeRegistration {
             final InstanceIdentifier<?> nodeRefIdent = nodeRef.getValue();
             final InstanceIdentifier<Node> nodeIdent =
                     nodeRefIdent.firstIdentifierOf(Node.class);
-
             final InstanceIdentifier<SwitchFeatures> swichFeaturesIdent =
                     nodeIdent.augmentation(FlowCapableNode.class).child(SwitchFeatures.class);
             final SwitchFeatures switchFeatures = newFlowNode.getSwitchFeatures();

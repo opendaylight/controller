@@ -14,6 +14,7 @@ import java.util.List;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.controller.md.statistics.manager.StatPermCollector.StatCapabTypes;
 import org.opendaylight.controller.md.statistics.manager.StatRpcMsgManager.TransactionCacheContainer;
 import org.opendaylight.controller.md.statistics.manager.StatisticsManager;
 import org.opendaylight.controller.md.statistics.manager.StatisticsManager.StatDataStoreOperation;
@@ -104,6 +105,7 @@ public class StatNotifyCommitPort extends StatAbstractNotifyCommit<OpendaylightP
                 /* Notification for continue collecting statistics - Port statistics are still same size
                  * and they are small - don't need to wait for whole apply operation*/
                 notifyToCollectNextStatistics(nodeIdent);
+                manager.addPostRegistrationCapabilities(nodeIdent, StatCapabTypes.PORT_STATS);
             }
         });
     }

@@ -119,6 +119,16 @@ public interface StatisticsManager extends AutoCloseable, TransactionChainListen
       */
      void disconnectedNodeUnregistration(InstanceIdentifier<Node> nodeIdent);
 
+     /**
+      * Method wraps {@link StatPermCollector}.addPostRegistrationCapabilities to provide
+      * parallel statCollection process for set of Nodes. So it has to identify
+      * correct collector for node.
+      *
+      * @param nodeIdent
+      * @param capabType
+      */
+     void addPostRegistrationCapabilities(InstanceIdentifier<Node> nodeIdent, StatCapabTypes capabType);
+
     /**
      * Method provides access to Device RPC methods by wrapped
      * internal method. In next {@link StatRpcMsgManager} is registered all
