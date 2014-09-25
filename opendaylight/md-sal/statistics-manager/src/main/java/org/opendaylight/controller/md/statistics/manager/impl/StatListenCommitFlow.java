@@ -8,6 +8,9 @@
 
 package org.opendaylight.controller.md.statistics.manager.impl;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -17,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -62,10 +64,6 @@ import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-
 /**
  * statistics-manager
  * org.opendaylight.controller.md.statistics.manager.impl
@@ -85,6 +83,8 @@ public class StatListenCommitFlow extends StatAbstractListenCommit<Flow, Openday
     protected static final Logger LOG = LoggerFactory.getLogger(StatListenCommitFlow.class);
 
     private static final String ALIEN_SYSTEM_FLOW_ID = "#UF$TABLE*";
+
+    private static final Integer REMOVE_AFTER_MISSING_COLLECTION = 1;
 
     private final AtomicInteger unaccountedFlowsCounter = new AtomicInteger(0);
 
@@ -142,8 +142,7 @@ public class StatListenCommitFlow extends StatAbstractListenCommit<Flow, Openday
                         Optional<FlowCapableNode> fNode = Optional.absent();
                         try {
                             fNode = tx.read(LogicalDatastoreType.OPERATIONAL, fNodeIdent).checkedGet();
-                        }
-                        catch (final ReadFailedException e) {
+                        } catch (final ReadFailedException e) {
                             LOG.debug("Read Operational/DS for FlowCapableNode fail! {}", fNodeIdent, e);
                             return;
                         }
@@ -192,6 +191,20 @@ public class StatListenCommitFlow extends StatAbstractListenCommit<Flow, Openday
                 }
 
                 statsFlowCommitAll(flowStats, nodeIdent, tx);
+                /* cleaning all not cached hash collisions */
+                final Map<InstanceIdentifier<Flow>, Integer> listAliens = mapNodesForDelete.get(nodeIdent);
+                if (listAliens != null) {
+                    for (final Entry<InstanceIdentifier<Flow>, Integer> nodeForDelete : listAliens.entrySet()) {
+                        final Integer lifeIndex = nodeForDelete.getValue();
+                        if (nodeForDelete.getValue() > 0) {
+                            nodeForDelete.setValue(Integer.valueOf(lifeIndex.intValue() - 1));
+                        } else {
+                            final InstanceIdentifier<Flow> flowNodeIdent = nodeForDelete.getKey();
+                            mapNodesForDelete.get(nodeIdent).remove(flowNodeIdent);
+                            tx.delete(LogicalDatastoreType.OPERATIONAL, flowNodeIdent);
+                        }
+                    }
+                }
                 /* Notification for continue collecting statistics */
                 notifyToCollectNextStatistics(nodeIdent);
             }
@@ -246,14 +259,13 @@ public class StatListenCommitFlow extends StatAbstractListenCommit<Flow, Openday
     /**
      * build pseudoUnique hashCode for flow in table
      * for future easy identification
+     *
+     * FIXME: we expect same version for YANG models for all clusters and that has to be fix
+     * FIXME: CREATE BETTER KEY - for flow (MATCH is the problem)
      */
-    static String buildHashCode(final FlowAndStatisticsMapList deviceFlow) {
-        final FlowBuilder builder = new FlowBuilder();
-        builder.setMatch(deviceFlow.getMatch());
-        builder.setCookie(deviceFlow.getCookie());
-        builder.setPriority(deviceFlow.getPriority());
-        final Flow flowForHashCode = builder.build();
-        return String.valueOf(flowForHashCode.hashCode());
+    static String buildFlowIdOperKey(final FlowAndStatisticsMapList deviceFlow) {
+        return new StringBuffer().append(deviceFlow.getMatch())
+                .append(deviceFlow.getPriority()).append(deviceFlow.getCookie().getValue()).toString();
     }
 
     private class NodeUpdateState {
@@ -286,6 +298,7 @@ public class StatListenCommitFlow extends StatAbstractListenCommit<Flow, Openday
     }
 
     private class TableFlowUpdateState {
+
         private boolean tableEnsured = false;
         final KeyedInstanceIdentifier<Table, TableKey> tableRef;
         final TableKey tableKey;
@@ -304,7 +317,7 @@ public class StatListenCommitFlow extends StatAbstractListenCommit<Flow, Openday
                     for (final FlowHashIdMap flowHashId : flowHashMap) {
                         try {
                             flowIdByHash.put(flowHashId.getKey(), flowHashId.getFlowId());
-                        } catch (Exception e) {
+                        } catch (final Exception e) {
                             LOG.warn("flow hashing hit a duplicate for {} -> {}", flowHashId.getKey(), flowHashId.getFlowId());
                         }
                     }
@@ -338,12 +351,7 @@ public class StatListenCommitFlow extends StatAbstractListenCommit<Flow, Openday
         }
 
         private void initConfigFlows(final ReadWriteTransaction trans) {
-            Optional<Table> table = readLatestConfiguration(tableRef);
-            try {
-                table = trans.read(LogicalDatastoreType.CONFIGURATION, tableRef).checkedGet();
-            } catch (final ReadFailedException e) {
-                table = Optional.absent();
-            }
+            final Optional<Table> table = readLatestConfiguration(tableRef);
             List<Flow> localList = null;
             if(table.isPresent()) {
                 localList = table.get().getFlow();
@@ -378,7 +386,7 @@ public class StatListenCommitFlow extends StatAbstractListenCommit<Flow, Openday
 
         void reportFlow(final FlowAndStatisticsMapList flowStat, final ReadWriteTransaction trans) {
             ensureTable(trans);
-            final FlowHashIdMapKey hashingKey = new FlowHashIdMapKey(buildHashCode(flowStat));
+            final FlowHashIdMapKey hashingKey = new FlowHashIdMapKey(buildFlowIdOperKey(flowStat));
             FlowKey flowKey = getFlowKeyAndRemoveHash(hashingKey);
             if (flowKey == null) {
                 flowKey = searchInConfiguration(flowStat, trans);
@@ -394,13 +402,12 @@ public class StatListenCommitFlow extends StatAbstractListenCommit<Flow, Openday
             trans.put(LogicalDatastoreType.OPERATIONAL, flowIdent, flowBuilder.build());
             /* check life for Alien flows */
             if (flowKey.getId().getValue().startsWith(ALIEN_SYSTEM_FLOW_ID)) {
-                removeData(flowIdent, Integer.valueOf(5));
+                removeData(flowIdent, REMOVE_AFTER_MISSING_COLLECTION);
             }
         }
 
         /* Build and deploy new FlowHashId map */
         private void updateHashCache(final ReadWriteTransaction trans, final FlowKey flowKey, final FlowHashIdMapKey hashingKey) {
-            // TODO Auto-generated method stub
             final FlowHashIdMapBuilder flHashIdMap = new FlowHashIdMapBuilder();
             flHashIdMap.setFlowId(flowKey.getId());
             flHashIdMap.setKey(hashingKey);
@@ -411,43 +418,23 @@ public class StatListenCommitFlow extends StatAbstractListenCommit<Flow, Openday
         }
 
         void removeUnreportedFlows(final ReadWriteTransaction tx) {
+            final InstanceIdentifier<Node> nodeIdent = tableRef.firstIdentifierOf(Node.class);
             final Map<FlowHashIdMapKey, FlowId> listForRemove = getRemovalList();
-            final Optional<Table> configTable = readLatestConfiguration(tableRef);
-            List<Flow> configFlows = Collections.emptyList();
-            if (configTable.isPresent() && configTable.get().getFlow() != null) {
-                configFlows = new ArrayList<>(configTable.get().getFlow());
-            }
             for (final Entry<FlowHashIdMapKey, FlowId> entryForRemove : listForRemove.entrySet()) {
                 final FlowKey flowKey = new FlowKey(entryForRemove.getValue());
                 final InstanceIdentifier<Flow> flowRef = tableRef.child(Flow.class, flowKey);
-                final InstanceIdentifier<FlowStatisticsData> flowStatIdent = flowRef.augmentation(FlowStatisticsData.class);
                 if (flowKey.getId().getValue().startsWith(ALIEN_SYSTEM_FLOW_ID)) {
-                    final InstanceIdentifier<Node> nodeIdent = tableRef.firstIdentifierOf(Node.class);
-                    final Integer lifeIndex = mapNodesForDelete.get(nodeIdent).remove(flowRef);
+                    final Integer lifeIndex = mapNodesForDelete.get(nodeIdent).get(flowRef);
                     if (lifeIndex > 0) {
-                        mapNodesForDelete.get(nodeIdent).put(flowRef, Integer.valueOf(lifeIndex.intValue() - 1));
                         break;
-                    }
-                } else {
-                    if (configFlows.remove(flowRef)) {
-                        /* Node is still presented in Config/DataStore - probably lost some multipart msg */
-                        break;
+                    } else {
+                        mapNodesForDelete.get(nodeIdent).remove(flowRef);
                     }
                 }
-                final Optional<FlowStatisticsData> flowStatNodeCheck;
-                try {
-                    flowStatNodeCheck = tx.read(LogicalDatastoreType.OPERATIONAL, flowStatIdent).checkedGet();
-                }
-                catch (final ReadFailedException e) {
-                    LOG.debug("Read FlowStatistics {} in Operational/DS fail! Statisticscan not beupdated.", flowStatIdent, e);
-                    break;
-                }
-                if (flowStatNodeCheck.isPresent()) {
-                    /* Node isn't new and it has not been removed yet */
-                    final InstanceIdentifier<FlowHashIdMap> flHashIdent = tableRef.augmentation(FlowHashIdMapping.class).child(FlowHashIdMap.class, entryForRemove.getKey());
-                    tx.delete(LogicalDatastoreType.OPERATIONAL, flowRef);
-                    tx.delete(LogicalDatastoreType.OPERATIONAL, flHashIdent);
-                }
+                final InstanceIdentifier<FlowHashIdMap> flHashIdent =
+                        tableRef.augmentation(FlowHashIdMapping.class).child(FlowHashIdMap.class, entryForRemove.getKey());
+                tx.delete(LogicalDatastoreType.OPERATIONAL, flowRef);
+                tx.delete(LogicalDatastoreType.OPERATIONAL, flHashIdent);
             }
         }
     }
