@@ -231,7 +231,7 @@ public class StatisticsManagerImpl implements StatisticsManager, Runnable {
        cleanDataStoreOperQueue();
    }
 
-   private synchronized void cleanDataStoreOperQueue() {
+   private void cleanDataStoreOperQueue() {
        // Drain all events, making sure any blocked threads are unblocked
        while (! dataStoreOperQueue.isEmpty()) {
            dataStoreOperQueue.poll();
@@ -242,6 +242,9 @@ public class StatisticsManagerImpl implements StatisticsManager, Runnable {
    public void onTransactionChainFailed(final TransactionChain<?, ?> chain, final AsyncTransaction<?, ?> transaction,
            final Throwable cause) {
        LOG.warn("Failed to export Flow Capable Statistics, Transaction {} failed.",transaction.getIdentifier(),cause);
+       txChain.close();
+       txChain = dataBroker.createTransactionChain(StatisticsManagerImpl.this);
+       cleanDataStoreOperQueue();
    }
 
    @Override
@@ -295,6 +298,7 @@ public class StatisticsManagerImpl implements StatisticsManager, Runnable {
    public void disconnectedNodeUnregistration(final InstanceIdentifier<Node> nodeIdent) {
        rpcMsgManager.cleaningRpcRegistry();
        cleanDataStoreOperQueue();
+       flowListeningCommiter.cleanForDisconnect(nodeIdent);
        for (final StatPermCollector collector : statCollectors) {
            if (collector.disconnectedNodeUnregistration(nodeIdent)) {
                if ( ! collector.hasActiveNodes()) {
