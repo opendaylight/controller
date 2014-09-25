@@ -62,6 +62,7 @@ import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -248,12 +249,10 @@ public class StatListenCommitFlow extends StatAbstractListenCommit<Flow, Openday
      * for future easy identification
      */
     static String buildHashCode(final FlowAndStatisticsMapList deviceFlow) {
-        final FlowBuilder builder = new FlowBuilder();
-        builder.setMatch(deviceFlow.getMatch());
-        builder.setCookie(deviceFlow.getCookie());
-        builder.setPriority(deviceFlow.getPriority());
-        final Flow flowForHashCode = builder.build();
-        return String.valueOf(flowForHashCode.hashCode());
+        final int hashCode = Objects.hashCode(deviceFlow.getMatch(), deviceFlow.getPriority());
+        final StringBuilder bl = new StringBuilder(hashCode);
+        bl.append(deviceFlow.getCookie());
+        return bl.toString();
     }
 
     private class NodeUpdateState {
@@ -304,7 +303,7 @@ public class StatListenCommitFlow extends StatAbstractListenCommit<Flow, Openday
                     for (final FlowHashIdMap flowHashId : flowHashMap) {
                         try {
                             flowIdByHash.put(flowHashId.getKey(), flowHashId.getFlowId());
-                        } catch (Exception e) {
+                        } catch (final Exception e) {
                             LOG.warn("flow hashing hit a duplicate for {} -> {}", flowHashId.getKey(), flowHashId.getFlowId());
                         }
                     }
@@ -338,12 +337,7 @@ public class StatListenCommitFlow extends StatAbstractListenCommit<Flow, Openday
         }
 
         private void initConfigFlows(final ReadWriteTransaction trans) {
-            Optional<Table> table = readLatestConfiguration(tableRef);
-            try {
-                table = trans.read(LogicalDatastoreType.CONFIGURATION, tableRef).checkedGet();
-            } catch (final ReadFailedException e) {
-                table = Optional.absent();
-            }
+            final Optional<Table> table = readLatestConfiguration(tableRef);
             List<Flow> localList = null;
             if(table.isPresent()) {
                 localList = table.get().getFlow();
@@ -394,13 +388,12 @@ public class StatListenCommitFlow extends StatAbstractListenCommit<Flow, Openday
             trans.put(LogicalDatastoreType.OPERATIONAL, flowIdent, flowBuilder.build());
             /* check life for Alien flows */
             if (flowKey.getId().getValue().startsWith(ALIEN_SYSTEM_FLOW_ID)) {
-                removeData(flowIdent, Integer.valueOf(5));
+                removeData(flowIdent, Integer.valueOf(3));
             }
         }
 
         /* Build and deploy new FlowHashId map */
         private void updateHashCache(final ReadWriteTransaction trans, final FlowKey flowKey, final FlowHashIdMapKey hashingKey) {
-            // TODO Auto-generated method stub
             final FlowHashIdMapBuilder flHashIdMap = new FlowHashIdMapBuilder();
             flHashIdMap.setFlowId(flowKey.getId());
             flHashIdMap.setKey(hashingKey);
@@ -411,21 +404,16 @@ public class StatListenCommitFlow extends StatAbstractListenCommit<Flow, Openday
         }
 
         void removeUnreportedFlows(final ReadWriteTransaction tx) {
+            final InstanceIdentifier<Node> nodeIdent = tableRef.firstIdentifierOf(Node.class);
             final Map<FlowHashIdMapKey, FlowId> listForRemove = getRemovalList();
-            final Optional<Table> configTable = readLatestConfiguration(tableRef);
-            List<Flow> configFlows = Collections.emptyList();
-            if (configTable.isPresent() && configTable.get().getFlow() != null) {
-                configFlows = new ArrayList<>(configTable.get().getFlow());
-            }
+            initConfigFlows(tx);
             for (final Entry<FlowHashIdMapKey, FlowId> entryForRemove : listForRemove.entrySet()) {
                 final FlowKey flowKey = new FlowKey(entryForRemove.getValue());
                 final InstanceIdentifier<Flow> flowRef = tableRef.child(Flow.class, flowKey);
                 final InstanceIdentifier<FlowStatisticsData> flowStatIdent = flowRef.augmentation(FlowStatisticsData.class);
                 if (flowKey.getId().getValue().startsWith(ALIEN_SYSTEM_FLOW_ID)) {
-                    final InstanceIdentifier<Node> nodeIdent = tableRef.firstIdentifierOf(Node.class);
                     final Integer lifeIndex = mapNodesForDelete.get(nodeIdent).remove(flowRef);
                     if (lifeIndex > 0) {
-                        mapNodesForDelete.get(nodeIdent).put(flowRef, Integer.valueOf(lifeIndex.intValue() - 1));
                         break;
                     }
                 } else {
@@ -447,6 +435,17 @@ public class StatListenCommitFlow extends StatAbstractListenCommit<Flow, Openday
                     final InstanceIdentifier<FlowHashIdMap> flHashIdent = tableRef.augmentation(FlowHashIdMapping.class).child(FlowHashIdMap.class, entryForRemove.getKey());
                     tx.delete(LogicalDatastoreType.OPERATIONAL, flowRef);
                     tx.delete(LogicalDatastoreType.OPERATIONAL, flHashIdent);
+                }
+            }
+            final Map<InstanceIdentifier<Flow>, Integer> listAliens = mapNodesForDelete.get(nodeIdent);
+            /* cleaning all not cached hash collisions */
+            for (final Entry<InstanceIdentifier<Flow>, Integer> nodeForDelete : listAliens.entrySet()) {
+                final Integer lifeIndex = nodeForDelete.getValue();
+                if (nodeForDelete.getValue() > 0) {
+                    nodeForDelete.setValue(Integer.valueOf(lifeIndex.intValue() - 1));
+                } else {
+                    LOG.info("Possible collidation for hashCode for flow {}", nodeForDelete.getKey());
+                    tx.delete(LogicalDatastoreType.OPERATIONAL, nodeForDelete.getKey());
                 }
             }
         }
