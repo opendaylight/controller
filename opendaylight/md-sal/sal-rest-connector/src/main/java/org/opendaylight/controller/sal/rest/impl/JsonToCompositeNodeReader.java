@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 class JsonToCompositeNodeReader {
-    private static final Logger LOG = LoggerFactory.getLogger(JsonReader.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JsonToCompositeNodeReader.class);
     private static final Splitter COLON_SPLITTER = Splitter.on(':');
 
     private JsonToCompositeNodeReader() {
@@ -113,14 +113,29 @@ class JsonToCompositeNodeReader {
         }
     }
 
+    /**
+     * Transform input value to URI instance.
+     *
+     * Input string has to be in format moduleName:localName. moduleName part is then transformed to URI instance.
+     * If moduleName part contains character like "<" or ">" then null value is returned because they
+     * aren't valid URI characters.
+     *
+     * @param jsonElementName
+     *  value in format moduleName:localName
+     * @return
+     */
     private static URI getNamespaceFor(final String jsonElementName) {
         final Iterator<String> it = COLON_SPLITTER.split(jsonElementName).iterator();
 
-        // The string needs to me in form "moduleName:localName"
+        // The string needs to be in form "moduleName:localName"
         if (it.hasNext()) {
             final String maybeURI = it.next();
             if (Iterators.size(it) == 1) {
-                return URI.create(maybeURI);
+                try {
+                    return URI.create(maybeURI);
+                } catch (IllegalArgumentException e) {
+                    LOG.debug("Value {} couldn't be interpreted as URI.", maybeURI);
+                }
             }
         }
 
@@ -144,7 +159,7 @@ class JsonToCompositeNodeReader {
             }
         }
 
-        // it could be identityref Built-In Type
+        // it could be identityref Built-In Type therefore it is necessary to look at value as module_name:local_name
         URI namespace = getNamespaceFor(value);
         if (namespace != null) {
             return new IdentityValuesDTO(namespace.toString(), getLocalNameFor(value), null, value);

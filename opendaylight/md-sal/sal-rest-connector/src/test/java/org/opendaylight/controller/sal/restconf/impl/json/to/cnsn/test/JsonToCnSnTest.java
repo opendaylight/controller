@@ -422,4 +422,36 @@ public class JsonToCnSnTest {
         assertTrue(exceptionMessage.contains("Root element of Json has to be Object"));
     }
 
+    /**
+     * Tests case when JSON input data value is in format string1:string2 and first string contain characters "<" or ">" (invalid URI characters).
+     *
+     * During loading data it is also interpreting as data value in moduleName:localName (potential leafref value).
+     * ModuleName part is transformed to URI which causes exception which is caught and URI value is null which cause that potential value in simple node is
+     * simple string (value from JSON input) and not IdentityValueDTO instance which is used for leaf-ref candidates.
+     */
+    @Test
+    public void invalidUriCharacterInValue() {
+        final Node<?> rootNode = TestUtils.readInputToCnSn("/json-to-cnsn/invalid-uri-character-in-value.json", true,
+                    JsonToCompositeNodeProvider.INSTANCE);
+
+        assertTrue(rootNode instanceof CompositeNode);
+        Node<?> lf1 = null;
+        Node<?> lf2 = null;
+        for(Node<?> child : ((CompositeNode)rootNode).getChildren()) {
+            if (child.getNodeType().getLocalName().equals("lf1")) {
+                lf1 = child;
+            } else if (child.getNodeType().getLocalName().equals("lf2")) {
+                lf2 = child;
+            }
+        }
+
+        assertNotNull(lf1);
+        assertNotNull(lf2);
+        assertTrue(lf1 instanceof SimpleNode<?>);
+        assertTrue(lf2 instanceof SimpleNode<?>);
+
+        assertEquals("module<Name:value lf1", ((SimpleNode<?>) lf1).getValue());
+        assertEquals("module>Name:value lf2", ((SimpleNode<?>) lf2).getValue());
+    }
+
 }
