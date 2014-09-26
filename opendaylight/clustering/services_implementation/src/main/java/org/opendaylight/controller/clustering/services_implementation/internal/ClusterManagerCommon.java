@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -19,6 +18,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
 import javax.transaction.HeuristicMixedException;
@@ -48,6 +48,9 @@ public abstract class ClusterManagerCommon implements IClusterServicesCommon {
             .getLogger(ClusterManagerCommon.class);
     private ConcurrentMap<String, GetUpdatesContainer> cacheUpdateAware =
         new ConcurrentHashMap<String, GetUpdatesContainer>();
+    // Keep track of the early birds that gets to early
+    private ConcurrentMap<String, List<ICacheUpdateAware>> cacheUpdateAwareEarlyBirds =
+        new ConcurrentHashMap<String, List<ICacheUpdateAware>>();
     private Set<ICoordinatorChangeAware> coordinatorChangeAware = Collections
             .synchronizedSet(new HashSet<ICoordinatorChangeAware>());
     private ListenCoordinatorChange coordinatorChangeListener = null;
@@ -106,11 +109,15 @@ public abstract class ClusterManagerCommon implements IClusterServicesCommon {
                                              "been registered", cache,
                                              this.containerName);
                             } catch (CacheListenerAddException exc) {
-                                logger.debug("Cache {} didn't exist when {} tried to register to its updates", cache, s);
-                                // Do nothing, the important is that
-                                // we don't register the listener in
-                                // the shadow, and we are not doing
-                                // that.
+                                logger.debug(
+                                    "Cache {} for container {} didn't exist when {} tried to register to its updates",
+                                    cache, this.containerName, s);
+                                List<ICacheUpdateAware> cacheAwares = this.cacheUpdateAwareEarlyBirds.get(cache);
+                                if (cacheAwares == null) {
+                                    cacheAwares = new CopyOnWriteArrayList<ICacheUpdateAware>();
+                                }
+                                cacheAwares.add(s);
+                                this.cacheUpdateAwareEarlyBirds.put(cache, cacheAwares);
                             }
                         }
                     }
@@ -188,15 +195,45 @@ public abstract class ClusterManagerCommon implements IClusterServicesCommon {
             this.coordinatorChangeListener = null;
             logger.debug("Coordinator change handler UNregistered");
         }
+        // Clear the early birds
+        this.cacheUpdateAwareEarlyBirds.clear();
     }
 
     @Override
     public ConcurrentMap<?, ?> createCache(String cacheName,
             Set<IClusterServices.cacheMode> cMode) throws CacheExistException,
             CacheConfigException {
+        ConcurrentMap<?, ?> res = null;
         if (this.clusterService != null) {
-            return this.clusterService.createCache(this.containerName,
-                    cacheName, cMode);
+            res = this.clusterService.createCache(this.containerName,
+                                                  cacheName, cMode);
+            // Now let see if we have some early Bird cache Update
+            // Aware
+            List<ICacheUpdateAware> cacheAwares = this.cacheUpdateAwareEarlyBirds.get(cacheName);
+            if (cacheAwares != null) {
+                // Let register the early birds now
+                for (ICacheUpdateAware s : cacheAwares) {
+                    GetUpdatesContainer<?, ?> up = new GetUpdatesContainer(s, this.containerName, cacheName);
+                    if (up != null) {
+                        try {
+                            this.clusterService.addListener(this.containerName,
+                                                            cacheName, up);
+                            this.cacheUpdateAware.put(cacheName, up);
+                            logger.trace("Early bird cachename:{} on container:{} has " +
+                                         "been registered", cacheName,
+                                         this.containerName);
+                        } catch (CacheListenerAddException exc) {
+                            logger.debug(
+                                "Cache {} for container {} didn't exist when {} tried to register to its updates",
+                                cacheName, this.containerName, s);
+                        }
+                    }
+                }
+            }
+            // Do cleanup
+            this.cacheUpdateAwareEarlyBirds.remove(cacheName);
+            cacheAwares = null;
+            return res;
         } else {
             return null;
         }
