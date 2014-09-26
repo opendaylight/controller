@@ -10,6 +10,10 @@
             <param-name>javax.ws.rs.Application</param-name>
             <param-value>org.opendaylight.controller.sal.rest.impl.RestconfApplication</param-value>
         </init-param>
+         <init-param>
+             <param-name>cors.exposed.headers</param-name>
+             <param-value>Access-Control-Allow-Origin,Access-Control-Allow-Credentials,Location</param-value>
+         </init-param>
         <!-- AAA Auth Filter -->
         <init-param>
             <param-name>com.sun.jersey.spi.container.ContainerRequestFilters</param-name>
