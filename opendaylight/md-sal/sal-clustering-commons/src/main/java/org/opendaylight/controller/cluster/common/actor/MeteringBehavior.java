@@ -32,19 +32,35 @@ public class MeteringBehavior implements Procedure<Object> {
     private final MetricRegistry METRICREGISTRY = MetricsReporter.getInstance().getMetricsRegistry();
     private final String MSG_PROCESSING_RATE = "msg-rate";
 
-    private String actorName;
+    private String actorQualifiedName;
     private Timer msgProcessingTimer;
 
     /**
      *
      * @param actor whose behaviour needs to be metered
      */
+    public MeteringBehavior(AbstractUntypedActorWithMetering actor){
+        Preconditions.checkArgument(actor != null, "actor must not be null");
+        this.meteredActor = actor;
+
+        String actorName = actor.getActorNameOverride() != null ? actor.getActorNameOverride()
+                                                                : actor.getSelf().path().name();
+        init(actorName);
+    }
+
     public MeteringBehavior(UntypedActor actor){
         Preconditions.checkArgument(actor != null, "actor must not be null");
-
         this.meteredActor = actor;
-        actorName = meteredActor.getSelf().path().toStringWithoutAddress();
-        final String msgProcessingTime = MetricRegistry.name(actorName, MSG_PROCESSING_RATE);
+
+        String actorName = actor.getSelf().path().name();
+        init(actorName);
+    }
+
+    private void init(String actorName){
+        actorQualifiedName = new StringBuilder(meteredActor.getSelf().path().parent().toStringWithoutAddress()).
+                append("/").append(actorName).toString();
+
+        final String msgProcessingTime = MetricRegistry.name(actorQualifiedName, MSG_PROCESSING_RATE);
         msgProcessingTimer = METRICREGISTRY.timer(msgProcessingTime);
     }
 
@@ -69,7 +85,7 @@ public class MeteringBehavior implements Procedure<Object> {
         final String messageType = message.getClass().getSimpleName();
 
         final String msgProcessingTimeByMsgType =
-                MetricRegistry.name(actorName, MSG_PROCESSING_RATE, messageType);
+                MetricRegistry.name(actorQualifiedName, MSG_PROCESSING_RATE, messageType);
 
         final Timer msgProcessingTimerByMsgType = METRICREGISTRY.timer(msgProcessingTimeByMsgType);
 

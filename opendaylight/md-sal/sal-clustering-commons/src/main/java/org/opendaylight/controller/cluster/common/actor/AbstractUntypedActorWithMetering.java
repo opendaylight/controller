@@ -12,7 +12,16 @@ package org.opendaylight.controller.cluster.common.actor;
  */
 public abstract class AbstractUntypedActorWithMetering extends AbstractUntypedActor {
 
+    //this is used in the metric name. Some transient actors do not have defined names
+    private String actorNameOverride;
+
     public AbstractUntypedActorWithMetering() {
+        if (isMetricsCaptureEnabled())
+            getContext().become(new MeteringBehavior(this));
+    }
+
+    public AbstractUntypedActorWithMetering(String actorNameOverride){
+        this.actorNameOverride = actorNameOverride;
         if (isMetricsCaptureEnabled())
             getContext().become(new MeteringBehavior(this));
     }
@@ -20,5 +29,9 @@ public abstract class AbstractUntypedActorWithMetering extends AbstractUntypedAc
     private boolean isMetricsCaptureEnabled(){
         CommonConfig config = new CommonConfig(getContext().system().settings().config());
         return config.isMetricCaptureEnabled();
+    }
+
+    public String getActorNameOverride() {
+        return actorNameOverride;
     }
 }
