@@ -15,7 +15,7 @@ import akka.actor.ReceiveTimeout;
 import akka.japi.Creator;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
-import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
+import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;
 import org.opendaylight.controller.cluster.datastore.exceptions.UnknownMessageException;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
@@ -55,7 +55,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
  * <li> {@link org.opendaylight.controller.cluster.datastore.messages.CloseTransaction}
  * </p>
  */
-public abstract class ShardTransaction extends AbstractUntypedActor {
+public abstract class ShardTransaction extends AbstractUntypedActorWithMetering {
 
     private final ActorRef shardActor;
     private final SchemaContext schemaContext;
@@ -64,6 +64,7 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
 
     protected ShardTransaction(ActorRef shardActor, SchemaContext schemaContext,
             ShardStats shardStats, String transactionID) {
+        super("shard-tx"); //actor name override used for metering. This does not change the "real" actor name
         this.shardActor = shardActor;
         this.schemaContext = schemaContext;
         this.shardStats = shardStats;
