@@ -8,18 +8,9 @@
 package org.opendaylight.controller.sal.compatibility;
 
 import com.google.common.collect.Iterables;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.JdkFutureAdapters;
 import org.opendaylight.controller.md.sal.binding.util.TypeSafeDataReader;
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
@@ -48,6 +39,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.ta
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.AggregateFlowStatisticsUpdate;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.FlowStatisticsData;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.FlowsStatisticsUpdate;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllFlowStatisticsFromFlowTableInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllFlowStatisticsFromFlowTableInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAllFlowStatisticsFromFlowTableOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetFlowStatisticsFromFlowTableInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.OpendaylightFlowStatisticsListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.OpendaylightFlowStatisticsService;
@@ -84,10 +78,24 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.N
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.OpendaylightPortStatisticsListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.OpendaylightPortStatisticsService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.node.connector.statistics.and.port.number.map.NodeConnectorStatisticsAndPortNumberMap;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.table.types.rev131026.TableId;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Future;
 
 public class InventoryAndReadAdapter implements IPluginInReadService, IPluginInInventoryService, OpendaylightInventoryListener, OpendaylightFlowStatisticsListener, OpendaylightFlowTableStatisticsListener, OpendaylightPortStatisticsListener {
     private static final Logger LOG = LoggerFactory.getLogger(InventoryAndReadAdapter.class);
@@ -252,22 +260,57 @@ public class InventoryAndReadAdapter implements IPluginInReadService, IPluginInI
 
     @Override
     public List<FlowOnNode> readAllFlow(final Node node, final boolean cached) {
-        final ArrayList<FlowOnNode> output = new ArrayList<>();
-        final Table table = readOperationalTable(node, OPENFLOWV10_TABLE_ID);
-        if (table != null) {
-            final List<Flow> flows = table.getFlow();
-            LOG.trace("Number of flows installed in table 0 of node {} : {}", node, flows.size());
+        final ArrayList<FlowOnNode> ret= new ArrayList<>();
+        if (cached) {
+            final Table table = readOperationalTable(node, OPENFLOWV10_TABLE_ID);
+            if (table != null) {
+                final List<Flow> flows = table.getFlow();
+                LOG.trace("Number of flows installed in table 0 of node {} : {}", node, flows.size());
 
-            for (final Flow flow : flows) {
-                final FlowStatisticsData statsFromDataStore = flow.getAugmentation(FlowStatisticsData.class);
-                if (statsFromDataStore != null) {
-                    final FlowOnNode it = new FlowOnNode(ToSalConversionsUtils.toFlow(flow, node));
-                    output.add(addFlowStats(it, statsFromDataStore.getFlowStatistics()));
+                for (final Flow flow : flows) {
+                    final FlowStatisticsData statsFromDataStore = flow.getAugmentation(FlowStatisticsData.class);
+                    if (statsFromDataStore != null) {
+                        final FlowOnNode it = new FlowOnNode(ToSalConversionsUtils.toFlow(flow, node));
+                        ret.add(addFlowStats(it, statsFromDataStore.getFlowStatistics()));
+                    }
                 }
             }
-        }
+        } else {
+            GetAllFlowStatisticsFromFlowTableInput input =
+                new GetAllFlowStatisticsFromFlowTableInputBuilder()
+                    .setNode(NodeMapping.toNodeRef(node))
+                    .setTableId(new TableId(OPENFLOWV10_TABLE_ID))
+                    .build();
+            Future<RpcResult<GetAllFlowStatisticsFromFlowTableOutput>> future =
+                getFlowStatisticsService().getAllFlowStatisticsFromFlowTable(input);
 
-        return output;
+            Futures.addCallback(JdkFutureAdapters.listenInPoolThread(future),
+                new FutureCallback<RpcResult<GetAllFlowStatisticsFromFlowTableOutput>>() {
+
+                    @Override
+                    public void onSuccess(final RpcResult<GetAllFlowStatisticsFromFlowTableOutput> result) {
+                        GetAllFlowStatisticsFromFlowTableOutput output = result.getResult();
+                        if (output != null) {
+                            List<FlowAndStatisticsMapList> flowAndStatisticsMapList = output.getFlowAndStatisticsMapList();
+                            if (flowAndStatisticsMapList != null) {
+                                for (FlowAndStatisticsMapList flowAndStatistics : flowAndStatisticsMapList) {
+                                    final FlowOnNode it = new FlowOnNode(ToSalConversionsUtils.toFlow(flowAndStatistics, node));
+                                    ret.add(addFlowStats(it, flowAndStatistics));
+                                }
+                            } else {
+                                LOG.warn("FlowAndStatisticsMapList is null in GetAllFlowStatisticsFromFlowTableOutput");
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(final Throwable t) {
+                        LOG.warn("Response Registration for Statistics RPC call fail!", t);
+                    }
+
+                });
+        }
+        return ret;
     }
 
     @Override
