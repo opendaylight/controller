@@ -35,7 +35,6 @@
       <feature version="${sal.version}">odl-adsal-core</feature>
       <bundle>mvn:org.opendaylight.controller/clustering.services/${clustering.services.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/clustering.services-implementation/${clustering.services_implementation.version}</bundle>
-      <bundle>mvn:org.opendaylight.controller/clustering.stub/${clustering.stub.version}</bundle>
    </feature>
    <feature name="odl-adsal-configuration" description="OpenDaylight :: AD-SAL :: Configuration" version="${configuration.version}">
       <feature version="${sal.version}">odl-adsal-core</feature>
