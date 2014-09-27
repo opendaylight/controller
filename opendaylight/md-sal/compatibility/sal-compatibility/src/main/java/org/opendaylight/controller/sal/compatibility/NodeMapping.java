@@ -10,11 +10,6 @@ package org.opendaylight.controller.sal.compatibility;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import java.math.BigInteger;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.regex.Pattern;
 import org.opendaylight.controller.sal.common.util.Arguments;
 import org.opendaylight.controller.sal.core.AdvertisedBandwidth;
 import org.opendaylight.controller.sal.core.Bandwidth;
@@ -64,6 +59,12 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.math.BigInteger;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.regex.Pattern;
 
 public final class NodeMapping {
 
@@ -167,7 +168,7 @@ public final class NodeMapping {
      * @param aDNode
      * @return
      */
-    private static NodeId toNodeId(org.opendaylight.controller.sal.core.Node aDNode) {
+    public static NodeId toNodeId(org.opendaylight.controller.sal.core.Node aDNode) {
         String targetPrefix = null;
         if (NodeIDType.OPENFLOW.equals(aDNode.getType())) {
                 targetPrefix = OPENFLOW_ID_PREFIX;
