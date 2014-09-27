@@ -7,12 +7,9 @@
  */
 package org.opendaylight.controller.md.inventory.manager;
 
-import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
+
 import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -24,6 +21,11 @@ import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 
 class FlowCapableInventoryProvider implements AutoCloseable, Runnable, TransactionChainListener {
     private static final Logger LOG = LoggerFactory.getLogger(FlowCapableInventoryProvider.class);
@@ -59,7 +61,7 @@ class FlowCapableInventoryProvider implements AutoCloseable, Runnable, Transacti
     void enqueue(final InventoryOperation op) {
         try {
             queue.put(op);
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             LOG.warn("Failed to enqueue operation {}", op, e);
         }
     }
@@ -70,7 +72,7 @@ class FlowCapableInventoryProvider implements AutoCloseable, Runnable, Transacti
         if (this.listenerRegistration != null) {
             try {
                 this.listenerRegistration.close();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LOG.error("Failed to stop inventory provider", e);
             }
             listenerRegistration = null;
@@ -95,7 +97,14 @@ class FlowCapableInventoryProvider implements AutoCloseable, Runnable, Transacti
             for (; ; ) {
                 InventoryOperation op = queue.take();
 
-                final ReadWriteTransaction tx = txChain.newReadWriteTransaction();
+                ReadWriteTransaction tx;
+                try {
+                    tx = txChain.newReadWriteTransaction();
+                } catch (final IllegalStateException e) {
+                    txChain.close();
+                    txChain = dataBroker.createTransactionChain(this);
+                    tx = txChain.newReadWriteTransaction();
+                }
                 LOG.debug("New operations available, starting transaction {}", tx.getIdentifier());
 
                 int ops = 0;
@@ -113,6 +122,7 @@ class FlowCapableInventoryProvider implements AutoCloseable, Runnable, Transacti
                 LOG.debug("Processed {} operations, submitting transaction {}", ops, tx.getIdentifier());
 
                 final CheckedFuture<Void, TransactionCommitFailedException> result = tx.submit();
+                final Object ident = tx.getIdentifier();
                 Futures.addCallback(result, new FutureCallback<Void>() {
                     @Override
                     public void onSuccess(final Void aVoid) {
@@ -121,11 +131,11 @@ class FlowCapableInventoryProvider implements AutoCloseable, Runnable, Transacti
 
                     @Override
                     public void onFailure(final Throwable throwable) {
-                        LOG.error("Transaction {} failed.", tx.getIdentifier(), throwable);
+                        LOG.error("Transaction {} failed.", ident, throwable);
                     }
                 });
             }
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             LOG.info("Processing interrupted, terminating", e);
         }
 
