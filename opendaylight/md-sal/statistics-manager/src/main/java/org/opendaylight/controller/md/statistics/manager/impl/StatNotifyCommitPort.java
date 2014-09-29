@@ -23,6 +23,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
@@ -30,6 +31,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.F
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.FlowCapableNodeConnectorStatisticsDataBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.NodeConnectorStatisticsUpdate;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.OpendaylightPortStatisticsListener;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.flow.capable.node.connector.statistics.FlowCapableNodeConnectorStatistics;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.flow.capable.node.connector.statistics.FlowCapableNodeConnectorStatisticsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.node.connector.statistics.and.port.number.map.NodeConnectorStatisticsAndPortNumberMap;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -125,12 +127,13 @@ public class StatNotifyCommitPort extends StatAbstractNotifyCommit<OpendaylightP
             return;
         }
         for (final NodeConnectorStatisticsAndPortNumberMap nConnectPort : portStats) {
-            final FlowCapableNodeConnectorStatisticsData stats = new FlowCapableNodeConnectorStatisticsDataBuilder()
-                    .setFlowCapableNodeConnectorStatistics(new FlowCapableNodeConnectorStatisticsBuilder(nConnectPort).build()).build();
+            final FlowCapableNodeConnectorStatistics stats = new FlowCapableNodeConnectorStatisticsBuilder(nConnectPort).build();
             final NodeConnectorKey key = new NodeConnectorKey(nConnectPort.getNodeConnectorId());
             final InstanceIdentifier<NodeConnector> nodeConnectorIdent = nodeIdent.child(NodeConnector.class, key);
             final InstanceIdentifier<FlowCapableNodeConnectorStatisticsData> nodeConnStatIdent = nodeConnectorIdent
                     .augmentation(FlowCapableNodeConnectorStatisticsData.class);
+            final InstanceIdentifier<FlowCapableNodeConnectorStatistics> flowCapNodeConnStatIdent =
+                    nodeConnStatIdent.child(FlowCapableNodeConnectorStatistics.class);
             Optional<NodeConnector> fNodeConector;
             try {
                 fNodeConector = tx.read(LogicalDatastoreType.OPERATIONAL, nodeConnectorIdent).checkedGet();
@@ -140,7 +143,9 @@ public class StatNotifyCommitPort extends StatAbstractNotifyCommit<OpendaylightP
                 fNodeConector = Optional.absent();
             }
             if (fNodeConector.isPresent()) {
-                tx.put(LogicalDatastoreType.OPERATIONAL, nodeConnStatIdent, stats);
+                tx.merge(LogicalDatastoreType.OPERATIONAL, nodeConnectorIdent, new NodeConnectorBuilder().setId(key.getId()).build());
+                tx.merge(LogicalDatastoreType.OPERATIONAL, nodeConnStatIdent, new FlowCapableNodeConnectorStatisticsDataBuilder().build());
+                tx.put(LogicalDatastoreType.OPERATIONAL, flowCapNodeConnStatIdent, stats);
             }
         }
     }
