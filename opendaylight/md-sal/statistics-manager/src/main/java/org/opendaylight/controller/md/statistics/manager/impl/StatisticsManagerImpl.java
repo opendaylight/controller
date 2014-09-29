@@ -67,8 +67,8 @@ public class StatisticsManagerImpl implements StatisticsManager, Runnable {
 
    private final static Logger LOG = LoggerFactory.getLogger(StatisticsManagerImpl.class);
 
-   private static final int QUEUE_DEPTH = 1000;
-   private static final int MAX_BATCH = 1;
+   private static final int QUEUE_DEPTH = 5000;
+   private static final int MAX_BATCH = 100;
 
    private final BlockingQueue<StatDataStoreOperation> dataStoreOperQueue = new LinkedBlockingDeque<>(QUEUE_DEPTH);
 
@@ -282,6 +282,7 @@ public class StatisticsManagerImpl implements StatisticsManager, Runnable {
    @Override
    public void disconnectedNodeUnregistration(final InstanceIdentifier<Node> nodeIdent) {
        flowListeningCommiter.cleanForDisconnect(nodeIdent);
+
        for (final StatPermCollector collector : statCollectors) {
            if (collector.disconnectedNodeUnregistration(nodeIdent)) {
                if ( ! collector.hasActiveNodes()) {

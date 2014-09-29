@@ -15,10 +15,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.statistics.manager.StatRpcMsgManager;
 import org.opendaylight.controller.md.statistics.manager.StatisticsManager;
-import org.opendaylight.controller.md.statistics.manager.StatisticsManager.StatDataStoreOperation;
 import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableKey;
@@ -86,7 +84,6 @@ public class StatRpcMsgManagerImpl implements StatRpcMsgManager {
 
     private final long maxLifeForRequest = 50; /* 50 second */
     private final int queueCapacity = 5000;
-    private final StatisticsManager manager;
 
     private final OpendaylightGroupStatisticsService groupStatsService;
     private final OpendaylightMeterStatisticsService meterStatsService;
@@ -101,7 +98,7 @@ public class StatRpcMsgManagerImpl implements StatRpcMsgManager {
 
     public StatRpcMsgManagerImpl (final StatisticsManager manager,
             final RpcConsumerRegistry rpcRegistry, final long minReqNetMonitInt) {
-        this.manager = Preconditions.checkNotNull(manager, "StatisticManager can not be null!");
+        Preconditions.checkArgument(manager != null, "StatisticManager can not be null!");
         Preconditions.checkArgument(rpcRegistry != null, "RpcConsumerRegistry can not be null !");
         groupStatsService = Preconditions.checkNotNull(
                 rpcRegistry.getRpcService(OpendaylightGroupStatisticsService.class),
@@ -322,30 +319,26 @@ public class StatRpcMsgManagerImpl implements StatRpcMsgManager {
 
     @Override
     public void getAggregateFlowStat(final NodeRef nodeRef, final TableId tableId) {
-
-        manager.enqueue(new StatDataStoreOperation() {
+        Preconditions.checkArgument(nodeRef != null, "NodeRef can not be null!");
+        Preconditions.checkArgument(tableId != null, "TableId can not be null!");
+        final RpcJobsQueue getAggregateFlowStat = new RpcJobsQueue() {
 
             @Override
-            public void applyOperation(final ReadWriteTransaction tx) {
-                final RpcJobsQueue getAggregateFlowStat = new RpcJobsQueue() {
-                    @Override
-                    public Void call() throws Exception {
-                        final GetAggregateFlowStatisticsFromFlowTableForAllFlowsInputBuilder builder =
-                                new GetAggregateFlowStatisticsFromFlowTableForAllFlowsInputBuilder();
-                        builder.setNode(nodeRef);
-                        builder.setTableId(tableId);
+            public Void call() throws Exception {
+                final GetAggregateFlowStatisticsFromFlowTableForAllFlowsInputBuilder builder =
+                        new GetAggregateFlowStatisticsFromFlowTableForAllFlowsInputBuilder();
+                builder.setNode(nodeRef);
+                builder.setTableId(tableId);
 
-                        final TableBuilder tbuilder = new TableBuilder();
-                        tbuilder.setId(tableId.getValue());
-                        tbuilder.setKey(new TableKey(tableId.getValue()));
-                        registrationRpcFutureCallBack(flowStatsService
-                                .getAggregateFlowStatisticsFromFlowTableForAllFlows(builder.build()), tbuilder.build(), nodeRef);
-                        return null;
-                    }
-                };
-                addGetAllStatJob(getAggregateFlowStat);
+                final TableBuilder tbuilder = new TableBuilder();
+                tbuilder.setId(tableId.getValue());
+                tbuilder.setKey(new TableKey(tableId.getValue()));
+                registrationRpcFutureCallBack(flowStatsService
+                        .getAggregateFlowStatisticsFromFlowTableForAllFlows(builder.build()), tbuilder.build(), nodeRef);
+                return null;
             }
-        });
+        };
+        addGetAllStatJob(getAggregateFlowStat);
     }
 
     @Override
