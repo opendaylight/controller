@@ -88,8 +88,12 @@ final class DOMDataBrokerTransactionChainImpl extends AbstractDOMForwardedTransa
     @Override
     public CheckedFuture<Void, TransactionCommitFailedException> submit(
             final DOMDataWriteTransaction transaction, final Iterable<DOMStoreThreePhaseCommitCohort> cohorts) {
-        checkNotFailed();
-        checkNotClosed();
+        try {
+            checkNotFailed();
+            checkNotClosed();
+        } catch (Exception e) {
+            Futures.immediateFailedCheckedFuture(e);
+        }
 
         final CheckedFuture<Void, TransactionCommitFailedException> ret = coordinator.submit(transaction, cohorts);
 
