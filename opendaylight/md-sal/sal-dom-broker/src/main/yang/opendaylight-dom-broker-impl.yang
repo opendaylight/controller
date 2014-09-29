@@ -116,7 +116,7 @@ module opendaylight-sal-dom-broker-impl {
             }
 
             leaf max-data-broker-commit-queue-size {
-                default 5000;
+                default 500000;
                 type uint16;
                 description "The maximum queue size for the data broker's commit executor.";
             }
