@@ -202,9 +202,9 @@ public class StatisticsManagerImpl implements StatisticsManager, Runnable {
                    }
                } while (op != null);
 
-                   LOG.trace("Processed {} operations, submitting transaction {}", ops, tx.getIdentifier());
+               LOG.trace("Processed {} operations, submitting transaction {}", ops, tx.getIdentifier());
 
-                   tx.submit(); //.checkedGet();
+                   tx.submit().checkedGet();
            } catch (final InterruptedException e) {
                LOG.warn("Stat Manager DS Operation thread interupted!", e);
                finishing = true;
