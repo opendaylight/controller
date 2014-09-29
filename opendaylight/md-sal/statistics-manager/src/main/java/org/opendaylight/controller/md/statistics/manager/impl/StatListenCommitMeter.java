@@ -151,7 +151,7 @@ public class StatListenCommitMeter extends StatAbstractListenCommit<Meter, Opend
                     LOG.debug("Read Operational/DS for Node fail! {}", nodeIdent, e);
                 }
                 if (node.isPresent()) {
-                    tx.put(LogicalDatastoreType.OPERATIONAL, meterFeatureIdent, stats, true);
+                    tx.put(LogicalDatastoreType.OPERATIONAL, meterFeatureIdent, stats);
                 }
             }
         });
@@ -211,7 +211,7 @@ public class StatListenCommitMeter extends StatAbstractListenCommit<Meter, Opend
                 LOG.debug("Read Operational/DS for FlowCapableNode fail! {}", fNodeIdent, e);
             }
             if (fNode.isPresent()) {
-                trans.put(LogicalDatastoreType.OPERATIONAL, msIdent, stats, true);
+                trans.put(LogicalDatastoreType.OPERATIONAL, msIdent, stats);
             }
         }
     }
@@ -259,8 +259,8 @@ public class StatListenCommitMeter extends StatAbstractListenCommit<Meter, Opend
             LOG.trace("Read Operational/DS for FlowCapableNode fail! Node {} doesn't exist.", fNodeIdent);
             return;
         }
-        final List<Meter> existMeters = fNode.get().getMeter().isEmpty()
-                ? Collections.<Meter> emptyList() : fNode.get().getMeter();
+        final List<Meter> existMeters = fNode.get().getMeter() != null
+                ? fNode.get().getMeter() : Collections.<Meter> emptyList();
         /* Add all existed groups paths - no updated paths has to be removed */
         for (final Meter meter : existMeters) {
             if (deviceMeterKeys.remove(meter.getKey())) {

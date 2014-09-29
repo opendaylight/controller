@@ -20,12 +20,14 @@ import org.opendaylight.controller.md.statistics.manager.StatisticsManager.StatD
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.FlowTableStatisticsData;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.FlowTableStatisticsDataBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.FlowTableStatisticsUpdate;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.OpendaylightFlowTableStatisticsListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.flow.table.and.statistics.map.FlowTableAndStatisticsMap;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.flow.table.statistics.FlowTableStatistics;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.flow.table.statistics.FlowTableStatisticsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionAware;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionId;
@@ -125,13 +127,17 @@ public class StatNotifyCommitTable extends StatAbstractNotifyCommit<Opendaylight
             return;
         }
         for (final FlowTableAndStatisticsMap tableStat : tableStats) {
-            final FlowTableStatisticsData stats = new FlowTableStatisticsDataBuilder()
-                    .setFlowTableStatistics(new FlowTableStatisticsBuilder(tableStat).build()).build();
-
-            final InstanceIdentifier<FlowTableStatisticsData> tStatIdent = fNodeIdent
-                    .child(Table.class, new TableKey(tableStat.getTableId().getValue()))
+            final InstanceIdentifier<Table> tableIdent = fNodeIdent
+                    .child(Table.class, new TableKey(tableStat.getTableId().getValue()));
+            final Table table = new TableBuilder().setId(tableStat.getTableId().getValue()).build();
+            trans.merge(LogicalDatastoreType.OPERATIONAL, tableIdent, table);
+            final InstanceIdentifier<FlowTableStatisticsData> tableStatIdent = tableIdent
                     .augmentation(FlowTableStatisticsData.class);
-            trans.put(LogicalDatastoreType.OPERATIONAL, tStatIdent, stats, true);
+            trans.merge(LogicalDatastoreType.OPERATIONAL, tableStatIdent, new FlowTableStatisticsDataBuilder().build());
+
+            final FlowTableStatistics stats = new FlowTableStatisticsBuilder(tableStat).build();
+            final InstanceIdentifier<FlowTableStatistics> tStatIdent = tableStatIdent.child(FlowTableStatistics.class);
+            trans.put(LogicalDatastoreType.OPERATIONAL, tStatIdent, stats);
         }
     }
 }

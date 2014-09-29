@@ -142,7 +142,7 @@ public class StatListenCommitQueue extends StatAbstractListenCommit<Queue, Opend
                     .child(NodeConnector.class, new NodeConnectorKey(queueEntry.getNodeConnectorId()))
                     .augmentation(FlowCapableNodeConnector.class)
                     .child(Queue.class, qKey).augmentation(FlowCapableNodeConnectorQueueStatisticsData.class);
-            trans.put(LogicalDatastoreType.OPERATIONAL, queueStatIdent, statBuild.build(), true);
+            trans.put(LogicalDatastoreType.OPERATIONAL, queueStatIdent, statBuild.build());
         }
     }
 }
