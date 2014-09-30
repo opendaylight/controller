@@ -46,7 +46,7 @@ public abstract class AbstractSessionNegotiator<M, S extends AbstractProtocolSes
         promise.setSuccess(session);
     }
 
-    protected final void negotiationFailed(final Throwable cause) {
+    protected void negotiationFailed(final Throwable cause) {
         LOG.debug("Negotiation on channel {} failed", channel, cause);
         channel.close();
         promise.setFailure(cause);
