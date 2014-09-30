@@ -155,7 +155,7 @@ public class StatListenCommitGroup extends StatAbstractListenCommit<Group, Opend
                     LOG.debug("Read Operational/DS for Node fail! {}", nodeIdent, e);
                 }
                 if (node.isPresent()) {
-                    tx.put(LogicalDatastoreType.OPERATIONAL, groupFeatureIdent, stats, true);
+                    tx.put(LogicalDatastoreType.OPERATIONAL, groupFeatureIdent, stats);
                 }
             }
         });
@@ -225,7 +225,7 @@ public class StatListenCommitGroup extends StatAbstractListenCommit<Group, Opend
                 LOG.debug("Read Operational/DS for FlowCapableNode fail! {}", fNodeIdent, e);
             }
             if (fNode.isPresent()) {
-                trans.put(LogicalDatastoreType.OPERATIONAL, gsIdent, stats, true);
+                trans.put(LogicalDatastoreType.OPERATIONAL, gsIdent, stats);
             }
         }
     }
@@ -271,8 +271,8 @@ public class StatListenCommitGroup extends StatAbstractListenCommit<Group, Opend
             LOG.trace("Read Operational/DS for FlowCapableNode fail! Node {} doesn't exist.", fNodeIdent);
             return;
         }
-        final List<Group> existGroups = fNode.get().getGroup().isEmpty()
-                ? Collections.<Group> emptyList() : fNode.get().getGroup();
+        final List<Group> existGroups = fNode.get().getGroup() != null
+                ? fNode.get().getGroup() : Collections.<Group> emptyList();
         /* Add all existed groups paths - no updated paths has to be removed */
         for (final Group group : existGroups) {
             if (deviceGroupKeys.remove(group.getKey())) {
