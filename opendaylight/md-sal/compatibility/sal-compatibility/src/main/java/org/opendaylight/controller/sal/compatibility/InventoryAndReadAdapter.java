@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.sal.compatibility;
 
-import com.google.common.collect.Iterables;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -70,7 +68,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRemoved;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeUpdated;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.OpendaylightInventoryListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.statistics.types.rev130925.GenericStatistics;
@@ -89,7 +86,9 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class InventoryAndReadAdapter implements IPluginInReadService, IPluginInInventoryService, OpendaylightInventoryListener, OpendaylightFlowStatisticsListener, OpendaylightFlowTableStatisticsListener, OpendaylightPortStatisticsListener {
+import com.google.common.collect.Iterables;
+
+public class InventoryAndReadAdapter implements IPluginInReadService, IPluginInInventoryService, OpendaylightFlowStatisticsListener, OpendaylightFlowTableStatisticsListener, OpendaylightPortStatisticsListener {
     private static final Logger LOG = LoggerFactory.getLogger(InventoryAndReadAdapter.class);
     private static final short OPENFLOWV10_TABLE_ID = 0;
 
@@ -398,12 +397,10 @@ public class InventoryAndReadAdapter implements IPluginInReadService, IPluginInI
         return nodeStats;
     }
 
-    @Override
     public void onNodeConnectorRemoved(final NodeConnectorRemoved update) {
         // Never received
     }
 
-    @Override
     public void onNodeRemoved(final NodeRemoved notification) {
         this.removeNodeConnectors(notification.getNodeRef().getValue());
         try {
@@ -414,7 +411,6 @@ public class InventoryAndReadAdapter implements IPluginInReadService, IPluginInI
         }
     }
 
-    @Override
     public void onNodeConnectorUpdated(final NodeConnectorUpdated update) {
         final NodeConnectorRef ref = update.getNodeConnectorRef();
         final UpdateType updateType;
@@ -432,9 +428,9 @@ public class InventoryAndReadAdapter implements IPluginInReadService, IPluginInI
         } catch (ConstructionException e) {
             LOG.warn("Failed to construct node connector for {}, not reporting the update", ref, e);
         }
+        // NOOP - Handled by NodeConnectorDataChangeListener
     }
 
-    @Override
     public void onNodeUpdated(final NodeUpdated notification) {
         final NodeRef ref = notification.getNodeRef();
 
