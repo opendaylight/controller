@@ -7,9 +7,7 @@
  */
 package org.opendaylight.controller.sal.compatibility;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-
+import com.google.common.base.Preconditions;
 import org.apache.felix.dm.Component;
 import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
@@ -36,7 +34,8 @@ import org.opendaylight.controller.sal.utils.INodeConnectorFactory;
 import org.opendaylight.controller.sal.utils.INodeFactory;
 import org.osgi.framework.BundleContext;
 
-import com.google.common.base.Preconditions;
+import java.util.Dictionary;
+import java.util.Hashtable;
 
 public class ComponentActivator extends ComponentActivatorAbstractBase {
     private final INodeConnectorFactory nodeConnectorFactory = new MDSalNodeConnectorFactory();
@@ -90,8 +89,8 @@ public class ComponentActivator extends ComponentActivatorAbstractBase {
 
     @Override
     public void start(final BundleContext context) {
-        super.start(context);
         this.context = Preconditions.checkNotNull(context);
+        super.start(context);
     }
 
     public ProviderContext setBroker(final BindingAwareBroker broker) {
@@ -101,14 +100,14 @@ public class ComponentActivator extends ComponentActivatorAbstractBase {
     @Override
     protected Object[] getGlobalImplementations() {
         return new Object[] {
+                this, // Used for setBroker callback
                 flow,
                 inventory,
                 dataPacket,
                 nodeFactory,
                 nodeConnectorFactory,
                 topology,
-                tpProvider,
-                this // Used for setBroker callback
+                tpProvider
         };
     }
 
@@ -216,6 +215,9 @@ public class ComponentActivator extends ComponentActivatorAbstractBase {
                 .setService(IDiscoveryService.class)
                 .setCallbacks("setDiscoveryPublisher", "setDiscoveryPublisher")
                 .setRequired(false));
+        it.add(createServiceDependency()
+                .setService(BindingAwareBroker.class)
+                .setRequired(true));
     }
 
     private void _instanceConfigure(final InventoryAndReadAdapter imp, final Component it, String containerName) {
@@ -232,6 +234,9 @@ public class ComponentActivator extends ComponentActivatorAbstractBase {
                 .setService(IPluginOutInventoryService.class)
                 .setCallbacks("setInventoryPublisher", "unsetInventoryPublisher")
                 .setRequired(false));
+        it.add(createServiceDependency()
+                .setService(BindingAwareBroker.class)
+                .setRequired(true));
     }
 
     private void _configure(final TopologyAdapter imp, final Component it) {

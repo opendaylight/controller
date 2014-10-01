@@ -77,7 +77,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createContainerServiceDependency(containerName).setService(
                     IInventoryService.class).setCallbacks(
                     "setInventoryService", "unsetInventoryService")
-                    .setRequired(false));
+                    .setRequired(true));
             c.add(createContainerServiceDependency(containerName).setService(
                     IStatisticsManager.class).setCallbacks(
                     "setStatisticsManager", "unsetStatisticsManager")
