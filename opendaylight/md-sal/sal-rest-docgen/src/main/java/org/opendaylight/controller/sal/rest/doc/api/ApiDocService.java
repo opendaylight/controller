@@ -37,6 +37,27 @@ public interface ApiDocService {
     public Response getRootDoc(@Context javax.ws.rs.core.UriInfo uriInfo);
 
     /**
+     * Similar as {@link #getRootDoc(javax.ws.rs.core.UriInfo)}. Index document contains REST apis for
+     * the yang module which is specified in uri as module_name(YYYY-MM-DD).
+     * @return response with 200 status code which contains data necessary for displaying in swagger
+     */
+    @GET
+    @Path("/modules/{module}({revision})")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getRootDocWithOneModule(@Context final javax.ws.rs.core.UriInfo uriInfo, @PathParam("module") final String module, @PathParam("revision") final String revision);
+
+    /**
+     * Generates list of modules in HTML format. Module has to contains at least one rpc,
+     * list or container at top level.
+     *
+     * @return
+     */
+    @GET
+    @Path("/modules")
+    @Produces(MediaType.TEXT_HTML)
+    public Response getListOfRestAwareModules(@Context final javax.ws.rs.core.UriInfo uriInfo);
+
+    /**
      * Generates Swagger compliant document listing APIs for module.
      *
      * @param module

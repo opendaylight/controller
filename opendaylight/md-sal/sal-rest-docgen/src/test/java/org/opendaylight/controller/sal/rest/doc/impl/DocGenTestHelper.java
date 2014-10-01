@@ -135,7 +135,7 @@ public class DocGenTestHelper {
 
         UriInfo info = mock(UriInfo.class);
 
-        when(info.getRequestUriBuilder()).thenReturn(mockBuilder);
+        when(info.getBaseUriBuilder()).thenReturn(mockBuilder);
         when(info.getBaseUri()).thenReturn(uri);
         return info;
     }

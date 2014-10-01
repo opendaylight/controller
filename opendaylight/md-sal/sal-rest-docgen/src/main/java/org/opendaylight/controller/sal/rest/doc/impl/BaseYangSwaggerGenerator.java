@@ -76,11 +76,9 @@ public class BaseYangSwaggerGenerator {
      * @param operType
      * @return list of modules converted to swagger compliant resource list.
      */
-    public ResourceList getResourceListing(UriInfo uriInfo, SchemaContext schemaContext, String context) {
+    public ResourceList getResourceListing(UriInfo uriInfo, SchemaContext schemaContext, String context, Set<Module> modules) {
 
         ResourceList resourceList = createResourceList();
-
-        Set<Module> modules = getSortedModules(schemaContext);
 
         List<Resource> resources = new ArrayList<>(modules.size());
 
@@ -90,7 +88,7 @@ public class BaseYangSwaggerGenerator {
             String revisionString = SIMPLE_DATE_FORMAT.format(module.getRevision());
             Resource resource = new Resource();
             _logger.debug("Working on [{},{}]...", module.getName(), revisionString);
-            ApiDeclaration doc = getApiDeclaration(module.getName(), revisionString, uriInfo, schemaContext, context);
+            ApiDeclaration doc = getApiDeclaration(module, uriInfo, context, schemaContext);
 
             if (doc != null) {
                 resource.setPath(generatePath(uriInfo, module.getName(), revisionString));
@@ -113,11 +111,19 @@ public class BaseYangSwaggerGenerator {
     }
 
     protected String generatePath(UriInfo uriInfo, String name, String revision) {
-        URI uri = uriInfo.getRequestUriBuilder().path(generateCacheKey(name, revision)).build();
+        URI uri = uriInfo.getBaseUriBuilder().path(generateCacheKey(name, revision)).build();
         return uri.toASCIIString();
     }
 
-    public ApiDeclaration getApiDeclaration(String module, String revision, UriInfo uriInfo, SchemaContext schemaContext, String context) {
+    public ApiDeclaration getApiDeclaration(String module, String revision, UriInfo uriInfo,
+            SchemaContext schemaContext, String context) {
+        final Module m = findModuleByNameAndRevision(module, revision, schemaContext);
+        Preconditions.checkArgument(m != null, "Could not find module by name,revision: " + module + "," + revision);
+
+        return getApiDeclaration(m, uriInfo, context, schemaContext);
+    }
+
+    protected Module findModuleByNameAndRevision(String module, String revision, SchemaContext schemaContext) {
         Date rev = null;
         try {
             rev = SIMPLE_DATE_FORMAT.parse(revision);
@@ -125,12 +131,11 @@ public class BaseYangSwaggerGenerator {
             throw new IllegalArgumentException(e);
         }
         Module m = schemaContext.findModuleByName(module, rev);
-        Preconditions.checkArgument(m != null, "Could not find module by name,revision: " + module + "," + revision);
-
-        return getApiDeclaration(m, rev, uriInfo, context, schemaContext);
+        return m;
     }
 
-    public ApiDeclaration getApiDeclaration(Module module, Date revision, UriInfo uriInfo, String context, SchemaContext schemaContext) {
+    public ApiDeclaration getApiDeclaration(Module module, UriInfo uriInfo, String context,
+            SchemaContext schemaContext) {
         String basePath = createBasePathFromUriInfo(uriInfo);
 
         ApiDeclaration doc = getSwaggerDocSpec(module, basePath, context, schemaContext);

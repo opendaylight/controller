@@ -20,8 +20,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.ws.rs.core.UriInfo;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionInstance;
-import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionListener;
+import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
 import org.opendaylight.controller.sal.rest.doc.impl.BaseYangSwaggerGenerator;
 import org.opendaylight.controller.sal.rest.doc.swagger.Api;
 import org.opendaylight.controller.sal.rest.doc.swagger.ApiDeclaration;
@@ -130,7 +130,7 @@ public class MountPointSwagger extends BaseYangSwaggerGenerator implements Mount
         dataStores.setDescription("Provides methods for accessing the data stores.");
         dataStores.setPath(generatePath(uriInfo, DATASTORES_LABEL, DATASTORES_REVISION));
         resources.add(dataStores);
-        ResourceList list = super.getResourceListing(uriInfo, context, urlPrefix);
+        ResourceList list = super.getResourceListing(uriInfo, context, urlPrefix, getSortedModules(context));
         resources.addAll(list.getApis());
         list.setApis(resources);
         return list;

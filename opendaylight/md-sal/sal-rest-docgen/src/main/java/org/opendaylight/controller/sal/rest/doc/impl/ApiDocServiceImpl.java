@@ -10,10 +10,9 @@ package org.opendaylight.controller.sal.rest.doc.impl;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Map.Entry;
-
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-
 import org.json.JSONWriter;
 import org.opendaylight.controller.sal.rest.doc.api.ApiDocService;
 import org.opendaylight.controller.sal.rest.doc.mountpoints.MountPointSwagger;
@@ -53,8 +52,22 @@ public class ApiDocServiceImpl implements ApiDocService {
     public synchronized Response getRootDoc(UriInfo uriInfo) {
         ApiDocGenerator generator = ApiDocGenerator.getInstance();
         ResourceList rootDoc = generator.getResourceListing(uriInfo);
-
         return Response.ok(rootDoc).build();
+    }
+
+    @Override
+    public synchronized Response getRootDocWithOneModule(UriInfo uriInfo, String moduleName, String revision) {
+        ApiDocGenerator generator = ApiDocGenerator.getInstance();
+        ResourceList rootDoc = generator.getResourceListing(uriInfo, moduleName, revision);
+        return Response.ok(rootDoc).build();
+    }
+
+    @Override
+    public Response getListOfRestAwareModules(UriInfo uriInfo) {
+        ApiDocGenerator generator = ApiDocGenerator.getInstance();
+        final String html = HTMLGeneratorForRestModules.generate(uriInfo.getBaseUriBuilder(),
+                generator.getListOfModulesWithRestLinks());
+        return Response.ok(html, MediaType.TEXT_HTML_TYPE).build();
     }
 
     /**
