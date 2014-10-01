@@ -10,6 +10,7 @@ package org.opendaylight.controller.sal.compatibility;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
@@ -68,6 +69,10 @@ class SalCompatibilityProvider implements BindingAwareProvider {
         inv.setNodeConnectorStatisticsService(session.getRpcService(OpendaylightPortStatisticsService.class));
         inv.setTopologyDiscovery(session.getRpcService(FlowTopologyDiscoveryService.class));
         inv.setDataProviderService(session.getSALService(DataProviderService.class));
+
+        final NodeDataChangeListener ndcl = new NodeDataChangeListener(inv,session.getSALService(DataBroker.class));
+        final NCDataChangeListener ncdcl = new NCDataChangeListener(inv,session.getSALService(DataBroker.class));
+
         // FIXME: remember registration for clean shutdown
         subscribe.registerNotificationListener(inv);
 
