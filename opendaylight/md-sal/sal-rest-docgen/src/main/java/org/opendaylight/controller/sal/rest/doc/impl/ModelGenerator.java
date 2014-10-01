@@ -146,8 +146,10 @@ public class ModelGenerator {
 
         for (DataSchemaNode childNode : module.getChildNodes()) {
             // For every container and list in the module
-            processDataNodeContainer((DataNodeContainer) childNode, moduleName, models, true, schemaContext);
-            processDataNodeContainer((DataNodeContainer) childNode, moduleName, models, false, schemaContext);
+            if (childNode instanceof ContainerSchemaNode || childNode instanceof ListSchemaNode) {
+                processDataNodeContainer((DataNodeContainer) childNode, moduleName, models, true, schemaContext);
+                processDataNodeContainer((DataNodeContainer) childNode, moduleName, models, false, schemaContext);
+            }
         }
 
     }
@@ -305,6 +307,9 @@ public class ModelGenerator {
                 JSONObject property = new JSONObject();
                 property.put(TYPE_KEY, childNode instanceof ListSchemaNode ? ARRAY_TYPE : OBJECT_TYPE);
                 property.put(ITEMS_KEY, items);
+                properties.put(childNode.getQName().getLocalName(), property);
+            } else if (childNode instanceof LeafSchemaNode){
+                JSONObject property = processLeafNode((LeafSchemaNode)childNode);
                 properties.put(childNode.getQName().getLocalName(), property);
             }
         }
