@@ -24,11 +24,11 @@
       <features.file>features.xml</features.file>
       <!-- Optional TODO: Move these properties to your parent pom and possibly
             DependencyManagement section of your parent pom -->
-      <branding.version>1.0.0-SNAPSHOT</branding.version>
-      <karaf.resources.version>1.4.2-SNAPSHOT</karaf.resources.version>
+      <branding.version>1.0.0-Helium</branding.version>
+      <karaf.resources.version>1.4.2-Helium</karaf.resources.version>
       <karaf.version>3.0.1</karaf.version>
-      <feature.test.version>0.6.2-SNAPSHOT</feature.test.version>
-      <karaf.empty.version>1.4.2-SNAPSHOT</karaf.empty.version>
+      <feature.test.version>0.6.2-Helium</feature.test.version>
+      <karaf.empty.version>1.4.2-Helium</karaf.empty.version>
       <surefire.version>2.16</surefire.version>
    </properties>
    <dependencies>
@@ -46,21 +46,21 @@
         <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>features-yangtools</artifactId>
-          <version>0.6.2-SNAPSHOT</version>
+          <version>0.6.2-Helium</version>
           <classifier>features</classifier>
           <type>xml</type>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>features-mdsal</artifactId>
-          <version>1.1-SNAPSHOT</version>
+          <version>1.1-Helium</version>
           <classifier>features</classifier>
           <type>xml</type>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.openflowplugin</groupId>
           <artifactId>features-openflowplugin</artifactId>
-          <version>0.0.3-SNAPSHOT</version>
+          <version>0.0.3-Helium</version>
           <classifier>features</classifier>
           <type>xml</type>
         </dependency>

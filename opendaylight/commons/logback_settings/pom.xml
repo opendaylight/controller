@@ -4,11 +4,11 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.parent</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.0.2-Helium</version>
     <relativePath>../parent</relativePath>
   </parent>
   <artifactId>commons.logback_settings</artifactId>
-  <version>0.0.2-SNAPSHOT</version>
+  <version>0.0.2-Helium</version>
   <scm>
     <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>

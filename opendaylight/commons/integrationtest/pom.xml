@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.opendaylight</artifactId>
-    <version>1.4.2-SNAPSHOT</version>
+    <version>1.4.2-Helium</version>
     <relativePath>../../commons/opendaylight</relativePath>
   </parent>
 
   <artifactId>commons.integrationtest</artifactId>
-  <version>0.5.2-SNAPSHOT</version>
+  <version>0.5.2-Helium</version>
   <packaging>pom</packaging>
 
   <dependencies>
@@ -89,7 +89,7 @@
           <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>checkstyle</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
+            <version>0.0.3-Helium</version>
           </dependency>
         </dependencies>
       </plugin>
