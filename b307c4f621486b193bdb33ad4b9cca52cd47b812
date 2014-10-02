@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_a9400c36",
+        "filename": "opendaylight/md-sal/sal-rest-docgen/src/main/java/org/opendaylight/controller/sal/rest/doc/impl/ModelGenerator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 310,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-10-02T06:33:24Z",
+      "side": 1,
+      "message": "what is purpose of this code?\nit is for swagger rpc properties part to display also information about leaves which are below rpc input container?",
+      "revId": "b307c4f621486b193bdb33ad4b9cca52cd47b812",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
