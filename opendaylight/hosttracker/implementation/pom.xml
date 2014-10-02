@@ -4,11 +4,11 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.opendaylight</artifactId>
-    <version>1.4.2-SNAPSHOT</version>
+    <version>1.4.2-Helium</version>
     <relativePath>../../commons/opendaylight</relativePath>
   </parent>
   <artifactId>hosttracker.implementation</artifactId>
-  <version>0.5.2-SNAPSHOT</version>
+  <version>0.5.2-Helium</version>
   <packaging>bundle</packaging>
 
   <properties>
