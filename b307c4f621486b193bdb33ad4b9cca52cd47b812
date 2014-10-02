@@ -16,6 +16,24 @@
       "revId": "b307c4f621486b193bdb33ad4b9cca52cd47b812",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e998546c",
+        "filename": "opendaylight/md-sal/sal-rest-docgen/src/main/java/org/opendaylight/controller/sal/rest/doc/impl/ModelGenerator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 310,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-10-02T20:51:59Z",
+      "side": 1,
+      "message": "If a module has a leaf node defined at the module level, this code will add that property to the *Post model. opflex.yang has an example of that.",
+      "parentUuid": "fa82b9bf_a9400c36",
+      "revId": "b307c4f621486b193bdb33ad4b9cca52cd47b812",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
