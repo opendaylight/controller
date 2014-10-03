@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.NameConflictException;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.YangModelSearchUtils;
@@ -40,6 +41,7 @@ public class ModuleMXBeanEntryNameConflictTest extends AbstractYangTest {
     Map<File, String> testedFilesToYangModules = new HashMap<>();
     Map<String, String> testedYangModulesToExpectedConflictingName = new HashMap<>();
 
+    @Ignore
     @Test
     public void testNameConflicts() throws Exception {
         prepareSamples();

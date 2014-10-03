@@ -75,7 +75,7 @@ module config-test-duplicate-attribute-in-list {
         case netconf {
             when "/config:modules/config:module/config:type = 'netconf'";
             // root runtime bean
-            leaf created-sessions {
+            leaf created-sessions2 {
                 type uint32;
             }
 

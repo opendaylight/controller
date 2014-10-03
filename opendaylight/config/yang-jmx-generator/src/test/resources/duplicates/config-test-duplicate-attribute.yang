@@ -56,7 +56,7 @@ module config-test-duplicate-attribute {
         case netconf {
             when "/config:modules/config:module/config:type = 'netconf'";
 
-           container dto-a {
+           container dto-a2 {
                 leaf simple-arg {
                        type uint32;
                    }
@@ -72,7 +72,7 @@ module config-test-duplicate-attribute {
         case netconf {
             when "/config:modules/config:module/config:type = 'netconf'";
             // root runtime bean
-            leaf created-sessions {
+            leaf created-sessions2 {
                 type uint32;
             }
 
