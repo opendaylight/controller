@@ -3,6 +3,8 @@ package org.opendaylight.controller.md.sal.dom.xsql.jdbc;
 import java.io.Serializable;
 import java.util.Map;
 
+import org.opendaylight.controller.md.sal.dom.xsql.XSQLBluePrint;
+
 public class JDBCCommand implements Serializable {
     public int type = 0;
     public static final int TYPE_EXECUTE_QUERY = 1;
@@ -10,16 +12,32 @@ public class JDBCCommand implements Serializable {
     public static final int TYPE_QUERY_RECORD = 3;
     public static final int TYPE_QUERY_FINISH = 4;
     public static final int TYPE_QUERY_ERROR = 5;
+    public static final int TYPE_METADATA = 6;
+    public static final int TYPE_METADATA_REPLY = 7;
 
     private JDBCResultSet rs = null;
     private Map record = null;
     private int rsID = -1;
     private Exception err = null;
+    private XSQLBluePrint bluePrint = null;
+
+    public JDBCCommand() {
+
+    }
+
+    public void setType(int t) {
+        this.type = t;
+    }
 
     public JDBCCommand(Exception _err, int _RSID) {
         this.type = TYPE_QUERY_ERROR;
         this.err = _err;
         this.rsID = _RSID;
+    }
+
+    public JDBCCommand(XSQLBluePrint bl) {
+        this.type = TYPE_METADATA_REPLY;
+        this.bluePrint = bl;
     }
 
     public JDBCCommand(JDBCResultSet _rs, int _type) {
@@ -58,5 +76,9 @@ public class JDBCCommand implements Serializable {
 
     public Exception getERROR() {
         return this.err;
+    }
+
+    public XSQLBluePrint getBluePrint() {
+        return this.bluePrint;
     }
 }
