@@ -31,38 +31,59 @@ import java.util.Properties;
 import java.util.concurrent.Executor;
 
 import org.opendaylight.controller.md.sal.dom.xsql.XSQLAdapter;
+import org.opendaylight.controller.md.sal.dom.xsql.XSQLBluePrint;
 
-public class JDBCConnection extends Thread implements Connection {
+public class JDBCConnection implements Connection, Runnable {
     private Socket socket = null;
     private DataInputStream in = null;
     private DataOutputStream out = null;
     private LinkedList<byte[]> queue = new LinkedList<byte[]>();
     private XSQLAdapter adapter = null;
+    private XSQLBluePrint metaData = null;
+    private String addr = null;
+    private boolean wasClosed = false;
 
     public JDBCConnection(Socket s, XSQLAdapter _a) {
         this.socket = s;
         this.adapter = _a;
         try {
             in = new DataInputStream(
-                new BufferedInputStream(s.getInputStream()));
-            out = new DataOutputStream(
-                new BufferedOutputStream(s.getOutputStream()));
+                    new BufferedInputStream(s.getInputStream()));
+            out = new DataOutputStream(new BufferedOutputStream(
+                    s.getOutputStream()));
             new JDBCObjectReader();
-            this.start();
+            new Thread(this).start();
         } catch (Exception err) {
             err.printStackTrace();
         }
     }
 
-    public JDBCConnection(String addr) throws Exception {
+    public Connection getProxy() {
+        return this;
+        /*
+        return (Connection) Proxy.newProxyInstance(this.getClass()
+                .getClassLoader(), new Class[] { Connection.class },
+                new JDBCProxy(this));
+                */
+    }
+
+    public JDBCConnection(String _addr) throws Exception {
+        this.addr = _addr;
+        init();
+    }
+
+    private void init() throws Exception {
+        if (addr.startsWith("http://"))
+            addr = addr.substring(7);
+        System.err.print("Address is:" + addr);
         socket = new Socket(addr, 40004);
         try {
-            in = new DataInputStream(
-                new BufferedInputStream(socket.getInputStream()));
-            out = new DataOutputStream(
-                new BufferedOutputStream(socket.getOutputStream()));
+            in = new DataInputStream(new BufferedInputStream(
+                    socket.getInputStream()));
+            out = new DataOutputStream(new BufferedOutputStream(
+                    socket.getOutputStream()));
             new JDBCObjectReader();
-            this.start();
+            new Thread(this).start();
         } catch (Exception err) {
             err.printStackTrace();
         }
@@ -73,12 +94,12 @@ public class JDBCConnection extends Thread implements Connection {
             ServerSocket s = new ServerSocket(50003);
             socket = s.accept();
             try {
-                in = new DataInputStream(
-                    new BufferedInputStream(socket.getInputStream()));
-                out = new DataOutputStream(
-                    new BufferedOutputStream(socket.getOutputStream()));
+                in = new DataInputStream(new BufferedInputStream(
+                        socket.getInputStream()));
+                out = new DataOutputStream(new BufferedOutputStream(
+                        socket.getOutputStream()));
                 new JDBCObjectReader();
-                this.start();
+                new Thread(this).start();
             } catch (Exception err) {
                 err.printStackTrace();
             }
@@ -86,7 +107,6 @@ public class JDBCConnection extends Thread implements Connection {
             err.printStackTrace();
         }
     }
-
 
     private boolean isStopped() {
         if (adapter != null && adapter.stopped) {
@@ -110,10 +130,20 @@ public class JDBCConnection extends Thread implements Connection {
             } catch (Exception err) {
                 System.out.println("Connection Lost or Closed.");
                 try {
+                    out.close();
+                } catch (Exception er) {
+                }
+                out = null;
+                try {
+                    in.close();
+                } catch (Exception er) {
+                }
+                in = null;
+                try {
                     socket.close();
                 } catch (Exception err2) {
                 }
-                //err.printStackTrace();
+                socket = null;
             }
         }
     }
@@ -167,38 +197,46 @@ public class JDBCConnection extends Thread implements Connection {
 
     public void processCommand(JDBCCommand cmd) {
         switch (cmd.getType()) {
-            case JDBCCommand.TYPE_EXECUTE_QUERY:
-                try {
-                    JDBCServer.execute(cmd.getRS(), adapter);
-                    send(new JDBCCommand(cmd.getRS(),
-                        JDBCCommand.TYPE_QUERY_REPLY));
-                    QueryUpdater u = new QueryUpdater(cmd.getRS());
-                    new Thread(u).start();
-                } catch (Exception err) {
-                    send(new JDBCCommand(err, cmd.getRSID()));
-                }
-                break;
-            case JDBCCommand.TYPE_QUERY_REPLY:
-                JDBCResultSet rs1 = JDBCStatement.getQuery(cmd.getRS().getID());
-                rs1.updateData(cmd.getRS());
-                break;
-            case JDBCCommand.TYPE_QUERY_RECORD:
-                JDBCResultSet rs2 = JDBCStatement.getQuery(cmd.getRSID());
-                rs2.addRecord(cmd.getRecord());
-                break;
-            case JDBCCommand.TYPE_QUERY_FINISH:
-                JDBCResultSet rs3 = JDBCStatement.removeQuery(cmd.getRSID());
-                rs3.setFinished(true);
-                break;
-            case JDBCCommand.TYPE_QUERY_ERROR:
-                System.err.println("ERROR Executing Query\n");
-                cmd.getERROR().printStackTrace();
-                JDBCResultSet rs4 = JDBCStatement.removeQuery(cmd.getRSID());
-                rs4.setError(cmd.getERROR());
-                rs4.setFinished(true);
-                synchronized (rs4) {
-                    rs4.notifyAll();
-                }
+        case JDBCCommand.TYPE_METADATA_REPLY:
+            this.metaData = cmd.getBluePrint();
+            synchronized (this) {
+                this.notifyAll();
+            }
+            break;
+        case JDBCCommand.TYPE_METADATA:
+            send(new JDBCCommand(this.adapter.getBluePrint()));
+            break;
+        case JDBCCommand.TYPE_EXECUTE_QUERY:
+            try {
+                JDBCServer.execute(cmd.getRS(), adapter);
+                send(new JDBCCommand(cmd.getRS(), JDBCCommand.TYPE_QUERY_REPLY));
+                QueryUpdater u = new QueryUpdater(cmd.getRS());
+                new Thread(u).start();
+            } catch (Exception err) {
+                send(new JDBCCommand(err, cmd.getRSID()));
+            }
+            break;
+        case JDBCCommand.TYPE_QUERY_REPLY:
+            JDBCResultSet rs1 = JDBCStatement.getQuery(cmd.getRS().getID());
+            rs1.updateData(cmd.getRS());
+            break;
+        case JDBCCommand.TYPE_QUERY_RECORD:
+            JDBCResultSet rs2 = JDBCStatement.getQuery(cmd.getRSID());
+            rs2.addRecord(cmd.getRecord());
+            break;
+        case JDBCCommand.TYPE_QUERY_FINISH:
+            JDBCResultSet rs3 = JDBCStatement.removeQuery(cmd.getRSID());
+            rs3.setFinished(true);
+            break;
+        case JDBCCommand.TYPE_QUERY_ERROR:
+            System.err.println("ERROR Executing Query\n");
+            cmd.getERROR().printStackTrace();
+            JDBCResultSet rs4 = JDBCStatement.removeQuery(cmd.getRSID());
+            rs4.setError(cmd.getERROR());
+            rs4.setFinished(true);
+            synchronized (rs4) {
+                rs4.notifyAll();
+            }
         }
     }
 
@@ -221,6 +259,15 @@ public class JDBCConnection extends Thread implements Connection {
     }
 
     public void send(Object o) {
+
+        if (this.socket == null) {
+            try {
+                init();
+            } catch (Exception err) {
+                err.printStackTrace();
+            }
+        }
+
         try {
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             ObjectOutputStream oout = new ObjectOutputStream(bout);
@@ -256,6 +303,7 @@ public class JDBCConnection extends Thread implements Connection {
 
     @Override
     public void close() throws SQLException {
+        wasClosed = true;
         try {
             socket.close();
         } catch (Exception err) {
@@ -271,7 +319,7 @@ public class JDBCConnection extends Thread implements Connection {
 
     @Override
     public Array createArrayOf(String typeName, Object[] elements)
-        throws SQLException {
+            throws SQLException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -302,28 +350,25 @@ public class JDBCConnection extends Thread implements Connection {
 
     @Override
     public Statement createStatement() throws SQLException {
-        return new JDBCStatement(this);
+        return new JDBCStatement(this).getProxy();
     }
 
     @Override
     public Statement createStatement(int resultSetType,
-        int resultSetConcurrency, int resultSetHoldability)
-        throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+            int resultSetConcurrency, int resultSetHoldability)
+            throws SQLException {
+        return new JDBCStatement(this).getProxy();
     }
 
     @Override
-    public Statement createStatement(int resultSetType,
-        int resultSetConcurrency)
-        throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+    public Statement createStatement(int resultSetType, int resultSetConcurrency)
+            throws SQLException {
+        return new JDBCStatement(this).getProxy();
     }
 
     @Override
     public Struct createStruct(String typeName, Object[] attributes)
-        throws SQLException {
+            throws SQLException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -360,8 +405,19 @@ public class JDBCConnection extends Thread implements Connection {
 
     @Override
     public DatabaseMetaData getMetaData() throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+        if (this.metaData == null) {
+            JDBCCommand cmd = new JDBCCommand();
+            cmd.setType(JDBCCommand.TYPE_METADATA);
+            synchronized (this) {
+                send(cmd);
+                try {
+                    this.wait();
+                } catch (Exception err) {
+                    err.printStackTrace();
+                }
+            }
+        }
+        return metaData;
     }
 
     @Override
@@ -384,7 +440,6 @@ public class JDBCConnection extends Thread implements Connection {
 
     @Override
     public boolean isClosed() throws SQLException {
-        // TODO Auto-generated method stub
         return false;
     }
 
@@ -408,15 +463,15 @@ public class JDBCConnection extends Thread implements Connection {
 
     @Override
     public CallableStatement prepareCall(String sql, int resultSetType,
-        int resultSetConcurrency, int resultSetHoldability)
-        throws SQLException {
+            int resultSetConcurrency, int resultSetHoldability)
+            throws SQLException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public CallableStatement prepareCall(String sql, int resultSetType,
-        int resultSetConcurrency) throws SQLException {
+            int resultSetConcurrency) throws SQLException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -429,44 +484,44 @@ public class JDBCConnection extends Thread implements Connection {
 
     @Override
     public PreparedStatement prepareStatement(String sql, int resultSetType,
-        int resultSetConcurrency, int resultSetHoldability)
-        throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+            int resultSetConcurrency, int resultSetHoldability)
+            throws SQLException {
+        System.err.println("SQL 1=" + sql);
+        return new JDBCStatement(this, sql).getProxy();
     }
 
     @Override
     public PreparedStatement prepareStatement(String sql, int resultSetType,
-        int resultSetConcurrency) throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+            int resultSetConcurrency) throws SQLException {
+        System.err.println("SQL 2=" + sql);
+        return new JDBCStatement(this, sql).getProxy();
     }
 
     @Override
     public PreparedStatement prepareStatement(String sql, int autoGeneratedKeys)
-        throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+            throws SQLException {
+        System.err.println("SQL 3=" + sql);
+        return new JDBCStatement(this, sql).getProxy();
     }
 
     @Override
     public PreparedStatement prepareStatement(String sql, int[] columnIndexes)
-        throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+            throws SQLException {
+        System.err.println("SQL 4=" + sql);
+        return new JDBCStatement(this, sql).getProxy();
     }
 
     @Override
     public PreparedStatement prepareStatement(String sql, String[] columnNames)
-        throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+            throws SQLException {
+        System.err.println("SQL 5=" + sql);
+        return new JDBCStatement(this, sql).getProxy();
     }
 
     @Override
     public PreparedStatement prepareStatement(String sql) throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+        System.err.println("SQL 6=" + sql);
+        return new JDBCStatement(this, sql).getProxy();
     }
 
     @Override
@@ -501,14 +556,14 @@ public class JDBCConnection extends Thread implements Connection {
 
     @Override
     public void setClientInfo(Properties properties)
-        throws SQLClientInfoException {
+            throws SQLClientInfoException {
         // TODO Auto-generated method stub
 
     }
 
     @Override
     public void setClientInfo(String name, String value)
-        throws SQLClientInfoException {
+            throws SQLClientInfoException {
         // TODO Auto-generated method stub
 
     }
@@ -569,7 +624,7 @@ public class JDBCConnection extends Thread implements Connection {
 
     @Override
     public void setNetworkTimeout(Executor executor, int milliseconds)
-        throws SQLException {
+            throws SQLException {
         // TODO Auto-generated method stub
 
     }
@@ -579,5 +634,5 @@ public class JDBCConnection extends Thread implements Connection {
         // TODO Auto-generated method stub
         return 0;
     }
-}
 
+}

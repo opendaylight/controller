@@ -63,6 +63,18 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
 
     }
 
+    public void loadBluePrint(){
+        try{
+            InputStream in = this.getClass().getClassLoader().getResourceAsStream("BluePrintCache.dat");
+            if(in!=null){
+                this.bluePrint =  XSQLBluePrint.load(in);
+            }
+            in.close();
+        }catch(Exception err){
+            err.printStackTrace();
+        }
+    }
+
     public static XSQLAdapter getInstance() {
         return a;
     }
@@ -164,6 +176,10 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
     }
 
     public void execute(JDBCResultSet rs) {
+        if(this.domDataBroker==null){
+            rs.setFinished(true);
+            return;
+        }
         List<XSQLBluePrintNode> tables = rs.getTables();
         List<Object> roots = collectModuleRoots(tables.get(0),LogicalDatastoreType.OPERATIONAL);
         roots.addAll(collectModuleRoots(tables.get(0),LogicalDatastoreType.CONFIGURATION));
@@ -282,6 +298,8 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
                 sout.close();
             } catch (Exception err) {
             }
+        } else if (input.equals("save")) {
+            XSQLBluePrint.save(this.bluePrint);
         } else if (input.equals("tocsv")) {
             toCsv = !toCsv;
             sout.println("to csv file is " + toCsv);
