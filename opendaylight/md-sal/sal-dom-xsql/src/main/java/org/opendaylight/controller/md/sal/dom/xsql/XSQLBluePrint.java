@@ -1,5 +1,6 @@
 package org.opendaylight.controller.md.sal.dom.xsql;
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -17,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class XSQLBluePrint implements DatabaseMetaData {
+public class XSQLBluePrint implements DatabaseMetaData, Serializable {
 
     public static final String CACHE_FILE_NAME = "BluePrintCache.dat";
 
@@ -344,7 +345,7 @@ public class XSQLBluePrint implements DatabaseMetaData {
 
     @Override
     public String getDatabaseProductName() throws SQLException {
-        return "VNE Query Language";
+        return "OpenDayLight";
     }
 
     @Override

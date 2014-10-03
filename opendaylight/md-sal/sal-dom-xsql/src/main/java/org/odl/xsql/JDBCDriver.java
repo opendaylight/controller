@@ -1,4 +1,4 @@
-package org.opendaylight.controller.md.sal.dom.xsql.jdbc;
+package org.odl.xsql;
 
 import java.sql.Connection;
 import java.sql.Driver;
@@ -8,6 +8,8 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
 import java.util.logging.Logger;
+
+import org.opendaylight.controller.md.sal.dom.xsql.jdbc.JDBCConnection;
 
 public class JDBCDriver implements Driver {
 
@@ -34,11 +36,12 @@ public class JDBCDriver implements Driver {
             if (url.equals("svr")) {
                 return new JDBCConnection(true);
             } else {
-                return new JDBCConnection(url);
+                return new JDBCConnection(url).getProxy();
             }
         } catch (Exception err) {
             err.printStackTrace();
         }
+        System.err.println("Error JDBC Connection");
         return null;
     }
 
