@@ -8,12 +8,21 @@ public class XSQLColumn implements Serializable, Comparable {
     private int charWidth = -1;
     private Class type = null;
     private transient Object bluePrintNode = null;
+    private String origName = null;
+    private String origTableName = null;
 
     public XSQLColumn(Object odlNode, String _tableName, Object _bluePrintNode) {
         this.name = XSQLODLUtils.getNodeNameFromDSN(odlNode);
         this.tableName = _tableName;
         this.bluePrintNode = _bluePrintNode;
         this.type = XSQLODLUtils.getTypeForODLColumn(odlNode);
+    }
+
+    public XSQLColumn(String _name, String _tableName,String _origName, String _origTableName){
+        this.name = _name;
+        this.tableName = _tableName;
+        this.origName = _origName;
+        this.origTableName = _origTableName;
     }
 
     public String getName() {

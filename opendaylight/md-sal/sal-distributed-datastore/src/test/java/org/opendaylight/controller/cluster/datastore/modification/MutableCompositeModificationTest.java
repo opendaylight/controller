@@ -35,8 +35,9 @@ public class MutableCompositeModificationTest extends AbstractModificationTest {
         MutableCompositeModification compositeModification = new MutableCompositeModification();
         compositeModification.addModification(new WriteModification(TestModel.TEST_PATH,
             ImmutableNodes.containerNode(TestModel.TEST_QNAME), TestModel.createTestContext()));
-
-        assertNotEquals(compositeModification.toSerializable(), compositeModification.toSerializable());
-
+        Object one = compositeModification.toSerializable();
+        try{Thread.sleep(10);}catch(Exception err){}
+        Object two = compositeModification.toSerializable();        
+        assertNotEquals(one,two);
     }
 }
