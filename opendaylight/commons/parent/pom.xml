@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>commons.parent</artifactId>
-  <version>1.0.2-Helium</version>
+  <version>1.0.3-SNAPSHOT</version>
   <packaging>pom</packaging>
   <prerequisites>
     <maven>3.0</maven>
