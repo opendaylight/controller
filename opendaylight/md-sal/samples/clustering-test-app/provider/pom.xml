@@ -4,7 +4,7 @@
     <parent>
         <artifactId>clustering-it</artifactId>
         <groupId>org.opendaylight.controller.samples</groupId>
-        <version>1.1-Helium</version>
+        <version>1.1.1-SNAPSHOT</version>
     </parent>
     <artifactId>clustering-it-provider</artifactId>
     <packaging>bundle</packaging>

@@ -140,7 +140,7 @@ public class Main {
                     .usage("Submit address + port for initial TCP connection (PURE TCP CONNECTIONS ARE NOT SUPPORTED YET)\n" +
                             "Submit username + password in addition to address + port for initial SSH connection\n" +
                             "If no arguments(or unexpected combination) is submitted, cli will be started without initial connection\n" +
-                            "To use with ODL controller, run with: java -jar netconf-cli-0.2.5-SNAPSHOT-executable.jar  --server localhost --port 1830 --username admin --password admin");
+                            "To use with ODL controller, run with: java -jar netconf-cli-0.2.6-SNAPSHOT-executable.jar  --server localhost --port 1830 --username admin --password admin");
 
             final ArgumentGroup tcpGroup = parser.addArgumentGroup("TCP")
                     .description("Base arguments to initiate TCP connection right away");
