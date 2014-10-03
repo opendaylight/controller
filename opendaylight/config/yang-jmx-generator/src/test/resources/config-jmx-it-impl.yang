@@ -49,7 +49,7 @@ module config-jmx-it-impl {
             }
 
 
-            leaf simpleInt {
+            leaf simpleInt1 {
                 type uint32;
                 default 99L;
             }
@@ -87,7 +87,7 @@ module config-jmx-it-impl {
                 }
             }
 
-            leaf simpleInt {
+            leaf simpleInt2 {
                 type uint32;
             }
 
@@ -202,7 +202,7 @@ module config-jmx-it-impl {
         case impl-netconf {
             when "/config:modules/config:module/config:type = 'impl-netconf'";
             // root runtime bean
-            leaf created-sessions {
+            leaf created-sessions-1 {
                 type uint32;
             }
 
