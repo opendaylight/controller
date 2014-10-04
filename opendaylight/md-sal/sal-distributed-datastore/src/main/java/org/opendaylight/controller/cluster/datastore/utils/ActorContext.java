@@ -13,6 +13,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
+import akka.dispatch.Futures;
 import akka.util.Timeout;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -31,11 +32,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
+import scala.concurrent.Promise;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
-
 import java.util.concurrent.TimeUnit;
-
 import static akka.pattern.Patterns.ask;
 
 /**
@@ -124,7 +124,7 @@ public class ActorContext {
      *         specified by the shardName
      */
     public Optional<ActorRef> findLocalShard(String shardName) {
-        Object result = executeOperation(shardManager, new FindLocalShard(shardName));
+        Object result = executeOperation(shardManager, new FindLocalShard(shardName, false));
 
         if (result instanceof LocalShardFound) {
             LocalShardFound found = (LocalShardFound) result;
@@ -136,8 +136,14 @@ public class ActorContext {
     }
 
 
+    public Future<Boolean> findLocalShardAsync(String shardName) {
+        final Promise<Boolean> promise = Futures.promise();
+
+        return promise.future();
+    }
+
     private String findPrimaryPathOrNull(String shardName) {
-        Object result = executeOperation(shardManager, new FindPrimary(shardName).toSerializable());
+        Object result = executeOperation(shardManager, new FindPrimary(shardName, false).toSerializable());
 
         if (result.getClass().equals(PrimaryFound.SERIALIZABLE_CLASS)) {
             PrimaryFound found = PrimaryFound.fromSerializable(result);

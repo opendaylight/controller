@@ -2,9 +2,11 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
 import akka.actor.Props;
+import akka.pattern.Patterns;
 import akka.persistence.RecoveryCompleted;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
+import akka.util.Timeout;
 import akka.japi.Creator;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -29,6 +31,8 @@ import org.opendaylight.controller.cluster.datastore.utils.MockConfiguration;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
 import java.net.URI;
 import java.util.Collection;
 import java.util.HashSet;
@@ -72,7 +76,7 @@ public class ShardManagerTest extends AbstractActorTest {
 
             shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
 
-            shardManager.tell(new FindPrimary("non-existent").toSerializable(), getRef());
+            shardManager.tell(new FindPrimary("non-existent", false).toSerializable(), getRef());
 
             expectMsgEquals(duration("5 seconds"),
                     new PrimaryNotFound("non-existent").toSerializable());
@@ -87,22 +91,41 @@ public class ShardManagerTest extends AbstractActorTest {
             shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
             shardManager.tell(new ActorInitialized(), mockShardActor);
 
-            shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME).toSerializable(), getRef());
+            shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, false).toSerializable(), getRef());
 
             expectMsgClass(duration("5 seconds"), PrimaryFound.SERIALIZABLE_CLASS);
         }};
     }
 
     @Test
-    public void testOnReceiveFindPrimaryForNotInitialzedShard() throws Exception {
+    public void testOnReceiveFindPrimaryForNotInitializedShard() throws Exception {
         new JavaTestKit(getSystem()) {{
             final ActorRef shardManager = getSystem().actorOf(newShardMgrProps());
 
             shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
 
-            shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME).toSerializable(), getRef());
+            shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, false).toSerializable(), getRef());
 
             expectMsgClass(duration("5 seconds"), ActorNotInitialized.class);
+        }};
+    }
+
+    @Test
+    public void testOnReceiveFindPrimaryWaitForShardInitialized() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            final ActorRef shardManager = getSystem().actorOf(newShardMgrProps());
+
+            shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
+
+            // We're passing waitUntilInitialized = true to FindPrimary so the response should be
+            // delayed until we send ActorInitialized.
+            Future<Object> future = Patterns.ask(shardManager, new FindPrimary(Shard.DEFAULT_NAME, true),
+                    new Timeout(5, TimeUnit.SECONDS));
+
+            shardManager.tell(new ActorInitialized(), mockShardActor);
+
+            Object resp = Await.result(future, duration("5 seconds"));
+            assertTrue("Expected: LocalShardFound, Actual: " + resp, resp instanceof PrimaryFound);
         }};
     }
 
@@ -113,7 +136,7 @@ public class ShardManagerTest extends AbstractActorTest {
 
             shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
 
-            shardManager.tell(new FindLocalShard("non-existent"), getRef());
+            shardManager.tell(new FindLocalShard("non-existent", false), getRef());
 
             LocalShardNotFound notFound = expectMsgClass(duration("5 seconds"), LocalShardNotFound.class);
 
@@ -129,7 +152,7 @@ public class ShardManagerTest extends AbstractActorTest {
             shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
             shardManager.tell(new ActorInitialized(), mockShardActor);
 
-            shardManager.tell(new FindLocalShard(Shard.DEFAULT_NAME), getRef());
+            shardManager.tell(new FindLocalShard(Shard.DEFAULT_NAME, false), getRef());
 
             LocalShardFound found = expectMsgClass(duration("5 seconds"), LocalShardFound.class);
 
@@ -144,11 +167,29 @@ public class ShardManagerTest extends AbstractActorTest {
             final ActorRef shardManager = getSystem().actorOf(newShardMgrProps());
 
             shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
-            //shardManager.tell(new ActorInitialized(), mockShardActor);
 
-            shardManager.tell(new FindLocalShard(Shard.DEFAULT_NAME), getRef());
+            shardManager.tell(new FindLocalShard(Shard.DEFAULT_NAME, false), getRef());
 
             expectMsgClass(duration("5 seconds"), ActorNotInitialized.class);
+        }};
+    }
+
+    @Test
+    public void testOnReceiveFindLocalShardWaitForShardInitialized() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            final ActorRef shardManager = getSystem().actorOf(newShardMgrProps());
+
+            shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
+
+            // We're passing waitUntilInitialized = true to FindLocalShard so the response should be
+            // delayed until we send ActorInitialized.
+            Future<Object> future = Patterns.ask(shardManager, new FindLocalShard(Shard.DEFAULT_NAME, true),
+                    new Timeout(5, TimeUnit.SECONDS));
+
+            shardManager.tell(new ActorInitialized(), mockShardActor);
+
+            Object resp = Await.result(future, duration("5 seconds"));
+            assertTrue("Expected: LocalShardFound, Actual: " + resp, resp instanceof LocalShardFound);
         }};
     }
 
@@ -159,7 +200,7 @@ public class ShardManagerTest extends AbstractActorTest {
 
             MockClusterWrapper.sendMemberUp(shardManager, "member-2", getRef().path().toString());
 
-            shardManager.tell(new FindPrimary("astronauts").toSerializable(), getRef());
+            shardManager.tell(new FindPrimary("astronauts", false).toSerializable(), getRef());
 
             PrimaryFound found = PrimaryFound.fromSerializable(expectMsgClass(duration("5 seconds"),
                     PrimaryFound.SERIALIZABLE_CLASS));
@@ -176,13 +217,13 @@ public class ShardManagerTest extends AbstractActorTest {
 
             MockClusterWrapper.sendMemberUp(shardManager, "member-2", getRef().path().toString());
 
-            shardManager.tell(new FindPrimary("astronauts").toSerializable(), getRef());
+            shardManager.tell(new FindPrimary("astronauts", false).toSerializable(), getRef());
 
             expectMsgClass(duration("5 seconds"), PrimaryFound.SERIALIZABLE_CLASS);
 
             MockClusterWrapper.sendMemberRemoved(shardManager, "member-2", getRef().path().toString());
 
-            shardManager.tell(new FindPrimary("astronauts").toSerializable(), getRef());
+            shardManager.tell(new FindPrimary("astronauts", false).toSerializable(), getRef());
 
             expectMsgClass(duration("5 seconds"), PrimaryNotFound.SERIALIZABLE_CLASS);
         }};
