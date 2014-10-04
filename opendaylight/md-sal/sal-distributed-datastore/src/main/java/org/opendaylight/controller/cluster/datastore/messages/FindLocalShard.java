@@ -14,12 +14,18 @@ package org.opendaylight.controller.cluster.datastore.messages;
  */
 public class FindLocalShard {
     private final String shardName;
+    private final boolean waitUntilInitialized;
 
-    public FindLocalShard(String shardName) {
+    public FindLocalShard(String shardName, boolean waitUntilInitialized) {
         this.shardName = shardName;
+        this.waitUntilInitialized = waitUntilInitialized;
     }
 
     public String getShardName() {
         return shardName;
+    }
+
+    public boolean isWaitUntilInitialized() {
+        return waitUntilInitialized;
     }
 }

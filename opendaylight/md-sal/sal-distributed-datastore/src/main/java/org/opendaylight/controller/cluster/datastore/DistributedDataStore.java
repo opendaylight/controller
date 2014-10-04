@@ -8,16 +8,10 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
-import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
-import akka.dispatch.OnComplete;
-import akka.util.Timeout;
-import com.google.common.base.Optional;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
-import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
-import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
@@ -34,7 +28,6 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.concurrent.Future;
 
 /**
  *
@@ -83,39 +76,11 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
 
         String shardName = ShardStrategyFactory.getStrategy(path).findShard(path);
 
-        Optional<ActorRef> shard = actorContext.findLocalShard(shardName);
-
-        //if shard is NOT local
-        if (!shard.isPresent()) {
-            LOG.debug("No local shard for shardName {} was found so returning a noop registration", shardName);
-            return new NoOpDataChangeListenerRegistration(listener);
-        }
-        //if shard is local
-        ActorRef dataChangeListenerActor = actorContext.getActorSystem().actorOf(DataChangeListener.props(listener));
-        Future future = actorContext.executeOperationAsync(shard.get(),
-                new RegisterChangeListener(path, dataChangeListenerActor.path(), scope),
-                new Timeout(actorContext.getOperationDuration().$times(REGISTER_DATA_CHANGE_LISTENER_TIMEOUT_FACTOR)));
-
         final DataChangeListenerRegistrationProxy listenerRegistrationProxy =
-                new DataChangeListenerRegistrationProxy(listener, dataChangeListenerActor);
-
-        future.onComplete(new OnComplete() {
-
-            @Override
-            public void onComplete(Throwable failure, Object result)
-                    throws Throwable {
-                if (failure != null) {
-                    LOG.error("Failed to register listener at path " + path.toString(), failure);
-                    return;
-                }
-                RegisterChangeListenerReply reply = (RegisterChangeListenerReply) result;
-                listenerRegistrationProxy.setListenerRegistrationActor(actorContext
-                        .actorSelection(reply.getListenerRegistrationPath()));
-            }
-        }, actorContext.getActorSystem().dispatcher());
+                new DataChangeListenerRegistrationProxy(shardName, actorContext, listener);
+        listenerRegistrationProxy.init(path, scope);
 
         return listenerRegistrationProxy;
-
     }
 
     @Override
