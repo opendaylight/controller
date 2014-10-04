@@ -216,6 +216,7 @@ public class Shard extends RaftActor {
 
         if (message instanceof RecoveryFailure){
             LOG.error(((RecoveryFailure) message).cause(), "Recovery failed because of this cause");
+            onRecoveryComplete();
         } else {
             super.onReceiveRecover(message);
         }
