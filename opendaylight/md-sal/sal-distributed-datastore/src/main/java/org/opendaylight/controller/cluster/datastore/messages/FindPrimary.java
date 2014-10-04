@@ -15,26 +15,33 @@ import com.google.common.base.Preconditions;
  *
  */
 public class FindPrimary implements SerializableMessage{
-  public static final Class SERIALIZABLE_CLASS = FindPrimary.class;
-    private final String shardName;
+    public static final Class<FindPrimary> SERIALIZABLE_CLASS = FindPrimary.class;
 
-    public FindPrimary(String shardName){
+    private final String shardName;
+    private final boolean waitUntilInitialized;
+
+    public FindPrimary(String shardName, boolean waitUntilInitialized){
 
         Preconditions.checkNotNull(shardName, "shardName should not be null");
 
         this.shardName = shardName;
+        this.waitUntilInitialized = waitUntilInitialized;
     }
 
     public String getShardName() {
         return shardName;
     }
 
-  @Override
-  public Object toSerializable() {
-    return this;
-  }
+    public boolean isWaitUntilInitialized() {
+        return waitUntilInitialized;
+    }
 
-  public static FindPrimary fromSerializable(Object message){
-    return (FindPrimary) message;
-  }
+    @Override
+    public Object toSerializable() {
+        return this;
+    }
+
+    public static FindPrimary fromSerializable(Object message){
+        return (FindPrimary) message;
+    }
 }
