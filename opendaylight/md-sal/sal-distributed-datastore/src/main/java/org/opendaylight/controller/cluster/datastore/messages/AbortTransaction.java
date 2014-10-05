@@ -11,10 +11,27 @@ package org.opendaylight.controller.cluster.datastore.messages;
 import org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages;
 
 public class AbortTransaction implements SerializableMessage {
-  public static final Class SERIALIZABLE_CLASS = ThreePhaseCommitCohortMessages.AbortTransaction.class;
+    public static final Class<ThreePhaseCommitCohortMessages.AbortTransaction> SERIALIZABLE_CLASS =
+            ThreePhaseCommitCohortMessages.AbortTransaction.class;
 
-  @Override
-  public Object toSerializable() {
-    return ThreePhaseCommitCohortMessages.AbortTransaction.newBuilder().build();
-  }
+    private final String transactionID;
+
+    public AbortTransaction(String transactionID) {
+        this.transactionID = transactionID;
+    }
+
+    public String getTransactionID() {
+        return transactionID;
+    }
+
+    @Override
+    public Object toSerializable() {
+        return ThreePhaseCommitCohortMessages.AbortTransaction.newBuilder().
+                setTransactionId(transactionID).build();
+    }
+
+    public static AbortTransaction fromSerializable(Object message) {
+        return new AbortTransaction(((ThreePhaseCommitCohortMessages.AbortTransaction)message).
+                getTransactionId());
+    }
 }

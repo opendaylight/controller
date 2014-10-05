@@ -194,22 +194,11 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
 
     @Test
     public void testPreCommit() throws Exception {
+        // Precommit is currently a no-op
         ThreePhaseCommitCohortProxy proxy = setupProxy(1);
 
         setupMockActorContext(PreCommitTransaction.SERIALIZABLE_CLASS,
                 new PreCommitTransactionReply());
-
-        proxy.preCommit().get(5, TimeUnit.SECONDS);
-
-        verifyCohortInvocations(1, PreCommitTransaction.SERIALIZABLE_CLASS);
-    }
-
-    @Test(expected = ExecutionException.class)
-    public void testPreCommitWithFailure() throws Exception {
-        ThreePhaseCommitCohortProxy proxy = setupProxy(2);
-
-        setupMockActorContext(PreCommitTransaction.SERIALIZABLE_CLASS,
-                new PreCommitTransactionReply(), new RuntimeException("mock"));
 
         proxy.preCommit().get(5, TimeUnit.SECONDS);
     }
@@ -313,7 +302,6 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
         proxy.commit().get(5, TimeUnit.SECONDS);
 
         verifyCohortInvocations(2, CanCommitTransaction.SERIALIZABLE_CLASS);
-        verifyCohortInvocations(2, PreCommitTransaction.SERIALIZABLE_CLASS);
         verifyCohortInvocations(2, CommitTransaction.SERIALIZABLE_CLASS);
     }
 }

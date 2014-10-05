@@ -21,15 +21,12 @@ import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransacti
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
-import org.opendaylight.controller.cluster.datastore.messages.PreCommitTransaction;
-import org.opendaylight.controller.cluster.datastore.messages.PreCommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
 import scala.runtime.AbstractFunction1;
-
 import java.util.Collections;
 import java.util.List;
 
@@ -39,6 +36,9 @@ import java.util.List;
 public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCohort{
 
     private static final Logger LOG = LoggerFactory.getLogger(ThreePhaseCommitCohortProxy.class);
+
+    private static final ListenableFuture<Void> IMMEDIATE_SUCCESS =
+            com.google.common.util.concurrent.Futures.immediateFuture(null);
 
     private final ActorContext actorContext;
     private final List<Future<ActorSelection>> cohortFutures;
@@ -108,7 +108,7 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
         // their canCommit processing. If any one fails then we'll fail canCommit.
 
         Future<Iterable<Object>> combinedFuture =
-                invokeCohorts(new CanCommitTransaction().toSerializable());
+                invokeCohorts(new CanCommitTransaction(transactionId).toSerializable());
 
         combinedFuture.onComplete(new OnComplete<Iterable<Object>>() {
             @Override
@@ -160,8 +160,9 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
 
     @Override
     public ListenableFuture<Void> preCommit() {
-        return voidOperation("preCommit",  new PreCommitTransaction().toSerializable(),
-                PreCommitTransactionReply.SERIALIZABLE_CLASS, true);
+        // We don't need to do anything here - preCommit is done atomically with the commit phase
+        // by the shard.
+        return IMMEDIATE_SUCCESS;
     }
 
     @Override
@@ -172,13 +173,13 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
         // exception then that exception will supersede and suppress the original exception. But
         // it's the original exception that is the root cause and of more interest to the client.
 
-        return voidOperation("abort", new AbortTransaction().toSerializable(),
+        return voidOperation("abort", new AbortTransaction(transactionId).toSerializable(),
                 AbortTransactionReply.SERIALIZABLE_CLASS, false);
     }
 
     @Override
     public ListenableFuture<Void> commit() {
-        return voidOperation("commit",  new CommitTransaction().toSerializable(),
+        return voidOperation("commit",  new CommitTransaction(transactionId).toSerializable(),
                 CommitTransactionReply.SERIALIZABLE_CLASS, true);
     }
 
