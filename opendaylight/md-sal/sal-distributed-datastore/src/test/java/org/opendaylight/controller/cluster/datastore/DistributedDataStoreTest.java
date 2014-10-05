@@ -33,9 +33,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import scala.concurrent.ExecutionContextExecutor;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
-
 import java.util.concurrent.TimeUnit;
-
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNull;
 import static org.junit.Assert.assertNotNull;
@@ -87,7 +85,7 @@ public class DistributedDataStoreTest extends AbstractActorTest{
 
         new DistributedDataStore(actorSystem, "config",
             mock(ClusterWrapper.class), mock(Configuration.class),
-            new DatastoreContext());
+            DatastoreContext.newBuilder().build());
 
         verify(actorSystem).actorOf(any(Props.class), eq("shardmanager-config"));
     }
