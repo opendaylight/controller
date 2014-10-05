@@ -8,197 +8,143 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
-import akka.actor.ActorPath;
 import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.Props;
-import akka.event.Logging;
-import akka.testkit.JavaTestKit;
+import akka.actor.ActorSystem;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
-import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
-import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
-import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
-import org.opendaylight.controller.cluster.datastore.messages.PreCommitTransaction;
-import org.opendaylight.controller.cluster.datastore.messages.PreCommitTransactionReply;
-import org.opendaylight.controller.cluster.datastore.messages.ReadyTransaction;
-import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
-import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
-import org.opendaylight.controller.cluster.datastore.messages.WriteData;
-import org.opendaylight.controller.cluster.datastore.messages.WriteDataReply;
+import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
+import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import scala.concurrent.Await;
-import scala.concurrent.Future;
-import scala.concurrent.duration.FiniteDuration;
-
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Collections;
-
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
+import java.util.concurrent.TimeUnit;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doReturn;
 
 public class BasicIntegrationTest extends AbstractActorTest {
 
     @Test
-    public void integrationTest() throws Exception{
-        // System.setProperty("shard.persistent", "true");
-        // This test will
-        // - create a Shard
-        // - initiate a transaction
-        // - write something
-        // - read the transaction for commit
-        // - commit the transaction
+    public void transactionIntegrationTest() throws Exception{
+        System.setProperty("shard.persistent", "true");
+        new IntegrationTestKit(getSystem()) {{
+            DistributedDataStore dataStore = setupDistributedDataStore("transactionIntegrationTest");
 
+            // 1. Create a write-only Tx
 
-        new JavaTestKit(getSystem()) {{
-            final ShardIdentifier identifier =
-                ShardIdentifier.builder().memberName("member-1")
-                    .shardName("inventory").type("config").build();
+            DOMStoreWriteTransaction writeTx = dataStore.newWriteOnlyTransaction();
+            assertNotNull("newWriteOnlyTransaction returned null", writeTx);
 
-            final SchemaContext schemaContext = TestModel.createTestContext();
-            DatastoreContext datastoreContext = new DatastoreContext();
+            // 2. Write some data
 
-            final Props props = Shard.props(identifier, Collections.EMPTY_MAP, datastoreContext, TestModel.createTestContext());
-            final ActorRef shard = getSystem().actorOf(props);
+            NormalizedNode<?, ?> containerNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            writeTx.write(TestModel.TEST_PATH, containerNode);
 
-            new Within(duration("10 seconds")) {
-                @Override
-                protected void run() {
-                    shard.tell(new UpdateSchemaContext(schemaContext), getRef());
+            // 3. Ready the Tx for commit
 
+            DOMStoreThreePhaseCommitCohort cohort = writeTx.ready();
 
-                    // Wait for a specific log message to show up
-                    final boolean result =
-                        new JavaTestKit.EventFilter<Boolean>(Logging.Info.class
-                        ) {
-                            @Override
-                            protected Boolean run() {
-                                return true;
-                            }
-                        }.from(shard.path().toString())
-                            .message("Switching from state Candidate to Leader")
-                            .occurrences(1).exec();
+            // 4. Commit the Tx
 
-                    assertEquals(true, result);
+            Boolean canCommit = cohort.canCommit().get();
+            assertEquals("canCommit", true, canCommit);
+            cohort.preCommit().get();
+            cohort.commit().get();
 
-                    // Create a transaction on the shard
-                    shard.tell(new CreateTransaction("txn-1", TransactionProxy.TransactionType.WRITE_ONLY.ordinal() ).toSerializable(), getRef());
+            // 5. Verify the data in the store
 
-                    final ActorSelection transaction =
-                        new ExpectMsg<ActorSelection>(duration("3 seconds"), "CreateTransactionReply") {
-                            @Override
-                            protected ActorSelection match(Object in) {
-                                if (CreateTransactionReply.SERIALIZABLE_CLASS.equals(in.getClass())) {
-                                    CreateTransactionReply reply = CreateTransactionReply.fromSerializable(in);
-                                    return getSystem()
-                                        .actorSelection(reply
-                                            .getTransactionPath());
-                                } else {
-                                    throw noMatch();
-                                }
-                            }
-                        }.get(); // this extracts the received message
+            DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
 
-                    assertNotNull(transaction);
+            Optional<NormalizedNode<?, ?>> optional = readTx.read(TestModel.TEST_PATH).get();
+            assertEquals("isPresent", true, optional.isPresent());
+            assertEquals("Data node", containerNode, optional.get());
+        }};
+    }
 
-                    System.out.println("Successfully created transaction");
+    @Test
+    public void transactionChainIntegrationTest() throws Exception{
+        System.setProperty("shard.persistent", "true");
+        new IntegrationTestKit(getSystem()) {{
+            DistributedDataStore dataStore = setupDistributedDataStore("transactionChainIntegrationTest");
 
-                    // 3. Write some data
-                    transaction.tell(new WriteData(TestModel.TEST_PATH,
-                        ImmutableNodes.containerNode(TestModel.TEST_QNAME), schemaContext).toSerializable(),
-                        getRef());
+            // 1. Create a Tx chain and write-only Tx
 
-                    Boolean writeDone = new ExpectMsg<Boolean>(duration("3 seconds"), "WriteDataReply") {
-                        @Override
-                        protected Boolean match(Object in) {
-                            if (in.getClass().equals(WriteDataReply.SERIALIZABLE_CLASS)) {
-                                return true;
-                            } else {
-                                throw noMatch();
-                            }
-                        }
-                    }.get(); // this extracts the received message
+            DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
 
-                    assertTrue(writeDone);
+            DOMStoreWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
+            assertNotNull("newWriteOnlyTransaction returned null", writeTx);
 
-                    System.out.println("Successfully wrote data");
+            // 2. Write some data
 
-                    // 4. Ready the transaction for commit
+            NormalizedNode<?, ?> containerNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            writeTx.write(TestModel.TEST_PATH, containerNode);
 
-                    transaction.tell(new ReadyTransaction().toSerializable(), getRef());
+            // 3. Ready the Tx for commit
 
-                    final ActorSelection cohort =
-                        new ExpectMsg<ActorSelection>(duration("3 seconds"), "ReadyTransactionReply") {
-                            @Override
-                            protected ActorSelection match(Object in) {
-                                if (in.getClass().equals(ReadyTransactionReply.SERIALIZABLE_CLASS)) {
-                                    ActorPath cohortPath =
-                                        ReadyTransactionReply.fromSerializable(getSystem(),in)
-                                            .getCohortPath();
-                                    return getSystem()
-                                        .actorSelection(cohortPath);
-                                } else {
-                                    throw noMatch();
-                                }
-                            }
-                        }.get(); // this extracts the received message
+            DOMStoreThreePhaseCommitCohort cohort = writeTx.ready();
 
-                    assertNotNull(cohort);
+            // 4. Commit the Tx
 
-                    System.out.println("Successfully readied the transaction");
+            Boolean canCommit = cohort.canCommit().get();
+            assertEquals("canCommit", true, canCommit);
+            cohort.preCommit().get();
+            cohort.commit().get();
 
-                    // 5. PreCommit the transaction
+            // 5. Verify the data in the store
 
-                    cohort.tell(new PreCommitTransaction().toSerializable(), getRef());
+            DOMStoreReadTransaction readTx = txChain.newReadOnlyTransaction();
 
-                    Boolean preCommitDone =
-                        new ExpectMsg<Boolean>(duration("3 seconds"), "PreCommitTransactionReply") {
-                            @Override
-                            protected Boolean match(Object in) {
-                                if (in.getClass().equals(PreCommitTransactionReply.SERIALIZABLE_CLASS)) {
-                                    return true;
-                                } else {
-                                    throw noMatch();
-                                }
-                            }
-                        }.get(); // this extracts the received message
+            Optional<NormalizedNode<?, ?>> optional = readTx.read(TestModel.TEST_PATH).get();
+            assertEquals("isPresent", true, optional.isPresent());
+            assertEquals("Data node", containerNode, optional.get());
+        }};
+    }
 
-                    assertTrue(preCommitDone);
+    class IntegrationTestKit extends ShardTestKit {
 
-                    System.out.println("Successfully pre-committed the transaction");
-
-                    // 6. Commit the transaction
-                    cohort.tell(new CommitTransaction().toSerializable(), getRef());
-
-                    // FIXME : Add assertions that the commit worked and that the cohort and transaction actors were terminated
-
-                    System.out.println("TODO : Check Successfully committed the transaction");
-                }
-
-
-            };
+        IntegrationTestKit(ActorSystem actorSystem) {
+            super(actorSystem);
         }
 
-            private ActorRef watchActor(ActorSelection actor) {
-                Future<ActorRef> future = actor
-                    .resolveOne(FiniteDuration.apply(100, "milliseconds"));
+        DistributedDataStore setupDistributedDataStore(String typeName) {
+            MockClusterWrapper cluster = new MockClusterWrapper();
+            Configuration mockConfig = mock(Configuration.class);
+            String shardName = "default";
+            doReturn(Lists.newArrayList(shardName)).when(mockConfig).getMemberShardNames(
+                    cluster.getCurrentMemberName());
+            doReturn(Collections.emptyList()).when(mockConfig).getMembersFromShardName(shardName);
+            doReturn(Collections.emptyMap()).when(mockConfig).getModuleNameToShardStrategyMap();
+            doReturn(Optional.of("odl-datastore-test")).when(mockConfig).getModuleNameFromNameSpace(
+                    TestModel.TEST_QNAME.getNamespace().toASCIIString());
 
-                try {
-                    ActorRef actorRef = Await.result(future,
-                        FiniteDuration.apply(100, "milliseconds"));
+            ShardStrategyFactory.setConfiguration(mockConfig);
 
-                    watch(actorRef);
+            DatastoreContext datastoreContext = new DatastoreContext();
+            DistributedDataStore dataStore = new DistributedDataStore(getSystem(), typeName, cluster,
+                    mockConfig, datastoreContext);
 
-                    return actorRef;
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+            SchemaContext schemaContext = TestModel.createTestContext();
+            dataStore.onGlobalContextUpdated(schemaContext);
 
+            ActorRef shard = null;
+            for(int i = 0; i < 20 * 5 && shard == null; i++) {
+                Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
+                shard = dataStore.getActorContext().findLocalShard(shardName);
             }
-        };
 
+            assertNotNull("Shard was not created", shard);
 
+            waitUntilLeader(shard);
+            return dataStore;
+        }
     }
 }

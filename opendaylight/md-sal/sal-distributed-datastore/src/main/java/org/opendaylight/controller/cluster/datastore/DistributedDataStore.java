@@ -12,6 +12,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.dispatch.OnComplete;
 import akka.util.Timeout;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
@@ -144,5 +145,10 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
     @Override
     public void close() throws Exception {
         actorContext.shutdown();
+    }
+
+    @VisibleForTesting
+    ActorContext getActorContext() {
+        return actorContext;
     }
 }

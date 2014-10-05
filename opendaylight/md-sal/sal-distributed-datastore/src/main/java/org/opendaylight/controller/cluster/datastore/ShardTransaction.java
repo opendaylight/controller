@@ -13,12 +13,9 @@ import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.ReceiveTimeout;
 import akka.japi.Creator;
-
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
-
-
 import org.opendaylight.controller.cluster.datastore.exceptions.UnknownMessageException;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
@@ -27,12 +24,12 @@ import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.DataExistsReply;
 import org.opendaylight.controller.cluster.datastore.messages.DeleteData;
 import org.opendaylight.controller.cluster.datastore.messages.DeleteDataReply;
+import org.opendaylight.controller.cluster.datastore.messages.ForwardedReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.MergeData;
 import org.opendaylight.controller.cluster.datastore.messages.MergeDataReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 import org.opendaylight.controller.cluster.datastore.messages.ReadDataReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransaction;
-import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.WriteData;
 import org.opendaylight.controller.cluster.datastore.messages.WriteDataReply;
 import org.opendaylight.controller.cluster.datastore.modification.CompositeModification;
@@ -78,20 +75,23 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
     private final ActorRef shardActor;
     protected final SchemaContext schemaContext;
     private final ShardStats shardStats;
+    private final String transactionID;
 
     private final MutableCompositeModification modification = new MutableCompositeModification();
 
     protected ShardTransaction(ActorRef shardActor, SchemaContext schemaContext,
-            ShardStats shardStats) {
+            ShardStats shardStats, String transactionID) {
         this.shardActor = shardActor;
         this.schemaContext = schemaContext;
         this.shardStats = shardStats;
+        this.transactionID = transactionID;
     }
 
     public static Props props(DOMStoreTransaction transaction, ActorRef shardActor,
-            SchemaContext schemaContext,DatastoreContext datastoreContext, ShardStats shardStats) {
+            SchemaContext schemaContext,DatastoreContext datastoreContext, ShardStats shardStats,
+            String transactionID) {
         return Props.create(new ShardTransactionCreator(transaction, shardActor, schemaContext,
-           datastoreContext, shardStats));
+           datastoreContext, shardStats, transactionID));
     }
 
     protected abstract DOMStoreTransaction getDOMStoreTransaction();
@@ -205,11 +205,9 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
 
     protected void readyTransaction(DOMStoreWriteTransaction transaction, ReadyTransaction message) {
         DOMStoreThreePhaseCommitCohort cohort =  transaction.ready();
-        ActorRef cohortActor = getContext().actorOf(
-            ThreePhaseCommitCohort.props(cohort, shardActor, modification, shardStats), "cohort");
-        getSender()
-        .tell(new ReadyTransactionReply(cohortActor.path()).toSerializable(), getSelf());
 
+        shardActor.forward(new ForwardedReadyTransaction(transactionID, cohort, modification),
+                getContext());
     }
 
     private static class ShardTransactionCreator implements Creator<ShardTransaction> {
@@ -221,15 +219,17 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
         final SchemaContext schemaContext;
         final DatastoreContext datastoreContext;
         final ShardStats shardStats;
+        final String transactionID;
 
         ShardTransactionCreator(DOMStoreTransaction transaction, ActorRef shardActor,
                 SchemaContext schemaContext, DatastoreContext datastoreContext,
-                ShardStats shardStats) {
+                ShardStats shardStats, String transactionID) {
             this.transaction = transaction;
             this.shardActor = shardActor;
             this.shardStats = shardStats;
             this.schemaContext = schemaContext;
             this.datastoreContext = datastoreContext;
+            this.transactionID = transactionID;
         }
 
         @Override
@@ -237,13 +237,13 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
             ShardTransaction tx;
             if(transaction instanceof DOMStoreReadWriteTransaction) {
                 tx = new ShardReadWriteTransaction((DOMStoreReadWriteTransaction)transaction,
-                        shardActor, schemaContext, shardStats);
+                        shardActor, schemaContext, shardStats, transactionID);
             } else if(transaction instanceof DOMStoreReadTransaction) {
                 tx = new ShardReadTransaction((DOMStoreReadTransaction)transaction, shardActor,
-                        schemaContext, shardStats);
+                        schemaContext, shardStats, transactionID);
             } else {
                 tx = new ShardWriteTransaction((DOMStoreWriteTransaction)transaction,
-                        shardActor, schemaContext, shardStats);
+                        shardActor, schemaContext, shardStats, transactionID);
             }
 
             tx.getContext().setReceiveTimeout(datastoreContext.getShardTransactionIdleTimeout());

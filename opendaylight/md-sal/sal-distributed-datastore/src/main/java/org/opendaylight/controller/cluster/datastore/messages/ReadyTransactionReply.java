@@ -13,27 +13,27 @@ import akka.actor.ActorSystem;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 
 public class ReadyTransactionReply implements SerializableMessage {
-  public static final Class SERIALIZABLE_CLASS = ShardTransactionMessages.ReadyTransactionReply.class;
-  private final ActorPath cohortPath;
+    public static final Class<ShardTransactionMessages.ReadyTransactionReply> SERIALIZABLE_CLASS =
+            ShardTransactionMessages.ReadyTransactionReply.class;
 
-  public ReadyTransactionReply(ActorPath cohortPath) {
+    private final ActorPath cohortPath;
 
-    this.cohortPath = cohortPath;
-  }
+    public ReadyTransactionReply(ActorPath cohortPath) {
 
-  public ActorPath getCohortPath() {
-    return cohortPath;
-  }
+        this.cohortPath = cohortPath;
+    }
 
-  @Override
-  public ShardTransactionMessages.ReadyTransactionReply toSerializable() {
-    return ShardTransactionMessages.ReadyTransactionReply.newBuilder()
-        .setActorPath(cohortPath.toString()).build();
-  }
+    public ActorPath getCohortPath() {
+        return cohortPath;
+    }
 
-  public static ReadyTransactionReply fromSerializable(ActorSystem actorSystem,Object serializable){
-    ShardTransactionMessages.ReadyTransactionReply o = (ShardTransactionMessages.ReadyTransactionReply) serializable;
-    return new ReadyTransactionReply(
-        actorSystem.actorFor(o.getActorPath()).path());
-  }
+    @Override
+    public ShardTransactionMessages.ReadyTransactionReply toSerializable() {
+        return ShardTransactionMessages.ReadyTransactionReply.newBuilder().setActorPath(cohortPath.toString()).build();
+    }
+
+    public static ReadyTransactionReply fromSerializable(ActorSystem actorSystem, Object serializable) {
+        ShardTransactionMessages.ReadyTransactionReply o = (ShardTransactionMessages.ReadyTransactionReply) serializable;
+        return new ReadyTransactionReply(actorSystem.actorFor(o.getActorPath()).path());
+    }
 }

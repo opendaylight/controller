@@ -80,7 +80,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = createShard();
             final Props props = ShardTransaction.props(store.newReadOnlyTransaction(), shard,
-                    testSchemaContext, datastoreContext, shardStats);
+                    testSchemaContext, datastoreContext, shardStats, "txn");
             final ActorRef subject = getSystem().actorOf(props, "testReadData");
 
             new Within(duration("1 seconds")) {
@@ -122,7 +122,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = createShard();
             final Props props = ShardTransaction.props( store.newReadOnlyTransaction(), shard,
-                    testSchemaContext, datastoreContext, shardStats);
+                    testSchemaContext, datastoreContext, shardStats, "txn");
             final ActorRef subject = getSystem().actorOf(props, "testReadDataWhenDataNotFound");
 
             new Within(duration("1 seconds")) {
@@ -165,7 +165,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = createShard();
             final Props props = ShardTransaction.props(store.newReadOnlyTransaction(), shard,
-                    testSchemaContext, datastoreContext, shardStats);
+                    testSchemaContext, datastoreContext, shardStats, "txn");
             final ActorRef subject = getSystem().actorOf(props, "testDataExistsPositive");
 
             new Within(duration("1 seconds")) {
@@ -207,7 +207,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = createShard();
             final Props props = ShardTransaction.props(store.newReadOnlyTransaction(), shard,
-                    testSchemaContext, datastoreContext, shardStats);
+                    testSchemaContext, datastoreContext, shardStats, "txn");
             final ActorRef subject = getSystem().actorOf(props, "testDataExistsNegative");
 
             new Within(duration("1 seconds")) {
@@ -284,7 +284,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = createShard();
             final Props props = ShardTransaction.props(store.newWriteOnlyTransaction(), shard,
-                    testSchemaContext, datastoreContext, shardStats);
+                    testSchemaContext, datastoreContext, shardStats, "txn");
             final ActorRef subject =
                 getSystem().actorOf(props, "testWriteData");
 
@@ -324,7 +324,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = createShard();
             final Props props = ShardTransaction.props(store.newReadWriteTransaction(), shard,
-                    testSchemaContext, datastoreContext, shardStats);
+                    testSchemaContext, datastoreContext, shardStats, "txn");
             final ActorRef subject =
                 getSystem().actorOf(props, "testMergeData");
 
@@ -365,7 +365,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = createShard();
             final Props props = ShardTransaction.props( store.newWriteOnlyTransaction(), shard,
-                    testSchemaContext, datastoreContext, shardStats);
+                    testSchemaContext, datastoreContext, shardStats, "txn");
             final ActorRef subject =
                 getSystem().actorOf(props, "testDeleteData");
 
@@ -404,7 +404,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = createShard();
             final Props props = ShardTransaction.props( store.newReadWriteTransaction(), shard,
-                    testSchemaContext, datastoreContext, shardStats);
+                    testSchemaContext, datastoreContext, shardStats, "txn");
             final ActorRef subject =
                 getSystem().actorOf(props, "testReadyTransaction");
 
@@ -442,7 +442,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = createShard();
             final Props props = ShardTransaction.props(store.newReadWriteTransaction(), shard,
-                    testSchemaContext, datastoreContext, shardStats);
+                    testSchemaContext, datastoreContext, shardStats, "txn");
             final ActorRef subject =
                 getSystem().actorOf(props, "testCloseTransaction");
 
@@ -492,7 +492,7 @@ public class ShardTransactionTest extends AbstractActorTest {
     public void testNegativePerformingWriteOperationOnReadTransaction() throws Exception {
         final ActorRef shard = createShard();
         final Props props = ShardTransaction.props(store.newReadOnlyTransaction(), shard,
-                testSchemaContext, datastoreContext, shardStats);
+                testSchemaContext, datastoreContext, shardStats, "txn");
         final TestActorRef subject = TestActorRef.apply(props,getSystem());
 
         subject.receive(new DeleteData(TestModel.TEST_PATH).toSerializable(), ActorRef.noSender());
@@ -508,7 +508,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = createShard();
             final Props props = ShardTransaction.props(store.newReadWriteTransaction(), shard,
-                    testSchemaContext, datastoreContext, shardStats);
+                    testSchemaContext, datastoreContext, shardStats, "txn");
             final ActorRef subject =
                 getSystem().actorOf(props, "testShardTransactionInactivity");
 
