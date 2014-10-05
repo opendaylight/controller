@@ -14,25 +14,20 @@ import akka.actor.ActorRef;
 
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
-import org.opendaylight.controller.cluster.datastore.messages.DeleteData;
-import org.opendaylight.controller.cluster.datastore.messages.MergeData;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
-import org.opendaylight.controller.cluster.datastore.messages.ReadyTransaction;
-import org.opendaylight.controller.cluster.datastore.messages.WriteData;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 /**
  * @author: syedbahm
  * Date: 8/6/14
  */
-public class ShardReadWriteTransaction extends ShardTransaction {
+public class ShardReadWriteTransaction extends ShardWriteTransaction {
     private final DOMStoreReadWriteTransaction transaction;
 
     public ShardReadWriteTransaction(DOMStoreReadWriteTransaction transaction, ActorRef shardActor,
-            SchemaContext schemaContext, ShardStats shardStats) {
-        super(shardActor, schemaContext, shardStats);
+            SchemaContext schemaContext, ShardStats shardStats, String transactionID) {
+        super(transaction, shardActor, schemaContext, shardStats, transactionID);
         this.transaction = transaction;
     }
 
@@ -40,23 +35,10 @@ public class ShardReadWriteTransaction extends ShardTransaction {
     public void handleReceive(Object message) throws Exception {
         if(ReadData.SERIALIZABLE_CLASS.equals(message.getClass())) {
             readData(transaction, ReadData.fromSerializable(message));
-        } else if(WriteData.SERIALIZABLE_CLASS.equals(message.getClass())) {
-            writeData(transaction, WriteData.fromSerializable(message, schemaContext));
-        } else if(MergeData.SERIALIZABLE_CLASS.equals(message.getClass())) {
-            mergeData(transaction, MergeData.fromSerializable(message, schemaContext));
-        } else if(DeleteData.SERIALIZABLE_CLASS.equals(message.getClass())) {
-            deleteData(transaction, DeleteData.fromSerializable(message));
-        } else if(ReadyTransaction.SERIALIZABLE_CLASS.equals(message.getClass())) {
-            readyTransaction(transaction, new ReadyTransaction());
         } else if(DataExists.SERIALIZABLE_CLASS.equals(message.getClass())) {
             dataExists(transaction, DataExists.fromSerializable(message));
         } else {
             super.handleReceive(message);
         }
-    }
-
-    @Override
-    protected DOMStoreTransaction getDOMStoreTransaction() {
-        return transaction;
     }
 }

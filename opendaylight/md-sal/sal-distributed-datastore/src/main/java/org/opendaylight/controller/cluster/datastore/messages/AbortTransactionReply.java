@@ -11,11 +11,11 @@ package org.opendaylight.controller.cluster.datastore.messages;
 import org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages;
 
 public class AbortTransactionReply implements SerializableMessage {
-  public static final Class SERIALIZABLE_CLASS = ThreePhaseCommitCohortMessages.AbortTransactionReply.class;
+    public static final Class<ThreePhaseCommitCohortMessages.AbortTransactionReply> SERIALIZABLE_CLASS =
+            ThreePhaseCommitCohortMessages.AbortTransactionReply.class;
 
-
-  @Override
-  public Object toSerializable() {
-    return ThreePhaseCommitCohortMessages.AbortTransactionReply.newBuilder().build();
-  }
+    @Override
+    public Object toSerializable() {
+        return ThreePhaseCommitCohortMessages.AbortTransactionReply.newBuilder().build();
+    }
 }

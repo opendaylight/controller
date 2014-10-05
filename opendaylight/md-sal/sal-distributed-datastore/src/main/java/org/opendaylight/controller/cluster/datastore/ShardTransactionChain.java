@@ -56,23 +56,26 @@ public class ShardTransactionChain extends AbstractUntypedActor {
         return getContext().parent();
     }
 
-    private ActorRef createTypedTransactionActor(CreateTransaction createTransaction,
-            String transactionId) {
+    private ActorRef createTypedTransactionActor(CreateTransaction createTransaction) {
+        String transactionName = "shard-" + createTransaction.getTransactionId();
         if(createTransaction.getTransactionType() ==
                 TransactionProxy.TransactionType.READ_ONLY.ordinal()) {
             return getContext().actorOf(
                     ShardTransaction.props( chain.newReadOnlyTransaction(), getShardActor(),
-                            schemaContext, datastoreContext, shardStats), transactionId);
+                            schemaContext, datastoreContext, shardStats,
+                            createTransaction.getTransactionId()), transactionName);
         } else if (createTransaction.getTransactionType() ==
                 TransactionProxy.TransactionType.READ_WRITE.ordinal()) {
             return getContext().actorOf(
                     ShardTransaction.props( chain.newReadWriteTransaction(), getShardActor(),
-                            schemaContext, datastoreContext, shardStats), transactionId);
+                            schemaContext, datastoreContext, shardStats,
+                            createTransaction.getTransactionId()), transactionName);
         } else if (createTransaction.getTransactionType() ==
                 TransactionProxy.TransactionType.WRITE_ONLY.ordinal()) {
             return getContext().actorOf(
                     ShardTransaction.props( chain.newWriteOnlyTransaction(), getShardActor(),
-                            schemaContext, datastoreContext, shardStats), transactionId);
+                            schemaContext, datastoreContext, shardStats,
+                            createTransaction.getTransactionId()), transactionName);
         } else {
             throw new IllegalArgumentException (
                     "CreateTransaction message has unidentified transaction type=" +
@@ -82,10 +85,9 @@ public class ShardTransactionChain extends AbstractUntypedActor {
 
     private void createTransaction(CreateTransaction createTransaction) {
 
-        ActorRef transactionActor = createTypedTransactionActor(createTransaction, "shard-" + createTransaction.getTransactionId());
-        getSender()
-            .tell(new CreateTransactionReply(transactionActor.path().toString(),createTransaction.getTransactionId()).toSerializable(),
-                getSelf());
+        ActorRef transactionActor = createTypedTransactionActor(createTransaction);
+        getSender().tell(new CreateTransactionReply(transactionActor.path().toString(),
+                createTransaction.getTransactionId()).toSerializable(), getSelf());
     }
 
     public static Props props(DOMStoreTransactionChain chain, SchemaContext schemaContext,
