@@ -11,10 +11,8 @@ package org.opendaylight.controller.cluster.datastore;
 import org.opendaylight.controller.cluster.raft.ConfigParams;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
-
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
-
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -29,29 +27,24 @@ public class DatastoreContext {
     private final int operationTimeoutInSeconds;
     private final String dataStoreMXBeanType;
     private final ConfigParams shardRaftConfig;
+    private final int shardTransactionCommitTimeoutInSeconds;
+    private final int shardTransactionCommitQueueCapacity;
 
-    public DatastoreContext() {
-        this("DistributedDatastore", null, Duration.create(10, TimeUnit.MINUTES), 5, 1000, 20000, 500);
+    private DatastoreContext(InMemoryDOMDataStoreConfigProperties dataStoreProperties,
+            ConfigParams shardRaftConfig, String dataStoreMXBeanType, int operationTimeoutInSeconds,
+            Duration shardTransactionIdleTimeout, int shardTransactionCommitTimeoutInSeconds,
+            int shardTransactionCommitQueueCapacity) {
+        this.dataStoreProperties = dataStoreProperties;
+        this.shardRaftConfig = shardRaftConfig;
+        this.dataStoreMXBeanType = dataStoreMXBeanType;
+        this.operationTimeoutInSeconds = operationTimeoutInSeconds;
+        this.shardTransactionIdleTimeout = shardTransactionIdleTimeout;
+        this.shardTransactionCommitTimeoutInSeconds = shardTransactionCommitTimeoutInSeconds;
+        this.shardTransactionCommitQueueCapacity = shardTransactionCommitQueueCapacity;
     }
 
-    public DatastoreContext(String dataStoreMXBeanType,
-            InMemoryDOMDataStoreConfigProperties dataStoreProperties,
-            Duration shardTransactionIdleTimeout,
-            int operationTimeoutInSeconds,
-            int shardJournalRecoveryLogBatchSize,
-            int shardSnapshotBatchCount,
-            int shardHeartbeatIntervalInMillis) {
-        this.dataStoreMXBeanType = dataStoreMXBeanType;
-        this.dataStoreProperties = dataStoreProperties;
-        this.shardTransactionIdleTimeout = shardTransactionIdleTimeout;
-        this.operationTimeoutInSeconds = operationTimeoutInSeconds;
-
-        DefaultConfigParamsImpl raftConfig = new DefaultConfigParamsImpl();
-        raftConfig.setHeartBeatInterval(new FiniteDuration(shardHeartbeatIntervalInMillis,
-                TimeUnit.MILLISECONDS));
-        raftConfig.setJournalRecoveryLogBatchSize(shardJournalRecoveryLogBatchSize);
-        raftConfig.setSnapshotBatchCount(shardSnapshotBatchCount);
-        shardRaftConfig = raftConfig;
+    public static Builder newBuilder() {
+        return new Builder();
     }
 
     public InMemoryDOMDataStoreConfigProperties getDataStoreProperties() {
@@ -72,5 +65,82 @@ public class DatastoreContext {
 
     public ConfigParams getShardRaftConfig() {
         return shardRaftConfig;
+    }
+
+    public int getShardTransactionCommitTimeoutInSeconds() {
+        return shardTransactionCommitTimeoutInSeconds;
+    }
+
+    public int getShardTransactionCommitQueueCapacity() {
+        return shardTransactionCommitQueueCapacity;
+    }
+
+    public static class Builder {
+        private InMemoryDOMDataStoreConfigProperties dataStoreProperties;
+        private Duration shardTransactionIdleTimeout = Duration.create(10, TimeUnit.MINUTES);
+        private int operationTimeoutInSeconds = 5;
+        private String dataStoreMXBeanType;
+        private int shardTransactionCommitTimeoutInSeconds = 30;
+        private int shardJournalRecoveryLogBatchSize = 1000;
+        private int shardSnapshotBatchCount = 20000;
+        private int shardHeartbeatIntervalInMillis = 500;
+        private int shardTransactionCommitQueueCapacity = 20000;
+
+        public Builder shardTransactionIdleTimeout(Duration shardTransactionIdleTimeout) {
+            this.shardTransactionIdleTimeout = shardTransactionIdleTimeout;
+            return this;
+        }
+
+        public Builder operationTimeoutInSeconds(int operationTimeoutInSeconds) {
+            this.operationTimeoutInSeconds = operationTimeoutInSeconds;
+            return this;
+        }
+
+        public Builder dataStoreMXBeanType(String dataStoreMXBeanType) {
+            this.dataStoreMXBeanType = dataStoreMXBeanType;
+            return this;
+        }
+
+        public Builder dataStoreProperties(InMemoryDOMDataStoreConfigProperties dataStoreProperties) {
+            this.dataStoreProperties = dataStoreProperties;
+            return this;
+        }
+
+        public Builder shardTransactionCommitTimeoutInSeconds(int shardTransactionCommitTimeoutInSeconds) {
+            this.shardTransactionCommitTimeoutInSeconds = shardTransactionCommitTimeoutInSeconds;
+            return this;
+        }
+
+        public Builder shardJournalRecoveryLogBatchSize(int shardJournalRecoveryLogBatchSize) {
+            this.shardJournalRecoveryLogBatchSize = shardJournalRecoveryLogBatchSize;
+            return this;
+        }
+
+        public Builder shardSnapshotBatchCount(int shardSnapshotBatchCount) {
+            this.shardSnapshotBatchCount = shardSnapshotBatchCount;
+            return this;
+        }
+
+        public Builder shardHeartbeatIntervalInMillis(int shardHeartbeatIntervalInMillis) {
+            this.shardHeartbeatIntervalInMillis = shardHeartbeatIntervalInMillis;
+            return this;
+        }
+
+        public Builder shardTransactionCommitQueueCapacity(int shardTransactionCommitQueueCapacity) {
+            this.shardTransactionCommitQueueCapacity = shardTransactionCommitQueueCapacity;
+            return this;
+        }
+
+        public DatastoreContext build() {
+            DefaultConfigParamsImpl raftConfig = new DefaultConfigParamsImpl();
+            raftConfig.setHeartBeatInterval(new FiniteDuration(shardHeartbeatIntervalInMillis,
+                    TimeUnit.MILLISECONDS));
+            raftConfig.setJournalRecoveryLogBatchSize(shardJournalRecoveryLogBatchSize);
+            raftConfig.setSnapshotBatchCount(shardSnapshotBatchCount);
+
+            return new DatastoreContext(dataStoreProperties, raftConfig, dataStoreMXBeanType,
+                    operationTimeoutInSeconds, shardTransactionIdleTimeout,
+                    shardTransactionCommitTimeoutInSeconds, shardTransactionCommitQueueCapacity);
+        }
     }
 }

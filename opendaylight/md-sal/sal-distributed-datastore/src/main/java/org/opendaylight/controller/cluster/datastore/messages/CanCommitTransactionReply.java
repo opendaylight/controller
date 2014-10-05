@@ -11,24 +11,26 @@ package org.opendaylight.controller.cluster.datastore.messages;
 import org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages;
 
 public class CanCommitTransactionReply implements SerializableMessage {
-  public static Class SERIALIZABLE_CLASS = ThreePhaseCommitCohortMessages.CanCommitTransactionReply.class;
-  private final Boolean canCommit;
+    public static Class<ThreePhaseCommitCohortMessages.CanCommitTransactionReply> SERIALIZABLE_CLASS =
+            ThreePhaseCommitCohortMessages.CanCommitTransactionReply.class;
 
-  public CanCommitTransactionReply(Boolean canCommit) {
-    this.canCommit = canCommit;
-  }
+    private final Boolean canCommit;
 
-  public Boolean getCanCommit() {
-    return canCommit;
-  }
+    public CanCommitTransactionReply(Boolean canCommit) {
+        this.canCommit = canCommit;
+    }
 
-  @Override
-  public Object toSerializable() {
-    return  ThreePhaseCommitCohortMessages.CanCommitTransactionReply.newBuilder().setCanCommit(canCommit).build();
-  }
+    public Boolean getCanCommit() {
+        return canCommit;
+    }
 
+    @Override
+    public Object toSerializable() {
+        return ThreePhaseCommitCohortMessages.CanCommitTransactionReply.newBuilder().setCanCommit(canCommit).build();
+    }
 
-  public static CanCommitTransactionReply fromSerializable(Object message) {
-    return  new CanCommitTransactionReply(((ThreePhaseCommitCohortMessages.CanCommitTransactionReply)message).getCanCommit());
-  }
+    public static CanCommitTransactionReply fromSerializable(Object message) {
+        return new CanCommitTransactionReply(
+                ((ThreePhaseCommitCohortMessages.CanCommitTransactionReply) message).getCanCommit());
+    }
 }
