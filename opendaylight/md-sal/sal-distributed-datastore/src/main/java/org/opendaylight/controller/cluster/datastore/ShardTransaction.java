@@ -13,38 +13,20 @@ import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.ReceiveTimeout;
 import akka.japi.Creator;
-
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
-
-
 import org.opendaylight.controller.cluster.datastore.exceptions.UnknownMessageException;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.DataExistsReply;
-import org.opendaylight.controller.cluster.datastore.messages.DeleteData;
-import org.opendaylight.controller.cluster.datastore.messages.DeleteDataReply;
-import org.opendaylight.controller.cluster.datastore.messages.MergeData;
-import org.opendaylight.controller.cluster.datastore.messages.MergeDataReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 import org.opendaylight.controller.cluster.datastore.messages.ReadDataReply;
-import org.opendaylight.controller.cluster.datastore.messages.ReadyTransaction;
-import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
-import org.opendaylight.controller.cluster.datastore.messages.WriteData;
-import org.opendaylight.controller.cluster.datastore.messages.WriteDataReply;
-import org.opendaylight.controller.cluster.datastore.modification.CompositeModification;
-import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
-import org.opendaylight.controller.cluster.datastore.modification.ImmutableCompositeModification;
-import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
-import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
-import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -76,34 +58,43 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 public abstract class ShardTransaction extends AbstractUntypedActor {
 
     private final ActorRef shardActor;
-    protected final SchemaContext schemaContext;
+    private final SchemaContext schemaContext;
     private final ShardStats shardStats;
-
-    private final MutableCompositeModification modification = new MutableCompositeModification();
+    private final String transactionID;
 
     protected ShardTransaction(ActorRef shardActor, SchemaContext schemaContext,
-            ShardStats shardStats) {
+            ShardStats shardStats, String transactionID) {
         this.shardActor = shardActor;
         this.schemaContext = schemaContext;
         this.shardStats = shardStats;
+        this.transactionID = transactionID;
     }
 
     public static Props props(DOMStoreTransaction transaction, ActorRef shardActor,
-            SchemaContext schemaContext,DatastoreContext datastoreContext, ShardStats shardStats) {
+            SchemaContext schemaContext,DatastoreContext datastoreContext, ShardStats shardStats,
+            String transactionID) {
         return Props.create(new ShardTransactionCreator(transaction, shardActor, schemaContext,
-           datastoreContext, shardStats));
+           datastoreContext, shardStats, transactionID));
     }
 
     protected abstract DOMStoreTransaction getDOMStoreTransaction();
+
+    protected ActorRef getShardActor() {
+        return shardActor;
+    }
+
+    protected String getTransactionID() {
+        return transactionID;
+    }
+
+    protected SchemaContext getSchemaContext() {
+        return schemaContext;
+    }
 
     @Override
     public void handleReceive(Object message) throws Exception {
         if (message.getClass().equals(CloseTransaction.SERIALIZABLE_CLASS)) {
             closeTransaction(true);
-        } else if (message instanceof GetCompositedModification) {
-            // This is here for testing only
-            getSender().tell(new GetCompositeModificationReply(
-                    new ImmutableCompositeModification(modification)), getSelf());
         } else if (message instanceof ReceiveTimeout) {
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Got ReceiveTimeout for inactivity - closing Tx");
@@ -162,56 +153,6 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
 
     }
 
-    protected void writeData(DOMStoreWriteTransaction transaction, WriteData message) {
-        modification.addModification(
-                new WriteModification(message.getPath(), message.getData(),schemaContext));
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("writeData at path : " + message.getPath().toString());
-        }
-        try {
-            transaction.write(message.getPath(), message.getData());
-            getSender().tell(new WriteDataReply().toSerializable(), getSelf());
-        }catch(Exception e){
-            getSender().tell(new akka.actor.Status.Failure(e), getSelf());
-        }
-    }
-
-    protected void mergeData(DOMStoreWriteTransaction transaction, MergeData message) {
-        modification.addModification(
-                new MergeModification(message.getPath(), message.getData(), schemaContext));
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("mergeData at path : " + message.getPath().toString());
-        }
-        try {
-            transaction.merge(message.getPath(), message.getData());
-            getSender().tell(new MergeDataReply().toSerializable(), getSelf());
-        }catch(Exception e){
-            getSender().tell(new akka.actor.Status.Failure(e), getSelf());
-        }
-    }
-
-    protected void deleteData(DOMStoreWriteTransaction transaction, DeleteData message) {
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("deleteData at path : " + message.getPath().toString());
-        }
-        modification.addModification(new DeleteModification(message.getPath()));
-        try {
-            transaction.delete(message.getPath());
-            getSender().tell(new DeleteDataReply().toSerializable(), getSelf());
-        }catch(Exception e){
-            getSender().tell(new akka.actor.Status.Failure(e), getSelf());
-        }
-    }
-
-    protected void readyTransaction(DOMStoreWriteTransaction transaction, ReadyTransaction message) {
-        DOMStoreThreePhaseCommitCohort cohort =  transaction.ready();
-        ActorRef cohortActor = getContext().actorOf(
-            ThreePhaseCommitCohort.props(cohort, shardActor, modification, shardStats), "cohort");
-        getSender()
-        .tell(new ReadyTransactionReply(cohortActor.path()).toSerializable(), getSelf());
-
-    }
-
     private static class ShardTransactionCreator implements Creator<ShardTransaction> {
 
         private static final long serialVersionUID = 1L;
@@ -221,15 +162,17 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
         final SchemaContext schemaContext;
         final DatastoreContext datastoreContext;
         final ShardStats shardStats;
+        final String transactionID;
 
         ShardTransactionCreator(DOMStoreTransaction transaction, ActorRef shardActor,
                 SchemaContext schemaContext, DatastoreContext datastoreContext,
-                ShardStats shardStats) {
+                ShardStats shardStats, String transactionID) {
             this.transaction = transaction;
             this.shardActor = shardActor;
             this.shardStats = shardStats;
             this.schemaContext = schemaContext;
             this.datastoreContext = datastoreContext;
+            this.transactionID = transactionID;
         }
 
         @Override
@@ -237,37 +180,17 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
             ShardTransaction tx;
             if(transaction instanceof DOMStoreReadWriteTransaction) {
                 tx = new ShardReadWriteTransaction((DOMStoreReadWriteTransaction)transaction,
-                        shardActor, schemaContext, shardStats);
+                        shardActor, schemaContext, shardStats, transactionID);
             } else if(transaction instanceof DOMStoreReadTransaction) {
                 tx = new ShardReadTransaction((DOMStoreReadTransaction)transaction, shardActor,
-                        schemaContext, shardStats);
+                        schemaContext, shardStats, transactionID);
             } else {
                 tx = new ShardWriteTransaction((DOMStoreWriteTransaction)transaction,
-                        shardActor, schemaContext, shardStats);
+                        shardActor, schemaContext, shardStats, transactionID);
             }
 
             tx.getContext().setReceiveTimeout(datastoreContext.getShardTransactionIdleTimeout());
             return tx;
-        }
-    }
-
-    // These classes are in here for test purposes only
-
-    static class GetCompositedModification {
-    }
-
-
-    static class GetCompositeModificationReply {
-        private final CompositeModification modification;
-
-
-        GetCompositeModificationReply(CompositeModification modification) {
-            this.modification = modification;
-        }
-
-
-        public CompositeModification getModification() {
-            return modification;
         }
     }
 }

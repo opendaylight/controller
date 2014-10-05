@@ -10,6 +10,21 @@ public final class ThreePhaseCommitCohortMessages {
   }
   public interface CanCommitTransactionOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
+
+    // required string transactionId = 1;
+    /**
+     * <code>required string transactionId = 1;</code>
+     */
+    boolean hasTransactionId();
+    /**
+     * <code>required string transactionId = 1;</code>
+     */
+    java.lang.String getTransactionId();
+    /**
+     * <code>required string transactionId = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getTransactionIdBytes();
   }
   /**
    * Protobuf type {@code org.opendaylight.controller.mdsal.CanCommitTransaction}
@@ -44,6 +59,7 @@ public final class ThreePhaseCommitCohortMessages {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       initFields();
+      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -59,6 +75,11 @@ public final class ThreePhaseCommitCohortMessages {
                                      extensionRegistry, tag)) {
                 done = true;
               }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              transactionId_ = input.readBytes();
               break;
             }
           }
@@ -100,13 +121,62 @@ public final class ThreePhaseCommitCohortMessages {
       return PARSER;
     }
 
+    private int bitField0_;
+    // required string transactionId = 1;
+    public static final int TRANSACTIONID_FIELD_NUMBER = 1;
+    private java.lang.Object transactionId_;
+    /**
+     * <code>required string transactionId = 1;</code>
+     */
+    public boolean hasTransactionId() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required string transactionId = 1;</code>
+     */
+    public java.lang.String getTransactionId() {
+      java.lang.Object ref = transactionId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          transactionId_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string transactionId = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getTransactionIdBytes() {
+      java.lang.Object ref = transactionId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b =
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        transactionId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private void initFields() {
+      transactionId_ = "";
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
 
+      if (!hasTransactionId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -114,6 +184,9 @@ public final class ThreePhaseCommitCohortMessages {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, getTransactionIdBytes());
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -123,6 +196,10 @@ public final class ThreePhaseCommitCohortMessages {
       if (size != -1) return size;
 
       size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, getTransactionIdBytes());
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
       return size;
@@ -239,6 +316,8 @@ public final class ThreePhaseCommitCohortMessages {
 
       public Builder clear() {
         super.clear();
+        transactionId_ = "";
+        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -265,6 +344,13 @@ public final class ThreePhaseCommitCohortMessages {
 
       public org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages.CanCommitTransaction buildPartial() {
         org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages.CanCommitTransaction result = new org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages.CanCommitTransaction(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.transactionId_ = transactionId_;
+        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
@@ -280,11 +366,20 @@ public final class ThreePhaseCommitCohortMessages {
 
       public Builder mergeFrom(org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages.CanCommitTransaction other) {
         if (other == org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages.CanCommitTransaction.getDefaultInstance()) return this;
+        if (other.hasTransactionId()) {
+          bitField0_ |= 0x00000001;
+          transactionId_ = other.transactionId_;
+          onChanged();
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
 
       public final boolean isInitialized() {
+        if (!hasTransactionId()) {
+
+          return false;
+        }
         return true;
       }
 
@@ -303,6 +398,81 @@ public final class ThreePhaseCommitCohortMessages {
             mergeFrom(parsedMessage);
           }
         }
+        return this;
+      }
+      private int bitField0_;
+
+      // required string transactionId = 1;
+      private java.lang.Object transactionId_ = "";
+      /**
+       * <code>required string transactionId = 1;</code>
+       */
+      public boolean hasTransactionId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required string transactionId = 1;</code>
+       */
+      public java.lang.String getTransactionId() {
+        java.lang.Object ref = transactionId_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          transactionId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>required string transactionId = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getTransactionIdBytes() {
+        java.lang.Object ref = transactionId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b =
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          transactionId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string transactionId = 1;</code>
+       */
+      public Builder setTransactionId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        transactionId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string transactionId = 1;</code>
+       */
+      public Builder clearTransactionId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        transactionId_ = getDefaultInstance().getTransactionId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string transactionId = 1;</code>
+       */
+      public Builder setTransactionIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        transactionId_ = value;
+        onChanged();
         return this;
       }
 
@@ -723,6 +893,21 @@ public final class ThreePhaseCommitCohortMessages {
 
   public interface AbortTransactionOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
+
+    // required string transactionId = 1;
+    /**
+     * <code>required string transactionId = 1;</code>
+     */
+    boolean hasTransactionId();
+    /**
+     * <code>required string transactionId = 1;</code>
+     */
+    java.lang.String getTransactionId();
+    /**
+     * <code>required string transactionId = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getTransactionIdBytes();
   }
   /**
    * Protobuf type {@code org.opendaylight.controller.mdsal.AbortTransaction}
@@ -757,6 +942,7 @@ public final class ThreePhaseCommitCohortMessages {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       initFields();
+      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -772,6 +958,11 @@ public final class ThreePhaseCommitCohortMessages {
                                      extensionRegistry, tag)) {
                 done = true;
               }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              transactionId_ = input.readBytes();
               break;
             }
           }
@@ -813,13 +1004,62 @@ public final class ThreePhaseCommitCohortMessages {
       return PARSER;
     }
 
+    private int bitField0_;
+    // required string transactionId = 1;
+    public static final int TRANSACTIONID_FIELD_NUMBER = 1;
+    private java.lang.Object transactionId_;
+    /**
+     * <code>required string transactionId = 1;</code>
+     */
+    public boolean hasTransactionId() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required string transactionId = 1;</code>
+     */
+    public java.lang.String getTransactionId() {
+      java.lang.Object ref = transactionId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          transactionId_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string transactionId = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getTransactionIdBytes() {
+      java.lang.Object ref = transactionId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b =
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        transactionId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private void initFields() {
+      transactionId_ = "";
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
 
+      if (!hasTransactionId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -827,6 +1067,9 @@ public final class ThreePhaseCommitCohortMessages {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, getTransactionIdBytes());
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -836,6 +1079,10 @@ public final class ThreePhaseCommitCohortMessages {
       if (size != -1) return size;
 
       size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, getTransactionIdBytes());
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
       return size;
@@ -952,6 +1199,8 @@ public final class ThreePhaseCommitCohortMessages {
 
       public Builder clear() {
         super.clear();
+        transactionId_ = "";
+        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -978,6 +1227,13 @@ public final class ThreePhaseCommitCohortMessages {
 
       public org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages.AbortTransaction buildPartial() {
         org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages.AbortTransaction result = new org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages.AbortTransaction(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.transactionId_ = transactionId_;
+        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
@@ -993,11 +1249,20 @@ public final class ThreePhaseCommitCohortMessages {
 
       public Builder mergeFrom(org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages.AbortTransaction other) {
         if (other == org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages.AbortTransaction.getDefaultInstance()) return this;
+        if (other.hasTransactionId()) {
+          bitField0_ |= 0x00000001;
+          transactionId_ = other.transactionId_;
+          onChanged();
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
 
       public final boolean isInitialized() {
+        if (!hasTransactionId()) {
+
+          return false;
+        }
         return true;
       }
 
@@ -1016,6 +1281,81 @@ public final class ThreePhaseCommitCohortMessages {
             mergeFrom(parsedMessage);
           }
         }
+        return this;
+      }
+      private int bitField0_;
+
+      // required string transactionId = 1;
+      private java.lang.Object transactionId_ = "";
+      /**
+       * <code>required string transactionId = 1;</code>
+       */
+      public boolean hasTransactionId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required string transactionId = 1;</code>
+       */
+      public java.lang.String getTransactionId() {
+        java.lang.Object ref = transactionId_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          transactionId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>required string transactionId = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getTransactionIdBytes() {
+        java.lang.Object ref = transactionId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b =
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          transactionId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string transactionId = 1;</code>
+       */
+      public Builder setTransactionId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        transactionId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string transactionId = 1;</code>
+       */
+      public Builder clearTransactionId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        transactionId_ = getDefaultInstance().getTransactionId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string transactionId = 1;</code>
+       */
+      public Builder setTransactionIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        transactionId_ = value;
+        onChanged();
         return this;
       }
 
@@ -1341,6 +1681,21 @@ public final class ThreePhaseCommitCohortMessages {
 
   public interface CommitTransactionOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
+
+    // required string transactionId = 1;
+    /**
+     * <code>required string transactionId = 1;</code>
+     */
+    boolean hasTransactionId();
+    /**
+     * <code>required string transactionId = 1;</code>
+     */
+    java.lang.String getTransactionId();
+    /**
+     * <code>required string transactionId = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getTransactionIdBytes();
   }
   /**
    * Protobuf type {@code org.opendaylight.controller.mdsal.CommitTransaction}
@@ -1375,6 +1730,7 @@ public final class ThreePhaseCommitCohortMessages {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       initFields();
+      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -1390,6 +1746,11 @@ public final class ThreePhaseCommitCohortMessages {
                                      extensionRegistry, tag)) {
                 done = true;
               }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              transactionId_ = input.readBytes();
               break;
             }
           }
@@ -1431,13 +1792,62 @@ public final class ThreePhaseCommitCohortMessages {
       return PARSER;
     }
 
+    private int bitField0_;
+    // required string transactionId = 1;
+    public static final int TRANSACTIONID_FIELD_NUMBER = 1;
+    private java.lang.Object transactionId_;
+    /**
+     * <code>required string transactionId = 1;</code>
+     */
+    public boolean hasTransactionId() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required string transactionId = 1;</code>
+     */
+    public java.lang.String getTransactionId() {
+      java.lang.Object ref = transactionId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          transactionId_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string transactionId = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getTransactionIdBytes() {
+      java.lang.Object ref = transactionId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b =
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        transactionId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private void initFields() {
+      transactionId_ = "";
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
 
+      if (!hasTransactionId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -1445,6 +1855,9 @@ public final class ThreePhaseCommitCohortMessages {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, getTransactionIdBytes());
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -1454,6 +1867,10 @@ public final class ThreePhaseCommitCohortMessages {
       if (size != -1) return size;
 
       size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, getTransactionIdBytes());
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
       return size;
@@ -1570,6 +1987,8 @@ public final class ThreePhaseCommitCohortMessages {
 
       public Builder clear() {
         super.clear();
+        transactionId_ = "";
+        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -1596,6 +2015,13 @@ public final class ThreePhaseCommitCohortMessages {
 
       public org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages.CommitTransaction buildPartial() {
         org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages.CommitTransaction result = new org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages.CommitTransaction(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.transactionId_ = transactionId_;
+        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
@@ -1611,11 +2037,20 @@ public final class ThreePhaseCommitCohortMessages {
 
       public Builder mergeFrom(org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages.CommitTransaction other) {
         if (other == org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages.CommitTransaction.getDefaultInstance()) return this;
+        if (other.hasTransactionId()) {
+          bitField0_ |= 0x00000001;
+          transactionId_ = other.transactionId_;
+          onChanged();
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
 
       public final boolean isInitialized() {
+        if (!hasTransactionId()) {
+
+          return false;
+        }
         return true;
       }
 
@@ -1634,6 +2069,81 @@ public final class ThreePhaseCommitCohortMessages {
             mergeFrom(parsedMessage);
           }
         }
+        return this;
+      }
+      private int bitField0_;
+
+      // required string transactionId = 1;
+      private java.lang.Object transactionId_ = "";
+      /**
+       * <code>required string transactionId = 1;</code>
+       */
+      public boolean hasTransactionId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required string transactionId = 1;</code>
+       */
+      public java.lang.String getTransactionId() {
+        java.lang.Object ref = transactionId_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          transactionId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>required string transactionId = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getTransactionIdBytes() {
+        java.lang.Object ref = transactionId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b =
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          transactionId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string transactionId = 1;</code>
+       */
+      public Builder setTransactionId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        transactionId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string transactionId = 1;</code>
+       */
+      public Builder clearTransactionId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        transactionId_ = getDefaultInstance().getTransactionId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string transactionId = 1;</code>
+       */
+      public Builder setTransactionIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        transactionId_ = value;
+        onChanged();
         return this;
       }
 
@@ -2625,14 +3135,16 @@ public final class ThreePhaseCommitCohortMessages {
   static {
     java.lang.String[] descriptorData = {
       "\n\014Cohort.proto\022!org.opendaylight.control" +
-      "ler.mdsal\"\026\n\024CanCommitTransaction\".\n\031Can" +
-      "CommitTransactionReply\022\021\n\tcanCommit\030\001 \002(" +
-      "\010\"\022\n\020AbortTransaction\"\027\n\025AbortTransactio" +
-      "nReply\"\023\n\021CommitTransaction\"\030\n\026CommitTra" +
-      "nsactionReply\"\026\n\024PreCommitTransaction\"\033\n" +
-      "\031PreCommitTransactionReplyBZ\n8org.openda" +
-      "ylight.controller.protobuff.messages.coh" +
-      "ort3pcB\036ThreePhaseCommitCohortMessages"
+      "ler.mdsal\"-\n\024CanCommitTransaction\022\025\n\rtra" +
+      "nsactionId\030\001 \002(\t\".\n\031CanCommitTransaction" +
+      "Reply\022\021\n\tcanCommit\030\001 \002(\010\")\n\020AbortTransac" +
+      "tion\022\025\n\rtransactionId\030\001 \002(\t\"\027\n\025AbortTran" +
+      "sactionReply\"*\n\021CommitTransaction\022\025\n\rtra" +
+      "nsactionId\030\001 \002(\t\"\030\n\026CommitTransactionRep" +
+      "ly\"\026\n\024PreCommitTransaction\"\033\n\031PreCommitT" +
+      "ransactionReplyBZ\n8org.opendaylight.cont" +
+      "roller.protobuff.messages.cohort3pcB\036Thr",
+      "eePhaseCommitCohortMessages"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -2644,7 +3156,7 @@ public final class ThreePhaseCommitCohortMessages {
           internal_static_org_opendaylight_controller_mdsal_CanCommitTransaction_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_org_opendaylight_controller_mdsal_CanCommitTransaction_descriptor,
-              new java.lang.String[] { });
+              new java.lang.String[] { "TransactionId", });
           internal_static_org_opendaylight_controller_mdsal_CanCommitTransactionReply_descriptor =
             getDescriptor().getMessageTypes().get(1);
           internal_static_org_opendaylight_controller_mdsal_CanCommitTransactionReply_fieldAccessorTable = new
@@ -2656,7 +3168,7 @@ public final class ThreePhaseCommitCohortMessages {
           internal_static_org_opendaylight_controller_mdsal_AbortTransaction_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_org_opendaylight_controller_mdsal_AbortTransaction_descriptor,
-              new java.lang.String[] { });
+              new java.lang.String[] { "TransactionId", });
           internal_static_org_opendaylight_controller_mdsal_AbortTransactionReply_descriptor =
             getDescriptor().getMessageTypes().get(3);
           internal_static_org_opendaylight_controller_mdsal_AbortTransactionReply_fieldAccessorTable = new
@@ -2668,7 +3180,7 @@ public final class ThreePhaseCommitCohortMessages {
           internal_static_org_opendaylight_controller_mdsal_CommitTransaction_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_org_opendaylight_controller_mdsal_CommitTransaction_descriptor,
-              new java.lang.String[] { });
+              new java.lang.String[] { "TransactionId", });
           internal_static_org_opendaylight_controller_mdsal_CommitTransactionReply_descriptor =
             getDescriptor().getMessageTypes().get(5);
           internal_static_org_opendaylight_controller_mdsal_CommitTransactionReply_fieldAccessorTable = new
