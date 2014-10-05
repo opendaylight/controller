@@ -112,7 +112,7 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
         // their canCommit processing. If any one fails then we'll fail canCommit.
 
         Future<Iterable<Object>> combinedFuture =
-                invokeCohorts(new CanCommitTransaction().toSerializable());
+                invokeCohorts(new CanCommitTransaction(transactionId).toSerializable());
 
         combinedFuture.onComplete(new OnComplete<Iterable<Object>>() {
             @Override
@@ -177,13 +177,13 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
         // exception then that exception will supersede and suppress the original exception. But
         // it's the original exception that is the root cause and of more interest to the client.
 
-        return voidOperation("abort", new AbortTransaction().toSerializable(),
+        return voidOperation("abort", new AbortTransaction(transactionId).toSerializable(),
                 AbortTransactionReply.SERIALIZABLE_CLASS, false);
     }
 
     @Override
     public ListenableFuture<Void> commit() {
-        return voidOperation("commit",  new CommitTransaction().toSerializable(),
+        return voidOperation("commit",  new CommitTransaction(transactionId).toSerializable(),
                 CommitTransactionReply.SERIALIZABLE_CLASS, true);
     }
 

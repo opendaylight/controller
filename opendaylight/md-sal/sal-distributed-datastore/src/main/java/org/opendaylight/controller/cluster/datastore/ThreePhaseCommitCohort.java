@@ -61,16 +61,16 @@ public class ThreePhaseCommitCohort extends AbstractUntypedActor {
     public void handleReceive(Object message) throws Exception {
         if (message.getClass()
             .equals(CanCommitTransaction.SERIALIZABLE_CLASS)) {
-            canCommit(new CanCommitTransaction());
+            canCommit(new CanCommitTransaction(null));
         } else if (message.getClass()
             .equals(PreCommitTransaction.SERIALIZABLE_CLASS)) {
             preCommit(new PreCommitTransaction());
         } else if (message.getClass()
             .equals(CommitTransaction.SERIALIZABLE_CLASS)) {
-            commit(new CommitTransaction());
+            commit(new CommitTransaction(null));
         } else if (message.getClass()
             .equals(AbortTransaction.SERIALIZABLE_CLASS)) {
-            abort(new AbortTransaction());
+            abort(new AbortTransaction(null));
         } else {
             unknownMessage(message);
         }

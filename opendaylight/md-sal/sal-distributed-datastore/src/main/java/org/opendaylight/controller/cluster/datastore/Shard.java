@@ -21,7 +21,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -29,23 +28,28 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
 import org.opendaylight.controller.cluster.common.actor.MeteringBehavior;
+import org.opendaylight.controller.cluster.datastore.ShardCommitCoordinator.CohortEntry;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardTransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardMBeanFactory;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
+import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
+import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
+import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChain;
+import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
-import org.opendaylight.controller.cluster.datastore.messages.ForwardedCommitTransaction;
+import org.opendaylight.controller.cluster.datastore.messages.ForwardedReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolved;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 import org.opendaylight.controller.cluster.datastore.messages.ReadDataReply;
+import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
-import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
 import org.opendaylight.controller.cluster.raft.RaftActor;
@@ -54,11 +58,9 @@ import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotRep
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationPayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreFactory;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionFactory;
@@ -73,6 +75,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import javax.annotation.Nonnull;
 
 /**
  * A Shard represents a portion of the logical data tree <br/>
@@ -88,7 +91,7 @@ public class Shard extends RaftActor {
     private final InMemoryDOMDataStore store;
 
     private final Map<Object, DOMStoreThreePhaseCommitCohort>
-        modificationToCohort = new HashMap<>();
+        modificationToTransactionID = new HashMap<>();
 
     private final LoggingAdapter LOG =
         Logging.getLogger(getContext().system(), this);
@@ -109,6 +112,8 @@ public class Shard extends RaftActor {
     private SchemaContext schemaContext;
 
     private ActorRef createSnapshotTransaction;
+
+    private final ShardCommitCoordinator commitCoordinator = new ShardCommitCoordinator();
 
     /**
      * Coordinates persistence recovery on startup.
@@ -195,35 +200,23 @@ public class Shard extends RaftActor {
         }
 
         if(message.getClass().equals(ReadDataReply.SERIALIZABLE_CLASS)) {
-            // This must be for install snapshot. Don't want to open this up and trigger
-            // deSerialization
-            self()
-                .tell(new CaptureSnapshotReply(ReadDataReply.getNormalizedNodeByteString(message)),
-                    self());
-
-            createSnapshotTransaction = null;
-            // Send a PoisonPill instead of sending close transaction because we do not really need
-            // a response
-            getSender().tell(PoisonPill.getInstance(), self());
-
+            handleReadDataReply(message);
+        } else if (message.getClass().equals(CreateTransaction.SERIALIZABLE_CLASS)) {
+            handleCreateTransaction(message);
+        } else if(message instanceof ForwardedReadyTransaction) {
+            handleForwardedReadyTransaction((ForwardedReadyTransaction)message);
+        } else if(message.getClass().equals(CanCommitTransaction.SERIALIZABLE_CLASS)) {
+            handleCanCommitTransaction(CanCommitTransaction.fromSerializable(message));
+        } else if(message.getClass().equals(CommitTransaction.SERIALIZABLE_CLASS)) {
+            handleCommitTransaction(CommitTransaction.fromSerializable(message));
+        } else if(message.getClass().equals(AbortTransaction.SERIALIZABLE_CLASS)) {
+            handleAbortTransaction(AbortTransaction.fromSerializable(message));
         } else if (message.getClass().equals(CloseTransactionChain.SERIALIZABLE_CLASS)){
             closeTransactionChain(CloseTransactionChain.fromSerializable(message));
         } else if (message instanceof RegisterChangeListener) {
             registerChangeListener((RegisterChangeListener) message);
         } else if (message instanceof UpdateSchemaContext) {
             updateSchemaContext((UpdateSchemaContext) message);
-        } else if (message instanceof ForwardedCommitTransaction) {
-            handleForwardedCommit((ForwardedCommitTransaction) message);
-        } else if (message.getClass()
-            .equals(CreateTransaction.SERIALIZABLE_CLASS)) {
-            if (isLeader()) {
-                createTransaction(CreateTransaction.fromSerializable(message));
-            } else if (getLeader() != null) {
-                getLeader().forward(message, getContext());
-            } else {
-                getSender().tell(new akka.actor.Status.Failure(new IllegalStateException(
-                    "Could not find leader so transaction cannot be created")), getSelf());
-            }
         } else if (message instanceof PeerAddressResolved) {
             PeerAddressResolved resolved = (PeerAddressResolved) message;
             setPeerAddress(resolved.getPeerId().toString(),
@@ -231,6 +224,134 @@ public class Shard extends RaftActor {
         } else {
             super.onReceiveCommand(message);
         }
+    }
+
+    private void handleCommitTransaction(CommitTransaction commit) {
+        String transactionID = commit.getTransactionID();
+        final CohortEntry cohortEntry = commitCoordinator.getCohortEntryIfCurrent(transactionID);
+        if(cohortEntry == null) {
+            IllegalStateException ex = new IllegalStateException(
+                    String.format("Cannot commit transaction %s - it is not the current transaction",
+                            transactionID));
+            LOG.error(ex.getMessage());
+            shardMBean.incrementFailedTransactionsCount();
+            getSender().tell(new akka.actor.Status.Failure(ex), getSelf());
+            return;
+        }
+
+        final ActorRef sender = getSender();
+        ListenableFuture<Void> preCommitFuture = cohortEntry.getCohort().preCommit();
+        Futures.addCallback(preCommitFuture, new FutureCallback<Void>() {
+            @Override
+            public void onSuccess(Void v) {
+                if(persistent) {
+                    Shard.this.persistData(sender, "identifier",
+                            new CompositeModificationPayload(cohortEntry.getModification().toSerializable()));
+                } else {
+                    Shard.this.finishCommit(sender);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                LOG.error(t, "An exception occurred while preCommitting transaction {}",
+                        cohortEntry.getTransactionID());
+                shardMBean.incrementFailedTransactionsCount();
+                sender.tell(new akka.actor.Status.Failure(t), getSelf());
+            }
+        });
+    }
+
+    private void finishCommit(@Nonnull final ActorRef sender) {
+        // The current entry should not be null at this point since we checked for validity at the
+        // start of the commit.
+        final CohortEntry cohortEntry = commitCoordinator.getCurrentCohortEntry();
+
+        LOG.debug("Finishing commit for transaction {}", cohortEntry.getTransactionID());
+
+        ListenableFuture<Void> future = cohortEntry.getCohort().commit();
+
+        final ActorRef self = getSelf();
+        Futures.addCallback(future, new FutureCallback<Void>() {
+            @Override
+            public void onSuccess(Void v) {
+                sender.tell(new CommitTransactionReply().toSerializable(), self);
+                shardMBean.incrementCommittedTransactionCount();
+                shardMBean.setLastCommittedTransactionTime(System.currentTimeMillis());
+                commitCoordinator.currentTransactionComplete();
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                LOG.error(t, "An exception occurred while committing transaction {}",
+                        cohortEntry.getTransactionID());
+                shardMBean.incrementFailedTransactionsCount();
+                sender.tell(new akka.actor.Status.Failure(t), self);
+                commitCoordinator.currentTransactionComplete();
+            }
+        });
+    }
+
+    private void handleCanCommitTransaction(CanCommitTransaction canCommit) {
+        commitCoordinator.handleCanCommit(canCommit, getSender(), self());
+    }
+
+    private void handleForwardedReadyTransaction(ForwardedReadyTransaction message) {
+        commitCoordinator.transactionReady(message.getTransactionID(), message.getCohort(),
+                message.getModification());
+
+        getSender().tell(new ReadyTransactionReply(self().path()).toSerializable(), getSelf());
+    }
+
+    private void handleAbortTransaction(AbortTransaction abort) {
+        final CohortEntry cohortEntry = commitCoordinator.getCohortEntryIfCurrent(
+                abort.getTransactionID());
+        if(cohortEntry != null) {
+            commitCoordinator.currentTransactionComplete();
+
+            final ListenableFuture<Void> future = cohortEntry.getCohort().abort();
+            final ActorRef sender = getSender();
+            final ActorRef self = getSelf();
+
+            Futures.addCallback(future, new FutureCallback<Void>() {
+                @Override
+                public void onSuccess(Void v) {
+                    shardMBean.incrementAbortTransactionsCount();
+                    sender.tell(new AbortTransactionReply().toSerializable(), self);
+                }
+
+                @Override
+                public void onFailure(Throwable t) {
+                    LOG.error(t, "An exception happened during abort");
+                    sender.tell(new akka.actor.Status.Failure(t), self);
+                }
+            });
+        }
+    }
+
+    private void handleCreateTransaction(Object message) {
+        if (isLeader()) {
+            createTransaction(CreateTransaction.fromSerializable(message));
+        } else if (getLeader() != null) {
+            getLeader().forward(message, getContext());
+        } else {
+            getSender().tell(new akka.actor.Status.Failure(new IllegalStateException(
+                "Could not find leader so transaction cannot be created")), getSelf());
+        }
+    }
+
+    private void handleReadDataReply(Object message) {
+        // This must be for install snapshot. Don't want to open this up and trigger
+        // deSerialization
+
+        self().tell(new CaptureSnapshotReply(ReadDataReply.getNormalizedNodeByteString(message)),
+                self());
+
+        createSnapshotTransaction = null;
+
+        // Send a PoisonPill instead of sending close transaction because we do not really need
+        // a response
+        getSender().tell(PoisonPill.getInstance(), self());
     }
 
     private void closeTransactionChain(CloseTransactionChain closeTransactionChain) {
@@ -329,43 +450,6 @@ public class Shard extends RaftActor {
         commitCohort.commit().get();
     }
 
-
-    private void commit(final ActorRef sender, Object serialized) {
-        Modification modification = MutableCompositeModification
-            .fromSerializable(serialized, schemaContext);
-        DOMStoreThreePhaseCommitCohort cohort =
-            modificationToCohort.remove(serialized);
-        if (cohort == null) {
-            // If there's no cached cohort then we must be applying replicated state.
-            commitWithNewTransaction(serialized);
-            return;
-        }
-
-        if(sender == null) {
-            LOG.error("Commit failed. Sender cannot be null");
-            return;
-        }
-
-        ListenableFuture<Void> future = cohort.commit();
-
-        Futures.addCallback(future, new FutureCallback<Void>() {
-            @Override
-            public void onSuccess(Void v) {
-                sender.tell(new CommitTransactionReply().toSerializable(), getSelf());
-                shardMBean.incrementCommittedTransactionCount();
-                shardMBean.setLastCommittedTransactionTime(System.currentTimeMillis());
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                LOG.error(t, "An exception happened during commit");
-                shardMBean.incrementFailedTransactionsCount();
-                sender.tell(new akka.actor.Status.Failure(t), getSelf());
-            }
-        });
-
-    }
-
     private void commitWithNewTransaction(Object modification) {
         DOMStoreWriteTransaction tx = store.newWriteOnlyTransaction();
         MutableCompositeModification.fromSerializable(modification, schemaContext).apply(tx);
@@ -375,21 +459,6 @@ public class Shard extends RaftActor {
         } catch (InterruptedException | ExecutionException e) {
             shardMBean.incrementFailedTransactionsCount();
             LOG.error(e, "Failed to commit");
-        }
-    }
-
-    private void handleForwardedCommit(ForwardedCommitTransaction message) {
-        Object serializedModification =
-            message.getModification().toSerializable();
-
-        modificationToCohort
-            .put(serializedModification, message.getCohort());
-
-        if (persistent) {
-            this.persistData(getSender(), "identifier",
-                new CompositeModificationPayload(serializedModification));
-        } else {
-            this.commit(getSender(), serializedModification);
         }
     }
 
@@ -530,14 +599,18 @@ public class Shard extends RaftActor {
         if (data instanceof CompositeModificationPayload) {
             Object modification = ((CompositeModificationPayload) data).getModification();
 
-            if (modification != null) {
-                commit(clientActor, modification);
-            } else {
+            if(modification == null) {
                 LOG.error(
-                    "modification is null - this is very unexpected, clientActor = {}, identifier = {}",
-                    identifier, clientActor != null ? clientActor.path().toString() : null);
+                     "modification is null - this is very unexpected, clientActor = {}, identifier = {}",
+                     identifier, clientActor != null ? clientActor.path().toString() : null);
+            } else if(clientActor == null) {
+                // There's no clientActor to which to send a commit reply so we must be applying
+                // replicated state from the leader.
+                commitWithNewTransaction(modification);
+            } else {
+                // This must be the OK to commit after replication consensus.
+                finishCommit(clientActor);
             }
-
         } else {
             LOG.error("Unknown state received {} Class loader = {} CompositeNodeMod.ClassLoader = {}",
                     data, data.getClass().getClassLoader(),
@@ -659,29 +732,8 @@ public class Shard extends RaftActor {
     }
 
     @VisibleForTesting
-    NormalizedNode<?,?> readStore(YangInstanceIdentifier id)
-            throws ExecutionException, InterruptedException {
-        DOMStoreReadTransaction transaction = store.newReadOnlyTransaction();
-
-        CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> future =
-            transaction.read(id);
-
-        Optional<NormalizedNode<?, ?>> optional = future.get();
-        NormalizedNode<?, ?> node = optional.isPresent()? optional.get() : null;
-
-        transaction.close();
-
-        return node;
-    }
-
-    @VisibleForTesting
-    void writeToStore(YangInstanceIdentifier id, NormalizedNode<?,?> node)
-        throws ExecutionException, InterruptedException {
-        DOMStoreWriteTransaction transaction = store.newWriteOnlyTransaction();
-
-        transaction.write(id, node);
-
-        syncCommitTransaction(transaction);
+    InMemoryDOMDataStore getDataStore() {
+        return store;
     }
 
     @VisibleForTesting
