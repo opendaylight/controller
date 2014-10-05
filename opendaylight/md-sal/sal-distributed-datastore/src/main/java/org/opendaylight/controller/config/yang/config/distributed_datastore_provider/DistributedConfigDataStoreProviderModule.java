@@ -40,18 +40,21 @@ public class DistributedConfigDataStoreProviderModule extends
             props = new ConfigProperties();
         }
 
-        DatastoreContext datastoreContext = new DatastoreContext("DistributedConfigDatastore",
-                InMemoryDOMDataStoreConfigProperties.create(
+        DatastoreContext datastoreContext = DatastoreContext.newBuilder()
+                .dataStoreMXBeanType("DistributedConfigDatastore")
+                .dataStoreProperties(InMemoryDOMDataStoreConfigProperties.create(
                         props.getMaxShardDataChangeExecutorPoolSize().getValue().intValue(),
                         props.getMaxShardDataChangeExecutorQueueSize().getValue().intValue(),
                         props.getMaxShardDataChangeListenerQueueSize().getValue().intValue(),
-                        props.getMaxShardDataStoreExecutorQueueSize().getValue().intValue()),
-                Duration.create(props.getShardTransactionIdleTimeoutInMinutes().getValue(),
-                        TimeUnit.MINUTES),
-                props.getOperationTimeoutInSeconds().getValue(),
-                props.getShardJournalRecoveryLogBatchSize().getValue().intValue(),
-                props.getShardSnapshotBatchCount().getValue().intValue(),
-                props.getShardHearbeatIntervalInMillis().getValue());
+                        props.getMaxShardDataStoreExecutorQueueSize().getValue().intValue()))
+                .shardTransactionIdleTimeout(Duration.create(
+                        props.getShardTransactionIdleTimeoutInMinutes().getValue(), TimeUnit.MINUTES))
+                .operationTimeoutInSeconds(props.getOperationTimeoutInSeconds().getValue())
+                .shardJournalRecoveryLogBatchSize(props.getShardJournalRecoveryLogBatchSize().
+                        getValue().intValue())
+                .shardSnapshotBatchCount(props.getShardSnapshotBatchCount().getValue().intValue())
+                .shardHeartbeatIntervalInMillis(props.getShardHearbeatIntervalInMillis().getValue())
+                .build();
 
         return DistributedDataStoreFactory.createInstance("config", getConfigSchemaServiceDependency(),
                 datastoreContext, bundleContext);
