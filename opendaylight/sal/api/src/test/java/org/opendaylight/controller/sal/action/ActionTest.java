@@ -17,6 +17,9 @@ import org.junit.Test;
 import org.junit.Assert;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.Property;
+import org.opendaylight.controller.sal.core.Tables;
+import org.opendaylight.controller.sal.core.Tier;
 import org.opendaylight.controller.sal.utils.EtherTypes;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.slf4j.Logger;
@@ -268,5 +271,90 @@ public class ActionTest {
         Assert.assertFalse(actions.contains(new Output(NodeConnectorCreator
                 .createNodeConnector((short) 5, node))));
         Assert.assertFalse(actions.contains(new Controller()));
+    }
+
+    @Test
+    public void testMetadata() {
+        Property tier1 = new Tier(1);
+        Property tier2 = new Tier(2);
+        Property table1 = new Tables((byte)0x7f);
+        Action a1 = new PopVlan();
+        List<Property> resprops = null;
+        resprops = a1.getMetadatas();
+        // This should be an empty list
+        Assert.assertTrue(resprops.isEmpty());
+        a1.setMetadata("tier1", tier1);
+        a1.setMetadata("tier2", tier2);
+        a1.setMetadata("table1", table1);
+        resprops = a1.getMetadatas();
+        // Check for the number of elements in it
+        Assert.assertTrue(resprops.size() == 3);
+        // Check if the elements are in it
+        Assert.assertTrue(resprops.contains(tier1));
+        Assert.assertTrue(resprops.contains(tier2));
+        Assert.assertTrue(resprops.contains(table1));
+        // Check for single elements retrieve
+        Assert.assertTrue(a1.getMetadata("tier1").equals(tier1));
+        Assert.assertTrue(a1.getMetadata("tier2").equals(tier2));
+        Assert.assertTrue(a1.getMetadata("table1").equals(table1));
+        // Now remove an element and make sure the remaining are
+        // correct
+        a1.removeMetadata("tier1");
+
+        resprops = a1.getMetadatas();
+        // Check for the number of elements in it
+        Assert.assertTrue(resprops.size() == 2);
+        // Check if the elements are in it
+        Assert.assertFalse(resprops.contains(tier1));
+        Assert.assertTrue(resprops.contains(tier2));
+        Assert.assertTrue(resprops.contains(table1));
+        // Check for single elements retrieve
+        Assert.assertTrue(a1.getMetadata("table1").equals(table1));
+        Assert.assertTrue(a1.getMetadata("tier2").equals(tier2));
+        Assert.assertNull(a1.getMetadata("tier1"));
+
+        // Check for an element never existed
+        Assert.assertNull(a1.getMetadata("table100"));
+
+        // Remove them all
+        a1.removeMetadata("tier2");
+        a1.removeMetadata("table1");
+
+        // Remove also a non-existent one
+        a1.removeMetadata("table100");
+
+        resprops = a1.getMetadatas();
+        // Check there are no elements left
+        Assert.assertTrue(resprops.size() == 0);
+
+        // Now check for exception on setting null values
+        try {
+            a1.setMetadata("foo", null);
+            // The line below should never be reached
+            Assert.assertTrue(false);
+        } catch (NullPointerException nue) {
+            // NPE should be raised for null value
+            Assert.assertTrue(true);
+        }
+
+        // Now check on using null key
+        try {
+            a1.setMetadata(null, table1);
+            // The line below should never be reached
+            Assert.assertTrue(false);
+        } catch (NullPointerException nue) {
+            // NPE should be raised for null value
+            Assert.assertTrue(true);
+        }
+
+        // Now check on using null key and null value
+        try {
+            a1.setMetadata(null, null);
+            // The line below should never be reached
+            Assert.assertTrue(false);
+        } catch (NullPointerException nue) {
+            // NPE should be raised for null value
+            Assert.assertTrue(true);
+        }
     }
 }
