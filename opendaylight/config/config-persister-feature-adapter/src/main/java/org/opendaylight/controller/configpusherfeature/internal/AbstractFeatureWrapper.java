@@ -8,6 +8,7 @@
 package org.opendaylight.controller.configpusherfeature.internal;
 
 import com.google.common.base.Preconditions;
+import java.lang.String;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -49,10 +50,20 @@ public class AbstractFeatureWrapper implements Feature {
     public LinkedHashSet<FeatureConfigSnapshotHolder> getFeatureConfigSnapshotHolders() throws Exception {
         LinkedHashSet <FeatureConfigSnapshotHolder> snapShotHolders = new LinkedHashSet<FeatureConfigSnapshotHolder>();
         for(ConfigFileInfo c: getConfigurationFiles()) {
+            final String finalname = c.getFinalname();
+            if (!finalname.endsWith(".xml") || finalname.equals("/etc/jetty.xml")) {
+                // Only non-specific XML files can possibly contain config snapshots.
+                // jetty.xml comes from https://github.com/ops4j/org.ops4j.pax.web/blob/master/pax-web-features/src/main/resources/features.xml
+                continue;
+            }
             try {
                 snapShotHolders.add(new FeatureConfigSnapshotHolder(c,this));
             } catch (JAXBException e) {
-                LOG.debug("{} is not a config subsystem config file",c.getFinalname());
+                LOG.warn(
+                        "Unable to parse configuration snapshot. Config from {} will be IGNORED. " +
+                        "Note that subsequent config files may fail due to this problem. " +
+                        "Xml markup in this file needs to be fixed, for detailed information see enclosed exception.",
+                        finalname, e);
             }
         }
         return snapShotHolders;
