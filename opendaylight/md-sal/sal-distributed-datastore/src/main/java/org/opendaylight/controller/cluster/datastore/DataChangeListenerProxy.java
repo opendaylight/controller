@@ -8,10 +8,9 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
+import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
-
 import com.google.common.base.Preconditions;
-
 import org.opendaylight.controller.cluster.datastore.messages.DataChanged;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
@@ -33,6 +32,6 @@ public class DataChangeListenerProxy implements AsyncDataChangeListener<YangInst
 
     @Override public void onDataChanged(
         AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
-        dataChangeListenerActor.tell(new DataChanged(schemaContext, change), null);
+        dataChangeListenerActor.tell(new DataChanged(schemaContext, change), ActorRef.noSender());
     }
 }
