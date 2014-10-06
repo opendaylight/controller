@@ -8,12 +8,9 @@
 
 package org.opendaylight.controller.netconf.nettyutil.handler.ssh.client;
 
-import com.google.common.base.Preconditions;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelOutboundHandlerAdapter;
-import io.netty.channel.ChannelPromise;
 import java.io.IOException;
 import java.net.SocketAddress;
+
 import org.apache.sshd.ClientChannel;
 import org.apache.sshd.ClientSession;
 import org.apache.sshd.SshClient;
@@ -25,6 +22,13 @@ import org.apache.sshd.common.future.SshFutureListener;
 import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.AuthenticationHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Preconditions;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelOutboundHandlerAdapter;
+import io.netty.channel.ChannelPromise;
 
 /**
  * Netty SSH handler class. Acts as interface between Netty and SSH library.
@@ -47,7 +51,7 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
     private final AuthenticationHandler authenticationHandler;
     private final SshClient sshClient;
 
-    private AsyncSshHanderReader sshReadAsyncListener;
+    private AsyncSshHandlerReader sshReadAsyncListener;
     private AsyncSshHandlerWriter sshWriteAsyncHandler;
 
     private ClientChannel channel;
@@ -138,7 +142,20 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
         connectPromise.setSuccess();
         connectPromise = null;
 
-        sshReadAsyncListener = new AsyncSshHanderReader(this, ctx, channel.getAsyncOut());
+        // TODO we should also read from error stream and at least log from that
+
+        sshReadAsyncListener = new AsyncSshHandlerReader(new AutoCloseable() {
+            @Override
+            public void close() throws Exception {
+                AsyncSshHandler.this.disconnect(ctx, ctx.newPromise());
+            }
+        }, new AsyncSshHandlerReader.ReadMsgHandler() {
+            @Override
+            public void onMessageRead(final ByteBuf msg) {
+                ctx.fireChannelRead(msg);
+            }
+        }, channel.toString(), channel.getAsyncOut());
+
         // if readAsyncListener receives immediate close, it will close this handler and closing this handler sets channel variable to null
         if(channel != null) {
             sshWriteAsyncHandler = new AsyncSshHandlerWriter(channel.getAsyncIn());
