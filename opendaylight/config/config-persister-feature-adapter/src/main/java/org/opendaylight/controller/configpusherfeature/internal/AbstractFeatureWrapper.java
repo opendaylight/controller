@@ -55,7 +55,11 @@ public class AbstractFeatureWrapper implements Feature {
             try {
                 snapShotHolders.add(new FeatureConfigSnapshotHolder(c,this));
             } catch (JAXBException e) {
-                logger.debug("{} is not a config subsystem config file",c.getFinalname());
+                logger.warn(
+                        "Unable to parse configuration snapshot. Initial config from {} will be IGNORED in this run. " +
+                        "Note that subsequent config files may fail due to this problem. " +
+                        "Xml markup in this file needs to be fixed, for detailed information see enclosed exception.",
+                        c.getFinalname(), e);
             }
         }
         return snapShotHolders;
