@@ -10,10 +10,8 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.Props;
 import akka.japi.Creator;
-
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
-
 import org.opendaylight.controller.cluster.datastore.messages.DataChanged;
 import org.opendaylight.controller.cluster.datastore.messages.DataChangedReply;
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
@@ -24,7 +22,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 public class DataChangeListener extends AbstractUntypedActor {
     private final AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener;
-    private volatile boolean notificationsEnabled = false;
+    private boolean notificationsEnabled = false;
 
     public DataChangeListener(AsyncDataChangeListener<YangInstanceIdentifier,
                                                       NormalizedNode<?, ?>> listener) {
@@ -55,7 +53,7 @@ public class DataChangeListener extends AbstractUntypedActor {
             change = reply.getChange();
         this.listener.onDataChanged(change);
 
-        if(getSender() != null){
+        if(!getContext().system().deadLetters().equals(getSender())) {
             getSender().tell(new DataChangedReply(), getSelf());
         }
     }
