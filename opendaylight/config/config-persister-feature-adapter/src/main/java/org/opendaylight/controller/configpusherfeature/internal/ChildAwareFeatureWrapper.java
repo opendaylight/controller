@@ -79,7 +79,12 @@ public class ChildAwareFeatureWrapper extends AbstractFeatureWrapper implements 
                     f = new FeatureConfigSnapshotHolder(h,this);
                     snapShotHolders.add(f);
                 } catch (JAXBException e) {
-                    logger.debug("{} is not a config subsystem config file",h.getFileInfo().getFinalname());
+                    logger.warn(
+                            "Unable to parse configuration. Config from {} will be IGNORED. " +
+                            "Note that subsequent config files may fail due to this problem. " +
+                            "Also, this config file should have been reported already. " +
+                            "Xml in this file needs to be fixed, for detailed information see enclosed exception.",
+                            h.getFileInfo().getFinalname(), e);
                 }
             }
         }
