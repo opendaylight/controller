@@ -25,10 +25,14 @@ import io.netty.channel.local.LocalAddress;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.sshd.server.PasswordAuthenticator;
+import org.apache.sshd.server.keyprovider.PEMGeneratorHostKeyProvider;
+import org.apache.sshd.server.session.ServerSession;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,13 +44,12 @@ import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
 import org.opendaylight.controller.netconf.client.NetconfClientSessionListener;
 import org.opendaylight.controller.netconf.client.SimpleNetconfClientSessionListener;
+import org.opendaylight.controller.netconf.client.TestingNetconfClient;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfigurationBuilder;
-import org.opendaylight.controller.netconf.client.TestingNetconfClient;
 import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.AuthenticationHandler;
 import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.LoginPassword;
-import org.opendaylight.controller.netconf.ssh.NetconfSSHServer;
-import org.opendaylight.controller.netconf.ssh.authentication.PEMGenerator;
+import org.opendaylight.controller.netconf.ssh.SshProxyServer;
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageUtil;
 import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -68,19 +71,21 @@ public class NetconfITSecureTest extends AbstractNetconfConfigTest {
     public static final String USERNAME = "user";
     public static final String PASSWORD = "pwd";
 
-    private NetconfSSHServer sshServer;
+    private SshProxyServer sshProxyServer;
 
     @Before
     public void setUp() throws Exception {
-        final char[] pem = PEMGenerator.generate().toCharArray();
-        sshServer = NetconfSSHServer.start(TLS_ADDRESS.getPort(), NetconfConfigUtil.getNetconfLocalAddress(), getNettyThreadgroup(), pem);
-        sshServer.setAuthProvider(getAuthProvider());
+        sshProxyServer = new SshProxyServer(TLS_ADDRESS, NetconfConfigUtil.getNetconfLocalAddress(), new PasswordAuthenticator() {
+            @Override
+            public boolean authenticate(final String username, final String password, final ServerSession session) {
+                return true;
+            }
+        }, new PEMGeneratorHostKeyProvider(Files.createTempFile("prefix", "suffix").toAbsolutePath().toString()));
     }
 
     @After
     public void tearDown() throws Exception {
-        sshServer.close();
-        sshServer.join();
+        sshProxyServer.close();
     }
 
     @Test
