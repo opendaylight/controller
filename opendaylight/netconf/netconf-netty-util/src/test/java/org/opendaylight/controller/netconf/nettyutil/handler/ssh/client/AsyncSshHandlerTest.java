@@ -459,6 +459,8 @@ public class AsyncSshHandlerTest {
 
     private ChannelSubsystem getMockedSubsystemChannel(final IoInputStream asyncOut, final IoOutputStream asyncIn) throws IOException {
         final ChannelSubsystem subsystemChannel = mock(ChannelSubsystem.class);
+        doReturn("subsystemChannel").when(subsystemChannel).toString();
+
         doNothing().when(subsystemChannel).setStreaming(any(ClientChannel.Streaming.class));
         final OpenFuture openFuture = mock(OpenFuture.class);
 

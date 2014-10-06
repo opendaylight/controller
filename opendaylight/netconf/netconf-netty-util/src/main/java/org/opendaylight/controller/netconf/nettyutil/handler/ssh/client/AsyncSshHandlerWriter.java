@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  * Async Ssh writer. Takes messages(byte arrays) and sends them encrypted to remote server.
  * Also handles pending writes by caching requests until pending state is over.
  */
-final class AsyncSshHandlerWriter implements AutoCloseable {
+public final class AsyncSshHandlerWriter implements AutoCloseable {
 
     private static final Logger logger = LoggerFactory
             .getLogger(AsyncSshHandlerWriter.class);
@@ -116,7 +116,7 @@ final class AsyncSshHandlerWriter implements AutoCloseable {
         writeWithPendingDetection(pendingWrite.ctx, pendingWrite.promise, msg);
     }
 
-    private static String byteBufToString(final ByteBuf msg) {
+    public static String byteBufToString(final ByteBuf msg) {
         msg.resetReaderIndex();
         final String s = msg.toString(Charsets.UTF_8);
         msg.resetReaderIndex();
