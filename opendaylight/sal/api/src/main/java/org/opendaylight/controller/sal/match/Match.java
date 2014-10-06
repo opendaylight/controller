@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -15,18 +14,22 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.utils.EtherTypes;
 import org.opendaylight.controller.sal.utils.IPProtocols;
 import org.opendaylight.controller.sal.utils.NetUtils;
@@ -52,7 +55,9 @@ public class Match implements Cloneable, Serializable {
         reversableMatches = Collections.unmodifiableMap(map);
     }
     private Map<MatchType, MatchField> fields;
-    private int matches; // concise way to tell which fields the match is set for (may remove if not needed)
+    private int matches; // concise way to tell which fields the match
+                         // is set for (may remove if not needed)
+    private ConcurrentMap<String, Property> props;
 
     public Match() {
         fields = new HashMap<MatchType, MatchField>();
@@ -62,6 +67,81 @@ public class Match implements Cloneable, Serializable {
     public Match(Match match) {
         fields = new HashMap<MatchType, MatchField>(match.fields);
         matches = match.matches;
+    }
+
+    /**
+     * Gets the list of metadata currently registered with this match
+     *
+     * @return List of metadata currently registered
+     */
+    public List <Property> getMetadatas() {
+        if (this.props != null) {
+            // Return all the values in the map
+            Collection res = this.props.values();
+            if (res == null) {
+                return null;
+            }
+            return new ArrayList<Property>(res);
+        }
+        return null;
+    }
+
+    /**
+     * Gets the metadata registered with a name if present
+     *
+     * @param name the name of the property to be extracted
+     *
+     * @return List of metadata currently registered
+     */
+    public Property getMetadata(String name) {
+        if (name == null) {
+            return null;
+        }
+        if (this.props != null) {
+            // Return the Property associated to the name
+            return this.props.get(name);
+        }
+        return null;
+    }
+
+    /**
+     * Sets the metadata associated to a name. If the name or prop is NULL,
+     * an exception NullPointerException will be raised.
+     *
+     * @param name the name of the property to be set
+     * @param prop, property to be set
+     */
+    public void setMetadata(String name, Property prop) {
+        if (this.props == null) {
+            props = new ConcurrentHashMap<String, Property>();
+        }
+
+        if (this.props != null) {
+            this.props.put(name, prop);
+        }
+    }
+
+    /**
+     * Remove the metadata associated to a name. If the name is NULL,
+     * nothing will be removed.
+     *
+     * @param name the name of the property to be set
+     * @param prop, property to be set
+     *
+     * @return List of metadata currently registered
+     */
+    public void removeMetadata(String name) {
+        if (this.props == null) {
+            return;
+        }
+
+        if (this.props != null) {
+            this.props.remove(name);
+        }
+        // It's intentional to keep the this.props still allocated
+        // till the parent data structure will be alive, so to avoid
+        // unnecessary allocation/deallocation, even if it's holding
+        // nothing
     }
 
     /**

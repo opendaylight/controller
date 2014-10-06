@@ -11,11 +11,15 @@ package org.opendaylight.controller.sal.match;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.Property;
+import org.opendaylight.controller.sal.core.Tables;
+import org.opendaylight.controller.sal.core.Tier;
 import org.opendaylight.controller.sal.utils.EtherTypes;
 import org.opendaylight.controller.sal.utils.IPProtocols;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
@@ -637,5 +641,90 @@ public class MatchTest {
 
         // No intersection with null match, empty set
         Assert.assertNull(m6.getIntersection(null));
+    }
+
+    @Test
+    public void testMetadata() {
+        Property tier1 = new Tier(1);
+        Property tier2 = new Tier(2);
+        Property table1 = new Tables((byte)0x7f);
+        Match m1 = new Match();
+        List<Property> resprops = null;
+        resprops = m1.getMetadatas();
+        // This should be null
+        Assert.assertNull(resprops);
+        m1.setMetadata("tier1", tier1);
+        m1.setMetadata("tier2", tier2);
+        m1.setMetadata("table1", table1);
+        resprops = m1.getMetadatas();
+        // Check for the number of elements in it
+        Assert.assertTrue(resprops.size() == 3);
+        // Check if the elements are in it
+        Assert.assertTrue(resprops.contains(tier1));
+        Assert.assertTrue(resprops.contains(tier2));
+        Assert.assertTrue(resprops.contains(table1));
+        // Check for single elements retrieve
+        Assert.assertTrue(m1.getMetadata("tier1").equals(tier1));
+        Assert.assertTrue(m1.getMetadata("tier2").equals(tier2));
+        Assert.assertTrue(m1.getMetadata("table1").equals(table1));
+        // Now remove an element and make sure the remaining are
+        // correct
+        m1.removeMetadata("tier1");
+
+        resprops = m1.getMetadatas();
+        // Check for the number of elements in it
+        Assert.assertTrue(resprops.size() == 2);
+        // Check if the elements are in it
+        Assert.assertFalse(resprops.contains(tier1));
+        Assert.assertTrue(resprops.contains(tier2));
+        Assert.assertTrue(resprops.contains(table1));
+        // Check for single elements retrieve
+        Assert.assertTrue(m1.getMetadata("table1").equals(table1));
+        Assert.assertTrue(m1.getMetadata("tier2").equals(tier2));
+        Assert.assertNull(m1.getMetadata("tier1"));
+
+        // Check for an element never existed
+        Assert.assertNull(m1.getMetadata("table100"));
+
+        // Remove them all
+        m1.removeMetadata("tier2");
+        m1.removeMetadata("table1");
+
+        // Remove also a non-existent one
+        m1.removeMetadata("table100");
+
+        resprops = m1.getMetadatas();
+        // Check there are no elements left
+        Assert.assertTrue(resprops.size() == 0);
+
+        // Now check for exception on setting null values
+        try {
+            m1.setMetadata("foo", null);
+            // The line below should never be reached
+            Assert.assertTrue(false);
+        } catch (NullPointerException nue) {
+            // NPE should be raised for null value
+            Assert.assertTrue(true);
+        }
+
+        // Now check on using null key
+        try {
+            m1.setMetadata(null, table1);
+            // The line below should never be reached
+            Assert.assertTrue(false);
+        } catch (NullPointerException nue) {
+            // NPE should be raised for null value
+            Assert.assertTrue(true);
+        }
+
+        // Now check on using null key and null value
+        try {
+            m1.setMetadata(null, null);
+            // The line below should never be reached
+            Assert.assertTrue(false);
+        } catch (NullPointerException nue) {
+            // NPE should be raised for null value
+            Assert.assertTrue(true);
+        }
     }
 }
