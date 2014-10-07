@@ -13,6 +13,7 @@ import java.util.List;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.statistics.manager.StatPermCollector.StatCapabTypes;
+import org.opendaylight.controller.md.statistics.manager.impl.StatisticsManagerConfig;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.Meter;
@@ -70,7 +71,7 @@ public interface StatisticsManager extends AutoCloseable, TransactionChainListen
      * @param minReqNetMonitInt
      */
     void start(final NotificationProviderService notifService,
-            final RpcConsumerRegistry rpcRegistry, final long minReqNetMonitInt);
+            final RpcConsumerRegistry rpcRegistry);
 
     /**
      * Method provides read/write DataStore functionality cross applyOperation
@@ -184,6 +185,8 @@ public interface StatisticsManager extends AutoCloseable, TransactionChainListen
      * @return
      */
     StatNotifyCommiter<OpendaylightPortStatisticsListener> getPortNotifyCommit();
+
+    StatisticsManagerConfig getConfiguration();
 
 }
 
