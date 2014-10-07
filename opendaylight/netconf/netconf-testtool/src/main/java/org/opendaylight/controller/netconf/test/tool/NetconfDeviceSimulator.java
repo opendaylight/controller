@@ -23,7 +23,6 @@ import io.netty.channel.local.LocalAddress;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.HashedWheelTimer;
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
@@ -31,6 +30,8 @@ import java.net.Inet4Address;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.AbstractMap;
 import java.util.Date;
 import java.util.HashMap;
@@ -41,6 +42,9 @@ import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.apache.sshd.server.PasswordAuthenticator;
+import org.apache.sshd.server.keyprovider.PEMGeneratorHostKeyProvider;
+import org.apache.sshd.server.session.ServerSession;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfManagementSession;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
@@ -55,8 +59,7 @@ import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceSnapshot;
 import org.opendaylight.controller.netconf.monitoring.osgi.NetconfMonitoringOperationService;
-import org.opendaylight.controller.netconf.ssh.NetconfSSHServer;
-import org.opendaylight.controller.netconf.ssh.authentication.PEMGenerator;
+import org.opendaylight.controller.netconf.ssh.SshProxyServer;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceException;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceRepresentation;
@@ -83,6 +86,7 @@ public class NetconfDeviceSimulator implements Closeable {
     private final NioEventLoopGroup nettyThreadgroup;
     private final HashedWheelTimer hashedWheelTimer;
     private final List<Channel> devicesChannels = Lists.newArrayList();
+    private final List<SshProxyServer> sshWrappers = Lists.newArrayList();
 
     public NetconfDeviceSimulator() {
         this(new NioEventLoopGroup(), new HashedWheelTimer());
@@ -158,6 +162,10 @@ public class NetconfDeviceSimulator implements Closeable {
         int currentPort = params.startingPort;
 
         final List<Integer> openDevices = Lists.newArrayList();
+
+        // Generate key to temp folder
+        final PEMGeneratorHostKeyProvider keyPairProvider = getPemGeneratorHostKeyProvider();
+
         for (int i = 0; i < params.deviceCount; i++) {
             final InetSocketAddress address = getAddress(currentPort);
 
@@ -167,8 +175,16 @@ public class NetconfDeviceSimulator implements Closeable {
 
                 server = dispatcher.createLocalServer(tcpLocalAddress);
                 try {
-                    final NetconfSSHServer sshServer = NetconfSSHServer.start(currentPort, tcpLocalAddress, nettyThreadgroup, getPemArray());
-                    sshServer.setAuthProvider(new AcceptingAuthProvider());
+                    final SshProxyServer sshServer = new SshProxyServer(new InetSocketAddress("0.0.0.0", currentPort), tcpLocalAddress,
+                            new PasswordAuthenticator() {
+                                @Override
+                                public boolean authenticate(final String username, final String password, final ServerSession session) {
+                                    // All connections are accepted
+                                    return true;
+                                }
+                            }, keyPairProvider);
+
+                    sshWrappers.add(sshServer);
                 } catch (final Exception e) {
                     LOG.warn("Cannot start simulated device on {}, skipping", address, e);
                     // Close local server and continue
@@ -222,10 +238,12 @@ public class NetconfDeviceSimulator implements Closeable {
         return openDevices;
     }
 
-    private char[] getPemArray() {
+    private PEMGeneratorHostKeyProvider getPemGeneratorHostKeyProvider() {
         try {
-            return PEMGenerator.readOrGeneratePK(new File("PK")).toCharArray();
+            final Path tempFile = Files.createTempFile("tempKeyNetconfTest", "suffix");
+            return new PEMGeneratorHostKeyProvider(tempFile.toAbsolutePath().toString());
         } catch (final IOException e) {
+            LOG.error("Unable to generate PEM key", e);
             throw new RuntimeException(e);
         }
     }
@@ -280,6 +298,9 @@ public class NetconfDeviceSimulator implements Closeable {
 
     @Override
     public void close() {
+        for (final SshProxyServer sshWrapper : sshWrappers) {
+            sshWrapper.close();
+        }
         for (final Channel deviceCh : devicesChannels) {
             deviceCh.close();
         }
