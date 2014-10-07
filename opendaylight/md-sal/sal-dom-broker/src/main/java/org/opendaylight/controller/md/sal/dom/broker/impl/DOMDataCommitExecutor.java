@@ -21,7 +21,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCoh
  *
  *
  */
-interface DOMDataCommitExecutor {
+public interface DOMDataCommitExecutor {
 
     /**
      * Submits supplied transaction to be executed in context of provided

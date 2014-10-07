@@ -8,6 +8,7 @@
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
 import static com.google.common.base.Preconditions.checkState;
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import java.util.EnumMap;
@@ -25,7 +26,6 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.util.DurationStatsTracker;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,23 +35,24 @@ public class DOMDataBrokerImpl extends AbstractDOMForwardedTransactionFactory<DO
 
     private static final Logger LOG = LoggerFactory.getLogger(DOMDataBrokerImpl.class);
 
-    private final DOMDataCommitCoordinatorImpl coordinator;
+    private final DOMDataCommitExecutor coordinator;
     private final AtomicLong txNum = new AtomicLong();
     private final AtomicLong chainNum = new AtomicLong();
     private volatile AutoCloseable closeable;
 
     public DOMDataBrokerImpl(final Map<LogicalDatastoreType, DOMStore> datastores,
             final ListeningExecutorService executor) {
+        this(datastores, new DOMDataCommitCoordinatorImpl(executor));
+    }
+
+    public DOMDataBrokerImpl(final Map<LogicalDatastoreType, DOMStore> datastores,
+            final DOMDataCommitExecutor coordinator) {
         super(datastores);
-        this.coordinator = new DOMDataCommitCoordinatorImpl(executor);
+        this.coordinator = Preconditions.checkNotNull(coordinator);
     }
 
     public void setCloseable(final AutoCloseable closeable) {
         this.closeable = closeable;
-    }
-
-    public DurationStatsTracker getCommitStatsTracker() {
-        return coordinator.getCommitStatsTracker();
     }
 
     @Override
