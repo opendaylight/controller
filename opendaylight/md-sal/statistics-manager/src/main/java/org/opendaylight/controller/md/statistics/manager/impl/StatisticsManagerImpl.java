@@ -8,15 +8,8 @@
 
 package org.opendaylight.controller.md.statistics.manager.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ThreadFactory;
-
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -46,8 +39,14 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadFactory;
 
 /**
 * statistics-manager
@@ -73,8 +72,6 @@ public class StatisticsManagerImpl implements StatisticsManager, Runnable {
    private final BlockingQueue<StatDataStoreOperation> dataStoreOperQueue = new LinkedBlockingDeque<>(QUEUE_DEPTH);
 
    private final DataBroker dataBroker;
-   private final int maxNodesForCollectors;
-   private long minReqNetMonitInt;
    private final ExecutorService statRpcMsgManagerExecutor;
    private final ExecutorService statDataStoreOperationServ;
    private StatRpcMsgManager rpcMsgManager;
@@ -91,23 +88,24 @@ public class StatisticsManagerImpl implements StatisticsManager, Runnable {
    private StatNotifyCommiter<OpendaylightFlowTableStatisticsListener> tableNotifCommiter;
    private StatNotifyCommiter<OpendaylightPortStatisticsListener> portNotifyCommiter;
 
-   public StatisticsManagerImpl (final DataBroker dataBroker, final int maxNodesForCollector) {
+   private final StatisticsManagerConfig statManagerConfig;
+
+   public StatisticsManagerImpl (final DataBroker dataBroker, StatisticsManagerConfig statManagerconfig) {
+       this.statManagerConfig = Preconditions.checkNotNull(statManagerconfig);
        this.dataBroker = Preconditions.checkNotNull(dataBroker, "DataBroker can not be null!");
        ThreadFactory threadFact;
        threadFact = new ThreadFactoryBuilder().setNameFormat("odl-stat-rpc-oper-thread-%d").build();
        statRpcMsgManagerExecutor = Executors.newSingleThreadExecutor(threadFact);
        threadFact = new ThreadFactoryBuilder().setNameFormat("odl-stat-ds-oper-thread-%d").build();
        statDataStoreOperationServ = Executors.newSingleThreadExecutor(threadFact);
-       maxNodesForCollectors = maxNodesForCollector;
        txChain =  dataBroker.createTransactionChain(this);
    }
 
    @Override
    public void start(final NotificationProviderService notifService,
-           final RpcConsumerRegistry rpcRegistry, final long minReqNetMonitInt) {
+           final RpcConsumerRegistry rpcRegistry) {
        Preconditions.checkArgument(rpcRegistry != null, "RpcConsumerRegistry can not be null !");
-       this.minReqNetMonitInt = minReqNetMonitInt;
-       rpcMsgManager = new StatRpcMsgManagerImpl(this, rpcRegistry, minReqNetMonitInt);
+       rpcMsgManager = new StatRpcMsgManagerImpl(this, rpcRegistry, statManagerConfig.getMinRequestNetMonitorInterval());
        statCollectors = Collections.emptyList();
        nodeRegistrator = new StatNodeRegistrationImpl(this, dataBroker, notifService);
        flowListeningCommiter = new StatListenCommitFlow(this, dataBroker, notifService);
@@ -272,7 +270,8 @@ public class StatisticsManagerImpl implements StatisticsManager, Runnable {
                }
            }
            final StatPermCollectorImpl newCollector = new StatPermCollectorImpl(this,
-                   minReqNetMonitInt, statCollectors.size() + 1, maxNodesForCollectors);
+                   statManagerConfig.getMinRequestNetMonitorInterval(), statCollectors.size() + 1,
+                   statManagerConfig.getMaxNodesForCollector());
            final List<StatPermCollector> statCollectorsNew = new ArrayList<>(statCollectors);
            newCollector.connectedNodeRegistration(nodeIdent, statTypes, nrOfSwitchTables);
            statCollectorsNew.add(newCollector);
@@ -355,5 +354,10 @@ public class StatisticsManagerImpl implements StatisticsManager, Runnable {
    public StatNotifyCommiter<OpendaylightPortStatisticsListener> getPortNotifyCommit() {
        return portNotifyCommiter;
    }
+
+    @Override
+    public StatisticsManagerConfig getConfiguration() {
+        return statManagerConfig;
+    }
 }
 
