@@ -12,19 +12,26 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 
-import ch.ethz.ssh2.Connection;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
-import java.io.InputStream;
 import java.net.InetSocketAddress;
-import junit.framework.Assert;
-import org.apache.commons.io.IOUtils;
+import java.nio.file.Files;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import org.apache.sshd.ClientSession;
+import org.apache.sshd.SshClient;
+import org.apache.sshd.client.future.AuthFuture;
+import org.apache.sshd.client.future.ConnectFuture;
+import org.apache.sshd.server.PasswordAuthenticator;
+import org.apache.sshd.server.keyprovider.PEMGeneratorHostKeyProvider;
+import org.apache.sshd.server.session.ServerSession;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.opendaylight.controller.netconf.auth.AuthProvider;
-import org.opendaylight.controller.netconf.ssh.NetconfSSHServer;
+import org.opendaylight.controller.netconf.ssh.SshProxyServer;
 import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceListener;
@@ -39,13 +46,15 @@ public class SSHServerTest {
     private static final String PASSWORD = "netconf";
     private static final String HOST = "127.0.0.1";
     private static final int PORT = 1830;
-    private static final InetSocketAddress tcpAddress = new InetSocketAddress("127.0.0.1", 8383);
     private static final Logger logger = LoggerFactory.getLogger(SSHServerTest.class);
-    private Thread sshServerThread;
+
+    private SshProxyServer server;
 
     @Mock
     private BundleContext mockedContext;
-
+    private final ExecutorService nioExec = Executors.newFixedThreadPool(1);
+    private final EventLoopGroup clientGroup = new NioEventLoopGroup();
+    private final ScheduledExecutorService minaTimerEx = Executors.newScheduledThreadPool(1);
 
     @Before
     public void setUp() throws Exception {
@@ -55,42 +64,39 @@ public class SSHServerTest {
         doReturn(new ServiceReference[0]).when(mockedContext).getServiceReferences(anyString(), anyString());
 
         logger.info("Creating SSH server");
-        String pem;
-        try (InputStream is = getClass().getResourceAsStream("/RSA.pk")) {
-            pem = IOUtils.toString(is);
-        }
 
-
-        EventLoopGroup bossGroup = new NioEventLoopGroup();
-        NetconfSSHServer server = NetconfSSHServer.start(PORT, NetconfConfigUtil.getNetconfLocalAddress(),
-                bossGroup, pem.toCharArray());
-        server.setAuthProvider(new AuthProvider() {
-            @Override
-            public boolean authenticated(final String username, final String password) {
-                return true;
-            }
-        });
-
-        sshServerThread = new Thread(server);
-        sshServerThread.setDaemon(true);
-        sshServerThread.start();
-        logger.info("SSH server on " + PORT);
+        final InetSocketAddress addr = InetSocketAddress.createUnresolved(HOST, PORT);
+        server = new SshProxyServer(minaTimerEx, clientGroup, nioExec);
+        server.bind(addr, NetconfConfigUtil.getNetconfLocalAddress(),
+                new PasswordAuthenticator() {
+                    @Override
+                    public boolean authenticate(final String username, final String password, final ServerSession session) {
+                        return true;
+                    }
+                }, new PEMGeneratorHostKeyProvider(Files.createTempFile("prefix", "suffix").toAbsolutePath().toString()));
+        logger.info("SSH server started on " + PORT);
     }
 
     @Test
-    public void connect() {
+    public void connect() throws Exception {
+        final SshClient sshClient = SshClient.setUpDefaultClient();
+        sshClient.start();
         try {
-            Connection conn = new Connection(HOST, PORT);
-            Assert.assertNotNull(conn);
-            logger.info("connecting to SSH server");
-            conn.connect();
-            logger.info("authenticating ...");
-            boolean isAuthenticated = conn.authenticateWithPassword(USER, PASSWORD);
-            Assert.assertTrue(isAuthenticated);
-        } catch (Exception e) {
-            logger.error("Error while starting SSH server.", e);
+            final ConnectFuture connect = sshClient.connect(USER, HOST, PORT);
+            connect.await(30, TimeUnit.SECONDS);
+            org.junit.Assert.assertTrue(connect.isConnected());
+            final ClientSession session = connect.getSession();
+            session.addPasswordIdentity(PASSWORD);
+            final AuthFuture auth = session.auth();
+            auth.await(30, TimeUnit.SECONDS);
+            org.junit.Assert.assertTrue(auth.isSuccess());
+        } finally {
+            sshClient.close(true);
+            server.close();
+            clientGroup.shutdownGracefully().await();
+            minaTimerEx.shutdownNow();
+            nioExec.shutdownNow();
         }
-
     }
 
 }
