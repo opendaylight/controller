@@ -8,9 +8,9 @@
 package org.opendaylight.controller.md.sal.dom.store.benchmark;
 
 import java.util.concurrent.TimeUnit;
-import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
+import org.opendaylight.controller.md.sal.dom.broker.impl.DOMDataBrokerImpl;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Measurement;
@@ -19,34 +19,30 @@ import org.openjdk.jmh.annotations.Warmup;
 /**
  * @author Lukas Sedlak <lsedlak@cisco.com>
  */
-public abstract class AbstractInMemoryDatastoreWriteTransactionBenchmark extends AbstractInMemoryWriteTransactionBenchmark {
+public abstract class AbstractInMemoryBrokerWriteTransactionBenchmark extends AbstractInMemoryWriteTransactionBenchmark {
 
-    protected InMemoryDOMDataStore domStore;
+    protected DOMDataBrokerImpl domBroker;
 
     protected void initTestNode() throws Exception {
         final YangInstanceIdentifier testPath = YangInstanceIdentifier.builder(BenchmarkModel.TEST_PATH)
             .build();
-        DOMStoreReadWriteTransaction writeTx = domStore.newReadWriteTransaction();
-        writeTx.write(testPath, provideOuterListNode());
+        DOMDataReadWriteTransaction writeTx = domBroker.newReadWriteTransaction();
+        writeTx.put(LogicalDatastoreType.OPERATIONAL, testPath, provideOuterListNode());
 
-        DOMStoreThreePhaseCommitCohort cohort = writeTx.ready();
-        cohort.canCommit().get();
-        cohort.preCommit().get();
-        cohort.commit().get();
+        writeTx.submit().get();
     }
 
     @Benchmark
     @Warmup(iterations = WARMUP_ITERATIONS, timeUnit = TimeUnit.MILLISECONDS)
     @Measurement(iterations = MEASUREMENT_ITERATIONS, timeUnit = TimeUnit.MILLISECONDS)
     public void write100KSingleNodeWithOneInnerItemInOneCommitBenchmark() throws Exception {
-        DOMStoreReadWriteTransaction writeTx = domStore.newReadWriteTransaction();
+
+        DOMDataReadWriteTransaction writeTx = domBroker.newReadWriteTransaction();
         for (int outerListKey = 0; outerListKey < OUTER_LIST_100K; ++outerListKey) {
-            writeTx.write(OUTER_LIST_100K_PATHS[outerListKey], OUTER_LIST_ONE_ITEM_INNER_LIST[outerListKey]);
+            writeTx.put(LogicalDatastoreType.OPERATIONAL, OUTER_LIST_100K_PATHS[outerListKey], OUTER_LIST_ONE_ITEM_INNER_LIST[outerListKey]);
         }
-        DOMStoreThreePhaseCommitCohort cohort = writeTx.ready();
-        cohort.canCommit().get();
-        cohort.preCommit().get();
-        cohort.commit().get();
+
+        writeTx.submit().get();
     }
 
     @Benchmark
@@ -54,13 +50,10 @@ public abstract class AbstractInMemoryDatastoreWriteTransactionBenchmark extends
     @Measurement(iterations = MEASUREMENT_ITERATIONS, timeUnit = TimeUnit.MILLISECONDS)
     public void write100KSingleNodeWithOneInnerItemInCommitPerWriteBenchmark() throws Exception {
         for (int outerListKey = 0; outerListKey < OUTER_LIST_100K; ++outerListKey) {
-            DOMStoreReadWriteTransaction writeTx = domStore.newReadWriteTransaction();
-            writeTx.write(OUTER_LIST_100K_PATHS[outerListKey], OUTER_LIST_ONE_ITEM_INNER_LIST[outerListKey]);
+            DOMDataReadWriteTransaction writeTx = domBroker.newReadWriteTransaction();
+            writeTx.put(LogicalDatastoreType.OPERATIONAL, OUTER_LIST_100K_PATHS[outerListKey], OUTER_LIST_ONE_ITEM_INNER_LIST[outerListKey]);
 
-            DOMStoreThreePhaseCommitCohort cohort = writeTx.ready();
-            cohort.canCommit().get();
-            cohort.preCommit().get();
-            cohort.commit().get();
+            writeTx.submit().get();
         }
     }
 
@@ -68,14 +61,12 @@ public abstract class AbstractInMemoryDatastoreWriteTransactionBenchmark extends
     @Warmup(iterations = WARMUP_ITERATIONS, timeUnit = TimeUnit.MILLISECONDS)
     @Measurement(iterations = MEASUREMENT_ITERATIONS, timeUnit = TimeUnit.MILLISECONDS)
     public void write50KSingleNodeWithTwoInnerItemsInOneCommitBenchmark() throws Exception {
-        DOMStoreReadWriteTransaction writeTx = domStore.newReadWriteTransaction();
+        DOMDataReadWriteTransaction writeTx = domBroker.newReadWriteTransaction();
         for (int outerListKey = 0; outerListKey < OUTER_LIST_50K; ++outerListKey) {
-            writeTx.write(OUTER_LIST_50K_PATHS[outerListKey], OUTER_LIST_TWO_ITEM_INNER_LIST[outerListKey]);
+            writeTx.put(LogicalDatastoreType.OPERATIONAL, OUTER_LIST_50K_PATHS[outerListKey], OUTER_LIST_TWO_ITEM_INNER_LIST[outerListKey]);
         }
-        DOMStoreThreePhaseCommitCohort cohort = writeTx.ready();
-        cohort.canCommit().get();
-        cohort.preCommit().get();
-        cohort.commit().get();
+
+        writeTx.submit().get();
     }
 
     @Benchmark
@@ -83,12 +74,9 @@ public abstract class AbstractInMemoryDatastoreWriteTransactionBenchmark extends
     @Measurement(iterations = MEASUREMENT_ITERATIONS, timeUnit = TimeUnit.MILLISECONDS)
     public void write50KSingleNodeWithTwoInnerItemsInCommitPerWriteBenchmark() throws Exception {
         for (int outerListKey = 0; outerListKey < OUTER_LIST_50K; ++outerListKey) {
-            DOMStoreReadWriteTransaction writeTx = domStore.newReadWriteTransaction();
-            writeTx.write(OUTER_LIST_50K_PATHS[outerListKey], OUTER_LIST_TWO_ITEM_INNER_LIST[outerListKey]);
-            DOMStoreThreePhaseCommitCohort cohort = writeTx.ready();
-            cohort.canCommit().get();
-            cohort.preCommit().get();
-            cohort.commit().get();
+            DOMDataReadWriteTransaction writeTx = domBroker.newReadWriteTransaction();
+            writeTx.put(LogicalDatastoreType.OPERATIONAL, OUTER_LIST_50K_PATHS[outerListKey], OUTER_LIST_TWO_ITEM_INNER_LIST[outerListKey]);
+            writeTx.submit().get();
         }
     }
 
@@ -96,14 +84,11 @@ public abstract class AbstractInMemoryDatastoreWriteTransactionBenchmark extends
     @Warmup(iterations = WARMUP_ITERATIONS, timeUnit = TimeUnit.MILLISECONDS)
     @Measurement(iterations = MEASUREMENT_ITERATIONS, timeUnit = TimeUnit.MILLISECONDS)
     public void write10KSingleNodeWithTenInnerItemsInOneCommitBenchmark() throws Exception {
-        DOMStoreReadWriteTransaction writeTx = domStore.newReadWriteTransaction();
+        DOMDataReadWriteTransaction writeTx = domBroker.newReadWriteTransaction();
         for (int outerListKey = 0; outerListKey < OUTER_LIST_10K; ++outerListKey) {
-            writeTx.write(OUTER_LIST_10K_PATHS[outerListKey], OUTER_LIST_TEN_ITEM_INNER_LIST[outerListKey]);
+            writeTx.put(LogicalDatastoreType.OPERATIONAL, OUTER_LIST_10K_PATHS[outerListKey], OUTER_LIST_TEN_ITEM_INNER_LIST[outerListKey]);
         }
-        DOMStoreThreePhaseCommitCohort cohort = writeTx.ready();
-        cohort.canCommit().get();
-        cohort.preCommit().get();
-        cohort.commit().get();
+        writeTx.submit().get();
     }
 
     @Benchmark
@@ -111,12 +96,9 @@ public abstract class AbstractInMemoryDatastoreWriteTransactionBenchmark extends
     @Measurement(iterations = MEASUREMENT_ITERATIONS, timeUnit = TimeUnit.MILLISECONDS)
     public void write10KSingleNodeWithTenInnerItemsInCommitPerWriteBenchmark() throws Exception {
         for (int outerListKey = 0; outerListKey < OUTER_LIST_10K; ++outerListKey) {
-            DOMStoreReadWriteTransaction writeTx = domStore.newReadWriteTransaction();
-            writeTx.write(OUTER_LIST_10K_PATHS[outerListKey], OUTER_LIST_TEN_ITEM_INNER_LIST[outerListKey]);
-            DOMStoreThreePhaseCommitCohort cohort = writeTx.ready();
-            cohort.canCommit().get();
-            cohort.preCommit().get();
-            cohort.commit().get();
+            DOMDataReadWriteTransaction writeTx = domBroker.newReadWriteTransaction();
+            writeTx.put(LogicalDatastoreType.OPERATIONAL, OUTER_LIST_10K_PATHS[outerListKey], OUTER_LIST_TEN_ITEM_INNER_LIST[outerListKey]);
+            writeTx.submit().get();
         }
     }
 }
