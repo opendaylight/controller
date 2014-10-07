@@ -31,7 +31,7 @@ public class StatisticsManagerActivator extends AbstractBindingAwareProvider {
 
     /* TODO move it to ConfigSubsystem */
     private static final long DEFAULT_MIN_REQUEST_NET_MONITOR_INTERVAL = 3000L;
-    private static final int MAX_NODES_FOR_COLLECTOR = 16;
+    private static final int MAX_NODES_FOR_COLLECTOR = 32;
 
     private StatisticsManager statsProvider;
 

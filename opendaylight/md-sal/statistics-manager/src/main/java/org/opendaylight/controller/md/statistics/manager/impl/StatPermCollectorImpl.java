@@ -39,7 +39,7 @@ public class StatPermCollectorImpl implements StatPermCollector {
 
     private final static Logger LOG = LoggerFactory.getLogger(StatPermCollectorImpl.class);
 
-    private final static long STAT_COLLECT_TIME_OUT = 30000L;
+    private final static long STAT_COLLECT_TIME_OUT = 3000L;
 
     private final ExecutorService statNetCollectorServ;
     private final StatisticsManager manager;
@@ -149,6 +149,7 @@ public class StatPermCollectorImpl implements StatPermCollector {
                 if (wakeMe) {
                     LOG.trace("STAT-COLLECTOR is notified to conntinue");
                     statCollectorLock.notify();
+                    wakeMe = false;
                 }
             }
         }
