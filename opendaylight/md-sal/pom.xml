@@ -50,6 +50,7 @@
     <module>sal-netconf-connector</module>
 
     <module>inventory-manager</module>
+    <module>inventory-manager-config</module>
     <module>statistics-manager</module>
     <module>topology-manager</module>
     <module>forwardingrules-manager</module>
