@@ -1,6 +1,10 @@
 package test.mock.util;
 
 import com.google.common.util.concurrent.Futures;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Future;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.FlowTableStatisticsUpdateBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.GetFlowTablesStatisticsInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.GetFlowTablesStatisticsOutput;
@@ -15,15 +19,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicLong;
-
 public class OpendaylightFlowTableStatisticsServiceMock implements OpendaylightFlowTableStatisticsService {
     NotificationProviderServiceHelper notifService;
-    AtomicLong transNum = new AtomicLong();
 
     public OpendaylightFlowTableStatisticsServiceMock(NotificationProviderServiceHelper notifService) {
         this.notifService = notifService;
@@ -32,7 +29,7 @@ public class OpendaylightFlowTableStatisticsServiceMock implements OpendaylightF
     @Override
     public Future<RpcResult<GetFlowTablesStatisticsOutput>> getFlowTablesStatistics(GetFlowTablesStatisticsInput input) {
         GetFlowTablesStatisticsOutputBuilder builder = new GetFlowTablesStatisticsOutputBuilder();
-        TransactionId transId = new TransactionId(BigInteger.valueOf(transNum.incrementAndGet()));
+        TransactionId transId = new TransactionId(BigInteger.valueOf(TestUtils.getNewTransactionId()));
         builder.setTransactionId(transId);
         FlowTableStatisticsUpdateBuilder ftsBuilder = new FlowTableStatisticsUpdateBuilder();
         FlowTableAndStatisticsMapBuilder ftasmBuilder = new FlowTableAndStatisticsMapBuilder();

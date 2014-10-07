@@ -38,7 +38,7 @@ public class OpendaylightQueueStatisticsServiceMock implements OpendaylightQueue
     @Override
     public Future<RpcResult<GetAllQueuesStatisticsFromAllPortsOutput>> getAllQueuesStatisticsFromAllPorts(GetAllQueuesStatisticsFromAllPortsInput input) {
         GetAllQueuesStatisticsFromAllPortsOutputBuilder builder = new GetAllQueuesStatisticsFromAllPortsOutputBuilder();
-        TransactionId transId = new TransactionId(BigInteger.valueOf(transNum.incrementAndGet()));
+        TransactionId transId = new TransactionId(BigInteger.valueOf(TestUtils.getNewTransactionId()));
         builder.setTransactionId(transId);
         QueueStatisticsUpdateBuilder qsuBuilder = new QueueStatisticsUpdateBuilder();
         QueueIdAndStatisticsMapBuilder qiasmBuilder = new QueueIdAndStatisticsMapBuilder();
@@ -57,7 +57,7 @@ public class OpendaylightQueueStatisticsServiceMock implements OpendaylightQueue
     @Override
     public Future<RpcResult<GetAllQueuesStatisticsFromGivenPortOutput>> getAllQueuesStatisticsFromGivenPort(GetAllQueuesStatisticsFromGivenPortInput input) {
         GetAllQueuesStatisticsFromGivenPortOutputBuilder builder = new GetAllQueuesStatisticsFromGivenPortOutputBuilder();
-        TransactionId transId = new TransactionId(BigInteger.valueOf(transNum.incrementAndGet()));
+        TransactionId transId = new TransactionId(BigInteger.valueOf(TestUtils.getNewTransactionId()));
         builder.setTransactionId(transId);
         return Futures.immediateFuture(RpcResultBuilder.success(builder.build()).build());
     }
@@ -65,7 +65,7 @@ public class OpendaylightQueueStatisticsServiceMock implements OpendaylightQueue
     @Override
     public Future<RpcResult<GetQueueStatisticsFromGivenPortOutput>> getQueueStatisticsFromGivenPort(GetQueueStatisticsFromGivenPortInput input) {
         GetQueueStatisticsFromGivenPortOutputBuilder builder = new GetQueueStatisticsFromGivenPortOutputBuilder();
-        TransactionId transId = new TransactionId(BigInteger.valueOf(transNum.incrementAndGet()));
+        TransactionId transId = new TransactionId(BigInteger.valueOf(TestUtils.getNewTransactionId()));
         builder.setTransactionId(transId);
         QueueIdAndStatisticsMapBuilder qiasmBuilder = new QueueIdAndStatisticsMapBuilder();
         List<QueueIdAndStatisticsMap> queueIdAndStatisticsMaps = new ArrayList<>();
