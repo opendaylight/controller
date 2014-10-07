@@ -23,6 +23,15 @@
       <classifier>features</classifier>
       <type>xml</type>
     </dependency>
+
+  <dependency>
+      <groupId>org.opendaylight.controller.md</groupId>
+      <artifactId>statistics-manager-config</artifactId>
+      <version>${mdsal.version}</version>
+      <type>xml</type>
+      <classifier>config</classifier>
+  </dependency>
+
     <dependency>
       <groupId>org.opendaylight.controller.model</groupId>
       <artifactId>model-flow-base</artifactId>
