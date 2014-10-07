@@ -77,6 +77,7 @@
     <config.toaster.configfile>03-toaster-sample.xml</config.toaster.configfile>
     <config.restconf.configfile>10-rest-connector.xml</config.restconf.configfile>
     <config.netconf.connector.configfile>99-netconf-connector.xml</config.netconf.connector.configfile>
+    <config.inventory.manager.configfile>30-inventory-manager.xml</config.inventory.manager.configfile>
     <configuration.implementation.version>0.5.0-SNAPSHOT</configuration.implementation.version>
     <configuration.version>0.5.0-SNAPSHOT</configuration.version>
     <connectionmanager.version>0.2.0-SNAPSHOT</connectionmanager.version>
