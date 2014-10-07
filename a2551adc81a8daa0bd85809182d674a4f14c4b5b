@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da87b5cf_8479a895",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/action/Action.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-10-07T17:29:51Z",
+      "side": 1,
+      "message": "please return Collections.emptyList() instead of null (here and above)",
+      "revId": "a2551adc81a8daa0bd85809182d674a4f14c4b5b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da87b5cf_6474a49c",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/match/Match.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-10-07T17:29:51Z",
+      "side": 1,
+      "message": "please return Collections.emptyList() instead of null",
+      "revId": "a2551adc81a8daa0bd85809182d674a4f14c4b5b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
