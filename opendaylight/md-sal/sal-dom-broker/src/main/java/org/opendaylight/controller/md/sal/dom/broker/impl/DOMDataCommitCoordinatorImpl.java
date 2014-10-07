@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
-import org.opendaylight.yangtools.util.DurationStatsTracker;
+import org.opendaylight.yangtools.util.DurationStatisticsTracker;
 import org.opendaylight.yangtools.util.concurrent.MappingCheckedFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
 
     private static final Logger LOG = LoggerFactory.getLogger(DOMDataCommitCoordinatorImpl.class);
-    private final DurationStatsTracker commitStatsTracker = new DurationStatsTracker();
+    private final DurationStatisticsTracker commitStatsTracker = DurationStatisticsTracker.createConcurrent();
     private final ListeningExecutorService executor;
 
     /**
@@ -56,7 +56,7 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
         this.executor = Preconditions.checkNotNull(executor, "executor must not be null.");
     }
 
-    public DurationStatsTracker getCommitStatsTracker() {
+    public DurationStatisticsTracker getCommitStatsTracker() {
         return commitStatsTracker;
     }
 
@@ -129,16 +129,16 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
                 AtomicReferenceFieldUpdater.newUpdater(CommitCoordinationTask.class, CommitPhase.class, "currentPhase");
         private final DOMDataWriteTransaction tx;
         private final Iterable<DOMStoreThreePhaseCommitCohort> cohorts;
-        private final DurationStatsTracker commitStatTracker;
+        private final DurationStatisticsTracker commitStatTracker;
         private final int cohortSize;
         private volatile CommitPhase currentPhase = CommitPhase.SUBMITTED;
 
         public CommitCoordinationTask(final DOMDataWriteTransaction transaction,
                 final Iterable<DOMStoreThreePhaseCommitCohort> cohorts,
-                final DurationStatsTracker commitStatTracker) {
+                final DurationStatisticsTracker commitStatsTracker) {
             this.tx = Preconditions.checkNotNull(transaction, "transaction must not be null");
             this.cohorts = Preconditions.checkNotNull(cohorts, "cohorts must not be null");
-            this.commitStatTracker = commitStatTracker;
+            this.commitStatTracker = commitStatsTracker;
             this.cohortSize = Iterables.size(cohorts);
         }
 
