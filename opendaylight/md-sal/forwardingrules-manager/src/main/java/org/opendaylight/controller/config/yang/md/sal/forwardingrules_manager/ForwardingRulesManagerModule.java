@@ -1,12 +1,15 @@
 package org.opendaylight.controller.config.yang.md.sal.forwardingrules_manager;
 
 import org.opendaylight.controller.frm.ForwardingRulesManager;
+import org.opendaylight.controller.frm.impl.FRMConfig;
 import org.opendaylight.controller.frm.impl.ForwardingRulesManagerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ForwardingRulesManagerModule extends org.opendaylight.controller.config.yang.md.sal.forwardingrules_manager.AbstractForwardingRulesManagerModule {
     private final static Logger LOG = LoggerFactory.getLogger(ForwardingRulesManagerModule.class);
+
+    private static final boolean CLEAN_ALIEN_FLOWS_ON_RECONCIL_DEFAULT = false;
 
     private ForwardingRulesManager forwardingrulessManagerProvider;
 
@@ -26,7 +29,9 @@ public class ForwardingRulesManagerModule extends org.opendaylight.controller.co
     @Override
     public java.lang.AutoCloseable createInstance() {
         LOG.info("FRM module initialization.");
-        forwardingrulessManagerProvider = new ForwardingRulesManagerImpl(getDataBrokerDependency(), getRpcRegistryDependency());
+        FRMConfig config = createConfig();
+        forwardingrulessManagerProvider = new ForwardingRulesManagerImpl(getDataBrokerDependency(),
+                getRpcRegistryDependency(), getNotificationServiceDependency(), config);
         forwardingrulessManagerProvider.start();
         LOG.info("FRM module started successfully.");
         return new AutoCloseable() {
@@ -40,6 +45,17 @@ public class ForwardingRulesManagerModule extends org.opendaylight.controller.co
                 LOG.info("FRM module stoped.");
             }
         };
+    }
+
+    public FRMConfig createConfig() {
+        FRMConfig.FrmConfigBuilder builder = FRMConfig.builder();
+        if (getFrmSettings() != null && getFrmSettings().getCleanAlienFlowsOnReconciliation() != null) {
+            builder.setCleanAlienFlowsOnReconcil(getFrmSettings().getCleanAlienFlowsOnReconciliation());
+        } else {
+            // Default to false if nothing is set
+            builder.setCleanAlienFlowsOnReconcil(CLEAN_ALIEN_FLOWS_ON_RECONCIL_DEFAULT);
+        }
+        return builder.build();
     }
 
 }
