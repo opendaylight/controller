@@ -13,12 +13,10 @@ import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.ReceiveTimeout;
 import akka.japi.Creator;
-
+import akka.serialization.Serialization;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
-
-
 import org.opendaylight.controller.cluster.datastore.exceptions.UnknownMessageException;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
@@ -207,8 +205,8 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
         DOMStoreThreePhaseCommitCohort cohort =  transaction.ready();
         ActorRef cohortActor = getContext().actorOf(
             ThreePhaseCommitCohort.props(cohort, shardActor, modification, shardStats), "cohort");
-        getSender()
-        .tell(new ReadyTransactionReply(cohortActor.path()).toSerializable(), getSelf());
+        getSender().tell(new ReadyTransactionReply(
+            Serialization.serializedActorPath(cohortActor)).toSerializable(), getSelf());
 
     }
 
