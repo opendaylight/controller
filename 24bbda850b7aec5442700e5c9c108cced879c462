@@ -16,6 +16,24 @@
       "revId": "24bbda850b7aec5442700e5c9c108cced879c462",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da87b5cf_47a40257",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-08T22:25:49Z",
+      "side": 1,
+      "message": "Abhishek if I am getting your point your are suggesting doing a resolveOne and getting the ActorRef/ActorPath that way. Am I right?",
+      "parentUuid": "da87b5cf_a7762e05",
+      "revId": "24bbda850b7aec5442700e5c9c108cced879c462",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
