@@ -34,12 +34,27 @@ module forwardingrules-manager {
                 }
             }
 
+            container notification-service {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity mdsal:binding-notification-service;
+                    }
+                }
+            }
+
             container data-broker {
                 uses config:service-ref {
                     refine type {
                         mandatory false;
                         config:required-identity mdsal:binding-async-data-broker;
                     }
+                }
+            }
+
+            container frm-settings {
+                leaf clean-alien-flows-on-reconciliation {
+                    type boolean;
                 }
             }
         }
