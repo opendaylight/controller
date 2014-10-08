@@ -8,15 +8,14 @@
 
 package org.opendaylight.controller.frm.impl;
 
-import java.util.Collections;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
-
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import org.opendaylight.controller.frm.FlowNodeReconciliation;
 import org.opendaylight.controller.frm.ForwardingRulesCommiter;
 import org.opendaylight.controller.frm.ForwardingRulesManager;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
+import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.Meter;
@@ -29,8 +28,9 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * forwardingrules-manager
@@ -49,9 +49,11 @@ public class ForwardingRulesManagerImpl implements ForwardingRulesManager {
 
     private final AtomicLong txNum = new AtomicLong();
     private final Object lockObj = new Object();
+    private final FRMConfig frmConfig;
     private Set<InstanceIdentifier<FlowCapableNode>> activeNodes = Collections.emptySet();
 
     private final DataBroker dataService;
+    private final NotificationProviderService notificationsService;
     private final SalFlowService salFlowService;
     private final SalGroupService salGroupService;
     private final SalMeterService salMeterService;
@@ -61,9 +63,11 @@ public class ForwardingRulesManagerImpl implements ForwardingRulesManager {
     private ForwardingRulesCommiter<Meter> meterListener;
     private FlowNodeReconciliation nodeListener;
 
-    public ForwardingRulesManagerImpl(final DataBroker dataBroker,
-            final RpcConsumerRegistry rpcRegistry) {
+    public ForwardingRulesManagerImpl(final DataBroker dataBroker, final RpcConsumerRegistry rpcRegistry,
+                                      NotificationProviderService notificationsService, FRMConfig frmConfig) {
         this.dataService = Preconditions.checkNotNull(dataBroker, "DataBroker can not be null!");
+        this.notificationsService = Preconditions.checkNotNull(notificationsService);
+        this.frmConfig = frmConfig;
 
         Preconditions.checkArgument(rpcRegistry != null, "RpcConsumerRegistry can not be null !");
 
@@ -80,7 +84,7 @@ public class ForwardingRulesManagerImpl implements ForwardingRulesManager {
         this.flowListener = new FlowForwarder(this, dataService);
         this.groupListener = new GroupForwarder(this, dataService);
         this.meterListener = new MeterForwarder(this, dataService);
-        this.nodeListener = new FlowNodeReconciliationImpl(this, dataService);
+        this.nodeListener = new FlowNodeReconciliationImpl(this, notificationsService);
         LOG.info("ForwardingRulesManager has started successfull.");
     }
 
@@ -180,6 +184,11 @@ public class ForwardingRulesManagerImpl implements ForwardingRulesManager {
     @Override
     public FlowNodeReconciliation getFlowNodeReconciliation() {
         return nodeListener;
+    }
+
+    @Override
+    public FRMConfig getConfiguration() {
+        return frmConfig;
     }
 }
 
