@@ -1,28 +1,16 @@
 package org.opendaylight.controller.cluster.datastore;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-import akka.actor.ActorPath;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
 import akka.dispatch.Futures;
-
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import static org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType.READ_ONLY;
-import static org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType.WRITE_ONLY;
-import static org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType.READ_WRITE;
-
 import org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType;
 import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
 import org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException;
@@ -52,22 +40,29 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCoh
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
+
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType.READ_ONLY;
+import static org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType.READ_WRITE;
+import static org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType.WRITE_ONLY;
 
 @SuppressWarnings("resource")
 public class TransactionProxyTest extends AbstractActorTest {
@@ -186,7 +181,7 @@ public class TransactionProxyTest extends AbstractActorTest {
         return argThat(matcher);
     }
 
-    private Future<Object> readyTxReply(ActorPath path) {
+    private Future<Object> readyTxReply(String path) {
         return Futures.successful((Object)new ReadyTransactionReply(path).toSerializable());
     }
 
@@ -227,10 +222,6 @@ public class TransactionProxyTest extends AbstractActorTest {
         doReturn(createTransactionReply(actorRef)).when(mockActorContext).
                 executeShardOperation(eq(DefaultShardStrategy.DEFAULT_SHARD),
                         eqCreateTransaction(memberName, type));
-        doReturn(actorRef.path().toString()).when(mockActorContext).resolvePath(
-                anyString(), eq(actorRef.path().toString()));
-        doReturn(actorRef.path()).when(mockActorContext).actorFor(actorRef.path().toString());
-
         return actorRef;
     }
 
@@ -624,19 +615,19 @@ public class TransactionProxyTest extends AbstractActorTest {
                 DeleteDataReply.SERIALIZABLE_CLASS);
     }
 
-    private void verifyCohortPathFutures(ThreePhaseCommitCohortProxy proxy,
-            Object... expReplies) throws Exception {
+    private void verifyCohortFutures(ThreePhaseCommitCohortProxy proxy,
+        Object... expReplies) throws Exception {
         assertEquals("getReadyOperationFutures size", expReplies.length,
-                proxy.getCohortPathFutures().size());
+                proxy.getCohortFutures().size());
 
         int i = 0;
-        for( Future<ActorPath> future: proxy.getCohortPathFutures()) {
+        for( Future<ActorSelection> future: proxy.getCohortFutures()) {
             assertNotNull("Ready operation Future is null", future);
 
             Object expReply = expReplies[i++];
-            if(expReply instanceof ActorPath) {
-                ActorPath actual = Await.result(future, Duration.create(5, TimeUnit.SECONDS));
-                assertEquals("Cohort actor path", expReply, actual);
+            if(expReply instanceof ActorSelection) {
+                ActorSelection actual = Await.result(future, Duration.create(5, TimeUnit.SECONDS));
+                assertEquals("Cohort actor path", (ActorSelection) expReply, actual);
             } else {
                 // Expecting exception.
                 try {
@@ -662,7 +653,7 @@ public class TransactionProxyTest extends AbstractActorTest {
         doReturn(writeDataReply()).when(mockActorContext).executeRemoteOperationAsync(
                 eq(actorSelection(actorRef)), eqWriteData(nodeToWrite));
 
-        doReturn(readyTxReply(actorRef.path())).when(mockActorContext).executeRemoteOperationAsync(
+        doReturn(readyTxReply(actorRef.path().toString())).when(mockActorContext).executeRemoteOperationAsync(
                 eq(actorSelection(actorRef)), isA(ReadyTransaction.SERIALIZABLE_CLASS));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
@@ -681,7 +672,7 @@ public class TransactionProxyTest extends AbstractActorTest {
         verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
                 WriteDataReply.SERIALIZABLE_CLASS);
 
-        verifyCohortPathFutures(proxy, actorRef.path());
+        verifyCohortFutures(proxy, getSystem().actorSelection(actorRef.path()));
     }
 
     @SuppressWarnings("unchecked")
@@ -697,7 +688,7 @@ public class TransactionProxyTest extends AbstractActorTest {
         doReturn(Futures.failed(new TestException())).when(mockActorContext).
                 executeRemoteOperationAsync(eq(actorSelection(actorRef)), eqWriteData(nodeToWrite));
 
-        doReturn(readyTxReply(actorRef.path())).when(mockActorContext).executeRemoteOperationAsync(
+        doReturn(readyTxReply(actorRef.path().toString())).when(mockActorContext).executeRemoteOperationAsync(
                 eq(actorSelection(actorRef)), isA(ReadyTransaction.SERIALIZABLE_CLASS));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
@@ -716,7 +707,7 @@ public class TransactionProxyTest extends AbstractActorTest {
         verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
                 MergeDataReply.SERIALIZABLE_CLASS, TestException.class);
 
-        verifyCohortPathFutures(proxy, TestException.class);
+        verifyCohortFutures(proxy, TestException.class);
     }
 
     @SuppressWarnings("unchecked")
@@ -747,7 +738,7 @@ public class TransactionProxyTest extends AbstractActorTest {
         verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
                 MergeDataReply.SERIALIZABLE_CLASS);
 
-        verifyCohortPathFutures(proxy, TestException.class);
+        verifyCohortFutures(proxy, TestException.class);
     }
 
     @Test
@@ -773,7 +764,7 @@ public class TransactionProxyTest extends AbstractActorTest {
 
         ThreePhaseCommitCohortProxy proxy = (ThreePhaseCommitCohortProxy) ready;
 
-        verifyCohortPathFutures(proxy, PrimaryNotFoundException.class);
+        verifyCohortFutures(proxy, PrimaryNotFoundException.class);
     }
 
     @SuppressWarnings("unchecked")
@@ -801,7 +792,7 @@ public class TransactionProxyTest extends AbstractActorTest {
 
         ThreePhaseCommitCohortProxy proxy = (ThreePhaseCommitCohortProxy) ready;
 
-        verifyCohortPathFutures(proxy, IllegalArgumentException.class);
+        verifyCohortFutures(proxy, IllegalArgumentException.class);
     }
 
     @Test
