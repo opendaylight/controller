@@ -8,16 +8,13 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
-import akka.actor.ActorPath;
 import akka.actor.ActorSelection;
 import akka.dispatch.Futures;
 import akka.dispatch.OnComplete;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
-
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransaction;
@@ -30,7 +27,6 @@ import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import scala.concurrent.Future;
 import scala.runtime.AbstractFunction1;
 
@@ -45,29 +41,29 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
     private static final Logger LOG = LoggerFactory.getLogger(ThreePhaseCommitCohortProxy.class);
 
     private final ActorContext actorContext;
-    private final List<Future<ActorPath>> cohortPathFutures;
-    private volatile List<ActorPath> cohortPaths;
+    private final List<Future<ActorSelection>> cohortFutures;
+    private volatile List<ActorSelection> cohorts;
     private final String transactionId;
 
     public ThreePhaseCommitCohortProxy(ActorContext actorContext,
-            List<Future<ActorPath>> cohortPathFutures, String transactionId) {
+            List<Future<ActorSelection>> cohortFutures, String transactionId) {
         this.actorContext = actorContext;
-        this.cohortPathFutures = cohortPathFutures;
+        this.cohortFutures = cohortFutures;
         this.transactionId = transactionId;
     }
 
-    private Future<Void> buildCohortPathsList() {
+    private Future<Void> buildCohortList() {
 
-        Future<Iterable<ActorPath>> combinedFutures = Futures.sequence(cohortPathFutures,
+        Future<Iterable<ActorSelection>> combinedFutures = Futures.sequence(cohortFutures,
                 actorContext.getActorSystem().dispatcher());
 
-        return combinedFutures.transform(new AbstractFunction1<Iterable<ActorPath>, Void>() {
+        return combinedFutures.transform(new AbstractFunction1<Iterable<ActorSelection>, Void>() {
             @Override
-            public Void apply(Iterable<ActorPath> paths) {
-                cohortPaths = Lists.newArrayList(paths);
+            public Void apply(Iterable<ActorSelection> actorSelections) {
+                cohorts = Lists.newArrayList(actorSelections);
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("Tx {} successfully built cohort path list: {}",
-                        transactionId, cohortPaths);
+                        transactionId, cohorts);
                 }
                 return null;
             }
@@ -87,12 +83,12 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
         // extracted from ReadyTransactionReply messages by the Futures that were obtained earlier
         // and passed to us from upstream processing. If any one fails then  we'll fail canCommit.
 
-        buildCohortPathsList().onComplete(new OnComplete<Void>() {
+        buildCohortList().onComplete(new OnComplete<Void>() {
             @Override
             public void onComplete(Throwable failure, Void notUsed) throws Throwable {
                 if(failure != null) {
                     if(LOG.isDebugEnabled()) {
-                        LOG.debug("Tx {}: a cohort path Future failed: {}", transactionId, failure);
+                        LOG.debug("Tx {}: a cohort Future failed: {}", transactionId, failure);
                     }
                     returnFuture.setException(failure);
                 } else {
@@ -150,12 +146,11 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
     }
 
     private Future<Iterable<Object>> invokeCohorts(Object message) {
-        List<Future<Object>> futureList = Lists.newArrayListWithCapacity(cohortPaths.size());
-        for(ActorPath actorPath : cohortPaths) {
+        List<Future<Object>> futureList = Lists.newArrayListWithCapacity(cohorts.size());
+        for(ActorSelection cohort : cohorts) {
             if(LOG.isDebugEnabled()) {
-                LOG.debug("Tx {}: Sending {} to cohort {}", transactionId, message, actorPath);
+                LOG.debug("Tx {}: Sending {} to cohort {}", transactionId, message, cohort);
             }
-            ActorSelection cohort = actorContext.actorSelection(actorPath);
 
             futureList.add(actorContext.executeRemoteOperationAsync(cohort, message));
         }
@@ -198,11 +193,11 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
         // The cohort actor list should already be built at this point by the canCommit phase but,
         // if not for some reason, we'll try to build it here.
 
-        if(cohortPaths != null) {
+        if(cohorts != null) {
             finishVoidOperation(operationName, message, expectedResponseClass, propagateException,
                     returnFuture);
         } else {
-            buildCohortPathsList().onComplete(new OnComplete<Void>() {
+            buildCohortList().onComplete(new OnComplete<Void>() {
                 @Override
                 public void onComplete(Throwable failure, Void notUsed) throws Throwable {
                     if(failure != null) {
@@ -280,7 +275,7 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
     }
 
     @VisibleForTesting
-    List<Future<ActorPath>> getCohortPathFutures() {
-        return Collections.unmodifiableList(cohortPathFutures);
+    List<Future<ActorSelection>> getCohortFutures() {
+        return Collections.unmodifiableList(cohortFutures);
     }
 }

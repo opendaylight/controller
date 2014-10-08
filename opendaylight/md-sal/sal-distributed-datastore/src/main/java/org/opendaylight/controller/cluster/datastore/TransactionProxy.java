@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
-import akka.actor.ActorPath;
 import akka.actor.ActorSelection;
 import akka.dispatch.OnComplete;
 
@@ -314,7 +313,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             LOG.debug("Tx {} Trying to get {} transactions ready for commit", identifier,
                 remoteTransactionPaths.size());
         }
-        List<Future<ActorPath>> cohortPathFutures = Lists.newArrayList();
+        List<Future<ActorSelection>> cohortFutures = Lists.newArrayList();
 
         for(TransactionContext transactionContext : remoteTransactionPaths.values()) {
 
@@ -322,14 +321,14 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                 LOG.debug("Tx {} Readying transaction for shard {}", identifier,
                     transactionContext.getShardName());
             }
-            cohortPathFutures.add(transactionContext.readyTransaction());
+            cohortFutures.add(transactionContext.readyTransaction());
         }
 
         if(transactionChainProxy != null){
-            transactionChainProxy.onTransactionReady(cohortPathFutures);
+            transactionChainProxy.onTransactionReady(cohortFutures);
         }
 
-        return new ThreePhaseCommitCohortProxy(actorContext, cohortPathFutures,
+        return new ThreePhaseCommitCohortProxy(actorContext, cohortFutures,
                 identifier.toString());
     }
 
@@ -433,7 +432,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
         void closeTransaction();
 
-        Future<ActorPath> readyTransaction();
+        Future<ActorSelection> readyTransaction();
 
         void writeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data);
 
@@ -493,10 +492,6 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             return actor;
         }
 
-        private String getResolvedCohortPath(String cohortPath) {
-            return actorContext.resolvePath(actorPath, cohortPath);
-        }
-
         @Override
         public void closeTransaction() {
             if(LOG.isDebugEnabled()) {
@@ -506,7 +501,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         }
 
         @Override
-        public Future<ActorPath> readyTransaction() {
+        public Future<ActorSelection> readyTransaction() {
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Tx {} readyTransaction called with {} previous recorded operations pending",
                     identifier, recordedOperationFutures.size());
@@ -532,9 +527,9 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             // Transform the combined Future into a Future that returns the cohort actor path from
             // the ReadyTransactionReply. That's the end result of the ready operation.
 
-            return combinedFutures.transform(new AbstractFunction1<Iterable<Object>, ActorPath>() {
+            return combinedFutures.transform(new AbstractFunction1<Iterable<Object>, ActorSelection>() {
                 @Override
-                public ActorPath apply(Iterable<Object> notUsed) {
+                public ActorSelection apply(Iterable<Object> notUsed) {
                     if(LOG.isDebugEnabled()) {
                         LOG.debug("Tx {} readyTransaction: pending recorded operations succeeded",
                             identifier);
@@ -551,16 +546,9 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                     if(serializedReadyReply.getClass().equals(
                                                      ReadyTransactionReply.SERIALIZABLE_CLASS)) {
                         ReadyTransactionReply reply = ReadyTransactionReply.fromSerializable(
-                                actorContext.getActorSystem(), serializedReadyReply);
+                               serializedReadyReply);
 
-                        String resolvedCohortPath = getResolvedCohortPath(
-                                reply.getCohortPath().toString());
-
-                        if(LOG.isDebugEnabled()) {
-                            LOG.debug("Tx {} readyTransaction: resolved cohort path {}",
-                                identifier, resolvedCohortPath);
-                        }
-                        return actorContext.actorFor(resolvedCohortPath);
+                        return actorContext.actorSelection(reply.getCohortPath());
                     } else {
                         // Throwing an exception here will fail the Future.
 
@@ -799,7 +787,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         }
 
         @Override
-        public Future<ActorPath> readyTransaction() {
+        public Future<ActorSelection> readyTransaction() {
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Tx {} readyTransaction called", identifier);
             }

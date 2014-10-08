@@ -298,34 +298,6 @@ public class ActorContext {
         actorSystem.shutdown();
     }
 
-    /**
-     * @deprecated Need to stop using this method. There are ways to send a
-     * remote ActorRef as a string which should be used instead of this hack
-     *
-     * @param primaryPath
-     * @param localPathOfRemoteActor
-     * @return
-     */
-    @Deprecated
-    public String resolvePath(final String primaryPath,
-        final String localPathOfRemoteActor) {
-        StringBuilder builder = new StringBuilder();
-        String[] primaryPathElements = primaryPath.split("/");
-        builder.append(primaryPathElements[0]).append("//")
-            .append(primaryPathElements[1]).append(primaryPathElements[2]);
-        String[] remotePathElements = localPathOfRemoteActor.split("/");
-        for (int i = 3; i < remotePathElements.length; i++) {
-            builder.append("/").append(remotePathElements[i]);
-        }
-
-        return builder.toString();
-
-    }
-
-    public ActorPath actorFor(String path){
-        return actorSystem.actorFor(path).path();
-    }
-
     public String getCurrentMemberName(){
         return clusterWrapper.getCurrentMemberName();
     }
