@@ -8,10 +8,12 @@
 
 package org.opendaylight.controller.cluster.datastore.utils;
 
+import akka.actor.ActorIdentity;
 import akka.actor.ActorPath;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
+import akka.actor.Identify;
 import akka.actor.PoisonPill;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
@@ -322,8 +324,22 @@ public class ActorContext {
 
     }
 
-    public ActorPath actorFor(String path){
-        return actorSystem.actorFor(path).path();
+    public ActorPath actorFor(String path) {
+        ActorSelection actorSelection = actorSystem.actorSelection(path);
+        Object message = new Identify(1);
+        Future<Object> future = ask(actorSelection, message , operationTimeout);
+        ActorIdentity actorIdentity = null;
+        try {
+            actorIdentity = (ActorIdentity) Await.result(future, operationDuration);
+            if (actorIdentity.getRef() != null) {
+                return actorIdentity.getRef().path();
+            }
+        } catch (Exception e) {
+            LOG.error("Actor for path not found: " + path, e);
+            throw new TimeoutException("Sending message " + message.getClass().toString() +
+                " to actor " + actorSelection.toString() + " failed" , e);
+        }
+        return actorSystem.deadLetters().path();
     }
 
     public String getCurrentMemberName(){

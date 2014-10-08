@@ -493,10 +493,6 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             return actor;
         }
 
-        private String getResolvedCohortPath(String cohortPath) {
-            return actorContext.resolvePath(actorPath, cohortPath);
-        }
-
         @Override
         public void closeTransaction() {
             if(LOG.isDebugEnabled()) {
@@ -553,14 +549,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                         ReadyTransactionReply reply = ReadyTransactionReply.fromSerializable(
                                 actorContext.getActorSystem(), serializedReadyReply);
 
-                        String resolvedCohortPath = getResolvedCohortPath(
-                                reply.getCohortPath().toString());
-
-                        if(LOG.isDebugEnabled()) {
-                            LOG.debug("Tx {} readyTransaction: resolved cohort path {}",
-                                identifier, resolvedCohortPath);
-                        }
-                        return actorContext.actorFor(resolvedCohortPath);
+                        return actorContext.actorFor(reply.getCohortPath().toString());
                     } else {
                         // Throwing an exception here will fail the Future.
 

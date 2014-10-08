@@ -1,6 +1,6 @@
 package org.opendaylight.controller.cluster.datastore.utils;
 
-import java.util.concurrent.TimeUnit;
+import akka.actor.ActorPath;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
@@ -8,7 +8,7 @@ import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.japi.Creator;
 import akka.testkit.JavaTestKit;
-
+import akka.testkit.TestActorRef;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
@@ -16,10 +16,12 @@ import org.opendaylight.controller.cluster.datastore.Configuration;
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound;
-
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
+
+import java.util.concurrent.TimeUnit;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
@@ -57,6 +59,24 @@ public class ActorContextTest extends AbstractActorTest{
 
         System.out.println(actorContext
             .actorFor("akka://system/user/shardmanager/shard/transaction"));
+    }
+
+    @Test
+    public void testActorFor() {
+        ActorContext actorContext =
+            new ActorContext(getSystem(), mock(ActorRef.class),
+                mock(ClusterWrapper.class), mock(Configuration.class));
+
+        TestActorRef<DoNothingActor> actorRef = TestActorRef.create(getSystem(),
+            Props.create(DoNothingActor.class), "testActor1");
+        ActorPath expected = actorRef.path();
+        ActorPath actual = actorContext.actorFor("akka://test/user/testActor1");
+        assertEquals(expected, actual);
+
+        // a find for non-existent actor should return deadletters
+        expected = getSystem().deadLetters().path();
+        actual = actorContext.actorFor("akka://test/user/NonExistingActor");
+        assertEquals(expected, actual);
     }
 
 
