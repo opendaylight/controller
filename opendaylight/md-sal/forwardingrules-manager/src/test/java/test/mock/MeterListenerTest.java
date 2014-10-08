@@ -1,32 +1,29 @@
 /**
- * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
- *
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this distribution,
- * and is available at http://www.eclipse.org/legal/epl-v10.html
- */
+* Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+*
+* This program and the accompanying materials are made available under the
+* terms of the Eclipse Public License v1.0 which accompanies this distribution,
+* and is available at http://www.eclipse.org/legal/epl-v10.html
+*/
 package test.mock;
 
 import org.junit.Test;
+import org.opendaylight.controller.frm.impl.FRMConfig;
 import org.opendaylight.controller.frm.impl.ForwardingRulesManagerImpl;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.Meter;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.MeterBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.MeterKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.AddMeterInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.RemoveMeterInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.UpdateMeterInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.MeterId;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import test.mock.util.FRMTest;
-import test.mock.util.RpcProviderRegistryMock;
 import test.mock.util.SalMeterServiceMock;
 
 import java.util.List;
@@ -34,12 +31,13 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 public class MeterListenerTest extends FRMTest {
-    RpcProviderRegistry rpcProviderRegistryMock = new RpcProviderRegistryMock();
-    NodeKey s1Key = new NodeKey(new NodeId("S1"));
+
+    private final FRMConfig frmConfig = FRMConfig.builder().setCleanAlienFlowsOnReconcil(false).build();
 
     @Test
     public void addTwoMetersTest() throws Exception {
-        ForwardingRulesManagerImpl forwardingRulesManager = new ForwardingRulesManagerImpl(getDataBroker(), rpcProviderRegistryMock);
+        ForwardingRulesManagerImpl forwardingRulesManager = new ForwardingRulesManagerImpl(getDataBroker(), rpcRegistry,
+                notificationMock.getNotifBroker(), frmConfig);
         forwardingRulesManager.start();
 
         addFlowCapableNode(s1Key);
@@ -75,7 +73,8 @@ public class MeterListenerTest extends FRMTest {
 
     @Test
     public void updateMeterTest() throws Exception {
-        ForwardingRulesManagerImpl forwardingRulesManager = new ForwardingRulesManagerImpl(getDataBroker(), rpcProviderRegistryMock);
+        ForwardingRulesManagerImpl forwardingRulesManager = new ForwardingRulesManagerImpl(getDataBroker(), rpcRegistry,
+                notificationMock.getNotifBroker(), frmConfig);
         forwardingRulesManager.start();
 
         addFlowCapableNode(s1Key);
@@ -108,7 +107,8 @@ public class MeterListenerTest extends FRMTest {
 
     @Test
     public void removeMeterTest() throws Exception {
-        ForwardingRulesManagerImpl forwardingRulesManager = new ForwardingRulesManagerImpl(getDataBroker(), rpcProviderRegistryMock);
+        ForwardingRulesManagerImpl forwardingRulesManager = new ForwardingRulesManagerImpl(getDataBroker(), rpcRegistry,
+                notificationMock.getNotifBroker(), frmConfig);
         forwardingRulesManager.start();
 
         addFlowCapableNode(s1Key);
