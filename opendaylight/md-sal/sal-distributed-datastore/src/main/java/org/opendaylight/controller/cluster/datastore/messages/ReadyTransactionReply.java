@@ -8,32 +8,32 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import akka.actor.ActorPath;
-import akka.actor.ActorSystem;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 
 public class ReadyTransactionReply implements SerializableMessage {
   public static final Class SERIALIZABLE_CLASS = ShardTransactionMessages.ReadyTransactionReply.class;
-  private final ActorPath cohortPath;
+  private final String cohortPath;
 
-  public ReadyTransactionReply(ActorPath cohortPath) {
+  public ReadyTransactionReply(String cohortPath) {
 
     this.cohortPath = cohortPath;
   }
 
-  public ActorPath getCohortPath() {
+  public String getCohortPath() {
     return cohortPath;
   }
 
   @Override
   public ShardTransactionMessages.ReadyTransactionReply toSerializable() {
     return ShardTransactionMessages.ReadyTransactionReply.newBuilder()
-        .setActorPath(cohortPath.toString()).build();
+        .setActorPath(cohortPath).build();
   }
 
-  public static ReadyTransactionReply fromSerializable(ActorSystem actorSystem,Object serializable){
-    ShardTransactionMessages.ReadyTransactionReply o = (ShardTransactionMessages.ReadyTransactionReply) serializable;
-    return new ReadyTransactionReply(
-        actorSystem.actorFor(o.getActorPath()).path());
+  public static ReadyTransactionReply fromSerializable(Object serializable) {
+      ShardTransactionMessages.ReadyTransactionReply o =
+          (ShardTransactionMessages.ReadyTransactionReply) serializable;
+
+      return new ReadyTransactionReply(o.getActorPath());
+
   }
 }

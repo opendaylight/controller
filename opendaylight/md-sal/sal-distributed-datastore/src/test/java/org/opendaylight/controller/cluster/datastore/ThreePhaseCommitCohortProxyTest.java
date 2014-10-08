@@ -4,19 +4,8 @@ import akka.actor.ActorPath;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
 import akka.dispatch.Futures;
-
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.isA;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -33,12 +22,19 @@ import org.opendaylight.controller.cluster.datastore.messages.PreCommitTransacti
 import org.opendaylight.controller.cluster.datastore.messages.SerializableMessage;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.DoNothingActor;
-
 import scala.concurrent.Future;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.isA;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
 
@@ -56,28 +52,28 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
         doReturn(getSystem()).when(actorContext).getActorSystem();
     }
 
-    private Future<ActorPath> newCohortPath() {
+    private Future<ActorSelection> newCohort() {
         ActorPath path = getSystem().actorOf(Props.create(DoNothingActor.class)).path();
-        doReturn(mock(ActorSelection.class)).when(actorContext).actorSelection(path);
-        return Futures.successful(path);
+        ActorSelection actorSelection = getSystem().actorSelection(path);
+        return Futures.successful(actorSelection);
     }
 
     private final ThreePhaseCommitCohortProxy setupProxy(int nCohorts) throws Exception {
-        List<Future<ActorPath>> cohortPathFutures = Lists.newArrayList();
+        List<Future<ActorSelection>> cohortFutures = Lists.newArrayList();
         for(int i = 1; i <= nCohorts; i++) {
-            cohortPathFutures.add(newCohortPath());
+            cohortFutures.add(newCohort());
         }
 
-        return new ThreePhaseCommitCohortProxy(actorContext, cohortPathFutures, "txn-1");
+        return new ThreePhaseCommitCohortProxy(actorContext, cohortFutures, "txn-1");
     }
 
     private ThreePhaseCommitCohortProxy setupProxyWithFailedCohortPath()
             throws Exception {
-        List<Future<ActorPath>> cohortPathFutures = Lists.newArrayList();
-        cohortPathFutures.add(newCohortPath());
-        cohortPathFutures.add(Futures.<ActorPath>failed(new TestException()));
+        List<Future<ActorSelection>> cohortFutures = Lists.newArrayList();
+        cohortFutures.add(newCohort());
+        cohortFutures.add(Futures.<ActorSelection>failed(new TestException()));
 
-        return new ThreePhaseCommitCohortProxy(actorContext, cohortPathFutures, "txn-1");
+        return new ThreePhaseCommitCohortProxy(actorContext, cohortFutures, "txn-1");
     }
 
     private void setupMockActorContext(Class<?> requestType, Object... responses) {

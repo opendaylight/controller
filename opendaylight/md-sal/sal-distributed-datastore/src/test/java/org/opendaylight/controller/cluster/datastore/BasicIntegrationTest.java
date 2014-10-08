@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
-import akka.actor.ActorPath;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
@@ -134,11 +133,10 @@ public class BasicIntegrationTest extends AbstractActorTest {
                             @Override
                             protected ActorSelection match(Object in) {
                                 if (in.getClass().equals(ReadyTransactionReply.SERIALIZABLE_CLASS)) {
-                                    ActorPath cohortPath =
-                                        ReadyTransactionReply.fromSerializable(getSystem(),in)
+                                    String cohortPath =
+                                        ReadyTransactionReply.fromSerializable(in)
                                             .getCohortPath();
-                                    return getSystem()
-                                        .actorSelection(cohortPath);
+                                    return getSystem().actorSelection(cohortPath);
                                 } else {
                                     throw noMatch();
                                 }
