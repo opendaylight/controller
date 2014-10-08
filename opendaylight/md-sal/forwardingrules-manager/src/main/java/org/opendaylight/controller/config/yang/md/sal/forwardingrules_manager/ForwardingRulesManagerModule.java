@@ -1,6 +1,7 @@
 package org.opendaylight.controller.config.yang.md.sal.forwardingrules_manager;
 
 import org.opendaylight.controller.frm.ForwardingRulesManager;
+import org.opendaylight.controller.frm.impl.FRMConfig;
 import org.opendaylight.controller.frm.impl.ForwardingRulesManagerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +27,16 @@ public class ForwardingRulesManagerModule extends org.opendaylight.controller.co
     @Override
     public java.lang.AutoCloseable createInstance() {
         LOG.info("FRM module initialization.");
-        forwardingrulessManagerProvider = new ForwardingRulesManagerImpl(getDataBrokerDependency(), getRpcRegistryDependency());
+
+        FRMConfig.FrmConfigBuilder fcBuilder = FRMConfig.builder();
+        if (getFrmSettings() != null && getFrmSettings().getCleanAlienFlowsOnReconciliation() != null) {
+            fcBuilder.setCleanAlienFlowsOnReconcil(getFrmSettings().getCleanAlienFlowsOnReconciliation());
+        } else {
+            // Default to false if nothing is set
+            fcBuilder.setCleanAlienFlowsOnReconcil(false);
+        }
+        forwardingrulessManagerProvider = new ForwardingRulesManagerImpl(getDataBrokerDependency(),
+                getRpcRegistryDependency(), getNotificationServiceDependency(), fcBuilder.build());
         forwardingrulessManagerProvider.start();
         LOG.info("FRM module started successfully.");
         return new AutoCloseable() {
