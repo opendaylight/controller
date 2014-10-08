@@ -13,6 +13,10 @@
         <!-- AAA Auth Filter -->
         <init-param>
             <param-name>com.sun.jersey.spi.container.ContainerRequestFilters</param-name>
+            <!-- 
+                 FIXME: Find out better way to provide this in AAA-enabled development,
+                 without refering it from restconf codebase. 
+            -->
             <param-value> org.opendaylight.aaa.sts.TokenAuthFilter</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
