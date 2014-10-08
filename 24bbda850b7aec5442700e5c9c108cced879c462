@@ -34,6 +34,24 @@
       "revId": "24bbda850b7aec5442700e5c9c108cced879c462",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da87b5cf_47bba272",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-10-08T22:51:43Z",
+      "side": 1,
+      "message": "Yes, if we need resolved path. Do we need to resolve the path though? I understand that we want to ensure existence of actor. But since we\u0027ll be sending messages to this actor in future, resolving now still wont guarantee actor\u0027s existence in future.",
+      "parentUuid": "da87b5cf_47a40257",
+      "revId": "24bbda850b7aec5442700e5c9c108cced879c462",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
