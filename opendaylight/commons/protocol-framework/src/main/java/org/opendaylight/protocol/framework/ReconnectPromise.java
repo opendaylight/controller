@@ -98,10 +98,8 @@ final class ReconnectPromise<S extends ProtocolSession<?>, L extends SessionList
                 return;
             }
 
-            // Check if initial connection was fully finished. If the session was dropped during negotiation, reconnect will not happen.
-            // Session can be dropped during negotiation on purpose by the client side and would make no sense to initiate reconnect
             if (promise.isInitialConnectFinished() == false) {
-                return;
+                LOG.debug("Connection to {} was dropped during negotiation, reattempting", promise.address);
             }
 
             LOG.debug("Reconnecting after connection to {} was dropped", promise.address);
