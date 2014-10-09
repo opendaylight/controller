@@ -57,7 +57,5 @@ public class CommitStatusTest {
         Assert.assertNotEquals(status, new CommitStatus(newInst2, reusedInst, recreatedInst));
         Assert.assertNotEquals(status, new CommitStatus(newInst, reusedInst2, recreatedInst));
         Assert.assertNotEquals(status, new CommitStatus(newInst, reusedInst, recreatedInst2));
-
-        CommitStatus status2 = new CommitStatus(newInst, reusedInst, recreatedInst);
     }
 }

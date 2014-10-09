@@ -45,8 +45,12 @@ public final class NetconfDeviceSalFacade implements AutoCloseable, RemoteDevice
     private final List<AutoCloseable> salRegistrations = Lists.newArrayList();
 
     public NetconfDeviceSalFacade(final RemoteDeviceId id, final Broker domBroker, final BindingAwareBroker bindingBroker, final BundleContext bundleContext, final ExecutorService executor) {
+        this(id, domBroker, bindingBroker, bundleContext, new NetconfDeviceSalProvider(id, executor));
+    }
+
+    NetconfDeviceSalFacade(final RemoteDeviceId id, final Broker domBroker, final BindingAwareBroker bindingBroker, final BundleContext bundleContext, final NetconfDeviceSalProvider provider) {
         this.id = id;
-        this.salProvider = new NetconfDeviceSalProvider(id, executor);
+        this.salProvider = provider;
         registerToSal(domBroker, bindingBroker, bundleContext);
     }
 

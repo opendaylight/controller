@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.sal.connect.netconf.schema;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
@@ -83,6 +84,21 @@ public final class NetconfRemoteSchemaYangSourceProvider implements SchemaSource
 
     @Override
     public CheckedFuture<YangTextSchemaSource, SchemaSourceException> getSource(final SourceIdentifier sourceIdentifier) {
+        final CheckedFuture<YangTextSchemaSource, SchemaSourceException> checked = getSourceChecked(sourceIdentifier);
+        // / FIXME remove this get, it is only present to wait until source is retrieved
+        // (goal is to limit concurrent schema download, since NetconfDevice listener does not handle concurrent messages properly)
+        try {
+            logger.trace("{}: Blocking for {}", id, sourceIdentifier);
+            checked.checkedGet();
+        } catch (final SchemaSourceException e) {
+            return Futures.immediateFailedCheckedFuture(e);
+        }
+
+        return checked;
+    }
+
+    @VisibleForTesting
+    CheckedFuture<YangTextSchemaSource, SchemaSourceException> getSourceChecked(final SourceIdentifier sourceIdentifier) {
         final String moduleName = sourceIdentifier.getName();
 
         // If formatted revision is SourceIdentifier.NOT_PRESENT_FORMATTED_REVISION, we have to omit it from request
@@ -96,24 +112,15 @@ public final class NetconfRemoteSchemaYangSourceProvider implements SchemaSource
                 rpc.invokeRpc(GET_SCHEMA_QNAME, getSchemaRequest),
                 new ResultToYangSourceTransformer(id, sourceIdentifier, moduleName, revision));
 
-        final CheckedFuture<YangTextSchemaSource, SchemaSourceException> checked = Futures.makeChecked(transformed, MAPPER);
 
-        // / FIXME remove this get, it is only present to wait until source is retrieved
-        // (goal is to limit concurrent schema download, since NetconfDevice listener does not handle concurrent messages properly)
-        try {
-            logger.trace("{}: Blocking for {}", id, sourceIdentifier);
-            checked.checkedGet();
-        } catch (final SchemaSourceException e) {
-            return Futures.immediateFailedCheckedFuture(e);
-        }
-
-        return checked;
+        return Futures.makeChecked(transformed, MAPPER);
     }
 
     /**
      * Transform composite node to string schema representation and then to ASTSchemaSource
      */
-    private static final class ResultToYangSourceTransformer implements
+    @VisibleForTesting
+    static final class ResultToYangSourceTransformer implements
             Function<RpcResult<CompositeNode>, YangTextSchemaSource> {
 
         private final RemoteDeviceId id;
@@ -155,7 +162,8 @@ public final class NetconfRemoteSchemaYangSourceProvider implements SchemaSource
 
     }
 
-    private static class NetconfYangTextSchemaSource extends YangTextSchemaSource {
+    @VisibleForTesting
+    static final class NetconfYangTextSchemaSource extends YangTextSchemaSource {
         private final RemoteDeviceId id;
         private final Optional<String> schemaString;
 
