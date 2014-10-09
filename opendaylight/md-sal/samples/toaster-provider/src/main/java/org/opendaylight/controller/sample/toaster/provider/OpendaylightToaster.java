@@ -141,6 +141,8 @@ public class OpendaylightToaster implements ToasterService, ToasterProviderRunti
             {
                 darknessFactor.set( darkness );
             }
+
+            LOG.info("onDataChanged - new Toaster config: {}", toaster);
         }
     }
 
