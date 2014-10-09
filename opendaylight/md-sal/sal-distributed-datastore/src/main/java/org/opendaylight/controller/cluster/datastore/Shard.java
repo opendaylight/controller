@@ -76,7 +76,6 @@ import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -113,7 +112,10 @@ public class Shard extends RaftActor {
 
     private final ShardStats shardMBean;
 
-    private final List<ActorSelection> dataChangeListeners = new ArrayList<>();
+    private final List<ActorSelection> dataChangeListeners =  Lists.newArrayList();
+
+    private final List<DelayedListenerRegistration> delayedListenerRegistrations =
+                                                                       Lists.newArrayList();
 
     private final DatastoreContext datastoreContext;
 
@@ -576,53 +578,60 @@ public class Shard extends RaftActor {
         store.onGlobalContextUpdated(message.getSchemaContext());
     }
 
-    @VisibleForTesting void updateSchemaContext(SchemaContext schemaContext) {
+    @VisibleForTesting
+    void updateSchemaContext(SchemaContext schemaContext) {
         store.onGlobalContextUpdated(schemaContext);
     }
 
-    private void registerChangeListener(
-        RegisterChangeListener registerChangeListener) {
+    private void registerChangeListener(RegisterChangeListener registerChangeListener) {
 
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("registerDataChangeListener for {}", registerChangeListener
-                .getPath());
+        LOG.debug("registerDataChangeListener for {}", registerChangeListener.getPath());
+
+        ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
+                                                     NormalizedNode<?, ?>>> registration;
+        if(isLeader()) {
+            registration = doChangeListenerRegistration(registerChangeListener);
+        } else {
+            LOG.debug("Shard is not the leader - delaying registration");
+
+            DelayedListenerRegistration delayedReg =
+                    new DelayedListenerRegistration(registerChangeListener);
+            delayedListenerRegistrations.add(delayedReg);
+            registration = delayedReg;
         }
 
+        ActorRef listenerRegistration = getContext().actorOf(
+                DataChangeListenerRegistration.props(registration));
 
-        ActorSelection dataChangeListenerPath = getContext()
-            .system().actorSelection(
+        LOG.debug("registerDataChangeListener sending reply, listenerRegistrationPath = {} ",
+                    listenerRegistration.path());
+
+        getSender().tell(new RegisterChangeListenerReply(listenerRegistration.path()),getSelf());
+    }
+
+    private ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
+                                               NormalizedNode<?, ?>>> doChangeListenerRegistration(
+            RegisterChangeListener registerChangeListener) {
+
+        ActorSelection dataChangeListenerPath = getContext().system().actorSelection(
                 registerChangeListener.getDataChangeListenerPath());
-
 
         // Notify the listener if notifications should be enabled or not
         // If this shard is the leader then it will enable notifications else
         // it will not
-        dataChangeListenerPath
-            .tell(new EnableNotification(isLeader()), getSelf());
+        dataChangeListenerPath.tell(new EnableNotification(true), getSelf());
 
         // Now store a reference to the data change listener so it can be notified
         // at a later point if notifications should be enabled or disabled
         dataChangeListeners.add(dataChangeListenerPath);
 
-        AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>
-            listener = new DataChangeListenerProxy(schemaContext, dataChangeListenerPath);
+        AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener =
+                new DataChangeListenerProxy(schemaContext, dataChangeListenerPath);
 
-        ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>
-            registration = store.registerChangeListener(registerChangeListener.getPath(),
-                listener, registerChangeListener.getScope());
-        ActorRef listenerRegistration =
-            getContext().actorOf(
-                DataChangeListenerRegistration.props(registration));
+        LOG.debug("Registering for path {}", registerChangeListener.getPath());
 
-        if(LOG.isDebugEnabled()) {
-            LOG.debug(
-                "registerDataChangeListener sending reply, listenerRegistrationPath = {} "
-                , listenerRegistration.path().toString());
-        }
-
-        getSender()
-            .tell(new RegisterChangeListenerReply(listenerRegistration.path()),
-                getSelf());
+        return store.registerChangeListener(registerChangeListener.getPath(), listener,
+                registerChangeListener.getScope());
     }
 
     private boolean isMetricsCaptureEnabled(){
@@ -798,17 +807,28 @@ public class Shard extends RaftActor {
         }
     }
 
-    @Override protected void onStateChanged() {
+    @Override
+    protected void onStateChanged() {
+        boolean isLeader = isLeader();
         for (ActorSelection dataChangeListener : dataChangeListeners) {
-            dataChangeListener
-                .tell(new EnableNotification(isLeader()), getSelf());
+            dataChangeListener.tell(new EnableNotification(isLeader), getSelf());
+        }
+
+        if(isLeader) {
+            for(DelayedListenerRegistration reg: delayedListenerRegistrations) {
+                if(!reg.isClosed()) {
+                    reg.setDelegate(doChangeListenerRegistration(reg.getRegisterChangeListener()));
+                }
+            }
+
+            delayedListenerRegistrations.clear();
         }
 
         shardMBean.setRaftState(getRaftState().name());
         shardMBean.setCurrentTerm(getCurrentTerm());
 
         // If this actor is no longer the leader close all the transaction chains
-        if(!isLeader()){
+        if(!isLeader){
             for(Map.Entry<String, DOMStoreTransactionChain> entry : transactionChains.entrySet()){
                 if(LOG.isDebugEnabled()) {
                     LOG.debug(
@@ -861,5 +881,46 @@ public class Shard extends RaftActor {
     @VisibleForTesting
     ShardStats getShardMBean() {
         return shardMBean;
+    }
+
+    private static class DelayedListenerRegistration implements
+        ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> {
+
+        private volatile boolean closed;
+
+        private final RegisterChangeListener registerChangeListener;
+
+        private volatile ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
+                                                             NormalizedNode<?, ?>>> delegate;
+
+        DelayedListenerRegistration(RegisterChangeListener registerChangeListener) {
+            this.registerChangeListener = registerChangeListener;
+        }
+
+        void setDelegate( ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
+                                            NormalizedNode<?, ?>>> registration) {
+            this.delegate = registration;
+        }
+
+        boolean isClosed() {
+            return closed;
+        }
+
+        RegisterChangeListener getRegisterChangeListener() {
+            return registerChangeListener;
+        }
+
+        @Override
+        public AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> getInstance() {
+            return delegate != null ? delegate.getInstance() : null;
+        }
+
+        @Override
+        public void close() {
+            closed = true;
+            if(delegate != null) {
+                delegate.close();
+            }
+        }
     }
 }
