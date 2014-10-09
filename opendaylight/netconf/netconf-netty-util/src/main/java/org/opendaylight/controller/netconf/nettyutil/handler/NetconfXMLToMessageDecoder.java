@@ -30,6 +30,29 @@ public final class NetconfXMLToMessageDecoder extends ByteToMessageDecoder {
                 LOG.trace("Received to decode: {}", ByteBufUtil.hexDump(in));
             }
 
+            /* Strip the leading whitespaces (at least some of the most common
+             * ones: [ \t\n\x0B\f\r]. Byte values:  0x20 (space),
+             * 0x09 (horizontal tab), 0x0a (line feed), 0x0b (vertical tabulation),
+             * 0x0c (form feed), 0x0d (carriage return).
+             *
+             * In some situations (such as when talking to a Cisco router), the in
+             * buffer may contain leading whitespaces. It is necessary to strip
+             * them else the XML parsing will fail.
+             */
+            int nDiscardedBytes = 0;
+            while (in.isReadable()) {
+                byte b = in.getByte(in.readerIndex());
+                if (b == 0x0d || b == 0x0a || b == 0x20 || b == 0x0c || b == 0x09 || b == 0x0b) {
+                    in.readByte();
+                    nDiscardedBytes++;
+                } else {
+                    break;
+                }
+            }
+            if (nDiscardedBytes != 0)
+                LOG.debug("Discarded the {} leading byte(s)", nDiscardedBytes);
+        }
+        if (in.isReadable()) {
             out.add(new NetconfMessage(XmlUtil.readXmlToDocument(new ByteBufInputStream(in))));
         } else {
             LOG.debug("No more content in incoming buffer.");
