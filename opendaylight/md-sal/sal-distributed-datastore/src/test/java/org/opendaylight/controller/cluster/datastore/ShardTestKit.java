@@ -53,6 +53,7 @@ class ShardTestKit extends JavaTestKit {
                     return;
                 }
             } catch (Exception e) {
+                System.err.println("FindLeader timed out");
                 e.printStackTrace();
             }
 
