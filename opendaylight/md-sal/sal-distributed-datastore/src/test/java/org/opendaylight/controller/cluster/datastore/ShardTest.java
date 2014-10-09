@@ -1,12 +1,12 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
+import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.dispatch.Dispatchers;
 import akka.dispatch.OnComplete;
 import akka.japi.Creator;
 import akka.pattern.Patterns;
-import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import akka.util.Timeout;
 import com.google.common.base.Function;
@@ -15,6 +15,7 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.Uninterruptibles;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +30,6 @@ import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransacti
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
-import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
 import org.opendaylight.controller.cluster.datastore.messages.ForwardedReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolved;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
@@ -43,6 +43,7 @@ import org.opendaylight.controller.cluster.datastore.modification.WriteModificat
 import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
 import org.opendaylight.controller.cluster.datastore.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.datastore.utils.InMemorySnapshotStore;
+import org.opendaylight.controller.cluster.datastore.utils.MockDataChangeListener;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogImplEntry;
 import org.opendaylight.controller.cluster.raft.Snapshot;
@@ -50,6 +51,9 @@ import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
+import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
+import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
+import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationPayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
@@ -78,6 +82,7 @@ import scala.concurrent.duration.FiniteDuration;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -86,6 +91,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
@@ -97,17 +103,14 @@ public class ShardTest extends AbstractActorTest {
 
     private static final SchemaContext SCHEMA_CONTEXT = TestModel.createTestContext();
 
-    private static final ShardIdentifier IDENTIFIER = ShardIdentifier.builder().memberName("member-1")
-            .shardName("inventory").type("config").build();
-
     private static final AtomicInteger NEXT_SHARD_NUM = new AtomicInteger();
 
-    private static String shardName() {
-        return "shard" + NEXT_SHARD_NUM.getAndIncrement();
-    }
+    private final ShardIdentifier shardID = ShardIdentifier.builder().memberName("member-1")
+            .shardName("inventory").type("config" + NEXT_SHARD_NUM.getAndIncrement()).build();
 
     private DatastoreContext dataStoreContext = DatastoreContext.newBuilder().
-            shardJournalRecoveryLogBatchSize(3).shardSnapshotBatchCount(5000).build();
+            shardJournalRecoveryLogBatchSize(3).shardSnapshotBatchCount(5000).
+            shardHeartbeatIntervalInMillis(100).build();
 
     @Before
     public void setUp() {
@@ -124,40 +127,149 @@ public class ShardTest extends AbstractActorTest {
     }
 
     private Props newShardProps() {
-        return Shard.props(IDENTIFIER, Collections.<ShardIdentifier,String>emptyMap(),
+        return Shard.props(shardID, Collections.<ShardIdentifier,String>emptyMap(),
                 dataStoreContext, SCHEMA_CONTEXT);
     }
 
     @Test
-    public void testOnReceiveRegisterListener() throws Exception {
-        new JavaTestKit(getSystem()) {{
-            ActorRef subject = getSystem().actorOf(newShardProps(), "testRegisterChangeListener");
+    public void testRegisterChangeListener() throws Exception {
+        new ShardTestKit(getSystem()) {{
+            TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
+                    newShardProps(),  "testRegisterChangeListener");
 
-            subject.tell(new UpdateSchemaContext(SchemaContextHelper.full()), getRef());
+            waitUntilLeader(shard);
 
-            subject.tell(new RegisterChangeListener(TestModel.TEST_PATH,
-                    getRef().path(), AsyncDataBroker.DataChangeScope.BASE), getRef());
+            shard.tell(new UpdateSchemaContext(SchemaContextHelper.full()), ActorRef.noSender());
 
-            EnableNotification enable = expectMsgClass(duration("3 seconds"), EnableNotification.class);
-            assertEquals("isEnabled", false, enable.isEnabled());
+            MockDataChangeListener listener = new MockDataChangeListener(1);
+            ActorRef dclActor = getSystem().actorOf(DataChangeListener.props(listener),
+                    "testRegisterChangeListener-DataChangeListener");
+
+            shard.tell(new RegisterChangeListener(TestModel.TEST_PATH,
+                    dclActor.path(), AsyncDataBroker.DataChangeScope.BASE), getRef());
 
             RegisterChangeListenerReply reply = expectMsgClass(duration("3 seconds"),
                     RegisterChangeListenerReply.class);
-            assertTrue(reply.getListenerRegistrationPath().toString().matches(
+            String replyPath = reply.getListenerRegistrationPath().toString();
+            assertTrue("Incorrect reply path: " + replyPath, replyPath.matches(
                     "akka:\\/\\/test\\/user\\/testRegisterChangeListener\\/\\$.*"));
+
+            YangInstanceIdentifier path = TestModel.TEST_PATH;
+            writeToStore(shard, path, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+
+            listener.waitForChangeEvents(path);
+
+            dclActor.tell(PoisonPill.getInstance(), ActorRef.noSender());
+            shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
+        }};
+    }
+
+    @SuppressWarnings("serial")
+    @Test
+    public void testChangeListenerNotifiedWhenNotTheLeaderOnRegistration() throws Exception {
+        // This test tests the timing window in which a change listener is registered before the
+        // shard becomes the leader. We verify that the listener is registered and notified of the
+        // existing data when the shard becomes the leader.
+        new ShardTestKit(getSystem()) {{
+            // For this test, we want to send the RegisterChangeListener message after the shard
+            // has recovered from persistence and before it becomes the leader. So we subclass
+            // Shard to override onReceiveCommand and, when the first ElectionTimeout is received,
+            // we know that the shard has been initialized to a follower and has started the
+            // election process. The following 2 CountDownLatches are used to coordinate the
+            // ElectionTimeout with the sending of the RegisterChangeListener message.
+            final CountDownLatch onFirstElectionTimeout = new CountDownLatch(1);
+            final CountDownLatch onChangeListenerRegistered = new CountDownLatch(1);
+            Creator<Shard> creator = new Creator<Shard>() {
+                boolean firstElectionTimeout = true;
+
+                @Override
+                public Shard create() throws Exception {
+                    return new Shard(shardID, Collections.<ShardIdentifier,String>emptyMap(),
+                            dataStoreContext, SCHEMA_CONTEXT) {
+                        @Override
+                        public void onReceiveCommand(final Object message) {
+                            if(message instanceof ElectionTimeout && firstElectionTimeout) {
+                                // Got the first ElectionTimeout. We don't forward it to the
+                                // base Shard yet until we've sent the RegisterChangeListener
+                                // message. So we signal the onFirstElectionTimeout latch to tell
+                                // the main thread to send the RegisterChangeListener message and
+                                // start a thread to wait on the onChangeListenerRegistered latch,
+                                // which the main thread signals after it has sent the message.
+                                // After the onChangeListenerRegistered is triggered, we send the
+                                // original ElectionTimeout message to proceed with the election.
+                                firstElectionTimeout = false;
+                                final ActorRef self = getSelf();
+                                new Thread() {
+                                    @Override
+                                    public void run() {
+                                        Uninterruptibles.awaitUninterruptibly(
+                                                onChangeListenerRegistered, 5, TimeUnit.SECONDS);
+                                        self.tell(message, self);
+                                    }
+                                }.start();
+
+                                onFirstElectionTimeout.countDown();
+                            } else {
+                                super.onReceiveCommand(message);
+                            }
+                        }
+                    };
+                }
+            };
+
+            MockDataChangeListener listener = new MockDataChangeListener(1);
+            ActorRef dclActor = getSystem().actorOf(DataChangeListener.props(listener),
+                    "testRegisterChangeListenerWhenNotLeaderInitially-DataChangeListener");
+
+            TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
+                    Props.create(new DelegatingShardCreator(creator)),
+                    "testRegisterChangeListenerWhenNotLeaderInitially");
+
+            // Write initial data into the in-memory store.
+            YangInstanceIdentifier path = TestModel.TEST_PATH;
+            writeToStore(shard, path, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+
+            // Wait until the shard receives the first ElectionTimeout message.
+            assertEquals("Got first ElectionTimeout", true,
+                    onFirstElectionTimeout.await(5, TimeUnit.SECONDS));
+
+            // Now send the RegisterChangeListener and wait for the reply.
+            shard.tell(new RegisterChangeListener(path, dclActor.path(),
+                    AsyncDataBroker.DataChangeScope.SUBTREE), getRef());
+
+            RegisterChangeListenerReply reply = expectMsgClass(duration("5 seconds"),
+                    RegisterChangeListenerReply.class);
+            assertNotNull("getListenerRegistrationPath", reply.getListenerRegistrationPath());
+
+            // Sanity check - verify the shard is not the leader yet.
+            shard.tell(new FindLeader(), getRef());
+            FindLeaderReply findLeadeReply =
+                    expectMsgClass(duration("5 seconds"), FindLeaderReply.class);
+            assertNull("Expected the shard not to be the leader", findLeadeReply.getLeaderActor());
+
+            // Signal the onChangeListenerRegistered latch to tell the thread above to proceed
+            // with the election process.
+            onChangeListenerRegistered.countDown();
+
+            // Wait for the shard to become the leader and notify our listener with the existing
+            // data in the store.
+            listener.waitForChangeEvents(path);
+
+            dclActor.tell(PoisonPill.getInstance(), ActorRef.noSender());
+            shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
         }};
     }
 
     @Test
     public void testCreateTransaction(){
         new ShardTestKit(getSystem()) {{
-            ActorRef subject = getSystem().actorOf(newShardProps(), "testCreateTransaction");
+            ActorRef shard = getSystem().actorOf(newShardProps(), "testCreateTransaction");
 
-            waitUntilLeader(subject);
+            waitUntilLeader(shard);
 
-            subject.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
+            shard.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
 
-            subject.tell(new CreateTransaction("txn-1",
+            shard.tell(new CreateTransaction("txn-1",
                     TransactionProxy.TransactionType.READ_ONLY.ordinal() ).toSerializable(), getRef());
 
             CreateTransactionReply reply = expectMsgClass(duration("3 seconds"),
@@ -166,18 +278,19 @@ public class ShardTest extends AbstractActorTest {
             String path = reply.getTransactionActorPath().toString();
             assertTrue("Unexpected transaction path " + path,
                     path.contains("akka://test/user/testCreateTransaction/shard-txn-1"));
-            expectNoMsg();
+
+            shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
         }};
     }
 
     @Test
     public void testCreateTransactionOnChain(){
         new ShardTestKit(getSystem()) {{
-            final ActorRef subject = getSystem().actorOf(newShardProps(), "testCreateTransactionOnChain");
+            final ActorRef shard = getSystem().actorOf(newShardProps(), "testCreateTransactionOnChain");
 
-            waitUntilLeader(subject);
+            waitUntilLeader(shard);
 
-            subject.tell(new CreateTransaction("txn-1",
+            shard.tell(new CreateTransaction("txn-1",
                     TransactionProxy.TransactionType.READ_ONLY.ordinal() , "foobar").toSerializable(),
                     getRef());
 
@@ -187,47 +300,69 @@ public class ShardTest extends AbstractActorTest {
             String path = reply.getTransactionActorPath().toString();
             assertTrue("Unexpected transaction path " + path,
                     path.contains("akka://test/user/testCreateTransactionOnChain/shard-txn-1"));
-            expectNoMsg();
+
+            shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
         }};
     }
 
     @Test
     public void testPeerAddressResolved(){
-        new JavaTestKit(getSystem()) {{
-            final ShardIdentifier identifier =
-                ShardIdentifier.builder().memberName("member-1")
-                    .shardName("inventory").type("config").build();
-
-            Props props = Shard.props(identifier,
-                    Collections.<ShardIdentifier, String>singletonMap(identifier, null),
-                    dataStoreContext, SCHEMA_CONTEXT);
-            final ActorRef subject = getSystem().actorOf(props, "testPeerAddressResolved");
-
-            new Within(duration("3 seconds")) {
-                @Override
-                protected void run() {
-
-                    subject.tell(
-                        new PeerAddressResolved(identifier, "akka://foobar"),
-                        getRef());
-
-                    expectNoMsg();
+        new ShardTestKit(getSystem()) {{
+            final CountDownLatch recoveryComplete = new CountDownLatch(1);
+            class TestShard extends Shard {
+                TestShard() {
+                    super(shardID, Collections.<ShardIdentifier, String>singletonMap(shardID, null),
+                            dataStoreContext, SCHEMA_CONTEXT);
                 }
-            };
+
+                Map<String, String> getPeerAddresses() {
+                    return getRaftActorContext().getPeerAddresses();
+                }
+
+                @Override
+                protected void onRecoveryComplete() {
+                    try {
+                        super.onRecoveryComplete();
+                    } finally {
+                        recoveryComplete.countDown();
+                    }
+                }
+            }
+
+            final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
+                    Props.create(new DelegatingShardCreator(new Creator<Shard>() {
+                        @Override
+                        public TestShard create() throws Exception {
+                            return new TestShard();
+                        }
+                    })), "testPeerAddressResolved");
+
+            //waitUntilLeader(shard);
+            assertEquals("Recovery complete", true,
+                    Uninterruptibles.awaitUninterruptibly(recoveryComplete, 5, TimeUnit.SECONDS));
+
+            String address = "akka://foobar";
+            shard.underlyingActor().onReceiveCommand(new PeerAddressResolved(shardID, address));
+
+            assertEquals("getPeerAddresses", address,
+                    ((TestShard)shard.underlyingActor()).getPeerAddresses().get(shardID.toString()));
+
+            shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
         }};
     }
 
     @Test
     public void testApplySnapshot() throws ExecutionException, InterruptedException {
-        TestActorRef<Shard> ref = TestActorRef.create(getSystem(), newShardProps());
+        TestActorRef<Shard> shard = TestActorRef.create(getSystem(), newShardProps(),
+                "testApplySnapshot");
 
         NormalizedNodeToNodeCodec codec =
             new NormalizedNodeToNodeCodec(SCHEMA_CONTEXT);
 
-        writeToStore(ref, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+        writeToStore(shard, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
         YangInstanceIdentifier root = YangInstanceIdentifier.builder().build();
-        NormalizedNode<?,?> expected = readStore(ref, root);
+        NormalizedNode<?,?> expected = readStore(shard, root);
 
         NormalizedNodeMessages.Container encode = codec.encode(expected);
 
@@ -235,17 +370,19 @@ public class ShardTest extends AbstractActorTest {
                 encode.getNormalizedNode().toByteString().toByteArray(),
                 Collections.<ReplicatedLogEntry>emptyList(), 1, 2, 3, 4));
 
-        ref.underlyingActor().onReceiveCommand(applySnapshot);
+        shard.underlyingActor().onReceiveCommand(applySnapshot);
 
-        NormalizedNode<?,?> actual = readStore(ref, root);
+        NormalizedNode<?,?> actual = readStore(shard, root);
 
         assertEquals(expected, actual);
+
+        shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
     }
 
     @Test
     public void testApplyState() throws Exception {
 
-        TestActorRef<Shard> shard = TestActorRef.create(getSystem(), newShardProps());
+        TestActorRef<Shard> shard = TestActorRef.create(getSystem(), newShardProps(), "testApplyState");
 
         NormalizedNode<?, ?> node = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
@@ -259,6 +396,8 @@ public class ShardTest extends AbstractActorTest {
 
         NormalizedNode<?,?> actual = readStore(shard, TestModel.TEST_PATH);
         assertEquals("Applied state", node, actual);
+
+        shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
     }
 
     @SuppressWarnings("serial")
@@ -279,7 +418,7 @@ public class ShardTest extends AbstractActorTest {
         DOMStoreReadTransaction readTx = testStore.newReadOnlyTransaction();
         NormalizedNode<?, ?> root = readTx.read(YangInstanceIdentifier.builder().build()).get().get();
 
-        InMemorySnapshotStore.addSnapshot(IDENTIFIER.toString(), Snapshot.create(
+        InMemorySnapshotStore.addSnapshot(shardID.toString(), Snapshot.create(
                 new NormalizedNodeToNodeCodec(SCHEMA_CONTEXT).encode(
                         root).
                                 getNormalizedNode().toByteString().toByteArray(),
@@ -287,7 +426,7 @@ public class ShardTest extends AbstractActorTest {
 
         // Set up the InMemoryJournal.
 
-        InMemoryJournal.addEntry(IDENTIFIER.toString(), 0, new ReplicatedLogImplEntry(0, 1, newPayload(
+        InMemoryJournal.addEntry(shardID.toString(), 0, new ReplicatedLogImplEntry(0, 1, newPayload(
                   new WriteModification(TestModel.OUTER_LIST_PATH,
                           ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build(),
                           SCHEMA_CONTEXT))));
@@ -301,11 +440,11 @@ public class ShardTest extends AbstractActorTest {
             Modification mod = new MergeModification(path,
                     ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, i),
                     SCHEMA_CONTEXT);
-            InMemoryJournal.addEntry(IDENTIFIER.toString(), i, new ReplicatedLogImplEntry(i, 1,
+            InMemoryJournal.addEntry(shardID.toString(), i, new ReplicatedLogImplEntry(i, 1,
                     newPayload(mod)));
         }
 
-        InMemoryJournal.addEntry(IDENTIFIER.toString(), nListEntries + 1,
+        InMemoryJournal.addEntry(shardID.toString(), nListEntries + 1,
                 new ApplyLogEntries(nListEntries));
 
         // Create the actor and wait for recovery complete.
@@ -315,7 +454,7 @@ public class ShardTest extends AbstractActorTest {
         Creator<Shard> creator = new Creator<Shard>() {
             @Override
             public Shard create() throws Exception {
-                return new Shard(IDENTIFIER, Collections.<ShardIdentifier,String>emptyMap(),
+                return new Shard(shardID, Collections.<ShardIdentifier,String>emptyMap(),
                         dataStoreContext, SCHEMA_CONTEXT) {
                     @Override
                     protected void onRecoveryComplete() {
@@ -363,6 +502,8 @@ public class ShardTest extends AbstractActorTest {
                 shard.underlyingActor().getShardMBean().getCommitIndex());
         assertEquals("Last applied", nListEntries,
                 shard.underlyingActor().getShardMBean().getLastApplied());
+
+        shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
     }
 
     private CompositeModificationPayload newPayload(Modification... mods) {
@@ -433,7 +574,8 @@ public class ShardTest extends AbstractActorTest {
         System.setProperty("shard.persistent", "true");
         new ShardTestKit(getSystem()) {{
             final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
-                    newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()), shardName());
+                    newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                    "testConcurrentThreePhaseCommits");
 
             waitUntilLeader(shard);
 
@@ -518,7 +660,6 @@ public class ShardTest extends AbstractActorTest {
                 @Override
                 public void onComplete(Throwable error, Object resp) {
                     if(error != null) {
-                        System.out.println(new java.util.Date()+": "+getClass().getSimpleName() + " failure: "+error);
                         caughtEx.set(new AssertionError(getClass().getSimpleName() + " failure", error));
                     } else {
                         try {
@@ -606,7 +747,17 @@ public class ShardTest extends AbstractActorTest {
             assertTrue("Missing leaf " + TestModel.ID_QNAME.getLocalName(), idLeaf.isPresent());
             assertEquals(TestModel.ID_QNAME.getLocalName() + " value", 1, idLeaf.get().getValue());
 
+            for(int i = 0; i < 20 * 5; i++) {
+                long lastLogIndex = shard.underlyingActor().getShardMBean().getLastLogIndex();
+                if(lastLogIndex == 2) {
+                    break;
+                }
+                Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
+            }
+
             assertEquals("Last log index", 2, shard.underlyingActor().getShardMBean().getLastLogIndex());
+
+            shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
         }};
     }
 
@@ -614,7 +765,8 @@ public class ShardTest extends AbstractActorTest {
     public void testCommitPhaseFailure() throws Throwable {
         new ShardTestKit(getSystem()) {{
             final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
-                    newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()), shardName());
+                    newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                    "testCommitPhaseFailure");
 
             waitUntilLeader(shard);
 
@@ -681,6 +833,8 @@ public class ShardTest extends AbstractActorTest {
             inOrder.verify(cohort1).preCommit();
             inOrder.verify(cohort1).commit();
             inOrder.verify(cohort2).canCommit();
+
+            shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
         }};
     }
 
@@ -688,7 +842,8 @@ public class ShardTest extends AbstractActorTest {
     public void testPreCommitPhaseFailure() throws Throwable {
         new ShardTestKit(getSystem()) {{
             final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
-                    newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()), shardName());
+                    newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                    "testPreCommitPhaseFailure");
 
             waitUntilLeader(shard);
 
@@ -722,6 +877,8 @@ public class ShardTest extends AbstractActorTest {
             InOrder inOrder = inOrder(cohort);
             inOrder.verify(cohort).canCommit();
             inOrder.verify(cohort).preCommit();
+
+            shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
         }};
     }
 
@@ -729,7 +886,8 @@ public class ShardTest extends AbstractActorTest {
     public void testCanCommitPhaseFailure() throws Throwable {
         new ShardTestKit(getSystem()) {{
             final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
-                    newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()), shardName());
+                    newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                    "testCanCommitPhaseFailure");
 
             waitUntilLeader(shard);
 
@@ -750,6 +908,8 @@ public class ShardTest extends AbstractActorTest {
 
             shard.tell(new CanCommitTransaction(transactionID).toSerializable(), getRef());
             expectMsgClass(duration, akka.actor.Status.Failure.class);
+
+            shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
         }};
     }
 
@@ -758,7 +918,8 @@ public class ShardTest extends AbstractActorTest {
         System.setProperty("shard.persistent", "true");
         new ShardTestKit(getSystem()) {{
             final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
-                    newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()), shardName());
+                    newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                    "testAbortBeforeFinishCommit");
 
             waitUntilLeader(shard);
 
@@ -810,6 +971,8 @@ public class ShardTest extends AbstractActorTest {
 
             NormalizedNode<?, ?> node = readStore(shard, TestModel.TEST_PATH);
             assertNotNull(TestModel.TEST_QNAME.getLocalName() + " not found", node);
+
+            shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
         }};
     }
 
@@ -819,7 +982,8 @@ public class ShardTest extends AbstractActorTest {
 
         new ShardTestKit(getSystem()) {{
             final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
-                    newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()), shardName());
+                    newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                    "testTransactionCommitTimeout");
 
             waitUntilLeader(shard);
 
@@ -877,6 +1041,8 @@ public class ShardTest extends AbstractActorTest {
 
             NormalizedNode<?, ?> node = readStore(shard, listNodePath);
             assertNotNull(listNodePath + " not found", node);
+
+            shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
         }};
     }
 
@@ -886,7 +1052,8 @@ public class ShardTest extends AbstractActorTest {
 
         new ShardTestKit(getSystem()) {{
             final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
-                    newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()), shardName());
+                    newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                    "testTransactionCommitQueueCapacityExceeded");
 
             waitUntilLeader(shard);
 
@@ -935,6 +1102,8 @@ public class ShardTest extends AbstractActorTest {
 
             shard.tell(new CanCommitTransaction(transactionID3).toSerializable(), getRef());
             expectMsgClass(duration, akka.actor.Status.Failure.class);
+
+            shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
         }};
     }
 
@@ -942,10 +1111,13 @@ public class ShardTest extends AbstractActorTest {
     public void testCanCommitBeforeReadyFailure() throws Throwable {
         new ShardTestKit(getSystem()) {{
             final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
-                    newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()), shardName());
+                    newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                    "testCanCommitBeforeReadyFailure");
 
             shard.tell(new CanCommitTransaction("tx").toSerializable(), getRef());
             expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
+
+            shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
         }};
     }
 
@@ -953,7 +1125,8 @@ public class ShardTest extends AbstractActorTest {
     public void testAbortTransaction() throws Throwable {
         new ShardTestKit(getSystem()) {{
             final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
-                    newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()), shardName());
+                    newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                    "testAbortTransaction");
 
             waitUntilLeader(shard);
 
@@ -1016,6 +1189,8 @@ public class ShardTest extends AbstractActorTest {
             InOrder inOrder = inOrder(cohort1, cohort2);
             inOrder.verify(cohort1).canCommit();
             inOrder.verify(cohort2).canCommit();
+
+            shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
         }};
     }
 
@@ -1026,7 +1201,7 @@ public class ShardTest extends AbstractActorTest {
             Creator<Shard> creator = new Creator<Shard>() {
                 @Override
                 public Shard create() throws Exception {
-                    return new Shard(IDENTIFIER, Collections.<ShardIdentifier,String>emptyMap(),
+                    return new Shard(shardID, Collections.<ShardIdentifier,String>emptyMap(),
                             dataStoreContext, SCHEMA_CONTEXT) {
                         @Override
                         public void saveSnapshot(Object snapshot) {
@@ -1050,6 +1225,8 @@ public class ShardTest extends AbstractActorTest {
             shard.tell(new CaptureSnapshot(-1,-1,-1,-1), getRef());
 
             assertEquals("Snapshot saved", true, latch.get().await(5, TimeUnit.SECONDS));
+
+            shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
         }};
     }
 
