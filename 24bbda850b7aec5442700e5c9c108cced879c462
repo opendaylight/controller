@@ -52,6 +52,24 @@
       "revId": "24bbda850b7aec5442700e5c9c108cced879c462",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da87b5cf_a72e2ea4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-10-09T01:18:49Z",
+      "side": 1,
+      "message": "Didnt realize ActorSelection.resolveOne() does resolve the path via Identify message. Can change to use resolveOne.\n\nFrom the cohort paths, resolved in TransactionProxy , we again create ActorSelection in ThreePhaseCommitCohortProxy\u0027s invokeCohorts(). \nAnd during the invoke the actor is getting validated.\n\nSo are you guys suggesting that we deal with ActorSelection instead of ActorPath throughout, there by avoiding this conversions and validations?",
+      "parentUuid": "da87b5cf_47bba272",
+      "revId": "24bbda850b7aec5442700e5c9c108cced879c462",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
