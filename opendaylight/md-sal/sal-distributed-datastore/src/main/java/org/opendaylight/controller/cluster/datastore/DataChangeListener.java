@@ -19,8 +19,12 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DataChangeListener extends AbstractUntypedActor {
+    private static final Logger LOG = LoggerFactory.getLogger(DataChangeListener.class);
+
     private final AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener;
     private boolean notificationsEnabled = false;
 
@@ -29,7 +33,8 @@ public class DataChangeListener extends AbstractUntypedActor {
         this.listener = Preconditions.checkNotNull(listener, "listener should not be null");
     }
 
-    @Override public void handleReceive(Object message) throws Exception {
+    @Override
+    public void handleReceive(Object message) throws Exception {
         if(message instanceof DataChanged){
             dataChanged(message);
         } else if(message instanceof EnableNotification){
@@ -39,18 +44,24 @@ public class DataChangeListener extends AbstractUntypedActor {
 
     private void enableNotification(EnableNotification message) {
         notificationsEnabled = message.isEnabled();
+        LOG.debug("{} notifications for listener {}", (notificationsEnabled ? "Enabled" : "Disabled"),
+                listener);
     }
 
     private void dataChanged(Object message) {
 
         // Do nothing if notifications are not enabled
-        if(!notificationsEnabled){
+        if(!notificationsEnabled) {
+            LOG.debug("Notifications not enabled for listener {} - dropping change notification",
+                    listener);
             return;
         }
 
         DataChanged reply = (DataChanged) message;
-        AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>>
-            change = reply.getChange();
+        AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = reply.getChange();
+
+        LOG.debug("Sending change notification {} to listener {}", change, listener);
+
         this.listener.onDataChanged(change);
 
         // It seems the sender is never null but it doesn't hurt to check. If the caller passes in
