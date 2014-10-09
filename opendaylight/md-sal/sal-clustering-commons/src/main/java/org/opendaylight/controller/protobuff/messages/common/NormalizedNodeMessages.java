@@ -4176,6 +4176,50 @@ public final class NormalizedNodeMessages {
      */
     org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.PathArgumentOrBuilder getArgumentsOrBuilder(
         int index);
+
+    // repeated string code = 2;
+    /**
+     * <code>repeated string code = 2;</code>
+     *
+     * <pre>
+     * A list of string codes which can be used for any repeated strings in the path args. This is
+     * optional - an InstanceIdentifier may be encoded as part of another message, eg NormalizedNode,
+     * that contains the codes.
+     * </pre>
+     */
+    java.util.List<java.lang.String>
+    getCodeList();
+    /**
+     * <code>repeated string code = 2;</code>
+     *
+     * <pre>
+     * A list of string codes which can be used for any repeated strings in the path args. This is
+     * optional - an InstanceIdentifier may be encoded as part of another message, eg NormalizedNode,
+     * that contains the codes.
+     * </pre>
+     */
+    int getCodeCount();
+    /**
+     * <code>repeated string code = 2;</code>
+     *
+     * <pre>
+     * A list of string codes which can be used for any repeated strings in the path args. This is
+     * optional - an InstanceIdentifier may be encoded as part of another message, eg NormalizedNode,
+     * that contains the codes.
+     * </pre>
+     */
+    java.lang.String getCode(int index);
+    /**
+     * <code>repeated string code = 2;</code>
+     *
+     * <pre>
+     * A list of string codes which can be used for any repeated strings in the path args. This is
+     * optional - an InstanceIdentifier may be encoded as part of another message, eg NormalizedNode,
+     * that contains the codes.
+     * </pre>
+     */
+    com.google.protobuf.ByteString
+        getCodeBytes(int index);
   }
   /**
    * Protobuf type {@code org.opendaylight.controller.mdsal.InstanceIdentifier}
@@ -4236,6 +4280,14 @@ public final class NormalizedNodeMessages {
               arguments_.add(input.readMessage(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.PathArgument.PARSER, extensionRegistry));
               break;
             }
+            case 18: {
+              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+                code_ = new com.google.protobuf.LazyStringArrayList();
+                mutable_bitField0_ |= 0x00000002;
+              }
+              code_.add(input.readBytes());
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -4246,6 +4298,9 @@ public final class NormalizedNodeMessages {
       } finally {
         if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
           arguments_ = java.util.Collections.unmodifiableList(arguments_);
+        }
+        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+          code_ = new com.google.protobuf.UnmodifiableLazyStringList(code_);
         }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
@@ -4314,8 +4369,63 @@ public final class NormalizedNodeMessages {
       return arguments_.get(index);
     }
 
+    // repeated string code = 2;
+    public static final int CODE_FIELD_NUMBER = 2;
+    private com.google.protobuf.LazyStringList code_;
+    /**
+     * <code>repeated string code = 2;</code>
+     *
+     * <pre>
+     * A list of string codes which can be used for any repeated strings in the path args. This is
+     * optional - an InstanceIdentifier may be encoded as part of another message, eg NormalizedNode,
+     * that contains the codes.
+     * </pre>
+     */
+    public java.util.List<java.lang.String>
+        getCodeList() {
+      return code_;
+    }
+    /**
+     * <code>repeated string code = 2;</code>
+     *
+     * <pre>
+     * A list of string codes which can be used for any repeated strings in the path args. This is
+     * optional - an InstanceIdentifier may be encoded as part of another message, eg NormalizedNode,
+     * that contains the codes.
+     * </pre>
+     */
+    public int getCodeCount() {
+      return code_.size();
+    }
+    /**
+     * <code>repeated string code = 2;</code>
+     *
+     * <pre>
+     * A list of string codes which can be used for any repeated strings in the path args. This is
+     * optional - an InstanceIdentifier may be encoded as part of another message, eg NormalizedNode,
+     * that contains the codes.
+     * </pre>
+     */
+    public java.lang.String getCode(int index) {
+      return code_.get(index);
+    }
+    /**
+     * <code>repeated string code = 2;</code>
+     *
+     * <pre>
+     * A list of string codes which can be used for any repeated strings in the path args. This is
+     * optional - an InstanceIdentifier may be encoded as part of another message, eg NormalizedNode,
+     * that contains the codes.
+     * </pre>
+     */
+    public com.google.protobuf.ByteString
+        getCodeBytes(int index) {
+      return code_.getByteString(index);
+    }
+
     private void initFields() {
       arguments_ = java.util.Collections.emptyList();
+      code_ = com.google.protobuf.LazyStringArrayList.EMPTY;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -4338,6 +4448,9 @@ public final class NormalizedNodeMessages {
       for (int i = 0; i < arguments_.size(); i++) {
         output.writeMessage(1, arguments_.get(i));
       }
+      for (int i = 0; i < code_.size(); i++) {
+        output.writeBytes(2, code_.getByteString(i));
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -4350,6 +4463,15 @@ public final class NormalizedNodeMessages {
       for (int i = 0; i < arguments_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, arguments_.get(i));
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < code_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeBytesSizeNoTag(code_.getByteString(i));
+        }
+        size += dataSize;
+        size += 1 * getCodeList().size();
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -4474,6 +4596,8 @@ public final class NormalizedNodeMessages {
         } else {
           argumentsBuilder_.clear();
         }
+        code_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
 
@@ -4510,6 +4634,12 @@ public final class NormalizedNodeMessages {
         } else {
           result.arguments_ = argumentsBuilder_.build();
         }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          code_ = new com.google.protobuf.UnmodifiableLazyStringList(
+              code_);
+          bitField0_ = (bitField0_ & ~0x00000002);
+        }
+        result.code_ = code_;
         onBuilt();
         return result;
       }
@@ -4550,6 +4680,16 @@ public final class NormalizedNodeMessages {
               argumentsBuilder_.addAllMessages(other.arguments_);
             }
           }
+        }
+        if (!other.code_.isEmpty()) {
+          if (code_.isEmpty()) {
+            code_ = other.code_;
+            bitField0_ = (bitField0_ & ~0x00000002);
+          } else {
+            ensureCodeIsMutable();
+            code_.addAll(other.code_);
+          }
+          onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -4822,6 +4962,153 @@ public final class NormalizedNodeMessages {
           arguments_ = null;
         }
         return argumentsBuilder_;
+      }
+
+      // repeated string code = 2;
+      private com.google.protobuf.LazyStringList code_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      private void ensureCodeIsMutable() {
+        if (!((bitField0_ & 0x00000002) == 0x00000002)) {
+          code_ = new com.google.protobuf.LazyStringArrayList(code_);
+          bitField0_ |= 0x00000002;
+         }
+      }
+      /**
+       * <code>repeated string code = 2;</code>
+       *
+       * <pre>
+       * A list of string codes which can be used for any repeated strings in the path args. This is
+       * optional - an InstanceIdentifier may be encoded as part of another message, eg NormalizedNode,
+       * that contains the codes.
+       * </pre>
+       */
+      public java.util.List<java.lang.String>
+          getCodeList() {
+        return java.util.Collections.unmodifiableList(code_);
+      }
+      /**
+       * <code>repeated string code = 2;</code>
+       *
+       * <pre>
+       * A list of string codes which can be used for any repeated strings in the path args. This is
+       * optional - an InstanceIdentifier may be encoded as part of another message, eg NormalizedNode,
+       * that contains the codes.
+       * </pre>
+       */
+      public int getCodeCount() {
+        return code_.size();
+      }
+      /**
+       * <code>repeated string code = 2;</code>
+       *
+       * <pre>
+       * A list of string codes which can be used for any repeated strings in the path args. This is
+       * optional - an InstanceIdentifier may be encoded as part of another message, eg NormalizedNode,
+       * that contains the codes.
+       * </pre>
+       */
+      public java.lang.String getCode(int index) {
+        return code_.get(index);
+      }
+      /**
+       * <code>repeated string code = 2;</code>
+       *
+       * <pre>
+       * A list of string codes which can be used for any repeated strings in the path args. This is
+       * optional - an InstanceIdentifier may be encoded as part of another message, eg NormalizedNode,
+       * that contains the codes.
+       * </pre>
+       */
+      public com.google.protobuf.ByteString
+          getCodeBytes(int index) {
+        return code_.getByteString(index);
+      }
+      /**
+       * <code>repeated string code = 2;</code>
+       *
+       * <pre>
+       * A list of string codes which can be used for any repeated strings in the path args. This is
+       * optional - an InstanceIdentifier may be encoded as part of another message, eg NormalizedNode,
+       * that contains the codes.
+       * </pre>
+       */
+      public Builder setCode(
+          int index, java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureCodeIsMutable();
+        code_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string code = 2;</code>
+       *
+       * <pre>
+       * A list of string codes which can be used for any repeated strings in the path args. This is
+       * optional - an InstanceIdentifier may be encoded as part of another message, eg NormalizedNode,
+       * that contains the codes.
+       * </pre>
+       */
+      public Builder addCode(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureCodeIsMutable();
+        code_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string code = 2;</code>
+       *
+       * <pre>
+       * A list of string codes which can be used for any repeated strings in the path args. This is
+       * optional - an InstanceIdentifier may be encoded as part of another message, eg NormalizedNode,
+       * that contains the codes.
+       * </pre>
+       */
+      public Builder addAllCode(
+          java.lang.Iterable<java.lang.String> values) {
+        ensureCodeIsMutable();
+        super.addAll(values, code_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string code = 2;</code>
+       *
+       * <pre>
+       * A list of string codes which can be used for any repeated strings in the path args. This is
+       * optional - an InstanceIdentifier may be encoded as part of another message, eg NormalizedNode,
+       * that contains the codes.
+       * </pre>
+       */
+      public Builder clearCode() {
+        code_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string code = 2;</code>
+       *
+       * <pre>
+       * A list of string codes which can be used for any repeated strings in the path args. This is
+       * optional - an InstanceIdentifier may be encoded as part of another message, eg NormalizedNode,
+       * that contains the codes.
+       * </pre>
+       */
+      public Builder addCodeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureCodeIsMutable();
+        code_.add(value);
+        onChanged();
+        return this;
       }
 
       // @@protoc_insertion_point(builder_scope:org.opendaylight.controller.mdsal.InstanceIdentifier)
@@ -9998,30 +10285,30 @@ public final class NormalizedNodeMessages {
       "controller.mdsal.PathArgumentAttribute\022@" +
       "\n\nattributes\030\005 \003(\0132,.org.opendaylight.co" +
       "ntroller.mdsal.Attribute\022\017\n\007intType\030\006 \001(" +
-      "\005\"X\n\022InstanceIdentifier\022B\n\targuments\030\001 \003" +
+      "\005\"f\n\022InstanceIdentifier\022B\n\targuments\030\001 \003" +
       "(\0132/.org.opendaylight.controller.mdsal.P" +
-      "athArgument\"\245\003\n\004Node\022\014\n\004path\030\001 \001(\t\022\014\n\004ty" +
-      "pe\030\002 \001(\t\022E\n\014pathArgument\030\003 \001(\0132/.org.ope" +
-      "ndaylight.controller.mdsal.PathArgument\022" +
-      "\017\n\007intType\030\004 \001(\005\022@\n\nattributes\030\005 \003(\0132,.o",
-      "rg.opendaylight.controller.mdsal.Attribu" +
-      "te\0226\n\005child\030\006 \003(\0132\'.org.opendaylight.con" +
-      "troller.mdsal.Node\022\r\n\005value\030\007 \001(\t\022\021\n\tval" +
-      "ueType\030\010 \001(\t\022\024\n\014intValueType\030\t \001(\005\022V\n\027in" +
-      "stanceIdentifierValue\030\n \001(\01325.org.openda" +
-      "ylight.controller.mdsal.InstanceIdentifi" +
-      "er\022\021\n\tbitsValue\030\013 \003(\t\022\014\n\004code\030\014 \003(\t\"`\n\tC" +
-      "ontainer\022\022\n\nparentPath\030\001 \002(\t\022?\n\016normaliz" +
-      "edNode\030\002 \001(\0132\'.org.opendaylight.controll" +
-      "er.mdsal.Node\"\246\001\n\014NodeMapEntry\022U\n\026instan",
-      "ceIdentifierPath\030\001 \002(\01325.org.opendayligh" +
-      "t.controller.mdsal.InstanceIdentifier\022?\n" +
-      "\016normalizedNode\030\002 \001(\0132\'.org.opendaylight" +
-      ".controller.mdsal.Node\"N\n\007NodeMap\022C\n\nmap" +
-      "Entries\030\001 \003(\0132/.org.opendaylight.control" +
-      "ler.mdsal.NodeMapEntryBO\n5org.opendaylig" +
-      "ht.controller.protobuff.messages.commonB" +
-      "\026NormalizedNodeMessages"
+      "athArgument\022\014\n\004code\030\002 \003(\t\"\245\003\n\004Node\022\014\n\004pa" +
+      "th\030\001 \001(\t\022\014\n\004type\030\002 \001(\t\022E\n\014pathArgument\030\003" +
+      " \001(\0132/.org.opendaylight.controller.mdsal" +
+      ".PathArgument\022\017\n\007intType\030\004 \001(\005\022@\n\nattrib",
+      "utes\030\005 \003(\0132,.org.opendaylight.controller" +
+      ".mdsal.Attribute\0226\n\005child\030\006 \003(\0132\'.org.op" +
+      "endaylight.controller.mdsal.Node\022\r\n\005valu" +
+      "e\030\007 \001(\t\022\021\n\tvalueType\030\010 \001(\t\022\024\n\014intValueTy" +
+      "pe\030\t \001(\005\022V\n\027instanceIdentifierValue\030\n \001(" +
+      "\01325.org.opendaylight.controller.mdsal.In" +
+      "stanceIdentifier\022\021\n\tbitsValue\030\013 \003(\t\022\014\n\004c" +
+      "ode\030\014 \003(\t\"`\n\tContainer\022\022\n\nparentPath\030\001 \002" +
+      "(\t\022?\n\016normalizedNode\030\002 \001(\0132\'.org.openday" +
+      "light.controller.mdsal.Node\"\246\001\n\014NodeMapE",
+      "ntry\022U\n\026instanceIdentifierPath\030\001 \002(\01325.o" +
+      "rg.opendaylight.controller.mdsal.Instanc" +
+      "eIdentifier\022?\n\016normalizedNode\030\002 \001(\0132\'.or" +
+      "g.opendaylight.controller.mdsal.Node\"N\n\007" +
+      "NodeMap\022C\n\nmapEntries\030\001 \003(\0132/.org.openda" +
+      "ylight.controller.mdsal.NodeMapEntryBO\n5" +
+      "org.opendaylight.controller.protobuff.me" +
+      "ssages.commonB\026NormalizedNodeMessages"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -10057,7 +10344,7 @@ public final class NormalizedNodeMessages {
           internal_static_org_opendaylight_controller_mdsal_InstanceIdentifier_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_org_opendaylight_controller_mdsal_InstanceIdentifier_descriptor,
-              new java.lang.String[] { "Arguments", });
+              new java.lang.String[] { "Arguments", "Code", });
           internal_static_org_opendaylight_controller_mdsal_Node_descriptor =
             getDescriptor().getMessageTypes().get(5);
           internal_static_org_opendaylight_controller_mdsal_Node_fieldAccessorTable = new

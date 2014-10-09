@@ -15,15 +15,6 @@ import static junit.framework.TestCase.assertEquals;
 public class PathUtilsTest {
 
     @Test
-    public void getParentPath(){
-        assertEquals("", PathUtils.getParentPath("foobar"));
-        assertEquals("", PathUtils.getParentPath("/a"));
-        assertEquals("/a", PathUtils.getParentPath("/a/b"));
-        assertEquals("/a/b", PathUtils.getParentPath("/a/b/c"));
-        assertEquals("/a/b", PathUtils.getParentPath("a/b/c"));
-    }
-
-    @Test
     public void toStringNodeIdentifier(){
         YangInstanceIdentifier.PathArgument pathArgument = nodeIdentifier();
 

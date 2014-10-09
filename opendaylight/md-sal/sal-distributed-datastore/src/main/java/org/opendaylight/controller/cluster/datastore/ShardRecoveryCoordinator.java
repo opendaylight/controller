@@ -142,7 +142,7 @@ class ShardRecoveryCoordinator {
             try {
                 NormalizedNodeMessages.Node serializedNode = NormalizedNodeMessages.Node.parseFrom(snapshot);
                 NormalizedNode<?, ?> node = new NormalizedNodeToNodeCodec(schemaContext).decode(
-                        YangInstanceIdentifier.builder().build(), serializedNode);
+                        serializedNode);
 
                 // delete everything first
                 resultingTx.delete(YangInstanceIdentifier.builder().build());
