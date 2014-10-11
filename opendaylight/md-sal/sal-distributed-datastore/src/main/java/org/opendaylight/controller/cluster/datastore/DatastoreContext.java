@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.datastore;
 import org.opendaylight.controller.cluster.raft.ConfigParams;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
+import akka.util.Timeout;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 import java.util.concurrent.TimeUnit;
@@ -29,11 +30,12 @@ public class DatastoreContext {
     private final ConfigParams shardRaftConfig;
     private final int shardTransactionCommitTimeoutInSeconds;
     private final int shardTransactionCommitQueueCapacity;
+    private final Timeout shardInitializationTimeout;
 
     private DatastoreContext(InMemoryDOMDataStoreConfigProperties dataStoreProperties,
             ConfigParams shardRaftConfig, String dataStoreMXBeanType, int operationTimeoutInSeconds,
             Duration shardTransactionIdleTimeout, int shardTransactionCommitTimeoutInSeconds,
-            int shardTransactionCommitQueueCapacity) {
+            int shardTransactionCommitQueueCapacity, Timeout shardInitializationTimeout) {
         this.dataStoreProperties = dataStoreProperties;
         this.shardRaftConfig = shardRaftConfig;
         this.dataStoreMXBeanType = dataStoreMXBeanType;
@@ -41,6 +43,7 @@ public class DatastoreContext {
         this.shardTransactionIdleTimeout = shardTransactionIdleTimeout;
         this.shardTransactionCommitTimeoutInSeconds = shardTransactionCommitTimeoutInSeconds;
         this.shardTransactionCommitQueueCapacity = shardTransactionCommitQueueCapacity;
+        this.shardInitializationTimeout = shardInitializationTimeout;
     }
 
     public static Builder newBuilder() {
@@ -75,6 +78,10 @@ public class DatastoreContext {
         return shardTransactionCommitQueueCapacity;
     }
 
+    public Timeout getShardInitializationTimeout() {
+        return shardInitializationTimeout;
+    }
+
     public static class Builder {
         private InMemoryDOMDataStoreConfigProperties dataStoreProperties;
         private Duration shardTransactionIdleTimeout = Duration.create(10, TimeUnit.MINUTES);
@@ -85,6 +92,7 @@ public class DatastoreContext {
         private int shardSnapshotBatchCount = 20000;
         private int shardHeartbeatIntervalInMillis = 500;
         private int shardTransactionCommitQueueCapacity = 20000;
+        private Timeout shardInitializationTimeout = new Timeout(5, TimeUnit.MINUTES);
 
         public Builder shardTransactionIdleTimeout(Duration shardTransactionIdleTimeout) {
             this.shardTransactionIdleTimeout = shardTransactionIdleTimeout;
@@ -131,6 +139,11 @@ public class DatastoreContext {
             return this;
         }
 
+        public Builder shardInitializationTimeout(long timeout, TimeUnit unit) {
+            this.shardInitializationTimeout = new Timeout(timeout, unit);
+            return this;
+        }
+
         public DatastoreContext build() {
             DefaultConfigParamsImpl raftConfig = new DefaultConfigParamsImpl();
             raftConfig.setHeartBeatInterval(new FiniteDuration(shardHeartbeatIntervalInMillis,
@@ -140,7 +153,8 @@ public class DatastoreContext {
 
             return new DatastoreContext(dataStoreProperties, raftConfig, dataStoreMXBeanType,
                     operationTimeoutInSeconds, shardTransactionIdleTimeout,
-                    shardTransactionCommitTimeoutInSeconds, shardTransactionCommitQueueCapacity);
+                    shardTransactionCommitTimeoutInSeconds, shardTransactionCommitQueueCapacity,
+                    shardInitializationTimeout);
         }
     }
 }

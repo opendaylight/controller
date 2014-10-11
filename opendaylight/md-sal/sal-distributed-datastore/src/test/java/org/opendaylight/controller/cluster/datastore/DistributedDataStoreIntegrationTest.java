@@ -4,11 +4,14 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
 import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
+import org.opendaylight.controller.cluster.datastore.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.utils.MockDataChangeListener;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
@@ -16,6 +19,7 @@ import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
@@ -26,9 +30,15 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
+
+    private final DatastoreContext.Builder datastoreContextBuilder =
+            DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(100);
 
     @Test
     public void testWriteTransactionWithSingleShard() throws Exception{
@@ -72,7 +82,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
             cohort.preCommit().get(5, TimeUnit.SECONDS);
             cohort.commit().get(5, TimeUnit.SECONDS);
 
-            // 5. Verify the data in the store
+            // Verify the data in the store
 
             DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
 
@@ -95,7 +105,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
             DistributedDataStore dataStore =
                     setupDistributedDataStore("testReadWriteTransaction", "test-1");
 
-         // 1. Create a read-write Tx
+            // 1. Create a read-write Tx
 
             DOMStoreReadWriteTransaction readWriteTx = dataStore.newReadWriteTransaction();
             assertNotNull("newReadWriteTransaction returned null", readWriteTx);
@@ -135,6 +145,267 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
             assertEquals("Data node", nodeToWrite, optional.get());
 
             cleanup(dataStore);
+        }};
+    }
+
+    @Test
+    public void testTransactionWritesWithShardNotInitiallyReady() throws Exception{
+        new IntegrationTestKit(getSystem()) {{
+            String testName = "testTransactionWritesWithShardNotInitiallyReady";
+            String shardName = "test-1";
+
+            // Setup the InMemoryJournal to block shard recovery to ensure the shard isn't
+            // initialized until we create and submit the write the Tx.
+            String persistentID = String.format("member-1-shard-%s-%s", shardName, testName);
+            CountDownLatch blockRecoveryLatch = new CountDownLatch(1);
+            InMemoryJournal.addBlockReadMessagesLatch(persistentID, blockRecoveryLatch);
+
+            DistributedDataStore dataStore = setupDistributedDataStore(testName, false, shardName);
+
+            final DOMStoreWriteTransaction writeTx = dataStore.newWriteOnlyTransaction();
+            assertNotNull("newReadWriteTransaction returned null", writeTx);
+
+            final YangInstanceIdentifier listEntryPath = YangInstanceIdentifier.builder(
+                    TestModel.OUTER_LIST_PATH).nodeWithKey(TestModel.OUTER_LIST_QNAME,
+                            TestModel.ID_QNAME, 1).build();
+
+            final AtomicReference<DOMStoreThreePhaseCommitCohort> txCohort = new AtomicReference<>();
+            final AtomicReference<Exception> caughtEx = new AtomicReference<>();
+            final CountDownLatch txReady = new CountDownLatch(1);
+            Thread txThread = new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        writeTx.write(TestModel.TEST_PATH,
+                                ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+
+                        writeTx.merge(TestModel.OUTER_LIST_PATH, ImmutableNodes.mapNodeBuilder(
+                                TestModel.OUTER_LIST_QNAME).build());
+
+                        writeTx.write(listEntryPath, ImmutableNodes.mapEntry(
+                                TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1));
+
+                        writeTx.delete(listEntryPath);
+
+                        txCohort.set(writeTx.ready());
+                    } catch(Exception e) {
+                        caughtEx.set(e);
+                        return;
+                    } finally {
+                        txReady.countDown();
+                    }
+                }
+            };
+
+            txThread.start();
+
+            boolean done = Uninterruptibles.awaitUninterruptibly(txReady, 5, TimeUnit.SECONDS);
+            if(caughtEx.get() != null) {
+                throw caughtEx.get();
+            }
+
+            assertEquals("Tx ready", true, done);
+
+            blockRecoveryLatch.countDown();
+
+            assertEquals("canCommit", true, txCohort.get().canCommit().get(5, TimeUnit.SECONDS));
+            txCohort.get().preCommit().get(5, TimeUnit.SECONDS);
+            txCohort.get().commit().get(5, TimeUnit.SECONDS);
+
+            // Verify the data in the store
+
+            DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
+
+            Optional<NormalizedNode<?, ?>> optional = readTx.read(TestModel.TEST_PATH).
+                    get(5, TimeUnit.SECONDS);
+            assertEquals("isPresent", true, optional.isPresent());
+
+            optional = readTx.read(TestModel.OUTER_LIST_PATH).get(5, TimeUnit.SECONDS);
+            assertEquals("isPresent", true, optional.isPresent());
+
+            optional = readTx.read(listEntryPath).get(5, TimeUnit.SECONDS);
+            assertEquals("isPresent", false, optional.isPresent());
+
+            cleanup(dataStore);
+        }};
+    }
+
+    @Test
+    public void testTransactionReadsWithShardNotInitiallyReady() throws Exception{
+        new IntegrationTestKit(getSystem()) {{
+            String testName = "testTransactionReadsWithShardNotInitiallyReady";
+            String shardName = "test-1";
+
+            // Setup the InMemoryJournal to block shard recovery to ensure the shard isn't
+            // initialized until we create the Tx.
+            String persistentID = String.format("member-1-shard-%s-%s", shardName, testName);
+            CountDownLatch blockRecoveryLatch = new CountDownLatch(1);
+            InMemoryJournal.addBlockReadMessagesLatch(persistentID, blockRecoveryLatch);
+
+            DistributedDataStore dataStore = setupDistributedDataStore(testName, false, shardName);
+
+            final DOMStoreReadWriteTransaction readWriteTx = dataStore.newReadWriteTransaction();
+            assertNotNull("newReadWriteTransaction returned null", readWriteTx);
+
+            final AtomicReference<CheckedFuture<Boolean, ReadFailedException>> txExistsFuture =
+                    new AtomicReference<>();
+            final AtomicReference<CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException>>
+                    txReadFuture = new AtomicReference<>();
+            final AtomicReference<Exception> caughtEx = new AtomicReference<>();
+            final CountDownLatch txReadsDone = new CountDownLatch(1);
+            Thread txThread = new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        readWriteTx.write(TestModel.TEST_PATH,
+                                ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+
+                        txExistsFuture.set(readWriteTx.exists(TestModel.TEST_PATH));
+
+                        txReadFuture.set(readWriteTx.read(TestModel.TEST_PATH));
+                    } catch(Exception e) {
+                        caughtEx.set(e);
+                        return;
+                    } finally {
+                        txReadsDone.countDown();
+                    }
+                }
+            };
+
+            txThread.start();
+
+            boolean done = Uninterruptibles.awaitUninterruptibly(txReadsDone, 5, TimeUnit.SECONDS);
+            if(caughtEx.get() != null) {
+                throw caughtEx.get();
+            }
+
+            assertEquals("Tx reads done", true, done);
+
+            blockRecoveryLatch.countDown();
+
+            assertEquals("exists", true, txExistsFuture.get().checkedGet(5, TimeUnit.SECONDS));
+            assertEquals("read", true, txReadFuture.get().checkedGet(5, TimeUnit.SECONDS).isPresent());
+
+            readWriteTx.close();
+
+            cleanup(dataStore);
+        }};
+    }
+
+    @Test(expected=NotInitializedException.class)
+    public void testTransactionCommitFailureWithShardNotInitialized() throws Throwable{
+        new IntegrationTestKit(getSystem()) {{
+            String testName = "testTransactionCommitFailureWithShardNotInitialized";
+            String shardName = "test-1";
+
+            datastoreContextBuilder.shardInitializationTimeout(300, TimeUnit.MILLISECONDS);
+
+            // Setup the InMemoryJournal to block shard recovery.
+            String persistentID = String.format("member-1-shard-%s-%s", shardName, testName);
+            CountDownLatch blockRecoveryLatch = new CountDownLatch(1);
+            InMemoryJournal.addBlockReadMessagesLatch(persistentID, blockRecoveryLatch);
+
+            DistributedDataStore dataStore = setupDistributedDataStore(testName, false, shardName);
+
+            final DOMStoreWriteTransaction writeTx = dataStore.newWriteOnlyTransaction();
+            assertNotNull("newReadWriteTransaction returned null", writeTx);
+
+            final AtomicReference<DOMStoreThreePhaseCommitCohort> txCohort = new AtomicReference<>();
+            final AtomicReference<Exception> caughtEx = new AtomicReference<>();
+            final CountDownLatch txReady = new CountDownLatch(1);
+            Thread txThread = new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        writeTx.write(TestModel.TEST_PATH,
+                                ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+
+                        txCohort.set(writeTx.ready());
+                    } catch(Exception e) {
+                        caughtEx.set(e);
+                        return;
+                    } finally {
+                        txReady.countDown();
+                    }
+                }
+            };
+
+            txThread.start();
+
+            boolean done = Uninterruptibles.awaitUninterruptibly(txReady, 5, TimeUnit.SECONDS);
+            if(caughtEx.get() != null) {
+                throw caughtEx.get();
+            }
+
+            assertEquals("Tx ready", true, done);
+
+            try {
+                txCohort.get().canCommit().get(5, TimeUnit.SECONDS);
+            } catch(ExecutionException e) {
+                throw e.getCause();
+            } finally {
+                cleanup(dataStore);
+            }
+        }};
+    }
+
+    @Test(expected=NotInitializedException.class)
+    public void testTransactionReadFailureWithShardNotInitialized() throws Throwable{
+        new IntegrationTestKit(getSystem()) {{
+            String testName = "testTransactionReadFailureWithShardNotInitialized";
+            String shardName = "test-1";
+
+            datastoreContextBuilder.shardInitializationTimeout(300, TimeUnit.MILLISECONDS);
+
+            // Setup the InMemoryJournal to block shard recovery.
+            String persistentID = String.format("member-1-shard-%s-%s", shardName, testName);
+            CountDownLatch blockRecoveryLatch = new CountDownLatch(1);
+            InMemoryJournal.addBlockReadMessagesLatch(persistentID, blockRecoveryLatch);
+
+            DistributedDataStore dataStore = setupDistributedDataStore(testName, false, shardName);
+
+            final DOMStoreReadWriteTransaction readWriteTx = dataStore.newReadWriteTransaction();
+            assertNotNull("newReadWriteTransaction returned null", readWriteTx);
+
+            final AtomicReference<CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException>>
+                    txReadFuture = new AtomicReference<>();
+            final AtomicReference<Exception> caughtEx = new AtomicReference<>();
+            final CountDownLatch txReadDone = new CountDownLatch(1);
+            Thread txThread = new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        readWriteTx.write(TestModel.TEST_PATH,
+                                ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+
+                        txReadFuture.set(readWriteTx.read(TestModel.TEST_PATH));
+
+                        readWriteTx.close();
+                    } catch(Exception e) {
+                        caughtEx.set(e);
+                        return;
+                    } finally {
+                        txReadDone.countDown();
+                    }
+                }
+            };
+
+            txThread.start();
+
+            boolean done = Uninterruptibles.awaitUninterruptibly(txReadDone, 5, TimeUnit.SECONDS);
+            if(caughtEx.get() != null) {
+                throw caughtEx.get();
+            }
+
+            assertEquals("Tx read done", true, done);
+
+            try {
+                txReadFuture.get().checkedGet(5, TimeUnit.SECONDS);
+            } catch(ReadFailedException e) {
+                throw e.getCause();
+            } finally {
+                cleanup(dataStore);
+            }
         }};
     }
 
@@ -253,31 +524,37 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
         }
 
         DistributedDataStore setupDistributedDataStore(String typeName, String... shardNames) {
+            return setupDistributedDataStore(typeName, true, shardNames);
+        }
+
+        DistributedDataStore setupDistributedDataStore(String typeName, boolean waitUntilLeader,
+                String... shardNames) {
             MockClusterWrapper cluster = new MockClusterWrapper();
             Configuration config = new ConfigurationImpl("module-shards.conf", "modules.conf");
             ShardStrategyFactory.setConfiguration(config);
 
-            DatastoreContext datastoreContext = DatastoreContext.newBuilder().build();
+            DatastoreContext datastoreContext = datastoreContextBuilder.build();
             DistributedDataStore dataStore = new DistributedDataStore(getSystem(), typeName, cluster,
                     config, datastoreContext);
 
             SchemaContext schemaContext = SchemaContextHelper.full();
             dataStore.onGlobalContextUpdated(schemaContext);
 
-            for(String shardName: shardNames) {
-                ActorRef shard = null;
-                for(int i = 0; i < 20 * 5 && shard == null; i++) {
-                    Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
-                    Optional<ActorRef> shardReply = dataStore.getActorContext().findLocalShard(shardName);
-                    if(shardReply.isPresent()) {
-                        shard = shardReply.get();
+            if(waitUntilLeader) {
+                for(String shardName: shardNames) {
+                    ActorRef shard = null;
+                    for(int i = 0; i < 20 * 5 && shard == null; i++) {
+                        Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
+                        Optional<ActorRef> shardReply = dataStore.getActorContext().findLocalShard(shardName);
+                        if(shardReply.isPresent()) {
+                            shard = shardReply.get();
+                        }
                     }
+
+                    assertNotNull("Shard was not created", shard);
+
+                    waitUntilLeader(shard);
                 }
-
-                assertNotNull("Shard was not created", shard);
-
-                System.out.println("!!!!!!shard: "+shard.path().toString());
-                waitUntilLeader(shard);
             }
 
             return dataStore;

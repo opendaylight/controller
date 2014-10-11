@@ -53,9 +53,8 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
 
         actorContext = new ActorContext(actorSystem, actorSystem.actorOf(
                 ShardManager.props(type, cluster, configuration, datastoreContext)
-                    .withMailbox(ActorContext.MAILBOX), shardManagerId ), cluster, configuration);
-
-        actorContext.setOperationTimeout(datastoreContext.getOperationTimeoutInSeconds());
+                    .withMailbox(ActorContext.MAILBOX), shardManagerId ),
+                cluster, configuration, datastoreContext);
     }
 
     public DistributedDataStore(ActorContext actorContext) {
