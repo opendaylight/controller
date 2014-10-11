@@ -9,8 +9,8 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSelection;
+import akka.dispatch.Mapper;
 import akka.dispatch.OnComplete;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.FinalizablePhantomReference;
 import com.google.common.base.FinalizableReferenceQueue;
@@ -18,10 +18,10 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
-
-import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
+import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
@@ -46,17 +46,17 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import scala.Function1;
 import scala.concurrent.Future;
-import scala.runtime.AbstractFunction1;
-
+import scala.concurrent.Promise;
+import scala.concurrent.duration.FiniteDuration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.concurrent.GuardedBy;
 
 /**
  * TransactionProxy acts as a proxy for one or more transactions that were created on a remote shard
@@ -72,18 +72,14 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
-    private final TransactionChainProxy transactionChainProxy;
-
-
-
-    public enum TransactionType {
+    public static enum TransactionType {
         READ_ONLY,
         WRITE_ONLY,
         READ_WRITE
     }
 
-    static Function1<Throwable, Throwable> SAME_FAILURE_TRANSFORMER = new AbstractFunction1<
-                                                                          Throwable, Throwable>() {
+    static final Mapper<Throwable, Throwable> SAME_FAILURE_TRANSFORMER =
+                                                              new Mapper<Throwable, Throwable>() {
         @Override
         public Throwable apply(Throwable failure) {
             return failure;
@@ -92,9 +88,13 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
     private static final AtomicLong counter = new AtomicLong();
 
-    private static final Logger
-        LOG = LoggerFactory.getLogger(TransactionProxy.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TransactionProxy.class);
 
+    /**
+     * Time interval in between transaction create retries.
+     */
+    private static final FiniteDuration CREATE_TX_TRY_INTERVAL =
+            FiniteDuration.create(1, TimeUnit.SECONDS);
 
     /**
      * Used to enqueue the PhantomReferences for read-only TransactionProxy instances. The
@@ -173,11 +173,15 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
     private List<ActorSelection> remoteTransactionActors;
     private AtomicBoolean remoteTransactionActorsMB;
 
-    private final Map<String, TransactionContext> remoteTransactionPaths = new HashMap<>();
+    /**
+     * Stores the create transaction results per shard.
+     */
+    private final Map<String, TransactionFutureCallback> txFutureCallbackMap = new HashMap<>();
 
     private final TransactionType transactionType;
     private final ActorContext actorContext;
     private final TransactionIdentifier identifier;
+    private final TransactionChainProxy transactionChainProxy;
     private final SchemaContext schemaContext;
     private boolean inReadyState;
 
@@ -185,17 +189,8 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         this(actorContext, transactionType, null);
     }
 
-    @VisibleForTesting
-    List<Future<Object>> getRecordedOperationFutures() {
-        List<Future<Object>> recordedOperationFutures = Lists.newArrayList();
-        for(TransactionContext transactionContext : remoteTransactionPaths.values()) {
-            recordedOperationFutures.addAll(transactionContext.getRecordedOperationFutures());
-        }
-
-        return recordedOperationFutures;
-    }
-
-    public TransactionProxy(ActorContext actorContext, TransactionType transactionType, TransactionChainProxy transactionChainProxy) {
+    public TransactionProxy(ActorContext actorContext, TransactionType transactionType,
+            TransactionChainProxy transactionChainProxy) {
         this.actorContext = Preconditions.checkNotNull(actorContext,
             "actorContext should not be null");
         this.transactionType = Preconditions.checkNotNull(transactionType,
@@ -229,6 +224,19 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         }
     }
 
+    @VisibleForTesting
+    List<Future<Object>> getRecordedOperationFutures() {
+        List<Future<Object>> recordedOperationFutures = Lists.newArrayList();
+        for(TransactionFutureCallback txFutureCallback : txFutureCallbackMap.values()) {
+            TransactionContext transactionContext = txFutureCallback.getTransactionContext();
+            if(transactionContext != null) {
+                recordedOperationFutures.addAll(transactionContext.getRecordedOperationFutures());
+            }
+        }
+
+        return recordedOperationFutures;
+    }
+
     @Override
     public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(
             final YangInstanceIdentifier path) {
@@ -239,13 +247,43 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         if(LOG.isDebugEnabled()) {
             LOG.debug("Tx {} read {}", identifier, path);
         }
-        createTransactionIfMissing(actorContext, path);
 
-        return transactionContext(path).readData(path);
+        TransactionFutureCallback txFutureCallback = getOrCreateTxFutureCallback(path);
+        TransactionContext transactionContext = txFutureCallback.getTransactionContext();
+
+        CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> future;
+        if(transactionContext != null) {
+            future = transactionContext.readData(path);
+        } else {
+            // The shard Tx hasn't been created yet so add the Tx operation to the Tx Future
+            // callback to be executed after the Tx is created.
+            final SettableFuture<Optional<NormalizedNode<?, ?>>> proxyFuture = SettableFuture.create();
+            txFutureCallback.addTxOperationOnComplete(new TransactionOperation() {
+                @Override
+                public void invoke(TransactionContext transactionContext) {
+                    Futures.addCallback(transactionContext.readData(path),
+                        new FutureCallback<Optional<NormalizedNode<?, ?>>>() {
+                            @Override
+                            public void onSuccess(Optional<NormalizedNode<?, ?>> data) {
+                                proxyFuture.set(data);
+                            }
+
+                            @Override
+                            public void onFailure(Throwable t) {
+                                proxyFuture.setException(t);
+                            }
+                        });
+                }
+            });
+
+            future = MappingCheckedFuture.create(proxyFuture, ReadFailedException.MAPPER);
+        }
+
+        return future;
     }
 
     @Override
-    public CheckedFuture<Boolean, ReadFailedException> exists(YangInstanceIdentifier path) {
+    public CheckedFuture<Boolean, ReadFailedException> exists(final YangInstanceIdentifier path) {
 
         Preconditions.checkState(transactionType != TransactionType.WRITE_ONLY,
                 "Exists operation on write-only transaction is not allowed");
@@ -253,9 +291,39 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         if(LOG.isDebugEnabled()) {
             LOG.debug("Tx {} exists {}", identifier, path);
         }
-        createTransactionIfMissing(actorContext, path);
 
-        return transactionContext(path).dataExists(path);
+        TransactionFutureCallback txFutureCallback = getOrCreateTxFutureCallback(path);
+        TransactionContext transactionContext = txFutureCallback.getTransactionContext();
+
+        CheckedFuture<Boolean, ReadFailedException> future;
+        if(transactionContext != null) {
+            future = transactionContext.dataExists(path);
+        } else {
+            // The shard Tx hasn't been created yet so add the Tx operation to the Tx Future
+            // callback to be executed after the Tx is created.
+            final SettableFuture<Boolean> proxyFuture = SettableFuture.create();
+            txFutureCallback.addTxOperationOnComplete(new TransactionOperation() {
+                @Override
+                public void invoke(TransactionContext transactionContext) {
+                    Futures.addCallback(transactionContext.dataExists(path),
+                        new FutureCallback<Boolean>() {
+                            @Override
+                            public void onSuccess(Boolean exists) {
+                                proxyFuture.set(exists);
+                            }
+
+                            @Override
+                            public void onFailure(Throwable t) {
+                                proxyFuture.setException(t);
+                            }
+                        });
+                }
+            });
+
+            future = MappingCheckedFuture.create(proxyFuture, ReadFailedException.MAPPER);
+        }
+
+        return future;
     }
 
     private void checkModificationState() {
@@ -266,41 +334,78 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
     }
 
     @Override
-    public void write(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
+    public void write(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
 
         checkModificationState();
 
         if(LOG.isDebugEnabled()) {
             LOG.debug("Tx {} write {}", identifier, path);
         }
-        createTransactionIfMissing(actorContext, path);
 
-        transactionContext(path).writeData(path, data);
+        TransactionFutureCallback txFutureCallback = getOrCreateTxFutureCallback(path);
+        TransactionContext transactionContext = txFutureCallback.getTransactionContext();
+        if(transactionContext != null) {
+            transactionContext.writeData(path, data);
+        } else {
+            // The shard Tx hasn't been created yet so add the Tx operation to the Tx Future
+            // callback to be executed after the Tx is created.
+            txFutureCallback.addTxOperationOnComplete(new TransactionOperation() {
+                @Override
+                public void invoke(TransactionContext transactionContext) {
+                    transactionContext.writeData(path, data);
+                }
+            });
+        }
     }
 
     @Override
-    public void merge(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
+    public void merge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
 
         checkModificationState();
 
         if(LOG.isDebugEnabled()) {
             LOG.debug("Tx {} merge {}", identifier, path);
         }
-        createTransactionIfMissing(actorContext, path);
 
-        transactionContext(path).mergeData(path, data);
+        TransactionFutureCallback txFutureCallback = getOrCreateTxFutureCallback(path);
+        TransactionContext transactionContext = txFutureCallback.getTransactionContext();
+        if(transactionContext != null) {
+            transactionContext.mergeData(path, data);
+        } else {
+            // The shard Tx hasn't been created yet so add the Tx operation to the Tx Future
+            // callback to be executed after the Tx is created.
+            txFutureCallback.addTxOperationOnComplete(new TransactionOperation() {
+                @Override
+                public void invoke(TransactionContext transactionContext) {
+                    transactionContext.mergeData(path, data);
+                }
+            });
+        }
     }
 
     @Override
-    public void delete(YangInstanceIdentifier path) {
+    public void delete(final YangInstanceIdentifier path) {
 
         checkModificationState();
+
         if(LOG.isDebugEnabled()) {
             LOG.debug("Tx {} delete {}", identifier, path);
         }
-        createTransactionIfMissing(actorContext, path);
 
-        transactionContext(path).deleteData(path);
+        TransactionFutureCallback txFutureCallback = getOrCreateTxFutureCallback(path);
+        TransactionContext transactionContext = txFutureCallback.getTransactionContext();
+        if(transactionContext != null) {
+            transactionContext.deleteData(path);
+        } else {
+            // The shard Tx hasn't been created yet so add the Tx operation to the Tx Future
+            // callback to be executed after the Tx is created.
+            txFutureCallback.addTxOperationOnComplete(new TransactionOperation() {
+                @Override
+                public void invoke(TransactionContext transactionContext) {
+                    transactionContext.deleteData(path);
+                }
+            });
+        }
     }
 
     @Override
@@ -311,19 +416,38 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         inReadyState = true;
 
         if(LOG.isDebugEnabled()) {
-            LOG.debug("Tx {} Trying to get {} transactions ready for commit", identifier,
-                remoteTransactionPaths.size());
+            LOG.debug("Tx {} Readying {} transactions for commit", identifier,
+                    txFutureCallbackMap.size());
         }
+
         List<Future<ActorSelection>> cohortFutures = Lists.newArrayList();
 
-        for(TransactionContext transactionContext : remoteTransactionPaths.values()) {
+        for(TransactionFutureCallback txFutureCallback : txFutureCallbackMap.values()) {
 
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Tx {} Readying transaction for shard {}", identifier,
-                    transactionContext.getShardName());
+                        txFutureCallback.getShardName());
             }
-            cohortFutures.add(transactionContext.readyTransaction());
+
+            TransactionContext transactionContext = txFutureCallback.getTransactionContext();
+            if(transactionContext != null) {
+                cohortFutures.add(transactionContext.readyTransaction());
+            } else {
+                // The shard Tx hasn't been created yet so create a promise to ready the Tx later
+                // after it's created.
+                final Promise<ActorSelection> cohortPromise = akka.dispatch.Futures.promise();
+                txFutureCallback.addTxOperationOnComplete(new TransactionOperation() {
+                    @Override
+                    public void invoke(TransactionContext transactionContext) {
+                        cohortPromise.completeWith(transactionContext.readyTransaction());
+                    }
+                });
+
+                cohortFutures.add(cohortPromise.future());
+            }
         }
+
+        txFutureCallbackMap.clear();
 
         if(transactionChainProxy != null){
             transactionChainProxy.onTransactionReady(cohortFutures);
@@ -340,11 +464,21 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
     @Override
     public void close() {
-        for(TransactionContext transactionContext : remoteTransactionPaths.values()) {
-            transactionContext.closeTransaction();
+        for(TransactionFutureCallback txFutureCallback : txFutureCallbackMap.values()) {
+            TransactionContext transactionContext = txFutureCallback.getTransactionContext();
+            if(transactionContext != null) {
+                transactionContext.closeTransaction();
+            } else {
+                txFutureCallback.addTxOperationOnComplete(new TransactionOperation() {
+                    @Override
+                    public void invoke(TransactionContext transactionContext) {
+                        transactionContext.closeTransaction();
+                    }
+                });
+            }
         }
 
-        remoteTransactionPaths.clear();
+        txFutureCallbackMap.clear();
 
         if(transactionType == TransactionType.READ_ONLY) {
             remoteTransactionActors.clear();
@@ -352,77 +486,35 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         }
     }
 
-    private TransactionContext transactionContext(YangInstanceIdentifier path){
-        String shardName = shardNameFromIdentifier(path);
-        return remoteTransactionPaths.get(shardName);
-    }
-
     private String shardNameFromIdentifier(YangInstanceIdentifier path){
         return ShardStrategyFactory.getStrategy(path).findShard(path);
     }
 
-    private void createTransactionIfMissing(ActorContext actorContext,
-        YangInstanceIdentifier path) {
+    private TransactionFutureCallback getOrCreateTxFutureCallback(YangInstanceIdentifier path) {
+        String shardName = shardNameFromIdentifier(path);
+        TransactionFutureCallback txFutureCallback = txFutureCallbackMap.get(shardName);
+        if(txFutureCallback == null) {
+            Future<ActorSelection> findPrimaryFuture = actorContext.findPrimaryShardAsync(shardName);
 
-        if(transactionChainProxy != null){
-            transactionChainProxy.waitTillCurrentTransactionReady();
-        }
+            final TransactionFutureCallback newTxFutureCallback =
+                    new TransactionFutureCallback(shardName);
 
-        String shardName = ShardStrategyFactory.getStrategy(path).findShard(path);
+            txFutureCallback = newTxFutureCallback;
+            txFutureCallbackMap.put(shardName, txFutureCallback);
 
-        TransactionContext transactionContext =
-            remoteTransactionPaths.get(shardName);
-
-        if (transactionContext != null) {
-            // A transaction already exists with that shard
-            return;
-        }
-
-        try {
-            Optional<ActorSelection> primaryShard = actorContext.findPrimaryShard(shardName);
-            if (!primaryShard.isPresent()) {
-                throw new PrimaryNotFoundException("Primary could not be found for shard " + shardName);
-            }
-
-            Object response = actorContext.executeOperation(primaryShard.get(),
-                    new CreateTransaction(identifier.toString(), this.transactionType.ordinal(),
-                            getTransactionChainId()).toSerializable());
-            if (response.getClass().equals(CreateTransactionReply.SERIALIZABLE_CLASS)) {
-                CreateTransactionReply reply =
-                    CreateTransactionReply.fromSerializable(response);
-
-                String transactionPath = reply.getTransactionPath();
-
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug("Tx {} Received transaction path = {}", identifier, transactionPath);
+            findPrimaryFuture.onComplete(new OnComplete<ActorSelection>() {
+                @Override
+                public void onComplete(Throwable failure, ActorSelection primaryShard) {
+                    if(failure != null) {
+                        newTxFutureCallback.onComplete(failure, null);
+                    } else {
+                        newTxFutureCallback.setPrimaryShard(primaryShard);
+                    }
                 }
-                ActorSelection transactionActor = actorContext.actorSelection(transactionPath);
-
-                if (transactionType == TransactionType.READ_ONLY) {
-                    // Add the actor to the remoteTransactionActors list for access by the
-                    // cleanup PhantonReference.
-                    remoteTransactionActors.add(transactionActor);
-
-                    // Write to the memory barrier volatile to publish the above update to the
-                    // remoteTransactionActors list for thread visibility.
-                    remoteTransactionActorsMB.set(true);
-                }
-
-                transactionContext = new TransactionContextImpl(shardName, transactionPath,
-                    transactionActor, identifier, actorContext, schemaContext);
-
-                remoteTransactionPaths.put(shardName, transactionContext);
-            } else {
-                throw new IllegalArgumentException(String.format(
-                    "Invalid reply type {} for CreateTransaction", response.getClass()));
-            }
-        } catch (Exception e) {
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("Tx {} Creating NoOpTransaction because of : {}", identifier, e.getMessage());
-            }
-            remoteTransactionPaths
-                .put(shardName, new NoOpTransactionContext(shardName, e, identifier));
+            }, actorContext.getActorSystem().dispatcher());
         }
+
+        return txFutureCallback;
     }
 
     public String getTransactionChainId() {
@@ -432,6 +524,167 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         return transactionChainProxy.getTransactionChainId();
     }
 
+    /**
+     * Interface for a transaction operation to be invoked later.
+     */
+    private static interface TransactionOperation {
+        void invoke(TransactionContext transactionContext);
+    }
+
+    /**
+     * Implements a Future OnComplete callback for a CreateTransaction message. This class handles
+     * retries, up to a limit, if the shard doesn't have a leader yet. This is done by scheduling a
+     * retry task after a short delay.
+     * <p>
+     * The end result from a completed CreateTransaction message is a TransactionContext that is
+     * used to perform transaction operations. Transaction operations that occur before the
+     * CreateTransaction completes are cache and executed once the CreateTransaction completes,
+     * successfully or not.
+     */
+    private class TransactionFutureCallback extends OnComplete<Object> {
+
+        /**
+         * The list of transaction operations to execute once the CreateTransaction completes.
+         */
+        @GuardedBy("txOperationsOnComplete")
+        private final List<TransactionOperation> txOperationsOnComplete = Lists.newArrayList();
+
+        /**
+         * The TransactionContext resulting from the CreateTransaction reply.
+         */
+        private volatile TransactionContext transactionContext;
+
+        /**
+         * The target primary shard.
+         */
+        private volatile ActorSelection primaryShard;
+
+        private volatile int createTxTries = (int) (actorContext.getDatastoreContext().
+                getShardLeaderElectionTimeout().duration().toMillis() /
+                CREATE_TX_TRY_INTERVAL.toMillis());
+
+        private final String shardName;
+
+        TransactionFutureCallback(String shardName) {
+            this.shardName = shardName;
+        }
+
+        String getShardName() {
+            return shardName;
+        }
+
+        TransactionContext getTransactionContext() {
+            return transactionContext;
+        }
+
+
+        /**
+         * Sets the target primary shard and initiates a CreateTransaction try.
+         */
+        void setPrimaryShard(ActorSelection primaryShard) {
+            LOG.debug("Tx {} Primary shard found - trying create transaction", identifier);
+
+            this.primaryShard = primaryShard;
+            tryCreateTransaction();
+        }
+
+        /**
+         * Adds a TransactionOperation to be executed after the CreateTransaction completes.
+         */
+        void addTxOperationOnComplete(TransactionOperation operation) {
+            synchronized(txOperationsOnComplete) {
+                if(transactionContext == null) {
+                    LOG.debug("Tx {} Adding operation on complete {}", identifier);
+
+                    txOperationsOnComplete.add(operation);
+                } else {
+                    operation.invoke(transactionContext);
+                }
+            }
+        }
+
+        /**
+         * Performs a CreateTransaction try async.
+         */
+        private void tryCreateTransaction() {
+            Future<Object> createTxFuture = actorContext.executeOperationAsync(primaryShard,
+                    new CreateTransaction(identifier.toString(),
+                            TransactionProxy.this.transactionType.ordinal(),
+                            getTransactionChainId()).toSerializable());
+
+            createTxFuture.onComplete(this, actorContext.getActorSystem().dispatcher());
+        }
+
+        @Override
+        public void onComplete(Throwable failure, Object response) {
+            if(failure instanceof NoShardLeaderException) {
+                // There's no leader for the shard yet - schedule and try again, unless we're out
+                // of retries. Note: createTxTries is volatile as it may be written by different
+                // threads however not concurrently, therefore decrementing it non-atomically here
+                // is ok.
+                if(--createTxTries > 0) {
+                    LOG.debug("Tx {} Shard {} has no leader yet - scheduling create Tx retry",
+                            identifier, shardName);
+
+                    actorContext.getActorSystem().scheduler().scheduleOnce(CREATE_TX_TRY_INTERVAL,
+                            new Runnable() {
+                                @Override
+                                public void run() {
+                                    tryCreateTransaction();
+                                }
+                            }, actorContext.getActorSystem().dispatcher());
+                    return;
+                }
+            }
+
+            // Create the TransactionContext from the response or failure and execute delayed
+            // TransactionOperations. This entire section is done atomically (ie synchronized) with
+            // respect to #addTxOperationOnComplete to handle timing issues and ensure no
+            // TransactionOperation is missed and that they are processed in the order they occurred.
+            synchronized(txOperationsOnComplete) {
+                if(failure != null) {
+                    LOG.debug("Tx {} Creating NoOpTransaction because of error: {}", identifier,
+                            failure.getMessage());
+
+                    transactionContext = new NoOpTransactionContext(shardName, failure, identifier);
+                } else if (response.getClass().equals(CreateTransactionReply.SERIALIZABLE_CLASS)) {
+                    createValidTransactionContext(CreateTransactionReply.fromSerializable(response));
+                } else {
+                    IllegalArgumentException exception = new IllegalArgumentException(String.format(
+                        "Invalid reply type {} for CreateTransaction", response.getClass()));
+
+                    transactionContext = new NoOpTransactionContext(shardName, exception, identifier);
+                }
+
+                for(TransactionOperation oper: txOperationsOnComplete) {
+                    oper.invoke(transactionContext);
+                }
+
+                txOperationsOnComplete.clear();
+            }
+        }
+
+        private void createValidTransactionContext(CreateTransactionReply reply) {
+            String transactionPath = reply.getTransactionPath();
+
+            LOG.debug("Tx {} Received transaction actor path {}", identifier, transactionPath);
+
+            ActorSelection transactionActor = actorContext.actorSelection(transactionPath);
+
+            if (transactionType == TransactionType.READ_ONLY) {
+                // Add the actor to the remoteTransactionActors list for access by the
+                // cleanup PhantonReference.
+                remoteTransactionActors.add(transactionActor);
+
+                // Write to the memory barrier volatile to publish the above update to the
+                // remoteTransactionActors list for thread visibility.
+                remoteTransactionActorsMB.set(true);
+            }
+
+            transactionContext = new TransactionContextImpl(shardName, transactionActor,
+                identifier, actorContext, schemaContext);
+        }
+    }
 
     private interface TransactionContext {
         String getShardName();
@@ -481,14 +734,11 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
         private final ActorContext actorContext;
         private final SchemaContext schemaContext;
-        private final String actorPath;
         private final ActorSelection actor;
 
-        private TransactionContextImpl(String shardName, String actorPath,
-                ActorSelection actor, TransactionIdentifier identifier, ActorContext actorContext,
-                SchemaContext schemaContext) {
+        private TransactionContextImpl(String shardName, ActorSelection actor,
+                TransactionIdentifier identifier, ActorContext actorContext, SchemaContext schemaContext) {
             super(shardName, identifier);
-            this.actorPath = actorPath;
             this.actor = actor;
             this.actorContext = actorContext;
             this.schemaContext = schemaContext;
@@ -533,9 +783,9 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             // Transform the combined Future into a Future that returns the cohort actor path from
             // the ReadyTransactionReply. That's the end result of the ready operation.
 
-            return combinedFutures.transform(new AbstractFunction1<Iterable<Object>, ActorSelection>() {
+            return combinedFutures.transform(new Mapper<Iterable<Object>, ActorSelection>() {
                 @Override
-                public ActorSelection apply(Iterable<Object> notUsed) {
+                public ActorSelection checkedApply(Iterable<Object> notUsed) {
                     if(LOG.isDebugEnabled()) {
                         LOG.debug("Tx {} readyTransaction: pending recorded operations succeeded",
                             identifier);
@@ -599,6 +849,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Tx {} readData called path = {}", identifier, path);
             }
+
             final SettableFuture<Optional<NormalizedNode<?, ?>>> returnFuture = SettableFuture.create();
 
             // If there were any previous recorded put/merge/delete operation reply Futures then we
@@ -777,9 +1028,9 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
         private final Logger LOG = LoggerFactory.getLogger(NoOpTransactionContext.class);
 
-        private final Exception failure;
+        private final Throwable failure;
 
-        public NoOpTransactionContext(String shardName, Exception failure,
+        public NoOpTransactionContext(String shardName, Throwable failure,
                 TransactionIdentifier identifier){
             super(shardName, identifier);
             this.failure = failure;
