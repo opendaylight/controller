@@ -14,11 +14,13 @@ import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
 import akka.dispatch.Mapper;
+import akka.pattern.AskTimeoutException;
 import akka.util.Timeout;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.Configuration;
+import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
 import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
 import org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException;
@@ -29,6 +31,7 @@ import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryFound;
+import org.opendaylight.controller.cluster.datastore.messages.PrimaryNotFound;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
@@ -50,25 +53,55 @@ public class ActorContext {
     private static final Logger
         LOG = LoggerFactory.getLogger(ActorContext.class);
 
-    private static final FiniteDuration DEFAULT_OPER_DURATION = Duration.create(5, TimeUnit.SECONDS);
-
     public static final String MAILBOX = "bounded-mailbox";
+
+    private static final Mapper<Throwable, Throwable> FIND_PRIMARY_FAILURE_TRANSFORMER =
+                                                              new Mapper<Throwable, Throwable>() {
+        @Override
+        public Throwable apply(Throwable failure) {
+            Throwable actualFailure = failure;
+            if(failure instanceof AskTimeoutException) {
+                // A timeout exception most likely means the shard isn't initialized.
+                actualFailure = new NotInitializedException(
+                        "Timed out trying to find the primary shard. Most likely cause is the " +
+                        "shard is not initialized yet.");
+            }
+
+            return actualFailure;
+        }
+    };
 
     private final ActorSystem actorSystem;
     private final ActorRef shardManager;
     private final ClusterWrapper clusterWrapper;
     private final Configuration configuration;
+    private final DatastoreContext datastoreContext;
     private volatile SchemaContext schemaContext;
-    private FiniteDuration operationDuration = DEFAULT_OPER_DURATION;
-    private Timeout operationTimeout = new Timeout(operationDuration);
+    private final FiniteDuration operationDuration;
+    private final Timeout operationTimeout;
 
     public ActorContext(ActorSystem actorSystem, ActorRef shardManager,
-        ClusterWrapper clusterWrapper,
-        Configuration configuration) {
+            ClusterWrapper clusterWrapper, Configuration configuration) {
+        this(actorSystem, shardManager, clusterWrapper, configuration,
+                DatastoreContext.newBuilder().build());
+    }
+
+    public ActorContext(ActorSystem actorSystem, ActorRef shardManager,
+            ClusterWrapper clusterWrapper, Configuration configuration,
+            DatastoreContext datastoreContext) {
         this.actorSystem = actorSystem;
         this.shardManager = shardManager;
         this.clusterWrapper = clusterWrapper;
         this.configuration = configuration;
+        this.datastoreContext = datastoreContext;
+
+        operationDuration = Duration.create(datastoreContext.getOperationTimeoutInSeconds(),
+                TimeUnit.SECONDS);
+        operationTimeout = new Timeout(operationDuration);
+    }
+
+    public DatastoreContext getDatastoreContext() {
+        return datastoreContext;
     }
 
     public ActorSystem getActorSystem() {
@@ -95,11 +128,6 @@ public class ActorContext {
         }
     }
 
-    public void setOperationTimeout(int timeoutInSeconds) {
-        operationDuration = Duration.create(timeoutInSeconds, TimeUnit.SECONDS);
-        operationTimeout = new Timeout(operationDuration);
-    }
-
     public SchemaContext getSchemaContext() {
         return schemaContext;
     }
@@ -116,6 +144,34 @@ public class ActorContext {
             return Optional.absent();
         }
         return Optional.of(actorSystem.actorSelection(path));
+    }
+
+    public Future<ActorSelection> findPrimaryShardAsync(final String shardName) {
+        Future<Object> future = executeOperationAsync(shardManager,
+                new FindPrimary(shardName, true).toSerializable(),
+                datastoreContext.getShardInitializationTimeout());
+
+        return future.transform(new Mapper<Object, ActorSelection>() {
+            @Override
+            public ActorSelection checkedApply(Object response) throws Exception {
+                if(response.getClass().equals(PrimaryFound.SERIALIZABLE_CLASS)) {
+                    PrimaryFound found = PrimaryFound.fromSerializable(response);
+
+                    LOG.debug("Primary found {}", found.getPrimaryPath());
+                    return actorSystem.actorSelection(found.getPrimaryPath());
+                } else if(response instanceof ActorNotInitialized) {
+                    throw new NotInitializedException(
+                            String.format("Found primary shard %s but it's not initialized yet. " +
+                                          "Please try again later", shardName));
+                } else if(response instanceof PrimaryNotFound) {
+                    throw new PrimaryNotFoundException(
+                            String.format("No primary shard found for %S.", shardName));
+                }
+
+                throw new UnknownMessageException(String.format(
+                        "FindPrimary returned unkown response: %s", response));
+            }
+        }, FIND_PRIMARY_FAILURE_TRANSFORMER, getActorSystem().dispatcher());
     }
 
     /**
@@ -143,9 +199,9 @@ public class ActorContext {
      *
      * @param shardName the name of the local shard that needs to be found
      */
-    public Future<ActorRef> findLocalShardAsync( final String shardName, Timeout timeout) {
+    public Future<ActorRef> findLocalShardAsync( final String shardName) {
         Future<Object> future = executeOperationAsync(shardManager,
-                new FindLocalShard(shardName, true), timeout);
+                new FindLocalShard(shardName, true), datastoreContext.getShardInitializationTimeout());
 
         return future.map(new Mapper<Object, ActorRef>() {
             @Override
@@ -238,15 +294,28 @@ public class ActorContext {
      *
      * @param actor the ActorSelection
      * @param message the message to send
+     * @param timeout the operation timeout
      * @return a Future containing the eventual result
      */
-    public Future<Object> executeOperationAsync(ActorSelection actor, Object message) {
+    public Future<Object> executeOperationAsync(ActorSelection actor, Object message,
+            Timeout timeout) {
         Preconditions.checkArgument(actor != null, "actor must not be null");
         Preconditions.checkArgument(message != null, "message must not be null");
 
         LOG.debug("Sending message {} to {}", message.getClass().toString(), actor.toString());
 
-        return ask(actor, message, operationTimeout);
+        return ask(actor, message, timeout);
+    }
+
+    /**
+     * Execute an operation on a remote actor asynchronously.
+     *
+     * @param actor the ActorSelection
+     * @param message the message to send
+     * @return a Future containing the eventual result
+     */
+    public Future<Object> executeOperationAsync(ActorSelection actor, Object message) {
+        return executeOperationAsync(actor, message, operationTimeout);
     }
 
     /**

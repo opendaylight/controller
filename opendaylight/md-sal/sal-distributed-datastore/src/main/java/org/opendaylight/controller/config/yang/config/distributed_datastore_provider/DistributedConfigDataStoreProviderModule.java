@@ -54,6 +54,10 @@ public class DistributedConfigDataStoreProviderModule extends
                         getValue().intValue())
                 .shardSnapshotBatchCount(props.getShardSnapshotBatchCount().getValue().intValue())
                 .shardHeartbeatIntervalInMillis(props.getShardHearbeatIntervalInMillis().getValue())
+                .shardInitializationTimeout(props.getShardInitializationTimeoutInSeconds().getValue(),
+                        TimeUnit.SECONDS)
+                .shardLeaderElectionTimeout(props.getShardLeaderElectionTimeoutInSeconds().getValue(),
+                        TimeUnit.SECONDS)
                 .shardTransactionCommitTimeoutInSeconds(
                         props.getShardTransactionCommitTimeoutInSeconds().getValue().intValue())
                 .shardTransactionCommitQueueCapacity(
