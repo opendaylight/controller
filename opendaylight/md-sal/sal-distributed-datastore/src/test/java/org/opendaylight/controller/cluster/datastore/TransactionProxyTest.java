@@ -5,9 +5,15 @@ import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
+import akka.testkit.JavaTestKit;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.CheckedFuture;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
@@ -44,6 +50,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import static org.junit.Assert.assertEquals;
@@ -54,7 +61,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.times;
@@ -64,7 +70,7 @@ import static org.opendaylight.controller.cluster.datastore.TransactionProxy.Tra
 import static org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType.WRITE_ONLY;
 
 @SuppressWarnings("resource")
-public class TransactionProxyTest extends AbstractActorTest {
+public class TransactionProxyTest {
 
     @SuppressWarnings("serial")
     static class TestException extends RuntimeException {
@@ -73,6 +79,8 @@ public class TransactionProxyTest extends AbstractActorTest {
     static interface Invoker {
         CheckedFuture<?, ReadFailedException> invoke(TransactionProxy proxy) throws Exception;
     }
+
+    private static ActorSystem system;
 
     private final Configuration configuration = new MockConfiguration();
 
@@ -86,18 +94,43 @@ public class TransactionProxyTest extends AbstractActorTest {
 
     String memberName = "mock-member";
 
+    @BeforeClass
+    public static void setUpClass() throws IOException {
+
+        Config config = ConfigFactory.parseMap(ImmutableMap.<String, Object>builder().
+                put("akka.actor.default-dispatcher.type",
+                        "akka.testkit.CallingThreadDispatcherConfigurator").build()).
+                withFallback(ConfigFactory.load());
+        system = ActorSystem.create("test", config);
+    }
+
+    @AfterClass
+    public static void tearDownClass() throws IOException {
+        JavaTestKit.shutdownActorSystem(system);
+        system = null;
+    }
+
     @Before
     public void setUp(){
         MockitoAnnotations.initMocks(this);
 
         schemaContext = TestModel.createTestContext();
 
+        DatastoreContext dataStoreContext = DatastoreContext.newBuilder().build();
+
         doReturn(getSystem()).when(mockActorContext).getActorSystem();
         doReturn(memberName).when(mockActorContext).getCurrentMemberName();
         doReturn(schemaContext).when(mockActorContext).getSchemaContext();
         doReturn(mockClusterWrapper).when(mockActorContext).getClusterWrapper();
+        doReturn(mockClusterWrapper).when(mockActorContext).getClusterWrapper();
+        doReturn(dataStoreContext).when(mockActorContext).getDatastoreContext();
 
         ShardStrategyFactory.setConfiguration(configuration);
+        System.out.println("dispatcher: "+getSystem().dispatcher().getClass().getName());
+    }
+
+    private ActorSystem getSystem() {
+        return system;
     }
 
     private CreateTransaction eqCreateTransaction(final String memberName,
@@ -317,11 +350,11 @@ public class TransactionProxyTest extends AbstractActorTest {
         doReturn(actorSystem.actorSelection(actorRef.path())).
                 when(mockActorContext).actorSelection(actorRef.path().toString());
 
-        doReturn(Optional.of(actorSystem.actorSelection(actorRef.path()))).
-                when(mockActorContext).findPrimaryShard(eq(DefaultShardStrategy.DEFAULT_SHARD));
+        doReturn(Futures.successful(actorSystem.actorSelection(actorRef.path()))).
+                when(mockActorContext).findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
 
-        doReturn(createTransactionReply(actorRef)).when(mockActorContext).
-                executeOperation(eq(actorSystem.actorSelection(actorRef.path())),
+        doReturn(Futures.successful(createTransactionReply(actorRef))).when(mockActorContext).
+                executeOperationAsync(eq(actorSystem.actorSelection(actorRef.path())),
                         eqCreateTransaction(memberName, type));
 
         doReturn(false).when(mockActorContext).isLocalPath(actorRef.path().toString());
@@ -398,12 +431,13 @@ public class TransactionProxyTest extends AbstractActorTest {
         ActorRef actorRef = getSystem().actorOf(Props.create(DoNothingActor.class));
 
         if (exToThrow instanceof PrimaryNotFoundException) {
-            doReturn(Optional.absent()).when(mockActorContext).findPrimaryShard(anyString());
+            doReturn(Futures.failed(exToThrow)).when(mockActorContext).findPrimaryShardAsync(anyString());
         } else {
-            doReturn(Optional.of(getSystem().actorSelection(actorRef.path()))).
-                    when(mockActorContext).findPrimaryShard(anyString());
+            doReturn(Futures.successful(getSystem().actorSelection(actorRef.path()))).
+                    when(mockActorContext).findPrimaryShardAsync(anyString());
         }
-        doThrow(exToThrow).when(mockActorContext).executeOperation(any(ActorSelection.class), any());
+        doReturn(Futures.failed(exToThrow)).when(mockActorContext).executeOperationAsync(
+                any(ActorSelection.class), any());
 
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, READ_ONLY);
 
@@ -693,8 +727,7 @@ public class TransactionProxyTest extends AbstractActorTest {
         doReturn(mergeSerializedDataReply()).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqSerializedMergeData(nodeToWrite));
 
-        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
-                WRITE_ONLY);
+        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, WRITE_ONLY);
 
         transactionProxy.merge(TestModel.TEST_PATH, nodeToWrite);
 
@@ -815,10 +848,10 @@ public class TransactionProxyTest extends AbstractActorTest {
 
         ThreePhaseCommitCohortProxy proxy = (ThreePhaseCommitCohortProxy) ready;
 
+        verifyCohortFutures(proxy, TestException.class);
+
         verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
                 MergeDataReply.SERIALIZABLE_CLASS, TestException.class);
-
-        verifyCohortFutures(proxy, TestException.class);
     }
 
     @SuppressWarnings("unchecked")
@@ -855,9 +888,8 @@ public class TransactionProxyTest extends AbstractActorTest {
     @Test
     public void testReadyWithInitialCreateTransactionFailure() throws Exception {
 
-        doReturn(Optional.absent()).when(mockActorContext).findPrimaryShard(anyString());
-//        doThrow(new PrimaryNotFoundException("mock")).when(mockActorContext).executeShardOperation(
-//                anyString(), any());
+        doReturn(Futures.failed(new PrimaryNotFoundException("mock"))).when(
+                mockActorContext).findPrimaryShardAsync(anyString());
 
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
                 WRITE_ONLY);
@@ -958,8 +990,8 @@ public class TransactionProxyTest extends AbstractActorTest {
         doReturn(actorSystem.actorSelection(shardActorRef.path())).
             when(mockActorContext).actorSelection(shardActorRef.path().toString());
 
-        doReturn(Optional.of(actorSystem.actorSelection(shardActorRef.path()))).
-            when(mockActorContext).findPrimaryShard(eq(DefaultShardStrategy.DEFAULT_SHARD));
+        doReturn(Futures.successful(actorSystem.actorSelection(shardActorRef.path()))).
+            when(mockActorContext).findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
 
         String actorPath = "akka.tcp://system@127.0.0.1:2550/user/tx-actor";
         CreateTransactionReply createTransactionReply = CreateTransactionReply.newBuilder()
@@ -967,8 +999,8 @@ public class TransactionProxyTest extends AbstractActorTest {
             .setTransactionActorPath(actorPath)
             .build();
 
-        doReturn(createTransactionReply).when(mockActorContext).
-            executeOperation(eq(actorSystem.actorSelection(shardActorRef.path())),
+        doReturn(Futures.successful(createTransactionReply)).when(mockActorContext).
+            executeOperationAsync(eq(actorSystem.actorSelection(shardActorRef.path())),
                 eqCreateTransaction(memberName, READ_ONLY));
 
         doReturn(true).when(mockActorContext).isLocalPath(actorPath);
@@ -1013,8 +1045,8 @@ public class TransactionProxyTest extends AbstractActorTest {
         doReturn(actorSystem.actorSelection(shardActorRef.path())).
             when(mockActorContext).actorSelection(shardActorRef.path().toString());
 
-        doReturn(Optional.of(actorSystem.actorSelection(shardActorRef.path()))).
-            when(mockActorContext).findPrimaryShard(eq(DefaultShardStrategy.DEFAULT_SHARD));
+        doReturn(Futures.successful(actorSystem.actorSelection(shardActorRef.path()))).
+            when(mockActorContext).findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
 
         String actorPath = "akka.tcp://system@127.0.0.1:2550/user/tx-actor";
         CreateTransactionReply createTransactionReply = CreateTransactionReply.newBuilder()
@@ -1022,8 +1054,8 @@ public class TransactionProxyTest extends AbstractActorTest {
             .setTransactionActorPath(actorPath)
             .build();
 
-        doReturn(createTransactionReply).when(mockActorContext).
-            executeOperation(eq(actorSystem.actorSelection(shardActorRef.path())),
+        doReturn(Futures.successful(createTransactionReply)).when(mockActorContext).
+        executeOperationAsync(eq(actorSystem.actorSelection(shardActorRef.path())),
                 eqCreateTransaction(memberName, WRITE_ONLY));
 
         doReturn(true).when(mockActorContext).isLocalPath(actorPath);
