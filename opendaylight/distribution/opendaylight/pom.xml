@@ -1163,7 +1163,6 @@
         <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>binding-generator-api</artifactId>
-          <version>${yangtools.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
@@ -1184,7 +1183,6 @@
         <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>binding-model-api</artifactId>
-          <version>${yangtools.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
