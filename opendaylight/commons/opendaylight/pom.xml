@@ -1696,6 +1696,7 @@
         <artifactId>ganymed</artifactId>
         <version>${ganymed.version}</version>
       </dependency>
+
       <!-- Third parties from opendaylight released -->
       <dependency>
         <groupId>org.opendaylight.controller.thirdparty</groupId>
@@ -1712,174 +1713,16 @@
         <artifactId>org.openflow.openflowj</artifactId>
         <version>1.0.2</version>
       </dependency>
+
+      <!-- yangtools artifacts -->
       <dependency>
         <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>binding-generator-impl</artifactId>
+        <artifactId>yangtools-artifacts</artifactId>
         <version>${yangtools.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>binding-data-codec</artifactId>
-        <version>${yangtools.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>binding-generator-spi</artifactId>
-        <version>${yangtools.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>binding-generator-util</artifactId>
-        <version>${yangtools.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>binding-type-provider</artifactId>
-        <version>${yangtools.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>concepts</artifactId>
-        <version>${yangtools.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>object-cache-api</artifactId>
-        <version>${yangtools.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>object-cache-guava</artifactId>
-        <version>${yangtools.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>restconf-client-api</artifactId>
-        <version>${yangtools.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>restconf-client-impl</artifactId>
-        <version>${yangtools.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>util</artifactId>
-        <version>${yangtools.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>yang-data-composite-node</artifactId>
-        <version>${yangtools.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>yang-data-codec-gson</artifactId>
-        <version>${yangtools.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
 
-      <!-- yangtools dependencies -->
-      <dependency>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>yang-binding</artifactId>
-        <version>${yangtools.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>yang-common</artifactId>
-        <version>${yangtools.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>yang-data-api</artifactId>
-        <version>${yangtools.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>yang-data-impl</artifactId>
-        <version>${yangtools.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>yang-data-util</artifactId>
-        <version>${yangtools.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>yang-maven-plugin-spi</artifactId>
-        <version>${yangtools.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>yang-model-api</artifactId>
-        <version>${yangtools.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>yang-model-util</artifactId>
-        <version>${yangtools.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>yang-parser-api</artifactId>
-        <version>${yangtools.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>yang-parser-impl</artifactId>
-        <version>${yangtools.version}</version>
-      </dependency>
-      <!-- yang model dependencies -->
-      <dependency>
-        <groupId>org.opendaylight.yangtools.model</groupId>
-        <artifactId>ietf-inet-types</artifactId>
-        <version>${ietf-inet-types.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools.model</groupId>
-        <artifactId>ietf-restconf</artifactId>
-        <version>${ietf-restconf.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools.model</groupId>
-        <artifactId>ietf-topology</artifactId>
-        <version>${ietf-topology.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools.model</groupId>
-        <artifactId>ietf-topology-l3-unicast-igp</artifactId>
-        <version>${ietf-topology.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools.model</groupId>
-        <artifactId>ietf-yang-types</artifactId>
-        <version>${ietf-yang-types.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools.model</groupId>
-        <artifactId>ietf-yang-types-20130715</artifactId>
-        <version>2013.07.15.7-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools.model</groupId>
-        <artifactId>opendaylight-l2-types</artifactId>
-        <version>${opendaylight-l2-types.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools.model</groupId>
-        <artifactId>yang-ext</artifactId>
-        <version>${yang-ext.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools.thirdparty</groupId>
-        <artifactId>antlr4-runtime-osgi-nohead</artifactId>
-        <version>4.0</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools.thirdparty</groupId>
-        <artifactId>xtend-lib-osgi</artifactId>
-        <version>${xtend.version}</version>
-      </dependency>
       <dependency>
         <groupId>org.openexi</groupId>
         <artifactId>nagasena</artifactId>
@@ -1948,12 +1791,6 @@
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>sal-binding-it</artifactId>
         <version>${mdsal.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>mockito-configuration</artifactId>
-        <version>${yangtools.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
