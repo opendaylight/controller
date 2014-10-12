@@ -8,12 +8,10 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
-import java.util.concurrent.TimeUnit;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.PoisonPill;
 import akka.dispatch.OnComplete;
-import akka.util.Timeout;
 import org.opendaylight.controller.cluster.datastore.exceptions.LocalShardNotFoundException;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataChangeListenerRegistration;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
@@ -41,8 +39,6 @@ import scala.concurrent.Future;
 public class DataChangeListenerRegistrationProxy implements ListenerRegistration {
 
     private static final Logger LOG = LoggerFactory.getLogger(DataChangeListenerRegistrationProxy.class);
-
-    public static final Timeout REGISTER_TIMEOUT = new Timeout(5, TimeUnit.MINUTES);
 
     private volatile ActorSelection listenerRegistrationActor;
     private final AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener;
@@ -99,7 +95,7 @@ public class DataChangeListenerRegistrationProxy implements ListenerRegistration
         dataChangeListenerActor = actorContext.getActorSystem().actorOf(
                 DataChangeListener.props(listener));
 
-        Future<ActorRef> findFuture = actorContext.findLocalShardAsync(shardName, REGISTER_TIMEOUT);
+        Future<ActorRef> findFuture = actorContext.findLocalShardAsync(shardName);
         findFuture.onComplete(new OnComplete<ActorRef>() {
             @Override
             public void onComplete(Throwable failure, ActorRef shard) {
@@ -121,7 +117,7 @@ public class DataChangeListenerRegistrationProxy implements ListenerRegistration
 
         Future<Object> future = actorContext.executeOperationAsync(shard,
                 new RegisterChangeListener(path, dataChangeListenerActor.path(), scope),
-                REGISTER_TIMEOUT);
+                actorContext.getDatastoreContext().getShardInitializationTimeout());
 
         future.onComplete(new OnComplete<Object>(){
             @Override
