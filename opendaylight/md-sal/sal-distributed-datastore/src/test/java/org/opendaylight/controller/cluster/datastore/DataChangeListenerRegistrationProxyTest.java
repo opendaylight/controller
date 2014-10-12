@@ -204,8 +204,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
 
             doReturn(mockActorSystem).when(actorContext).getActorSystem();
             doReturn(duration("5 seconds")).when(actorContext).getOperationDuration();
-            doReturn(Futures.successful(getRef())).when(actorContext).findLocalShardAsync(eq(shardName),
-                    any(Timeout.class));
+            doReturn(Futures.successful(getRef())).when(actorContext).findLocalShardAsync(eq(shardName));
             doReturn(Futures.failed(new RuntimeException("mock"))).
                     when(actorContext).executeOperationAsync(any(ActorRef.class),
                             any(Object.class), any(Timeout.class));
@@ -228,12 +227,12 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
             final DataChangeListenerRegistrationProxy proxy = new DataChangeListenerRegistrationProxy(
                     shardName, actorContext, mockListener);
 
+            doReturn(DatastoreContext.newBuilder().build()).when(actorContext).getDatastoreContext();
             doReturn(getSystem()).when(actorContext).getActorSystem();
             doReturn(getSystem().actorSelection(getRef().path())).
                     when(actorContext).actorSelection(getRef().path());
             doReturn(duration("5 seconds")).when(actorContext).getOperationDuration();
-            doReturn(Futures.successful(getRef())).when(actorContext).findLocalShardAsync(eq(shardName),
-                    any(Timeout.class));
+            doReturn(Futures.successful(getRef())).when(actorContext).findLocalShardAsync(eq(shardName));
 
             Answer<Future<Object>> answer = new Answer<Future<Object>>() {
                 @Override
