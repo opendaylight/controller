@@ -30,6 +30,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
 import org.opendaylight.controller.cluster.common.actor.MeteringBehavior;
 import org.opendaylight.controller.cluster.datastore.ShardCommitCoordinator.CohortEntry;
+import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardTransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardMBeanFactory;
@@ -442,9 +443,9 @@ public class Shard extends RaftActor {
         } else if (getLeader() != null) {
             getLeader().forward(message, getContext());
         } else {
-            getSender().tell(new akka.actor.Status.Failure(new IllegalStateException(
+            getSender().tell(new akka.actor.Status.Failure(new NoShardLeaderException(
                 "Could not find shard leader so transaction cannot be created. This typically happens" +
-                " when system is coming up or recovering and a leader is being elected. Try again" +
+                " when the system is coming up or recovering and a leader is being elected. Try again" +
                 " later.")), getSelf());
         }
     }
