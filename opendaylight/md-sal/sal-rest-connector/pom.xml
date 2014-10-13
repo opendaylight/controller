@@ -100,6 +100,14 @@
       <artifactId>yang-data-codec-gson</artifactId>
     </dependency>
 
+    <!--  https://java.net/projects/stax-utils/pages/Home  -->
+    <dependency>
+      <groupId>net.java.dev.stax-utils</groupId>
+      <artifactId>stax-utils</artifactId>
+      <version>20070216</version>
+      <scope>compile</scope>
+    </dependency>
+
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
@@ -140,6 +148,8 @@
             </Private-Package>
             <Import-Package>*,
             com.sun.jersey.spi.container.servlet, org.eclipse.jetty.servlets</Import-Package>
+            <Embed-Dependency>stax-utils</Embed-Dependency>
+<!--            <Embed-Transitive>true</Embed-Transitive> -->
             <Web-ContextPath>/restconf</Web-ContextPath>
           </instructions>
         </configuration>

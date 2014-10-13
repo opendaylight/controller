@@ -6,10 +6,16 @@ public class NormalizedNodeContext {
 
     private final InstanceIdentifierContext context;
     private final NormalizedNode<?,?> data;
+    private boolean prettyPrint = false;
 
     public NormalizedNodeContext(InstanceIdentifierContext context, NormalizedNode<?, ?> data) {
         this.context = context;
         this.data = data;
+    }
+
+    public NormalizedNodeContext(InstanceIdentifierContext context, NormalizedNode<?, ?> data, boolean prettyPrint) {
+        this(context, data);
+        this.prettyPrint = prettyPrint;
     }
 
     public InstanceIdentifierContext getInstanceIdentifierContext() {
@@ -19,4 +25,9 @@ public class NormalizedNodeContext {
     public NormalizedNode<?, ?> getData() {
         return data;
     }
+
+    public boolean isPrettyPrint() {
+        return prettyPrint;
+    }
+
 }
