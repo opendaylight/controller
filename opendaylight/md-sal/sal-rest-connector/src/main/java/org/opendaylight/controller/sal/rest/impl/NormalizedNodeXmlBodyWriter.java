@@ -47,6 +47,8 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 public class NormalizedNodeXmlBodyWriter implements MessageBodyWriter<NormalizedNodeContext> {
 
     private static final XMLOutputFactory XML_FACTORY;
+    private static final int NO_INDENT = 0;
+    private static final int DEFAULT_INDENT = 2;
 
     static {
         XML_FACTORY = XMLOutputFactory.newFactory();
@@ -94,7 +96,8 @@ public class NormalizedNodeXmlBodyWriter implements MessageBodyWriter<Normalized
         }
 
         NormalizedNodeStreamWriter jsonWriter = XMLStreamNormalizedNodeStreamWriter.create(xmlWriter,
-                pathContext.getSchemaContext(), schemaPath);
+                pathContext.getSchemaContext(), schemaPath, t.isPrettyPrint() ? DEFAULT_INDENT : NO_INDENT);
+
         NormalizedNodeWriter nnWriter = NormalizedNodeWriter.forStreamWriter(jsonWriter);
         if (isDataRoot) {
             writeRootElement(xmlWriter, nnWriter, (ContainerNode) data);
