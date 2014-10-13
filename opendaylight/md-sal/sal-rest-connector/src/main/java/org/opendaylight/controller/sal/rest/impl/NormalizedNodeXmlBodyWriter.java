@@ -8,7 +8,10 @@
 package org.opendaylight.controller.sal.rest.impl;
 
 import com.google.common.base.Throwables;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -19,10 +22,19 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
@@ -40,6 +52,8 @@ import org.opendaylight.yangtools.yang.data.impl.codec.xml.XMLStreamNormalizedNo
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 @Provider
 @Produces({ Draft02.MediaTypes.API + RestconfService.XML, Draft02.MediaTypes.DATA + RestconfService.XML,
@@ -76,8 +90,13 @@ public class NormalizedNodeXmlBodyWriter implements MessageBodyWriter<Normalized
         }
 
         XMLStreamWriter xmlWriter;
+        OutputStream xmlOutputStream = entityStream;
+        if (t.isPrettyPrint()) {
+            xmlOutputStream = new ByteArrayOutputStream();
+        }
+
         try {
-            xmlWriter = XML_FACTORY.createXMLStreamWriter(entityStream);
+            xmlWriter = XML_FACTORY.createXMLStreamWriter(xmlOutputStream);
         } catch (XMLStreamException e) {
             throw new IllegalStateException(e);
         } catch (FactoryConfigurationError e) {
@@ -93,9 +112,9 @@ public class NormalizedNodeXmlBodyWriter implements MessageBodyWriter<Normalized
             schemaPath = schemaPath.getParent();
         }
 
-        NormalizedNodeStreamWriter jsonWriter = XMLStreamNormalizedNodeStreamWriter.create(xmlWriter,
+        NormalizedNodeStreamWriter xmlNNStreamWriter = XMLStreamNormalizedNodeStreamWriter.create(xmlWriter,
                 pathContext.getSchemaContext(), schemaPath);
-        NormalizedNodeWriter nnWriter = NormalizedNodeWriter.forStreamWriter(jsonWriter);
+        NormalizedNodeWriter nnWriter = NormalizedNodeWriter.forStreamWriter(xmlNNStreamWriter);
         if (isDataRoot) {
             writeRootElement(xmlWriter, nnWriter, (ContainerNode) data);
         } else {
@@ -107,6 +126,23 @@ public class NormalizedNodeXmlBodyWriter implements MessageBodyWriter<Normalized
             nnWriter.write(data);
             nnWriter.flush();
         }
+
+        if (t.isPrettyPrint()) {
+            prettyPrintXml(xmlOutputStream, entityStream);
+        }
+    }
+    private void prettyPrintXml(final OutputStream xmlOutputStream, final OutputStream prettyPrintedOutputStream) {
+        InputStream inputStreamAsXml = new ByteArrayInputStream(((ByteArrayOutputStream)xmlOutputStream).toByteArray());
+        try {
+            Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputStreamAsXml);
+            Transformer trans = TransformerFactory.newInstance().newTransformer();
+            trans.setOutputProperty(OutputKeys.INDENT, "yes");
+            trans.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+            trans.transform(new DOMSource(document), new StreamResult(prettyPrintedOutputStream));
+        } catch (SAXException | ParserConfigurationException |  TransformerFactoryConfigurationError | TransformerException | IOException e) {
+            throw new IllegalStateException("Pretty printing of xml output wasn't successfull.");
+        }
+
     }
 
     private void writeRootElement(XMLStreamWriter xmlWriter, NormalizedNodeWriter nnWriter, ContainerNode data)
