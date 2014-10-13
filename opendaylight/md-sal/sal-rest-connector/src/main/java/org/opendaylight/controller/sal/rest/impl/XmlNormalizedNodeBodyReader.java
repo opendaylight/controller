@@ -82,7 +82,7 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
             Document doc = dBuilder.parse(entityStream);
 
             NormalizedNode<?, ?> result = parse(path.get(),doc);
-            return new NormalizedNodeContext(path.get(),result);
+            return new NormalizedNodeContext(path.get(), result);
         } catch (Exception e) {
             LOG.debug("Error parsing json input", e);
 
