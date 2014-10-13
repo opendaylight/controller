@@ -45,6 +45,9 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
     Draft02.MediaTypes.OPERATION + RestconfService.JSON, MediaType.APPLICATION_JSON })
 public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<NormalizedNodeContext> {
 
+    private static final int NO_INDENT = 0;
+    private static final int DEFAULT_INDENT = 2;
+
     @Override
     public boolean isWriteable(final Class<?> type, final Type genericType, final Annotation[] annotations, final MediaType mediaType) {
         return type.equals(NormalizedNodeContext.class);
@@ -80,7 +83,7 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
         if(!schema.isAugmenting() && !(schema instanceof SchemaContext)) {
             initialNs = schema.getQName().getNamespace();
         }
-        NormalizedNodeStreamWriter jsonWriter = JSONNormalizedNodeStreamWriter.create(context.getSchemaContext(),path,initialNs,outputWriter);
+        NormalizedNodeStreamWriter jsonWriter = JSONNormalizedNodeStreamWriter.create(context.getSchemaContext(),path,initialNs,outputWriter,t.isPrettyPrint() ? DEFAULT_INDENT : NO_INDENT);
         NormalizedNodeWriter nnWriter = NormalizedNodeWriter.forStreamWriter(jsonWriter);
         if(isDataRoot) {
             writeDataRoot(outputWriter,nnWriter,(ContainerNode) data);
@@ -91,7 +94,10 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
             nnWriter.write(data);
         }
         nnWriter.flush();
-        outputWriter.write('}');
+        if (t.isPrettyPrint()) {
+            outputWriter.write("\n");
+        }
+        outputWriter.write("}");
         outputWriter.flush();
     }
 

@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import javanet.staxutils.IndentingXMLStreamWriter;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -81,6 +82,9 @@ public class NormalizedNodeXmlBodyWriter implements MessageBodyWriter<Normalized
         XMLStreamWriter xmlWriter;
         try {
             xmlWriter = XML_FACTORY.createXMLStreamWriter(entityStream);
+            if (t.isPrettyPrint()) {
+                xmlWriter = new IndentingXMLStreamWriter(xmlWriter);
+            }
         } catch (XMLStreamException e) {
             throw new IllegalStateException(e);
         } catch (FactoryConfigurationError e) {
@@ -96,9 +100,9 @@ public class NormalizedNodeXmlBodyWriter implements MessageBodyWriter<Normalized
             schemaPath = schemaPath.getParent();
         }
 
-        NormalizedNodeStreamWriter jsonWriter = XMLStreamNormalizedNodeStreamWriter.create(xmlWriter,
+        NormalizedNodeStreamWriter xmlNNStreamWriter = XMLStreamNormalizedNodeStreamWriter.create(xmlWriter,
                 pathContext.getSchemaContext(), schemaPath);
-        NormalizedNodeWriter nnWriter = NormalizedNodeWriter.forStreamWriter(jsonWriter);
+        NormalizedNodeWriter nnWriter = NormalizedNodeWriter.forStreamWriter(xmlNNStreamWriter);
         if (isDataRoot) {
             writeRootElement(xmlWriter, nnWriter, (ContainerNode) data);
         } else {

@@ -657,7 +657,7 @@ public class RestconfImpl implements RestconfService {
             normalizedII = controllerContext.toNormalized(iiWithData.getInstanceIdentifier());
             data = broker.readConfigurationData(normalizedII);
         }
-        return new NormalizedNodeContext(iiWithData, data);
+        return new NormalizedNodeContext(iiWithData, data, parsePrettyPrintParameter(uriInfo));
     }
 
     @SuppressWarnings("unchecked")
@@ -717,7 +717,7 @@ public class RestconfImpl implements RestconfService {
             data = broker.readOperationalData(normalizedII);
         }
 
-        return new NormalizedNodeContext(iiWithData, data);
+        return new NormalizedNodeContext(iiWithData, data, parsePrettyPrintParameter(info));
     }
 
     private boolean parsePrettyPrintParameter(final UriInfo info) {
