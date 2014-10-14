@@ -11,7 +11,6 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Cancellable;
-import akka.event.LoggingAdapter;
 import com.google.common.base.Preconditions;
 import com.google.protobuf.ByteString;
 import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
@@ -81,12 +80,8 @@ public class Leader extends AbstractRaftActorBehavior {
 
     private final int minReplicationCount;
 
-    private final LoggingAdapter LOG;
-
     public Leader(RaftActorContext context) {
         super(context);
-
-        LOG = context.getLogger();
 
         followers = context.getPeerAddresses().keySet();
 
@@ -123,17 +118,17 @@ public class Leader extends AbstractRaftActorBehavior {
 
     }
 
-    @Override protected RaftState handleAppendEntries(ActorRef sender,
+    @Override protected RaftActorBehavior handleAppendEntries(ActorRef sender,
         AppendEntries appendEntries) {
 
         if(LOG.isDebugEnabled()) {
             LOG.debug(appendEntries.toString());
         }
 
-        return state();
+        return this;
     }
 
-    @Override protected RaftState handleAppendEntriesReply(ActorRef sender,
+    @Override protected RaftActorBehavior handleAppendEntriesReply(ActorRef sender,
         AppendEntriesReply appendEntriesReply) {
 
         if(! appendEntriesReply.isSuccess()) {
@@ -149,7 +144,7 @@ public class Leader extends AbstractRaftActorBehavior {
 
         if(followerLogInformation == null){
             LOG.error("Unknown follower {}", followerId);
-            return state();
+            return this;
         }
 
         if (appendEntriesReply.isSuccess()) {
@@ -199,7 +194,7 @@ public class Leader extends AbstractRaftActorBehavior {
             applyLogToStateMachine(context.getCommitIndex());
         }
 
-        return state();
+        return this;
     }
 
     protected ClientRequestTracker removeClientRequestTracker(long logIndex) {
@@ -222,16 +217,16 @@ public class Leader extends AbstractRaftActorBehavior {
         return null;
     }
 
-    @Override protected RaftState handleRequestVoteReply(ActorRef sender,
+    @Override protected RaftActorBehavior handleRequestVoteReply(ActorRef sender,
         RequestVoteReply requestVoteReply) {
-        return state();
+        return this;
     }
 
     @Override public RaftState state() {
         return RaftState.Leader;
     }
 
-    @Override public RaftState handleMessage(ActorRef sender, Object originalMessage) {
+    @Override public RaftActorBehavior handleMessage(ActorRef sender, Object originalMessage) {
         Preconditions.checkNotNull(sender, "sender should not be null");
 
         Object message = fromSerializableMessage(originalMessage);
@@ -243,13 +238,15 @@ public class Leader extends AbstractRaftActorBehavior {
             // This applies to all RPC messages and responses
             if (rpc.getTerm() > context.getTermInformation().getCurrentTerm()) {
                 context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
-                return RaftState.Follower;
+
+                return switchBehavior(new Follower(context));
             }
         }
 
         try {
             if (message instanceof SendHeartBeat) {
-                return sendHeartBeat();
+                sendHeartBeat();
+                return this;
             } else if(message instanceof SendInstallSnapshot) {
                 installSnapshotIfNeeded();
             } else if (message instanceof Replicate) {
@@ -467,11 +464,10 @@ public class Leader extends AbstractRaftActorBehavior {
         return nextChunk;
     }
 
-    private RaftState sendHeartBeat() {
+    private void sendHeartBeat() {
         if (followers.size() > 0) {
             sendAppendEntries();
         }
-        return state();
     }
 
     private void stopHeartBeat() {

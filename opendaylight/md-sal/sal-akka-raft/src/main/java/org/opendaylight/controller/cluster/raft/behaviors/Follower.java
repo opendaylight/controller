@@ -9,7 +9,6 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
-import akka.event.LoggingAdapter;
 import com.google.protobuf.ByteString;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
@@ -39,17 +38,13 @@ import java.util.ArrayList;
 public class Follower extends AbstractRaftActorBehavior {
     private ByteString snapshotChunksCollected = ByteString.EMPTY;
 
-    private final LoggingAdapter LOG;
-
     public Follower(RaftActorContext context) {
         super(context);
-
-        LOG = context.getLogger();
 
         scheduleElection(electionDuration());
     }
 
-    @Override protected RaftState handleAppendEntries(ActorRef sender,
+    @Override protected RaftActorBehavior handleAppendEntries(ActorRef sender,
         AppendEntries appendEntries) {
 
         if(appendEntries.getEntries() != null && appendEntries.getEntries().size() > 0) {
@@ -133,7 +128,7 @@ public class Follower extends AbstractRaftActorBehavior {
                 new AppendEntriesReply(context.getId(), currentTerm(), false,
                     lastIndex(), lastTerm()), actor()
             );
-            return state();
+            return this;
         }
 
         if (appendEntries.getEntries() != null
@@ -181,9 +176,7 @@ public class Follower extends AbstractRaftActorBehavior {
             }
 
             if(LOG.isDebugEnabled()) {
-                context.getLogger().debug(
-                    "After cleanup entries to be added from = " + (addEntriesFrom
-                        + lastIndex())
+                LOG.debug("After cleanup entries to be added from = " + (addEntriesFrom + lastIndex())
                 );
             }
 
@@ -191,10 +184,7 @@ public class Follower extends AbstractRaftActorBehavior {
             for (int i = addEntriesFrom;
                  i < appendEntries.getEntries().size(); i++) {
 
-                context.getLogger().info(
-                    "Append entry to log " + appendEntries.getEntries().get(
-                        i).getData()
-                        .toString()
+                LOG.info("Append entry to log " + appendEntries.getEntries().get(i).getData().toString()
                 );
                 context.getReplicatedLog()
                     .appendAndPersist(appendEntries.getEntries().get(i));
@@ -239,24 +229,24 @@ public class Follower extends AbstractRaftActorBehavior {
         sender.tell(new AppendEntriesReply(context.getId(), currentTerm(), true,
             lastIndex(), lastTerm()), actor());
 
-        return state();
+        return this;
     }
 
-    @Override protected RaftState handleAppendEntriesReply(ActorRef sender,
+    @Override protected RaftActorBehavior handleAppendEntriesReply(ActorRef sender,
         AppendEntriesReply appendEntriesReply) {
-        return state();
+        return this;
     }
 
-    @Override protected RaftState handleRequestVoteReply(ActorRef sender,
+    @Override protected RaftActorBehavior handleRequestVoteReply(ActorRef sender,
         RequestVoteReply requestVoteReply) {
-        return state();
+        return this;
     }
 
     @Override public RaftState state() {
         return RaftState.Follower;
     }
 
-    @Override public RaftState handleMessage(ActorRef sender, Object originalMessage) {
+    @Override public RaftActorBehavior handleMessage(ActorRef sender, Object originalMessage) {
 
         Object message = fromSerializableMessage(originalMessage);
 
@@ -271,7 +261,7 @@ public class Follower extends AbstractRaftActorBehavior {
         }
 
         if (message instanceof ElectionTimeout) {
-            return RaftState.Candidate;
+            return switchBehavior(new Candidate(context));
 
         } else if (message instanceof InstallSnapshot) {
             InstallSnapshot installSnapshot = (InstallSnapshot) message;
@@ -297,8 +287,8 @@ public class Follower extends AbstractRaftActorBehavior {
                 // this is the last chunk, create a snapshot object and apply
 
                 snapshotChunksCollected = snapshotChunksCollected.concat(installSnapshot.getData());
-                context.getLogger().debug("Last chunk received: snapshotChunksCollected.size:{}",
-                    snapshotChunksCollected.size());
+                LOG.debug("Last chunk received: snapshotChunksCollected.size:{}",
+                        snapshotChunksCollected.size());
 
                 Snapshot snapshot = Snapshot.create(snapshotChunksCollected.toByteArray(),
                     new ArrayList<ReplicatedLogEntry>(),
@@ -324,7 +314,7 @@ public class Follower extends AbstractRaftActorBehavior {
                 true), actor());
 
         } catch (Exception e) {
-            context.getLogger().error("Exception in InstallSnapshot of follower", e);
+            LOG.error("Exception in InstallSnapshot of follower", e);
             //send reply with success as false. The chunk will be sent again on failure
             sender.tell(new InstallSnapshotReply(currentTerm(), context.getId(),
                 installSnapshot.getChunkIndex(), false), actor());
