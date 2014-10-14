@@ -40,16 +40,34 @@ public class ShardReadWriteTransaction extends ShardTransaction {
     public void handleReceive(Object message) throws Exception {
         if(ReadData.SERIALIZABLE_CLASS.equals(message.getClass())) {
             readData(transaction, ReadData.fromSerializable(message));
+
+        } else if(ReadData.class.equals(message.getClass())) {
+            readData(transaction, (ReadData) message);
+
         } else if(WriteData.SERIALIZABLE_CLASS.equals(message.getClass())) {
             writeData(transaction, WriteData.fromSerializable(message, schemaContext));
-        } else if(MergeData.SERIALIZABLE_CLASS.equals(message.getClass())) {
+
+        } else if(WriteData.class.equals(message.getClass())) {
+            writeData(transaction, (WriteData) message);
+
+        }  else if(MergeData.SERIALIZABLE_CLASS.equals(message.getClass())) {
             mergeData(transaction, MergeData.fromSerializable(message, schemaContext));
+
+        } else if(MergeData.class.equals(message.getClass())) {
+            mergeData(transaction, (MergeData) message);
+
         } else if(DeleteData.SERIALIZABLE_CLASS.equals(message.getClass())) {
             deleteData(transaction, DeleteData.fromSerializable(message));
+
+        } else if(DeleteData.class.equals(message.getClass())) {
+            deleteData(transaction, (DeleteData) message);
+
         } else if(ReadyTransaction.SERIALIZABLE_CLASS.equals(message.getClass())) {
             readyTransaction(transaction, new ReadyTransaction());
+
         } else if(DataExists.SERIALIZABLE_CLASS.equals(message.getClass())) {
             dataExists(transaction, DataExists.fromSerializable(message));
+
         } else {
             super.handleReceive(message);
         }
