@@ -25,17 +25,18 @@ import org.opendaylight.controller.cluster.raft.RaftState;
  * differently.
  */
 public interface RaftActorBehavior extends AutoCloseable{
+
     /**
      * Handle a message. If the processing of the message warrants a state
-     * change then a new state should be returned otherwise this method should
-     * return the state for the current behavior.
+     * change then a new behavior should be returned otherwise this method should
+     * return the current behavior.
      *
      * @param sender The sender of the message
      * @param message A message that needs to be processed
      *
-     * @return The new state or self (this)
+     * @return The new behavior or current behavior
      */
-    RaftState handleMessage(ActorRef sender, Object message);
+    RaftActorBehavior handleMessage(ActorRef sender, Object message);
 
     /**
      * The state associated with a given behavior

@@ -10,9 +10,9 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
 import akka.actor.Cancellable;
+import akka.event.LoggingAdapter;
 import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
-import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
@@ -47,6 +47,11 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     /**
      *
      */
+    protected final LoggingAdapter LOG;
+
+    /**
+     *
+     */
     private Cancellable electionCancel = null;
 
     /**
@@ -57,6 +62,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
 
     protected AbstractRaftActorBehavior(RaftActorContext context) {
         this.context = context;
+        this.LOG = context.getLogger();
     }
 
     /**
@@ -71,7 +77,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      * @param appendEntries  The AppendEntries message
      * @return
      */
-    protected abstract RaftState handleAppendEntries(ActorRef sender,
+    protected abstract RaftActorBehavior handleAppendEntries(ActorRef sender,
         AppendEntries appendEntries);
 
 
@@ -83,19 +89,21 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      * @param appendEntries
      * @return
      */
-    protected RaftState appendEntries(ActorRef sender,
+    protected RaftActorBehavior appendEntries(ActorRef sender,
         AppendEntries appendEntries) {
 
         // 1. Reply false if term < currentTerm (§5.1)
         if (appendEntries.getTerm() < currentTerm()) {
-            context.getLogger().debug(
-                "Cannot append entries because sender term " + appendEntries
-                    .getTerm() + " is less than " + currentTerm());
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Cannot append entries because sender term {} is less than {}",
+                        appendEntries.getTerm(), currentTerm());
+            }
+
             sender.tell(
                 new AppendEntriesReply(context.getId(), currentTerm(), false,
                     lastIndex(), lastTerm()), actor()
             );
-            return state();
+            return this;
         }
 
 
@@ -114,7 +122,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      * @param appendEntriesReply The AppendEntriesReply message
      * @return
      */
-    protected abstract RaftState handleAppendEntriesReply(ActorRef sender,
+    protected abstract RaftActorBehavior handleAppendEntriesReply(ActorRef sender,
         AppendEntriesReply appendEntriesReply);
 
     /**
@@ -125,11 +133,12 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      * @param requestVote
      * @return
      */
-    protected RaftState requestVote(ActorRef sender,
+    protected RaftActorBehavior requestVote(ActorRef sender,
         RequestVote requestVote) {
 
-
-        context.getLogger().debug(requestVote.toString());
+        if(LOG.isDebugEnabled()) {
+            LOG.debug(requestVote.toString());
+        }
 
         boolean grantVote = false;
 
@@ -167,7 +176,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
 
         sender.tell(new RequestVoteReply(currentTerm(), grantVote), actor());
 
-        return state();
+        return this;
     }
 
     /**
@@ -182,7 +191,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      * @param requestVoteReply The RequestVoteReply message
      * @return
      */
-    protected abstract RaftState handleRequestVoteReply(ActorRef sender,
+    protected abstract RaftActorBehavior handleRequestVoteReply(ActorRef sender,
         RequestVoteReply requestVoteReply);
 
     /**
@@ -341,12 +350,14 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
             } else {
                 //if one index is not present in the log, no point in looping
                 // around as the rest wont be present either
-                context.getLogger().warning(
-                    "Missing index {} from log. Cannot apply state. Ignoring {} to {}", i, i, index );
+                LOG.warning(
+                        "Missing index {} from log. Cannot apply state. Ignoring {} to {}", i, i, index);
                 break;
             }
         }
-        context.getLogger().debug("Setting last applied to {}", newLastApplied);
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Setting last applied to {}", newLastApplied);
+        }
         context.setLastApplied(newLastApplied);
 
         // send a message to persist a ApplyLogEntries marker message into akka's persistent journal
@@ -361,7 +372,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     }
 
     @Override
-    public RaftState handleMessage(ActorRef sender, Object message) {
+    public RaftActorBehavior handleMessage(ActorRef sender, Object message) {
         if (message instanceof AppendEntries) {
             return appendEntries(sender, (AppendEntries) message);
         } else if (message instanceof AppendEntriesReply) {
@@ -371,10 +382,21 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         } else if (message instanceof RequestVoteReply) {
             return handleRequestVoteReply(sender, (RequestVoteReply) message);
         }
-        return state();
+        return this;
     }
 
     @Override public String getLeaderId() {
         return leaderId;
+    }
+
+    protected RaftActorBehavior switchBehavior(RaftActorBehavior behavior) {
+        LOG.info("Switching from behavior {} to {}", this.state(), behavior.state());
+        try {
+            close();
+        } catch (Exception e) {
+            LOG.error(e, "Failed to close behavior : {}", this.state());
+        }
+
+        return behavior;
     }
 }
