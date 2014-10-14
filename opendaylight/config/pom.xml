@@ -193,9 +193,21 @@
             <configuration>
               <outputDirectory>${project.build.directory}/jacoco</outputDirectory>
               <haltOnFailure>false</haltOnFailure>
-              <check>
-                <classRatio>80</classRatio>
-              </check>
+              <rules>
+                <rule>
+                  <element>CLASS</element>
+                  <excludes>
+                    <exclude>*Test</exclude>
+                  </excludes>
+                  <limits>
+                    <limit>
+                      <counter>LINE</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.50</minimum>
+                    </limit>
+                  </limits>
+                </rule>
+              </rules>
             </configuration>
           </execution>
         </executions>
