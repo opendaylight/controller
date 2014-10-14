@@ -402,8 +402,10 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                     remoteTransactionActorsMB.set(true);
                 }
 
+                boolean isShardLocal = Optional.fromNullable(actorContext.findLocalShard(shardName)).isPresent();
+
                 transactionContext = new TransactionContextImpl(shardName, transactionPath,
-                    transactionActor, identifier, actorContext, schemaContext);
+                    transactionActor, identifier, actorContext, schemaContext, isShardLocal);
 
                 remoteTransactionPaths.put(shardName, transactionContext);
             } else {
@@ -477,15 +479,17 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         private final SchemaContext schemaContext;
         private final String actorPath;
         private final ActorSelection actor;
+        private final boolean isShardLocal;
 
         private TransactionContextImpl(String shardName, String actorPath,
                 ActorSelection actor, TransactionIdentifier identifier, ActorContext actorContext,
-                SchemaContext schemaContext) {
+                SchemaContext schemaContext, boolean isShardLocal) {
             super(shardName, identifier);
             this.actorPath = actorPath;
             this.actor = actor;
             this.actorContext = actorContext;
             this.schemaContext = schemaContext;
+            this.isShardLocal = isShardLocal;
         }
 
         private ActorSelection getActor() {
@@ -564,8 +568,9 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Tx {} deleteData called path = {}", identifier, path);
             }
+            DeleteData deleteData = new DeleteData(path);
             recordedOperationFutures.add(actorContext.executeRemoteOperationAsync(getActor(),
-                    new DeleteData(path).toSerializable() ));
+                isShardLocal ? deleteData : deleteData.toSerializable()));
         }
 
         @Override
@@ -573,8 +578,9 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Tx {} mergeData called path = {}", identifier, path);
             }
+            MergeData mergeData = new MergeData(path, data, schemaContext);
             recordedOperationFutures.add(actorContext.executeRemoteOperationAsync(getActor(),
-                    new MergeData(path, data, schemaContext).toSerializable()));
+                isShardLocal ? mergeData : mergeData.toSerializable()));
         }
 
         @Override
@@ -582,8 +588,9 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Tx {} writeData called path = {}", identifier, path);
             }
+            WriteData writeData = new WriteData(path, data, schemaContext);
             recordedOperationFutures.add(actorContext.executeRemoteOperationAsync(getActor(),
-                    new WriteData(path, data, schemaContext).toSerializable()));
+                isShardLocal ? writeData : writeData.toSerializable()));
         }
 
         @Override
@@ -674,8 +681,10 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                 }
             };
 
+            ReadData readData = new ReadData(path);
+
             Future<Object> readFuture = actorContext.executeRemoteOperationAsync(getActor(),
-                    new ReadData(path).toSerializable());
+                isShardLocal ? readData : readData.toSerializable());
             readFuture.onComplete(onComplete, actorContext.getActorSystem().dispatcher());
         }
 
