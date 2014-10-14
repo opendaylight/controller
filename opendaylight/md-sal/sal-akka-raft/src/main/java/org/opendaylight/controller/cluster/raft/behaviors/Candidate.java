@@ -11,7 +11,6 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
-import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
@@ -52,7 +51,7 @@ public class Candidate extends AbstractRaftActorBehavior {
 
         peers = context.getPeerAddresses().keySet();
 
-        context.getLogger().debug("Election:Candidate has following peers:"+ peers);
+        LOG.debug("Election:Candidate has following peers:" + peers);
 
         if(peers.size() > 0) {
             // Votes are required from a majority of the peers including self.
@@ -78,21 +77,21 @@ public class Candidate extends AbstractRaftActorBehavior {
         scheduleElection(electionDuration());
     }
 
-    @Override protected RaftState handleAppendEntries(ActorRef sender,
+    @Override protected RaftActorBehavior handleAppendEntries(ActorRef sender,
         AppendEntries appendEntries) {
 
-        context.getLogger().debug(appendEntries.toString());
+        LOG.debug(appendEntries.toString());
 
-        return state();
+        return this;
     }
 
-    @Override protected RaftState handleAppendEntriesReply(ActorRef sender,
+    @Override protected RaftActorBehavior handleAppendEntriesReply(ActorRef sender,
         AppendEntriesReply appendEntriesReply) {
 
-        return state();
+        return this;
     }
 
-    @Override protected RaftState handleRequestVoteReply(ActorRef sender,
+    @Override protected RaftActorBehavior handleRequestVoteReply(ActorRef sender,
         RequestVoteReply requestVoteReply) {
 
         if (requestVoteReply.isVoteGranted()) {
@@ -100,10 +99,10 @@ public class Candidate extends AbstractRaftActorBehavior {
         }
 
         if (voteCount >= votesRequired) {
-            return RaftState.Leader;
+            return switchBehavior(new Leader(context));
         }
 
-        return state();
+        return this;
     }
 
     @Override public RaftState state() {
@@ -111,7 +110,7 @@ public class Candidate extends AbstractRaftActorBehavior {
     }
 
     @Override
-    public RaftState handleMessage(ActorRef sender, Object originalMessage) {
+    public RaftActorBehavior handleMessage(ActorRef sender, Object originalMessage) {
 
         Object message = fromSerializableMessage(originalMessage);
 
@@ -119,14 +118,15 @@ public class Candidate extends AbstractRaftActorBehavior {
 
             RaftRPC rpc = (RaftRPC) message;
 
-            context.getLogger().debug("RaftRPC message received {} my term is {}", rpc.toString(), context.getTermInformation().getCurrentTerm());
+            LOG.debug("RaftRPC message received {} my term is {}", rpc.toString(), context.getTermInformation().getCurrentTerm());
 
             // If RPC request or response contains term T > currentTerm:
             // set currentTerm = T, convert to follower (§5.1)
             // This applies to all RPC messages and responses
             if (rpc.getTerm() > context.getTermInformation().getCurrentTerm()) {
                 context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
-                return RaftState.Follower;
+
+                return switchBehavior(new Follower(context));
             }
         }
 
@@ -137,11 +137,12 @@ public class Candidate extends AbstractRaftActorBehavior {
                 // ourselves the leader. This gives enough time for a leader
                 // who we do not know about (as a peer)
                 // to send a message to the candidate
-                return RaftState.Leader;
+
+                return switchBehavior(new Leader(context));
             }
             startNewTerm();
             scheduleElection(electionDuration());
-            return state();
+            return this;
         }
 
         return super.handleMessage(sender, message);
@@ -159,7 +160,7 @@ public class Candidate extends AbstractRaftActorBehavior {
         context.getTermInformation().updateAndPersist(currentTerm + 1,
             context.getId());
 
-        context.getLogger().debug("Starting new term " + (currentTerm + 1));
+        LOG.debug("Starting new term " + (currentTerm + 1));
 
         // Request for a vote
         // TODO: Retry request for vote if replies do not arrive in a reasonable

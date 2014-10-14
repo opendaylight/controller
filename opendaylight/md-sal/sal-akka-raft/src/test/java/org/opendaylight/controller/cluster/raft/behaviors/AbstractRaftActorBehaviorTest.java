@@ -7,7 +7,6 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.AbstractActorTest;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
-import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
@@ -17,11 +16,13 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
+import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior.RaftState;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
 
@@ -79,12 +80,12 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
             RaftActorBehavior behavior = createBehavior(context);
 
             // Send an unknown message so that the state of the RaftActor remains unchanged
-            RaftState expected = behavior.handleMessage(getRef(), "unknown");
+            RaftActorBehavior expected = behavior.handleMessage(getRef(), "unknown");
 
-            RaftState raftState =
+            RaftActorBehavior raftBehavior =
                 behavior.handleMessage(getRef(), appendEntries);
 
-            assertEquals(expected, raftState);
+            assertEquals(expected, raftBehavior);
 
             // Also expect an AppendEntriesReply to be sent where success is false
             final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"),
@@ -145,12 +146,12 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
                 }
 
                 // Send an unknown message so that the state of the RaftActor remains unchanged
-                RaftState expected = behavior.handleMessage(getRef(), "unknown");
+                RaftActorBehavior expected = behavior.handleMessage(getRef(), "unknown");
 
-                RaftState raftState =
+                RaftActorBehavior raftBehavior =
                     behavior.handleMessage(getRef(), appendEntries);
 
-                assertEquals(expected, raftState);
+                assertEquals(expected, raftBehavior);
 
                 assertEquals(1, log.size());
 
@@ -174,11 +175,11 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
                     RaftActorBehavior behavior = createBehavior(
                         createActorContext(behaviorActor));
 
-                    RaftState raftState = behavior.handleMessage(getTestActor(),
+                    RaftActorBehavior raftBehavior = behavior.handleMessage(getTestActor(),
                         new RequestVote(1000, "test", 10000, 999));
 
-                    if(behavior.state() != RaftState.Follower){
-                        assertEquals(RaftState.Follower, raftState);
+                    if(!(behavior instanceof Follower)){
+                        assertTrue(raftBehavior instanceof Follower);
                     } else {
 
                         final Boolean out =
@@ -228,11 +229,11 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
 
                     RaftActorBehavior behavior = createBehavior(actorContext);
 
-                    RaftState raftState = behavior.handleMessage(getTestActor(),
+                    RaftActorBehavior raftBehavior = behavior.handleMessage(getTestActor(),
                         new RequestVote(1000, "test", 10000, 999));
 
-                    if(behavior.state() != RaftState.Follower){
-                        assertEquals(RaftState.Follower, raftState);
+                    if(!(behavior instanceof Follower)){
+                        assertTrue(raftBehavior instanceof Follower);
                     } else {
                         final Boolean out =
                             new ExpectMsg<Boolean>(duration("1 seconds"),
@@ -309,10 +310,10 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
         setLastLogEntry(
             (MockRaftActorContext) actorContext, 0, 0, p);
 
-        RaftState raftState = createBehavior(actorContext)
+        RaftActorBehavior raftBehavior = createBehavior(actorContext)
             .handleMessage(actorRef, rpc);
 
-        assertEquals(RaftState.Follower, raftState);
+        assertTrue(raftBehavior instanceof Follower);
     }
 
     protected MockRaftActorContext.SimpleReplicatedLog setLastLogEntry(

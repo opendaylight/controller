@@ -9,13 +9,13 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
-import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
+import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior.RaftState;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -109,10 +109,10 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
         Candidate candidate =
             new Candidate(raftActorContext);
 
-        RaftState raftState =
+        RaftActorBehavior raftBehavior =
             candidate.handleMessage(candidateActor, new ElectionTimeout());
 
-        Assert.assertEquals(RaftState.Leader, raftState);
+        Assert.assertTrue(raftBehavior instanceof Leader);
     }
 
     @Test
@@ -123,10 +123,10 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
         Candidate candidate =
             new Candidate(raftActorContext);
 
-        RaftState raftState =
+        RaftActorBehavior raftBehavior =
             candidate.handleMessage(candidateActor, new ElectionTimeout());
 
-        Assert.assertEquals(RaftState.Candidate, raftState);
+        Assert.assertTrue(raftBehavior instanceof Candidate);
     }
 
     @Test
@@ -137,9 +137,9 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
         Candidate candidate =
             new Candidate(raftActorContext);
 
-        RaftState stateOnFirstVote = candidate.handleMessage(peerActor1, new RequestVoteReply(0, true));
+        RaftActorBehavior behaviorOnFirstVote = candidate.handleMessage(peerActor1, new RequestVoteReply(0, true));
 
-        Assert.assertEquals(RaftState.Leader, stateOnFirstVote);
+        Assert.assertTrue(behaviorOnFirstVote instanceof Leader);
 
     }
 
@@ -151,12 +151,12 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
         Candidate candidate =
             new Candidate(raftActorContext);
 
-        RaftState stateOnFirstVote = candidate.handleMessage(peerActor1, new RequestVoteReply(0, true));
+        RaftActorBehavior behaviorOnFirstVote = candidate.handleMessage(peerActor1, new RequestVoteReply(0, true));
 
-        RaftState stateOnSecondVote = candidate.handleMessage(peerActor2, new RequestVoteReply(0, true));
+        RaftActorBehavior behaviorOnSecondVote = candidate.handleMessage(peerActor2, new RequestVoteReply(0, true));
 
-        Assert.assertEquals(RaftState.Candidate, stateOnFirstVote);
-        Assert.assertEquals(RaftState.Leader, stateOnSecondVote);
+        Assert.assertTrue(behaviorOnFirstVote instanceof Candidate);
+        Assert.assertTrue(behaviorOnSecondVote instanceof Leader);
 
     }
 

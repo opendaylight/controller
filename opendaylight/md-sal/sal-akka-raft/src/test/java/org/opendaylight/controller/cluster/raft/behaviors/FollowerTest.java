@@ -9,7 +9,6 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
-import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
@@ -21,6 +20,7 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
+import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior.RaftState;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -85,10 +85,10 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         Follower follower =
             new Follower(raftActorContext);
 
-        RaftState raftState =
+        RaftActorBehavior raftBehavior =
             follower.handleMessage(followerActor, new ElectionTimeout());
 
-        Assert.assertEquals(RaftState.Candidate, raftState);
+        Assert.assertTrue(raftBehavior instanceof Candidate);
     }
 
     @Test
@@ -187,7 +187,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             AppendEntries appendEntries =
                 new AppendEntries(2, "leader-1", 100, 1, entries, 101);
 
-            RaftState raftState =
+            RaftActorBehavior raftBehavior =
                 createBehavior(context).handleMessage(getRef(), appendEntries);
 
             assertEquals(101L, context.getLastApplied());
@@ -226,12 +226,12 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             RaftActorBehavior behavior = createBehavior(context);
 
             // Send an unknown message so that the state of the RaftActor remains unchanged
-            RaftState expected = behavior.handleMessage(getRef(), "unknown");
+            RaftActorBehavior expected = behavior.handleMessage(getRef(), "unknown");
 
-            RaftState raftState =
+            RaftActorBehavior raftBehavior =
                 behavior.handleMessage(getRef(), appendEntries);
 
-            assertEquals(expected, raftState);
+            assertEquals(expected, raftBehavior);
 
             // Also expect an AppendEntriesReply to be sent where success is false
             final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"),
@@ -302,12 +302,12 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             RaftActorBehavior behavior = createBehavior(context);
 
             // Send an unknown message so that the state of the RaftActor remains unchanged
-            RaftState expected = behavior.handleMessage(getRef(), "unknown");
+            RaftActorBehavior expected = behavior.handleMessage(getRef(), "unknown");
 
-            RaftState raftState =
+            RaftActorBehavior raftBehavior =
                 behavior.handleMessage(getRef(), appendEntries);
 
-            assertEquals(expected, raftState);
+            assertEquals(expected, raftBehavior);
             assertEquals(5, log.last().getIndex() + 1);
             assertNotNull(log.get(3));
             assertNotNull(log.get(4));
@@ -382,12 +382,12 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             RaftActorBehavior behavior = createBehavior(context);
 
             // Send an unknown message so that the state of the RaftActor remains unchanged
-            RaftState expected = behavior.handleMessage(getRef(), "unknown");
+            RaftActorBehavior expected = behavior.handleMessage(getRef(), "unknown");
 
-            RaftState raftState =
+            RaftActorBehavior raftBehavior =
                 behavior.handleMessage(getRef(), appendEntries);
 
-            assertEquals(expected, raftState);
+            assertEquals(expected, raftBehavior);
 
             // The entry at index 2 will be found out-of-sync with the leader
             // and will be removed

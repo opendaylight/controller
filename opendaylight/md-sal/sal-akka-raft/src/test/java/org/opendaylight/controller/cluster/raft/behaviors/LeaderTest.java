@@ -12,7 +12,6 @@ import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformationImpl;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
-import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogImplEntry;
 import org.opendaylight.controller.cluster.raft.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
@@ -25,6 +24,7 @@ import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
+import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior.RaftState;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages;
 
@@ -54,8 +54,8 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
             // handle message should return the Leader state when it receives an
             // unknown message
-            RaftState state = leader.handleMessage(senderActor, "foo");
-            Assert.assertEquals(RaftState.Leader, state);
+            RaftActorBehavior behavior = leader.handleMessage(senderActor, "foo");
+            Assert.assertTrue(behavior instanceof Leader);
         }};
     }
 
@@ -125,7 +125,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
                     actorContext.setPeerAddresses(peerAddresses);
 
                     Leader leader = new Leader(actorContext);
-                    RaftState raftState = leader
+                    RaftActorBehavior raftBehavior = leader
                         .handleMessage(senderActor, new Replicate(null, null,
                             new MockRaftActorContext.MockReplicatedLogEntry(1,
                                 100,
@@ -133,7 +133,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
                         ));
 
                     // State should not change
-                    assertEquals(RaftState.Leader, raftState);
+                    assertTrue(raftBehavior instanceof Leader);
 
                     final String out =
                         new ExpectMsg<String>(duration("1 seconds"), "match hint") {
@@ -179,11 +179,11 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
                             .build());
 
                     Leader leader = new Leader(actorContext);
-                    RaftState raftState = leader
+                    RaftActorBehavior raftBehavior = leader
                         .handleMessage(senderActor, new Replicate(null, "state-id",actorContext.getReplicatedLog().get(1)));
 
                     // State should not change
-                    assertEquals(RaftState.Leader, raftState);
+                    assertTrue(raftBehavior instanceof Leader);
 
                     assertEquals(1, actorContext.getCommitIndex());
 
@@ -258,10 +258,10 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
                             new MockRaftActorContext.MockPayload("D"));
 
                     // this should invoke a sendinstallsnapshot as followersLastIndex < snapshotIndex
-                    RaftState raftState = leader.handleMessage(
+                    RaftActorBehavior raftBehavior = leader.handleMessage(
                         senderActor, new Replicate(null, "state-id", entry));
 
-                    assertEquals(RaftState.Leader, raftState);
+                    assertTrue(raftBehavior instanceof Leader);
 
                     // we might receive some heartbeat messages, so wait till we SendInstallSnapshot
                     Boolean[] matches = new ReceiveWhile<Boolean>(Boolean.class, duration("2 seconds")) {
@@ -333,9 +333,9 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
                         new ReplicatedLogImplEntry(newEntryIndex, currentTerm,
                             new MockRaftActorContext.MockPayload("D"));
 
-                    RaftState raftState = leader.handleMessage(senderActor, new SendInstallSnapshot());
+                    RaftActorBehavior raftBehavior = leader.handleMessage(senderActor, new SendInstallSnapshot());
 
-                    assertEquals(RaftState.Leader, raftState);
+                    assertTrue(raftBehavior instanceof Leader);
 
                     // check if installsnapshot gets called with the correct values.
                     final String out =
@@ -419,11 +419,11 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
                     //clears leaders log
                     actorContext.getReplicatedLog().removeFrom(0);
 
-                    RaftState raftState = leader.handleMessage(senderActor,
+                    RaftActorBehavior raftBehavior = leader.handleMessage(senderActor,
                         new InstallSnapshotReply(currentTerm, followerActor.path().toString(),
                             leader.getFollowerToSnapshot().getChunkIndex(), true));
 
-                    assertEquals(RaftState.Leader, raftState);
+                    assertTrue(raftBehavior instanceof Leader);
 
                     assertEquals(leader.mapFollowerToSnapshot.size(), 0);
                     assertEquals(leader.followerToLog.size(), 1);
