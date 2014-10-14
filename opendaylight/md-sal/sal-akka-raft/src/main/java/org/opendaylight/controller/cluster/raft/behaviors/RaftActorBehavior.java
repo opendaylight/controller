@@ -9,7 +9,6 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
-import org.opendaylight.controller.cluster.raft.RaftState;
 
 /**
  * A RaftActorBehavior represents the specific behavior of a RaftActor
@@ -25,6 +24,13 @@ import org.opendaylight.controller.cluster.raft.RaftState;
  * differently.
  */
 public interface RaftActorBehavior extends AutoCloseable{
+
+    public enum RaftState {
+        Candidate,
+        Follower,
+        Leader
+    }
+
     /**
      * Handle a message. If the processing of the message warrants a state
      * change then a new state should be returned otherwise this method should
