@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "ba8cc1f7_af0285b2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardReadWriteTransaction.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-15T18:22:17Z",
+      "side": 1,
+      "message": "For ReadData, it\u0027s the reply that\u0027s heavyweight so I think the reply data should be unserialized as well. We don\u0027t need to do the same for the other reply messages as they\u0027re very small although it would make it consistent.",
+      "revId": "c3b3cefd5ab3c0b576ae0122e093b5b66f7eef80",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_343b28ed",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardReadWriteTransaction.java",
         "patchSetId": 3
