@@ -63,8 +63,7 @@ public class NetconfDocumentedException extends Exception {
         public static ErrorType from( String text ) {
             try {
                 return valueOf( text );
-            }
-            catch( Exception e ) {
+            } catch( Exception e ) {
                 return application;
             }
         }
@@ -102,8 +101,7 @@ public class NetconfDocumentedException extends Exception {
         }
 
         public static ErrorTag from( String text ) {
-            for( ErrorTag e: values() )
-            {
+            for( ErrorTag e: values() )     {
                 if( e.getTagValue().equals( text ) ) {
                     return e;
                 }
@@ -123,8 +121,7 @@ public class NetconfDocumentedException extends Exception {
         public static ErrorSeverity from( String text ) {
             try {
                 return valueOf( text );
-            }
-            catch( Exception e ) {
+            } catch( Exception e ) {
                 return error;
             }
         }
@@ -206,25 +203,19 @@ public class NetconfDocumentedException extends Exception {
         NodeList replyChildren = rpcReply.getChildNodes();
         for( int i = 0; i < replyChildren.getLength(); i++ ) {
             Node replyChild = replyChildren.item( i );
-            if( RPC_ERROR.equals( replyChild.getNodeName() ) )
-            {
+            if( RPC_ERROR.equals( replyChild.getNodeName() ) ) {
                 NodeList rpcErrorChildren = replyChild.getChildNodes();
-                for( int j = 0; j < rpcErrorChildren.getLength(); j++ )
-                {
+                for( int j = 0; j < rpcErrorChildren.getLength(); j++ ) {
                     Node rpcErrorChild = rpcErrorChildren.item( j );
                     if( ERROR_TYPE.equals( rpcErrorChild.getNodeName() ) ) {
                         errorType = ErrorType.from( rpcErrorChild.getTextContent() );
-                    }
-                    else if( ERROR_TAG.equals( rpcErrorChild.getNodeName() ) ) {
+                    } else if( ERROR_TAG.equals( rpcErrorChild.getNodeName() ) ) {
                         errorTag = ErrorTag.from( rpcErrorChild.getTextContent() );
-                    }
-                    else if( ERROR_SEVERITY.equals( rpcErrorChild.getNodeName() ) ) {
+                    } else if( ERROR_SEVERITY.equals( rpcErrorChild.getNodeName() ) ) {
                         errorSeverity = ErrorSeverity.from( rpcErrorChild.getTextContent() );
-                    }
-                    else if( ERROR_MESSAGE.equals( rpcErrorChild.getNodeName() ) ) {
+                    } else if( ERROR_MESSAGE.equals( rpcErrorChild.getNodeName() ) ) {
                         errorMessage = rpcErrorChild.getTextContent();
-                    }
-                    else if( ERROR_INFO.equals( rpcErrorChild.getNodeName() ) ) {
+                    } else if( ERROR_INFO.equals( rpcErrorChild.getNodeName() ) ) {
                         errorInfo = parseErrorInfo( rpcErrorChild );
                     }
                 }
@@ -298,8 +289,7 @@ public class NetconfDocumentedException extends Exception {
                     errorInfoNode.appendChild( createTextNode( doc, entry.getKey(), entry.getValue() ) );
                 }
             }
-        }
-        catch( ParserConfigurationException e ) {
+        } catch( ParserConfigurationException e ) {
             LOG.error( "Error outputting to XML document", e ); // this shouldn't happen
         }
 

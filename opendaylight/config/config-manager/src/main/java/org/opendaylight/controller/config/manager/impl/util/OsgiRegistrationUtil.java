@@ -21,7 +21,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class OsgiRegistrationUtil {
-    private static final Logger logger = LoggerFactory.getLogger(OsgiRegistrationUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(OsgiRegistrationUtil.class);
+
+    private OsgiRegistrationUtil() {
+    }
 
     @SafeVarargs
     public static <T> AutoCloseable registerService(BundleContext bundleContext, T service, Class<? super T> ... interfaces) {
@@ -80,7 +83,7 @@ public class OsgiRegistrationUtil {
                     try {
                         ac.close();
                     } catch (Exception e) {
-                        logger.warn("Exception while closing {}", ac, e);
+                        LOGGER.warn("Exception while closing {}", ac, e);
                         if (firstException == null) {
                             firstException = e;
                         } else {

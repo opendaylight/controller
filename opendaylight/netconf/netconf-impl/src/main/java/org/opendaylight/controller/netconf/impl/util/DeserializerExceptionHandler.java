@@ -21,7 +21,7 @@ import java.util.Map;
 public final class
         DeserializerExceptionHandler implements ChannelHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(DeserializerExceptionHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DeserializerExceptionHandler.class);
 
 
     @Override
@@ -36,7 +36,7 @@ public final class
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        logger.warn("An exception occurred during message handling", cause);
+        LOGGER.warn("An exception occurred during message handling", cause);
         handleDeserializerException(ctx, cause);
     }
 

@@ -17,6 +17,9 @@ import java.util.Set;
 
 public class AnnotationsHelper {
 
+    private AnnotationsHelper() {
+    }
+
     /**
      * Look for annotation specified by annotationType on method. First observe
      * method's class, then its super classes, then all provided interfaces.

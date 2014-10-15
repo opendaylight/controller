@@ -25,7 +25,8 @@ public final class XmlNetconfValidator {
 
     private static final Schema SCHEMA;
 
-    private XmlNetconfValidator() {}
+    private XmlNetconfValidator() {
+    }
 
     static {
         final InputStream xmlSchema = XmlNetconfValidator.class.getResourceAsStream("/xml.xsd");

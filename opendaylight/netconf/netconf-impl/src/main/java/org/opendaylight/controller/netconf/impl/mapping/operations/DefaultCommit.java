@@ -29,7 +29,7 @@ import java.io.InputStream;
 
 public class DefaultCommit extends AbstractNetconfOperation {
 
-    private static final Logger logger = LoggerFactory.getLogger(DefaultCommit.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCommit.class);
 
     private static final String NOTIFY_ATTR = "notify";
 
@@ -69,12 +69,12 @@ public class DefaultCommit extends AbstractNetconfOperation {
                 "Subsequent netconf operation expected by %s", this);
 
         if (isCommitWithoutNotification(requestMessage)) {
-            logger.debug("Skipping commit notification");
+            LOGGER.debug("Skipping commit notification");
         } else {
             // Send commit notification if commit was not issued by persister
             removePersisterAttributes(requestMessage);
             Element cfgSnapshot = getConfigSnapshot(operationRouter);
-            logger.debug("Config snapshot retrieved successfully {}", cfgSnapshot);
+            LOGGER.debug("Config snapshot retrieved successfully {}", cfgSnapshot);
             notificationProducer.sendCommitNotification("ok", cfgSnapshot, cap.getCapabilities());
         }
 
@@ -101,16 +101,16 @@ public class DefaultCommit extends AbstractNetconfOperation {
             xmlElement = XmlElement.fromDomElementWithExpected(message.getDocumentElement(),
                     XmlNetconfConstants.RPC_KEY, XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
         } catch (NetconfDocumentedException e) {
-            logger.trace("Commit operation is not valid due to  {}",e);
+            LOGGER.trace("Commit operation is not valid due to  {}",e);
             return false;
         }
 
         String attr = xmlElement.getAttribute(NOTIFY_ATTR);
 
-        if (attr == null || attr.equals("")){
+        if ("".equals(attr)){
             return false;
         } else if (attr.equals(Boolean.toString(false))) {
-            logger.debug("Commit operation received with notify=false attribute {}", message);
+            LOGGER.debug("Commit operation received with notify=false attribute {}", message);
             return true;
         } else {
             return false;

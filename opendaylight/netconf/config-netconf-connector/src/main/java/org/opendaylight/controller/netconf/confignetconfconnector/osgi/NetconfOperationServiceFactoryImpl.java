@@ -24,7 +24,7 @@ public class NetconfOperationServiceFactoryImpl implements NetconfOperationServi
     private final YangStoreService yangStoreService;
     private final ConfigRegistryJMXClient jmxClient;
 
-    private static final Logger logger = LoggerFactory.getLogger(NetconfOperationServiceFactoryImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NetconfOperationServiceFactoryImpl.class);
 
     public NetconfOperationServiceFactoryImpl(YangStoreService yangStoreService) {
         this(yangStoreService, ManagementFactory.getPlatformMBeanServer());
@@ -44,9 +44,9 @@ public class NetconfOperationServiceFactoryImpl implements NetconfOperationServi
             } catch (IllegalStateException e) {
                 ++i;
                 if (i > SILENT_ATTEMPTS) {
-                    logger.info("JMX client not created after {} attempts, still trying", i, e);
+                    LOGGER.info("JMX client not created after {} attempts, still trying", i, e);
                 } else {
-                    logger.debug("JMX client could not be created, reattempting, try {}", i, e);
+                    LOGGER.debug("JMX client could not be created, reattempting, try {}", i, e);
                 }
                 try {
                     Thread.sleep(ATTEMPT_TIMEOUT_MS);
@@ -59,9 +59,9 @@ public class NetconfOperationServiceFactoryImpl implements NetconfOperationServi
 
         jmxClient = configRegistryJMXClient;
         if (i > SILENT_ATTEMPTS) {
-            logger.info("Created JMX client after {} attempts", i);
+            LOGGER.info("Created JMX client after {} attempts", i);
         } else {
-            logger.debug("Created JMX client after {} attempts", i);
+            LOGGER.debug("Created JMX client after {} attempts", i);
         }
     }
 

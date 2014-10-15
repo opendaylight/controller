@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 
 public class EditConfigXmlParser {
 
-    private static final Logger logger = LoggerFactory.getLogger(EditConfigXmlParser.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EditConfigXmlParser.class);
 
     public static final String EDIT_CONFIG = "edit-config";
     public static final String DEFAULT_OPERATION_KEY = "default-operation";
@@ -61,12 +61,12 @@ public class EditConfigXmlParser {
             targetElement  = xml.getOnlyChildElementWithSameNamespace(EditConfigXmlParser.TARGET_KEY);
             targetChildNode = targetElement.getOnlyChildElementWithSameNamespace();
         } catch (final MissingNameSpaceException | UnexpectedNamespaceException e) {
-            logger.trace("Can't get only child element with same namespace due to {}",e);
+            LOGGER.trace("Can't get only child element with same namespace due to {}",e);
             throw NetconfDocumentedException.wrap(e);
         }
         String datastoreValue = targetChildNode.getName();
         Datastore targetDatastore = Datastore.valueOf(datastoreValue);
-        logger.debug("Setting {} to '{}'", EditConfigXmlParser.TARGET_KEY, targetDatastore);
+        LOGGER.debug("Setting {} to '{}'", EditConfigXmlParser.TARGET_KEY, targetDatastore);
 
         // check target
         if (targetDatastore != Datastore.candidate){
@@ -89,7 +89,7 @@ public class EditConfigXmlParser {
         } else {
             testOption = EditConfigXmlParser.TestOption.getDefault();
         }
-        logger.debug("Setting {} to '{}'", EditConfigXmlParser.TEST_OPTION_KEY, testOption);
+        LOGGER.debug("Setting {} to '{}'", EditConfigXmlParser.TEST_OPTION_KEY, testOption);
 
         // Error option
         Optional<XmlElement> errorOptionElement = xml
@@ -107,7 +107,7 @@ public class EditConfigXmlParser {
                 .getOnlyChildElementWithSameNamespaceOptionally(EditConfigXmlParser.DEFAULT_OPERATION_KEY);
         if (defaultContent.isPresent()) {
             String mergeStrategyString = defaultContent.get().getTextContent();
-            logger.trace("Setting merge strategy to {}", mergeStrategyString);
+            LOGGER.trace("Setting merge strategy to {}", mergeStrategyString);
             editStrategyType = EditStrategyType.valueOf(mergeStrategyString);
         }
 
@@ -115,7 +115,7 @@ public class EditConfigXmlParser {
         try {
             configElement = xml.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.CONFIG_KEY);
         } catch (MissingNameSpaceException e) {
-            logger.trace("Can't get only child element with same namespace due to {}",e);
+            LOGGER.trace("Can't get only child element with same namespace due to {}",e);
             throw NetconfDocumentedException.wrap(e);
         }
 

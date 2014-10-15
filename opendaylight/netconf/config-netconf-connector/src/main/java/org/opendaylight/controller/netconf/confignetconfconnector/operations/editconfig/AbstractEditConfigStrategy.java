@@ -21,7 +21,7 @@ import java.util.Map;
 
 public abstract class AbstractEditConfigStrategy implements EditConfigStrategy {
 
-    private static final Logger logger = LoggerFactory.getLogger(AbstractEditConfigStrategy.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractEditConfigStrategy.class);
 
     @Override
     public void executeConfiguration(String module, String instance, Map<String, AttributeConfigElement> configuration,
@@ -29,7 +29,7 @@ public abstract class AbstractEditConfigStrategy implements EditConfigStrategy {
 
         try {
             ObjectName on = ta.lookupConfigBean(module, instance);
-            logger.debug("ServiceInstance for {} {} located successfully under {}", module, instance, on);
+            LOGGER.debug("ServiceInstance for {} {} located successfully under {}", module, instance, on);
             executeStrategy(configuration, ta, on, services);
         } catch (InstanceNotFoundException e) {
             handleMissingInstance(configuration, ta, module, instance, services);

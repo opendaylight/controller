@@ -17,14 +17,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ConfigPusherCustomizer implements ServiceTrackerCustomizer<ConfigPusher, ConfigPusher>, AutoCloseable {
-    private static final Logger logger = LoggerFactory.getLogger(ConfigPusherCustomizer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigPusherCustomizer.class);
     private ConfigFeaturesListener configFeaturesListener = null;
     private FeatureServiceCustomizer featureServiceCustomizer = null;
     private ServiceTracker<FeaturesService,FeaturesService> fsst = null;
 
     @Override
     public ConfigPusher addingService(ServiceReference<ConfigPusher> configPusherServiceReference) {
-        logger.trace("Got ConfigPusherCustomizer.addingService {}", configPusherServiceReference);
+        LOGGER.trace("Got ConfigPusherCustomizer.addingService {}", configPusherServiceReference);
         BundleContext bc = configPusherServiceReference.getBundle().getBundleContext();
         ConfigPusher cpService = bc.getService(configPusherServiceReference);
         featureServiceCustomizer = new FeatureServiceCustomizer(cpService);

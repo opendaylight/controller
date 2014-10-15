@@ -10,6 +10,9 @@ package org.opendaylight.controller.netconf.mapping.api;
 
 public interface NetconfOperationProvider {
 
+    private NetconfOperationProvider() {
+    }
+
     NetconfOperationServiceSnapshot openSnapshot(String sessionIdForReporting);
 
     public static class NetconfOperationProviderUtil {

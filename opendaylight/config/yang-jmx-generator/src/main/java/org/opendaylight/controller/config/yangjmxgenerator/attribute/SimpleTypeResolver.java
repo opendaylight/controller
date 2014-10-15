@@ -19,6 +19,9 @@ import java.util.Map;
 
 public class SimpleTypeResolver {
 
+    private SimpleTypeResolver() {
+    }
+
     public static SimpleType<?> getSimpleType(Type type) {
         SimpleType<?> expectedSimpleType = JAVA_TYPE_TO_SIMPLE_TYPE.get(type
                 .getFullyQualifiedName());

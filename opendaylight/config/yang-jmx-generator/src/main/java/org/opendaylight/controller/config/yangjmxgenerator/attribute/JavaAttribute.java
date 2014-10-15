@@ -96,24 +96,30 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
-        if (!super.equals(o))
+        }
+        if (!super.equals(o)) {
             return false;
+        }
 
         JavaAttribute that = (JavaAttribute) o;
 
         if (nullableDefault != null ? !nullableDefault
-                .equals(that.nullableDefault) : that.nullableDefault != null)
+                .equals(that.nullableDefault) : that.nullableDefault != null) {
             return false;
+        }
         if (nullableDescription != null ? !nullableDescription
                 .equals(that.nullableDescription)
-                : that.nullableDescription != null)
+                : that.nullableDescription != null) {
             return false;
-        if (type != null ? !type.equals(that.type) : that.type != null)
+        }
+        if (type != null ? !type.equals(that.type) : that.type != null) {
             return false;
+        }
 
         return true;
     }

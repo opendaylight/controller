@@ -29,7 +29,7 @@ import java.util.TreeSet;
  * Useful when persisting current configuration.
  */
 public class CapabilityStrippingConfigSnapshotHolder implements ConfigSnapshotHolder {
-    private static final Logger logger = LoggerFactory.getLogger(CapabilityStrippingConfigSnapshotHolder.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CapabilityStrippingConfigSnapshotHolder.class);
 
     private final String configSnapshot;
     private final StripCapabilitiesResult stripCapabilitiesResult;
@@ -54,7 +54,7 @@ public class CapabilityStrippingConfigSnapshotHolder implements ConfigSnapshotHo
     static StripCapabilitiesResult stripCapabilities(XmlElement configElement, Set<String> allCapabilitiesFromHello) {
         // collect all namespaces
         Set<String> foundNamespacesInXML = getNamespaces(configElement);
-        logger.trace("All capabilities {}\nFound namespaces in XML {}", allCapabilitiesFromHello, foundNamespacesInXML);
+        LOGGER.trace("All capabilities {}\nFound namespaces in XML {}", allCapabilitiesFromHello, foundNamespacesInXML);
         // required are referenced both in xml and hello
         SortedSet<String> requiredCapabilities = new TreeSet<>();
         // can be removed
@@ -68,7 +68,7 @@ public class CapabilityStrippingConfigSnapshotHolder implements ConfigSnapshotHo
             }
         }
 
-        logger.trace("Required capabilities {}, \nObsolete capabilities {}",
+        LOGGER.trace("Required capabilities {}, \nObsolete capabilities {}",
                 requiredCapabilities, obsoleteCapabilities);
 
         return new StripCapabilitiesResult(requiredCapabilities, obsoleteCapabilities);

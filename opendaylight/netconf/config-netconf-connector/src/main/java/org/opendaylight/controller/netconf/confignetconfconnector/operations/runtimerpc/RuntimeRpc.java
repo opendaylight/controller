@@ -46,7 +46,7 @@ import java.util.Map;
 
 public class RuntimeRpc extends AbstractConfigNetconfOperation {
 
-    private static final Logger logger = LoggerFactory.getLogger(Commit.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Commit.class);
     public static final String CONTEXT_INSTANCE = "context-instance";
 
     private final YangStoreSnapshot yangStoreSnapshot;
@@ -98,7 +98,7 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
         try {
             namespace = xml.getNamespace();
         } catch (MissingNameSpaceException e) {
-            logger.trace("Can't get namespace from xml element due to {}",e);
+            LOGGER.trace("Can't get namespace from xml element due to {}",e);
             throw NetconfDocumentedException.wrap(e);
         }
         final XmlElement contextInstanceElement = xml.getOnlyChildElement(CONTEXT_INSTANCE);
@@ -133,7 +133,7 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
         try {
             netconfOperationNamespace = operationElement.getNamespace();
         } catch (MissingNameSpaceException e) {
-            logger.debug("Cannot retrieve netconf operation namespace from message due to {}", e);
+            LOGGER.debug("Cannot retrieve netconf operation namespace from message due to {}", e);
             return HandlingPriority.CANNOT_HANDLE;
         }
 
@@ -159,7 +159,7 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
                     netconfOperationName);
 
         } catch (IllegalStateException e) {
-            logger.debug("Cannot handle runtime operation {}:{}", netconfOperationNamespace, netconfOperationName, e);
+            LOGGER.debug("Cannot handle runtime operation {}:{}", netconfOperationNamespace, netconfOperationName, e);
             return HandlingPriority.CANNOT_HANDLE;
         }
 
@@ -182,12 +182,12 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
         // TODO check for namespaces and unknown elements
         final NetconfOperationExecution execution = fromXml(xml);
 
-        logger.debug("Invoking operation {} on {} with arguments {}", execution.operationName, execution.on,
+        LOGGER.debug("Invoking operation {} on {} with arguments {}", execution.operationName, execution.on,
                 execution.attributes);
         final Object result = executeOperation(getConfigRegistryClient(), execution.on, execution.operationName,
                 execution.attributes);
 
-        logger.trace("Operation {} called successfully on {} with arguments {} with result {}", execution.operationName,
+        LOGGER.trace("Operation {} called successfully on {} with arguments {} with result {}", execution.operationName,
                 execution.on, execution.attributes, result);
 
         if (execution.isVoid()) {

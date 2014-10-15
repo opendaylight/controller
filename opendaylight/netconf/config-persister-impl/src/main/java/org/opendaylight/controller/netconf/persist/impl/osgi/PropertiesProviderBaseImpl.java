@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 public class PropertiesProviderBaseImpl implements PropertiesProvider {
 
-    private static final Logger logger = LoggerFactory.getLogger(PropertiesProviderBaseImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PropertiesProviderBaseImpl.class);
     private final BundleContext bundleContext;
 
     public PropertiesProviderBaseImpl(BundleContext bundleContext) {
@@ -28,7 +28,7 @@ public class PropertiesProviderBaseImpl implements PropertiesProvider {
     }
 
     public String getPropertyWithoutPrefix(String fullKey){
-        logger.trace("Full key {}", fullKey);
+        LOGGER.trace("Full key {}", fullKey);
         return bundleContext.getProperty(fullKey);
     }
 

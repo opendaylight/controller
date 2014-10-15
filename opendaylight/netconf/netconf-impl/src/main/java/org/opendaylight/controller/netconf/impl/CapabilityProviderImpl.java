@@ -29,14 +29,14 @@ public class CapabilityProviderImpl implements CapabilityProvider {
     private final NetconfOperationServiceSnapshot netconfOperationServiceSnapshot;
     private final Set<String> capabilityURIs;
 
-    private static final Logger logger = LoggerFactory.getLogger(DefaultCommitNotificationProducer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCommitNotificationProducer.class);
 
     public CapabilityProviderImpl(NetconfOperationServiceSnapshot netconfOperationServiceSnapshot) {
         this.netconfOperationServiceSnapshot = netconfOperationServiceSnapshot;
         Map<String, Capability> urisToCapabilitiesInternalMap = getCapabilitiesInternal(netconfOperationServiceSnapshot);
-        List<String> capabilityURIs = new ArrayList<>(urisToCapabilitiesInternalMap.keySet());
-        Collections.sort(capabilityURIs);
-        this.capabilityURIs = Collections.unmodifiableSet(new TreeSet<>(capabilityURIs));
+        List<String> uris = new ArrayList<>(urisToCapabilitiesInternalMap.keySet());
+        Collections.sort(uris);
+        this.capabilityURIs = Collections.unmodifiableSet(new TreeSet<>(uris));
     }
 
     private static Map<String, Capability> getCapabilitiesInternal(
@@ -49,7 +49,7 @@ public class CapabilityProviderImpl implements CapabilityProvider {
             for (Capability cap : caps) {
 
                 if(capabilityMap.containsKey(cap.getCapabilityUri())) {
-                    logger.debug("Duplicate capability {} from service {}", cap.getCapabilityUri(), netconfOperationService);
+                    LOGGER.debug("Duplicate capability {} from service {}", cap.getCapabilityUri(), netconfOperationService);
                 }
 
                 capabilityMap.put(cap.getCapabilityUri(), cap);

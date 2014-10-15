@@ -59,7 +59,7 @@ public class ConfigSnapshot {
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("ConfigSnapshot{");
+        final StringBuilder sb = new StringBuilder("ConfigSnapshot{");
         sb.append("configSnapshot='").append(configSnapshot).append('\'');
         sb.append(", capabilities=").append(capabilities);
         sb.append('}');

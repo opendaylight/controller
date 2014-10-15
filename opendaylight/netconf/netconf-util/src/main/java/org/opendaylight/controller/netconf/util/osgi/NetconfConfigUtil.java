@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class NetconfConfigUtil {
-    private static final Logger logger = LoggerFactory.getLogger(NetconfConfigUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NetconfConfigUtil.class);
 
     private static final String PREFIX_PROP = "netconf.";
 
@@ -33,10 +33,10 @@ public final class NetconfConfigUtil {
 
     private static final String CONNECTION_TIMEOUT_MILLIS_PROP = "connectionTimeoutMillis";
     private static final long DEFAULT_TIMEOUT_MILLIS = 5000;
-    private static final LocalAddress netconfLocalAddress = new LocalAddress("netconf");
+    private static final LocalAddress NETCONF_LOCAL_ADDRESS = new LocalAddress("netconf");
 
     public static LocalAddress getNetconfLocalAddress() {
-        return netconfLocalAddress;
+        return NETCONF_LOCAL_ADDRESS;
     }
 
     public static long extractTimeoutMillis(final BundleContext bundleContext) {
@@ -48,7 +48,7 @@ public final class NetconfConfigUtil {
         try {
             return Long.parseLong(timeoutString);
         } catch (final NumberFormatException e) {
-            logger.warn("Cannot parse {} property: {}, using defaults", key, timeoutString, e);
+            LOGGER.warn("Cannot parse {} property: {}, using defaults", key, timeoutString, e);
             return DEFAULT_TIMEOUT_MILLIS;
         }
     }
@@ -89,7 +89,7 @@ public final class NetconfConfigUtil {
             try {
                 return Optional.of(parseAddress(address, port));
             } catch (final RuntimeException e) {
-                logger.warn("Unable to parse {} netconf address from {}:{}, fallback to default",
+                LOGGER.warn("Unable to parse {} netconf address from {}:{}, fallback to default",
                         infixProp, address, port, e);
             }
         }

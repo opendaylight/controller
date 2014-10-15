@@ -17,6 +17,9 @@ import static org.opendaylight.yangtools.yang.common.SimpleDateFormatUtil.getRev
 
 public final class Util {
 
+    private Util() {
+    }
+
     public static String writeDate(final Date date) {
         return getRevisionFormat().format(date);
     }

@@ -47,7 +47,7 @@ import java.lang.reflect.Method;
  */
 @ThreadSafe
 public class DynamicWritableWrapper extends AbstractDynamicWrapper {
-    private static final Logger logger = LoggerFactory
+    private static final Logger LOGGER = LoggerFactory
             .getLogger(DynamicWritableWrapper.class);
 
     private final ReadOnlyAtomicBoolean configBeanModificationDisabled;
@@ -77,23 +77,24 @@ public class DynamicWritableWrapper extends AbstractDynamicWrapper {
     @Override
     public synchronized void setAttribute(Attribute attribute)
             throws AttributeNotFoundException, InvalidAttributeValueException, MBeanException, ReflectionException {
+        Attribute newAttribute = attribute;
         if (configBeanModificationDisabled.get() == true) {
             throw new IllegalStateException("Operation is not allowed now");
         }
 
-        if (attribute.getName().equals("Attribute")) {
-            setAttribute((Attribute) attribute.getValue());
+        if ("Attribute".equals(newAttribute.getName())) {
+            setAttribute((Attribute) newAttribute.getValue());
             return;
         }
 
         try {
-            if (attribute.getValue() instanceof ObjectName) {
-                attribute = fixDependencyAttribute(attribute);
-            } else if (attribute.getValue() instanceof ObjectName[]) {
-                attribute = fixDependencyListAttribute(attribute);
+            if (newAttribute.getValue() instanceof ObjectName) {
+                newAttribute = fixDependencyAttribute(newAttribute);
+            } else if (newAttribute.getValue() instanceof ObjectName[]) {
+                newAttribute = fixDependencyListAttribute(newAttribute);
             }
 
-            internalServer.setAttribute(objectNameInternal, attribute);
+            internalServer.setAttribute(objectNameInternal, newAttribute);
         } catch (InstanceNotFoundException e) {
             throw new MBeanException(e);
         }
@@ -101,21 +102,23 @@ public class DynamicWritableWrapper extends AbstractDynamicWrapper {
     }
 
     private Attribute fixDependencyListAttribute(Attribute attribute) {
-        AttributeHolder attributeHolder = attributeHolderMap.get(attribute.getName());
+        Attribute newAttribute = attribute;
+        AttributeHolder attributeHolder = attributeHolderMap.get(newAttribute.getName());
         if (attributeHolder.getRequireInterfaceOrNull() != null) {
-            attribute = new Attribute(attribute.getName(), fixObjectNames((ObjectName[]) attribute.getValue()));
+            newAttribute = new Attribute(newAttribute.getName(), fixObjectNames((ObjectName[]) newAttribute.getValue()));
         }
-        return attribute;
+        return newAttribute;
     }
 
     private Attribute fixDependencyAttribute(Attribute attribute) {
-        AttributeHolder attributeHolder = attributeHolderMap.get(attribute.getName());
+        Attribute newAttribute = attribute;
+        AttributeHolder attributeHolder = attributeHolderMap.get(newAttribute.getName());
         if (attributeHolder.getRequireInterfaceOrNull() != null) {
-            attribute = new Attribute(attribute.getName(), fixObjectName((ObjectName) attribute.getValue()));
+            newAttribute = new Attribute(newAttribute.getName(), fixObjectName((ObjectName) newAttribute.getValue()));
         } else {
-            attribute = new Attribute(attribute.getName(), attribute.getValue());
+            newAttribute = new Attribute(newAttribute.getName(), newAttribute.getValue());
         }
-        return attribute;
+        return newAttribute;
     }
 
     private ObjectName[] fixObjectNames(ObjectName[] dependencies) {
@@ -137,7 +140,7 @@ public class DynamicWritableWrapper extends AbstractDynamicWrapper {
                 setAttribute(attribute);
                 result.add(attribute);
             } catch (Exception e) {
-                logger.warn("Setting attribute {} failed on {}", attribute.getName(), moduleIdentifier, e);
+                LOGGER.warn("Setting attribute {} failed on {}", attribute.getName(), moduleIdentifier, e);
                 throw new IllegalArgumentException(
                         "Setting attribute failed - " + attribute.getName()
                                 + " on " + moduleIdentifier, e);

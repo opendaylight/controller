@@ -54,7 +54,7 @@ public class JMXGenerator implements CodeGenerator {
 
     private PackageTranslator packageTranslator;
     private final CodeWriter codeWriter;
-    private static final Logger logger = LoggerFactory
+    private static final Logger LOGGER = LoggerFactory
             .getLogger(JMXGenerator.class);
     private Map<String, String> namespaceToPackageMapping;
     private File resourceBaseDir;
@@ -83,8 +83,9 @@ public class JMXGenerator implements CodeGenerator {
 
         packageTranslator = new PackageTranslator(namespaceToPackageMapping);
 
-        if (!outputBaseDir.exists())
+        if (!outputBaseDir.exists()) {
             outputBaseDir.mkdirs();
+        }
 
         GeneratedFilesTracker generatedFiles = new GeneratedFilesTracker();
         // create SIE structure qNamesToSIEs
@@ -127,7 +128,7 @@ public class JMXGenerator implements CodeGenerator {
         Preconditions.checkNotNull(resourceBaseDir,
                 "resource base dir attribute was null");
 
-        StringBuffer fullyQualifiedNamesOfFactories = new StringBuffer();
+        StringBuilder fullyQualifiedNamesOfFactories = new StringBuilder();
         // create MBEs
         for (Module module : yangModulesInCurrentMavenModule) {
             String packageName = packageTranslator.getPackageName(module);
@@ -166,7 +167,7 @@ public class JMXGenerator implements CodeGenerator {
                         fullyQualifiedNamesOfFactories.toString());
             } catch (IOException e) {
                 String message = "Cannot write to " + serviceLoaderFile;
-                logger.error(message);
+                LOGGER.error(message);
                 throw new RuntimeException(message, e);
             }
         }
@@ -184,10 +185,11 @@ public class JMXGenerator implements CodeGenerator {
 
     @Override
     public void setAdditionalConfig(Map<String, String> additionalCfg) {
-        if (logger != null)
-            logger.debug(getClass().getCanonicalName(),
+        if (LOGGER != null) {
+            LOGGER.debug(getClass().getCanonicalName(),
                     ": Additional configuration received: ",
                     additionalCfg.toString());
+        }
         this.namespaceToPackageMapping = extractNamespaceMapping(additionalCfg);
         this.generateModuleFactoryFile = extractModuleFactoryBoolean(additionalCfg);
     }
@@ -195,10 +197,12 @@ public class JMXGenerator implements CodeGenerator {
     private boolean extractModuleFactoryBoolean(
             Map<String, String> additionalCfg) {
         String bool = additionalCfg.get(MODULE_FACTORY_FILE_BOOLEAN);
-        if (bool == null)
+        if (bool == null) {
             return true;
-        if (bool.equals("false"))
+        }
+        if ("false".equals(bool)) {
             return false;
+        }
         return true;
     }
 
@@ -250,8 +254,8 @@ public class JMXGenerator implements CodeGenerator {
     public void setMavenProject(MavenProject project) {
         this.projectBaseDir = project.getBasedir();
 
-        if (logger != null)
-            logger.debug(getClass().getCanonicalName(), " project base dir: ",
+        if (LOGGER != null)
+            LOGGER.debug(getClass().getCanonicalName(), " project base dir: ",
                     projectBaseDir);
     }
 
@@ -268,7 +272,7 @@ public class JMXGenerator implements CodeGenerator {
                     }
                 }
                 if (undeletedFiles.isEmpty() == false) {
-                    logger.error(
+                    LOGGER.error(
                             "Illegal state occurred: Unable to delete already generated files, undeleted files: {}",
                             undeletedFiles);
                 }

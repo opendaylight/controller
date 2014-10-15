@@ -19,7 +19,7 @@ public enum EditStrategyType {
     // additional per element
     delete, remove;
 
-    private static final Set<EditStrategyType> defaultStrats = EnumSet.of(merge, replace, none);
+    private static final Set<EditStrategyType> DEFAULT_STRATS = EnumSet.of(merge, replace, none);
 
     public static EditStrategyType getDefaultStrategy() {
         return merge;
@@ -36,24 +36,23 @@ public enum EditStrategyType {
             return true;
 
         default:
-            throw new IllegalStateException("Default edit strategy can be only of value " + defaultStrats + " but was "
+            throw new IllegalStateException("Default edit strategy can be only of value " + DEFAULT_STRATS + " but was "
                     + this);
         }
     }
     public static void compareParsedStrategyToDefaultEnforcing(EditStrategyType parsedStrategy,
                                                                   EditStrategyType defaultStrategy) throws OperationNotPermittedException {
-        if (defaultStrategy.isEnforcing()) {
-            if (parsedStrategy != defaultStrategy){
-                throw new OperationNotPermittedException(String.format("With "
-                        + defaultStrategy
-                        + " as "
-                        + EditConfigXmlParser.DEFAULT_OPERATION_KEY
-                        + " operations on module elements are not permitted since the default option is restrictive"),
-                        NetconfDocumentedException.ErrorType.application,
-                        NetconfDocumentedException.ErrorTag.operation_failed,
-                        NetconfDocumentedException.ErrorSeverity.error);
-            }
-        }
+        if (defaultStrategy.isEnforcing() &&
+            (parsedStrategy != defaultStrategy)) {
+            throw new OperationNotPermittedException(String.format("With "
+                    + defaultStrategy
+                    + " as "
+                    + EditConfigXmlParser.DEFAULT_OPERATION_KEY
+                    + " operations on module elements are not permitted since the default option is restrictive"),
+                    NetconfDocumentedException.ErrorType.application,
+                    NetconfDocumentedException.ErrorTag.operation_failed,
+                    NetconfDocumentedException.ErrorSeverity.error);
+    }
 
     }
     public EditConfigStrategy getFittingStrategy() {

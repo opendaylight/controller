@@ -35,7 +35,7 @@ public class SimpleNetconfClientSessionListener implements NetconfClientSessionL
         }
     }
 
-    private static final Logger logger = LoggerFactory.getLogger(SimpleNetconfClientSessionListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleNetconfClientSessionListener.class);
 
     @GuardedBy("this")
     private final Queue<RequestEntry> requests = new ArrayDeque<>();
@@ -48,12 +48,12 @@ public class SimpleNetconfClientSessionListener implements NetconfClientSessionL
         while (!requests.isEmpty()) {
             final RequestEntry e = requests.peek();
             if (e.promise.setUncancellable()) {
-                logger.debug("Sending message {}", e.request);
+                LOGGER.debug("Sending message {}", e.request);
                 clientSession.sendMessage(e.request);
                 break;
             }
 
-            logger.debug("Message {} has been cancelled, skipping it", e.request);
+            LOGGER.debug("Message {} has been cancelled, skipping it", e.request);
             requests.poll();
         }
     }
@@ -61,7 +61,7 @@ public class SimpleNetconfClientSessionListener implements NetconfClientSessionL
     @Override
     public final synchronized void onSessionUp(NetconfClientSession clientSession) {
         this.clientSession = Preconditions.checkNotNull(clientSession);
-        logger.debug("Client session {} went up", clientSession);
+        LOGGER.debug("Client session {} went up", clientSession);
         dispatchRequest();
     }
 
@@ -76,28 +76,28 @@ public class SimpleNetconfClientSessionListener implements NetconfClientSessionL
 
     @Override
     public final void onSessionDown(NetconfClientSession clientSession, Exception e) {
-        logger.debug("Client Session {} went down unexpectedly", clientSession, e);
+        LOGGER.debug("Client Session {} went down unexpectedly", clientSession, e);
         tearDown(e);
     }
 
     @Override
     public final void onSessionTerminated(NetconfClientSession clientSession,
             NetconfTerminationReason netconfTerminationReason) {
-        logger.debug("Client Session {} terminated, reason: {}", clientSession,
+        LOGGER.debug("Client Session {} terminated, reason: {}", clientSession,
                 netconfTerminationReason.getErrorMessage());
         tearDown(new RuntimeException(netconfTerminationReason.getErrorMessage()));
     }
 
     @Override
     public synchronized void onMessage(NetconfClientSession session, NetconfMessage message) {
-        logger.debug("New message arrived: {}", message);
+        LOGGER.debug("New message arrived: {}", message);
 
         final RequestEntry e = requests.poll();
         if (e != null) {
             e.promise.setSuccess(message);
             dispatchRequest();
         } else {
-            logger.info("Ignoring unsolicited message {}", message);
+            LOGGER.info("Ignoring unsolicited message {}", message);
         }
     }
 

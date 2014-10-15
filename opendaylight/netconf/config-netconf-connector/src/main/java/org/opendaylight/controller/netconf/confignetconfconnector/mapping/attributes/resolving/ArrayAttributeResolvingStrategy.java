@@ -25,7 +25,7 @@ final class ArrayAttributeResolvingStrategy extends AbstractAttributeResolvingSt
 
     private final AttributeResolvingStrategy<?, ? extends OpenType<?>> innerTypeResolvingStrategy;
 
-    private static final Logger logger = LoggerFactory.getLogger(ArrayAttributeResolvingStrategy.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArrayAttributeResolvingStrategy.class);
 
     public ArrayAttributeResolvingStrategy(AttributeResolvingStrategy<?, ? extends OpenType<?>> innerTypeResolved,
             ArrayType<?> openType) {
@@ -74,7 +74,7 @@ final class ArrayAttributeResolvingStrategy extends AbstractAttributeResolvingSt
             i++;
         }
 
-        logger.debug("Attribute {} : {} parsed to type {} as {}", attrName, value, getOpenType(),
+        LOGGER.debug("Attribute {} : {} parsed to type {} as {}", attrName, value, getOpenType(),
                 toStringArray(parsedArray));
 
         return Optional.of(parsedArray);

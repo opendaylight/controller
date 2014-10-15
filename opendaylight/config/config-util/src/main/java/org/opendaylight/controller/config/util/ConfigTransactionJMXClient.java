@@ -45,12 +45,13 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
     }
 
     public <T> T newMXBeanProxy(ObjectName on, Class<T> clazz) {
+        ObjectName onName = on;
         // if on is without transaction, add it. Reason is that when using getters on MXBeans the transaction name is stripped
-        on = ObjectNameUtil.withTransactionName(on, getTransactionName());
+        onName = ObjectNameUtil.withTransactionName(onName, getTransactionName());
         // if this is service reference and user requests for implementation, look it up
-        on = ConfigRegistryJMXClient.translateServiceRefIfPossible(on, clazz, configMBeanServer);
-        on = ObjectNameUtil.withTransactionName(on, getTransactionName());
-        return JMX.newMXBeanProxy(configMBeanServer, on, clazz);
+        onName = ConfigRegistryJMXClient.translateServiceRefIfPossible(onName, clazz, configMBeanServer);
+        onName = ObjectNameUtil.withTransactionName(onName, getTransactionName());
+        return JMX.newMXBeanProxy(configMBeanServer, onName, clazz);
     }
 
     /**
@@ -260,9 +261,10 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
 
     @Override
     public void setAttribute(ObjectName on, String attrName, Attribute attribute) {
-        if (ObjectNameUtil.getTransactionName(on) == null)
+        if (ObjectNameUtil.getTransactionName(on) == null) {
             throw new IllegalArgumentException("Not in transaction instance "
                     + on + ", no transaction name present");
+        }
 
         try {
             configMBeanServer.setAttribute(on, attribute);
@@ -274,9 +276,10 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
 
     @Override
     public Attribute getAttribute(ObjectName on, String attrName) {
-        if (ObjectNameUtil.getTransactionName(on) == null)
+        if (ObjectNameUtil.getTransactionName(on) == null) {
             throw new IllegalArgumentException("Not in transaction instance "
                     + on + ", no transaction name present");
+        }
 
         try {
             return new Attribute(attrName, configMBeanServer.getAttribute(on,attrName));

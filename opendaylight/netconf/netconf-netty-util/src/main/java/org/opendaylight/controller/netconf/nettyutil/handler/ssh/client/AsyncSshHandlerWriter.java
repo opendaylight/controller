@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  */
 final class AsyncSshHandlerWriter implements AutoCloseable {
 
-    private static final Logger logger = LoggerFactory
+    private static final Logger LOGGER = LoggerFactory
             .getLogger(AsyncSshHandlerWriter.class);
 
     // public static final int MAX_PENDING_WRITES = 1000;
@@ -68,15 +68,15 @@ final class AsyncSshHandlerWriter implements AutoCloseable {
 
     private void writeWithPendingDetection(final ChannelHandlerContext ctx, final ChannelPromise promise, final ByteBuf byteBufMsg) {
         try {
-            if (logger.isTraceEnabled()) {
-                logger.trace("Writing request on channel: {}, message: {}", ctx.channel(), byteBufToString(byteBufMsg));
+            if (LOGGER.isTraceEnabled()) {
+                LOGGER.trace("Writing request on channel: {}, message: {}", ctx.channel(), byteBufToString(byteBufMsg));
             }
             asyncIn.write(toBuffer(byteBufMsg)).addListener(new SshFutureListener<IoWriteFuture>() {
 
                         @Override
                         public void operationComplete(final IoWriteFuture future) {
-                            if (logger.isTraceEnabled()) {
-                                logger.trace("Ssh write request finished on channel: {} with result: {}: and ex:{}, message: {}",
+                            if (LOGGER.isTraceEnabled()) {
+                                LOGGER.trace("Ssh write request finished on channel: {} with result: {}: and ex:{}, message: {}",
                                         ctx.channel(), future.isWritten(), future.getException(), byteBufToString(byteBufMsg));
                             }
 
@@ -84,7 +84,7 @@ final class AsyncSshHandlerWriter implements AutoCloseable {
                             if (future.isWritten()) {
                                 promise.setSuccess();
                             } else {
-                                logger.warn("Ssh write request failed on channel: {} for message: {}", ctx.channel(), byteBufToString(byteBufMsg), future.getException());
+                                LOGGER.warn("Ssh write request failed on channel: {} for message: {}", ctx.channel(), byteBufToString(byteBufMsg), future.getException());
                                 promise.setFailure(future.getException());
                             }
 
@@ -109,8 +109,8 @@ final class AsyncSshHandlerWriter implements AutoCloseable {
         // In case of pending, reschedule next message from queue
         final PendingWriteRequest pendingWrite = pending.poll();
         final ByteBuf msg = pendingWrite.msg;
-        if (logger.isTraceEnabled()) {
-            logger.trace("Writing pending request on channel: {}, message: {}", pendingWrite.ctx.channel(), byteBufToString(msg));
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Writing pending request on channel: {}, message: {}", pendingWrite.ctx.channel(), byteBufToString(msg));
         }
 
         writeWithPendingDetection(pendingWrite.ctx, pendingWrite.promise, msg);
@@ -125,13 +125,13 @@ final class AsyncSshHandlerWriter implements AutoCloseable {
 
     private void queueRequest(final ChannelHandlerContext ctx, final ByteBuf msg, final ChannelPromise promise) {
 //        try {
-        logger.debug("Write pending on channel: {}, queueing, current queue size: {}", ctx.channel(), pending.size());
-        if (logger.isTraceEnabled()) {
-            logger.trace("Queueing request due to pending: {}", byteBufToString(msg));
+        LOGGER.debug("Write pending on channel: {}, queueing, current queue size: {}", ctx.channel(), pending.size());
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Queueing request due to pending: {}", byteBufToString(msg));
         }
         new PendingWriteRequest(ctx, msg, promise).pend(pending);
 //        } catch (final Exception ex) {
-//            logger.warn("Unable to queue write request on channel: {}. Setting fail for the request: {}", ctx.channel(), ex, byteBufToString(msg));
+//            LOGGER.warn("Unable to queue write request on channel: {}. Setting fail for the request: {}", ctx.channel(), ex, byteBufToString(msg));
 //            msg.release();
 //            promise.setFailure(ex);
 //        }

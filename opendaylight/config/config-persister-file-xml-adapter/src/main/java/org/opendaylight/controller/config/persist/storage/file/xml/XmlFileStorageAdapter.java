@@ -31,7 +31,7 @@ import java.util.SortedSet;
  * StorageAdapter that stores configuration in an xml file.
  */
 public class XmlFileStorageAdapter implements StorageAdapter, Persister {
-    private static final Logger logger = LoggerFactory.getLogger(XmlFileStorageAdapter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(XmlFileStorageAdapter.class);
 
     public static final String FILE_STORAGE_PROP = "fileStorage";
     public static final String NUMBER_OF_BACKUPS = "numberOfBackups";
@@ -42,15 +42,15 @@ public class XmlFileStorageAdapter implements StorageAdapter, Persister {
     @Override
     public Persister instantiate(PropertiesProvider propertiesProvider) {
         File storage = extractStorageFileFromProperties(propertiesProvider);
-        logger.debug("Using file {}", storage.getAbsolutePath());
+        LOGGER.debug("Using file {}", storage.getAbsolutePath());
         // Create file if it does not exist
         File parentFile = storage.getAbsoluteFile().getParentFile();
         if (parentFile.exists() == false) {
-            logger.debug("Creating parent folders {}", parentFile);
+            LOGGER.debug("Creating parent folders {}", parentFile);
             parentFile.mkdirs();
         }
         if (storage.exists() == false) {
-            logger.debug("Storage file does not exist, creating empty file");
+            LOGGER.debug("Storage file does not exist, creating empty file");
             try {
                 boolean result = storage.createNewFile();
                 if (result == false)
@@ -87,7 +87,7 @@ public class XmlFileStorageAdapter implements StorageAdapter, Persister {
         } else {
             numberOfStoredBackups = Integer.MAX_VALUE;
         }
-        logger.trace("Property {} set to {}", NUMBER_OF_BACKUPS, numberOfStoredBackups);
+        LOGGER.trace("Property {} set to {}", NUMBER_OF_BACKUPS, numberOfStoredBackups);
         return result;
     }
 
@@ -110,10 +110,11 @@ public class XmlFileStorageAdapter implements StorageAdapter, Persister {
 
         Optional<ConfigSnapshot> lastSnapshot = Config.fromXml(storage).getLastSnapshot();
 
-        if (lastSnapshot.isPresent())
+        if (lastSnapshot.isPresent()) {
             return Lists.newArrayList(toConfigSnapshot(lastSnapshot.get()));
-        else
+        } else {
             return Collections.emptyList();
+        }
     }
 
 

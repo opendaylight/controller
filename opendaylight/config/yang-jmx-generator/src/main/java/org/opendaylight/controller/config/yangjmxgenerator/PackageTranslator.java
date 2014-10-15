@@ -58,19 +58,20 @@ public class PackageTranslator {
 
     // TODO add to PackageTranslator
     private static String sanitizePackage(String namespace) {
-        namespace = namespace.replace("://", ".");
-        namespace = namespace.replace("/", ".");
-        namespace = namespace.replace(":", ".");
-        namespace = namespace.replace("-", "_");
-        namespace = namespace.replace("@", ".");
-        namespace = namespace.replace("$", ".");
-        namespace = namespace.replace("#", ".");
-        namespace = namespace.replace("'", ".");
-        namespace = namespace.replace("*", ".");
-        namespace = namespace.replace("+", ".");
-        namespace = namespace.replace(",", ".");
-        namespace = namespace.replace(";", ".");
-        namespace = namespace.replace("=", ".");
-        return namespace;
+        String newNamespace = namespace;
+        newNamespace = newNamespace.replace("://", ".");
+        newNamespace = newNamespace.replace("/", ".");
+        newNamespace = newNamespace.replace(":", ".");
+        newNamespace = newNamespace.replace("-", "_");
+        newNamespace = newNamespace.replace("@", ".");
+        newNamespace = newNamespace.replace("$", ".");
+        newNamespace = newNamespace.replace("#", ".");
+        newNamespace = newNamespace.replace("'", ".");
+        newNamespace = newNamespace.replace("*", ".");
+        newNamespace = newNamespace.replace("+", ".");
+        newNamespace = newNamespace.replace(",", ".");
+        newNamespace = newNamespace.replace(";", ".");
+        newNamespace = newNamespace.replace("=", ".");
+        return newNamespace;
     }
 }

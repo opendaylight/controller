@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 
 public class NetconfClientSession extends AbstractNetconfSession<NetconfClientSession, NetconfClientSessionListener> {
 
-    private static final Logger logger = LoggerFactory.getLogger(NetconfClientSession.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NetconfClientSession.class);
     private final Collection<String> capabilities;
 
     /**
@@ -38,7 +38,7 @@ public class NetconfClientSession extends AbstractNetconfSession<NetconfClientSe
             final Collection<String> capabilities) {
         super(sessionListener, channel, sessionId);
         this.capabilities = capabilities;
-        logger.debug("Client Session {} created", toString());
+        LOGGER.debug("Client Session {} created", toString());
     }
 
     public Collection<String> getServerCapabilities() {

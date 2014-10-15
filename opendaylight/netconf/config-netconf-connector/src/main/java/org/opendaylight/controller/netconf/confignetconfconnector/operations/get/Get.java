@@ -42,7 +42,7 @@ import org.w3c.dom.Element;
 public class Get extends AbstractConfigNetconfOperation {
 
     private final YangStoreSnapshot yangStoreSnapshot;
-    private static final Logger logger = LoggerFactory.getLogger(Get.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Get.class);
 
     public Get(YangStoreSnapshot yangStoreSnapshot, ConfigRegistryClient configRegistryClient,
                String netconfSessionIdForReporting) {
@@ -133,7 +133,7 @@ public class Get extends AbstractConfigNetconfOperation {
 
         final Element element = runtime.toXml(runtimeBeans, configBeans, document);
 
-        logger.trace("{} operation successful", XmlNetconfConstants.GET);
+        LOGGER.trace("{} operation successful", XmlNetconfConstants.GET);
 
         return element;
     }
