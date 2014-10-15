@@ -69,6 +69,24 @@
       "revId": "c3b3cefd5ab3c0b576ae0122e093b5b66f7eef80",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_2f58b5f9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 405,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-15T17:40:32Z",
+      "side": 1,
+      "message": "I guess I don\u0027t follow. If the local shard replica is the leader then the Tx actor will be local so we don\u0027t have to serialize data (i.e. bypass ProtoBuf). But if the local shard replica is not the leader, the Tx actor will actually be remote. In that case, don\u0027t we need serialize as it will go over the wire? So if isLocalShard is true, can\u0027t the returned Tx actor still be remote (if the local shard isn\u0027t the leader) and, if so, wouldn\u0027t bypassing ProtoBuf cause an issue?",
+      "parentUuid": "ba8cc1f7_2f41950b",
+      "revId": "c3b3cefd5ab3c0b576ae0122e093b5b66f7eef80",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
