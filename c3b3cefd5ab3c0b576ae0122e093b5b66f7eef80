@@ -104,6 +104,24 @@
       "revId": "c3b3cefd5ab3c0b576ae0122e093b5b66f7eef80",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_cf4a69ac",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 405,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-10-15T23:57:01Z",
+      "side": 1,
+      "message": "Hi Tom,\nThis is my understanding, hoping i am not wrong.\n\nEven if the local shard replica is not the leader, the Tx actor gets created where the local replica is. The Tx actor makes a write to the local shard replica (which is a Raft Actor). Since the local shard actor not the leader, it will send it to the leader (which is remote). \n\nActorContext#findPrimary returns a local shard (if there is one, leader or not) and the excuteRemoteOperation executes the CreateTransaction message on this shard, which in turns creates a ShardTransaction Actor\n\nSo, it seems, currently the TxActor may or may not be co-located with the leader.\nBug-2194 which has been opened targets this.",
+      "parentUuid": "ba8cc1f7_2f58b5f9",
+      "revId": "c3b3cefd5ab3c0b576ae0122e093b5b66f7eef80",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
