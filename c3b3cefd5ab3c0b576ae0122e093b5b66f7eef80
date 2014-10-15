@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_4f465925",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardReadWriteTransaction.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-10-15T17:08:08Z",
+      "side": 1,
+      "message": "Right, will get it done",
+      "parentUuid": "ba8cc1f7_343b28ed",
+      "revId": "c3b3cefd5ab3c0b576ae0122e093b5b66f7eef80",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_7431b00a",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2014-10-15T13:09:16Z",
       "side": 1,
       "message": "The call to executeShardOperation above calls FindPrimaryShard on the ShardManager. If there is a local shard, it returns that actor path. However the local shard may not be the leader. In that case, the CreateTransaction message is forwarded to the leader by the local shard. The call to findLocalShard just verifies that there is a local shard, not that it is the leader. So it seems the transactionActor may be remote regardless of whether or not there is a local shard as the local shard may not be the leader. \n\nIt seems we need a way to tell if the transactionActor is local or not. I\u0027m not sure if akka provides such functionality.\n\nUnless I\u0027m wrong and missing something here...",
+      "revId": "c3b3cefd5ab3c0b576ae0122e093b5b66f7eef80",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_2f41950b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 405,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-10-15T17:08:08Z",
+      "side": 1,
+      "message": "You are right. The FindPrimary does not actually return the primary/leader of the shard, it just returns a replica of the shard,which may or may not be the leader. If its not the leader, then the replica would forward the message to the leader and that would be a ProtoBuf message (raft component). \n\nThis change ensures that if a local replica of the shard exists (leader or not) , then we need not use ProtoBuf.\n\nI was planning to open a seprarate defect for fixing the FindPrimary, which might be more significant when we move to granular sharding.",
+      "parentUuid": "ba8cc1f7_7431b00a",
       "revId": "c3b3cefd5ab3c0b576ae0122e093b5b66f7eef80",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
