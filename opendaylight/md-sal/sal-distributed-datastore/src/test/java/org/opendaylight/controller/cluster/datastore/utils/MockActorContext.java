@@ -12,6 +12,7 @@ import static org.junit.Assert.assertNotNull;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
+import com.google.common.base.Optional;
 
 public class MockActorContext extends ActorContext {
 
@@ -30,19 +31,13 @@ public class MockActorContext extends ActorContext {
         super(actorSystem, shardManager, new MockClusterWrapper(), new MockConfiguration());
     }
 
-
-    @Override public Object executeShardOperation(String shardName,
-        Object message) {
-        return executeShardOperationResponse;
-    }
-
-    @Override public Object executeRemoteOperation(ActorSelection actor,
-        Object message) {
+    @Override public Object executeOperation(ActorSelection actor,
+                                             Object message) {
         return executeRemoteOperationResponse;
     }
 
-    @Override public ActorSelection findPrimary(String shardName) {
-        return null;
+    @Override public Optional<ActorSelection> findPrimaryShard(String shardName) {
+        return Optional.absent();
     }
 
     public void setExecuteShardOperationResponse(Object response){
@@ -74,14 +69,9 @@ public class MockActorContext extends ActorContext {
     }
 
     @Override
-    public Object executeLocalOperation(ActorRef actor,
-        Object message) {
+    public Object executeOperation(ActorRef actor,
+                                   Object message) {
         return this.executeLocalOperationResponse;
     }
 
-    @Override
-    public Object executeLocalShardOperation(String shardName,
-        Object message) {
-        return this.executeLocalShardOperationResponse;
-    }
 }

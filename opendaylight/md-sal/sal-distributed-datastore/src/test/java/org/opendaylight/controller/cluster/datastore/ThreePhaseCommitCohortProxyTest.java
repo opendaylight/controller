@@ -91,12 +91,12 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
                     .successful(((SerializableMessage) responses[i]).toSerializable()));
         }
 
-        stubber.when(actorContext).executeRemoteOperationAsync(any(ActorSelection.class),
+        stubber.when(actorContext).executeOperationAsync(any(ActorSelection.class),
                 isA(requestType));
     }
 
     private void verifyCohortInvocations(int nCohorts, Class<?> requestType) {
-        verify(actorContext, times(nCohorts)).executeRemoteOperationAsync(
+        verify(actorContext, times(nCohorts)).executeOperationAsync(
                 any(ActorSelection.class), isA(requestType));
     }
 
