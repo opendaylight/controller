@@ -140,6 +140,24 @@
       "revId": "c3b3cefd5ab3c0b576ae0122e093b5b66f7eef80",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_9a1d7d76",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 405,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-16T17:17:06Z",
+      "side": 1,
+      "message": "Kamal, Tom is right here. A shard may be local but it\u0027s leader may be remote and the transaction is always created on the leader. A more reliable way of knowing if a transaction is local/remote is by looking at the address/actor path of the transaction.",
+      "parentUuid": "ba8cc1f7_6feebd8d",
+      "revId": "c3b3cefd5ab3c0b576ae0122e093b5b66f7eef80",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
