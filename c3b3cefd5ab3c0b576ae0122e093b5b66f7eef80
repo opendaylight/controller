@@ -122,6 +122,24 @@
       "revId": "c3b3cefd5ab3c0b576ae0122e093b5b66f7eef80",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_6feebd8d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 405,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-16T00:16:57Z",
+      "side": 1,
+      "message": "Kamal - in looking at the Shard code, on receipt of a CreateTransaction message, it checks if it is the leader. If yes then it creates a local Tx actor and replies to the caller. If not, it forwards the CreateTransaction message to the leader. So the Tx actor is always created on the leader shard.\n\nSo the mere presence of a local shard does not mean that the returned Tx actor is local.",
+      "parentUuid": "ba8cc1f7_cf4a69ac",
+      "revId": "c3b3cefd5ab3c0b576ae0122e093b5b66f7eef80",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
