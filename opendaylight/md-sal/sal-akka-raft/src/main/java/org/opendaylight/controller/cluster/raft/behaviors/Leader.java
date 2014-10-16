@@ -73,7 +73,6 @@ public class Leader extends AbstractRaftActorBehavior {
     private final Set<String> followers;
 
     private Cancellable heartbeatSchedule = null;
-    private Cancellable appendEntriesSchedule = null;
     private Cancellable installSnapshotSchedule = null;
 
     private List<ClientRequestTracker> trackerList = new ArrayList<>();

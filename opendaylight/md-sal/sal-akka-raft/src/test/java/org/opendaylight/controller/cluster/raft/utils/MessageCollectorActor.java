@@ -12,6 +12,7 @@ import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
+import com.google.common.collect.Lists;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
@@ -63,6 +64,20 @@ public class MessageCollectorActor extends UntypedActor {
         }
 
         return null;
+    }
+
+    public static List<Object> getAllMatching(ActorRef actor, Class clazz) throws Exception {
+        List<Object> allMessages = getAllMessages(actor);
+
+        List<Object> output = Lists.newArrayList();
+
+        for(Object message : allMessages){
+            if(message.getClass().equals(clazz)){
+                output.add(message);
+            }
+        }
+
+        return output;
     }
 
 }
