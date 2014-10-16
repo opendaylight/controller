@@ -138,8 +138,6 @@ public final class Main {
     }
 
     public static void main(final String[] args) {
-        ch.ethz.ssh2.log.Logger.enabled = true;
-
         final Params params = parseArgs(args, Params.getParser());
         params.validate();
 
