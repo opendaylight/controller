@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_3a6d5105",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-16T16:19:28Z",
+      "side": 1,
+      "message": "This does not quite make sense to me. If the sender is no sender then is that equal to deadLetters?",
+      "revId": "262f879c4120ca17927ac3c412cc6ed9fb4afaee",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_1a740dce",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DataChangeListenerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-16T16:19:28Z",
+      "side": 1,
+      "message": "We should add a test for the noSender case as well.",
+      "revId": "262f879c4120ca17927ac3c412cc6ed9fb4afaee",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
