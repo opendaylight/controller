@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_d5ed16f1",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/test/java/org/opendaylight/controller/protobuff/messages/transaction/ShardTransactionChainMessagesTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-16T22:02:32Z",
+      "side": 1,
+      "message": "Yeah - the Tx chain messages being tested/verified here are no longer used. They were previously removed from the proto file but not the ShardTransactionChainMessages class. I cleaned it up.",
+      "parentUuid": "ba8cc1f7_69d31d39",
+      "revId": "2e8743a238db914f46afdfb907707854ef31085d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_b5e65243",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
         "patchSetId": 7
@@ -30,6 +48,24 @@
       "writtenOn": "2014-10-16T21:49:57Z",
       "side": 1,
       "message": "We probably should delay scheduling till recovery is completed.",
+      "revId": "2e8743a238db914f46afdfb907707854ef31085d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_75ba0ae3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-16T22:02:32Z",
+      "side": 1,
+      "message": "Yeah - good point",
+      "parentUuid": "ba8cc1f7_b5e65243",
       "revId": "2e8743a238db914f46afdfb907707854ef31085d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_95bf8ed0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 375,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-16T22:02:32Z",
+      "side": 1,
+      "message": "yup",
+      "parentUuid": "ba8cc1f7_d5ff56a9",
+      "revId": "2e8743a238db914f46afdfb907707854ef31085d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_552b4630",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
         "patchSetId": 7
@@ -64,6 +118,24 @@
       "writtenOn": "2014-10-16T21:49:57Z",
       "side": 1,
       "message": "The path return by self().path() is a local path. Please make sure that you pass Serialization.serializedActorPath(self())).toSerializable() to ReadyTransactionReply",
+      "revId": "2e8743a238db914f46afdfb907707854ef31085d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_35b482f1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-16T22:02:32Z",
+      "side": 1,
+      "message": "Yeah I made that change in the next patch set when I rebased on Kamal\u0027s recent changes.",
+      "parentUuid": "ba8cc1f7_552b4630",
       "revId": "2e8743a238db914f46afdfb907707854ef31085d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
