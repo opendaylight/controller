@@ -231,7 +231,7 @@ public class BrokerFacade {
     private CheckedFuture<Void, TransactionCommitFailedException> deleteDataViaTransaction(
             final DOMDataWriteTransaction writeTransaction, final LogicalDatastoreType datastore,
             YangInstanceIdentifier path) {
-        LOG.info("Delete " + datastore.name() + " via Restconf: {}", path);
+        LOG.trace("Delete " + datastore.name() + " via Restconf: {}", path);
         writeTransaction.delete(datastore, path);
         return writeTransaction.submit();
     }
