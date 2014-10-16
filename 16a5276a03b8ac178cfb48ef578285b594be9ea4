@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_1a22cdb9",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/src/main/java/org/opendaylight/controller/md/sal/dom/xsql/XSQLAdapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-16T17:08:53Z",
+      "side": 1,
+      "message": "The code to get the printstream should be move to a method instead of having the same thing copied to the two log methods.",
+      "revId": "16a5276a03b8ac178cfb48ef578285b594be9ea4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
