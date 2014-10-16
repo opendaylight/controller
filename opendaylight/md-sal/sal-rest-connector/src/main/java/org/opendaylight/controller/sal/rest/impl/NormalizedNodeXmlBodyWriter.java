@@ -16,7 +16,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 import javax.xml.stream.FactoryConfigurationError;
@@ -28,6 +27,8 @@ import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
 import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
@@ -72,7 +73,9 @@ public class NormalizedNodeXmlBodyWriter implements MessageBodyWriter<Normalized
             WebApplicationException {
         InstanceIdentifierContext pathContext = t.getInstanceIdentifierContext();
         if (t.getData() == null) {
-            throw new RestconfDocumentedException(Response.Status.NOT_FOUND);
+            throw new RestconfDocumentedException(
+                    "Request could not be completed because the relevant data model content does not exist.",
+                    ErrorType.APPLICATION, ErrorTag.DATA_MISSING);
         }
 
         XMLStreamWriter xmlWriter;
