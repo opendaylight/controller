@@ -106,7 +106,6 @@
     <forwarding.staticrouting.northbound.version>0.5.0-SNAPSHOT</forwarding.staticrouting.northbound.version>
     <forwardingrulesmanager.implementation.version>0.5.0-SNAPSHOT</forwardingrulesmanager.implementation.version>
     <forwardingrulesmanager.version>0.7.0-SNAPSHOT</forwardingrulesmanager.version>
-    <ganymed.version>1.2.0-SNAPSHOT</ganymed.version>
     <hosttracker.api.version>0.6.0-SNAPSHOT</hosttracker.api.version>
     <hosttracker.implementation.version>0.6.0-SNAPSHOT</hosttracker.implementation.version>
     <hosttracker.northbound.version>0.5.0-SNAPSHOT</hosttracker.northbound.version>
@@ -180,7 +179,7 @@
     <sonar.language>java</sonar.language>
     <sonar.jacoco.reportPath>target/code-coverage/jacoco.exec</sonar.jacoco.reportPath>
     <sonar.jacoco.itReportPath>target/code-coverage/jacoco-it.exec</sonar.jacoco.itReportPath>
-    <sonar.skippedModules>org.openflow.openflowj,net.sf.jung2,org.opendaylight.controller.protobuff.messages,ch.ethz.ssh2</sonar.skippedModules>
+    <sonar.skippedModules>org.openflow.openflowj,net.sf.jung2,org.opendaylight.controller.protobuff.messages</sonar.skippedModules>
     <sonar.profile>Sonar way with Findbugs</sonar.profile>
     <spifly.version>1.0.0</spifly.version>
     <spring-osgi.version>1.2.1</spring-osgi.version>
@@ -1690,11 +1689,6 @@
         <groupId>org.opendaylight.controller.thirdparty</groupId>
         <artifactId>com.sun.jersey.jersey-servlet</artifactId>
         <version>${jersey-servlet.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller.thirdparty</groupId>
-        <artifactId>ganymed</artifactId>
-        <version>${ganymed.version}</version>
       </dependency>
       <!-- Third parties from opendaylight released -->
       <dependency>
