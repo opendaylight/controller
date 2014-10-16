@@ -12,8 +12,10 @@ import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformationImpl;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
+import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogImplEntry;
 import org.opendaylight.controller.cluster.raft.SerializationUtils;
+import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
@@ -22,6 +24,7 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
+import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
@@ -31,6 +34,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -671,6 +675,145 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
             assertEquals(1, appendEntriesReply.getLogLastTerm());
 
         }};
+    }
+
+    @Test
+    public void testHandleAppendEntriesReplyFailure(){
+        new JavaTestKit(getSystem()) {
+            {
+
+                ActorRef leaderActor =
+                    getSystem().actorOf(Props.create(MessageCollectorActor.class));
+
+                ActorRef followerActor =
+                    getSystem().actorOf(Props.create(MessageCollectorActor.class));
+
+
+                MockRaftActorContext leaderActorContext =
+                    new MockRaftActorContext("leader", getSystem(), leaderActor);
+
+                Map<String, String> peerAddresses = new HashMap();
+                peerAddresses.put("follower-1",
+                    followerActor.path().toString());
+
+                leaderActorContext.setPeerAddresses(peerAddresses);
+
+                Leader leader = new Leader(leaderActorContext);
+
+                AppendEntriesReply reply = new AppendEntriesReply("follower-1", 1, false, 10, 1);
+
+                RaftActorBehavior raftActorBehavior = leader.handleAppendEntriesReply(followerActor, reply);
+
+                assertEquals(RaftState.Leader, raftActorBehavior.state());
+
+            }};
+    }
+
+    @Test
+    public void testHandleAppendEntriesReplySuccess() throws Exception {
+        new JavaTestKit(getSystem()) {
+            {
+
+                ActorRef leaderActor =
+                    getSystem().actorOf(Props.create(MessageCollectorActor.class));
+
+                ActorRef followerActor =
+                    getSystem().actorOf(Props.create(MessageCollectorActor.class));
+
+
+                MockRaftActorContext leaderActorContext =
+                    new MockRaftActorContext("leader", getSystem(), leaderActor);
+
+                leaderActorContext.setReplicatedLog(
+                    new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 3, 1).build());
+
+                Map<String, String> peerAddresses = new HashMap();
+                peerAddresses.put("follower-1",
+                    followerActor.path().toString());
+
+                leaderActorContext.setPeerAddresses(peerAddresses);
+                leaderActorContext.setCommitIndex(1);
+                leaderActorContext.setLastApplied(1);
+                leaderActorContext.getTermInformation().update(1, "leader");
+
+                Leader leader = new Leader(leaderActorContext);
+
+                AppendEntriesReply reply = new AppendEntriesReply("follower-1", 1, true, 2, 1);
+
+                RaftActorBehavior raftActorBehavior = leader.handleAppendEntriesReply(followerActor, reply);
+
+                assertEquals(RaftState.Leader, raftActorBehavior.state());
+
+                assertEquals(2, leaderActorContext.getCommitIndex());
+
+                ApplyLogEntries applyLogEntries =
+                    (ApplyLogEntries) MessageCollectorActor.getFirstMatching(leaderActor,
+                        ApplyLogEntries.class);
+
+                assertNotNull(applyLogEntries);
+
+                assertEquals(2, leaderActorContext.getLastApplied());
+
+                assertEquals(2, applyLogEntries.getToIndex());
+
+                List<Object> applyStateList = MessageCollectorActor.getAllMatching(leaderActor,
+                    ApplyState.class);
+
+                assertEquals(1,applyStateList.size());
+
+                ApplyState applyState = (ApplyState) applyStateList.get(0);
+
+                assertEquals(2, applyState.getReplicatedLogEntry().getIndex());
+
+            }};
+    }
+
+    @Test
+    public void testHandleAppendEntriesReplyUnknownFollower(){
+        new JavaTestKit(getSystem()) {
+            {
+
+                ActorRef leaderActor =
+                    getSystem().actorOf(Props.create(MessageCollectorActor.class));
+
+                MockRaftActorContext leaderActorContext =
+                    new MockRaftActorContext("leader", getSystem(), leaderActor);
+
+                Leader leader = new Leader(leaderActorContext);
+
+                AppendEntriesReply reply = new AppendEntriesReply("follower-1", 1, false, 10, 1);
+
+                RaftActorBehavior raftActorBehavior = leader.handleAppendEntriesReply(getRef(), reply);
+
+                assertEquals(RaftState.Leader, raftActorBehavior.state());
+
+            }};
+    }
+
+    @Test
+    public void testHandleRequestVoteReply(){
+        new JavaTestKit(getSystem()) {
+            {
+
+                ActorRef leaderActor =
+                    getSystem().actorOf(Props.create(MessageCollectorActor.class));
+
+                MockRaftActorContext leaderActorContext =
+                    new MockRaftActorContext("leader", getSystem(), leaderActor);
+
+                Leader leader = new Leader(leaderActorContext);
+
+                RaftActorBehavior raftActorBehavior = leader.handleRequestVoteReply(getRef(), new RequestVoteReply(1, true));
+
+                assertEquals(RaftState.Leader, raftActorBehavior.state());
+
+                raftActorBehavior = leader.handleRequestVoteReply(getRef(), new RequestVoteReply(1, false));
+
+                assertEquals(RaftState.Leader, raftActorBehavior.state());
+
+
+            }};
+
     }
 
     private static class LeaderTestKit extends JavaTestKit {

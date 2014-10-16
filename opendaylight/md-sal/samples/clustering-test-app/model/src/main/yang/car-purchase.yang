@@ -24,6 +24,10 @@ module car-purchase {
         "Clustering sample app";
     }
 
+    identity foo-context {
+        description "foo context";
+    }
+
     rpc buy-car {
           description
             "buy a new car";
