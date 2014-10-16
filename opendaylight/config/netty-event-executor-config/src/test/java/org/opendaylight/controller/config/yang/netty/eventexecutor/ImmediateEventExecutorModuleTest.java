@@ -21,12 +21,12 @@ import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 
 public class ImmediateEventExecutorModuleTest extends AbstractConfigTest {
 
-    private GlobalEventExecutorModuleFactory factory;
+    private ImmediateEventExecutorModuleFactory factory;
     private final String instanceName = ImmediateEventExecutorModuleFactory.SINGLETON_NAME;
 
     @Before
     public void setUp() {
-        factory = new GlobalEventExecutorModuleFactory();
+        factory = new ImmediateEventExecutorModuleFactory();
         super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext,factory));
     }
 

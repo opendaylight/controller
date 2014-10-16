@@ -53,6 +53,7 @@ public class InternalJMXRegistrator implements Closeable {
 
     @GuardedBy("this")
     private final Set<ObjectName> registeredObjectNames = new HashSet<>();
+    @GuardedBy("this")
     private final List<InternalJMXRegistrator> children = new ArrayList<>();
 
     public synchronized InternalJMXRegistration registerMBean(Object object,
@@ -79,9 +80,8 @@ public class InternalJMXRegistrator implements Closeable {
         }
     }
 
-    public InternalJMXRegistrator createChild() {
-        InternalJMXRegistrator child = new InternalJMXRegistrator(
-                configMBeanServer);
+    public synchronized InternalJMXRegistrator createChild() {
+        InternalJMXRegistrator child = new InternalJMXRegistrator(configMBeanServer);
         children.add(child);
         return child;
     }
@@ -137,7 +137,7 @@ public class InternalJMXRegistrator implements Closeable {
         return getSameNames(result);
     }
 
-    private Set<ObjectName> getSameNames(Set<ObjectName> superSet) {
+    private synchronized Set<ObjectName> getSameNames(Set<ObjectName> superSet) {
         Set<ObjectName> result = new HashSet<>(superSet);
         result.retainAll(registeredObjectNames);
         for (InternalJMXRegistrator child : children) {
