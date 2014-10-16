@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_69d31d39",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/test/java/org/opendaylight/controller/protobuff/messages/transaction/ShardTransactionChainMessagesTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-16T21:49:57Z",
+      "side": 1,
+      "message": "Verification removed???",
+      "revId": "2e8743a238db914f46afdfb907707854ef31085d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_b5e65243",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-16T21:49:57Z",
+      "side": 1,
+      "message": "We probably should delay scheduling till recovery is completed.",
+      "revId": "2e8743a238db914f46afdfb907707854ef31085d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_d5ff56a9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 375,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-16T21:49:57Z",
+      "side": 1,
+      "message": "typo in log message \"commititing\"",
+      "revId": "2e8743a238db914f46afdfb907707854ef31085d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_552b4630",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-16T21:49:57Z",
+      "side": 1,
+      "message": "The path return by self().path() is a local path. Please make sure that you pass Serialization.serializedActorPath(self())).toSerializable() to ReadyTransactionReply",
+      "revId": "2e8743a238db914f46afdfb907707854ef31085d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
