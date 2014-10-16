@@ -94,7 +94,7 @@ public final class Services {
             XmlElement typeElement = service.getOnlyChildElement(TYPE_KEY);
             Entry<String, String> prefixNamespace = typeElement.findNamespaceOfTextContent();
 
-            Preconditions.checkState(prefixNamespace.getKey()!=null && !prefixNamespace.getKey().equals(""), "Type attribute was not prefixed");
+            Preconditions.checkState(prefixNamespace.getKey()!=null && !"".equals(prefixNamespace.getKey()), "Type attribute was not prefixed");
 
             Map<String, Map<String, String>> namespaceToServices = retVal.get(prefixNamespace.getValue());
             if(namespaceToServices == null) {
@@ -170,14 +170,14 @@ public final class Services {
         }
 
         public static ServiceInstance fromString(String instanceId) {
-            instanceId = instanceId.trim();
-            Matcher matcher = p.matcher(instanceId);
+            String id = instanceId.trim();
+            Matcher matcher = P.matcher(id);
             if(!matcher.matches()) {
-                matcher = pDeprecated.matcher(instanceId);
+                matcher = P_DEPRECATED.matcher(id);
             }
 
-            Preconditions.checkArgument(matcher.matches(), "Unexpected format for provider, expected " + p.toString()
-                    + " or " + pDeprecated.toString() + " but was " + instanceId);
+            Preconditions.checkArgument(matcher.matches(), "Unexpected format for provider, expected " + P.toString()
+                    + " or " + P_DEPRECATED.toString() + " but was " + id);
 
             String factoryName = matcher.group(1);
             String instanceName = matcher.group(2);
@@ -203,7 +203,7 @@ public final class Services {
             return instanceName;
         }
 
-        private static final String blueprint = "/"
+        private static final String BLUEPRINT = "/"
                 + XmlNetconfConstants.MODULES_KEY + "/" + XmlNetconfConstants.MODULE_KEY + "["
                 + XmlNetconfConstants.TYPE_KEY + "='%s']["
                 + XmlNetconfConstants.NAME_KEY + "='%s']";
@@ -211,22 +211,22 @@ public final class Services {
         // TODO unify with xpath in RuntimeRpc
 
         // Previous version of xpath, needs to be supported for backwards compatibility (persisted configs by config-persister)
-        private static final String blueprintRDeprecated = "/" + XmlNetconfConstants.CONFIG_KEY + "/"
+        private static final String BLUEPRINT_R_DEPRECATED = "/" + XmlNetconfConstants.CONFIG_KEY + "/"
                 + XmlNetconfConstants.MODULES_KEY + "/" + XmlNetconfConstants.MODULE_KEY + "\\["
                 + XmlNetconfConstants.NAME_KEY + "='%s'\\]/" + XmlNetconfConstants.INSTANCE_KEY + "\\["
                 + XmlNetconfConstants.NAME_KEY + "='%s'\\]";
 
-        private static final String blueprintR = "/"
+        private static final String BLUEPRINT_R = "/"
                 + XmlNetconfConstants.MODULES_KEY + "/" + XmlNetconfConstants.MODULE_KEY + "\\["
                 + XmlNetconfConstants.TYPE_KEY + "='%s'\\]\\["
                 + XmlNetconfConstants.NAME_KEY + "='%s'\\]";
 
-        private static final Pattern pDeprecated = Pattern.compile(String.format(blueprintRDeprecated, "(.+)", "(.+)"));
-        private static final Pattern p = Pattern.compile(String.format(blueprintR, "(.+)", "(.+)"));
+        private static final Pattern P_DEPRECATED = Pattern.compile(String.format(BLUEPRINT_R_DEPRECATED, "(.+)", "(.+)"));
+        private static final Pattern P = Pattern.compile(String.format(BLUEPRINT_R, "(.+)", "(.+)"));
 
         @Override
         public String toString() {
-            return String.format(blueprint, moduleName, instanceName);
+            return String.format(BLUEPRINT, moduleName, instanceName);
         }
 
         @Override

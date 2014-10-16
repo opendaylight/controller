@@ -57,7 +57,8 @@ public final class XmlUtil {
         BUILDERFACTORY = factory;
     }
 
-    private XmlUtil() {}
+    private XmlUtil() {
+    }
 
     public static Element readXmlToElement(String xmlContent) throws SAXException, IOException {
         Document doc = readXmlToDocument(xmlContent);

@@ -47,7 +47,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
  * All threads are daemons.
  */
 public class NetconfSSHActivator implements BundleActivator {
-    private static final Logger logger = LoggerFactory.getLogger(NetconfSSHActivator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NetconfSSHActivator.class);
     private static AuthProviderTracker authProviderTracker;
 
     private NetconfSSHServer server;
@@ -73,12 +73,12 @@ public class NetconfSSHActivator implements BundleActivator {
                 InfixProp.ssh);
 
         if (maybeSshSocketAddress.isPresent() == false) {
-            logger.trace("SSH bridge not configured");
+            LOGGER.trace("SSH bridge not configured");
             return null;
         }
 
         final InetSocketAddress sshSocketAddress = maybeSshSocketAddress.get();
-        logger.trace("Starting netconf SSH bridge at {}", sshSocketAddress);
+        LOGGER.trace("Starting netconf SSH bridge at {}", sshSocketAddress);
 
         final LocalAddress localAddress = NetconfConfigUtil.getNetconfLocalAddress();
 
@@ -98,7 +98,7 @@ public class NetconfSSHActivator implements BundleActivator {
         final Thread serverThread = new Thread(server, "netconf SSH server thread");
         serverThread.setDaemon(true);
         serverThread.start();
-        logger.trace("Netconf SSH  bridge up and running.");
+        LOGGER.trace("Netconf SSH  bridge up and running.");
         return serverThread;
     }
 
@@ -119,7 +119,7 @@ public class NetconfSSHActivator implements BundleActivator {
 
         @Override
         public AuthProvider addingService(final ServiceReference<AuthProvider> reference) {
-            logger.trace("Service {} added", reference);
+            LOGGER.trace("Service {} added", reference);
             final AuthProvider authService = bundleContext.getService(reference);
             final Integer newServicePreference = getPreference(reference);
             if(isBetter(newServicePreference)) {
@@ -151,14 +151,14 @@ public class NetconfSSHActivator implements BundleActivator {
             final AuthProvider authService = bundleContext.getService(reference);
             final Integer newServicePreference = getPreference(reference);
             if(isBetter(newServicePreference)) {
-                logger.trace("Replacing modified service {} in netconf SSH.", reference);
+                LOGGER.trace("Replacing modified service {} in netconf SSH.", reference);
                 server.setAuthProvider(authService);
             }
         }
 
         @Override
         public void removedService(final ServiceReference<AuthProvider> reference, final AuthProvider service) {
-            logger.trace("Removing service {} from netconf SSH. " +
+            LOGGER.trace("Removing service {} from netconf SSH. " +
                     "SSH won't authenticate users until AuthProvider service will be started.", reference);
             maxPreference = null;
             server.setAuthProvider(null);

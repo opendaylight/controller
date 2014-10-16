@@ -11,6 +11,7 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 import com.google.common.collect.Maps;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class SimpleCompositeAttributeReadingStrategy extends SimpleAttributeReadingStrategy {
 
@@ -23,7 +24,7 @@ public class SimpleCompositeAttributeReadingStrategy extends SimpleAttributeRead
 
     @Override
     protected Object postprocessParsedValue(String textContent) {
-        HashMap<String,String> map = Maps.newHashMap();
+        Map<String,String> map = Maps.newHashMap();
         map.put(key, textContent);
         return map;
     }

@@ -25,7 +25,7 @@ import io.netty.util.concurrent.Promise;
 public class NetconfClientDispatcherImpl extends AbstractDispatcher<NetconfClientSession, NetconfClientSessionListener>
         implements NetconfClientDispatcher, Closeable {
 
-    private static final Logger logger = LoggerFactory.getLogger(NetconfClientDispatcherImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NetconfClientDispatcherImpl.class);
 
     private final Timer timer;
 
@@ -55,7 +55,7 @@ public class NetconfClientDispatcherImpl extends AbstractDispatcher<NetconfClien
     }
 
     private Future<NetconfClientSession> createTcpClient(final NetconfClientConfiguration currentConfiguration) {
-        logger.debug("Creating TCP client with configuration: {}", currentConfiguration);
+        LOGGER.debug("Creating TCP client with configuration: {}", currentConfiguration);
         return super.createClient(currentConfiguration.getAddress(), currentConfiguration.getReconnectStrategy(),
                 new PipelineInitializer<NetconfClientSession>() {
 
@@ -72,7 +72,7 @@ public class NetconfClientDispatcherImpl extends AbstractDispatcher<NetconfClien
     }
 
     private Future<Void> createReconnectingTcpClient(final NetconfReconnectingClientConfiguration currentConfiguration) {
-        logger.debug("Creating reconnecting TCP client with configuration: {}", currentConfiguration);
+        LOGGER.debug("Creating reconnecting TCP client with configuration: {}", currentConfiguration);
         final TcpClientChannelInitializer init = new TcpClientChannelInitializer(getNegotiatorFactory(currentConfiguration),
                 currentConfiguration.getSessionListener());
 
@@ -86,7 +86,7 @@ public class NetconfClientDispatcherImpl extends AbstractDispatcher<NetconfClien
     }
 
     private Future<NetconfClientSession> createSshClient(final NetconfClientConfiguration currentConfiguration) {
-        logger.debug("Creating SSH client with configuration: {}", currentConfiguration);
+        LOGGER.debug("Creating SSH client with configuration: {}", currentConfiguration);
         return super.createClient(currentConfiguration.getAddress(), currentConfiguration.getReconnectStrategy(),
                 new PipelineInitializer<NetconfClientSession>() {
 
@@ -102,7 +102,7 @@ public class NetconfClientDispatcherImpl extends AbstractDispatcher<NetconfClien
     }
 
     private Future<Void> createReconnectingSshClient(final NetconfReconnectingClientConfiguration currentConfiguration) {
-        logger.debug("Creating reconnecting SSH client with configuration: {}", currentConfiguration);
+        LOGGER.debug("Creating reconnecting SSH client with configuration: {}", currentConfiguration);
         final SshClientChannelInitializer init = new SshClientChannelInitializer(currentConfiguration.getAuthHandler(),
                 getNegotiatorFactory(currentConfiguration), currentConfiguration.getSessionListener());
 

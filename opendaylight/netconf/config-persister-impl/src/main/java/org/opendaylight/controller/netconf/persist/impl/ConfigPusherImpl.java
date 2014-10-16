@@ -53,7 +53,7 @@ import org.xml.sax.SAXException;
 
 @Immutable
 public class ConfigPusherImpl implements ConfigPusher {
-    private static final Logger logger = LoggerFactory.getLogger(ConfigPusherImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigPusherImpl.class);
 
     private final long maxWaitForCapabilitiesMillis;
     private final long conflictingVersionTimeoutMillis;
@@ -83,35 +83,34 @@ public class ConfigPusherImpl implements ConfigPusher {
                  * it is good idea to perform garbage collection to prune
                  * any garbage we have accumulated during startup.
                  */
-                logger.debug("Running post-initialization garbage collection...");
+                LOGGER.debug("Running post-initialization garbage collection...");
                 System.gc();
-                logger.debug("Post-initialization garbage collection completed.");
-                logger.debug("ConfigPusher has pushed configs {}, gc completed", configs);
-            }
-            catch (NetconfDocumentedException e) {
-                logger.error("Error pushing configs {}",configs);
+                LOGGER.debug("Post-initialization garbage collection completed.");
+                LOGGER.debug("ConfigPusher has pushed configs {}, gc completed", configs);
+            } catch (NetconfDocumentedException e) {
+                LOGGER.error("Error pushing configs {}",configs);
                 throw new IllegalStateException(e);
             }
         }
     }
 
     public void pushConfigs(List<? extends ConfigSnapshotHolder> configs) throws InterruptedException {
-        logger.debug("Requested to push configs {}", configs);
+        LOGGER.debug("Requested to push configs {}", configs);
         this.queue.put(configs);
     }
 
     private LinkedHashMap<? extends ConfigSnapshotHolder, EditAndCommitResponse> internalPushConfigs(List<? extends ConfigSnapshotHolder> configs) throws NetconfDocumentedException {
-        logger.debug("Last config snapshots to be pushed to netconf: {}", configs);
+        LOGGER.debug("Last config snapshots to be pushed to netconf: {}", configs);
         LinkedHashMap<ConfigSnapshotHolder, EditAndCommitResponse> result = new LinkedHashMap<>();
         // start pushing snapshots:
         for (ConfigSnapshotHolder configSnapshotHolder : configs) {
             if(configSnapshotHolder != null) {
                 EditAndCommitResponse editAndCommitResponseWithRetries = pushConfigWithConflictingVersionRetries(configSnapshotHolder);
-                logger.debug("Config snapshot pushed successfully: {}, result: {}", configSnapshotHolder, result);
+                LOGGER.debug("Config snapshot pushed successfully: {}, result: {}", configSnapshotHolder, result);
                 result.put(configSnapshotHolder, editAndCommitResponseWithRetries);
             }
         }
-        logger.debug("All configuration snapshots have been pushed successfully.");
+        LOGGER.debug("All configuration snapshots have been pushed successfully.");
         return result;
     }
 
@@ -133,7 +132,7 @@ public class ConfigPusherImpl implements ConfigPusher {
                 return pushConfig(configSnapshotHolder, operationService);
             } catch (ConflictingVersionException e) {
                 lastException = e;
-                logger.debug("Conflicting version detected, will retry after timeout");
+                LOGGER.debug("Conflicting version detected, will retry after timeout");
                 sleep();
             }
         } while (stopwatch.elapsed(TimeUnit.MILLISECONDS) < conflictingVersionTimeoutMillis);
@@ -148,7 +147,7 @@ public class ConfigPusherImpl implements ConfigPusher {
             try {
                 return getOperationService(expectedCapabilities, idForReporting);
             } catch (NotEnoughCapabilitiesException e) {
-                logger.debug("Not enough capabilities: " + e.toString());
+                LOGGER.debug("Not enough capabilities: " + e.toString());
                 lastException = e;
                 sleep();
             }
@@ -187,7 +186,7 @@ public class ConfigPusherImpl implements ConfigPusher {
             return serviceCandidate;
         } else {
             serviceCandidate.close();
-            logger.trace("Netconf server did not provide required capabilities for {} " +
+            LOGGER.trace("Netconf server did not provide required capabilities for {} " +
                     "Expected but not found: {}, all expected {}, current {}",
                     idForReporting, notFoundDiff, expectedCapabilities, serviceCandidate.getCapabilities()
             );
@@ -234,7 +233,7 @@ public class ConfigPusherImpl implements ConfigPusher {
         } catch (SAXException | IOException e) {
             throw new IllegalStateException("Cannot parse " + configSnapshotHolder);
         }
-        logger.trace("Pushing last configuration to netconf: {}", configSnapshotHolder);
+        LOGGER.trace("Pushing last configuration to netconf: {}", configSnapshotHolder);
         Stopwatch stopwatch = new Stopwatch().start();
         NetconfMessage editConfigMessage = createEditConfigMessage(xmlToBePersisted);
 
@@ -244,16 +243,16 @@ public class ConfigPusherImpl implements ConfigPusher {
         Document commitResponseMessage = sendRequestGetResponseCheckIsOK(getCommitMessage(), operationService,
                 "commit", configSnapshotHolder.toString());
 
-        if (logger.isTraceEnabled()) {
+        if (LOGGER.isTraceEnabled()) {
             StringBuilder response = new StringBuilder("editConfig response = {");
             response.append(XmlUtil.toString(editResponseMessage));
             response.append("}");
             response.append("commit response = {");
             response.append(XmlUtil.toString(commitResponseMessage));
             response.append("}");
-            logger.trace("Last configuration loaded successfully");
-            logger.trace("Detailed message {}", response);
-            logger.trace("Total time spent {} ms", stopwatch.elapsed(TimeUnit.MILLISECONDS));
+            LOGGER.trace("Last configuration loaded successfully");
+            LOGGER.trace("Detailed message {}", response);
+            LOGGER.trace("Total time spent {} ms", stopwatch.elapsed(TimeUnit.MILLISECONDS));
         }
         return new EditAndCommitResponse(editResponseMessage, commitResponseMessage);
     }

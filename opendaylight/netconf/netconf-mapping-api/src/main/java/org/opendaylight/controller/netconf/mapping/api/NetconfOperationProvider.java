@@ -13,7 +13,8 @@ public interface NetconfOperationProvider {
     NetconfOperationServiceSnapshot openSnapshot(String sessionIdForReporting);
 
     public static class NetconfOperationProviderUtil {
-
+        private NetconfOperationProviderUtil() {
+        }
         public static String getNetconfSessionIdForReporting(long sessionId) {
             return "netconf session id " + sessionId;
         }

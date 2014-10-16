@@ -21,7 +21,7 @@ import javax.management.openmbean.SimpleType;
 public class ObjectNameAttributeResolvingStrategy extends AbstractAttributeResolvingStrategy<ObjectName, SimpleType<?>> {
 
     private final ServiceRegistryWrapper serviceTracker;
-    private static final Logger logger = LoggerFactory.getLogger(ObjectNameAttributeResolvingStrategy.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ObjectNameAttributeResolvingStrategy.class);
 
     ObjectNameAttributeResolvingStrategy(ServiceRegistryWrapper serviceTracker) {
         super(SimpleType.OBJECTNAME);
@@ -40,11 +40,11 @@ public class ObjectNameAttributeResolvingStrategy extends AbstractAttributeResol
         String serviceName = mappedDep.getServiceName();
         String refName = mappedDep.getRefName();
         String namespace = mappedDep.getNamespace();
-        logger.trace("Getting service instance by service name {} : {} and ref name {}", namespace, serviceName, refName);
+        LOGGER.trace("Getting service instance by service name {} : {} and ref name {}", namespace, serviceName, refName);
 
         ObjectName on = serviceTracker.getByServiceAndRefName(namespace, serviceName, refName);
 
-        logger.debug("Attribute {} : {} parsed to type {}", attrName, value, getOpenType());
+        LOGGER.debug("Attribute {} : {} parsed to type {}", attrName, value, getOpenType());
         return Optional.of(on);
     }
 

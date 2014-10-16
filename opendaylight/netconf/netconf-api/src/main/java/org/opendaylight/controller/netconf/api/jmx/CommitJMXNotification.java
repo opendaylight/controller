@@ -37,7 +37,7 @@ public class CommitJMXNotification extends NetconfJMXNotification {
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("CommitJMXNotification{");
+        final StringBuilder sb = new StringBuilder("CommitJMXNotification{");
         sb.append("configSnapshot=").append(configSnapshot);
         sb.append(", capabilities=").append(getCapabilities());
         sb.append('}');

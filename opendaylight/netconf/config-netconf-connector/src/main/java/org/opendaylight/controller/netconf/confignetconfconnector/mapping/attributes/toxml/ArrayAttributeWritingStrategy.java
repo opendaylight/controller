@@ -25,7 +25,7 @@ public class ArrayAttributeWritingStrategy implements AttributeWritingStrategy {
     public void writeElement(Element parentElement, String namespace, Object value) {
         Util.checkType(value, List.class);
 
-        for (Object innerObject : ((List<?>) value)) {
+        for (Object innerObject : (List<?>) value) {
             innnerStrategy.writeElement(parentElement, namespace, innerObject);
         }
 

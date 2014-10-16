@@ -20,27 +20,27 @@ import java.util.Collections;
 import java.util.List;
 
 public class NoOpStorageAdapter implements StorageAdapter, Persister {
-    private static final Logger logger = LoggerFactory.getLogger(NoOpStorageAdapter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NoOpStorageAdapter.class);
 
     @Override
     public Persister instantiate(PropertiesProvider propertiesProvider) {
-        logger.debug("instantiate called with {}", propertiesProvider);
+        LOGGER.debug("instantiate called with {}", propertiesProvider);
         return this;
     }
 
     @Override
     public void persistConfig(ConfigSnapshotHolder holder) throws IOException {
-        logger.debug("persistConfig called with {}", holder);
+        LOGGER.debug("persistConfig called with {}", holder);
     }
 
     @Override
     public List<ConfigSnapshotHolder> loadLastConfigs() throws IOException {
-        logger.debug("loadLastConfig called");
+        LOGGER.debug("loadLastConfig called");
         return Collections.emptyList();
     }
 
     @Override
     public void close() {
-        logger.debug("close called");
+        LOGGER.debug("close called");
     }
 }

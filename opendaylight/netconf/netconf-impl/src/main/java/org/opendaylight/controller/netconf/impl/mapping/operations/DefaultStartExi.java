@@ -25,7 +25,7 @@ import org.w3c.dom.Element;
 public class DefaultStartExi extends AbstractSingletonNetconfOperation implements DefaultNetconfOperation {
     public static final String START_EXI = "start-exi";
 
-    private static final Logger logger = LoggerFactory.getLogger(DefaultStartExi.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultStartExi.class);
     private NetconfServerSession netconfSession;
 
     public DefaultStartExi(String netconfSessionIdForReporting) {
@@ -35,7 +35,7 @@ public class DefaultStartExi extends AbstractSingletonNetconfOperation implement
     @Override
     public Document handle(Document message,
                            NetconfOperationChainedExecution subsequentOperation) throws NetconfDocumentedException {
-        logger.debug("Received start-exi message {} ", XmlUtil.toString(message));
+        LOGGER.debug("Received start-exi message {} ", XmlUtil.toString(message));
 
         try {
             netconfSession.startExiCommunication(new NetconfMessage(message));
@@ -50,7 +50,7 @@ public class DefaultStartExi extends AbstractSingletonNetconfOperation implement
     @Override
     protected Element handleWithNoSubsequentOperations(Document document, XmlElement operationElement) throws NetconfDocumentedException {
         Element getSchemaResult = document.createElementNS( XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0, XmlNetconfConstants.OK);
-        logger.trace("{} operation successful", START_EXI);
+        LOGGER.trace("{} operation successful", START_EXI);
         return getSchemaResult;
     }
 

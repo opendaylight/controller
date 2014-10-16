@@ -39,7 +39,7 @@ import java.util.TreeMap;
 
 public class NetconfOperationRouterImpl implements NetconfOperationRouter {
 
-    private static final Logger logger = LoggerFactory.getLogger(NetconfOperationRouterImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NetconfOperationRouterImpl.class);
 
     private final NetconfOperationServiceSnapshot netconfOperationServiceSnapshot;
     private Set<NetconfOperation> allNetconfOperations;
@@ -104,7 +104,7 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
             messageAsString = XmlUtil.toString(message);
             netconfOperationExecution = getNetconfOperationWithHighestPriority(message, session);
         } catch (IllegalArgumentException | IllegalStateException e) {
-            logger.warn("Unable to handle rpc {} on session {}", messageAsString, session, e);
+            LOGGER.warn("Unable to handle rpc {} on session {}", messageAsString, session, e);
 
             String errorMessage = String.format("Unable to handle rpc %s on session %s", messageAsString, session);
             Map<String, String> errorInfo = Maps.newHashMap();
@@ -137,7 +137,7 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
     }
 
     private NetconfDocumentedException handleUnexpectedEx(String s, Exception e) throws NetconfDocumentedException {
-        logger.error(s, e);
+        LOGGER.error(s, e);
 
         Map<String, String> info = Maps.newHashMap();
         info.put(NetconfDocumentedException.ErrorSeverity.error.toString(), e.toString());
@@ -150,7 +150,7 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
     private Document executeOperationWithHighestPriority(Document message,
             NetconfOperationExecution netconfOperationExecution, String messageAsString)
             throws NetconfDocumentedException {
-        logger.debug("Forwarding netconf message {} to {}", messageAsString, netconfOperationExecution.netconfOperation);
+        LOGGER.debug("Forwarding netconf message {} to {}", messageAsString, netconfOperationExecution.netconfOperation);
         return netconfOperationExecution.execute(message);
     }
 

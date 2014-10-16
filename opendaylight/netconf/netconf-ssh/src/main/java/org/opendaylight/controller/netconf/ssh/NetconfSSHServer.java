@@ -36,8 +36,8 @@ import io.netty.channel.local.LocalAddress;
 @ThreadSafe
 public final class NetconfSSHServer extends Thread implements AutoCloseable {
 
-    private static final Logger logger = LoggerFactory.getLogger(NetconfSSHServer.class);
-    private static final AtomicLong sessionIdCounter = new AtomicLong();
+    private static final Logger LOGGER = LoggerFactory.getLogger(NetconfSSHServer.class);
+    private static final AtomicLong SESSION_ID_COUNTER = new AtomicLong();
 
     private final ServerSocket serverSocket;
     private final LocalAddress localAddress;
@@ -51,12 +51,12 @@ public final class NetconfSSHServer extends Thread implements AutoCloseable {
         super(NetconfSSHServer.class.getSimpleName());
         this.bossGroup = bossGroup;
         this.pem = pem;
-        logger.trace("Creating SSH server socket on port {}", serverPort);
+        LOGGER.trace("Creating SSH server socket on port {}", serverPort);
         this.serverSocket = new ServerSocket(serverPort);
         if (serverSocket.isBound() == false) {
             throw new IllegalStateException("Socket can't be bound to requested port :" + serverPort);
         }
-        logger.trace("Server socket created.");
+        LOGGER.trace("Server socket created.");
         this.localAddress = localAddress;
         this.up = true;
         handshakeExecutor = Executors.newFixedThreadPool(10);
@@ -75,7 +75,7 @@ public final class NetconfSSHServer extends Thread implements AutoCloseable {
 
     public synchronized void setAuthProvider(final AuthProvider authProvider) {
         if(this.authProvider != null) {
-            logger.debug("Changing auth provider to {}", authProvider);
+            LOGGER.debug("Changing auth provider to {}", authProvider);
         }
         this.authProvider = Optional.fromNullable(authProvider);
     }
@@ -83,10 +83,10 @@ public final class NetconfSSHServer extends Thread implements AutoCloseable {
     @Override
     public void close() throws IOException {
         up = false;
-        logger.trace("Closing SSH server socket.");
+        LOGGER.trace("Closing SSH server socket.");
         serverSocket.close();
         bossGroup.shutdownGracefully();
-        logger.trace("SSH server socket closed.");
+        LOGGER.trace("SSH server socket closed.");
     }
 
     @VisibleForTesting
@@ -102,32 +102,32 @@ public final class NetconfSSHServer extends Thread implements AutoCloseable {
                 acceptedSocket = serverSocket.accept();
             } catch (final IOException e) {
                 if (up == false) {
-                    logger.trace("Exiting server thread", e);
+                    LOGGER.trace("Exiting server thread", e);
                 } else {
-                    logger.warn("Exception occurred during socket.accept", e);
+                    LOGGER.warn("Exception occurred during socket.accept", e);
                 }
             }
             if (acceptedSocket != null) {
                 try {
-                    final Handshaker task = new Handshaker(acceptedSocket, localAddress, sessionIdCounter.incrementAndGet(), getAuthProvider(), bossGroup, pem);
+                    final Handshaker task = new Handshaker(acceptedSocket, localAddress, SESSION_ID_COUNTER.incrementAndGet(), getAuthProvider(), bossGroup, pem);
                     handshakeExecutor.submit(task);
                 } catch (final IOException e) {
-                    logger.warn("Cannot set PEMHostKey, closing connection", e);
+                    LOGGER.warn("Cannot set PEMHostKey, closing connection", e);
                     closeSocket(acceptedSocket);
                 } catch (final IllegalStateException e) {
-                    logger.warn("Cannot accept connection, closing", e);
+                    LOGGER.warn("Cannot accept connection, closing", e);
                     closeSocket(acceptedSocket);
                 }
             }
         }
-        logger.debug("Server thread is exiting");
+        LOGGER.debug("Server thread is exiting");
     }
 
     private void closeSocket(final Socket acceptedSocket) {
         try {
             acceptedSocket.close();
         } catch (final IOException e) {
-            logger.warn("Ignoring exception while closing socket", e);
+            LOGGER.warn("Ignoring exception while closing socket", e);
         }
     }
 

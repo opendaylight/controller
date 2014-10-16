@@ -17,7 +17,8 @@ import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 
 public final class XMLNetconfUtil {
 
-    private XMLNetconfUtil() {}
+    private XMLNetconfUtil() {
+    }
 
     public static XPathExpression compileXPath(String xPath) {
         final XPathFactory xPathfactory = XPathFactory.newInstance();

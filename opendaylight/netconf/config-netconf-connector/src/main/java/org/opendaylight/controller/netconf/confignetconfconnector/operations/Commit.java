@@ -26,7 +26,7 @@ import com.google.common.base.Optional;
 
 public class Commit extends AbstractConfigNetconfOperation {
 
-    private static final Logger logger = LoggerFactory.getLogger(Commit.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Commit.class);
 
     private final TransactionProvider transactionProvider;
 
@@ -53,11 +53,11 @@ public class Commit extends AbstractConfigNetconfOperation {
         CommitStatus status;
         try {
             status = this.transactionProvider.commitTransaction();
-            logger.trace("Datastore {} committed successfully: {}", Datastore.candidate, status);
+            LOGGER.trace("Datastore {} committed successfully: {}", Datastore.candidate, status);
         } catch (ConflictingVersionException | ValidationException e) {
             throw NetconfDocumentedException.wrap(e);
         }
-        logger.trace("Datastore {} committed successfully: {}", Datastore.candidate, status);
+        LOGGER.trace("Datastore {} committed successfully: {}", Datastore.candidate, status);
 
         return XmlUtil.createElement(document, XmlNetconfConstants.OK, Optional.<String>absent());
     }

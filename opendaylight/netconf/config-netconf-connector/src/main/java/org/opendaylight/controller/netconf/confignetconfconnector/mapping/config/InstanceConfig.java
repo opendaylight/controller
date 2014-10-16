@@ -44,7 +44,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public final class InstanceConfig {
-    private static final Logger logger = LoggerFactory.getLogger(InstanceConfig.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(InstanceConfig.class);
 
     private final Map<String, AttributeIfc> yangToAttrConfig;
     private final String nullableDummyContainerName;
@@ -124,7 +124,7 @@ public final class InstanceConfig {
             try {
                 AttributeResolvingStrategy<?, ? extends OpenType<?>> attributeResolvingStrategy = resolvingStrategies
                         .get(attributeName);
-                logger.trace("Trying to set value {} of attribute {} with {}", value, attributeName, attributeResolvingStrategy);
+                LOGGER.trace("Trying to set value {} of attribute {} with {}", value, attributeName, attributeResolvingStrategy);
 
                 value.resolveValue(attributeResolvingStrategy, attributeName);
                 value.setJmxName(
@@ -140,17 +140,18 @@ public final class InstanceConfig {
                                                  EditStrategyType defaultStrategy,
                                                  Map<String, Map<Date,EditConfig.IdentityMapping>> identityMap) throws NetconfDocumentedException {
         Map<String, AttributeConfigElement> retVal = Maps.newHashMap();
+        XmlElement element = moduleElement;
 
         Map<String, AttributeReadingStrategy> strats = new ObjectXmlReader().prepareReading(yangToAttrConfig, identityMap);
         List<XmlElement> recognisedChildren = Lists.newArrayList();
 
-        XmlElement typeElement = moduleElement.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.TYPE_KEY);
-        XmlElement nameElement = moduleElement.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.NAME_KEY);
+        XmlElement typeElement = element.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.TYPE_KEY);
+        XmlElement nameElement = element.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.NAME_KEY);
         List<XmlElement> typeAndNameElements = Lists.newArrayList(typeElement, nameElement);
 
         // if dummy container was defined in yang, set moduleElement to its content
         if (nullableDummyContainerName != null) {
-            int size = moduleElement.getChildElements().size();
+            int size = element.getChildElements().size();
             int expectedChildNodes = 1 + typeAndNameElements.size();
             if (size > expectedChildNodes) {
                 throw new NetconfDocumentedException("Error reading module " + typeElement.getTextContent() + " : " +
@@ -160,7 +161,7 @@ public final class InstanceConfig {
             }
             if (size == expectedChildNodes) {
                 try {
-                    moduleElement = moduleElement.getOnlyChildElement(nullableDummyContainerName, moduleNamespace);
+                    element = element.getOnlyChildElement(nullableDummyContainerName, moduleNamespace);
                 } catch (NetconfDocumentedException e) {
                     throw new NetconfDocumentedException("Error reading module " + typeElement.getTextContent() + " : " +
                             nameElement.getTextContent() + " - Expected child node with name " + nullableDummyContainerName +
@@ -170,7 +171,7 @@ public final class InstanceConfig {
         }
 
         for (Entry<String, AttributeReadingStrategy> readStratEntry : strats.entrySet()) {
-            List<XmlElement> configNodes = getConfigNodes(moduleElement, moduleNamespace, readStratEntry.getKey(),
+            List<XmlElement> configNodes = getConfigNodes(element, moduleNamespace, readStratEntry.getKey(),
                     recognisedChildren, typeAndNameElements);
             AttributeConfigElement readElement = readStratEntry.getValue().readElement(configNodes);
             retVal.put(readStratEntry.getKey(), readElement);
@@ -178,17 +179,17 @@ public final class InstanceConfig {
 
         recognisedChildren.addAll(typeAndNameElements);
         try {
-            moduleElement.checkUnrecognisedElements(recognisedChildren);
+            element.checkUnrecognisedElements(recognisedChildren);
         } catch (NetconfDocumentedException e) {
             throw new NetconfDocumentedException("Error reading module " + typeElement.getTextContent() + " : " +
                     nameElement.getTextContent() + " - " +
                     e.getMessage(), e.getErrorType(), e.getErrorTag(),e.getErrorSeverity(),e.getErrorInfo());
         }
         // TODO: add check for conflicts between global and local edit strategy
-        String perInstanceEditStrategy = moduleElement.getAttribute(XmlNetconfConstants.OPERATION_ATTR_KEY,
+        String perInstanceEditStrategy = element.getAttribute(XmlNetconfConstants.OPERATION_ATTR_KEY,
                 XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
 
-        InstanceConfigElementResolved instanceConfigElementResolved = perInstanceEditStrategy.equals("") ? new InstanceConfigElementResolved(
+        InstanceConfigElementResolved instanceConfigElementResolved = "".equals(perInstanceEditStrategy) ? new InstanceConfigElementResolved(
                 retVal, defaultStrategy) : new InstanceConfigElementResolved(perInstanceEditStrategy, retVal, defaultStrategy);
 
         resolveConfiguration(instanceConfigElementResolved, services);
@@ -199,8 +200,8 @@ public final class InstanceConfig {
             List<XmlElement> recognisedChildren, List<XmlElement> typeAndName) throws NetconfDocumentedException {
         List<XmlElement> foundConfigNodes = moduleElement.getChildElementsWithinNamespace(name, moduleNamespace);
         if (foundConfigNodes.isEmpty()) {
-            logger.debug("No config nodes {}:{} found in {}", moduleNamespace, name, moduleElement);
-            logger.debug("Trying lookup of config nodes without specified namespace");
+            LOGGER.debug("No config nodes {}:{} found in {}", moduleNamespace, name, moduleElement);
+            LOGGER.debug("Trying lookup of config nodes without specified namespace");
             foundConfigNodes = moduleElement.getChildElementsWithinNamespace(name,
                     XmlNetconfConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
             // In case module type or name element is not present in config it
@@ -208,7 +209,7 @@ public final class InstanceConfig {
             // We need to remove config type and name from available module
             // config elements
             foundConfigNodes.removeAll(typeAndName);
-            logger.debug("Found {} config nodes {} without specified namespace in {}", foundConfigNodes.size(), name,
+            LOGGER.debug("Found {} config nodes {} without specified namespace in {}", foundConfigNodes.size(), name,
                     moduleElement);
         } else {
             List<XmlElement> foundWithoutNamespaceNodes = moduleElement.getChildElementsWithinNamespace(name,

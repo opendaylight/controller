@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  */
 final class AsyncSshHanderReader implements SshFutureListener<IoReadFuture>, AutoCloseable {
 
-    private static final Logger logger = LoggerFactory.getLogger(AsyncSshHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AsyncSshHandler.class);
 
     private static final int BUFFER_SIZE = 8192;
 
@@ -48,9 +48,9 @@ final class AsyncSshHanderReader implements SshFutureListener<IoReadFuture>, Aut
         if(future.getException() != null) {
             if(asyncOut.isClosed() || asyncOut.isClosing()) {
                 // Ssh dropped
-                logger.debug("Ssh session dropped on channel: {}", ctx.channel(), future.getException());
+                LOGGER.debug("Ssh session dropped on channel: {}", ctx.channel(), future.getException());
             } else {
-                logger.warn("Exception while reading from SSH remote on channel {}", ctx.channel(), future.getException());
+                LOGGER.warn("Exception while reading from SSH remote on channel {}", ctx.channel(), future.getException());
             }
             invokeDisconnect();
             return;

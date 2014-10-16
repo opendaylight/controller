@@ -18,12 +18,12 @@ import java.util.Map;
 
 public class NoneEditConfigStrategy implements EditConfigStrategy {
 
-    private static final Logger logger = LoggerFactory.getLogger(NoneEditConfigStrategy.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NoneEditConfigStrategy.class);
 
     @Override
     public void executeConfiguration(String module, String instance, Map<String, AttributeConfigElement> configuration,
                                      ConfigTransactionClient ta, ServiceRegistryWrapper services) {
-        logger.debug("Skipping configuration element for {}:{}", module, instance);
+        LOGGER.debug("Skipping configuration element for {}:{}", module, instance);
     }
 
 }

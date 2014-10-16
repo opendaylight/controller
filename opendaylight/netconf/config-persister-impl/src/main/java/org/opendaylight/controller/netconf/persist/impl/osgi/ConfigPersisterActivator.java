@@ -38,7 +38,7 @@ import com.google.common.annotations.VisibleForTesting;
 
 public class ConfigPersisterActivator implements BundleActivator {
 
-    private static final Logger logger = LoggerFactory.getLogger(ConfigPersisterActivator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigPersisterActivator.class);
     private static final MBeanServer platformMBeanServer = ManagementFactory.getPlatformMBeanServer();
 
     public static final String MAX_WAIT_FOR_CAPABILITIES_MILLIS_PROPERTY = "maxWaitForCapabilitiesMillis";
@@ -57,7 +57,7 @@ public class ConfigPersisterActivator implements BundleActivator {
 
     @Override
     public void start(final BundleContext context) throws Exception {
-        logger.debug("ConfigPersister starting");
+        LOGGER.debug("ConfigPersister starting");
         this.context = context;
 
         autoCloseables = new ArrayList<>();
@@ -68,7 +68,7 @@ public class ConfigPersisterActivator implements BundleActivator {
         long maxWaitForCapabilitiesMillis = getMaxWaitForCapabilitiesMillis(propertiesProvider);
         List<ConfigSnapshotHolder> configs = persisterAggregator.loadLastConfigs();
         long conflictingVersionTimeoutMillis = getConflictingVersionTimeoutMillis(propertiesProvider);
-        logger.debug("Following configs will be pushed: {}", configs);
+        LOGGER.debug("Following configs will be pushed: {}", configs);
 
         InnerCustomizer innerCustomizer = new InnerCustomizer(configs, maxWaitForCapabilitiesMillis,
                 conflictingVersionTimeoutMillis, persisterAggregator);
@@ -117,7 +117,7 @@ public class ConfigPersisterActivator implements BundleActivator {
 
         @Override
         public NetconfOperationProvider addingService(ServiceReference<NetconfOperationProvider> reference) {
-            logger.trace("Got OuterCustomizer.addingService {}", reference);
+            LOGGER.trace("Got OuterCustomizer.addingService {}", reference);
             // JMX was registered, track config-netconf-connector
             Filter filter;
             try {
@@ -156,15 +156,15 @@ public class ConfigPersisterActivator implements BundleActivator {
 
         @Override
         public NetconfOperationServiceFactory addingService(ServiceReference<NetconfOperationServiceFactory> reference) {
-            logger.trace("Got InnerCustomizer.addingService {}", reference);
+            LOGGER.trace("Got InnerCustomizer.addingService {}", reference);
             NetconfOperationServiceFactory service = reference.getBundle().getBundleContext().getService(reference);
 
-            logger.debug("Creating new job queue");
+            LOGGER.debug("Creating new job queue");
 
             final ConfigPusherImpl configPusher = new ConfigPusherImpl(service, maxWaitForCapabilitiesMillis, conflictingVersionTimeoutMillis);
-            logger.debug("Configuration Persister got {}", service);
-            logger.debug("Context was {}", context);
-            logger.debug("Registration was {}", registration);
+            LOGGER.debug("Configuration Persister got {}", service);
+            LOGGER.debug("Context was {}", context);
+            LOGGER.debug("Registration was {}", registration);
 
             final Thread pushingThread = new Thread(new Runnable() {
                 @Override
@@ -177,12 +177,12 @@ public class ConfigPersisterActivator implements BundleActivator {
                             registration = context.registerService(ConfigPusher.class.getName(), configPusher, null);
                             configPusher.process(autoCloseables, platformMBeanServer, persisterAggregator);
                         } else {
-                            logger.warn("Unable to process configs as BundleContext is null");
+                            LOGGER.warn("Unable to process configs as BundleContext is null");
                         }
                     } catch (InterruptedException e) {
-                        logger.info("ConfigPusher thread stopped",e);
+                        LOGGER.info("ConfigPusher thread stopped",e);
                     }
-                    logger.info("Configuration Persister initialization completed.");
+                    LOGGER.info("Configuration Persister initialization completed.");
                 }
             }, "config-pusher");
             synchronized (autoCloseables) {

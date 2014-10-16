@@ -32,7 +32,7 @@ public class DiscardChanges extends AbstractConfigNetconfOperation {
 
     public static final String DISCARD = "discard-changes";
 
-    private static final Logger logger = LoggerFactory.getLogger(DiscardChanges.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DiscardChanges.class);
 
     private final TransactionProvider transactionProvider;
 
@@ -58,7 +58,7 @@ public class DiscardChanges extends AbstractConfigNetconfOperation {
         try {
             this.transactionProvider.abortTransaction();
         } catch (final IllegalStateException e) {
-            logger.warn("Abort failed: ", e);
+            LOGGER.warn("Abort failed: ", e);
             final Map<String, String> errorInfo = new HashMap<>();
             errorInfo
                     .put(ErrorTag.operation_failed.name(),
@@ -66,7 +66,7 @@ public class DiscardChanges extends AbstractConfigNetconfOperation {
             throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.application, ErrorTag.operation_failed,
                     ErrorSeverity.error, errorInfo);
         }
-        logger.trace("Changes discarded successfully from datastore {}", Datastore.candidate);
+        LOGGER.trace("Changes discarded successfully from datastore {}", Datastore.candidate);
 
 
         return XmlUtil.createElement(document, XmlNetconfConstants.OK, Optional.<String>absent());
