@@ -32,7 +32,7 @@ import java.io.IOException;
 @ThreadSafe
 public class ConfigPersisterNotificationHandler implements Closeable {
 
-    private static final Logger logger = LoggerFactory.getLogger(ConfigPersisterNotificationHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigPersisterNotificationHandler.class);
     private final MBeanServerConnection mBeanServerConnection;
     private final NotificationListener listener;
 
@@ -48,7 +48,7 @@ public class ConfigPersisterNotificationHandler implements Closeable {
     }
 
     private static void registerAsJMXListener(final MBeanServerConnection mBeanServerConnection, final NotificationListener listener) {
-        logger.trace("Called registerAsJMXListener");
+        LOGGER.trace("Called registerAsJMXListener");
         try {
             mBeanServerConnection.addNotificationListener(DefaultCommitOperationMXBean.OBJECT_NAME, listener, null, null);
         } catch (InstanceNotFoundException | IOException e) {
@@ -65,13 +65,13 @@ public class ConfigPersisterNotificationHandler implements Closeable {
                 mBeanServerConnection.removeNotificationListener(on, listener);
             }
         } catch (final Exception e) {
-            logger.warn("Unable to unregister {} as listener for {}", listener, on, e);
+            LOGGER.warn("Unable to unregister {} as listener for {}", listener, on, e);
         }
     }
 }
 
 class ConfigPersisterNotificationListener implements NotificationListener {
-    private static final Logger logger = LoggerFactory.getLogger(ConfigPersisterNotificationListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigPersisterNotificationListener.class);
 
     private final Persister persisterAggregator;
 
@@ -81,20 +81,21 @@ class ConfigPersisterNotificationListener implements NotificationListener {
 
     @Override
     public void handleNotification(final Notification notification, final Object handback) {
-        if (!(notification instanceof NetconfJMXNotification))
+        if (!(notification instanceof NetconfJMXNotification)) {
             return;
+        }
 
         // Socket should not be closed at this point
         // Activator unregisters this as JMX listener before close is called
 
-        logger.trace("Received notification {}", notification);
+        LOGGER.trace("Received notification {}", notification);
         if (notification instanceof CommitJMXNotification) {
             try {
                 handleAfterCommitNotification((CommitJMXNotification) notification);
             } catch (final Exception e) {
                 // log exceptions from notification Handler here since
                 // notificationBroadcastSupport logs only DEBUG level
-                logger.warn("Failed to handle notification {}", notification, e);
+                LOGGER.warn("Failed to handle notification {}", notification, e);
                 throw e;
             }
         } else {
@@ -106,7 +107,7 @@ class ConfigPersisterNotificationListener implements NotificationListener {
         try {
             persisterAggregator.persistConfig(new CapabilityStrippingConfigSnapshotHolder(notification.getConfigSnapshot(),
                     notification.getCapabilities()));
-            logger.trace("Configuration persisted successfully");
+            LOGGER.trace("Configuration persisted successfully");
         } catch (final IOException e) {
             throw new RuntimeException("Unable to persist configuration snapshot", e);
         }

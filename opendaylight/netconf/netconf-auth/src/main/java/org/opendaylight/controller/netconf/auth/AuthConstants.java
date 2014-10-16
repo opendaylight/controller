@@ -10,6 +10,8 @@ package org.opendaylight.controller.netconf.auth;
 
 public class AuthConstants {
 
+    private AuthConstants() {
+    }
     /**
      * This property should be set for every implementation of AuthService published to OSGi.
      * Netconf SSH will pick the service with highest preference in case of multiple services present in OSGi.

@@ -31,9 +31,9 @@ public class SimpleAttributeWritingStrategy implements AttributeWritingStrategy 
 
     @Override
     public void writeElement(Element parentElement, String namespace, Object value) {
-        value = preprocess(value);
-        Util.checkType(value, String.class);
-        Element innerNode = createElement(document, key, (String) value, Optional.of(namespace));
+        Object newValue = preprocess(value);
+        Util.checkType(newValue, String.class);
+        Element innerNode = createElement(document, key, (String) newValue, Optional.of(namespace));
         parentElement.appendChild(innerNode);
     }
 

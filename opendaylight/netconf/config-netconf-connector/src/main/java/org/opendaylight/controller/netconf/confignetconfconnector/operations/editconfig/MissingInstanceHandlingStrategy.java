@@ -22,14 +22,14 @@ import java.util.Map;
 
 public class MissingInstanceHandlingStrategy extends AbstractEditConfigStrategy {
 
-    private static final Logger logger = LoggerFactory.getLogger(MissingInstanceHandlingStrategy.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MissingInstanceHandlingStrategy.class);
 
     @Override
     void handleMissingInstance(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta,
             String module, String instance, ServiceRegistryWrapper services) throws NetconfConfigHandlingException {
         try {
             ObjectName on = ta.createModule(module, instance);
-            logger.trace("New instance for {} {} created under name {}", module, instance, on);
+            LOGGER.trace("New instance for {} {} created under name {}", module, instance, on);
         } catch (InstanceAlreadyExistsException e1) {
             throw new NetconfConfigHandlingException(String.format("Unable to create instance for %s : %s.", module, instance),
                     NetconfDocumentedException.ErrorType.application,

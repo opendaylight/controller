@@ -70,7 +70,7 @@ public final class RuntimeRpcElementResolved {
         return ObjectNameUtil.createRuntimeBeanName(moduleName, instanceName, additionalAttributesJavaNames);
     }
 
-    private static final String xpathPatternBlueprint =
+    private static final String XPATH_PATTERN_BLUEPRINT =
             "/" + XmlNetconfConstants.MODULES_KEY
             + "/" + XmlNetconfConstants.MODULE_KEY
             + "\\["
@@ -84,15 +84,15 @@ public final class RuntimeRpcElementResolved {
             + "\\]"
             + "(?<additional>.*)";
 
-    private static final Pattern xpathPattern = Pattern.compile(xpathPatternBlueprint);
-    private static final String additionalPatternBlueprint = "(?<additionalKey>.+)\\[(.+)='(?<additionalValue>.+)'\\]";
-    private static final Pattern additionalPattern = Pattern.compile(additionalPatternBlueprint);
+    private static final Pattern XPATH_PATTERN = Pattern.compile(XPATH_PATTERN_BLUEPRINT);
+    private static final String ADDITIONAL_PATTERN_BLUEPRINT = "(?<additionalKey>.+)\\[(.+)='(?<additionalValue>.+)'\\]";
+    private static final Pattern ADDITIONAL_PATTERN = Pattern.compile(ADDITIONAL_PATTERN_BLUEPRINT);
 
     public static RuntimeRpcElementResolved fromXpath(String xpath, String elementName, String namespace) {
-        Matcher matcher = xpathPattern.matcher(xpath);
+        Matcher matcher = XPATH_PATTERN.matcher(xpath);
         Preconditions.checkState(matcher.matches(),
                 "Node %s with value '%s' not in required form on rpc element %s, required format is %s",
-                RuntimeRpc.CONTEXT_INSTANCE, xpath, elementName, xpathPatternBlueprint);
+                RuntimeRpc.CONTEXT_INSTANCE, xpath, elementName, XPATH_PATTERN_BLUEPRINT);
 
         PatternGroupResolver groups = new PatternGroupResolver(matcher.group("key1"), matcher.group("value1"),
                 matcher.group("value2"), matcher.group("additional"));
@@ -130,24 +130,24 @@ public final class RuntimeRpcElementResolved {
         }
 
         Map<String, String> getAdditionalKeys(String elementName, String moduleName) {
-            HashMap<String, String> additionalAttributes = Maps.newHashMap();
+            Map<String, String> additionalAttributeKeys = Maps.newHashMap();
 
             runtimeBeanYangName = moduleName;
             for (String additionalKeyValue : additional.split("/")) {
                 if (Strings.isNullOrEmpty(additionalKeyValue)){
                     continue;
                 }
-                Matcher matcher = additionalPattern.matcher(additionalKeyValue);
+                Matcher matcher = ADDITIONAL_PATTERN.matcher(additionalKeyValue);
                 Preconditions
                         .checkState(
                                 matcher.matches(),
                                 "Attribute %s not in required form on rpc element %s, required format for additional attributes is  %s",
-                                additionalKeyValue, elementName, additionalPatternBlueprint);
+                                additionalKeyValue, elementName, ADDITIONAL_PATTERN_BLUEPRINT);
                 String name = matcher.group("additionalKey");
                 runtimeBeanYangName = name;
-                additionalAttributes.put(name, matcher.group("additionalValue"));
+                additionalAttributeKeys.put(name, matcher.group("additionalValue"));
             }
-            return additionalAttributes;
+            return additionalAttributeKeys;
         }
 
         private String getRuntimeBeanYangName() {

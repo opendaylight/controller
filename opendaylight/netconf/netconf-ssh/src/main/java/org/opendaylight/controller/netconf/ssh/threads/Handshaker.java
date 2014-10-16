@@ -56,7 +56,7 @@ import io.netty.handler.stream.ChunkedStream;
  */
 @ThreadSafe
 public class Handshaker implements Runnable {
-    private static final Logger logger = LoggerFactory.getLogger(Handshaker.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Handshaker.class);
 
     private final ServerConnection ganymedConnection;
     private final String session;
@@ -68,7 +68,7 @@ public class Handshaker implements Runnable {
         this.session = "Session " + sessionId;
 
         String remoteAddressWithPort = socket.getRemoteSocketAddress().toString().replace("/", "");
-        logger.debug("{} started with {}", session, remoteAddressWithPort);
+        LOGGER.debug("{} started with {}", session, remoteAddressWithPort);
         String remoteAddress, remotePort;
         if (remoteAddressWithPort.contains(":")) {
             String[] split = remoteAddressWithPort.split(":");
@@ -106,14 +106,14 @@ public class Handshaker implements Runnable {
     @Override
     public void run() {
         // let ganymed process handshake
-        logger.trace("{} is started", session);
+        LOGGER.trace("{} is started", session);
         try {
             // TODO this should be guarded with a timer to prevent resource exhaustion
             ganymedConnection.connect();
         } catch (IOException e) {
-            logger.debug("{} connection error", session, e);
+            LOGGER.debug("{} connection error", session, e);
         }
-        logger.trace("{} is exiting", session);
+        LOGGER.trace("{} is exiting", session);
     }
 }
 
@@ -123,7 +123,7 @@ public class Handshaker implements Runnable {
  * down ssh connection.
  */
 class SSHClientHandler extends ChannelInboundHandlerAdapter {
-    private static final Logger logger = LoggerFactory.getLogger(SSHClientHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SSHClientHandler.class);
     private final AutoCloseable remoteConnection;
     private final BufferedOutputStream remoteOutputStream;
     private final String session;
@@ -139,7 +139,7 @@ class SSHClientHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
         this.channelHandlerContext = ctx;
-        logger.debug("{} Client active", session);
+        LOGGER.debug("{} Client active", session);
     }
 
     @Override
@@ -161,20 +161,20 @@ class SSHClientHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws IOException {
-        logger.trace("{} Flushing", session);
+        LOGGER.trace("{} Flushing", session);
         remoteOutputStream.flush();
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         // Close the connection when an exception is raised.
-        logger.warn("{} Unexpected exception from downstream", session, cause);
+        LOGGER.warn("{} Unexpected exception from downstream", session, cause);
         ctx.close();
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        logger.trace("{} channelInactive() called, closing remote client ctx", session);
+        LOGGER.trace("{} channelInactive() called, closing remote client ctx", session);
         remoteConnection.close();//this should close socket and all threads created for this client
         this.channelHandlerContext = null;
     }
@@ -191,7 +191,7 @@ class SSHClientHandler extends ChannelInboundHandlerAdapter {
  * Writes custom header to netty server, to inform it about IP address and username.
  */
 class ServerConnectionCallbackImpl implements ServerConnectionCallback {
-    private static final Logger logger = LoggerFactory.getLogger(ServerConnectionCallbackImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerConnectionCallbackImpl.class);
     public static final String NETCONF_SUBSYSTEM = "netconf";
 
     private final Supplier<String> currentUserSupplier;
@@ -257,21 +257,21 @@ class ServerConnectionCallbackImpl implements ServerConnectionCallback {
                             new ClientInputStreamPoolingThread(session, ss.getStdout(), channel, new AutoCloseable() {
                                 @Override
                                 public void close() throws Exception {
-                                    logger.trace("Closing both ganymed and local connection");
+                                    LOGGER.trace("Closing both ganymed and local connection");
                                     try {
                                         ganymedConnection.close();
                                     } catch (Exception e) {
-                                        logger.warn("Ignoring exception while closing ganymed", e);
+                                        LOGGER.warn("Ignoring exception while closing ganymed", e);
                                     }
                                     try {
                                         channel.close();
                                     } catch (Exception e) {
-                                        logger.warn("Ignoring exception while closing channel", e);
+                                        LOGGER.warn("Ignoring exception while closing channel", e);
                                     }
                                 }
                             }, sshClientHandler.getChannelHandlerContext()).start();
                         } else {
-                            logger.debug("{} Wrong subsystem requested:'{}', closing ssh session", serverSession, subsystem);
+                            LOGGER.debug("{} Wrong subsystem requested:'{}', closing ssh session", serverSession, subsystem);
                             String reason = "Only netconf subsystem is supported, requested:" + subsystem;
                             closeSession(ss, reason);
                         }
@@ -280,11 +280,11 @@ class ServerConnectionCallbackImpl implements ServerConnectionCallback {
             }
 
             public void closeSession(ServerSession ss, String reason) {
-                logger.trace("{} Closing session - {}", serverSession, reason);
+                LOGGER.trace("{} Closing session - {}", serverSession, reason);
                 try {
                     ss.getStdin().write(reason.getBytes());
                 } catch (IOException e) {
-                    logger.warn("{} Exception while closing session", serverSession, e);
+                    LOGGER.warn("{} Exception while closing session", serverSession, e);
                 }
                 ss.close();
             }
@@ -317,7 +317,7 @@ class ServerConnectionCallbackImpl implements ServerConnectionCallback {
  * When user closes connection, onEndOfInput.close() is called to tear down the local channel.
  */
 class ClientInputStreamPoolingThread extends Thread {
-    private static final Logger logger = LoggerFactory.getLogger(ClientInputStreamPoolingThread.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientInputStreamPoolingThread.class);
 
     private final InputStream fromClientIS;
     private final Channel serverChannel;
@@ -342,14 +342,14 @@ class ClientInputStreamPoolingThread extends Thread {
                 serverChannel.writeAndFlush(byteBuf);
             }
         } catch (Exception e) {
-            logger.warn("Exception", e);
+            LOGGER.warn("Exception", e);
         } finally {
-            logger.trace("End of input");
+            LOGGER.trace("End of input");
             // tear down connection
             try {
                 onEndOfInput.close();
             } catch (Exception e) {
-                logger.warn("Ignoring exception while closing socket", e);
+                LOGGER.warn("Ignoring exception while closing socket", e);
             }
         }
     }
@@ -361,7 +361,7 @@ class ClientInputStreamPoolingThread extends Thread {
  */
 @NotThreadSafe
 class ServerAuthenticationCallbackImpl implements ServerAuthenticationCallback, Supplier<String> {
-    private static final Logger logger = LoggerFactory.getLogger(ServerAuthenticationCallbackImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerAuthenticationCallbackImpl.class);
     private final AuthProvider authProvider;
     private final String session;
     private String currentUser;
@@ -373,7 +373,7 @@ class ServerAuthenticationCallbackImpl implements ServerAuthenticationCallback, 
 
     @Override
     public String initAuthentication(ServerConnection sc) {
-        logger.trace("{} Established connection", session);
+        LOGGER.trace("{} Established connection", session);
         return "Established connection" + "\r\n";
     }
 
@@ -393,11 +393,11 @@ class ServerAuthenticationCallbackImpl implements ServerAuthenticationCallback, 
         try {
             if (authProvider.authenticated(username, password)) {
                 currentUser = username;
-                logger.trace("{} user {} authenticated", session, currentUser);
+                LOGGER.trace("{} user {} authenticated", session, currentUser);
                 return AuthenticationResult.SUCCESS;
             }
         } catch (Exception e) {
-            logger.warn("{} Authentication failed", session, e);
+            LOGGER.warn("{} Authentication failed", session, e);
         }
         return AuthenticationResult.FAILURE;
     }

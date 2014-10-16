@@ -38,7 +38,7 @@ import org.xml.sax.SAXException;
 public final class XmlElement {
 
     private final Element element;
-    private static final Logger logger = LoggerFactory.getLogger(XmlElement.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(XmlElement.class);
 
     private XmlElement(Element element) {
         this.element = element;
@@ -108,8 +108,7 @@ public final class XmlElement {
     }
 
     public void checkNamespaceAttribute(String expectedNamespace) throws UnexpectedNamespaceException, MissingNameSpaceException {
-        if (!getNamespaceAttribute().equals(expectedNamespace))
-        {
+        if (!getNamespaceAttribute().equals(expectedNamespace)) {
             throw new UnexpectedNamespaceException(String.format("Unexpected namespace %s should be %s",
                     getNamespaceAttribute(),
                     expectedNamespace),
@@ -120,8 +119,7 @@ public final class XmlElement {
     }
 
     public void checkNamespace(String expectedNamespace) throws UnexpectedNamespaceException, MissingNameSpaceException {
-        if (!getNamespace().equals(expectedNamespace))
-       {
+        if (!getNamespace().equals(expectedNamespace)) {
             throw new UnexpectedNamespaceException(String.format("Unexpected namespace %s should be %s",
                     getNamespace(),
                     expectedNamespace),
@@ -132,7 +130,7 @@ public final class XmlElement {
     }
 
     public String getName() {
-        if (element.getLocalName()!=null && !element.getLocalName().equals("")){
+        if (element.getLocalName()!=null && !"".equals(element.getLocalName())) {
             return element.getLocalName();
         }
         return element.getTagName();
@@ -356,7 +354,7 @@ public final class XmlElement {
 
     public String getNamespaceAttribute() throws MissingNameSpaceException {
         String attribute = element.getAttribute(XmlUtil.XMLNS_ATTRIBUTE_KEY);
-        if (attribute == null || attribute.equals("")){
+        if ("".equals(attribute)) {
             throw new MissingNameSpaceException(String.format("Element %s must specify namespace",
                     toString()),
                     NetconfDocumentedException.ErrorType.application,
@@ -394,7 +392,7 @@ public final class XmlElement {
             try {
                 sb.append(", namespace='").append(getNamespace()).append('\'');
             } catch (MissingNameSpaceException e) {
-                logger.trace("Missing namespace for element.");
+                LOGGER.trace("Missing namespace for element.");
             }
         }
         sb.append('}');

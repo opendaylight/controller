@@ -27,7 +27,7 @@ public abstract class AbstractAttributeReadingStrategy implements AttributeReadi
 
     @Override
     public AttributeConfigElement readElement(List<XmlElement> configNodes) throws NetconfDocumentedException {
-        if (configNodes.size() == 0){
+        if (configNodes.isEmpty()){
             return AttributeConfigElement.createNullValue(postprocessNullableDefault(nullableDefault));
         }
         return readElementHook(configNodes);

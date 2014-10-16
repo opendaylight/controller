@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 
 public final class NetconfServerSession extends AbstractNetconfSession<NetconfServerSession, NetconfServerSessionListener> implements NetconfManagementSession {
 
-    private static final Logger logger = LoggerFactory.getLogger(NetconfServerSession.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NetconfServerSession.class);
 
     private final NetconfHelloMessageAdditionalHeader header;
 
@@ -50,7 +50,7 @@ public final class NetconfServerSession extends AbstractNetconfSession<NetconfSe
             NetconfHelloMessageAdditionalHeader header) {
         super(sessionListener, channel, sessionId);
         this.header = header;
-        logger.debug("Session {} created", toString());
+        LOGGER.debug("Session {} created", toString());
     }
 
     @Override
@@ -74,8 +74,8 @@ public final class NetconfServerSession extends AbstractNetconfSession<NetconfSe
 
     public static final String ISO_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
 
-    private static final String dateTimePatternString = DateAndTime.PATTERN_CONSTANTS.get(0);
-    private static final Pattern dateTimePattern = Pattern.compile(dateTimePatternString);
+    private static final String DATE_TIME_PATTERN_STRING= DateAndTime.PATTERN_CONSTANTS.get(0);
+    private static final Pattern DATE_TIME_PATTERN = Pattern.compile(DATE_TIME_PATTERN_STRING);
 
     @Override
     public Session toManagementSession() {
@@ -87,8 +87,8 @@ public final class NetconfServerSession extends AbstractNetconfSession<NetconfSe
         Preconditions.checkState(DateAndTime.PATTERN_CONSTANTS.size() == 1);
         String formattedDateTime = formatDateTime(loginTime);
 
-        Matcher matcher = dateTimePattern.matcher(formattedDateTime);
-        Preconditions.checkState(matcher.matches(), "Formatted datetime %s does not match pattern %s", formattedDateTime, dateTimePattern);
+        Matcher matcher = DATE_TIME_PATTERN.matcher(formattedDateTime);
+        Preconditions.checkState(matcher.matches(), "Formatted datetime %s does not match pattern %s", formattedDateTime, DATE_TIME_PATTERN);
         builder.setLoginTime(new DateAndTime(formattedDateTime));
 
         builder.setInBadRpcs(new ZeroBasedCounter32(inRpcFail));

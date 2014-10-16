@@ -26,7 +26,7 @@ import java.util.Map;
 
 final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingStrategy<Object, SimpleType<?>> {
 
-    private static final Logger logger = LoggerFactory.getLogger(SimpleAttributeResolvingStrategy.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleAttributeResolvingStrategy.class);
 
     SimpleAttributeResolvingStrategy(SimpleType<?> simpleType) {
         super(simpleType);
@@ -52,24 +52,24 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
 
         Util.checkType(value, String.class);
 
-        Resolver prefferedPlugin = resolverPlugins.get(cls.getCanonicalName());
-        prefferedPlugin = prefferedPlugin == null ? resolverPlugins.get(DEFAULT_RESOLVERS) : prefferedPlugin;
+        Resolver prefferedPlugin = RESOLVER_PLUGINS.get(cls.getCanonicalName());
+        prefferedPlugin = prefferedPlugin == null ? RESOLVER_PLUGINS.get(DEFAULT_RESOLVERS) : prefferedPlugin;
 
         Object parsedValue = prefferedPlugin.resolveObject(cls, attrName, (String) value);
-        logger.debug("Attribute {} : {} parsed to type {} with value {}", attrName, value, getOpenType(), parsedValue);
+        LOGGER.debug("Attribute {} : {} parsed to type {} with value {}", attrName, value, getOpenType(), parsedValue);
         return Optional.of(parsedValue);
     }
 
     private static final String DEFAULT_RESOLVERS = "default";
-    private static final Map<String, Resolver> resolverPlugins = Maps.newHashMap();
+    private static final Map<String, Resolver> RESOLVER_PLUGINS = Maps.newHashMap();
 
     static {
-        resolverPlugins.put(DEFAULT_RESOLVERS, new DefaultResolver());
-        resolverPlugins.put(String.class.getCanonicalName(), new StringResolver());
-        resolverPlugins.put(Date.class.getCanonicalName(), new DateResolver());
-        resolverPlugins.put(Character.class.getCanonicalName(), new CharResolver());
-        resolverPlugins.put(BigInteger.class.getCanonicalName(), new BigIntegerResolver());
-        resolverPlugins.put(BigDecimal.class.getCanonicalName(), new BigDecimalResolver());
+        RESOLVER_PLUGINS.put(DEFAULT_RESOLVERS, new DefaultResolver());
+        RESOLVER_PLUGINS.put(String.class.getCanonicalName(), new StringResolver());
+        RESOLVER_PLUGINS.put(Date.class.getCanonicalName(), new DateResolver());
+        RESOLVER_PLUGINS.put(Character.class.getCanonicalName(), new CharResolver());
+        RESOLVER_PLUGINS.put(BigInteger.class.getCanonicalName(), new BigIntegerResolver());
+        RESOLVER_PLUGINS.put(BigDecimal.class.getCanonicalName(), new BigDecimalResolver());
     }
 
     static interface Resolver {
@@ -96,7 +96,7 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
                 method = type.getMethod("valueOf", String.class);
                 return method.invoke(null, value);
             } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                logger.trace("Error parsing object {}",e);
+                LOGGER.trace("Error parsing object {}",e);
                 throw new NetconfDocumentedException("Error parsing object.",
                         NetconfDocumentedException.ErrorType.application,
                         NetconfDocumentedException.ErrorTag.operation_failed,
@@ -143,7 +143,7 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
             try {
                 return Util.readDate(value);
             } catch (ParseException e) {
-                logger.trace("Unable parse value {} due to  {}",value, e);
+                LOGGER.trace("Unable parse value {} due to  {}",value, e);
                 throw new NetconfDocumentedException("Unable to parse value "+value+" as date.",
                         NetconfDocumentedException.ErrorType.application,
                         NetconfDocumentedException.ErrorTag.operation_failed,

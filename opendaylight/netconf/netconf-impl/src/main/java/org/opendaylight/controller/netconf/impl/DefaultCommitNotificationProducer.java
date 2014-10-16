@@ -27,16 +27,16 @@ import java.util.Set;
 public class DefaultCommitNotificationProducer extends NotificationBroadcasterSupport implements
         DefaultCommitOperationMXBean, AutoCloseable {
 
-    private static final Logger logger = LoggerFactory.getLogger(DefaultCommitNotificationProducer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCommitNotificationProducer.class);
 
     private final MBeanServer mbeanServer;
 
-    private final ObjectName on = DefaultCommitOperationMXBean.OBJECT_NAME;
+    private static final ObjectName ON = DefaultCommitOperationMXBean.OBJECT_NAME;
 
     public DefaultCommitNotificationProducer(MBeanServer mBeanServer) {
         this.mbeanServer = mBeanServer;
-        logger.debug("Registering to JMX under {}", on);
-        registerMBean(this, mbeanServer, on);
+        LOGGER.debug("Registering to JMX under {}", ON);
+        registerMBean(this, mbeanServer, ON);
     }
 
     private static void registerMBean(final Object instance, final MBeanServer mbs, final ObjectName on) {
@@ -49,16 +49,16 @@ public class DefaultCommitNotificationProducer extends NotificationBroadcasterSu
 
     public void sendCommitNotification(String message, Element cfgSnapshot, Set<String> capabilities) {
         CommitJMXNotification notif = NetconfJMXNotification.afterCommit(this, message, cfgSnapshot, capabilities);
-        logger.debug("Notification about commit {} sent", notif);
+        LOGGER.debug("Notification about commit {} sent", notif);
         sendNotification(notif);
     }
 
     @Override
     public void close() {
         try {
-            mbeanServer.unregisterMBean(on);
+            mbeanServer.unregisterMBean(ON);
         } catch (InstanceNotFoundException | MBeanRegistrationException e) {
-            logger.warn("Ignoring exception while unregistering {} as {}", this, on, e);
+            LOGGER.warn("Ignoring exception while unregistering {} as {}", this, ON, e);
         }
     }
 }

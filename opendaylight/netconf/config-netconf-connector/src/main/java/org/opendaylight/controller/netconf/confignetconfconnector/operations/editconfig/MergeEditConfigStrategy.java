@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 public class MergeEditConfigStrategy extends AbstractEditConfigStrategy {
 
-    private static final Logger logger = LoggerFactory.getLogger(MergeEditConfigStrategy.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MergeEditConfigStrategy.class);
 
     public MergeEditConfigStrategy() {
 
@@ -52,20 +52,20 @@ public class MergeEditConfigStrategy extends AbstractEditConfigStrategy {
                 AttributeConfigElement ace = configAttributeEntry.getValue();
 
                 if (!ace.getResolvedValue().isPresent()) {
-                    logger.debug("Skipping attribute {} for {}", configAttributeEntry.getKey(), on);
+                    LOGGER.debug("Skipping attribute {} for {}", configAttributeEntry.getKey(), on);
                     continue;
                 }
 
                 Object toBeMergedIn = ace.getResolvedValue().get();
                 // Get the existing values so we can merge the new values with them.
                 Attribute currentAttribute = ta.getAttribute(on, ace.getJmxName());
-                Object oldValue = (currentAttribute != null ? currentAttribute.getValue() : null);
+                Object oldValue = currentAttribute != null ? currentAttribute.getValue() : null;
                 // Merge value with currentValue
                 toBeMergedIn = merge(oldValue, toBeMergedIn);
                 ta.setAttribute(on, ace.getJmxName(), new Attribute(ace.getJmxName(), toBeMergedIn));
-                logger.debug("Attribute {} set to {} for {}", configAttributeEntry.getKey(), toBeMergedIn, on);
+                LOGGER.debug("Attribute {} set to {} for {}", configAttributeEntry.getKey(), toBeMergedIn, on);
             } catch (Exception e) {
-                logger.error("Error while merging objectnames of {}", on, e);
+                LOGGER.error("Error while merging objectnames of {}", on, e);
                 throw new NetconfConfigHandlingException(String.format("Unable to set attributes for %s, Error with attribute %s : %s ",
                         on,
                         configAttributeEntry.getKey(),
@@ -83,10 +83,11 @@ public class MergeEditConfigStrategy extends AbstractEditConfigStrategy {
      * most common case for which it is needed.
      */
     protected Object merge(Object oldValue, Object toBeMergedIn) {
-        if (oldValue instanceof ObjectName[] && toBeMergedIn instanceof ObjectName[]) {
-            toBeMergedIn = mergeObjectNameArrays((ObjectName[]) oldValue, (ObjectName[]) toBeMergedIn);
+        Object mergeResult = toBeMergedIn;
+        if (oldValue instanceof ObjectName[] && mergeResult instanceof ObjectName[]) {
+            mergeResult = mergeObjectNameArrays((ObjectName[]) oldValue, (ObjectName[]) mergeResult);
         }
-        return toBeMergedIn;
+        return mergeResult;
     }
 
     /**

@@ -53,7 +53,7 @@ import org.w3c.dom.Element;
 
 public class EditConfig extends AbstractConfigNetconfOperation {
 
-    private static final Logger logger = LoggerFactory.getLogger(EditConfig.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EditConfig.class);
 
     private final YangStoreSnapshot yangStoreSnapshot;
 
@@ -80,7 +80,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
             executeSet(getConfigRegistryClient(), editConfigExecution);
         }
 
-        logger.trace("Operation {} successful", EditConfigXmlParser.EDIT_CONFIG);
+        LOGGER.trace("Operation {} successful", EditConfigXmlParser.EDIT_CONFIG);
 
         return XmlUtil.createElement(document, XmlNetconfConstants.OK, Optional.<String>absent());
     }
@@ -88,7 +88,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
     private void executeSet(ConfigRegistryClient configRegistryClient,
             EditConfigXmlParser.EditConfigExecution editConfigExecution) throws NetconfDocumentedException {
         set(configRegistryClient, editConfigExecution);
-        logger.debug("Set phase for {} operation successful", EditConfigXmlParser.EDIT_CONFIG);
+        LOGGER.debug("Set phase for {} operation successful", EditConfigXmlParser.EDIT_CONFIG);
     }
 
     private void executeTests(ConfigRegistryClient configRegistryClient,
@@ -96,13 +96,13 @@ public class EditConfig extends AbstractConfigNetconfOperation {
         try {
             test(configRegistryClient, editConfigExecution, editConfigExecution.getDefaultStrategy());
         } catch (final ValidationException e) {
-            logger.warn("Test phase for {} failed", EditConfigXmlParser.EDIT_CONFIG, e);
+            LOGGER.warn("Test phase for {} failed", EditConfigXmlParser.EDIT_CONFIG, e);
             final Map<String, String> errorInfo = new HashMap<>();
             errorInfo.put(ErrorTag.operation_failed.name(), e.getMessage());
             throw new NetconfDocumentedException("Test phase: " + e.getMessage(), e, ErrorType.application,
                     ErrorTag.operation_failed, ErrorSeverity.error, errorInfo);
         }
-        logger.debug("Test phase for {} operation successful", EditConfigXmlParser.EDIT_CONFIG);
+        LOGGER.debug("Test phase for {} operation successful", EditConfigXmlParser.EDIT_CONFIG);
     }
 
     private void test(ConfigRegistryClient configRegistryClient, EditConfigExecution execution,
@@ -158,7 +158,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
                     ObjectName on = refNameToServiceEntry.getValue().getObjectName(ta.getTransactionName());
                     try {
                         ObjectName saved = ta.saveServiceReference(qnameOfService, refNameToServiceEntry.getKey(), on);
-                        logger.debug("Saving service {} with on {} under name {} with service on {}", qnameOfService,
+                        LOGGER.debug("Saving service {} with on {} under name {} with service on {}", qnameOfService,
                                 on, refNameToServiceEntry.getKey(), saved);
                     } catch (InstanceNotFoundException e) {
                         throw new NetconfDocumentedException(String.format("Unable to save ref name " + refNameToServiceEntry.getKey() + " for instance " + on, e),

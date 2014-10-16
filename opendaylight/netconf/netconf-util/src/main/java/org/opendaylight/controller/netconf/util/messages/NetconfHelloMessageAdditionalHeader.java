@@ -81,7 +81,7 @@ public class NetconfHelloMessageAdditionalHeader {
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("NetconfHelloMessageAdditionalHeader{");
+        final StringBuilder sb = new StringBuilder("NetconfHelloMessageAdditionalHeader{");
         sb.append("userName='").append(userName).append('\'');
         sb.append(", hostAddress='").append(hostAddress).append('\'');
         sb.append(", port='").append(port).append('\'');

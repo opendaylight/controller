@@ -35,10 +35,10 @@ public class ObjectXmlWriter extends AttributeIfcSwitchStatement<AttributeWritin
         Map<String, AttributeWritingStrategy> preparedWriting = Maps.newHashMap();
 
         for (Entry<String, AttributeIfc> mappedAttributeEntry : yangToAttrConfig.entrySet()) {
-            String key = mappedAttributeEntry.getKey();
+            String attrKey = mappedAttributeEntry.getKey();
             AttributeIfc value = mappedAttributeEntry.getValue();
-            AttributeWritingStrategy strat = prepareWritingStrategy(key, value, document);
-            preparedWriting.put(key, strat);
+            AttributeWritingStrategy strat = prepareWritingStrategy(attrKey, value, document);
+            preparedWriting.put(attrKey, strat);
         }
 
         return preparedWriting;

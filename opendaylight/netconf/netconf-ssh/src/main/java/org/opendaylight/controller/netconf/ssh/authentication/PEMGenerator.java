@@ -26,9 +26,11 @@ import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
 
 public class PEMGenerator {
-    private static final Logger logger = LoggerFactory.getLogger(PEMGenerator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PEMGenerator.class);
     private static final int KEY_SIZE = 4096;
 
+    private PEMGenerator() {
+    }
 
     public static String readOrGeneratePK(File privateKeyFile) throws IOException {
         if (privateKeyFile.exists() == false) {
@@ -36,7 +38,7 @@ public class PEMGenerator {
             try {
                 return generateTo(privateKeyFile);
             } catch (Exception e) {
-                logger.error("Exception occurred while generating PEM string to {}", privateKeyFile, e);
+                LOGGER.error("Exception occurred while generating PEM string to {}", privateKeyFile, e);
                 throw new IllegalStateException("Error generating RSA key from file " + privateKeyFile);
             }
         } else {
@@ -44,7 +46,7 @@ public class PEMGenerator {
             try (FileInputStream fis = new FileInputStream(privateKeyFile)) {
                 return IOUtils.toString(fis);
             } catch (final IOException e) {
-                logger.error("Error reading RSA key from file {}", privateKeyFile, e);
+                LOGGER.error("Error reading RSA key from file {}", privateKeyFile, e);
                 throw new IOException("Error reading RSA key from file " + privateKeyFile, e);
             }
         }
@@ -60,7 +62,7 @@ public class PEMGenerator {
      */
     @VisibleForTesting
     public static String generateTo(File privateFile) throws IOException, NoSuchAlgorithmException {
-        logger.info("Generating private key to {}", privateFile.getAbsolutePath());
+        LOGGER.info("Generating private key to {}", privateFile.getAbsolutePath());
         String privatePEM = generate();
         FileUtils.write(privateFile, privatePEM);
         return privatePEM;

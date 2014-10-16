@@ -28,7 +28,6 @@ import com.google.common.base.Optional;
 
 public abstract class AbstractNetconfOperation implements NetconfOperation {
     private final String netconfSessionIdForReporting;
-    private static final Logger logger = LoggerFactory.getLogger(AbstractNetconfOperation.class);
 
     protected AbstractNetconfOperation(String netconfSessionIdForReporting) {
         this.netconfSessionIdForReporting = netconfSessionIdForReporting;
@@ -128,7 +127,7 @@ public abstract class AbstractNetconfOperation implements NetconfOperation {
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer(getClass().getName());
+        final StringBuilder sb = new StringBuilder(getClass().getName());
         try {
             sb.append("{name=").append(getOperationName());
         } catch(UnsupportedOperationException e) {

@@ -23,12 +23,12 @@ public class NetconfOperationServiceSnapshotImpl implements NetconfOperationServ
     private final String netconfSessionIdForReporting;
 
     public NetconfOperationServiceSnapshotImpl(Set<NetconfOperationServiceFactory> factories, String sessionIdForReporting) {
-        Set<NetconfOperationService> services = new HashSet<>();
+        Set<NetconfOperationService> operServices = new HashSet<>();
         netconfSessionIdForReporting = sessionIdForReporting;
         for (NetconfOperationServiceFactory factory : factories) {
-            services.add(factory.createService(netconfSessionIdForReporting));
+            operServices.add(factory.createService(netconfSessionIdForReporting));
         }
-        this.services = Collections.unmodifiableSet(services);
+        this.services = Collections.unmodifiableSet(operServices);
     }
 
 

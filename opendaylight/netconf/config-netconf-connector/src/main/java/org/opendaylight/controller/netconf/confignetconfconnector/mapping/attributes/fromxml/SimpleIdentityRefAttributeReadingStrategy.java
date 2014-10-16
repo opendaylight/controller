@@ -63,7 +63,7 @@ public class SimpleIdentityRefAttributeReadingStrategy extends SimpleAttributeRe
 
     @Override
     protected Object postprocessParsedValue(String textContent) {
-        HashMap<String,String> map = Maps.newHashMap();
+        Map<String,String> map = Maps.newHashMap();
         map.put(key, textContent);
         return map;
     }

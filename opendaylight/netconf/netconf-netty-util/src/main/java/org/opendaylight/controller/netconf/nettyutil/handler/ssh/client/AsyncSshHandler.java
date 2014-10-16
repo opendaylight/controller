@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
 
-    private static final Logger logger = LoggerFactory.getLogger(AsyncSshHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AsyncSshHandler.class);
     public static final String SUBSYSTEM = "netconf";
 
     public static final SshClient DEFAULT_CLIENT = SshClient.setUpDefaultClient();
@@ -73,7 +73,7 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
     }
 
     private void startSsh(final ChannelHandlerContext ctx, final SocketAddress address) {
-        logger.debug("Starting SSH to {} on channel: {}", address, ctx.channel());
+        LOGGER.debug("Starting SSH to {} on channel: {}", address, ctx.channel());
 
         final ConnectFuture sshConnectionFuture = sshClient.connect(authenticationHandler.getUsername(), address);
         sshConnectionFuture.addListener(new SshFutureListener<ConnectFuture>() {
@@ -90,7 +90,7 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
 
     private synchronized void handleSshSessionCreated(final ConnectFuture future, final ChannelHandlerContext ctx) {
         try {
-            logger.trace("SSH session created on channel: {}", ctx.channel());
+            LOGGER.trace("SSH session created on channel: {}", ctx.channel());
 
             session = future.getSession();
             final AuthFuture authenticateFuture = authenticationHandler.authenticate(session);
@@ -111,7 +111,7 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
 
     private synchronized void handleSshAuthenticated(final ClientSession session, final ChannelHandlerContext ctx) {
         try {
-            logger.debug("SSH session authenticated on channel: {}, server version: {}", ctx.channel(), session.getServerVersion());
+            LOGGER.debug("SSH session authenticated on channel: {}, server version: {}", ctx.channel(), session.getServerVersion());
 
             channel = session.createSubsystemChannel(SUBSYSTEM);
             channel.setStreaming(ClientChannel.Streaming.Async);
@@ -133,7 +133,7 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
     }
 
     private synchronized void handleSshChanelOpened(final ChannelHandlerContext ctx) {
-        logger.trace("SSH subsystem channel opened successfully on channel: {}", ctx.channel());
+        LOGGER.trace("SSH subsystem channel opened successfully on channel: {}", ctx.channel());
 
         connectPromise.setSuccess();
         connectPromise = null;
@@ -147,7 +147,7 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
     }
 
     private synchronized void handleSshSetupFailure(final ChannelHandlerContext ctx, final Throwable e) {
-        logger.warn("Unable to setup SSH connection on channel: {}", ctx.channel(), e);
+        LOGGER.warn("Unable to setup SSH connection on channel: {}", ctx.channel(), e);
         connectPromise.setFailure(e);
         connectPromise = null;
         throw new IllegalStateException("Unable to setup SSH connection on channel: " + ctx.channel(), e);
@@ -194,7 +194,7 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
         channel = null;
         promise.setSuccess();
 
-        logger.debug("SSH session closed on channel: {}", ctx.channel());
+        LOGGER.debug("SSH session closed on channel: {}", ctx.channel());
         ctx.fireChannelInactive();
     }
 

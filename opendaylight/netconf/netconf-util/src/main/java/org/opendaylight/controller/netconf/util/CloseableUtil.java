@@ -10,6 +10,9 @@ package org.opendaylight.controller.netconf.util;
 
 public class CloseableUtil {
 
+    private CloseableUtil() {
+    }
+
     public static void closeAll(Iterable<? extends AutoCloseable> autoCloseables) throws Exception {
         Exception lastException = null;
         for (AutoCloseable autoCloseable : autoCloseables) {

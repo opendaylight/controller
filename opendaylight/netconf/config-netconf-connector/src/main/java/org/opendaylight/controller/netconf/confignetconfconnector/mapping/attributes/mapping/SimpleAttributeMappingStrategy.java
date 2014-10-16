@@ -34,16 +34,16 @@ public class SimpleAttributeMappingStrategy extends AbstractAttributeMappingStra
         Preconditions.checkArgument(realClass.equals(expectedClass), "Type mismatch, expected " + expectedClass
                 + " but was " + realClass);
 
-        WriterPlugin prefferedPlugin = writerPlugins.get(value.getClass().getCanonicalName());
-        prefferedPlugin = prefferedPlugin == null ? writerPlugins.get(DEFAULT_WRITER_PLUGIN) : prefferedPlugin;
+        WriterPlugin prefferedPlugin = WRITER_PLUGINS.get(value.getClass().getCanonicalName());
+        prefferedPlugin = prefferedPlugin == null ? WRITER_PLUGINS.get(DEFAULT_WRITER_PLUGIN) : prefferedPlugin;
         return Optional.of(prefferedPlugin.writeObject(value));
     }
 
     private static final String DEFAULT_WRITER_PLUGIN = "default";
-    private static final Map<String, WriterPlugin> writerPlugins = Maps.newHashMap();
+    private static final Map<String, WriterPlugin> WRITER_PLUGINS = Maps.newHashMap();
     static {
-        writerPlugins.put(DEFAULT_WRITER_PLUGIN, new DefaultWriterPlugin());
-        writerPlugins.put(Date.class.getCanonicalName(), new DatePlugin());
+        WRITER_PLUGINS.put(DEFAULT_WRITER_PLUGIN, new DefaultWriterPlugin());
+        WRITER_PLUGINS.put(Date.class.getCanonicalName(), new DatePlugin());
     }
 
     /**

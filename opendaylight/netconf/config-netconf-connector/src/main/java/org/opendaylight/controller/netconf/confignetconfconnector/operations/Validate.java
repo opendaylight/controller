@@ -32,7 +32,7 @@ public class Validate extends AbstractConfigNetconfOperation {
 
     public static final String VALIDATE = "validate";
 
-    private static final Logger logger = LoggerFactory.getLogger(Validate.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Validate.class);
 
     private final TransactionProvider transactionProvider;
 
@@ -71,10 +71,10 @@ public class Validate extends AbstractConfigNetconfOperation {
         try {
             transactionProvider.validateTransaction();
         } catch (ValidationException e) {
-            logger.warn("Validation failed", e);
+            LOGGER.warn("Validation failed", e);
             throw NetconfDocumentedException.wrap(e);
         } catch (IllegalStateException e) {
-            logger.warn("Validation failed", e);
+            LOGGER.warn("Validation failed", e);
             final Map<String, String> errorInfo = new HashMap<>();
             errorInfo
                     .put(ErrorTag.operation_failed.name(),
@@ -84,7 +84,7 @@ public class Validate extends AbstractConfigNetconfOperation {
 
         }
 
-        logger.trace("Datastore {} validated successfully", Datastore.candidate);
+        LOGGER.trace("Datastore {} validated successfully", Datastore.candidate);
 
         return XmlUtil.createElement(document, XmlNetconfConstants.OK, Optional.<String>absent());
     }
