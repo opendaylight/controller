@@ -36,7 +36,6 @@
       <bundle>wrap:mvn:io.netty/netty-common/${netty.version}</bundle>
       <bundle>wrap:mvn:io.netty/netty-handler/${netty.version}</bundle>
       <bundle>wrap:mvn:io.netty/netty-codec-http/${netty.version}</bundle>
-      <bundle>mvn:org.opendaylight.controller.thirdparty/ganymed/1.2.0-SNAPSHOT</bundle>
    </feature>
    <feature name="odl-base-jersey" description="Jersey" version="${jersey.version}">
       <feature>odl-base-gemini-web</feature>
