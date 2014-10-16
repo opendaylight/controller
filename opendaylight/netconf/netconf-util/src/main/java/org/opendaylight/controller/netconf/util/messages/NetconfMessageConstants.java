@@ -12,7 +12,8 @@ import com.google.common.base.Charsets;
 
 public final class NetconfMessageConstants {
 
-    private NetconfMessageConstants(){}
+    private NetconfMessageConstants() {
+    }
     /**
      * The NETCONF 1.0 old-style message separator. This is framing mechanism
      * is used by default.

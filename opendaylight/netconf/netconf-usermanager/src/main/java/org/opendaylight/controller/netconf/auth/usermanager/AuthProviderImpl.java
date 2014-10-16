@@ -23,7 +23,7 @@ import com.google.common.annotations.VisibleForTesting;
  * AuthProvider implementation delegating to AD-SAL UserManager instance.
  */
 public class AuthProviderImpl implements AuthProvider {
-    private static final Logger logger = LoggerFactory.getLogger(AuthProviderImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthProviderImpl.class);
 
     private IUserManager nullableUserManager;
 
@@ -32,20 +32,20 @@ public class AuthProviderImpl implements AuthProvider {
         final ServiceTrackerCustomizer<IUserManager, IUserManager> customizer = new ServiceTrackerCustomizer<IUserManager, IUserManager>() {
             @Override
             public IUserManager addingService(final ServiceReference<IUserManager> reference) {
-                logger.trace("UerManager {} added", reference);
+                LOGGER.trace("UerManager {} added", reference);
                 nullableUserManager = bundleContext.getService(reference);
                 return nullableUserManager;
             }
 
             @Override
             public void modifiedService(final ServiceReference<IUserManager> reference, final IUserManager service) {
-                logger.trace("Replacing modified UerManager {}", reference);
+                LOGGER.trace("Replacing modified UerManager {}", reference);
                 nullableUserManager = service;
             }
 
             @Override
             public void removedService(final ServiceReference<IUserManager> reference, final IUserManager service) {
-                logger.trace("Removing UerManager {}. This AuthProvider will fail to authenticate every time", reference);
+                LOGGER.trace("Removing UerManager {}. This AuthProvider will fail to authenticate every time", reference);
                 synchronized (AuthProviderImpl.this) {
                     nullableUserManager = null;
                 }
@@ -62,11 +62,11 @@ public class AuthProviderImpl implements AuthProvider {
     @Override
     public synchronized boolean authenticated(final String username, final String password) {
         if (nullableUserManager == null) {
-            logger.warn("Cannot authenticate user '{}', user manager service is missing", username);
+            LOGGER.warn("Cannot authenticate user '{}', user manager service is missing", username);
             throw new IllegalStateException("User manager service is not available");
         }
         final AuthResultEnum authResult = nullableUserManager.authenticate(username, password);
-        logger.debug("Authentication result for user '{}' : {}", username, authResult);
+        LOGGER.debug("Authentication result for user '{}' : {}", username, authResult);
         return authResult.equals(AuthResultEnum.AUTH_ACCEPT) || authResult.equals(AuthResultEnum.AUTH_ACCEPT_LOC);
     }
 

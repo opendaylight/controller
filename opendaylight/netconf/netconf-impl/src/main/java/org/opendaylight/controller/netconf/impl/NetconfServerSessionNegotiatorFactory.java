@@ -51,7 +51,7 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
     private final long connectionTimeoutMillis;
     private final DefaultCommitNotificationProducer commitNotificationProducer;
     private final SessionMonitoringService monitoringService;
-    private static final Logger logger = LoggerFactory.getLogger(NetconfServerSessionNegotiatorFactory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NetconfServerSessionNegotiatorFactory.class);
     private final Set<String> baseCapabilities;
 
     // TODO too many params, refactor
@@ -112,7 +112,7 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
             proposal = new NetconfServerSessionPreferences(
                     createHelloMessage(sessionId, capabilityProvider), sessionId);
         } catch (NetconfDocumentedException e) {
-            logger.error("Unable to create hello mesage for session {} with capability provider {}", sessionId,capabilityProvider);
+            LOGGER.error("Unable to create hello mesage for session {} with capability provider {}", sessionId,capabilityProvider);
             throw new IllegalStateException(e);
         }
 

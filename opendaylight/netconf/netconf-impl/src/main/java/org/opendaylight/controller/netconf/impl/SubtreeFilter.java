@@ -27,14 +27,15 @@ import org.xml.sax.SAXException;
  * See <a href="http://tools.ietf.org/html/rfc6241#section-6">rfc6241</a> for details.
  */
 public class SubtreeFilter {
-    private static final Logger logger = LoggerFactory.getLogger(SubtreeFilter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SubtreeFilter.class);
 
     static Document applySubtreeFilter(Document requestDocument, Document rpcReply) throws NetconfDocumentedException {
         // FIXME: rpcReply document must be reread otherwise some nodes do not inherit namespaces. (services/service)
+        Document newRpcReply = rpcReply;
         try {
-            rpcReply = XmlUtil.readXmlToDocument(XmlUtil.toString(rpcReply, true));
+            newRpcReply = XmlUtil.readXmlToDocument(XmlUtil.toString(newRpcReply, true));
         } catch (SAXException | IOException e) {
-            logger.error("Cannot transform document", e);
+            LOGGER.error("Cannot transform document", e);
             throw new NetconfDocumentedException("Cannot transform document");
         }
 
@@ -53,10 +54,10 @@ public class SubtreeFilter {
 
 
                 // do
-                return filtered(maybeFilter.get(), rpcReply);
+                return filtered(maybeFilter.get(), newRpcReply);
             }
         }
-        return rpcReply; // return identical document
+        return newRpcReply; // return identical document
     }
 
     private static Document filtered(XmlElement filter, Document originalReplyDocument) throws NetconfDocumentedException {
@@ -159,7 +160,7 @@ public class SubtreeFilter {
         if (result == null) {
             result = MatchingResult.NO_MATCH;
         }
-        logger.debug("Matching {} to {} resulted in {}", src, filter, tagMatch);
+        LOGGER.debug("Matching {} to {} resulted in {}", src, filter, tagMatch);
         return result;
     }
 

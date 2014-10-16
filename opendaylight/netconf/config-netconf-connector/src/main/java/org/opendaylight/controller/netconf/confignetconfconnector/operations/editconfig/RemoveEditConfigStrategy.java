@@ -18,11 +18,11 @@ import java.util.Map;
 
 public class RemoveEditConfigStrategy extends DeleteEditConfigStrategy {
 
-    private static final Logger logger = LoggerFactory.getLogger(RemoveEditConfigStrategy.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RemoveEditConfigStrategy.class);
 
     @Override
     void handleMissingInstance(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta,
                                String module, String instance, ServiceRegistryWrapper services) {
-        logger.warn("Unable to delete {}:{}, ServiceInstance not found", module, instance);
+        LOGGER.warn("Unable to delete {}:{}, ServiceInstance not found", module, instance);
     }
 }

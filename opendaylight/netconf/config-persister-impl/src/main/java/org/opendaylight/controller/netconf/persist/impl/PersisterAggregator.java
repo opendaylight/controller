@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public final class PersisterAggregator implements Persister {
-    private static final Logger logger = LoggerFactory.getLogger(PersisterAggregator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PersisterAggregator.class);
 
     public static class PersisterWithConfiguration {
 
@@ -92,7 +92,7 @@ public final class PersisterAggregator implements Persister {
         String classKey = index + "." + ConfigPersisterActivator.STORAGE_ADAPTER_CLASS_PROP_SUFFIX;
         String storageAdapterClass = propertiesProvider.getProperty(classKey);
         StorageAdapter storageAdapter;
-        if (storageAdapterClass == null || storageAdapterClass.equals("")) {
+        if (storageAdapterClass == null || "".equals(storageAdapterClass)) {
             throw new IllegalStateException("No persister is defined in " +
                     propertiesProvider.getFullKeyForReporting(classKey)
                     + " property. Persister is not operational");
@@ -108,7 +108,7 @@ public final class PersisterAggregator implements Persister {
 
             boolean readOnly = false;
             String readOnlyProperty = propertiesProvider.getProperty(index + "." + "readonly");
-            if (readOnlyProperty != null && readOnlyProperty.equals("true")) {
+            if ("true".equals(readOnlyProperty)) {
                 readOnly = true;
             }
 
@@ -139,7 +139,7 @@ public final class PersisterAggregator implements Persister {
                 persisterWithConfigurations.add(PersisterAggregator.loadConfiguration(index, propertiesProvider));
             }
         }
-        logger.debug("Initialized persister with following adapters {}", persisterWithConfigurations);
+        LOGGER.debug("Initialized persister with following adapters {}", persisterWithConfigurations);
         return new PersisterAggregator(persisterWithConfigurations);
     }
 
@@ -147,7 +147,7 @@ public final class PersisterAggregator implements Persister {
     public void persistConfig(ConfigSnapshotHolder holder) throws IOException {
         for (PersisterWithConfiguration persisterWithConfiguration: persisterWithConfigurations){
             if (!persisterWithConfiguration.readOnly){
-                logger.debug("Calling {}.persistConfig", persisterWithConfiguration.getStorage());
+                LOGGER.debug("Calling {}.persistConfig", persisterWithConfiguration.getStorage());
                 persisterWithConfiguration.getStorage().persistConfig(holder);
             }
         }
@@ -169,12 +169,12 @@ public final class PersisterAggregator implements Persister {
                 throw new RuntimeException("Error while calling loadLastConfig on " +  persisterWithConfiguration, e);
             }
             if (!configs.isEmpty()) {
-                logger.debug("Found non empty configs using {}:{}", persisterWithConfiguration, configs);
+                LOGGER.debug("Found non empty configs using {}:{}", persisterWithConfiguration, configs);
                 return configs;
             }
         }
         // no storage had an answer
-        logger.debug("No non-empty list of configuration snapshots found");
+        LOGGER.debug("No non-empty list of configuration snapshots found");
         return Collections.emptyList();
     }
 
@@ -190,7 +190,7 @@ public final class PersisterAggregator implements Persister {
             try{
                 persisterWithConfiguration.storage.close();
             }catch(RuntimeException e) {
-                logger.error("Error while closing {}", persisterWithConfiguration.storage, e);
+                LOGGER.error("Error while closing {}", persisterWithConfiguration.storage, e);
                 if (lastException == null){
                     lastException = e;
                 } else {

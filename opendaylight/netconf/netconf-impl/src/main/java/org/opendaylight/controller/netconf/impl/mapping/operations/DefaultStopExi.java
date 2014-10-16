@@ -23,7 +23,7 @@ public class DefaultStopExi extends AbstractSingletonNetconfOperation implements
     public static final String STOP_EXI = "stop-exi";
     private NetconfServerSession netconfSession;
 
-    private static final Logger logger = LoggerFactory
+    private static final Logger LOGGER = LoggerFactory
             .getLogger(DefaultStartExi.class);
 
     public DefaultStopExi(String netconfSessionIdForReporting) {
@@ -32,12 +32,12 @@ public class DefaultStopExi extends AbstractSingletonNetconfOperation implements
 
     @Override
     protected Element handleWithNoSubsequentOperations(Document document, XmlElement operationElement) throws NetconfDocumentedException {
-        logger.debug("Received stop-exi message {} ", XmlUtil.toString(operationElement));
+        LOGGER.debug("Received stop-exi message {} ", XmlUtil.toString(operationElement));
 
         netconfSession.stopExiCommunication();
 
         Element getSchemaResult = document.createElementNS( XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0, XmlNetconfConstants.OK);
-        logger.trace("{} operation successful", STOP_EXI);
+        LOGGER.trace("{} operation successful", STOP_EXI);
         return getSchemaResult;
     }
 

@@ -23,9 +23,10 @@ import org.w3c.dom.Document;
 
 public final class NetconfMessageUtil {
 
-    private static final Logger logger = LoggerFactory.getLogger(NetconfMessageUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NetconfMessageUtil.class);
 
-    private NetconfMessageUtil() {}
+    private NetconfMessageUtil() {
+    }
 
     public static boolean isOKMessage(NetconfMessage message) throws NetconfDocumentedException {
         return isOKMessage(message.getDocument());
@@ -70,7 +71,7 @@ public final class NetconfMessageUtil {
                 try {
                     return input.getTextContent().trim();
                 } catch (NetconfDocumentedException e) {
-                    logger.trace("Error fetching inpit text content becauese {}",e);
+                    LOGGER.trace("Error fetching inpit text content becauese {}",e);
                     return null;
                 }
             }

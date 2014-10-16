@@ -19,9 +19,10 @@ import org.w3c.dom.Document;
 
 public final class NetconfUtil {
 
-    private static final Logger logger = LoggerFactory.getLogger(NetconfUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NetconfUtil.class);
 
-    private NetconfUtil() {}
+    private NetconfUtil() {
+    }
 
     public static Document checkIsMessageOk(Document response) throws NetconfDocumentedException {
         XmlElement element = XmlElement.fromDomDocument(response);
@@ -30,7 +31,7 @@ public final class NetconfUtil {
         if (element.getName().equals(XmlNetconfConstants.OK)) {
             return response;
         }
-        logger.warn("Can not load last configuration. Operation failed.");
+        LOGGER.warn("Can not load last configuration. Operation failed.");
         throw new IllegalStateException("Can not load last configuration. Operation failed: "
                 + XmlUtil.toString(response));
     }

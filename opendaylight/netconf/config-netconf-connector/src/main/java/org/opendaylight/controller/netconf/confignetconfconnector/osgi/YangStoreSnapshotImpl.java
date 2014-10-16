@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class YangStoreSnapshotImpl implements YangStoreSnapshot {
-    private static final Logger logger = LoggerFactory.getLogger(YangStoreSnapshotImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(YangStoreSnapshotImpl.class);
 
 
     private final Map<String /* Namespace from yang file */,
@@ -42,7 +42,7 @@ public class YangStoreSnapshotImpl implements YangStoreSnapshot {
 
 
     public YangStoreSnapshotImpl(final SchemaContext resolveSchemaContext) {
-        logger.trace("Resolved modules:{}", resolveSchemaContext.getModules());
+        LOGGER.trace("Resolved modules:{}", resolveSchemaContext.getModules());
         this.schemaContext = resolveSchemaContext;
         // JMX generator
 

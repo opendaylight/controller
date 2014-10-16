@@ -27,7 +27,7 @@ class CompositeAttributeResolvingStrategy extends
     private final Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> innerTypes;
     private final Map<String, String> yangToJavaAttrMapping;
 
-    private static final Logger logger = LoggerFactory.getLogger(CompositeAttributeResolvingStrategy.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CompositeAttributeResolvingStrategy.class);
 
     CompositeAttributeResolvingStrategy(Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> innerTypes,
             CompositeType openType, Map<String, String> yangToJavaAttrMapping) {
@@ -80,7 +80,7 @@ class CompositeAttributeResolvingStrategy extends
                     + " for attribute " + attrName + " from value " + value, e);
         }
 
-        logger.debug("Attribute {} : {} parsed to type {} as {}", attrName, value, getOpenType(), parsedValue);
+        LOGGER.debug("Attribute {} : {} parsed to type {} as {}", attrName, value, getOpenType(), parsedValue);
 
         return Optional.of(parsedValue);
     }

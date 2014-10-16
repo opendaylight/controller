@@ -45,7 +45,7 @@ public class NetconfClientSessionNegotiatorFactory implements SessionNegotiatorF
     private final long connectionTimeoutMillis;
     private final Timer timer;
     private final EXIOptions options;
-    private static final Logger logger = LoggerFactory.getLogger(NetconfClientSessionNegotiatorFactory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NetconfClientSessionNegotiatorFactory.class);
 
     public NetconfClientSessionNegotiatorFactory(Timer timer,
                                                  Optional<NetconfHelloMessageAdditionalHeader> additionalHeader,
@@ -72,7 +72,7 @@ public class NetconfClientSessionNegotiatorFactory implements SessionNegotiatorF
         try {
             helloMessage = NetconfHelloMessage.createClientHello(CLIENT_CAPABILITIES, additionalHeader);
         } catch (NetconfDocumentedException e) {
-            logger.error("Unable to create client hello message with capabilities {} and additional handler {}",CLIENT_CAPABILITIES,additionalHeader);
+            LOGGER.error("Unable to create client hello message with capabilities {} and additional handler {}",CLIENT_CAPABILITIES,additionalHeader);
             throw new IllegalStateException(e);
         }
 
