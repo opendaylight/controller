@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_95878e61",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardReadWriteTransaction.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-16T19:29:36Z",
+      "side": 1,
+      "message": "Yes that\u0027s to optimize the serialized ReadData reply. My point is that for a local Tx actor we\u0027re sending un-serialized request messages so I think it makes sense to also send un-serialized reply messages, i.e. if the caller sends an un-serialized message, reply back with an un-serialized message.\n\nFor a read, the request message is small so we don\u0027t really gain much by not serializing but the reply message can be very large so that\u0027s what we really want to optimize for local calls.",
+      "parentUuid": "ba8cc1f7_555ca625",
+      "revId": "c3b3cefd5ab3c0b576ae0122e093b5b66f7eef80",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_343b28ed",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardReadWriteTransaction.java",
         "patchSetId": 3
