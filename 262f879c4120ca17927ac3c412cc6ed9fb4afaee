@@ -87,6 +87,24 @@
       "revId": "262f879c4120ca17927ac3c412cc6ed9fb4afaee",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_557346b1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DataChangeListenerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-16T18:49:38Z",
+      "side": 1,
+      "message": "That test passes in getRef() as the sender so doesn\u0027t expectNoMsg verify no messages are sent to getRef()? If we pass null (or noSender) then no message would go to getRef() anyway - it would go to deadLetters. So I would want to verify no messages to deadLetters. I\u0027ll see what I can do.",
+      "parentUuid": "ba8cc1f7_3509e22c",
+      "revId": "262f879c4120ca17927ac3c412cc6ed9fb4afaee",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
