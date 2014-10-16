@@ -30,7 +30,7 @@ import com.google.common.base.Preconditions;
  * Delegates the the contained feature and provides additional methods.
  */
 public class AbstractFeatureWrapper implements Feature {
-    private static final Logger logger = LoggerFactory.getLogger(AbstractFeatureWrapper.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFeatureWrapper.class);
     protected Feature feature = null;
 
     protected AbstractFeatureWrapper() {
@@ -55,7 +55,7 @@ public class AbstractFeatureWrapper implements Feature {
             try {
                 snapShotHolders.add(new FeatureConfigSnapshotHolder(c,this));
             } catch (JAXBException e) {
-                logger.debug("{} is not a config subsystem config file",c.getFinalname());
+                LOGGER.debug("{} is not a config subsystem config file",c.getFinalname());
             }
         }
         return snapShotHolders;
@@ -71,18 +71,23 @@ public class AbstractFeatureWrapper implements Feature {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         AbstractFeatureWrapper other = (AbstractFeatureWrapper) obj;
         if (feature == null) {
-            if (other.feature != null)
+            if (other.feature != null) {
                 return false;
-        } else if (!feature.equals(other.feature))
+            }
+        } else if (!feature.equals(other.feature)) {
             return false;
+        }
         return true;
     }
 

@@ -19,6 +19,9 @@ import java.util.Set;
 
 public class ModuleQNameUtil {
 
+    private ModuleQNameUtil() {
+    }
+
     public static Set<String> getQNames(Map<String, Entry<ModuleFactory, BundleContext>> resolved) {
         Set<String> result = new HashSet<>();
         for (Entry<ModuleFactory, BundleContext> entry : resolved.values()) {

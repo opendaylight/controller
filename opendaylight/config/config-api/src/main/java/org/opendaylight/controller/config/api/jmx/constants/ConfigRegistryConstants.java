@@ -12,6 +12,9 @@ import javax.management.ObjectName;
 
 public class ConfigRegistryConstants {
 
+    private ConfigRegistryConstants() {
+    }
+
     public static final String TYPE_CONFIG_REGISTRY = "ConfigRegistry";
 
     public static final String ON_DOMAIN = "org.opendaylight.controller";

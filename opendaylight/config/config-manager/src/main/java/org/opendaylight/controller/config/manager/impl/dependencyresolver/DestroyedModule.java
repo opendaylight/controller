@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DestroyedModule implements AutoCloseable,
         Comparable<DestroyedModule>, Identifiable<ModuleIdentifier> {
-    private static final Logger logger = LoggerFactory
+    private static final Logger LOGGER = LoggerFactory
             .getLogger(DestroyedModule.class);
 
     private final ModuleIdentifier identifier;
@@ -43,21 +43,21 @@ public class DestroyedModule implements AutoCloseable,
 
     @Override
     public void close() {
-        logger.trace("Destroying {}", identifier);
+        LOGGER.trace("Destroying {}", identifier);
         try {
             instance.close();
         } catch (Exception e) {
-            logger.error("Error while closing instance of {}", identifier, e);
+            LOGGER.error("Error while closing instance of {}", identifier, e);
         }
         try {
             oldJMXRegistrator.close();
         } catch (Exception e) {
-            logger.error("Error while closing jmx registrator of {}", identifier, e);
+            LOGGER.error("Error while closing jmx registrator of {}", identifier, e);
         }
         try {
             osgiRegistration.close();
         } catch (Exception e) {
-            logger.error("Error while closing osgi registration of {}", identifier, e);
+            LOGGER.error("Error while closing osgi registration of {}", identifier, e);
         }
     }
 

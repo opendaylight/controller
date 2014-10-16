@@ -21,6 +21,9 @@ import java.util.Set;
 
 public class InterfacesHelper {
 
+    private InterfacesHelper() {
+    }
+
     public static Set<Class<?>> getAllInterfaces(Class<?> clazz) {
         if (clazz.isInterface()) {
             throw new IllegalArgumentException(clazz
@@ -38,17 +41,17 @@ public class InterfacesHelper {
     }
 
     private static Set<Class<?>> getAllSuperInterfaces(Set<Class<?>> ifcs) {
-        ifcs = new HashSet<>(ifcs); // create copy to modify
+        Set<Class<?>> interfaces = new HashSet<>(ifcs); // create copy to modify
         // each interface can extend other interfaces
         Set<Class<?>> result = new HashSet<>();
-        while (ifcs.size() > 0) {
-            Iterator<Class<?>> iterator = ifcs.iterator();
+        while (!interfaces.isEmpty()) {
+            Iterator<Class<?>> iterator = interfaces.iterator();
             Class<?> ifc = iterator.next();
             iterator.remove();
             if (ifc.isInterface() == false)  {
                 throw new IllegalArgumentException(ifc + " should be an interface");
             }
-            ifcs.addAll(Arrays.asList(ifc.getInterfaces()));
+            interfaces.addAll(Arrays.asList(ifc.getInterfaces()));
             result.add(ifc);
         }
         return result;

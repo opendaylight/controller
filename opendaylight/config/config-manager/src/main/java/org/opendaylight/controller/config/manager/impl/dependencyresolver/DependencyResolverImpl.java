@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
  */
 final class DependencyResolverImpl implements DependencyResolver,
         Comparable<DependencyResolverImpl> {
-    private static final Logger logger = LoggerFactory.getLogger(DependencyResolverImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DependencyResolverImpl.class);
 
     private final ModulesHolder modulesHolder;
     private final ModuleIdentifier name;
@@ -107,9 +107,9 @@ final class DependencyResolverImpl implements DependencyResolver,
                 ), jmxAttribute
         );
 
-        dependentReadOnlyON = translateServiceRefIfPossible(dependentReadOnlyON);
+        ObjectName newDependentReadOnlyON = translateServiceRefIfPossible(dependentReadOnlyON);
 
-        ModuleIdentifier moduleIdentifier = ObjectNameUtil.fromON(dependentReadOnlyON, ObjectNameUtil
+        ModuleIdentifier moduleIdentifier = ObjectNameUtil.fromON(newDependentReadOnlyON, ObjectNameUtil
                 .TYPE_MODULE);
 
         ModuleFactory foundFactory = modulesHolder.findModuleFactory(moduleIdentifier, jmxAttribute);
@@ -122,7 +122,7 @@ final class DependencyResolverImpl implements DependencyResolver,
                             + "Module name is %s : %s, expected service interface %s, dependent module ON %s , "
                             + "attribute %s",
                     foundFactory.getImplementationName(), foundFactory,
-                    expectedServiceInterface, dependentReadOnlyON,
+                    expectedServiceInterface, newDependentReadOnlyON,
                     jmxAttribute
             );
             throw new JmxAttributeValidationException(message, jmxAttribute);
@@ -134,13 +134,14 @@ final class DependencyResolverImpl implements DependencyResolver,
 
     // translate from serviceref to module ON
     private ObjectName translateServiceRefIfPossible(ObjectName dependentReadOnlyON) {
-        if (ObjectNameUtil.isServiceReference(dependentReadOnlyON)) {
-            String serviceQName = ObjectNameUtil.getServiceQName(dependentReadOnlyON);
-            String refName = ObjectNameUtil.getReferenceName(dependentReadOnlyON);
-            dependentReadOnlyON = ObjectNameUtil.withoutTransactionName( // strip again of transaction name
+        ObjectName translatedDependentReadOnlyON = dependentReadOnlyON;
+        if (ObjectNameUtil.isServiceReference(translatedDependentReadOnlyON)) {
+            String serviceQName = ObjectNameUtil.getServiceQName(translatedDependentReadOnlyON);
+            String refName = ObjectNameUtil.getReferenceName(translatedDependentReadOnlyON);
+            translatedDependentReadOnlyON = ObjectNameUtil.withoutTransactionName( // strip again of transaction name
                     readableRegistry.lookupConfigBeanByServiceInterfaceName(serviceQName, refName));
         }
-        return dependentReadOnlyON;
+        return translatedDependentReadOnlyON;
     }
 
     /**
@@ -155,12 +156,12 @@ final class DependencyResolverImpl implements DependencyResolver,
                     "Null parameters not allowed, got %s %s %s", expectedType,
                     dependentReadOnlyON, jmxAttribute));
         }
-        dependentReadOnlyON = translateServiceRefIfPossible(dependentReadOnlyON);
+        ObjectName translatedDependentReadOnlyON = translateServiceRefIfPossible(dependentReadOnlyON);
         transactionStatus.checkCommitStarted();
         transactionStatus.checkNotCommitted();
 
         ModuleIdentifier dependentModuleIdentifier = ObjectNameUtil.fromON(
-                dependentReadOnlyON, ObjectNameUtil.TYPE_MODULE);
+                translatedDependentReadOnlyON, ObjectNameUtil.TYPE_MODULE);
         Module module = modulesHolder.findModule(dependentModuleIdentifier,
                 jmxAttribute);
         synchronized (this) {
@@ -199,7 +200,7 @@ final class DependencyResolverImpl implements DependencyResolver,
         if (expectedBaseClass.isAssignableFrom(deserialized)) {
             return (Class<T>) deserialized;
         } else {
-            logger.error("Cannot resolve class of identity {} : deserialized class {} is not a subclass of {}.",
+            LOGGER.error("Cannot resolve class of identity {} : deserialized class {} is not a subclass of {}.",
                     identityRef, deserialized, expectedBaseClass);
             throw new IllegalArgumentException("Deserialized identity " + deserialized + " cannot be cast to " + expectedBaseClass);
         }
@@ -277,17 +278,17 @@ final class DependencyResolverImpl implements DependencyResolver,
     @Override
     public Object getAttribute(ObjectName name, String attribute)
             throws MBeanException, AttributeNotFoundException, InstanceNotFoundException, ReflectionException {
-        name = translateServiceRefIfPossible(name);
+        ObjectName newName = translateServiceRefIfPossible(name);
         // add transaction name
-        name = ObjectNameUtil.withTransactionName(name, transactionName);
-        return mBeanServer.getAttribute(name, attribute);
+        newName = ObjectNameUtil.withTransactionName(newName, transactionName);
+        return mBeanServer.getAttribute(newName, attribute);
     }
 
     @Override
     public <T> T newMXBeanProxy(ObjectName name, Class<T> interfaceClass) {
-        name = translateServiceRefIfPossible(name);
+        ObjectName newName = translateServiceRefIfPossible(name);
         // add transaction name
-        name = ObjectNameUtil.withTransactionName(name, transactionName);
-        return JMX.newMXBeanProxy(mBeanServer, name, interfaceClass);
+        newName = ObjectNameUtil.withTransactionName(newName, transactionName);
+        return JMX.newMXBeanProxy(mBeanServer, newName, interfaceClass);
     }
 }

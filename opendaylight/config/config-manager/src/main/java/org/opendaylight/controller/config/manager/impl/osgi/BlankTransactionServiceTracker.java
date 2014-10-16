@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  * functionality.
  */
 public class BlankTransactionServiceTracker implements ServiceTrackerCustomizer<ModuleFactory, Object> {
-    private static final Logger logger = LoggerFactory.getLogger(BlankTransactionServiceTracker.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BlankTransactionServiceTracker.class);
 
     public static final int DEFAULT_MAX_ATTEMPTS = 10;
 
@@ -65,7 +65,7 @@ public class BlankTransactionServiceTracker implements ServiceTrackerCustomizer<
             try {
                 // create transaction
                 CommitStatus commitStatus = blankTransaction.hit();
-                logger.debug("Committed blank transaction with status {}", commitStatus);
+                LOGGER.debug("Committed blank transaction with status {}", commitStatus);
                 return;
             } catch (ConflictingVersionException e) {
                 lastException = e;
@@ -76,7 +76,7 @@ public class BlankTransactionServiceTracker implements ServiceTrackerCustomizer<
                     throw new IllegalStateException(interruptedException);
                 }
             } catch (ValidationException e) {
-                logger.error("Validation exception while running blank transaction indicates programming error", e);
+                LOGGER.error("Validation exception while running blank transaction indicates programming error", e);
                 throw new RuntimeException("Validation exception while running blank transaction indicates programming error", e);
             }
         }

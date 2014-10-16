@@ -57,7 +57,7 @@ import static java.lang.String.format;
  * a read only wrapper.
  */
 abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrapper {
-    private static final Logger logger = LoggerFactory
+    private static final Logger LOGGER = LoggerFactory
             .getLogger(AbstractDynamicWrapper.class);
 
     protected final boolean writable;
@@ -234,7 +234,7 @@ abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrapper {
     public Object getAttribute(String attributeName)
             throws AttributeNotFoundException, MBeanException,
             ReflectionException {
-        if (attributeName.equals("MBeanInfo")) {
+        if ("MBeanInfo".equals(attributeName)) {
             return getMBeanInfo();
         }
 
@@ -318,7 +318,7 @@ abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrapper {
                 result.add(new Attribute(attributeName, value));
 
             } catch (Exception e) {
-                logger.debug("Getting attribute {} failed", attributeName, e);
+                LOGGER.debug("Getting attribute {} failed", attributeName, e);
             }
         }
         return result;
@@ -342,7 +342,7 @@ abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrapper {
                 && signature[0].equals(AttributeList.class.getName())) {
             return setAttributes((AttributeList) params[0]);
         } else {
-            logger.debug("Operation not found {} ", actionName);
+            LOGGER.debug("Operation not found {} ", actionName);
             throw new UnsupportedOperationException(
                     format("Operation not found on %s. Method invoke is only supported for getInstance and getAttribute(s) "
                             + "method, got actionName %s, params %s, signature %s ",

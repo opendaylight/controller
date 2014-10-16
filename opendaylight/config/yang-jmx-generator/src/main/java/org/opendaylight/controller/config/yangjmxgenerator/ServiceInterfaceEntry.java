@@ -46,7 +46,7 @@ import static org.opendaylight.controller.config.yangjmxgenerator.ConfigConstant
  * </p>
  */
 public class ServiceInterfaceEntry extends AbstractEntry {
-    private static final Logger logger = LoggerFactory
+    private static final Logger LOGGER = LoggerFactory
             .getLogger(ServiceInterfaceEntry.class);
 
     private static final String CLASS_NAME_SUFFIX = "ServiceInterface";
@@ -121,16 +121,16 @@ public class ServiceInterfaceEntry extends AbstractEntry {
      */
     public static Map<QName, ServiceInterfaceEntry> create(Module currentModule,
             String packageName,Map<IdentitySchemaNode, ServiceInterfaceEntry> definedSEItracker) {
-        logger.debug("Generating ServiceInterfaces from {} to package {}",
+        LOGGER.debug("Generating ServiceInterfaces from {} to package {}",
                 currentModule.getNamespace(), packageName);
 
         Map<IdentitySchemaNode, ServiceInterfaceEntry> identitiesToSIs = new HashMap<>();
         Set<IdentitySchemaNode> notVisited = new HashSet<>(
                 currentModule.getIdentities());
         int lastSize = notVisited.size() + 1;
-        while (notVisited.size() > 0) {
+        while (!notVisited.isEmpty()) {
             if (notVisited.size() == lastSize) {
-                logger.debug(
+                LOGGER.debug(
                         "Following identities will be ignored while generating ServiceInterfaces, as they are not derived from {} : {}",
                         SERVICE_TYPE_Q_NAME, notVisited);
                 break;
@@ -175,7 +175,7 @@ public class ServiceInterfaceEntry extends AbstractEntry {
         for (ServiceInterfaceEntry sie : identitiesToSIs.values()) {
             resultMap.put(sie.getQName(), sie);
         }
-        logger.debug("Number of ServiceInterfaces to be generated: {}",
+        LOGGER.debug("Number of ServiceInterfaces to be generated: {}",
                 resultMap.size());
         return resultMap;
     }
@@ -198,25 +198,33 @@ public class ServiceInterfaceEntry extends AbstractEntry {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
+        }
 
         ServiceInterfaceEntry that = (ServiceInterfaceEntry) o;
 
-        if (!maybeBaseCache.equals(that.maybeBaseCache))
+        if (!maybeBaseCache.equals(that.maybeBaseCache)) {
             return false;
-        if (!nullableDescription.equals(that.nullableDescription))
+        }
+        if (!nullableDescription.equals(that.nullableDescription)) {
             return false;
-        if (!exportedOsgiClassName.equals(that.exportedOsgiClassName))
+        }
+        if (!exportedOsgiClassName.equals(that.exportedOsgiClassName)) {
             return false;
-        if (!qName.equals(that.qName))
+        }
+        if (!qName.equals(that.qName)) {
             return false;
-        if (!packageName.equals(that.packageName))
+        }
+        if (!packageName.equals(that.packageName)) {
             return false;
-        if (!typeName.equals(that.typeName))
+        }
+        if (!typeName.equals(that.typeName)) {
             return false;
+        }
 
         return true;
     }

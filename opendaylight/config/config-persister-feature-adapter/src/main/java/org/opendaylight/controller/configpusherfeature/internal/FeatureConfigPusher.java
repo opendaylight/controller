@@ -25,7 +25,7 @@ import com.google.common.collect.LinkedHashMultimap;
  * Simple class to push configs to the config subsystem from Feature's configfiles
  */
 public class FeatureConfigPusher {
-    private static final Logger logger = LoggerFactory.getLogger(FeatureConfigPusher.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FeatureConfigPusher.class);
     private static final int MAX_RETRIES=100;
     private static final int RETRY_PAUSE_MILLIS=1;
     private FeaturesService featuresService = null;
@@ -90,13 +90,13 @@ public class FeatureConfigPusher {
                 if(installedFeatures.contains(feature)) {
                     return true;
                 } else {
-                    logger.warn("Karaf featuresService.listInstalledFeatures() has not yet finished installing feature (retry {}) {} {}",retries,feature.getName(),feature.getVersion());
+                    LOGGER.warn("Karaf featuresService.listInstalledFeatures() has not yet finished installing feature (retry {}) {} {}",retries,feature.getName(),feature.getVersion());
                 }
             } catch (Exception e) {
                 if(retries < MAX_RETRIES) {
-                    logger.warn("Karaf featuresService.listInstalledFeatures() has thrown an exception, retry {}, Exception {}", retries,e);
+                    LOGGER.warn("Karaf featuresService.listInstalledFeatures() has thrown an exception, retry {}, Exception {}", retries,e);
                 } else {
-                    logger.error("Giving up on Karaf featuresService.listInstalledFeatures() which has thrown an exception, retry {}, Exception {}", retries,e);
+                    LOGGER.error("Giving up on Karaf featuresService.listInstalledFeatures() which has thrown an exception, retry {}, Exception {}", retries,e);
                     throw e;
                 }
             }
@@ -106,7 +106,7 @@ public class FeatureConfigPusher {
                 throw new IllegalStateException(e1);
             }
         }
-        logger.error("Giving up (after {} retries) on Karaf featuresService.listInstalledFeatures() which has not yet finished installing feature {} {}",MAX_RETRIES,feature.getName(),feature.getVersion());
+        LOGGER.error("Giving up (after {} retries) on Karaf featuresService.listInstalledFeatures() which has not yet finished installing feature {} {}",MAX_RETRIES,feature.getName(),feature.getVersion());
         return false;
     }
 

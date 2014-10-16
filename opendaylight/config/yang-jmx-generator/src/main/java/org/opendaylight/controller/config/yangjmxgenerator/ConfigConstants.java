@@ -11,6 +11,9 @@ import org.opendaylight.yangtools.yang.common.QName;
 
 public class ConfigConstants {
 
+    private ConfigConstants() {
+    }
+
     public static final String CONFIG_NAMESPACE = "urn:opendaylight:params:xml:ns:yang:controller:config";
 
     public static final String CONFIG_MODULE = "config";

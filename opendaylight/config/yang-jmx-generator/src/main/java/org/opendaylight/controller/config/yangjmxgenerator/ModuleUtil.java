@@ -12,6 +12,9 @@ import org.opendaylight.yangtools.yang.model.api.Module;
 
 public class ModuleUtil {
 
+    private ModuleUtil() {
+    }
+
     public static QName getQName(final Module currentModule) {
         return QName.create(currentModule.getNamespace(), currentModule.getRevision(), currentModule.getName());
     }
