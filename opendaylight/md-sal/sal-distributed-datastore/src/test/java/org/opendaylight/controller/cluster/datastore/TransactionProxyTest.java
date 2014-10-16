@@ -1,12 +1,12 @@
 package org.opendaylight.controller.cluster.datastore;
 
-import akka.actor.ActorPath;
+import com.google.common.util.concurrent.CheckedFuture;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
 import akka.dispatch.Futures;
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
@@ -182,7 +182,7 @@ public class TransactionProxyTest extends AbstractActorTest {
         return argThat(matcher);
     }
 
-    private Future<Object> readyTxReply(ActorPath path) {
+    private Future<Object> readyTxReply(String path) {
         return Futures.successful((Object)new ReadyTransactionReply(path).toSerializable());
     }
 
@@ -227,12 +227,6 @@ public class TransactionProxyTest extends AbstractActorTest {
         doReturn(createTransactionReply(actorRef)).when(mockActorContext).
                 executeOperation(eq(getSystem().actorSelection(actorRef.path())),
                         eqCreateTransaction(memberName, type));
-
-        doReturn(actorRef.path().toString()).when(mockActorContext).resolvePath(
-                anyString(), eq(actorRef.path().toString()));
-
-        doReturn(actorRef.path()).when(mockActorContext).actorFor(actorRef.path().toString());
-
         return actorRef;
     }
 
@@ -631,19 +625,19 @@ public class TransactionProxyTest extends AbstractActorTest {
                 DeleteDataReply.SERIALIZABLE_CLASS);
     }
 
-    private void verifyCohortPathFutures(ThreePhaseCommitCohortProxy proxy,
-            Object... expReplies) throws Exception {
+    private void verifyCohortFutures(ThreePhaseCommitCohortProxy proxy,
+        Object... expReplies) throws Exception {
         assertEquals("getReadyOperationFutures size", expReplies.length,
-                proxy.getCohortPathFutures().size());
+                proxy.getCohortFutures().size());
 
         int i = 0;
-        for( Future<ActorPath> future: proxy.getCohortPathFutures()) {
+        for( Future<ActorSelection> future: proxy.getCohortFutures()) {
             assertNotNull("Ready operation Future is null", future);
 
             Object expReply = expReplies[i++];
-            if(expReply instanceof ActorPath) {
-                ActorPath actual = Await.result(future, Duration.create(5, TimeUnit.SECONDS));
-                assertEquals("Cohort actor path", expReply, actual);
+            if(expReply instanceof ActorSelection) {
+                ActorSelection actual = Await.result(future, Duration.create(5, TimeUnit.SECONDS));
+                assertEquals("Cohort actor path", (ActorSelection) expReply, actual);
             } else {
                 // Expecting exception.
                 try {
@@ -669,7 +663,7 @@ public class TransactionProxyTest extends AbstractActorTest {
         doReturn(writeDataReply()).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqWriteData(nodeToWrite));
 
-        doReturn(readyTxReply(actorRef.path())).when(mockActorContext).executeOperationAsync(
+        doReturn(readyTxReply(actorRef.path().toString())).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), isA(ReadyTransaction.SERIALIZABLE_CLASS));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
@@ -688,7 +682,7 @@ public class TransactionProxyTest extends AbstractActorTest {
         verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
                 WriteDataReply.SERIALIZABLE_CLASS);
 
-        verifyCohortPathFutures(proxy, actorRef.path());
+        verifyCohortFutures(proxy, getSystem().actorSelection(actorRef.path()));
     }
 
     @SuppressWarnings("unchecked")
@@ -704,7 +698,7 @@ public class TransactionProxyTest extends AbstractActorTest {
         doReturn(Futures.failed(new TestException())).when(mockActorContext).
                 executeOperationAsync(eq(actorSelection(actorRef)), eqWriteData(nodeToWrite));
 
-        doReturn(readyTxReply(actorRef.path())).when(mockActorContext).executeOperationAsync(
+        doReturn(readyTxReply(actorRef.path().toString())).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), isA(ReadyTransaction.SERIALIZABLE_CLASS));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
@@ -723,7 +717,7 @@ public class TransactionProxyTest extends AbstractActorTest {
         verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
                 MergeDataReply.SERIALIZABLE_CLASS, TestException.class);
 
-        verifyCohortPathFutures(proxy, TestException.class);
+        verifyCohortFutures(proxy, TestException.class);
     }
 
     @SuppressWarnings("unchecked")
@@ -754,7 +748,7 @@ public class TransactionProxyTest extends AbstractActorTest {
         verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
                 MergeDataReply.SERIALIZABLE_CLASS);
 
-        verifyCohortPathFutures(proxy, TestException.class);
+        verifyCohortFutures(proxy, TestException.class);
     }
 
     @Test
@@ -781,7 +775,7 @@ public class TransactionProxyTest extends AbstractActorTest {
 
         ThreePhaseCommitCohortProxy proxy = (ThreePhaseCommitCohortProxy) ready;
 
-        verifyCohortPathFutures(proxy, PrimaryNotFoundException.class);
+        verifyCohortFutures(proxy, PrimaryNotFoundException.class);
     }
 
     @SuppressWarnings("unchecked")
@@ -809,7 +803,7 @@ public class TransactionProxyTest extends AbstractActorTest {
 
         ThreePhaseCommitCohortProxy proxy = (ThreePhaseCommitCohortProxy) ready;
 
-        verifyCohortPathFutures(proxy, IllegalArgumentException.class);
+        verifyCohortFutures(proxy, IllegalArgumentException.class);
     }
 
     @Test

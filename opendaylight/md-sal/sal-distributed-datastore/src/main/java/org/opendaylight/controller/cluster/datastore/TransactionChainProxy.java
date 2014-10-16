@@ -8,7 +8,7 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
-import akka.actor.ActorPath;
+import akka.actor.ActorSelection;
 import akka.dispatch.Futures;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChain;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
@@ -28,7 +28,7 @@ import java.util.List;
 public class TransactionChainProxy implements DOMStoreTransactionChain{
     private final ActorContext actorContext;
     private final String transactionChainId;
-    private volatile List<Future<ActorPath>> cohortPathFutures = Collections.emptyList();
+    private volatile List<Future<ActorSelection>> cohortFutures = Collections.emptyList();
 
     public TransactionChainProxy(ActorContext actorContext) {
         this.actorContext = actorContext;
@@ -63,14 +63,14 @@ public class TransactionChainProxy implements DOMStoreTransactionChain{
         return transactionChainId;
     }
 
-    public void onTransactionReady(List<Future<ActorPath>> cohortPathFutures){
-        this.cohortPathFutures = cohortPathFutures;
+    public void onTransactionReady(List<Future<ActorSelection>> cohortFutures){
+        this.cohortFutures = cohortFutures;
     }
 
     public void waitTillCurrentTransactionReady(){
         try {
             Await.result(Futures
-                .sequence(this.cohortPathFutures, actorContext.getActorSystem().dispatcher()),
+                .sequence(this.cohortFutures, actorContext.getActorSystem().dispatcher()),
                 actorContext.getOperationDuration());
         } catch (Exception e) {
             throw new IllegalStateException("Failed when waiting for transaction on a chain to become ready", e);
