@@ -12,30 +12,37 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import ch.qos.logback.classic.Level;
+import com.google.common.base.Charsets;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.io.ByteStreams;
+import com.google.common.io.CharStreams;
 import com.google.common.io.Files;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-
 import java.util.concurrent.TimeUnit;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.annotation.Arg;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
-
+import org.opendaylight.controller.netconf.util.xml.XmlElement;
+import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Charsets;
-import com.google.common.io.CharStreams;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 public final class Main {
-
-    // TODO add logback config
-
-    // TODO make exi configurable
 
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
 
@@ -56,8 +63,8 @@ public final class Main {
         @Arg(dest = "generate-config-address")
         public String generateConfigsAddress;
 
-        @Arg(dest = "generate-configs-dir")
-        public File generateConfigsDir;
+        @Arg(dest = "distro-folder")
+        public File distroFolder;
 
         @Arg(dest = "generate-configs-batch-size")
         public int generateConfigBatchSize;
@@ -68,9 +75,15 @@ public final class Main {
         @Arg(dest = "exi")
         public boolean exi;
 
+        @Arg(dest = "debug")
+        public boolean debug;
+
         static ArgumentParser getParser() {
             final ArgumentParser parser = ArgumentParsers.newArgumentParser("netconf testool");
-            parser.addArgument("--devices-count")
+
+            parser.description("Netconf device simulator. Detailed info can be found at https://wiki.opendaylight.org/view/OpenDaylight_Controller:Netconf:Testtool#Building_testtool");
+
+            parser.addArgument("--device-count")
                     .type(Integer.class)
                     .setDefault(1)
                     .type(Integer.class)
@@ -79,8 +92,7 @@ public final class Main {
 
             parser.addArgument("--schemas-dir")
                     .type(File.class)
-                    .required(true)
-                    .help("Directory containing yang schemas to describe simulated devices")
+                    .help("Directory containing yang schemas to describe simulated devices. Some schemas e.g. netconf monitoring and inet types are included by default")
                     .dest("schemas-dir");
 
             parser.addArgument("--starting-port")
@@ -91,7 +103,7 @@ public final class Main {
 
             parser.addArgument("--generate-config-connection-timeout")
                     .type(Integer.class)
-                    .setDefault((int)TimeUnit.MINUTES.toMillis(5))
+                    .setDefault((int)TimeUnit.MINUTES.toMillis(30))
                     .help("Timeout to be generated in initial config files")
                     .dest("generate-config-connection-timeout");
 
@@ -103,14 +115,14 @@ public final class Main {
 
             parser.addArgument("--generate-configs-batch-size")
                     .type(Integer.class)
-                    .setDefault(100)
+                    .setDefault(4000)
                     .help("Number of connector configs per generated file")
                     .dest("generate-configs-batch-size");
 
-            parser.addArgument("--generate-configs-dir")
+            parser.addArgument("--distribution-folder")
                     .type(File.class)
-                    .help("Directory where initial config files for ODL distribution should be generated")
-                    .dest("generate-configs-dir");
+                    .help("Directory where the karaf distribution for controller is located")
+                    .dest("distro-folder");
 
             parser.addArgument("--ssh")
                     .type(Boolean.class)
@@ -120,9 +132,15 @@ public final class Main {
 
             parser.addArgument("--exi")
                     .type(Boolean.class)
-                    .setDefault(false)
+                    .setDefault(true)
                     .help("Whether to use exi to transport xml content")
                     .dest("exi");
+
+            parser.addArgument("--debug")
+                    .type(Boolean.class)
+                    .setDefault(false)
+                    .help("Whether to use debug log level instead of INFO")
+                    .dest("debug");
 
             return parser;
         }
@@ -131,23 +149,29 @@ public final class Main {
             checkArgument(deviceCount > 0, "Device count has to be > 0");
             checkArgument(startingPort > 1024, "Starting port has to be > 1024");
 
-            checkArgument(schemasDir.exists(), "Schemas dir has to exist");
-            checkArgument(schemasDir.isDirectory(), "Schemas dir has to be a directory");
-            checkArgument(schemasDir.canRead(), "Schemas dir has to be readable");
+            if(schemasDir != null) {
+                checkArgument(schemasDir.exists(), "Schemas dir has to exist");
+                checkArgument(schemasDir.isDirectory(), "Schemas dir has to be a directory");
+                checkArgument(schemasDir.canRead(), "Schemas dir has to be readable");
+            }
         }
     }
 
     public static void main(final String[] args) {
-        ch.ethz.ssh2.log.Logger.enabled = true;
-
         final Params params = parseArgs(args, Params.getParser());
         params.validate();
+
+        final ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        root.setLevel(params.debug ? Level.DEBUG : Level.INFO);
 
         final NetconfDeviceSimulator netconfDeviceSimulator = new NetconfDeviceSimulator();
         try {
             final List<Integer> openDevices = netconfDeviceSimulator.start(params);
-            if(params.generateConfigsDir != null) {
-                new ConfigGenerator(params.generateConfigsDir, openDevices).generate(params.ssh, params.generateConfigBatchSize, params.generateConfigsTimeout, params.generateConfigsAddress);
+            if(params.distroFolder != null) {
+                final ConfigGenerator configGenerator = new ConfigGenerator(params.distroFolder, openDevices);
+                final List<File> generated = configGenerator.generate(params.ssh, params.generateConfigBatchSize, params.generateConfigsTimeout, params.generateConfigsAddress);
+                configGenerator.updateFeatureFile(generated);
+                configGenerator.changeLoadOrder();
             }
         } catch (final Exception e) {
             LOG.error("Unhandled exception", e);
@@ -164,7 +188,6 @@ public final class Main {
             }
         }
     }
-
 
     private static Params parseArgs(final String[] args, final ArgumentParser parser) {
         final Params opt = new Params();
@@ -187,24 +210,45 @@ public final class Main {
         public static final String NETCONF_USE_SSH = "false";
         public static final String SIM_DEVICE_SUFFIX = "-sim-device";
 
-        private final File directory;
+        private static final String SIM_DEVICE_CFG_PREFIX = "simulated-devices_";
+        private static final String ETC_KARAF_PATH = "etc/";
+        private static final String ETC_OPENDAYLIGHT_KARAF_PATH = ETC_KARAF_PATH + "opendaylight/karaf/";
+
+        public static final String NETCONF_CONNECTOR_ALL_FEATURE = "odl-netconf-connector-all";
+        private static final String ORG_OPS4J_PAX_URL_MVN_CFG = "org.ops4j.pax.url.mvn.cfg";
+
+        private final File configDir;
         private final List<Integer> openDevices;
+        private final File ncFeatureFile;
+        private final File etcDir;
+        private final File loadOrderCfgFile;
 
         public ConfigGenerator(final File directory, final List<Integer> openDevices) {
-            this.directory = directory;
+            this.configDir = new File(directory, ETC_OPENDAYLIGHT_KARAF_PATH);
+            this.etcDir = new File(directory, ETC_KARAF_PATH);
+            this.loadOrderCfgFile = new File(etcDir, ORG_OPS4J_PAX_URL_MVN_CFG);
+            this.ncFeatureFile = getFeatureFile(directory, "features-netconf-connector");
             this.openDevices = openDevices;
         }
 
-        public void generate(final boolean useSsh, final int batchSize, final int generateConfigsTimeout, final String address) {
-            if(directory.exists() == false) {
-                checkState(directory.mkdirs(), "Unable to create folder %s" + directory);
+        public List<File> generate(final boolean useSsh, final int batchSize, final int generateConfigsTimeout, final String address) {
+            if(configDir.exists() == false) {
+                Preconditions.checkState(configDir.mkdirs(), "Unable to create directory " + configDir);
+            }
+
+            for (final File file : configDir.listFiles(new FileFilter() {
+                @Override
+                public boolean accept(final File pathname) {
+                    return !pathname.isDirectory() && pathname.getName().startsWith(SIM_DEVICE_CFG_PREFIX);
+                }
+            })) {
+                Preconditions.checkState(file.delete(), "Unable to clean previous generated file %s", file);
             }
 
             try(InputStream stream = Main.class.getResourceAsStream(NETCONF_CONNECTOR_XML)) {
                 checkNotNull(stream, "Cannot load %s", NETCONF_CONNECTOR_XML);
                 String configBlueprint = CharStreams.toString(new InputStreamReader(stream, Charsets.UTF_8));
 
-                // TODO make address configurable
                 checkState(configBlueprint.contains(NETCONF_CONNECTOR_NAME));
                 checkState(configBlueprint.contains(NETCONF_CONNECTOR_PORT));
                 checkState(configBlueprint.contains(NETCONF_USE_SSH));
@@ -223,6 +267,8 @@ public final class Main {
                 StringBuilder b = new StringBuilder();
                 b.append(before);
 
+                final List<File> generatedConfigs = Lists.newArrayList();
+
                 for (final Integer openDevice : openDevices) {
                     if(batchStart == null) {
                         batchStart = openDevice;
@@ -236,7 +282,9 @@ public final class Main {
                     connectorCount++;
                     if(connectorCount == batchSize) {
                         b.append(after);
-                        Files.write(b.toString(), new File(directory, String.format("simulated-devices_%d-%d.xml", batchStart, openDevice)), Charsets.UTF_8);
+                        final File to = new File(configDir, String.format(SIM_DEVICE_CFG_PREFIX + "%d-%d.xml", batchStart, openDevice));
+                        generatedConfigs.add(to);
+                        Files.write(b.toString(), to, Charsets.UTF_8);
                         connectorCount = 0;
                         b = new StringBuilder();
                         b.append(before);
@@ -247,12 +295,99 @@ public final class Main {
                 // Write remaining
                 if(connectorCount != 0) {
                     b.append(after);
-                    Files.write(b.toString(), new File(directory, String.format("simulated-devices_%d-%d.xml", batchStart, openDevices.get(openDevices.size() - 1))), Charsets.UTF_8);
+                    final File to = new File(configDir, String.format(SIM_DEVICE_CFG_PREFIX + "%d-%d.xml", batchStart, openDevices.get(openDevices.size() - 1)));
+                    generatedConfigs.add(to);
+                    Files.write(b.toString(), to, Charsets.UTF_8);
                 }
 
-                LOG.info("Config files generated in {}", directory);
+                LOG.info("Config files generated in {}", configDir);
+                return generatedConfigs;
             } catch (final IOException e) {
                 throw new RuntimeException("Unable to generate config files", e);
+            }
+        }
+
+
+        public void updateFeatureFile(final List<File> generated) {
+            // TODO karaf core contains jaxb for feature files, use that for modification
+            try {
+                final Document document = XmlUtil.readXmlToDocument(Files.toString(ncFeatureFile, Charsets.UTF_8));
+                final NodeList childNodes = document.getDocumentElement().getChildNodes();
+
+                for (int i = 0; i < childNodes.getLength(); i++) {
+                    final Node item = childNodes.item(i);
+                    if(item instanceof Element == false) {
+                        continue;
+                    }
+                    if(item.getLocalName().equals("feature") ==false) {
+                        continue;
+                    }
+
+                    if(NETCONF_CONNECTOR_ALL_FEATURE.equals(((Element) item).getAttribute("name"))) {
+                        final Element ncAllFeatureDefinition = (Element) item;
+                        // Clean previous generated files
+                        for (final XmlElement configfile : XmlElement.fromDomElement(ncAllFeatureDefinition).getChildElements("configfile")) {
+                            ncAllFeatureDefinition.removeChild(configfile.getDomElement());
+                        }
+                        for (final File file : generated) {
+                            final Element configfile = document.createElement("configfile");
+                            configfile.setTextContent("file:" + ETC_OPENDAYLIGHT_KARAF_PATH + file.getName());
+                            configfile.setAttribute("finalname", ETC_OPENDAYLIGHT_KARAF_PATH + file.getName());
+                            ncAllFeatureDefinition.appendChild(configfile);
+                        }
+                    }
+                }
+
+                Files.write(XmlUtil.toString(document), ncFeatureFile, Charsets.UTF_8);
+                LOG.info("Feature file {} updated", ncFeatureFile);
+            } catch (final IOException e) {
+                throw new RuntimeException("Unable to load features file as a resource");
+            } catch (final SAXException e) {
+                throw new RuntimeException("Unable to parse features file");
+            }
+        }
+
+
+        private static File getFeatureFile(final File distroFolder, final String featureName) {
+            checkExistingDir(distroFolder, String.format("Folder %s does not exist", distroFolder));
+
+            final File systemDir = checkExistingDir(new File(distroFolder, "system"), String.format("Folder %s does not contain a karaf distro, folder system is missing", distroFolder));
+            final File netconfConnectorFeaturesParentDir = checkExistingDir(new File(systemDir, "org/opendaylight/controller/" + featureName), String.format("Karaf distro in %s does not contain netconf-connector features", distroFolder));
+
+            // Find newest version for features
+            final File newestVersionDir = Collections.max(
+                    Lists.newArrayList(netconfConnectorFeaturesParentDir.listFiles(new FileFilter() {
+                        @Override
+                        public boolean accept(final File pathname) {
+                            return pathname.isDirectory();
+                        }
+                    })), new Comparator<File>() {
+                        @Override
+                        public int compare(final File o1, final File o2) {
+                            return o1.getName().compareTo(o2.getName());
+                        }
+                    });
+
+            return newestVersionDir.listFiles(new FileFilter() {
+                @Override
+                public boolean accept(final File pathname) {
+                    return pathname.getName().contains(featureName);
+                }
+            })[0];
+        }
+
+        private static File checkExistingDir(final File folder, final String msg) {
+            Preconditions.checkArgument(folder.exists(), msg);
+            Preconditions.checkArgument(folder.isDirectory(), msg);
+            return folder;
+        }
+
+        public void changeLoadOrder() {
+            try {
+                Files.write(ByteStreams.toByteArray(getClass().getResourceAsStream("/" +ORG_OPS4J_PAX_URL_MVN_CFG)), loadOrderCfgFile);
+                LOG.info("Load order changed to prefer local bundles/features by rewriting file {}", loadOrderCfgFile);
+            } catch (IOException e) {
+                throw new RuntimeException("Unable to rewrite features file " + loadOrderCfgFile, e);
             }
         }
     }
