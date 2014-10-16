@@ -69,6 +69,24 @@
       "revId": "262f879c4120ca17927ac3c412cc6ed9fb4afaee",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_3509e22c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DataChangeListenerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-16T17:26:47Z",
+      "side": 1,
+      "message": "We need to verify that the DataChangedReply message is not sent when we send a DataChanged with noSender. So we should expectNoMsg. Kind of like testDataChangedWhenNotificationsAreDisabled.",
+      "parentUuid": "ba8cc1f7_5a17f551",
+      "revId": "262f879c4120ca17927ac3c412cc6ed9fb4afaee",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
