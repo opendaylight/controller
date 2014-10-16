@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_da2b0593",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-16T17:18:01Z",
+      "side": 1,
+      "message": "If the caller passes in null for the sender (or ActorRef.noSender()), you would expect getSender() to return null. But it doesn\u0027t - I found that akka translates null to deadLetters, that\u0027s why we see the log message about deadLetters.\n\nI suppose it would be best to also check for null here to be safe in case the behavior in akka changes.",
+      "parentUuid": "ba8cc1f7_3a6d5105",
+      "revId": "262f879c4120ca17927ac3c412cc6ed9fb4afaee",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_1a740dce",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DataChangeListenerTest.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-10-16T16:19:28Z",
       "side": 1,
       "message": "We should add a test for the noSender case as well.",
+      "revId": "262f879c4120ca17927ac3c412cc6ed9fb4afaee",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_5a17f551",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DataChangeListenerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-16T17:18:01Z",
+      "side": 1,
+      "message": "I thought of that but there\u0027s nothing really concrete to verify. The only thing would be too verify there\u0027s no log message for deadLetters. I\u0027m not sure if that\u0027s feasible - I could look into if you want.",
+      "parentUuid": "ba8cc1f7_1a740dce",
       "revId": "262f879c4120ca17927ac3c412cc6ed9fb4afaee",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
