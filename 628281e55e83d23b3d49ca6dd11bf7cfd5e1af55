@@ -16,6 +16,24 @@
       "revId": "628281e55e83d23b3d49ca6dd11bf7cfd5e1af55",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_9abfbdd0",
+        "filename": "opendaylight/md-sal/model/model-flow-service/src/main/yang/node-config.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-10-16T13:14:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_baf081ca",
+      "revId": "628281e55e83d23b3d49ca6dd11bf7cfd5e1af55",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
