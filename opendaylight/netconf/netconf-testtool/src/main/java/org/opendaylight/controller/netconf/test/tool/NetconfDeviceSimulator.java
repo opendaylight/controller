@@ -10,6 +10,7 @@ package org.opendaylight.controller.netconf.test.tool;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Function;
+import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
@@ -17,6 +18,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.io.CharStreams;
 import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.Futures;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.local.LocalAddress;
@@ -25,6 +27,7 @@ import io.netty.util.HashedWheelTimer;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.net.Inet4Address;
@@ -64,6 +67,7 @@ import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
 import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 import org.opendaylight.yangtools.yang.model.repo.spi.PotentialSchemaSource;
 import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceListener;
+import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceProvider;
 import org.opendaylight.yangtools.yang.model.repo.util.FilesystemSchemaSourceCache;
 import org.opendaylight.yangtools.yang.parser.builder.impl.BuilderUtils;
 import org.opendaylight.yangtools.yang.parser.builder.impl.ModuleBuilder;
@@ -77,8 +81,6 @@ import org.slf4j.LoggerFactory;
 public class NetconfDeviceSimulator implements Closeable {
 
     private static final Logger LOG = LoggerFactory.getLogger(NetconfDeviceSimulator.class);
-
-    public static final int CONNECTION_TIMEOUT_MILLIS = 20000;
 
     private final NioEventLoopGroup nettyThreadgroup;
     private final HashedWheelTimer hashedWheelTimer;
@@ -123,34 +125,36 @@ public class NetconfDeviceSimulator implements Closeable {
     }
 
     private Map<ModuleBuilder, String> toModuleBuilders(final Map<SourceIdentifier, Map.Entry<ASTSchemaSource, YangTextSchemaSource>> sources) {
-            final Map<SourceIdentifier, ParserRuleContext> asts = Maps.transformValues(sources,  new Function<Map.Entry<ASTSchemaSource, YangTextSchemaSource>, ParserRuleContext>() {
-                @Override
-                public ParserRuleContext apply(final Map.Entry<ASTSchemaSource, YangTextSchemaSource> input) {
-                    return input.getKey().getAST();
-                }
-            });
-            final Map<String, TreeMap<Date, URI>> namespaceContext = BuilderUtils.createYangNamespaceContext(
-                    asts.values(), Optional.<SchemaContext>absent());
-
-            final ParseTreeWalker walker = new ParseTreeWalker();
-            final Map<ModuleBuilder, String> sourceToBuilder = new HashMap<>();
-
-            for (final Map.Entry<SourceIdentifier, ParserRuleContext> entry : asts.entrySet()) {
-                final ModuleBuilder moduleBuilder = YangParserListenerImpl.create(namespaceContext, entry.getKey().getName(),
-                        walker, entry.getValue()).getModuleBuilder();
-
-                try(InputStreamReader stream = new InputStreamReader(sources.get(entry.getKey()).getValue().openStream(), Charsets.UTF_8)) {
-                    sourceToBuilder.put(moduleBuilder, CharStreams.toString(stream));
-                } catch (final IOException e) {
-                    throw new RuntimeException(e);
-                }
+        final Map<SourceIdentifier, ParserRuleContext> asts = Maps.transformValues(sources, new Function<Map.Entry<ASTSchemaSource, YangTextSchemaSource>, ParserRuleContext>() {
+            @Override
+            public ParserRuleContext apply(final Map.Entry<ASTSchemaSource, YangTextSchemaSource> input) {
+                return input.getKey().getAST();
             }
+        });
+        final Map<String, TreeMap<Date, URI>> namespaceContext = BuilderUtils.createYangNamespaceContext(
+                asts.values(), Optional.<SchemaContext>absent());
 
-            return sourceToBuilder;
+        final ParseTreeWalker walker = new ParseTreeWalker();
+        final Map<ModuleBuilder, String> sourceToBuilder = new HashMap<>();
+
+        for (final Map.Entry<SourceIdentifier, ParserRuleContext> entry : asts.entrySet()) {
+            final ModuleBuilder moduleBuilder = YangParserListenerImpl.create(namespaceContext, entry.getKey().getName(),
+                    walker, entry.getValue()).getModuleBuilder();
+
+            try(InputStreamReader stream = new InputStreamReader(sources.get(entry.getKey()).getValue().openStream(), Charsets.UTF_8)) {
+                sourceToBuilder.put(moduleBuilder, CharStreams.toString(stream));
+            } catch (final IOException e) {
+                throw new RuntimeException(e);
+            }
         }
+
+        return sourceToBuilder;
+    }
 
 
     public List<Integer> start(final Main.Params params) {
+        LOG.info("Starting {}, {} simulated devices starting on port {}", params.deviceCount, params.ssh ? "SSH" : "TCP", params.startingPort);
+
         final Map<ModuleBuilder, String> moduleBuilders = parseSchemasToModuleBuilders(params);
 
         final NetconfServerDispatcher dispatcher = createDispatcher(moduleBuilders, params.exi, params.generateConfigsTimeout);
@@ -210,11 +214,10 @@ public class NetconfDeviceSimulator implements Closeable {
 
             devicesChannels.add(server.channel());
             openDevices.add(currentPort - 1);
-
         }
 
         if(openDevices.size() == params.deviceCount) {
-            LOG.info("All simulated devices started successfully from port {} to {}", params.startingPort, currentPort);
+            LOG.info("All simulated devices started successfully from port {} to {}", params.startingPort, currentPort - 1);
         } else {
             LOG.warn("Not all simulated devices started successfully. Started devices ar on ports {}", openDevices);
         }
@@ -251,8 +254,12 @@ public class NetconfDeviceSimulator implements Closeable {
             public void schemaSourceUnregistered(final PotentialSchemaSource<?> potentialSchemaSource) {}
         });
 
-        final FilesystemSchemaSourceCache<YangTextSchemaSource> cache = new FilesystemSchemaSourceCache<>(consumer, YangTextSchemaSource.class, params.schemasDir);
-        consumer.registerSchemaSourceListener(cache);
+        if(params.schemasDir != null) {
+            final FilesystemSchemaSourceCache<YangTextSchemaSource> cache = new FilesystemSchemaSourceCache<>(consumer, YangTextSchemaSource.class, params.schemasDir);
+            consumer.registerSchemaSourceListener(cache);
+        }
+
+        addDefaultSchemas(consumer);
 
         final Map<SourceIdentifier, Map.Entry<ASTSchemaSource, YangTextSchemaSource>> asts = Maps.newHashMap();
         for (final SourceIdentifier loadedSource : loadedSources) {
@@ -267,6 +274,36 @@ public class NetconfDeviceSimulator implements Closeable {
                 }
         }
         return toModuleBuilders(asts);
+    }
+
+    private void addDefaultSchemas(final SharedSchemaRepository consumer) {
+        SourceIdentifier sId = new SourceIdentifier("ietf-netconf-monitoring", "2010-10-04");
+        registerSource(consumer, "/META-INF/yang/ietf-netconf-monitoring.yang", sId);
+
+        sId = new SourceIdentifier("ietf-yang-types", "2013-07-15");
+        registerSource(consumer, "/META-INF/yang/ietf-yang-types@2013-07-15.yang", sId);
+
+        sId = new SourceIdentifier("ietf-inet-types", "2010-09-24");
+        registerSource(consumer, "/META-INF/yang/ietf-inet-types.yang", sId);
+    }
+
+    private void registerSource(final SharedSchemaRepository consumer, final String resource, final SourceIdentifier sourceId) {
+        consumer.registerSchemaSource(new SchemaSourceProvider<SchemaSourceRepresentation>() {
+            @Override
+            public CheckedFuture<? extends SchemaSourceRepresentation, SchemaSourceException> getSource(final SourceIdentifier sourceIdentifier) {
+                return Futures.immediateCheckedFuture(new YangTextSchemaSource(sourceId) {
+                    @Override
+                    protected Objects.ToStringHelper addToStringAttributes(final Objects.ToStringHelper toStringHelper) {
+                        return toStringHelper;
+                    }
+
+                    @Override
+                    public InputStream openStream() throws IOException {
+                        return getClass().getResourceAsStream(resource);
+                    }
+                });
+            }
+        }, PotentialSchemaSource.create(sourceId, YangTextSchemaSource.class, PotentialSchemaSource.Costs.IMMEDIATE.getValue()));
     }
 
     private static InetSocketAddress getAddress(final int port) {

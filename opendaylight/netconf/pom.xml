@@ -37,6 +37,7 @@
     <module>netconf-connector-config</module>
     <module>netconf-auth</module>
     <module>netconf-usermanager</module>
+    <module>netconf-testtool</module>
   </modules>
 
   <dependencies>
@@ -150,16 +151,6 @@
       </activation>
       <modules>
         <module>netconf-it</module>
-      </modules>
-    </profile>
-
-    <profile>
-        <id>testtool</id>
-        <activation>
-            <activeByDefault>false</activeByDefault>
-        </activation>
-        <modules>
-            <module>netconf-testtool</module>
       </modules>
     </profile>
   </profiles>
