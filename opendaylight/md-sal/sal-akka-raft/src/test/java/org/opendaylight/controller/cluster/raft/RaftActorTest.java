@@ -7,12 +7,17 @@ import akka.actor.Props;
 import akka.actor.Terminated;
 import akka.event.Logging;
 import akka.japi.Creator;
+import akka.persistence.RecoveryCompleted;
+import akka.persistence.SnapshotMetadata;
+import akka.persistence.SnapshotOffer;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.protobuf.ByteString;
 import org.junit.After;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
@@ -20,6 +25,7 @@ import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payloa
 import org.opendaylight.controller.cluster.raft.utils.MockAkkaJournal;
 import org.opendaylight.controller.cluster.raft.utils.MockSnapshotStore;
 import scala.concurrent.duration.FiniteDuration;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -32,7 +38,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.mockito.Mockito.mock;
 
 public class RaftActorTest extends AbstractActorTest {
 
@@ -45,30 +54,38 @@ public class RaftActorTest extends AbstractActorTest {
 
     public static class MockRaftActor extends RaftActor {
 
+        private final DataPersistenceProvider dataPersistenceProvider;
+
         public static final class MockRaftActorCreator implements Creator<MockRaftActor> {
             private final Map<String, String> peerAddresses;
             private final String id;
             private final Optional<ConfigParams> config;
+            private boolean persistent;
 
             private MockRaftActorCreator(Map<String, String> peerAddresses, String id,
-                    Optional<ConfigParams> config) {
+                    Optional<ConfigParams> config, boolean persistent) {
                 this.peerAddresses = peerAddresses;
                 this.id = id;
                 this.config = config;
+                this.persistent = persistent;
             }
 
             @Override
             public MockRaftActor create() throws Exception {
-                return new MockRaftActor(id, peerAddresses, config);
+                return new MockRaftActor(id, peerAddresses, config, persistent);
             }
         }
 
         private final CountDownLatch recoveryComplete = new CountDownLatch(1);
+        private final CountDownLatch applyRecoverySnapshot = new CountDownLatch(1);
+        private final CountDownLatch applyStateLatch = new CountDownLatch(1);
+
         private final List<Object> state;
 
-        public MockRaftActor(String id, Map<String, String> peerAddresses, Optional<ConfigParams> config) {
+        public MockRaftActor(String id, Map<String, String> peerAddresses, Optional<ConfigParams> config, boolean persistent) {
             super(id, peerAddresses, config);
             state = new ArrayList<>();
+            this.dataPersistenceProvider = (persistent) ? new PersistentDataProvider() : new NonPersistentDataProvider() ;
         }
 
         public void waitForRecoveryComplete() {
@@ -79,16 +96,27 @@ public class RaftActorTest extends AbstractActorTest {
             }
         }
 
+        public CountDownLatch getApplyRecoverySnapshotLatch(){
+            return applyRecoverySnapshot;
+        }
+
         public List<Object> getState() {
             return state;
         }
 
         public static Props props(final String id, final Map<String, String> peerAddresses,
                 Optional<ConfigParams> config){
-            return Props.create(new MockRaftActorCreator(peerAddresses, id, config));
+            return Props.create(new MockRaftActorCreator(peerAddresses, id, config, true));
         }
 
+        public static Props props(final String id, final Map<String, String> peerAddresses,
+                                  Optional<ConfigParams> config, boolean persistent){
+            return Props.create(new MockRaftActorCreator(peerAddresses, id, config, persistent));
+        }
+
+
         @Override protected void applyState(ActorRef clientActor, String identifier, Object data) {
+            applyStateLatch.countDown();
         }
 
         @Override
@@ -111,6 +139,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         @Override
         protected void applyRecoverySnapshot(ByteString snapshot) {
+            applyRecoverySnapshot.countDown();
             try {
                 Object data = toObject(snapshot);
                 System.out.println("!!!!!applyRecoverySnapshot: "+data);
@@ -130,6 +159,11 @@ public class RaftActorTest extends AbstractActorTest {
         }
 
         @Override protected void onStateChanged() {
+        }
+
+        @Override
+        protected DataPersistenceProvider persistence() {
+            return this.dataPersistenceProvider;
         }
 
         @Override public String persistenceId() {
@@ -155,6 +189,9 @@ public class RaftActorTest extends AbstractActorTest {
             return obj;
         }
 
+        public ReplicatedLog getReplicatedLog(){
+            return this.getRaftActorContext().getReplicatedLog();
+        }
 
     }
 
@@ -293,6 +330,145 @@ public class RaftActorTest extends AbstractActorTest {
             assertEquals("Recovered state size", 6, ref.underlyingActor().getState().size());
         }};
     }
+
+    /**
+     * This test verifies that when recovery is applicable (typically when persistence is true) the RaftActor does
+     * process recovery messages
+     *
+     * @throws Exception
+     */
+
+    @Test
+    public void testHandleRecoveryWhenDataPersistenceRecoveryApplicable() throws Exception {
+        new JavaTestKit(getSystem()) {
+            {
+                String persistenceId = "testHandleRecoveryWhenDataPersistenceRecoveryApplicable";
+
+                DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+                // Set the heartbeat interval high to essentially disable election otherwise the test
+                // may fail if the actor is switched to Leader and the commitIndex is set to the last
+                // log entry.
+                config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+
+                TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(), MockRaftActor.props(persistenceId,
+                        Collections.EMPTY_MAP, Optional.<ConfigParams>of(config)), persistenceId);
+
+                ByteString snapshotBytes  = fromObject(Arrays.asList(
+                        new MockRaftActorContext.MockPayload("A"),
+                        new MockRaftActorContext.MockPayload("B"),
+                        new MockRaftActorContext.MockPayload("C"),
+                        new MockRaftActorContext.MockPayload("D")));
+
+                Snapshot snapshot = Snapshot.create(snapshotBytes.toByteArray(),
+                        Lists.<ReplicatedLogEntry>newArrayList(), 3, 1 ,3, 1);
+
+                MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
+
+                mockRaftActor.onReceiveRecover(new SnapshotOffer(new SnapshotMetadata(persistenceId, 100, 100), snapshot));
+
+                CountDownLatch applyRecoverySnapshotLatch = mockRaftActor.getApplyRecoverySnapshotLatch();
+
+                assertEquals("apply recovery snapshot", true, applyRecoverySnapshotLatch.await(5, TimeUnit.SECONDS));
+
+                mockRaftActor.onReceiveRecover(new ReplicatedLogImplEntry(0, 1, new MockRaftActorContext.MockPayload("A")));
+
+                ReplicatedLog replicatedLog = mockRaftActor.getReplicatedLog();
+
+                assertEquals("add replicated log entry", 1, replicatedLog.size());
+
+                mockRaftActor.onReceiveRecover(new ReplicatedLogImplEntry(1, 1, new MockRaftActorContext.MockPayload("A")));
+
+                assertEquals("add replicated log entry", 2, replicatedLog.size());
+
+                mockRaftActor.onReceiveRecover(new ApplyLogEntries(1));
+
+                assertEquals("commit index 1", 1, mockRaftActor.getRaftActorContext().getCommitIndex());
+
+                // The snapshot had 4 items + we added 2 more items during the test
+                // We start removing from 5 and we should get 1 item in the replicated log
+                mockRaftActor.onReceiveRecover(new RaftActor.DeleteEntries(5));
+
+                assertEquals("remove log entries", 1, replicatedLog.size());
+
+                mockRaftActor.onReceiveRecover(new RaftActor.UpdateElectionTerm(10, "foobar"));
+
+                assertEquals("election term", 10, mockRaftActor.getRaftActorContext().getTermInformation().getCurrentTerm());
+                assertEquals("voted for", "foobar", mockRaftActor.getRaftActorContext().getTermInformation().getVotedFor());
+
+                mockRaftActor.onReceiveRecover(mock(RecoveryCompleted.class));
+
+                mockRaftActor.waitForRecoveryComplete();
+
+            }};
+    }
+
+    /**
+     * This test verifies that when recovery is not applicable (typically when persistence is false) the RaftActor does
+     * not process recovery messages
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testHandleRecoveryWhenDataPersistenceRecoveryNotApplicable() throws Exception {
+        new JavaTestKit(getSystem()) {
+            {
+                String persistenceId = "testHandleRecoveryWhenDataPersistenceRecoveryNotApplicable";
+
+                DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+                // Set the heartbeat interval high to essentially disable election otherwise the test
+                // may fail if the actor is switched to Leader and the commitIndex is set to the last
+                // log entry.
+                config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+
+                TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(), MockRaftActor.props(persistenceId,
+                        Collections.EMPTY_MAP, Optional.<ConfigParams>of(config), false), persistenceId);
+
+                MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
+
+                ByteString snapshotBytes  = fromObject(Arrays.asList(
+                        new MockRaftActorContext.MockPayload("A"),
+                        new MockRaftActorContext.MockPayload("B"),
+                        new MockRaftActorContext.MockPayload("C"),
+                        new MockRaftActorContext.MockPayload("D")));
+
+                Snapshot snapshot = Snapshot.create(snapshotBytes.toByteArray(),
+                        Lists.<ReplicatedLogEntry>newArrayList(), 3, 1 ,3, 1);
+
+                mockRaftActor.onReceiveRecover(new SnapshotOffer(new SnapshotMetadata(persistenceId, 100, 100), snapshot));
+
+                CountDownLatch applyRecoverySnapshotLatch = mockRaftActor.getApplyRecoverySnapshotLatch();
+
+                assertEquals("apply recovery snapshot", false, applyRecoverySnapshotLatch.await(1, TimeUnit.SECONDS));
+
+                mockRaftActor.onReceiveRecover(new ReplicatedLogImplEntry(0, 1, new MockRaftActorContext.MockPayload("A")));
+
+                ReplicatedLog replicatedLog = mockRaftActor.getReplicatedLog();
+
+                assertEquals("add replicated log entry", 0, replicatedLog.size());
+
+                mockRaftActor.onReceiveRecover(new ReplicatedLogImplEntry(1, 1, new MockRaftActorContext.MockPayload("A")));
+
+                assertEquals("add replicated log entry", 0, replicatedLog.size());
+
+                mockRaftActor.onReceiveRecover(new ApplyLogEntries(1));
+
+                assertEquals("commit index -1", -1, mockRaftActor.getRaftActorContext().getCommitIndex());
+
+                mockRaftActor.onReceiveRecover(new RaftActor.DeleteEntries(2));
+
+                assertEquals("remove log entries", 0, replicatedLog.size());
+
+                mockRaftActor.onReceiveRecover(new RaftActor.UpdateElectionTerm(10, "foobar"));
+
+                assertNotEquals("election term", 10, mockRaftActor.getRaftActorContext().getTermInformation().getCurrentTerm());
+                assertNotEquals("voted for", "foobar", mockRaftActor.getRaftActorContext().getTermInformation().getVotedFor());
+
+                mockRaftActor.onReceiveRecover(mock(RecoveryCompleted.class));
+
+                mockRaftActor.waitForRecoveryComplete();
+            }};
+    }
+
 
     private ByteString fromObject(Object snapshot) throws Exception {
         ByteArrayOutputStream b = null;
