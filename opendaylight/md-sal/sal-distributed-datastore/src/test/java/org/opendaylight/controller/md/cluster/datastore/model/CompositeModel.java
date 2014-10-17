@@ -293,7 +293,7 @@ public class CompositeModel {
     Set<QName> childAugmentations = new HashSet<>();
     childAugmentations.add(AUG_QNAME);
     final YangInstanceIdentifier.AugmentationIdentifier augmentationIdentifier =
-        new YangInstanceIdentifier.AugmentationIdentifier(null, childAugmentations);
+        new YangInstanceIdentifier.AugmentationIdentifier(childAugmentations);
     final AugmentationNode augmentationNode =
         Builders.augmentationBuilder()
             .withNodeIdentifier(augmentationIdentifier)

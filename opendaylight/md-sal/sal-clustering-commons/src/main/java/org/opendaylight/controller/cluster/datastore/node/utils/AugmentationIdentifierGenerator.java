@@ -46,7 +46,7 @@ public class AugmentationIdentifierGenerator {
                     .create(name.trim()));
         }
 
-        return new YangInstanceIdentifier.AugmentationIdentifier(null, childNames);
+        return new YangInstanceIdentifier.AugmentationIdentifier(childNames);
     }
 
 }
