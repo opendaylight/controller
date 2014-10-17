@@ -57,14 +57,14 @@ import com.google.common.util.concurrent.ListenableFuture;
 public class ListProcessingAndOrderingTest extends AbstractDataServiceTest {
 
     private static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier DOM_UNORDERED_LIST_PATH = org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier
-            .builder(Lists.QNAME).node(UnorderedContainer.QNAME).node(UnorderedList.QNAME).build();
+            .builder().node(Lists.QNAME).node(UnorderedContainer.QNAME).node(UnorderedList.QNAME).build();
 
     private static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier DOM_ORDERED_LIST_PATH = org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier
-            .builder(Lists.QNAME).node(OrderedContainer.QNAME).node(OrderedList.QNAME).build();
+            .builder().node(Lists.QNAME).node(OrderedContainer.QNAME).node(OrderedList.QNAME).build();
 
 
     private static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier DOM_UNKEYED_LIST_PATH = org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier
-            .builder(Lists.QNAME).node(UnkeyedContainer.QNAME).node(UnkeyedList.QNAME).build();
+            .builder().node(Lists.QNAME).node(UnkeyedContainer.QNAME).node(UnkeyedList.QNAME).build();
 
     private static final InstanceIdentifier<UnorderedContainer> UNORDERED_CONTAINER_PATH = InstanceIdentifier.builder(Lists.class).child(UnorderedContainer.class).build();
     private static final InstanceIdentifier<OrderedContainer> ORDERED_CONTAINER_PATH = InstanceIdentifier.builder(Lists.class).child(OrderedContainer.class).build();
