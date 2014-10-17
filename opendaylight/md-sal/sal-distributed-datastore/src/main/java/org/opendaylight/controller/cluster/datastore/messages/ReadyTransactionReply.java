@@ -11,29 +11,30 @@ package org.opendaylight.controller.cluster.datastore.messages;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 
 public class ReadyTransactionReply implements SerializableMessage {
-  public static final Class SERIALIZABLE_CLASS = ShardTransactionMessages.ReadyTransactionReply.class;
-  private final String cohortPath;
+    public static final Class<ShardTransactionMessages.ReadyTransactionReply> SERIALIZABLE_CLASS =
+            ShardTransactionMessages.ReadyTransactionReply.class;
 
-  public ReadyTransactionReply(String cohortPath) {
+    private final String cohortPath;
 
-    this.cohortPath = cohortPath;
-  }
+    public ReadyTransactionReply(String cohortPath) {
 
-  public String getCohortPath() {
-    return cohortPath;
-  }
+        this.cohortPath = cohortPath;
+    }
 
-  @Override
-  public ShardTransactionMessages.ReadyTransactionReply toSerializable() {
-    return ShardTransactionMessages.ReadyTransactionReply.newBuilder()
-        .setActorPath(cohortPath).build();
-  }
+    public String getCohortPath() {
+        return cohortPath;
+    }
 
-  public static ReadyTransactionReply fromSerializable(Object serializable) {
-      ShardTransactionMessages.ReadyTransactionReply o =
-          (ShardTransactionMessages.ReadyTransactionReply) serializable;
+    @Override
+    public ShardTransactionMessages.ReadyTransactionReply toSerializable() {
+        return ShardTransactionMessages.ReadyTransactionReply.newBuilder().
+                setActorPath(cohortPath).build();
+    }
 
-      return new ReadyTransactionReply(o.getActorPath());
+    public static ReadyTransactionReply fromSerializable(Object serializable) {
+        ShardTransactionMessages.ReadyTransactionReply o =
+                (ShardTransactionMessages.ReadyTransactionReply) serializable;
 
-  }
+        return new ReadyTransactionReply(o.getActorPath());
+    }
 }

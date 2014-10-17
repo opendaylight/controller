@@ -70,7 +70,7 @@ module distributed-datastore-provider {
          leaf max-shard-data-change-listener-queue-size {
             default 1000;
             type non-zero-uint32-type;
-            description "The maximum queue size for each shard's data store data change listeners.";
+            description "The maximum queue size for each shard's data store data change listener.";
          }
 
          leaf max-shard-data-store-executor-queue-size {
@@ -107,6 +107,18 @@ module distributed-datastore-provider {
             default 5000;
             type non-zero-uint32-type;
             description "The maximum number of journal log entries to batch on recovery for a shard before committing to the data store.";
+         }
+
+         leaf shard-transaction-commit-timeout-in-seconds {
+            default 30;
+            type non-zero-uint32-type;
+            description "The maximum amount of time a shard transaction three-phase commit can be idle without receiving the next messages before it aborts the transaction";
+         }
+
+         leaf shard-transaction-commit-queue-capacity {
+            default 20000;
+            type non-zero-uint32-type;
+            description "The maximum allowed capacity for each shard's transaction commit queue.";
          }
 
          leaf enable-metric-capture {
