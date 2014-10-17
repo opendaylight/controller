@@ -132,6 +132,12 @@ module distributed-datastore-provider {
              type non-zero-uint32-type;
              description "Max queue size that an actor's mailbox can reach";
          }
+
+         leaf persistent {
+            default true;
+            type boolean;
+            description "Enable or disable data persistence";
+         }
     }
 
     // Augments the 'configuration' choice node under modules/module.
