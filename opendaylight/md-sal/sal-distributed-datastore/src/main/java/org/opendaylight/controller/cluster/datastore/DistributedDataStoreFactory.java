@@ -11,27 +11,26 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.osgi.BundleDelegatingClassLoader;
-import com.google.common.base.Preconditions;
-import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import org.opendaylight.controller.cluster.datastore.config.ConfigurationReader;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.osgi.framework.BundleContext;
 
-import java.io.File;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class DistributedDataStoreFactory {
 
-    public static final String AKKA_CONF_PATH = "./configuration/initial/akka.conf";
     public static final String ACTOR_SYSTEM_NAME = "opendaylight-cluster-data";
+
     public static final String CONFIGURATION_NAME = "odl-cluster-data";
-    private static AtomicReference<ActorSystem> actorSystem = new AtomicReference<>();
+
+    private static AtomicReference<ActorSystem> persistentActorSystem = new AtomicReference<>();
 
     public static DistributedDataStore createInstance(String name, SchemaService schemaService,
                                                       DatastoreContext datastoreContext, BundleContext bundleContext) {
 
-        ActorSystem actorSystem = getOrCreateInstance(bundleContext);
+        ActorSystem actorSystem = getOrCreateInstance(bundleContext, datastoreContext.getConfigurationReader());
         Configuration config = new ConfigurationImpl("module-shards.conf", "modules.conf");
         final DistributedDataStore dataStore =
                 new DistributedDataStore(actorSystem, name, new ClusterWrapperImpl(actorSystem),
@@ -42,27 +41,26 @@ public class DistributedDataStoreFactory {
         return dataStore;
     }
 
-    synchronized private static final ActorSystem getOrCreateInstance(final BundleContext bundleContext) {
+    synchronized private static final ActorSystem getOrCreateInstance(final BundleContext bundleContext, ConfigurationReader configurationReader) {
 
-        if (actorSystem.get() != null){
-            return actorSystem.get();
+        AtomicReference<ActorSystem> actorSystemReference = persistentActorSystem;
+        String configurationName = CONFIGURATION_NAME;
+        String actorSystemName = ACTOR_SYSTEM_NAME;
+
+        if (actorSystemReference.get() != null){
+            return actorSystemReference.get();
         }
+
         // Create an OSGi bundle classloader for actor system
         BundleDelegatingClassLoader classLoader = new BundleDelegatingClassLoader(bundleContext.getBundle(),
                 Thread.currentThread().getContextClassLoader());
 
-        ActorSystem system = ActorSystem.create(ACTOR_SYSTEM_NAME,
-                ConfigFactory.load(readAkkaConfiguration()).getConfig(CONFIGURATION_NAME), classLoader);
+        ActorSystem system = ActorSystem.create(actorSystemName,
+                ConfigFactory.load(configurationReader.read()).getConfig(configurationName), classLoader);
         system.actorOf(Props.create(TerminationMonitor.class), "termination-monitor");
 
-        actorSystem.set(system);
+        actorSystemReference.set(system);
         return system;
     }
 
-
-    private static final Config readAkkaConfiguration() {
-        File defaultConfigFile = new File(AKKA_CONF_PATH);
-        Preconditions.checkState(defaultConfigFile.exists(), "akka.conf is missing");
-        return ConfigFactory.parseFile(defaultConfigFile);
-    }
 }

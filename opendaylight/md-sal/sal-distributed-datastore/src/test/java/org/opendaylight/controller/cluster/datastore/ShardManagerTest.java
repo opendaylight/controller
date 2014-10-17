@@ -2,18 +2,19 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
 import akka.actor.Props;
+import akka.japi.Creator;
 import akka.pattern.Patterns;
 import akka.persistence.RecoveryCompleted;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import akka.util.Timeout;
-import akka.japi.Creator;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Uninterruptibles;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.ActorInitialized;
 import org.opendaylight.controller.cluster.datastore.messages.ActorNotInitialized;
@@ -33,6 +34,7 @@ import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
+
 import java.net.URI;
 import java.util.Collection;
 import java.util.HashSet;
@@ -40,7 +42,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -347,6 +351,79 @@ public class ShardManagerTest extends AbstractActorTest {
         }};
     }
 
+    @Test
+    public void testRecoveryApplicable(){
+        new JavaTestKit(getSystem()) {
+            {
+                final Props persistentProps = ShardManager.props(shardMrgIDSuffix,
+                        new MockClusterWrapper(),
+                        new MockConfiguration(),
+                        DatastoreContext.newBuilder().persistent(true).build());
+                final TestActorRef<ShardManager> persistentShardManager =
+                        TestActorRef.create(getSystem(), persistentProps);
+
+                DataPersistenceProvider dataPersistenceProvider1 = persistentShardManager.underlyingActor().getDataPersistenceProvider();
+
+                assertTrue("Recovery Applicable", dataPersistenceProvider1.isRecoveryApplicable());
+
+                final Props nonPersistentProps = ShardManager.props(shardMrgIDSuffix,
+                        new MockClusterWrapper(),
+                        new MockConfiguration(),
+                        DatastoreContext.newBuilder().persistent(false).build());
+                final TestActorRef<ShardManager> nonPersistentShardManager =
+                        TestActorRef.create(getSystem(), nonPersistentProps);
+
+                DataPersistenceProvider dataPersistenceProvider2 = nonPersistentShardManager.underlyingActor().getDataPersistenceProvider();
+
+                assertFalse("Recovery Not Applicable", dataPersistenceProvider2.isRecoveryApplicable());
+
+
+            }};
+
+    }
+
+    @Test
+    public void testOnUpdateSchemaContextUpdateKnownModulesCallsDataPersistenceProvider()
+            throws Exception {
+        final CountDownLatch persistLatch = new CountDownLatch(1);
+        final Creator<ShardManager> creator = new Creator<ShardManager>() {
+            @Override
+            public ShardManager create() throws Exception {
+                return new ShardManager(shardMrgIDSuffix, new MockClusterWrapper(), new MockConfiguration(), DatastoreContext.newBuilder().build()) {
+                    @Override
+                    protected DataPersistenceProvider createDataPersistenceProvider(boolean persistent) {
+                        DataPersistenceProviderMonitor dataPersistenceProviderMonitor
+                                = new DataPersistenceProviderMonitor();
+                        dataPersistenceProviderMonitor.setPersistLatch(persistLatch);
+                        return dataPersistenceProviderMonitor;
+                    }
+                };
+            }
+        };
+
+        new JavaTestKit(getSystem()) {{
+
+            final TestActorRef<ShardManager> shardManager =
+                    TestActorRef.create(getSystem(), Props.create(new DelegatingShardManagerCreator(creator)));
+
+            ModuleIdentifier foo = mock(ModuleIdentifier.class);
+            when(foo.getNamespace()).thenReturn(new URI("foo"));
+
+            Set<ModuleIdentifier> moduleIdentifierSet = new HashSet<>();
+            moduleIdentifierSet.add(foo);
+
+            SchemaContext schemaContext = mock(SchemaContext.class);
+            when(schemaContext.getAllModuleIdentifiers()).thenReturn(moduleIdentifierSet);
+
+            shardManager.underlyingActor().onReceiveCommand(new UpdateSchemaContext(schemaContext));
+
+            assertEquals("Persisted", true,
+                    Uninterruptibles.awaitUninterruptibly(persistLatch, 5, TimeUnit.SECONDS));
+
+        }};
+    }
+
+
 
     private static class TestShardManager extends ShardManager {
         private final CountDownLatch recoveryComplete = new CountDownLatch(1);
@@ -386,5 +463,18 @@ public class ShardManagerTest extends AbstractActorTest {
             return new TestShardManager(shardMrgIDSuffix);
         }
 
+    }
+
+    private static class DelegatingShardManagerCreator implements Creator<ShardManager> {
+        private Creator<ShardManager> delegate;
+
+        public DelegatingShardManagerCreator(Creator<ShardManager> delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public ShardManager create() throws Exception {
+            return delegate.create();
+        }
     }
 }
