@@ -26,6 +26,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
+import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActorWithMetering;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
@@ -44,6 +45,7 @@ import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContex
 import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.duration.Duration;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -91,6 +93,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private final Collection<String> knownModules = new HashSet<>(128);
 
+    private final DataPersistenceProvider dataPersistenceProvider;
+
     /**
      * @param type defines the kind of data that goes into shards created by this shard manager. Examples of type would be
      *             configuration or operational
@@ -102,11 +106,16 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         this.cluster = Preconditions.checkNotNull(cluster, "cluster should not be null");
         this.configuration = Preconditions.checkNotNull(configuration, "configuration should not be null");
         this.datastoreContext = datastoreContext;
+        this.dataPersistenceProvider = createDataPersistenceProvider(datastoreContext.isPersistent());
 
         // Subscribe this actor to cluster member events
         cluster.subscribeToMemberEvents(getSelf());
 
         createLocalShards();
+    }
+
+    protected DataPersistenceProvider createDataPersistenceProvider(boolean persistent) {
+        return (persistent) ? new PersistentDataProvider() : new NonPersistentDataProvider();
     }
 
     public static Props props(final String type,
@@ -170,18 +179,27 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     @Override
     protected void handleRecover(Object message) throws Exception {
-        if(message instanceof SchemaContextModules){
-            SchemaContextModules msg = (SchemaContextModules) message;
-            knownModules.clear();
-            knownModules.addAll(msg.getModules());
-        } else if(message instanceof RecoveryFailure){
-            RecoveryFailure failure = (RecoveryFailure) message;
-            LOG.error(failure.cause(), "Recovery failed");
-        } else if(message instanceof RecoveryCompleted){
-            LOG.info("Recovery complete : {}", persistenceId());
+        if(dataPersistenceProvider.isRecoveryApplicable()) {
+            if (message instanceof SchemaContextModules) {
+                SchemaContextModules msg = (SchemaContextModules) message;
+                knownModules.clear();
+                knownModules.addAll(msg.getModules());
+            } else if (message instanceof RecoveryFailure) {
+                RecoveryFailure failure = (RecoveryFailure) message;
+                LOG.error(failure.cause(), "Recovery failed");
+            } else if (message instanceof RecoveryCompleted) {
+                LOG.info("Recovery complete : {}", persistenceId());
 
-            // Delete all the messages from the akka journal except the last one
-            deleteMessages(lastSequenceNr() - 1);
+                // Delete all the messages from the akka journal except the last one
+                deleteMessages(lastSequenceNr() - 1);
+            }
+        } else {
+            if (message instanceof RecoveryCompleted) {
+                LOG.info("Recovery complete : {}", persistenceId());
+
+                // Delete all the messages from the akka journal
+                deleteMessages(lastSequenceNr());
+            }
         }
     }
 
@@ -262,15 +280,15 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             knownModules.clear();
             knownModules.addAll(newModules);
 
-            persist(new SchemaContextModules(newModules), new Procedure<SchemaContextModules>() {
+            dataPersistenceProvider.persist(new SchemaContextModules(newModules), new Procedure<SchemaContextModules>() {
 
                 @Override
                 public void apply(SchemaContextModules param) throws Exception {
                     LOG.info("Sending new SchemaContext to Shards");
                     for (ShardInformation info : localShards.values()) {
-                        if(info.getActor() == null) {
+                        if (info.getActor() == null) {
                             info.setActor(getContext().actorOf(Shard.props(info.getShardId(),
-                                    info.getPeerAddresses(), datastoreContext, schemaContext),
+                                            info.getPeerAddresses(), datastoreContext, schemaContext),
                                     info.getShardId().toString()));
                         } else {
                             info.getActor().tell(message, getSelf());
@@ -428,6 +446,11 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     @VisibleForTesting
     Collection<String> getKnownModules() {
         return knownModules;
+    }
+
+    @VisibleForTesting
+    DataPersistenceProvider getDataPersistenceProvider() {
+        return dataPersistenceProvider;
     }
 
     private class ShardInformation {
