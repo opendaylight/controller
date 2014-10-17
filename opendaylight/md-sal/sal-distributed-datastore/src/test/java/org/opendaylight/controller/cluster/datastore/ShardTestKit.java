@@ -7,19 +7,20 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import java.util.concurrent.TimeUnit;
-import org.junit.Assert;
-import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
-import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
-import com.google.common.util.concurrent.Uninterruptibles;
-import scala.concurrent.Await;
-import scala.concurrent.Future;
-import scala.concurrent.duration.Duration;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.pattern.Patterns;
 import akka.testkit.JavaTestKit;
 import akka.util.Timeout;
+import com.google.common.util.concurrent.Uninterruptibles;
+import org.junit.Assert;
+import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
+import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
+
+import java.util.concurrent.TimeUnit;
 
 class ShardTestKit extends JavaTestKit {
 
@@ -61,4 +62,5 @@ class ShardTestKit extends JavaTestKit {
 
         Assert.fail("Leader not found for shard " + shard.path());
     }
+
 }

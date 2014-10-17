@@ -13,6 +13,7 @@ import com.google.common.base.Optional;
 import com.google.protobuf.ByteString;
 import org.junit.After;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.DataPersistence;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
@@ -45,6 +46,8 @@ public class RaftActorTest extends AbstractActorTest {
 
     public static class MockRaftActor extends RaftActor {
 
+        private final DataPersistence dataPersistence;
+
         public static final class MockRaftActorCreator implements Creator<MockRaftActor> {
             private final Map<String, String> peerAddresses;
             private final String id;
@@ -69,6 +72,7 @@ public class RaftActorTest extends AbstractActorTest {
         public MockRaftActor(String id, Map<String, String> peerAddresses, Optional<ConfigParams> config) {
             super(id, peerAddresses, config);
             state = new ArrayList<>();
+            this.dataPersistence = new PersistentData();
         }
 
         public void waitForRecoveryComplete() {
@@ -130,6 +134,11 @@ public class RaftActorTest extends AbstractActorTest {
         }
 
         @Override protected void onStateChanged() {
+        }
+
+        @Override
+        protected DataPersistence persistence() {
+            return this.dataPersistence;
         }
 
         @Override public String persistenceId() {

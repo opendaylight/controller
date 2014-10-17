@@ -11,10 +11,9 @@ package org.opendaylight.controller.cluster.example;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.japi.Creator;
-
 import com.google.common.base.Optional;
 import com.google.protobuf.ByteString;
-
+import org.opendaylight.controller.cluster.DataPersistence;
 import org.opendaylight.controller.cluster.example.messages.KeyValue;
 import org.opendaylight.controller.cluster.example.messages.KeyValueSaved;
 import org.opendaylight.controller.cluster.example.messages.PrintRole;
@@ -38,6 +37,7 @@ import java.util.Map;
 public class ExampleActor extends RaftActor {
 
     private final Map<String, String> state = new HashMap();
+    private final DataPersistence dataPersistence;
 
     private long persistIdentifier = 1;
 
@@ -45,6 +45,7 @@ public class ExampleActor extends RaftActor {
     public ExampleActor(String id, Map<String, String> peerAddresses,
         Optional<ConfigParams> configParams) {
         super(id, peerAddresses, configParams);
+        this.dataPersistence = new PersistentData();
     }
 
     public static Props props(final String id, final Map<String, String> peerAddresses,
@@ -158,6 +159,11 @@ public class ExampleActor extends RaftActor {
 
     @Override protected void onStateChanged() {
 
+    }
+
+    @Override
+    protected DataPersistence persistence() {
+        return dataPersistence;
     }
 
     @Override public void onReceiveRecover(Object message) {

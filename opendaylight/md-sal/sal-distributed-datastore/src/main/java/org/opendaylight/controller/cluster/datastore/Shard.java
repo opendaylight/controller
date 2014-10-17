@@ -27,6 +27,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import org.opendaylight.controller.cluster.DataPersistence;
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
 import org.opendaylight.controller.cluster.common.actor.MeteringBehavior;
 import org.opendaylight.controller.cluster.datastore.ShardCommitCoordinator.CohortEntry;
@@ -104,10 +105,6 @@ public class Shard extends RaftActor {
     private final LoggingAdapter LOG =
         Logging.getLogger(getContext().system(), this);
 
-    // By default persistent will be true and can be turned off using the system
-    // property shard.persistent
-    private final boolean persistent;
-
     /// The name of this shard
     private final ShardIdentifier name;
 
@@ -116,6 +113,8 @@ public class Shard extends RaftActor {
     private final List<ActorSelection> dataChangeListeners = new ArrayList<>();
 
     private final DatastoreContext datastoreContext;
+
+    private final DataPersistence dataPersistence;
 
     private SchemaContext schemaContext;
 
@@ -145,12 +144,9 @@ public class Shard extends RaftActor {
         this.name = name;
         this.datastoreContext = datastoreContext;
         this.schemaContext = schemaContext;
+        this.dataPersistence = (datastoreContext.isPersistent()) ? new PersistentData() : new NonPersistentData();
 
-        String setting = System.getProperty("shard.persistent");
-
-        this.persistent = !"false".equals(setting);
-
-        LOG.info("Shard created : {} persistent : {}", name, persistent);
+        LOG.info("Shard created : {}", name);
 
         store = InMemoryDOMDataStoreFactory.create(name.toString(), null,
                 datastoreContext.getDataStoreProperties());
@@ -301,12 +297,8 @@ public class Shard extends RaftActor {
             // currently uses a same thread executor anyway.
             cohortEntry.getCohort().preCommit().get();
 
-            if(persistent) {
-                Shard.this.persistData(getSender(), transactionID,
-                        new CompositeModificationPayload(cohortEntry.getModification().toSerializable()));
-            } else {
-                Shard.this.finishCommit(getSender(), transactionID);
-            }
+            Shard.this.persistData(getSender(), transactionID,
+                    new CompositeModificationPayload(cohortEntry.getModification().toSerializable()));
         } catch (InterruptedException | ExecutionException e) {
             LOG.error(e, "An exception occurred while preCommitting transaction {}",
                     cohortEntry.getTransactionID());
@@ -815,6 +807,11 @@ public class Shard extends RaftActor {
         }
     }
 
+    @Override
+    protected DataPersistence persistence() {
+        return dataPersistence;
+    }
+
     @Override protected void onLeaderChanged(String oldLeader, String newLeader) {
         shardMBean.setLeader(newLeader);
     }
@@ -855,4 +852,6 @@ public class Shard extends RaftActor {
     ShardStats getShardMBean() {
         return shardMBean;
     }
+
+
 }

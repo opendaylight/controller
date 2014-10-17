@@ -75,6 +75,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
@@ -84,14 +85,16 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static junit.framework.TestCase.assertNotNull;
+import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+
 
 public class ShardTest extends AbstractActorTest {
 
@@ -111,8 +114,6 @@ public class ShardTest extends AbstractActorTest {
 
     @Before
     public void setUp() {
-        System.setProperty("shard.persistent", "false");
-
         InMemorySnapshotStore.clear();
         InMemoryJournal.clear();
     }
@@ -1053,6 +1054,43 @@ public class ShardTest extends AbstractActorTest {
         }};
     }
 
+    @Test
+    public void testCreateSnapshotWithNonPersistentData() throws IOException, InterruptedException {
+        final DatastoreContext dataStoreContext = DatastoreContext.newBuilder().
+                shardJournalRecoveryLogBatchSize(3).shardSnapshotBatchCount(5000).persistent(false).build();
+
+        new ShardTestKit(getSystem()) {{
+            final AtomicReference<CountDownLatch> latch = new AtomicReference<>(new CountDownLatch(1));
+            Creator<Shard> creator = new Creator<Shard>() {
+                @Override
+                public Shard create() throws Exception {
+                    return new Shard(IDENTIFIER, Collections.<ShardIdentifier,String>emptyMap(),
+                            dataStoreContext, SCHEMA_CONTEXT) {
+                        @Override
+                        protected void commitSnapshot(long sequenceNumber) {
+                            super.commitSnapshot(sequenceNumber);
+                            latch.get().countDown();
+                        }
+                    };
+                }
+            };
+
+            TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
+                    Props.create(new DelegatingShardCreator(creator)), "testCreateSnapshot");
+
+            waitUntilLeader(shard);
+
+            shard.tell(new CaptureSnapshot(-1,-1,-1,-1), getRef());
+
+            assertEquals("Snapshot saved", true, latch.get().await(5, TimeUnit.SECONDS));
+
+            latch.set(new CountDownLatch(1));
+            shard.tell(new CaptureSnapshot(-1,-1,-1,-1), getRef());
+
+            assertEquals("Snapshot saved", true, latch.get().await(5, TimeUnit.SECONDS));
+        }};
+    }
+
     /**
      * This test simply verifies that the applySnapShot logic will work
      * @throws ReadFailedException
@@ -1084,6 +1122,7 @@ public class ShardTest extends AbstractActorTest {
         assertEquals(expected, actual);
 
     }
+
 
     private NormalizedNode readStore(InMemoryDOMDataStore store) throws ReadFailedException {
         DOMStoreReadTransaction transaction = store.newReadOnlyTransaction();

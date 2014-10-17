@@ -22,6 +22,7 @@ import akka.persistence.UntypedPersistentActor;
 import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import com.google.protobuf.ByteString;
+import org.opendaylight.controller.cluster.DataPersistence;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
@@ -38,6 +39,7 @@ import org.opendaylight.controller.cluster.raft.client.messages.RemoveRaftPeer;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
+
 import java.io.Serializable;
 import java.util.Map;
 
@@ -140,18 +142,22 @@ public abstract class RaftActor extends UntypedPersistentActor {
 
     @Override
     public void onReceiveRecover(Object message) {
-        if (message instanceof SnapshotOffer) {
-            onRecoveredSnapshot((SnapshotOffer)message);
-        } else if (message instanceof ReplicatedLogEntry) {
-            onRecoveredJournalLogEntry((ReplicatedLogEntry)message);
-        } else if (message instanceof ApplyLogEntries) {
-            onRecoveredApplyLogEntries((ApplyLogEntries)message);
-        } else if (message instanceof DeleteEntries) {
-            replicatedLog.removeFrom(((DeleteEntries) message).getFromIndex());
-        } else if (message instanceof UpdateElectionTerm) {
-            context.getTermInformation().update(((UpdateElectionTerm) message).getCurrentTerm(),
-                    ((UpdateElectionTerm) message).getVotedFor());
-        } else if (message instanceof RecoveryCompleted) {
+        if(persistence().isRecoveryApplicable()){
+            if (message instanceof SnapshotOffer) {
+                onRecoveredSnapshot((SnapshotOffer)message);
+            } else if (message instanceof ReplicatedLogEntry) {
+                onRecoveredJournalLogEntry((ReplicatedLogEntry)message);
+            } else if (message instanceof ApplyLogEntries) {
+                onRecoveredApplyLogEntries((ApplyLogEntries)message);
+            } else if (message instanceof DeleteEntries) {
+                replicatedLog.removeFrom(((DeleteEntries) message).getFromIndex());
+            } else if (message instanceof UpdateElectionTerm) {
+                context.getTermInformation().update(((UpdateElectionTerm) message).getCurrentTerm(),
+                        ((UpdateElectionTerm) message).getVotedFor());
+            }
+        }
+
+        if (message instanceof RecoveryCompleted) {
             onRecoveryCompletedMessage();
         }
     }
@@ -304,10 +310,9 @@ public abstract class RaftActor extends UntypedPersistentActor {
             SaveSnapshotSuccess success = (SaveSnapshotSuccess) message;
             LOG.info("SaveSnapshotSuccess received for snapshot");
 
-            context.getReplicatedLog().snapshotCommit();
+            long sequenceNumber = success.metadata().sequenceNr();
 
-            // TODO: Not sure if we want to be this aggressive with trimming stuff
-            trimPersistentData(success.metadata().sequenceNr());
+            commitSnapshot(sequenceNumber);
 
         } else if (message instanceof SaveSnapshotFailure) {
             SaveSnapshotFailure saveSnapshotFailure = (SaveSnapshotFailure) message;
@@ -485,7 +490,12 @@ public abstract class RaftActor extends UntypedPersistentActor {
         context.setPeerAddress(peerId, peerAddress);
     }
 
+    protected void commitSnapshot(long sequenceNumber) {
+        context.getReplicatedLog().snapshotCommit();
 
+        // TODO: Not sure if we want to be this aggressive with trimming stuff
+        trimPersistentData(sequenceNumber);
+    }
 
     /**
      * The applyState method will be called by the RaftActor when some data
@@ -566,17 +576,19 @@ public abstract class RaftActor extends UntypedPersistentActor {
      */
     protected abstract void onStateChanged();
 
+    protected abstract DataPersistence persistence();
+
     protected void onLeaderChanged(String oldLeader, String newLeader){};
 
     private void trimPersistentData(long sequenceNumber) {
         // Trim akka snapshots
         // FIXME : Not sure how exactly the SnapshotSelectionCriteria is applied
         // For now guessing that it is ANDed.
-        deleteSnapshots(new SnapshotSelectionCriteria(
+        persistence().deleteSnapshots(new SnapshotSelectionCriteria(
             sequenceNumber - context.getConfigParams().getSnapshotBatchCount(), 43200000));
 
         // Trim akka journal
-        deleteMessages(sequenceNumber);
+        persistence().deleteMessages(sequenceNumber);
     }
 
     private String getLeaderAddress(){
@@ -605,7 +617,7 @@ public abstract class RaftActor extends UntypedPersistentActor {
             captureSnapshot.getLastIndex(), captureSnapshot.getLastTerm(),
             captureSnapshot.getLastAppliedIndex(), captureSnapshot.getLastAppliedTerm());
 
-        saveSnapshot(sn);
+        persistence().saveSnapshot(sn);
 
         LOG.info("Persisting of snapshot done:{}", sn.getLogMessage());
 
@@ -647,7 +659,7 @@ public abstract class RaftActor extends UntypedPersistentActor {
             // FIXME: Maybe this should be done after the command is saved
             journal.subList(adjustedIndex , journal.size()).clear();
 
-            persist(new DeleteEntries(adjustedIndex), new Procedure<DeleteEntries>(){
+            persistence().persist(new DeleteEntries(adjustedIndex), new Procedure<DeleteEntries>(){
 
                 @Override public void apply(DeleteEntries param)
                     throws Exception {
@@ -677,7 +689,7 @@ public abstract class RaftActor extends UntypedPersistentActor {
             // persist call and the execution(s) of the associated event
             // handler. This also holds for multiple persist calls in context
             // of a single command.
-            persist(replicatedLogEntry,
+            persistence().persist(replicatedLogEntry,
                 new Procedure<ReplicatedLogEntry>() {
                     @Override
                     public void apply(ReplicatedLogEntry evt) throws Exception {
@@ -766,7 +778,7 @@ public abstract class RaftActor extends UntypedPersistentActor {
         public void updateAndPersist(long currentTerm, String votedFor){
             update(currentTerm, votedFor);
             // FIXME : Maybe first persist then update the state
-            persist(new UpdateElectionTerm(this.currentTerm, this.votedFor), new Procedure<UpdateElectionTerm>(){
+            persistence().persist(new UpdateElectionTerm(this.currentTerm, this.votedFor), new Procedure<UpdateElectionTerm>(){
 
                 @Override public void apply(UpdateElectionTerm param)
                     throws Exception {
@@ -794,4 +806,72 @@ public abstract class RaftActor extends UntypedPersistentActor {
         }
     }
 
+    protected class PersistentData implements DataPersistence {
+
+        public PersistentData(){
+
+        }
+
+        @Override
+        public boolean isRecoveryApplicable() {
+            return true;
+        }
+
+        @Override
+        public <T> void persist(T o, Procedure<T> procedure) {
+            RaftActor.this.persist(o, procedure);
+        }
+
+        @Override
+        public void saveSnapshot(Object o) {
+            RaftActor.this.saveSnapshot(o);
+        }
+
+        @Override
+        public void deleteSnapshots(SnapshotSelectionCriteria criteria) {
+            RaftActor.this.deleteSnapshots(criteria);
+        }
+
+        @Override
+        public void deleteMessages(long sequenceNumber) {
+            RaftActor.this.deleteMessages(sequenceNumber);
+        }
+    }
+
+    protected class NonPersistentData implements DataPersistence {
+
+        public NonPersistentData(){
+
+        }
+
+        @Override
+        public boolean isRecoveryApplicable() {
+            return false;
+        }
+
+        @Override
+        public <T> void persist(T o, Procedure<T> procedure) {
+            try {
+                procedure.apply(o);
+            } catch (Exception e) {
+                LOG.error(e, "An unexpected error occurred");
+            }
+        }
+
+        @Override
+        public void saveSnapshot(Object o) {
+            // Make saving Snapshot successful
+            commitSnapshot(-1L);
+        }
+
+        @Override
+        public void deleteSnapshots(SnapshotSelectionCriteria criteria) {
+
+        }
+
+        @Override
+        public void deleteMessages(long sequenceNumber) {
+
+        }
+    }
 }

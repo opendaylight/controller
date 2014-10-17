@@ -8,11 +8,14 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
+import org.opendaylight.controller.cluster.datastore.config.ConfigurationReader;
+import org.opendaylight.controller.cluster.datastore.config.FileConfigurationReader;
 import org.opendaylight.controller.cluster.raft.ConfigParams;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
+
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -29,11 +32,13 @@ public class DatastoreContext {
     private final ConfigParams shardRaftConfig;
     private final int shardTransactionCommitTimeoutInSeconds;
     private final int shardTransactionCommitQueueCapacity;
+    private final boolean persistent;
+    private final ConfigurationReader configurationReader;
 
     private DatastoreContext(InMemoryDOMDataStoreConfigProperties dataStoreProperties,
             ConfigParams shardRaftConfig, String dataStoreMXBeanType, int operationTimeoutInSeconds,
             Duration shardTransactionIdleTimeout, int shardTransactionCommitTimeoutInSeconds,
-            int shardTransactionCommitQueueCapacity) {
+            int shardTransactionCommitQueueCapacity, boolean persistent, ConfigurationReader configurationReader) {
         this.dataStoreProperties = dataStoreProperties;
         this.shardRaftConfig = shardRaftConfig;
         this.dataStoreMXBeanType = dataStoreMXBeanType;
@@ -41,6 +46,8 @@ public class DatastoreContext {
         this.shardTransactionIdleTimeout = shardTransactionIdleTimeout;
         this.shardTransactionCommitTimeoutInSeconds = shardTransactionCommitTimeoutInSeconds;
         this.shardTransactionCommitQueueCapacity = shardTransactionCommitQueueCapacity;
+        this.persistent = persistent;
+        this.configurationReader = configurationReader;
     }
 
     public static Builder newBuilder() {
@@ -75,6 +82,14 @@ public class DatastoreContext {
         return shardTransactionCommitQueueCapacity;
     }
 
+    public boolean isPersistent() {
+        return persistent;
+    }
+
+    public ConfigurationReader getConfigurationReader() {
+        return configurationReader;
+    }
+
     public static class Builder {
         private InMemoryDOMDataStoreConfigProperties dataStoreProperties;
         private Duration shardTransactionIdleTimeout = Duration.create(10, TimeUnit.MINUTES);
@@ -85,6 +100,9 @@ public class DatastoreContext {
         private int shardSnapshotBatchCount = 20000;
         private int shardHeartbeatIntervalInMillis = 500;
         private int shardTransactionCommitQueueCapacity = 20000;
+        private boolean persistent = true;
+        private ConfigurationReader configurationReader = new FileConfigurationReader();
+
 
         public Builder shardTransactionIdleTimeout(Duration shardTransactionIdleTimeout) {
             this.shardTransactionIdleTimeout = shardTransactionIdleTimeout;
@@ -131,6 +149,17 @@ public class DatastoreContext {
             return this;
         }
 
+        public Builder configurationReader(ConfigurationReader configurationReader){
+            this.configurationReader = configurationReader;
+            return this;
+        }
+
+
+        public Builder persistent(boolean persistent){
+            this.persistent = persistent;
+            return this;
+        }
+
         public DatastoreContext build() {
             DefaultConfigParamsImpl raftConfig = new DefaultConfigParamsImpl();
             raftConfig.setHeartBeatInterval(new FiniteDuration(shardHeartbeatIntervalInMillis,
@@ -140,7 +169,7 @@ public class DatastoreContext {
 
             return new DatastoreContext(dataStoreProperties, raftConfig, dataStoreMXBeanType,
                     operationTimeoutInSeconds, shardTransactionIdleTimeout,
-                    shardTransactionCommitTimeoutInSeconds, shardTransactionCommitQueueCapacity);
+                    shardTransactionCommitTimeoutInSeconds, shardTransactionCommitQueueCapacity, persistent, configurationReader);
         }
     }
 }
