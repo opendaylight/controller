@@ -1,0 +1,57 @@
+module sal-persisted-dom-test{
+    yang-version 1;
+    namespace "http://netconfcentral.org/ns/persistedtest";
+    prefix persistedtest;
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import opendaylight-md-sal-binding { prefix mdsal; revision-date 2013-10-28; }
+    import rpc-context { prefix rpcx; revision-date 2013-06-17; }
+    import opendaylight-md-sal-dom {prefix sal;}
+    import opendaylight-md-sal-common {prefix common;}
+
+    organization "Netconf Central";
+    contact "Sharon Aicler <saichler@cisco.com>";
+    description "Persisted Database POC for MDSAL";
+
+    revision "2014-10-20" {
+          description "Persistence module initial test version";
+    }
+
+    container sal-persisted-dom-test {
+        presence "test persisted dom";
+        description "Test the MDSAL model serialization and de serialization";        
+        leaf MainString {
+            type string;
+            config false;
+            mandatory true;
+            description "Test simple string";
+        }
+        container sal-persisted-sub-container {
+        	leaf SubContainerMainString {
+        		type string;
+        	}
+        }
+        list NoKeysubList {
+        	leaf name {
+        		type string;
+        	}
+        }
+    }
+	augment "/sal-persisted-dom-test" {
+        leaf MainString2 {
+            type string;
+            config false;
+            mandatory true;
+            description "Test simple string";
+        }	
+        list AugmentSubList {
+        	leaf SubAugName {
+        		type string;
+        	}
+        }
+	}
+    identity sal-persisted-dom-test {
+        base config:module-type;
+        config:java-name-prefix PersistedDB;
+    }
+}
