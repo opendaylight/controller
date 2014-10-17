@@ -11,10 +11,9 @@ package org.opendaylight.controller.cluster.example;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.japi.Creator;
-
 import com.google.common.base.Optional;
 import com.google.protobuf.ByteString;
-
+import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.example.messages.KeyValue;
 import org.opendaylight.controller.cluster.example.messages.KeyValueSaved;
 import org.opendaylight.controller.cluster.example.messages.PrintRole;
@@ -38,6 +37,7 @@ import java.util.Map;
 public class ExampleActor extends RaftActor {
 
     private final Map<String, String> state = new HashMap();
+    private final DataPersistenceProvider dataPersistenceProvider;
 
     private long persistIdentifier = 1;
 
@@ -45,6 +45,7 @@ public class ExampleActor extends RaftActor {
     public ExampleActor(String id, Map<String, String> peerAddresses,
         Optional<ConfigParams> configParams) {
         super(id, peerAddresses, configParams);
+        this.dataPersistenceProvider = new PersistentDataProvider();
     }
 
     public static Props props(final String id, final Map<String, String> peerAddresses,
@@ -57,7 +58,7 @@ public class ExampleActor extends RaftActor {
         });
     }
 
-    @Override public void onReceiveCommand(Object message){
+    @Override public void onReceiveCommand(Object message) throws Exception{
         if(message instanceof KeyValue){
             if(isLeader()) {
                 String persistId = Long.toString(persistIdentifier++);
@@ -160,7 +161,12 @@ public class ExampleActor extends RaftActor {
 
     }
 
-    @Override public void onReceiveRecover(Object message) {
+    @Override
+    protected DataPersistenceProvider persistence() {
+        return dataPersistenceProvider;
+    }
+
+    @Override public void onReceiveRecover(Object message)throws Exception {
         super.onReceiveRecover(message);
     }
 

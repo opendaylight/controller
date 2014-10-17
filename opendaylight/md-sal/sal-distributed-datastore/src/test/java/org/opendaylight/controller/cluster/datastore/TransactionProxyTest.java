@@ -368,7 +368,6 @@ public class TransactionProxyTest {
             future.checkedGet(5, TimeUnit.SECONDS);
             fail("Expected ReadFailedException");
         } catch(ReadFailedException e) {
-            e.printStackTrace();
             throw e.getCause();
         }
     }
