@@ -218,21 +218,14 @@
 
   <dependencyManagement>
     <dependencies>
+
        <!-- project specific dependencies -->
       <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>ietf-netconf-monitoring</artifactId>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>netconf-artifacts</artifactId>
         <version>${netconf.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>ietf-netconf-monitoring-extension</artifactId>
-        <version>${netconf.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>netconf-netty-util</artifactId>
-        <version>${netconf.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.apache.sshd</groupId>
@@ -865,11 +858,6 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
-        <artifactId>config-netconf-connector</artifactId>
-        <version>${netconf.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
         <artifactId>config-persister-api</artifactId>
         <version>${config.version}</version>
         <type>test-jar</type>
@@ -893,11 +881,6 @@
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>config-persister-feature-adapter</artifactId>
         <version>${config.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>config-persister-impl</artifactId>
-        <version>${netconf.version}</version>
       </dependency>
 
       <dependency>
@@ -1070,94 +1053,6 @@
         <version>${dummy-console.version}</version>
       </dependency>
 
-      <!-- Netconf -->
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>netconf-api</artifactId>
-        <version>${netconf.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>netconf-client</artifactId>
-        <version>${netconf.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>netconf-client</artifactId>
-        <version>${netconf.version}</version>
-        <type>test-jar</type>
-      </dependency>
-
-      <!--Netconf config-->
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>netconf-config-dispatcher</artifactId>
-        <version>${netconf.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>netconf-impl</artifactId>
-        <version>${netconf.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>netconf-impl</artifactId>
-        <version>${netconf.version}</version>
-        <type>test-jar</type>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>netconf-mapping-api</artifactId>
-        <version>${netconf.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>netconf-monitoring</artifactId>
-        <version>${netconf.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>netconf-netty-util</artifactId>
-        <version>${netconf.version}</version>
-        <type>test-jar</type>
-      </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>netconf-auth</artifactId>
-            <version>${netconf.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>netconf-usermanager</artifactId>
-            <version>${netconf.version}</version>
-        </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>netconf-ssh</artifactId>
-        <version>${netconf.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>netconf-ssh</artifactId>
-        <version>${netconf.version}</version>
-        <type>test-jar</type>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>netconf-tcp</artifactId>
-        <version>${netconf.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>netconf-util</artifactId>
-        <version>${netconf.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>netconf-util</artifactId>
-        <version>${netconf.version}</version>
-        <type>test-jar</type>
-      </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>netty-config-api</artifactId>
@@ -1349,16 +1244,6 @@
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>md-sal-config</artifactId>
         <version>${mdsal.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>netconf-config</artifactId>
-        <version>${netconf.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>netconf-connector-config</artifactId>
-        <version>${netconf.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
@@ -1805,14 +1690,6 @@
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>features-protocol-framework</artifactId>
         <version>${protocol-framework.version}</version>
-        <classifier>features</classifier>
-        <type>xml</type>
-        <scope>runtime</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>features-netconf</artifactId>
-        <version>${netconf.version}</version>
         <classifier>features</classifier>
         <type>xml</type>
         <scope>runtime</scope>
