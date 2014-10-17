@@ -1,6 +1,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
+import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Dispatchers;
 import akka.dispatch.OnComplete;
@@ -15,6 +16,9 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.Uninterruptibles;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -75,6 +79,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
@@ -84,14 +89,16 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static junit.framework.TestCase.assertNotNull;
+import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+
 
 public class ShardTest extends AbstractActorTest {
 
@@ -111,8 +118,6 @@ public class ShardTest extends AbstractActorTest {
 
     @Before
     public void setUp() {
-        System.setProperty("shard.persistent", "false");
-
         InMemorySnapshotStore.clear();
         InMemoryJournal.clear();
     }
@@ -1084,6 +1089,59 @@ public class ShardTest extends AbstractActorTest {
         assertEquals(expected, actual);
 
     }
+
+
+    @Test
+    public void testSnapshotWorksProperlyForNonPersistentShard() throws InterruptedException {
+
+        Config load = ConfigFactory.load("non-persistent");
+
+        final ActorSystem actorSystem = ActorSystem.create("non-persistent", load);
+
+        try {
+            final DatastoreContext dataStoreContext = DatastoreContext.newBuilder().
+                    shardJournalRecoveryLogBatchSize(3).shardSnapshotBatchCount(5000).persistent(false).build();
+
+            new ShardTestKit(actorSystem) {
+                {
+                    final AtomicReference<CountDownLatch> latch = new AtomicReference<>(new CountDownLatch(1));
+                    Creator<Shard> creator = new Creator<Shard>() {
+                        @Override
+                        public Shard create() throws Exception {
+                            return new Shard(IDENTIFIER, Collections.<ShardIdentifier, String>emptyMap(),
+                                    dataStoreContext, SCHEMA_CONTEXT) {
+                                @Override
+                                public void saveSnapshot(Object snapshot) {
+                                    super.saveSnapshot(snapshot);
+                                    latch.get().countDown();
+                                }
+                            };
+                        }
+                    };
+
+                    TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
+                            Props.create(new DelegatingShardCreator(creator)), "testCreateSnapshot");
+
+                    waitUntilLeader(shard);
+
+                    addTestData(shard, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+
+                    // FIXME: If we do not sleep here the subsequent CaptureSnapshot message does not
+                    // get delivered to the actor ????
+                    Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
+
+                    shard.tell(new CaptureSnapshot(-1, -1, -1, -1), getRef());
+
+                    assertEquals("Snapshot saved", true, latch.get().await(5, TimeUnit.SECONDS));
+                }
+
+            };
+        } finally {
+            actorSystem.shutdown();
+        }
+    }
+
+
 
     private NormalizedNode readStore(InMemoryDOMDataStore store) throws ReadFailedException {
         DOMStoreReadTransaction transaction = store.newReadOnlyTransaction();
