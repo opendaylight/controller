@@ -9,9 +9,8 @@
 package org.opendaylight.controller.md.sal.dom.broker.impl.jmx;
 
 import javax.annotation.Nonnull;
-
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
-import org.opendaylight.yangtools.util.DurationStatsTracker;
+import org.opendaylight.yangtools.util.DurationStatisticsTracker;
 
 /**
  * Implementation of the CommitStatsMXBean interface.
@@ -20,7 +19,7 @@ import org.opendaylight.yangtools.util.DurationStatsTracker;
  */
 public class CommitStatsMXBeanImpl extends AbstractMXBean implements CommitStatsMXBean {
 
-    private final DurationStatsTracker commitStatsTracker;
+    private final DurationStatisticsTracker commitStatsTracker;
 
     /**
      * Constructor.
@@ -28,7 +27,7 @@ public class CommitStatsMXBeanImpl extends AbstractMXBean implements CommitStats
      * @param commitStatsTracker the DurationStatsTracker used to obtain the stats.
      * @param mBeanType mBeanType Used as the <code>type</code> property in the bean's ObjectName.
      */
-    public CommitStatsMXBeanImpl(@Nonnull DurationStatsTracker commitStatsTracker,
+    public CommitStatsMXBeanImpl(@Nonnull DurationStatisticsTracker commitStatsTracker,
             @Nonnull String mBeanType) {
         super("CommitStats", mBeanType, null);
         this.commitStatsTracker = commitStatsTracker;
