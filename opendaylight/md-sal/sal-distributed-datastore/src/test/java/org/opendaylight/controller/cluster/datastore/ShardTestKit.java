@@ -7,19 +7,31 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import java.util.concurrent.TimeUnit;
-import org.junit.Assert;
-import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
-import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
-import com.google.common.util.concurrent.Uninterruptibles;
-import scala.concurrent.Await;
-import scala.concurrent.Future;
-import scala.concurrent.duration.Duration;
 import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.pattern.Patterns;
 import akka.testkit.JavaTestKit;
+import akka.testkit.TestActorRef;
 import akka.util.Timeout;
+import com.google.common.util.concurrent.Uninterruptibles;
+import org.junit.Assert;
+import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransaction;
+import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
+import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
+import org.opendaylight.controller.cluster.datastore.messages.ReadyTransaction;
+import org.opendaylight.controller.cluster.datastore.messages.WriteData;
+import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
+import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
+import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
+import org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages;
+import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
+import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
+
+import java.util.concurrent.TimeUnit;
 
 class ShardTestKit extends JavaTestKit {
 
@@ -60,5 +72,32 @@ class ShardTestKit extends JavaTestKit {
         }
 
         Assert.fail("Leader not found for shard " + shard.path());
+    }
+
+
+    protected void addTestData(TestActorRef<Shard> shard) {
+        shard.tell(new CreateTransaction("transaction-1", TransactionProxy.TransactionType.WRITE_ONLY.ordinal()).toSerializable(),
+                getRef());
+        ShardTransactionMessages.CreateTransactionReply createTransactionReply = this.expectMsgClass(ShardTransactionMessages.CreateTransactionReply.class);
+
+        ActorSelection transaction = this.getSystem().actorSelection(createTransactionReply.getTransactionActorPath());
+
+        transaction.tell(new WriteData(TestModel.TEST_PATH,
+                ImmutableNodes.containerNode(TestModel.TEST_QNAME), TestModel.createTestContext()).toSerializable(), getRef());
+
+
+        expectMsgClass(ShardTransactionMessages.WriteDataReply.class);
+
+        transaction.tell(new ReadyTransaction().toSerializable(), getRef());
+
+        expectMsgClass(ShardTransactionMessages.ReadyTransactionReply.class);
+
+        shard.tell(new CanCommitTransaction(createTransactionReply.getTransactionId()).toSerializable(), getRef());
+
+        expectMsgClass(ThreePhaseCommitCohortMessages.CanCommitTransactionReply.class);
+
+        shard.tell(new CommitTransaction(createTransactionReply.getTransactionId()).toSerializable(), getRef());
+
+        expectMsgClass(ThreePhaseCommitCohortMessages.CommitTransactionReply.class);
     }
 }
