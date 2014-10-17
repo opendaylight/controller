@@ -8,12 +8,15 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
+import org.opendaylight.controller.cluster.datastore.config.ConfigurationReader;
+import org.opendaylight.controller.cluster.datastore.config.FileConfigurationReader;
 import org.opendaylight.controller.cluster.raft.ConfigParams;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
 import akka.util.Timeout;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
+
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -32,12 +35,15 @@ public class DatastoreContext {
     private final int shardTransactionCommitQueueCapacity;
     private final Timeout shardInitializationTimeout;
     private final Timeout shardLeaderElectionTimeout;
+    private final boolean persistent;
+    private final ConfigurationReader configurationReader;
 
     private DatastoreContext(InMemoryDOMDataStoreConfigProperties dataStoreProperties,
             ConfigParams shardRaftConfig, String dataStoreMXBeanType, int operationTimeoutInSeconds,
             Duration shardTransactionIdleTimeout, int shardTransactionCommitTimeoutInSeconds,
             int shardTransactionCommitQueueCapacity, Timeout shardInitializationTimeout,
-            Timeout shardLeaderElectionTimeout) {
+            Timeout shardLeaderElectionTimeout,
+            boolean persistent, ConfigurationReader configurationReader) {
         this.dataStoreProperties = dataStoreProperties;
         this.shardRaftConfig = shardRaftConfig;
         this.dataStoreMXBeanType = dataStoreMXBeanType;
@@ -47,6 +53,8 @@ public class DatastoreContext {
         this.shardTransactionCommitQueueCapacity = shardTransactionCommitQueueCapacity;
         this.shardInitializationTimeout = shardInitializationTimeout;
         this.shardLeaderElectionTimeout = shardLeaderElectionTimeout;
+        this.persistent = persistent;
+        this.configurationReader = configurationReader;
     }
 
     public static Builder newBuilder() {
@@ -89,6 +97,14 @@ public class DatastoreContext {
         return shardLeaderElectionTimeout;
     }
 
+    public boolean isPersistent() {
+        return persistent;
+    }
+
+    public ConfigurationReader getConfigurationReader() {
+        return configurationReader;
+    }
+
     public static class Builder {
         private InMemoryDOMDataStoreConfigProperties dataStoreProperties;
         private Duration shardTransactionIdleTimeout = Duration.create(10, TimeUnit.MINUTES);
@@ -101,6 +117,8 @@ public class DatastoreContext {
         private int shardTransactionCommitQueueCapacity = 20000;
         private Timeout shardInitializationTimeout = new Timeout(5, TimeUnit.MINUTES);
         private Timeout shardLeaderElectionTimeout = new Timeout(30, TimeUnit.SECONDS);
+        private boolean persistent = true;
+        private ConfigurationReader configurationReader = new FileConfigurationReader();
 
         public Builder shardTransactionIdleTimeout(Duration shardTransactionIdleTimeout) {
             this.shardTransactionIdleTimeout = shardTransactionIdleTimeout;
@@ -157,6 +175,17 @@ public class DatastoreContext {
             return this;
         }
 
+        public Builder configurationReader(ConfigurationReader configurationReader){
+            this.configurationReader = configurationReader;
+            return this;
+        }
+
+
+        public Builder persistent(boolean persistent){
+            this.persistent = persistent;
+            return this;
+        }
+
         public DatastoreContext build() {
             DefaultConfigParamsImpl raftConfig = new DefaultConfigParamsImpl();
             raftConfig.setHeartBeatInterval(new FiniteDuration(shardHeartbeatIntervalInMillis,
@@ -167,7 +196,8 @@ public class DatastoreContext {
             return new DatastoreContext(dataStoreProperties, raftConfig, dataStoreMXBeanType,
                     operationTimeoutInSeconds, shardTransactionIdleTimeout,
                     shardTransactionCommitTimeoutInSeconds, shardTransactionCommitQueueCapacity,
-                    shardInitializationTimeout, shardLeaderElectionTimeout);
+                    shardInitializationTimeout, shardLeaderElectionTimeout,
+                    persistent, configurationReader);
         }
     }
 }

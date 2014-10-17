@@ -62,6 +62,7 @@ public class DistributedOperationalDataStoreProviderModule extends
                         props.getShardTransactionCommitTimeoutInSeconds().getValue().intValue())
                 .shardTransactionCommitQueueCapacity(
                         props.getShardTransactionCommitQueueCapacity().getValue().intValue())
+                .persistent(props.getPersistent().booleanValue())
                 .build();
 
         return DistributedDataStoreFactory.createInstance("operational",
