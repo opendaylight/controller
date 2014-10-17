@@ -17,9 +17,9 @@ import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-class SimulatedGet extends AbstractConfigNetconfOperation {
+class SimulatedGetConfig extends AbstractConfigNetconfOperation {
 
-    SimulatedGet(final String netconfSessionIdForReporting) {
+    SimulatedGetConfig(final String netconfSessionIdForReporting) {
         super(null, netconfSessionIdForReporting);
     }
 
@@ -37,6 +37,6 @@ class SimulatedGet extends AbstractConfigNetconfOperation {
 
     @Override
     protected String getOperationName() {
-        return XmlNetconfConstants.GET;
+        return XmlNetconfConstants.GET_CONFIG;
     }
 }
