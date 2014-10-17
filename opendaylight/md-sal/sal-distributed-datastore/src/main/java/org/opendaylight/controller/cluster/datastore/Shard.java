@@ -27,6 +27,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
 import org.opendaylight.controller.cluster.common.actor.MeteringBehavior;
 import org.opendaylight.controller.cluster.datastore.ShardCommitCoordinator.CohortEntry;
@@ -104,10 +105,6 @@ public class Shard extends RaftActor {
     private final LoggingAdapter LOG =
         Logging.getLogger(getContext().system(), this);
 
-    // By default persistent will be true and can be turned off using the system
-    // property shard.persistent
-    private final boolean persistent;
-
     /// The name of this shard
     private final ShardIdentifier name;
 
@@ -119,6 +116,8 @@ public class Shard extends RaftActor {
                                                                        Lists.newArrayList();
 
     private final DatastoreContext datastoreContext;
+
+    private final DataPersistenceProvider dataPersistenceProvider;
 
     private SchemaContext schemaContext;
 
@@ -148,12 +147,9 @@ public class Shard extends RaftActor {
         this.name = name;
         this.datastoreContext = datastoreContext;
         this.schemaContext = schemaContext;
+        this.dataPersistenceProvider = (datastoreContext.isPersistent()) ? new PersistentDataProvider() : new NonPersistentRaftDataProvider();
 
-        String setting = System.getProperty("shard.persistent");
-
-        this.persistent = !"false".equals(setting);
-
-        LOG.info("Shard created : {} persistent : {}", name, persistent);
+        LOG.info("Shard created : {} persistent : {}", name, datastoreContext.isPersistent());
 
         store = InMemoryDOMDataStoreFactory.create(name.toString(), null,
                 datastoreContext.getDataStoreProperties());
@@ -211,7 +207,7 @@ public class Shard extends RaftActor {
     }
 
     @Override
-    public void onReceiveRecover(Object message) {
+    public void onReceiveRecover(Object message) throws Exception {
         if(LOG.isDebugEnabled()) {
             LOG.debug("onReceiveRecover: Received message {} from {}",
                 message.getClass().toString(),
@@ -230,7 +226,7 @@ public class Shard extends RaftActor {
     }
 
     @Override
-    public void onReceiveCommand(Object message) {
+    public void onReceiveCommand(Object message) throws Exception {
         if(LOG.isDebugEnabled()) {
             LOG.debug("onReceiveCommand: Received message {} from {}", message, getSender());
         }
@@ -308,12 +304,8 @@ public class Shard extends RaftActor {
             // currently uses a same thread executor anyway.
             cohortEntry.getCohort().preCommit().get();
 
-            if(persistent) {
-                Shard.this.persistData(getSender(), transactionID,
-                        new CompositeModificationPayload(cohortEntry.getModification().toSerializable()));
-            } else {
-                Shard.this.finishCommit(getSender(), transactionID);
-            }
+            Shard.this.persistData(getSender(), transactionID,
+                    new CompositeModificationPayload(cohortEntry.getModification().toSerializable()));
         } catch (InterruptedException | ExecutionException e) {
             LOG.error(e, "An exception occurred while preCommitting transaction {}",
                     cohortEntry.getTransactionID());
@@ -843,12 +835,22 @@ public class Shard extends RaftActor {
         }
     }
 
+    @Override
+    protected DataPersistenceProvider persistence() {
+        return dataPersistenceProvider;
+    }
+
     @Override protected void onLeaderChanged(String oldLeader, String newLeader) {
         shardMBean.setLeader(newLeader);
     }
 
     @Override public String persistenceId() {
         return this.name.toString();
+    }
+
+    @VisibleForTesting
+    DataPersistenceProvider getDataPersistenceProvider() {
+        return dataPersistenceProvider;
     }
 
     private static class ShardCreator implements Creator<Shard> {
