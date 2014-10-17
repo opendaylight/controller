@@ -48,7 +48,7 @@ public class BackwardsCompatibleMountPointManagerTest {
 
     private BackwardsCompatibleMountPointManager compatibleMountPointManager;
     static final QName qName = QName.create("namespace", "12-12-1212", "mount");
-    static final YangInstanceIdentifier id = YangInstanceIdentifier.builder(qName).build();
+    static final YangInstanceIdentifier id = YangInstanceIdentifier.of(qName);
 
     @Before
     public void setUp() throws Exception {

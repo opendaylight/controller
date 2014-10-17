@@ -119,7 +119,7 @@ public class DataNormalizerTest {
 
     static final Short OUTER_LIST_ID = (short) 10;
 
-    static final YangInstanceIdentifier OUTER_LIST_PATH_LEGACY = YangInstanceIdentifier.builder(TEST_QNAME)
+    static final YangInstanceIdentifier OUTER_LIST_PATH_LEGACY = YangInstanceIdentifier.builder(TEST_PATH)
             .nodeWithKey(OUTER_LIST_QNAME, ID_QNAME, OUTER_LIST_ID).build();
 
     static final YangInstanceIdentifier LEAF_TWO_PATH_LEGACY = YangInstanceIdentifier.builder(OUTER_LIST_PATH_LEGACY)
@@ -295,7 +295,7 @@ public class DataNormalizerTest {
                 .withNodeIdentifier(new NodeIdentifier(TEST_QNAME)).withChild(testAnyXmlNode).build();
 
         DataNormalizer normalizer = new DataNormalizer(createTestContext());
-        Node<?> legacyNode = normalizer.toLegacy(YangInstanceIdentifier.builder(TEST_QNAME).build(), testContainerNode);
+        Node<?> legacyNode = normalizer.toLegacy(YangInstanceIdentifier.builder().node(TEST_QNAME).build(), testContainerNode);
 
         verifyLegacyNode(
                 legacyNode,
@@ -332,7 +332,7 @@ public class DataNormalizerTest {
 
         DataNormalizer normalizer = new DataNormalizer(createTestContext());
 
-        Node<?> legacyNode = normalizer.toLegacy(YangInstanceIdentifier.builder(TEST_QNAME).build(), testContainerNode);
+        Node<?> legacyNode = normalizer.toLegacy(YangInstanceIdentifier.builder().node(TEST_QNAME).build(), testContainerNode);
 
         verifyLegacyNode(
                 legacyNode,
@@ -359,7 +359,7 @@ public class DataNormalizerTest {
 
         DataNormalizer normalizer = new DataNormalizer(createTestContext());
 
-        Node<?> legacyNode = normalizer.toLegacy(YangInstanceIdentifier.builder(TEST_QNAME).build(), testContainerNode);
+        Node<?> legacyNode = normalizer.toLegacy(YangInstanceIdentifier.builder().node(TEST_QNAME).build(), testContainerNode);
 
         verifyLegacyNode(
                 legacyNode,
