@@ -369,11 +369,11 @@ public class NetconfDeviceSimulator implements Closeable {
 
         static class SimulatedOperationService implements NetconfOperationService {
             private final Set<Capability> capabilities;
-            private static SimulatedGet sGet;
+            private final long currentSessionId;
 
             public SimulatedOperationService(final Set<Capability> capabilities, final long currentSessionId) {
                 this.capabilities = capabilities;
-                sGet = new SimulatedGet(String.valueOf(currentSessionId));
+                this.currentSessionId = currentSessionId;
             }
 
             @Override
@@ -383,7 +383,12 @@ public class NetconfDeviceSimulator implements Closeable {
 
             @Override
             public Set<NetconfOperation> getNetconfOperations() {
-                return Sets.<NetconfOperation>newHashSet(sGet);
+                final DataList storage = new DataList();
+                final SimulatedGet sGet = new SimulatedGet(String.valueOf(currentSessionId), storage);
+                final SimulatedEditConfig sEditConfig = new SimulatedEditConfig(String.valueOf(currentSessionId), storage);
+                final SimulatedGetConfig sGetConfig = new SimulatedGetConfig(String.valueOf(currentSessionId), storage);
+                final SimulatedCommit sCommit = new SimulatedCommit(String.valueOf(currentSessionId));
+                return Sets.<NetconfOperation>newHashSet(sGet,  sGetConfig, sEditConfig, sCommit);
             }
 
             @Override

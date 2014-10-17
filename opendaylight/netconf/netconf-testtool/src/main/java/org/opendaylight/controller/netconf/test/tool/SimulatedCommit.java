@@ -17,29 +17,19 @@ import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-class SimulatedGet extends AbstractConfigNetconfOperation {
+class SimulatedCommit extends AbstractConfigNetconfOperation {
 
-    private final DataList storage;
-
-    SimulatedGet(final String netconfSessionIdForReporting, final DataList storage) {
+    SimulatedCommit(final String netconfSessionIdForReporting) {
         super(null, netconfSessionIdForReporting);
-        this.storage = storage;
     }
 
     @Override
     protected Element handleWithNoSubsequentOperations(final Document document, final XmlElement operationElement) throws NetconfDocumentedException {
-        final Element element = XmlUtil.createElement(document, XmlNetconfConstants.DATA_KEY, Optional.<String>absent());
-
-        for(final XmlElement e : storage.getConfigList()) {
-            final Element domElement = e.getDomElement();
-            element.appendChild(element.getOwnerDocument().importNode(domElement, true));
-        }
-
-        return element;
+        return XmlUtil.createElement(document, XmlNetconfConstants.OK, Optional.<String>absent());
     }
 
     @Override
     protected String getOperationName() {
-        return XmlNetconfConstants.GET;
+        return XmlNetconfConstants.COMMIT;
     }
 }
