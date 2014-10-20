@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_2a7420ce",
+        "filename": "opendaylight/netconf/netconf-testtool/src/main/java/org/opendaylight/controller/netconf/test/tool/NetconfDeviceSimulator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-10-20T15:23:42Z",
+      "side": 1,
+      "message": "com.google.common.util.concurrent.ThreadFactoryBuilder ?",
+      "revId": "e220ca8e105b62337f980d5bebf87546a7b44b4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
