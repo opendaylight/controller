@@ -11,6 +11,8 @@ import java.nio.charset.Charset;
 
 import org.opendaylight.controller.liblldp.Ethernet;
 import org.opendaylight.controller.liblldp.LLDP;
+import org.opendaylight.controller.liblldp.IEEE8021Q;
+import org.opendaylight.controller.liblldp.Packet;
 import org.opendaylight.controller.liblldp.LLDPTLV;
 import org.opendaylight.controller.liblldp.NetUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
@@ -42,6 +44,8 @@ public class LLDPDiscoveryUtils {
 
     public static NodeConnectorRef lldpToNodeConnectorRef(byte[] payload)  {
         Ethernet ethPkt = new Ethernet();
+        Packet nextPak = null;
+        LLDP lldp = null;
         try {
             ethPkt.deserialize(payload, 0,payload.length * NetUtils.NumBitsInAByte);
         } catch (Exception e) {
@@ -49,8 +53,19 @@ public class LLDPDiscoveryUtils {
         }
 
         if (ethPkt.getPayload() instanceof LLDP) {
-            LLDP lldp = (LLDP) ethPkt.getPayload();
-
+            lldp = (LLDP) ethPkt.getPayload();
+        }
+        else
+        {
+            nextPak = (Packet) ethPkt.getPayload();
+             if (nextPak instanceof IEEE8021Q) {
+                nextPak = ((IEEE8021Q) nextPak).getPayload();
+                if (nextPak instanceof LLDP) {
+                    lldp = (LLDP) nextPak;
+                }
+              }
+        }
+        if ( lldp != null ) {
             try {
                 NodeId srcNodeId = null;
                 NodeConnectorId srcNodeConnectorId = null;
