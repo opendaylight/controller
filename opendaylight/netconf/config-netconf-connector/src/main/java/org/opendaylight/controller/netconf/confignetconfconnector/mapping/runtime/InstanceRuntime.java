@@ -107,7 +107,7 @@ public class InstanceRuntime {
 
                 String elementName = jmxToYangChildRbeMapping.get(childMappingEntry.getKey());
 
-                Element innerXml = XmlUtil.createElement(document, elementName, Optional.<String>absent());
+                Element innerXml = XmlUtil.createElement(document, elementName, Optional.of(namespace));
                 childMappingEntry.getValue().toXml(objectName, innerChildRbeOns, document,
                         runtimeInstanceIndex, innerXml, namespace);
                 xml.appendChild(innerXml);
