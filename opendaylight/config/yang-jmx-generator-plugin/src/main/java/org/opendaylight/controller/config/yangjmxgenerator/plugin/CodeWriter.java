@@ -41,18 +41,18 @@ import java.util.Map.Entry;
 
 final class CodeWriter {
 
-    private static final Logger logger = LoggerFactory.getLogger(CodeWriter.class);
-    private static final Optional<String> copyright = StringUtil.loadCopyright();
+    private static final Logger LOGGER = LoggerFactory.getLogger(CodeWriter.class);
+    private static final Optional<String> COPYRIGHT = StringUtil.loadCopyright();
 
     public File writeSie(ServiceInterfaceEntry sie, File outputBaseDir) {
         try {
             GeneralInterfaceTemplate generalInterfaceTemplate = TemplateFactory.serviceInterfaceFromSie(sie);
-            GeneratedObject go = new GenericGeneratedObjectFactory().toGeneratedObject(generalInterfaceTemplate, copyright);
+            GeneratedObject go = new GenericGeneratedObjectFactory().toGeneratedObject(generalInterfaceTemplate, COPYRIGHT);
             return go.persist(outputBaseDir).get().getValue();
         } catch (Exception e) {
             String message = "An error occurred during Service interface generating, sie:"
                     + sie.getTypeName() + ", " + sie.getFullyQualifiedName();
-            logger.error(message, e);
+            LOGGER.error(message, e);
             throw new RuntimeException(message, e);
         }
     }
@@ -70,33 +70,33 @@ final class CodeWriter {
             // TOs
             Map<String,GeneralClassTemplate> tosFromMbe = TemplateFactory.tOsFromMbe(mbe);
             for(GeneralClassTemplate template: tosFromMbe.values()) {
-                gos.put(new GenericGeneratedObjectFactory().toGeneratedObject(template, copyright), true);
+                gos.put(new GenericGeneratedObjectFactory().toGeneratedObject(template, COPYRIGHT), true);
             }
 
             // MXBean interface
             GeneralInterfaceTemplate ifcTemplate = TemplateFactory.mXBeanInterfaceTemplateFromMbe(mbe);
-            gos.put(new GenericGeneratedObjectFactory().toGeneratedObject(ifcTemplate, copyright), true);
+            gos.put(new GenericGeneratedObjectFactory().toGeneratedObject(ifcTemplate, COPYRIGHT), true);
 
 
             // generate abstract factory
-            gos.put(new AbsFactoryGeneratedObjectFactory().toGeneratedObject(mbe, copyright), true);
+            gos.put(new AbsFactoryGeneratedObjectFactory().toGeneratedObject(mbe, COPYRIGHT), true);
 
             // generate abstract module
-            gos.put(new AbsModuleGeneratedObjectFactory().toGeneratedObject(mbe, copyright), true);
+            gos.put(new AbsModuleGeneratedObjectFactory().toGeneratedObject(mbe, COPYRIGHT), true);
 
             // generate concrete factory
             StubFactoryTemplate concreteFactory = TemplateFactory.stubFactoryTemplateFromMbe(mbe);
-            gos.put(new GenericGeneratedObjectFactory().toGeneratedObject(concreteFactory, copyright), false);
+            gos.put(new GenericGeneratedObjectFactory().toGeneratedObject(concreteFactory, COPYRIGHT), false);
 
 
             // generate concrete module
 
-            gos.put(new ConcreteModuleGeneratedObjectFactory().toGeneratedObject(mbe, copyright, Optional.<String>absent()), false);
+            gos.put(new ConcreteModuleGeneratedObjectFactory().toGeneratedObject(mbe, COPYRIGHT, Optional.<String>absent()), false);
 
             // write runtime bean MXBeans and registrators
             List<FtlTemplate> allFtlFiles = getRuntimeBeanFtlTemplates(mbe.getRuntimeBeans());
             for(FtlTemplate template: allFtlFiles) {
-                gos.put(new GenericGeneratedObjectFactory().toGeneratedObject(template, copyright), true);
+                gos.put(new GenericGeneratedObjectFactory().toGeneratedObject(template, COPYRIGHT), true);
             }
 
             generatedFiles.addAll(persistGeneratedObjects(targetBaseDir, mainBaseDir, gos));
@@ -113,7 +113,7 @@ final class CodeWriter {
         } catch (Exception e) {
             String message = "An error occurred during Module generating, mbe:"
                     + mbe.getJavaNamePrefix();
-            logger.error(message, e);
+            LOGGER.error(message, e);
             throw new RuntimeException(message, e);
         }
     }

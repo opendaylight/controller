@@ -173,10 +173,11 @@ public class LogbackModuleFactory extends
                 context.getLogger(Logger.ROOT_LOGGER_NAME));
         for (org.slf4j.Logger log : loggersToBeAdd) {
             LoggerTO logger = new LoggerTO();
-            if (((Logger) log).getLevel() != null)
+            if (((Logger) log).getLevel() != null) {
                 logger.setLevel(((Logger) log).getLevel().levelStr);
-            else
+            } else {
                 logger.setLevel(((Logger) log).getEffectiveLevel().levelStr);
+            }
             logger.setLoggerName(log.getName());
             Iterator<Appender<ILoggingEvent>> iter = ((Logger) log).iteratorForAppenders();
             while (iter.hasNext()) {

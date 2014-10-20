@@ -30,7 +30,7 @@ import com.google.common.base.Preconditions;
  * Delegates the the contained feature and provides additional methods.
  */
 public class ChildAwareFeatureWrapper extends AbstractFeatureWrapper implements Feature {
-    private static final Logger logger = LoggerFactory.getLogger(ChildAwareFeatureWrapper.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChildAwareFeatureWrapper.class);
     private FeaturesService featuresService= null;
 
     protected ChildAwareFeatureWrapper(Feature f) {
@@ -79,7 +79,7 @@ public class ChildAwareFeatureWrapper extends AbstractFeatureWrapper implements 
                     f = new FeatureConfigSnapshotHolder(h,this);
                     snapShotHolders.add(f);
                 } catch (JAXBException e) {
-                    logger.debug("{} is not a config subsystem config file",h.getFileInfo().getFinalname());
+                    LOGGER.debug("{} is not a config subsystem config file",h.getFileInfo().getFinalname());
                 }
             }
         }
@@ -95,11 +95,10 @@ public class ChildAwareFeatureWrapper extends AbstractFeatureWrapper implements 
         for(Feature f: features) {
             if (f.getName().equals(dependency.getName())) {
                 Version v = VersionTable.getVersion(f.getVersion());
-                if (range.contains(v)) {
-                    if (fi == null || VersionTable.getVersion(fi.getVersion()).compareTo(v) < 0) {
+                if (range.contains(v) &&
+                    (fi == null || VersionTable.getVersion(fi.getVersion()).compareTo(v) < 0)) {
                         fi = f;
                         break;
-                    }
                 }
             }
         }

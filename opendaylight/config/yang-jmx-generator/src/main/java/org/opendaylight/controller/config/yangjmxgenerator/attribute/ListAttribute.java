@@ -82,22 +82,27 @@ public class ListAttribute extends AbstractAttribute implements TypedAttribute {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
-        if (!super.equals(o))
+        }
+        if (!super.equals(o)) {
             return false;
+        }
 
         ListAttribute that = (ListAttribute) o;
 
         if (nullableDefault != null ? !nullableDefault
-                .equals(that.nullableDefault) : that.nullableDefault != null)
+                .equals(that.nullableDefault) : that.nullableDefault != null) {
             return false;
+        }
         if (nullableDescription != null ? !nullableDescription
                 .equals(that.nullableDescription)
-                : that.nullableDescription != null)
+                : that.nullableDescription != null) {
             return false;
+        }
 
         return true;
     }

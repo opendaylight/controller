@@ -113,7 +113,7 @@ public class TemplateFactory {
     static String serializeType(Type type, boolean addWildcards) {
         if (type instanceof ParameterizedType){
             ParameterizedType parameterizedType = (ParameterizedType) type;
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             sb.append(parameterizedType.getRawType().getFullyQualifiedName());
             sb.append(addWildcards ? "<? extends " : "<");
             boolean first = true;
@@ -282,12 +282,15 @@ public class TemplateFactory {
         for (Rpc rpc : rbe.getRpcs()) {
             AttributeIfc returnType = rpc.getReturnType();
 
-            if (returnType == VoidAttribute.getInstance())
+            if (returnType == VoidAttribute.getInstance()) {
                 continue;
-            if (returnType instanceof JavaAttribute)
+            }
+            if (returnType instanceof JavaAttribute) {
                 continue;
-            if (returnType instanceof ListAttribute && returnType.getOpenType() instanceof SimpleType)
+            }
+            if (returnType instanceof ListAttribute && returnType.getOpenType() instanceof SimpleType) {
                 continue;
+            }
 
             Preconditions.checkState(yangPropertiesToTypesMap.containsKey(returnType.getAttributeYangName()) == false,
                     "Duplicate TO %s for %s", returnType.getAttributeYangName(), rbe);
@@ -449,7 +452,6 @@ public class TemplateFactory {
                 String returnType;
                 AttributeIfc attributeIfc = attrEntry.getValue();
 
-                boolean isIdentityRef = false;
                 if (attributeIfc instanceof TypedAttribute) {
                     TypedAttribute typedAttribute = (TypedAttribute) attributeIfc;
                     returnType = serializeType(typedAttribute.getType());

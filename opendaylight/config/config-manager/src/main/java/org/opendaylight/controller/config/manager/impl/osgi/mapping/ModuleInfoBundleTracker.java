@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class ModuleInfoBundleTracker implements BundleTrackerCustomizer<Collection<ObjectRegistration<YangModuleInfo>>> {
 
-    private static final Logger logger = LoggerFactory.getLogger(ModuleInfoBundleTracker.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ModuleInfoBundleTracker.class);
 
     public static final String MODULE_INFO_PROVIDER_PATH_PREFIX = "META-INF/services/";
 
@@ -45,7 +45,7 @@ public final class ModuleInfoBundleTracker implements BundleTrackerCustomizer<Co
     @Override
     public Collection<ObjectRegistration<YangModuleInfo>> addingBundle(Bundle bundle, BundleEvent event) {
         URL resource = bundle.getEntry(MODULE_INFO_PROVIDER_PATH_PREFIX + YangModelBindingProvider.class.getName());
-        logger.debug("Got addingBundle({}) with YangModelBindingProvider resource {}", bundle, resource);
+        LOGGER.debug("Got addingBundle({}) with YangModelBindingProvider resource {}", bundle, resource);
         if(resource==null) {
             return null;
         }
@@ -54,16 +54,16 @@ public final class ModuleInfoBundleTracker implements BundleTrackerCustomizer<Co
         try (InputStream inputStream = resource.openStream()) {
             List<String> lines = IOUtils.readLines(inputStream);
             for (String moduleInfoName : lines) {
-                logger.trace("Retrieve ModuleInfo({}, {})", moduleInfoName, bundle);
+                LOGGER.trace("Retrieve ModuleInfo({}, {})", moduleInfoName, bundle);
                 YangModuleInfo moduleInfo = retrieveModuleInfo(moduleInfoName, bundle);
                 registrations.add(moduleInfoRegistry.registerModuleInfo(moduleInfo));
             }
 
         } catch (Exception e) {
-            logger.error("Error while reading {}", resource, e);
+            LOGGER.error("Error while reading {}", resource, e);
             throw new RuntimeException(e);
         }
-        logger.trace("Got following registrations {}", registrations);
+        LOGGER.trace("Got following registrations {}", registrations);
         return registrations;
     }
 
@@ -111,7 +111,7 @@ public final class ModuleInfoBundleTracker implements BundleTrackerCustomizer<Co
         } catch (NoClassDefFoundError e) {
 
 
-            logger.error("Error while executing getModuleInfo on {}", instance, e);
+            LOGGER.error("Error while executing getModuleInfo on {}", instance, e);
             throw e;
         }
     }
@@ -126,7 +126,7 @@ public final class ModuleInfoBundleTracker implements BundleTrackerCustomizer<Co
     }
 
     public static String logMessage(String slfMessage, Object... params) {
-        logger.info(slfMessage, params);
+        LOGGER.info(slfMessage, params);
         String formatMessage = slfMessage.replaceAll("\\{\\}", "%s");
         return format(formatMessage, params);
     }

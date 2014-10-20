@@ -68,7 +68,7 @@ public class DynamicReadableWrapper extends AbstractDynamicWrapper implements
     public Object getAttribute(String attributeName)
             throws AttributeNotFoundException, MBeanException,
             ReflectionException {
-        if (attributeName.equals("getInstance")) {
+        if ("getInstance".equals(attributeName)) {
             return getInstance();
         }
         return super.getAttribute(attributeName);

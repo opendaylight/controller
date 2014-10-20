@@ -139,7 +139,7 @@ public class DependencyResolverManager implements DependencyResolverFactory, Aut
 
             @Override
             protected Object handleInvocation(Object proxy, Method method, Object[] args) throws Throwable {
-                boolean isGetInstance = method.getName().equals("getInstance");
+                boolean isGetInstance = "getInstance".equals(method.getName());
                 if (isGetInstance) {
                     if (cachedInstance != null) {
                         return cachedInstance;

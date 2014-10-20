@@ -136,7 +136,7 @@ class AttributeHolder {
         for (RequireInterface ri : foundRequireInterfaces) {
             foundValues.add(ri.value());
         }
-        if (foundValues.size() == 0) {
+        if (foundValues.isEmpty()) {
             return null;
         } else if (foundValues.size() > 1) {
             throw new IllegalStateException("Error finding @RequireInterface. "

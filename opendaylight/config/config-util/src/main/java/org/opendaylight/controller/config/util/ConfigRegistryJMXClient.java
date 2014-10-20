@@ -74,16 +74,17 @@ public class ConfigRegistryJMXClient implements ConfigRegistryClient {
      */
     @Deprecated
     public <T> T newMBeanProxy(ObjectName on, Class<T> clazz) {
-        on = translateServiceRefIfPossible(on, clazz, configMBeanServer);
-        return JMX.newMBeanProxy(configMBeanServer, on, clazz);
+        ObjectName onObj = translateServiceRefIfPossible(on, clazz, configMBeanServer);
+        return JMX.newMBeanProxy(configMBeanServer, onObj, clazz);
     }
 
     static  ObjectName translateServiceRefIfPossible(ObjectName on, Class<?> clazz, MBeanServer configMBeanServer) {
-        if (ObjectNameUtil.isServiceReference(on) && clazz.equals(ServiceReferenceMXBean.class) == false) {
-            ServiceReferenceMXBean proxy = JMX.newMXBeanProxy(configMBeanServer, on, ServiceReferenceMXBean.class);
-            on = proxy.getCurrentImplementation();
+        ObjectName onObj = on;
+        if (ObjectNameUtil.isServiceReference(onObj) && clazz.equals(ServiceReferenceMXBean.class) == false) {
+            ServiceReferenceMXBean proxy = JMX.newMXBeanProxy(configMBeanServer, onObj, ServiceReferenceMXBean.class);
+            onObj = proxy.getCurrentImplementation();
         }
-        return on;
+        return onObj;
     }
 
 

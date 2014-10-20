@@ -53,7 +53,7 @@ class ConfigTransactionControllerImpl implements
         ConfigTransactionControllerInternal,
         ConfigTransactionControllerImplMXBean,
         Identifiable<TransactionIdentifier> {
-    private static final Logger logger = LoggerFactory.getLogger(ConfigTransactionControllerImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigTransactionControllerImpl.class);
 
     private final ConfigTransactionLookupRegistry txLookupRegistry;
     private final ObjectName controllerON;
@@ -226,7 +226,7 @@ class ConfigTransactionControllerImpl implements
             boolean isDefaultBean, BundleContext bundleContext)
             throws InstanceAlreadyExistsException {
 
-        logger.debug("Adding module {} to transaction {}", moduleIdentifier, this);
+        LOGGER.debug("Adding module {} to transaction {}", moduleIdentifier, this);
         if (moduleIdentifier.equals(module.getIdentifier()) == false) {
             throw new IllegalStateException("Incorrect name reported by module. Expected "
                     + moduleIdentifier + ", got " + module.getIdentifier());
@@ -271,15 +271,13 @@ class ConfigTransactionControllerImpl implements
     }
 
     private synchronized void destroyModule(ModuleIdentifier moduleIdentifier) {
-        logger.debug("Destroying module {} in transaction {}", moduleIdentifier, this);
+        LOGGER.debug("Destroying module {} in transaction {}", moduleIdentifier, this);
         transactionStatus.checkNotAborted();
 
         ModuleInternalTransactionalInfo found = dependencyResolverManager.findModuleInternalTransactionalInfo(moduleIdentifier);
-        if (blankTransaction == false) {
-
-            if (found.isDefaultBean()) {
-                logger.warn("Warning: removing default bean. This will be forbidden in next version of config-subsystem");
-            }
+        if (blankTransaction == false &&
+                found.isDefaultBean()) {
+            LOGGER.warn("Warning: removing default bean. This will be forbidden in next version of config-subsystem");
         }
         // first remove refNames, it checks for objectname existence
 
@@ -287,7 +285,7 @@ class ConfigTransactionControllerImpl implements
             writableSRRegistry.removeServiceReferences(
                     ObjectNameUtil.createTransactionModuleON(getTransactionName(), moduleIdentifier));
         } catch (InstanceNotFoundException e) {
-            logger.error("Possible code error: cannot find {} in {}", moduleIdentifier, writableSRRegistry);
+            LOGGER.error("Possible code error: cannot find {} in {}", moduleIdentifier, writableSRRegistry);
             throw new IllegalStateException("Possible code error: cannot find " + moduleIdentifier, e);
         }
 
@@ -313,15 +311,15 @@ class ConfigTransactionControllerImpl implements
         }
         configBeanModificationDisabled.set(true);
         try {
-            validate_noLocks();
+            validateNoLocks();
         } finally {
             configBeanModificationDisabled.set(false);
         }
     }
 
-    private void validate_noLocks() throws ValidationException {
+    private void validateNoLocks() throws ValidationException {
         transactionStatus.checkNotAborted();
-        logger.trace("Validating transaction {}", getTransactionIdentifier());
+        LOGGER.trace("Validating transaction {}", getTransactionIdentifier());
         // call validate()
         List<ValidationException> collectedExceptions = new ArrayList<>();
         for (Entry<ModuleIdentifier, Module> entry : dependencyResolverManager
@@ -331,17 +329,17 @@ class ConfigTransactionControllerImpl implements
             try {
                 module.validate();
             } catch (Exception e) {
-                logger.warn("Validation exception in {}", getTransactionName(),
+                LOGGER.warn("Validation exception in {}", getTransactionName(),
                         e);
                 collectedExceptions.add(ValidationException
                         .createForSingleException(name, e));
             }
         }
-        if (collectedExceptions.size() > 0) {
+        if (!collectedExceptions.isEmpty()) {
             throw ValidationException
                     .createFromCollectedValidationExceptions(collectedExceptions);
         }
-        logger.trace("Validated transaction {}", getTransactionIdentifier());
+        LOGGER.trace("Validated transaction {}", getTransactionIdentifier());
     }
 
     /**
@@ -358,9 +356,9 @@ class ConfigTransactionControllerImpl implements
         transactionStatus.checkNotCommitStarted();
         configBeanModificationDisabled.set(true);
         try {
-            validate_noLocks();
+            validateNoLocks();
         } catch (ValidationException e) {
-            logger.trace("Commit failed on validation");
+            LOGGER.trace("Commit failed on validation");
             configBeanModificationDisabled.set(false); // recoverable error
             throw e;
         }
@@ -383,7 +381,7 @@ class ConfigTransactionControllerImpl implements
                             + "to obtain a lock");
         }
 
-        logger.trace("Committing transaction {}", getTransactionIdentifier());
+        LOGGER.trace("Committing transaction {}", getTransactionIdentifier());
 
         // call getInstance()
         for (Entry<ModuleIdentifier, Module> entry : dependencyResolverManager
@@ -391,12 +389,12 @@ class ConfigTransactionControllerImpl implements
             Module module = entry.getValue();
             ModuleIdentifier name = entry.getKey();
             try {
-                logger.debug("About to commit {} in transaction {}",
+                LOGGER.debug("About to commit {} in transaction {}",
                         name, getTransactionIdentifier());
                 AutoCloseable instance = module.getInstance();
                 checkNotNull(instance, "Instance is null:{} in transaction {}", name, getTransactionIdentifier());
             } catch (Exception e) {
-                logger.error("Commit failed on {} in transaction {}", name,
+                LOGGER.error("Commit failed on {} in transaction {}", name,
                         getTransactionIdentifier(), e);
                 internalAbort();
                 throw new IllegalStateException(
@@ -407,7 +405,7 @@ class ConfigTransactionControllerImpl implements
 
         // count dependency order
 
-        logger.trace("Committed configuration {}", getTransactionIdentifier());
+        LOGGER.trace("Committed configuration {}", getTransactionIdentifier());
         transactionStatus.setCommitted();
 
         return dependencyResolverManager.getSortedModuleIdentifiers();
@@ -421,7 +419,7 @@ class ConfigTransactionControllerImpl implements
     }
 
     private void internalAbort() {
-        logger.trace("Aborting {}", this);
+        LOGGER.trace("Aborting {}", this);
         transactionStatus.setAborted();
         close();
     }

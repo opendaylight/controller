@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Set;
 
 public class InternalJMXRegistrator implements Closeable {
-    private static final Logger logger = LoggerFactory
+    private static final Logger LOGGER = LoggerFactory
             .getLogger(InternalJMXRegistrator.class);
     private final MBeanServer configMBeanServer;
 
@@ -100,7 +100,7 @@ public class InternalJMXRegistrator implements Closeable {
             try {
                 configMBeanServer.unregisterMBean(on);
             } catch (Exception e) {
-                logger.warn("Ignoring error while unregistering {}", on, e);
+                LOGGER.warn("Ignoring error while unregistering {}", on, e);
             }
         }
         registeredObjectNames.clear();

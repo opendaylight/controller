@@ -29,6 +29,8 @@ import java.util.Set;
  */
 @ThreadSafe
 public class ObjectNameUtil {
+    private ObjectNameUtil() {
+    }
 
     public static final String ON_DOMAIN = ConfigRegistryConstants.ON_DOMAIN;
     public static final String MODULE_FACTORY_NAME_KEY = "moduleFactoryName";
@@ -270,7 +272,7 @@ public class ObjectNameUtil {
     }
 
     public static Map<String, String> getAdditionalProperties(ObjectName on) {
-        Hashtable<String, String> keyPropertyList = on.getKeyPropertyList();
+        Map<String, String> keyPropertyList = on.getKeyPropertyList();
         Map<String, String> result = new HashMap<>();
         for (Entry<String, String> entry : keyPropertyList.entrySet()) {
             result.put(entry.getKey(), entry.getValue());
@@ -304,8 +306,8 @@ public class ObjectNameUtil {
 
     public static ObjectName createModulePattern(String moduleName,
                                                  String instanceName) {
-        moduleName = moduleName == null ? ON_WILDCARD : moduleName;
-        instanceName = instanceName == null ? ON_WILDCARD : instanceName;
+        String finalModuleName = moduleName == null ? ON_WILDCARD : moduleName;
+        String finalInstanceName = instanceName == null ? ON_WILDCARD : instanceName;
 
         // do not return object names containing transaction name
         ObjectName namePattern = ObjectNameUtil
@@ -313,34 +315,34 @@ public class ObjectNameUtil {
                         + ObjectNameUtil.TYPE_KEY + "="
                         + ObjectNameUtil.TYPE_MODULE + ","
                         + ObjectNameUtil.MODULE_FACTORY_NAME_KEY + "="
-                        + moduleName + "," + ""
-                        + ObjectNameUtil.INSTANCE_NAME_KEY + "=" + instanceName);
+                        + finalModuleName + "," + ""
+                        + ObjectNameUtil.INSTANCE_NAME_KEY + "=" + finalInstanceName);
         return namePattern;
     }
 
     public static ObjectName createModulePattern(String ifcName,
                                                  String instanceName, String transactionName) {
-        ifcName = ifcName == null ? ON_WILDCARD : ifcName;
-        instanceName = instanceName == null ? ON_WILDCARD : instanceName;
-        transactionName = transactionName == null ? ON_WILDCARD : transactionName;
+        String finalIfcName = ifcName == null ? ON_WILDCARD : ifcName;
+        String finalInstanceName = instanceName == null ? ON_WILDCARD : instanceName;
+        String finalTransactionName = transactionName == null ? ON_WILDCARD : transactionName;
 
         return ObjectNameUtil.createON(ObjectNameUtil.ON_DOMAIN
                 + ":type=Module," + ObjectNameUtil.MODULE_FACTORY_NAME_KEY
-                + "=" + ifcName + "," + ObjectNameUtil.INSTANCE_NAME_KEY + "="
-                + instanceName + "," + ObjectNameUtil.TRANSACTION_NAME_KEY
-                + "=" + transactionName);
+                + "=" + finalIfcName + "," + ObjectNameUtil.INSTANCE_NAME_KEY + "="
+                + finalInstanceName + "," + ObjectNameUtil.TRANSACTION_NAME_KEY
+                + "=" + finalTransactionName);
     }
 
     public static ObjectName createRuntimeBeanPattern(String moduleName,
                                                       String instanceName) {
-        moduleName = moduleName == null ? ON_WILDCARD : moduleName;
-        instanceName = instanceName == null ? ON_WILDCARD : instanceName;
+        String finalModuleName = moduleName == null ? ON_WILDCARD : moduleName;
+        String finalInstanceName = instanceName == null ? ON_WILDCARD : instanceName;
 
         return ObjectNameUtil.createON(ObjectNameUtil.ON_DOMAIN + ":"
                 + ObjectNameUtil.TYPE_KEY + "="
                 + ObjectNameUtil.TYPE_RUNTIME_BEAN + ","
-                + ObjectNameUtil.MODULE_FACTORY_NAME_KEY + "=" + moduleName
-                + "," + ObjectNameUtil.INSTANCE_NAME_KEY + "=" + instanceName
+                + ObjectNameUtil.MODULE_FACTORY_NAME_KEY + "=" + finalModuleName
+                + "," + ObjectNameUtil.INSTANCE_NAME_KEY + "=" + finalInstanceName
                 + ",*");
 
     }

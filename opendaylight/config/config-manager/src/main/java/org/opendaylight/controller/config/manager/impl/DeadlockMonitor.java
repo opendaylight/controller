@@ -11,7 +11,7 @@ import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
 
 public class DeadlockMonitor implements AutoCloseable {
-    private static final Logger logger = LoggerFactory.getLogger(DeadlockMonitorRunnable.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DeadlockMonitorRunnable.class);
 
     private static final long WARN_AFTER_MILLIS = 5000;
 
@@ -43,7 +43,7 @@ public class DeadlockMonitor implements AutoCloseable {
             moduleIdentifierWithNanosStack.push(current);
             top = current;
         }
-        logger.trace("setCurrentlyInstantiatedModule {}, top {}", currentlyInstantiatedModule, top);
+        LOGGER.trace("setCurrentlyInstantiatedModule {}, top {}", currentlyInstantiatedModule, top);
     }
 
     public boolean isAlive() {
@@ -78,7 +78,7 @@ public class DeadlockMonitor implements AutoCloseable {
                     // is the getInstance() running longer than WARN_AFTER_MILLIS ?
                     long runningTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - copy.nanoTime);
                     if (runningTime > WARN_AFTER_MILLIS) {
-                        logger.warn("{} did not finish after {} ms", copy.moduleIdentifier, runningTime);
+                        LOGGER.warn("{} did not finish after {} ms", copy.moduleIdentifier, runningTime);
                     }
                 }
                 try {
@@ -87,7 +87,7 @@ public class DeadlockMonitor implements AutoCloseable {
                     interrupt();
                 }
             }
-            logger.trace("Exiting {}", this);
+            LOGGER.trace("Exiting {}", this);
         }
 
         @Override
@@ -122,14 +122,21 @@ public class DeadlockMonitor implements AutoCloseable {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
 
             ModuleIdentifierWithNanos that = (ModuleIdentifierWithNanos) o;
 
-            if (nanoTime != that.nanoTime) return false;
-            if (moduleIdentifier != null ? !moduleIdentifier.equals(that.moduleIdentifier) : that.moduleIdentifier != null)
+            if (nanoTime != that.nanoTime) {
                 return false;
+            }
+            if (moduleIdentifier != null ? !moduleIdentifier.equals(that.moduleIdentifier) : that.moduleIdentifier != null) {
+                return false;
+            }
 
             return true;
         }

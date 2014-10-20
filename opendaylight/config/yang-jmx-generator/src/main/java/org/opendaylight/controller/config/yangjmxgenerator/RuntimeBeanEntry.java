@@ -217,8 +217,6 @@ public class RuntimeBeanEntry {
             final Map<QName, Set<RpcDefinition>> identitiesToRpcs) {
 
         List<AttributeIfc> attributes = Lists.newArrayList();
-        // List<JavaAttribute> javaAttributes = new ArrayList<>();
-        // List<TOAttribute> toAttributes = new ArrayList<>();
         List<RuntimeBeanEntry> runtimeBeanEntries = new ArrayList<>();
         for (DataSchemaNode child : subtree.getChildNodes()) {
             // child leaves can be java attributes, TO attributes, or child
@@ -278,7 +276,7 @@ public class RuntimeBeanEntry {
                             .findJavaParameter(rpcDefinition);
                     AttributeIfc returnType;
                     if (rpcDefinition.getOutput() == null
-                            || rpcDefinition.getOutput().getChildNodes().size() == 0) {
+                            || rpcDefinition.getOutput().getChildNodes().isEmpty()) {
                         returnType = VoidAttribute.getInstance();
                     } else if (rpcDefinition.getOutput().getChildNodes().size() == 1) {
                         DataSchemaNode returnDSN = rpcDefinition.getOutput()
@@ -366,7 +364,7 @@ public class RuntimeBeanEntry {
                 currentModule, identitiesToRpcs);
 
         Optional<String> keyYangName;
-        if (listSchemaNode.getKeyDefinition().size() == 0) {
+        if (listSchemaNode.getKeyDefinition().isEmpty()) {
             keyYangName = Optional.absent();
         } else if (listSchemaNode.getKeyDefinition().size() == 1) {
             // key must be either null or one of supported key types

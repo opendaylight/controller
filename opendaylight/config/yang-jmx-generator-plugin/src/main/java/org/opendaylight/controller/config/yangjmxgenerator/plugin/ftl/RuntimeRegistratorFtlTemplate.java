@@ -108,7 +108,7 @@ public class RuntimeRegistratorFtlTemplate extends GeneralClassTemplate {
                     .getFullyQualifiedName(rootRB.getPackageName(), rootRB.getJavaNameOfRuntimeMXBean());
             String childRegistratorFQN = rootFtlFile.getFullyQualifiedName();
             Field rbParameter = new Field(fullyQualifiedNameOfMXBean, "rb");
-            StringBuffer registerBody = new StringBuffer();
+            StringBuilder registerBody = new StringBuilder();
             registerBody.append(format("%s %s = this.%s.registerRoot(%s);\n",
                     HierarchicalRuntimeBeanRegistration.class
                             .getCanonicalName(), hierachchicalRegistration
@@ -200,12 +200,12 @@ public class RuntimeRegistratorFtlTemplate extends GeneralClassTemplate {
                 unorderedResult.put(entry.getKey(), entry.getValue());
             }
 
-            if (childRegistratorMap.size() > 0) {
+            if (!childRegistratorMap.isEmpty()) {
                 // first entry is the direct descendant according to the create
                 // contract
                 RuntimeRegistratorFtlTemplate childRegistrator = childRegistratorMap
                         .values().iterator().next();
-                StringBuffer body = new StringBuffer();
+                StringBuilder body = new StringBuilder();
                 String key, value;
                 key = child.getJavaNamePrefix();
                 body.append(format(

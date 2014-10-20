@@ -38,7 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceReadableRegistry, SearchableServiceReferenceWritableRegistry {
-    private static final Logger logger = LoggerFactory.getLogger(ServiceReferenceRegistryImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceReferenceRegistryImpl.class);
 
     private final Map<String, ModuleFactory> factories;
     private final Map<String, Set<String>> factoryNamesToQNames;
@@ -176,7 +176,7 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
                 boolean skipChecks = true;
                 newRegistry.saveServiceReference(refNameEntry.getKey(), currentImplementation, skipChecks);
             } catch (InstanceNotFoundException e) {
-                logger.error("Cannot save service reference({}, {})", refNameEntry.getKey(), currentImplementation);
+                LOGGER.error("Cannot save service reference({}, {})", refNameEntry.getKey(), currentImplementation);
                 throw new IllegalStateException("Possible code error", e);
             }
         }
@@ -201,22 +201,22 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
 
         Map<String, Set<String /* QName */>> modifiableFactoryNamesToQNames = new HashMap<>();
         Set<ServiceInterfaceAnnotation> allAnnotations = new HashSet<>();
-        Set<String /* qName */> allQNames = new HashSet<>();
+        Set<String /* qName */> allQNameSet = new HashSet<>();
 
 
         for (Entry<String, ModuleFactory> entry : factories.entrySet()) {
             if (entry.getKey().equals(entry.getValue().getImplementationName()) == false) {
-                logger.error("Possible error in code: Mismatch between supplied and actual name of {}", entry);
+                LOGGER.error("Possible error in code: Mismatch between supplied and actual name of {}", entry);
                 throw new IllegalArgumentException("Possible error in code: Mismatch between supplied and actual name of " + entry);
             }
             Set<ServiceInterfaceAnnotation> siAnnotations = InterfacesHelper.getServiceInterfaceAnnotations(entry.getValue());
             Set<String> qNames = InterfacesHelper.getQNames(siAnnotations);
             allAnnotations.addAll(siAnnotations);
-            allQNames.addAll(qNames);
+            allQNameSet.addAll(qNames);
             modifiableFactoryNamesToQNames.put(entry.getKey(), Collections.unmodifiableSet(qNames));
         }
         this.factoryNamesToQNames = Collections.unmodifiableMap(modifiableFactoryNamesToQNames);
-        this.allQNames = Collections.unmodifiableSet(allQNames);
+        this.allQNames = Collections.unmodifiableSet(allQNameSet);
         // fill namespacesToAnnotations
         Map<String /* namespace */, Map<String /* localName */, ServiceInterfaceAnnotation>> modifiableNamespacesToAnnotations =
                 new HashMap<>();
@@ -228,7 +228,7 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
                 modifiableNamespacesToAnnotations.put(sia.namespace(), ofNamespace);
             }
             if (ofNamespace.containsKey(sia.localName())) {
-                logger.error("Cannot construct namespacesToAnnotations map, conflict between local names in {}, offending local name: {}, map so far {}",
+                LOGGER.error("Cannot construct namespacesToAnnotations map, conflict between local names in {}, offending local name: {}, map so far {}",
                         sia.namespace(), sia.localName(), modifiableNamespacesToAnnotations);
                 throw new IllegalArgumentException("Conflict between local names in " + sia.namespace() + " : " + sia.localName());
             }
@@ -237,7 +237,7 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
         }
         this.namespacesToAnnotations = Collections.unmodifiableMap(modifiableNamespacesToAnnotations);
         this.serviceQNamesToAnnotations = Collections.unmodifiableMap(modifiableServiceQNamesToAnnotations);
-        logger.trace("factoryNamesToQNames:{}", this.factoryNamesToQNames);
+        LOGGER.trace("factoryNamesToQNames:{}", this.factoryNamesToQNames);
     }
 
     @Override
@@ -256,7 +256,7 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
         String factoryName = ObjectNameUtil.getFactoryName(objectName);
         Set<String> serviceInterfaceAnnotations = factoryNamesToQNames.get(factoryName);
         if (serviceInterfaceAnnotations == null) {
-            logger.error("Possible error in code: cannot find factory annotations of '{}' extracted from ON {} in {}",
+            LOGGER.error("Possible error in code: cannot find factory annotations of '{}' extracted from ON {} in {}",
                     factoryName, objectName, factoryNamesToQNames);
             throw new IllegalArgumentException("Cannot find factory with name " + factoryName);
         }
@@ -267,12 +267,12 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
     public synchronized String getServiceInterfaceName(String namespace, String localName) {
         Map<String /* localName */, ServiceInterfaceAnnotation> ofNamespace = namespacesToAnnotations.get(namespace);
         if (ofNamespace == null) {
-            logger.error("Cannot find namespace {} in {}", namespace, namespacesToAnnotations);
+            LOGGER.error("Cannot find namespace {} in {}", namespace, namespacesToAnnotations);
             throw new IllegalArgumentException("Cannot find namespace " + namespace);
         }
         ServiceInterfaceAnnotation sia = ofNamespace.get(localName);
         if (sia == null) {
-            logger.error("Cannot find local name {} in namespace {}, found only {}", localName, namespace, ofNamespace);
+            LOGGER.error("Cannot find local name {} in namespace {}, found only {}", localName, namespace, ofNamespace);
             throw new IllegalArgumentException("Cannot find local name " + localName + " in namespace " + namespace);
         }
         return sia.value();
@@ -300,7 +300,7 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
         try {
             on = lookupRegistry.lookupConfigBean(moduleIdentifier.getFactoryName(), moduleIdentifier.getInstanceName());
         } catch (InstanceNotFoundException e) {
-            logger.error("Cannot find instance {}", moduleIdentifier);
+            LOGGER.error("Cannot find instance {}", moduleIdentifier);
             throw new IllegalStateException("Cannot find instance " + moduleIdentifier, e);
         }
         return on;
@@ -311,7 +311,7 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
         ServiceReference serviceReference = new ServiceReference(serviceInterfaceQName, refName);
         ModuleIdentifier moduleIdentifier = refNames.get(serviceReference);
         if (moduleIdentifier == null) {
-            logger.error("Cannot find qname {} and refName {} in {}", serviceInterfaceQName, refName, refName);
+            LOGGER.error("Cannot find qname {} and refName {} in {}", serviceInterfaceQName, refName, refName);
             throw new IllegalArgumentException("Cannot find " + serviceReference);
         }
         return getObjectName(moduleIdentifier);
@@ -322,7 +322,7 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
         Map<String, Map<String, ObjectName>> serviceMapping = getServiceMapping();
         Map<String, ObjectName> innerMap = serviceMapping.get(serviceInterfaceQName);
         if (innerMap == null) {
-            logger.error("Cannot find qname {} in {}", serviceInterfaceQName, refNames);
+            LOGGER.error("Cannot find qname {} in {}", serviceInterfaceQName, refNames);
             throw new IllegalArgumentException("Cannot find " + serviceInterfaceQName);
         }
         return innerMap;
@@ -348,7 +348,7 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
         String referenceName = ObjectNameUtil.getReferenceName(objectName);
         ServiceReference serviceReference = new ServiceReference(serviceQName, referenceName);
         if (refNames.containsKey(serviceReference) == false) {
-            logger.warn("Cannot find {} in {}", serviceReference, refNames);
+            LOGGER.warn("Cannot find {} in {}", serviceReference, refNames);
             throw new InstanceNotFoundException("Service reference not found:" + objectName);
         }
     }
@@ -387,13 +387,13 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
         // check that service interface name exist
         Set<String> serviceInterfaceQNames = factoryNamesToQNames.get(moduleIdentifier.getFactoryName());
         if (serviceInterfaceQNames == null) {
-            logger.error("Possible error in code: cannot find factoryName {} in {}, {}", moduleIdentifier.getFactoryName(),
+            LOGGER.error("Possible error in code: cannot find factoryName {} in {}, {}", moduleIdentifier.getFactoryName(),
                     factoryNamesToQNames, moduleIdentifier);
             throw new IllegalStateException("Possible error in code: cannot find annotations of existing factory " + moduleIdentifier.getFactoryName());
         }
         // supplied serviceInterfaceName must exist in this collection
         if (serviceInterfaceQNames.contains(serviceReference.getServiceInterfaceQName()) == false) {
-            logger.error("Cannot find qName {} with factory name {}, found {}", serviceReference.getServiceInterfaceQName(), moduleIdentifier.getFactoryName(), serviceInterfaceQNames);
+            LOGGER.error("Cannot find qName {} with factory name {}, found {}", serviceReference.getServiceInterfaceQName(), moduleIdentifier.getFactoryName(), serviceInterfaceQNames);
             throw new IllegalArgumentException("Cannot find service interface " + serviceReference.getServiceInterfaceQName() + " within factory " + moduleIdentifier.getFactoryName());
         }
 
@@ -465,11 +465,11 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
     }
 
     private synchronized void removeServiceReference(ServiceReference serviceReference) throws InstanceNotFoundException {
-        logger.debug("Removing service reference {} from {}", serviceReference, this);
+        LOGGER.debug("Removing service reference {} from {}", serviceReference, this);
         assertWritable();
         // is the qName known?
         if (allQNames.contains(serviceReference.getServiceInterfaceQName()) == false) {
-            logger.error("Cannot find qname {} in {}", serviceReference.getServiceInterfaceQName(), allQNames);
+            LOGGER.error("Cannot find qname {} in {}", serviceReference.getServiceInterfaceQName(), allQNames);
             throw new IllegalArgumentException("Cannot find service interface " + serviceReference.getServiceInterfaceQName());
         }
         ModuleIdentifier removed = refNames.remove(serviceReference);
@@ -518,7 +518,7 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
     private Set<ServiceReference> findServiceReferencesLinkingTo(ObjectName moduleObjectName, Set<String> serviceInterfaceQNames) {
         String factoryName = ObjectNameUtil.getFactoryName(moduleObjectName);
         if (serviceInterfaceQNames == null) {
-            logger.warn("Possible error in code: cannot find factoryName {} in {}, object name {}", factoryName, factoryNamesToQNames, moduleObjectName);
+            LOGGER.warn("Possible error in code: cannot find factoryName {} in {}, object name {}", factoryName, factoryNamesToQNames, moduleObjectName);
             throw new IllegalStateException("Possible error in code: cannot find annotations of existing factory " + factoryName);
         }
         String instanceName = ObjectNameUtil.getInstanceName(moduleObjectName);

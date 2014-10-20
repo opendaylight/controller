@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ConfigFeaturesListener implements  FeaturesListener,  AutoCloseable {
-    private static final Logger logger = LoggerFactory.getLogger(ConfigFeaturesListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigFeaturesListener.class);
     private static final int QUEUE_SIZE = 1000;
     private BlockingQueue<FeatureEvent> queue = new LinkedBlockingQueue<FeatureEvent>(QUEUE_SIZE);
     Thread pushingThread = null;
@@ -36,7 +36,7 @@ public class ConfigFeaturesListener implements  FeaturesListener,  AutoCloseable
 
     @Override
     public void repositoryEvent(RepositoryEvent event) {
-        logger.debug("Repository: " + event.getType() + " " + event.getRepository());
+        LOGGER.debug("Repository: " + event.getType() + " " + event.getRepository());
     }
 
     @Override

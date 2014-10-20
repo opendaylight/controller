@@ -25,7 +25,7 @@ import java.util.Map;
  */
 public class BundleContextBackedModuleFactoriesResolver implements
         ModuleFactoriesResolver {
-    private static final Logger logger = LoggerFactory
+    private static final Logger LOGGER = LoggerFactory
             .getLogger(BundleContextBackedModuleFactoriesResolver.class);
     private final BundleContext bundleContext;
 
@@ -62,14 +62,14 @@ public class BundleContextBackedModuleFactoriesResolver implements
             if (serviceReference.getBundle() == null || serviceReference.getBundle().getBundleContext() == null) {
                 throw new NullPointerException("Bundle context of " + factory + " ModuleFactory not found.");
             }
-            logger.debug("Reading factory {} {}", moduleName, factory);
+            LOGGER.debug("Reading factory {} {}", moduleName, factory);
 
             Map.Entry<ModuleFactory, BundleContext> conflicting = result.get(moduleName);
             if (conflicting != null) {
                 String error = String
                         .format("Module name is not unique. Found two conflicting factories with same name '%s': '%s' '%s'",
                                 moduleName, conflicting.getKey(), factory);
-                logger.error(error);
+                LOGGER.error(error);
                 throw new IllegalArgumentException(error);
             } else {
                 result.put(moduleName, new AbstractMap.SimpleImmutableEntry<>(factory,

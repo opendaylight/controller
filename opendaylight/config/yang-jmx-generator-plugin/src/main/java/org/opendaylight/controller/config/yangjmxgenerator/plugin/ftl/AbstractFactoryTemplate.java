@@ -19,14 +19,14 @@ import java.util.List;
 
 public class AbstractFactoryTemplate extends GeneralClassTemplate {
 
-    private static final List<String> implementedIfcs = Lists
+    private static final List<String> IMPLEMENTED_IFCS = Lists
             .newArrayList(ModuleFactory.class.getCanonicalName());
 
     public AbstractFactoryTemplate(Header header, String packageName,
                                    String abstractFactoryName,
                                    List<Field> fields) {
         super(header, packageName, abstractFactoryName, Collections
-                .<String> emptyList(), implementedIfcs, fields, Collections
+                .<String> emptyList(), IMPLEMENTED_IFCS, fields, Collections
                 .<MethodDefinition> emptyList(), true, false, Collections
                 .<Constructor> emptyList());
     }

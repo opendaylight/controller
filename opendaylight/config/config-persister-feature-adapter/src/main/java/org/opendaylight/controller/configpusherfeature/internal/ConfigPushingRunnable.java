@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.LinkedHashMultimap;
 
 public class ConfigPushingRunnable implements Runnable {
-    private static final Logger logger = LoggerFactory.getLogger(ConfigPushingRunnable.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigPushingRunnable.class);
     private static final int POLL_TIME = 1;
     private BlockingQueue<FeatureEvent> queue;
     private FeatureConfigPusher configPusher;
@@ -49,14 +49,14 @@ public class ConfigPushingRunnable implements Runnable {
                             processFeatureEvent(event,toInstall);
                         }
                 } else if(toInstall.isEmpty()) {
-                    logger.error("ConfigPushingRunnable - exiting");
+                    LOGGER.error("ConfigPushingRunnable - exiting");
                     return;
                 }
             } catch (InterruptedException e) {
-                logger.error("ConfigPushingRunnable - interupted");
+                LOGGER.error("ConfigPushingRunnable - interupted");
                 interuppted = true;
             } catch (Exception e) {
-                logger.error("Exception while processing features {}", e);
+                LOGGER.error("Exception while processing features {}", e);
             }
         }
     }
@@ -73,7 +73,7 @@ public class ConfigPushingRunnable implements Runnable {
 
     protected void logPushResult(LinkedHashMultimap<Feature,FeatureConfigSnapshotHolder> results) {
         for(Feature f:results.keySet()) {
-            logger.info("Pushed configs for feature {} {}",f,results.get(f));
+            LOGGER.info("Pushed configs for feature {} {}",f,results.get(f));
         }
     }
 }

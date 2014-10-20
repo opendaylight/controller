@@ -93,22 +93,22 @@ final class ModuleMXBeanEntryBuilder {
         return this;
     }
 
-    private static final Logger logger = LoggerFactory
+    private static final Logger LOGGER = LoggerFactory
             .getLogger(ModuleMXBeanEntryBuilder.class);
 
     // TODO: the XPath should be parsed by code generator IMO
     private static final String MAGIC_STRING = "MAGIC_STRING";
     private static final String MODULE_CONDITION_XPATH_TEMPLATE = "^/MAGIC_STRING:modules/MAGIC_STRING:module/MAGIC_STRING:type\\s*=\\s*['\"](.+)['\"]$";
-    private static final SchemaPath expectedConfigurationAugmentationSchemaPath = SchemaPath.create(true,
+    private static final SchemaPath EXPECTED_CONFIGURATION_AUGMENTATION_SCHEMA_PATH = SchemaPath.create(true,
             createConfigQName("modules"), createConfigQName("module"), createConfigQName("configuration"));
-    private static final SchemaPath expectedStateAugmentationSchemaPath = SchemaPath.create(true,
+    private static final SchemaPath EXPECTED_STATE_AUGMENTATION_SCHEMA_PATH = SchemaPath.create(true,
             createConfigQName("modules"), createConfigQName("module"), createConfigQName("state"));
     private static final Pattern PREFIX_COLON_LOCAL_NAME = Pattern
             .compile("^(.+):(.+)$");
 
 
     public Map<String, ModuleMXBeanEntry> build() {
-        logger.debug("Generating ModuleMXBeans of {} to package {}",
+        LOGGER.debug("Generating ModuleMXBeans of {} to package {}",
                 currentModule.getNamespace(), packageName);
 
         String configModulePrefix;
@@ -146,7 +146,7 @@ final class ModuleMXBeanEntryBuilder {
         checkAttributeNamesUniqueness(uniqueGeneratedClassesNames, result);
         checkUnaugumentedIdentities(unaugmentedModuleIdentities);
 
-        logger.debug("Number of ModuleMXBeans to be generated: {}", result.size());
+        LOGGER.debug("Number of ModuleMXBeans to be generated: {}", result.size());
 
         return result;
     }
@@ -166,7 +166,7 @@ final class ModuleMXBeanEntryBuilder {
 
     private static void checkUnaugumentedIdentities(final Map<String, IdentitySchemaNode> unaugmentedModuleIdentities) {
         if (unaugmentedModuleIdentities.size() > 0) {
-            logger.warn("Augmentation not found for all currentModule identities: {}",
+            LOGGER.warn("Augmentation not found for all currentModule identities: {}",
                     unaugmentedModuleIdentities.keySet());
         }
     }
@@ -190,7 +190,7 @@ final class ModuleMXBeanEntryBuilder {
                             + identityLocalName);
                 } else {
                     moduleIdentities.put(identityLocalName, id);
-                    logger.debug("Found identity {}", identityLocalName);
+                    LOGGER.debug("Found identity {}", identityLocalName);
                 }
                 // validation check on unknown schema nodes
                 boolean providedServiceWasSet = false;
@@ -270,13 +270,13 @@ final class ModuleMXBeanEntryBuilder {
 
         HAS_CHILDREN_AND_QNAME dataNodeContainer = getDataNodeContainer(choiceCaseNode);
 
-        if (expectedConfigurationAugmentationSchemaPath.equals(augmentation.getTargetPath())) {
-            logger.debug("Parsing configuration of {}", moduleLocalNameFromXPath);
+        if (EXPECTED_CONFIGURATION_AUGMENTATION_SCHEMA_PATH.equals(augmentation.getTargetPath())) {
+            LOGGER.debug("Parsing configuration of {}", moduleLocalNameFromXPath);
             yangToAttributes = fillConfiguration(dataNodeContainer, currentModule, typeProviderWrapper, qNamesToSIEs,
                     schemaContext, packageName);
             checkUniqueAttributesWithGeneratedClass(uniqueGeneratedClassesNames, when.getQName(), yangToAttributes);
-        } else if (expectedStateAugmentationSchemaPath.equals(augmentation.getTargetPath())) {
-            logger.debug("Parsing state of {}", moduleLocalNameFromXPath);
+        } else if (EXPECTED_STATE_AUGMENTATION_SCHEMA_PATH.equals(augmentation.getTargetPath())) {
+            LOGGER.debug("Parsing state of {}", moduleLocalNameFromXPath);
             try {
                 runtimeBeans = fillRuntimeBeans(dataNodeContainer, currentModule, typeProviderWrapper, packageName,
                         moduleLocalNameFromXPath, javaNamePrefix);

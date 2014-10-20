@@ -33,17 +33,20 @@ public abstract class AbstractAttribute implements AttributeIfc {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof AbstractAttribute))
+        }
+        if (!(o instanceof AbstractAttribute)) {
             return false;
+        }
 
         AbstractAttribute that = (AbstractAttribute) o;
 
         if (attributeYangName != null ? !attributeYangName
                 .equals(that.attributeYangName)
-                : that.attributeYangName != null)
+                : that.attributeYangName != null) {
             return false;
+        }
 
         return true;
     }

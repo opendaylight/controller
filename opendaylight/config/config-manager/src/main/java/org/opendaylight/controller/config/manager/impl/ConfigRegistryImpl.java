@@ -60,7 +60,7 @@ import java.util.Set;
  */
 @ThreadSafe
 public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBean {
-    private static final Logger logger = LoggerFactory.getLogger(ConfigRegistryImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigRegistryImpl.class);
 
     private final ModuleFactoriesResolver resolver;
     private final MBeanServer configMBeanServer;
@@ -166,7 +166,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         for (ModuleInternalInfo moduleInternalInfo : currentConfig.getEntries()) {
             String name = moduleInternalInfo.getModuleFactory().getImplementationName();
             if (allCurrentFactories.containsKey(name) == false) {
-                logger.trace("Factory {} not found in SR, using reference from previous commit", name);
+                LOGGER.trace("Factory {} not found in SR, using reference from previous commit", name);
                 allCurrentFactories.put(name,
                         Maps.immutableEntry(moduleInternalInfo.getModuleFactory(), moduleInternalInfo.getBundleContext()));
             }
@@ -202,7 +202,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
             throws ConflictingVersionException, ValidationException {
         final String transactionName = ObjectNameUtil
                 .getTransactionName(transactionControllerON);
-        logger.trace("About to commit {}. Current parentVersion: {}, versionCounter {}", transactionName, version, versionCounter);
+        LOGGER.trace("About to commit {}. Current parentVersion: {}, versionCounter {}", transactionName, version, versionCounter);
 
         // find ConfigTransactionController
         Map<String, Entry<ConfigTransactionControllerInternal, ConfigTransactionLookupRegistry>> transactions = transactionsHolder.getCurrentTransactions();
@@ -230,7 +230,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         } catch (Error | RuntimeException t) { // some libs throw Errors: e.g.
             // javax.xml.ws.spi.FactoryFinder$ConfigurationError
             isHealthy = false;
-            logger.error("Configuration Transaction failed on 2PC, server is unhealthy", t);
+            LOGGER.error("Configuration Transaction failed on 2PC, server is unhealthy", t);
             if (t instanceof RuntimeException) {
                 throw (RuntimeException) t;
             } else {
@@ -292,7 +292,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
 
         int orderingIdx = 0;
         for (ModuleIdentifier moduleIdentifier : orderedModuleIdentifiers) {
-            logger.trace("Registering {}", moduleIdentifier);
+            LOGGER.trace("Registering {}", moduleIdentifier);
             ModuleInternalTransactionalInfo entry = commitInfo.getCommitted()
                     .get(moduleIdentifier);
             if (entry == null) {
@@ -427,7 +427,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
                 configTransactionControllerEntry.getValue().close();
                 configTransactionController.abortConfig();
             } catch (RuntimeException e) {
-                logger.warn("Ignoring exception while aborting {}",
+                LOGGER.warn("Ignoring exception while aborting {}",
                         configTransactionController, e);
             }
         }
@@ -524,14 +524,10 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
     @Override
     public Set<ObjectName> lookupRuntimeBeans(String moduleName,
                                               String instanceName) {
-        if (moduleName == null) {
-            moduleName = "*";
-        }
-        if (instanceName == null) {
-            instanceName = "*";
-        }
+        String finalModuleName = moduleName == null ? "*" : moduleName;
+        String finalInstanceName = instanceName == null ? "*" : instanceName;
         ObjectName namePattern = ObjectNameUtil.createRuntimeBeanPattern(
-                moduleName, instanceName);
+                finalModuleName, finalInstanceName);
         return baseJMXRegistrator.queryNames(namePattern, null);
     }
 
@@ -609,7 +605,7 @@ class ConfigHolder {
      * Service Registry.
      */
     public void addAll(Collection<ModuleInternalInfo> configInfos) {
-        if (currentConfig.size() > 0) {
+        if (!currentConfig.isEmpty()) {
             throw new IllegalStateException(
                     "Error - some config entries were not removed: "
                             + currentConfig);
