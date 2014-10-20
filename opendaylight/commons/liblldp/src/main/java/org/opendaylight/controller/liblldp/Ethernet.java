@@ -30,6 +30,7 @@ public class Ethernet extends Packet {
     static {
         etherTypeClassMap = new HashMap<Short, Class<? extends Packet>>();
         etherTypeClassMap.put(EtherTypes.LLDP.shortValue(), LLDP.class);
+        etherTypeClassMap.put(EtherTypes.VLANTAGGED.shortValue(), IEEE8021Q.class);
     }
     private static Map<String, Pair<Integer, Integer>> fieldCoordinates = new LinkedHashMap<String, Pair<Integer, Integer>>() {
         private static final long serialVersionUID = 1L;
