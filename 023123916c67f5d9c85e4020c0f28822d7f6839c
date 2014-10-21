@@ -54,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_3b9310a5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStoreFactory.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-21T23:08:44Z",
+      "side": 1,
+      "message": "Right - my concern was losing persistence for this ShardManager but as you pointed we only needed to persist the schema modules to avoid Shard failures on recovery.",
+      "parentUuid": "ba8cc1f7_3b3790e5",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_0077bbd5",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistence/NonPersistentJournal.java",
         "patchSetId": 2
@@ -89,6 +107,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_db8f8474",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistence/NonPersistentJournal.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-21T23:08:44Z",
+      "side": 1,
+      "message": "How come we need that? Just curious....",
+      "parentUuid": "ba8cc1f7_5b57f402",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_80bc2b6e",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistence/NonPersistentJournal.java",
         "patchSetId": 2
@@ -118,6 +154,24 @@
       "side": 1,
       "message": "Should be private but I do not see any advantage to making this a ConcurrentHashMap.",
       "parentUuid": "ba8cc1f7_80bc2b6e",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_9be9fc1c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistence/NonPersistentJournal.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-21T23:08:44Z",
+      "side": 1,
+      "message": "Optimization to gain concurrent access below to avoid exclusive locking, specifically when writing. With ConcurrentMap, you can remove the synchronized blocks below.",
+      "parentUuid": "ba8cc1f7_7b5c3826",
       "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -194,6 +248,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_5bf3740a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistence/NonPersistentJournal.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-21T23:08:44Z",
+      "side": 1,
+      "message": "I think it would be more optimal to use an AtomicLong instead of putting a new Long instance each time to inc.",
+      "parentUuid": "ba8cc1f7_9b4d7c75",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_e0a65753",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistence/NonPersistentJournal.java",
         "patchSetId": 2
@@ -264,6 +336,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_fbba8809",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1099,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-21T23:08:44Z",
+      "side": 1,
+      "message": "You mean it should use the \"real\" NonPersistentJournal? If so, is the purpose of this test to verify the NonPersistentJournal/NonPersistentSnapshot impls interact with akka correctly?",
+      "parentUuid": "ba8cc1f7_1b688cb9",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_e07df7b2",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
         "patchSetId": 2
@@ -293,6 +383,24 @@
       "side": 1,
       "message": "writeToStore would not write to the journal, thus the addTestData",
       "parentUuid": "ba8cc1f7_e07df7b2",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_bbd5e044",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1121,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-21T23:08:44Z",
+      "side": 1,
+      "message": "Right, but do we need the journal writes when capturing a snapshot? Just wondering for my own understanding.... also to keep tests as simple as possible.",
+      "parentUuid": "ba8cc1f7_9b749c9d",
       "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
