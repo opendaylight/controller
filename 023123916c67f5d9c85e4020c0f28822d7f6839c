@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_a04fef91",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStoreFactory.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-21T19:45:47Z",
+      "side": 1,
+      "message": "By using a non-persistence store for the whole actor system, it appears we will lose persistence for the ShardManager and any other persistent actor other than Shard where we want persistence.",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_0077bbd5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistence/NonPersistentJournal.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-21T19:45:47Z",
+      "side": 1,
+      "message": "How come we need to store the entry counts? What would fail or what would we lose if we didn\u0027t?",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_80bc2b6e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistence/NonPersistentJournal.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-21T19:45:47Z",
+      "side": 1,
+      "message": "Should be private? Also can we use ConcurrentHashMap?",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_607247e7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistence/NonPersistentJournal.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-21T19:45:47Z",
+      "side": 1,
+      "message": "Can we make \"new Long(-1)\" a static final constant?",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_c0a9d325",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistence/NonPersistentJournal.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-21T19:45:47Z",
+      "side": 1,
+      "message": "Is this correct? I assume you want to inc the value stored in the map, in which case you\u0027d want to do:\n\nif(journal \u003d\u003d null) {\n    journals.put(persistenceId, Long.valueOf(0));\n} else {\n    journals.put(persistenceId, Long.valueOf(journal + 1));\n}\n\nOr use AtomicLong.",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_e0a65753",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistence/NonPersistentJournal.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-21T19:45:47Z",
+      "side": 1,
+      "message": "Should this be implemented?",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_c080f38d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1099,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-21T19:45:47Z",
+      "side": 1,
+      "message": "I\u0027m not clear on the purpose of this test. The persistent flag in the DatastoreContext appears to only be used by the  higher-level DistributedDataStoreFactory. For unit tests, ActorSystem#create uses the application.conf under src/test/resources which configures the test InMemoryJournal/InMemorySnapshotStore classes. So it appears this test is really identical to testCreateSnapshot or am I missing something?",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_e07df7b2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1121,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-21T19:45:47Z",
+      "side": 1,
+      "message": "Can you use the direct writeToStore method here?",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_804aeb81",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1123,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-21T19:45:47Z",
+      "side": 1,
+      "message": "Why do we sleep here?",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_20743fce",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1130,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-21T19:45:47Z",
+      "side": 1,
+      "message": "The local ActorSystem should be shutdown/cleaned up.",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_406dc303",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTestKit.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-21T19:45:47Z",
+      "side": 1,
+      "message": "Instead of using Tx\u0027s to store data, can you use the direct writeToStore method in ShardTest?",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
