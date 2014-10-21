@@ -37,6 +37,23 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_fb8cc881",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStoreFactory.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-10-21T22:56:57Z",
+      "side": 1,
+      "message": "It will be better if you initialize all the above variables after actorSystemReference null check, because in that case, no initialization is required. Also, for creation, you may move out the code outside to new private method, just to make it more readable.",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_0077bbd5",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistence/NonPersistentJournal.java",
         "patchSetId": 2
