@@ -113,6 +113,9 @@ public class BaseYangSwaggerGenerator {
     }
 
     protected String generatePath(UriInfo uriInfo, String name, String revision) {
+        if (uriInfo == null) {
+            return generateCacheKey(name, revision);
+        }
         URI uri = uriInfo.getRequestUriBuilder().path(generateCacheKey(name, revision)).build();
         return uri.toASCIIString();
     }
@@ -141,6 +144,9 @@ public class BaseYangSwaggerGenerator {
     }
 
     protected String createBasePathFromUriInfo(UriInfo uriInfo) {
+        if (uriInfo == null) {
+            return RESTCONF_CONTEXT_ROOT;
+        }
         String portPart = "";
         int port = uriInfo.getBaseUri().getPort();
         if (port != -1) {
