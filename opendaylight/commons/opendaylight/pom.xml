@@ -221,11 +221,19 @@
        <!-- project specific dependencies -->
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
+        <artifactId>config-artifacts</artifactId>
+        <version>${config.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
         <artifactId>netconf-artifacts</artifactId>
         <version>${netconf.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+
       <dependency>
         <groupId>org.apache.sshd</groupId>
         <artifactId>sshd-core</artifactId>
@@ -841,60 +849,6 @@
       <!-- config-->
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
-        <artifactId>config-api</artifactId>
-        <version>${config.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>config-manager</artifactId>
-        <version>${config.version}</version>
-        <type>test-jar</type>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>config-manager</artifactId>
-        <version>${config.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>config-persister-api</artifactId>
-        <version>${config.version}</version>
-        <type>test-jar</type>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>config-persister-api</artifactId>
-        <version>${config.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>config-persister-directory-xml-adapter</artifactId>
-        <version>${config.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>config-persister-file-xml-adapter</artifactId>
-        <version>${config.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>config-persister-feature-adapter</artifactId>
-        <version>${config.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>config-util</artifactId>
-        <version>${config.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>config-util</artifactId>
-        <version>${config.version}</version>
-        <type>test-jar</type>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
         <artifactId>configuration</artifactId>
         <version>${configuration.version}</version>
       </dependency>
@@ -1035,11 +989,6 @@
         <artifactId>liblldp</artifactId>
         <version>${sal.version}</version>
       </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>logback-config</artifactId>
-        <version>${config.version}</version>
-      </dependency>
       <!-- Debug and logging -->
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
@@ -1052,26 +1001,6 @@
         <version>${dummy-console.version}</version>
       </dependency>
 
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>netty-config-api</artifactId>
-        <version>${config.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>netty-event-executor-config</artifactId>
-        <version>${config.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>netty-threadgroup-config</artifactId>
-        <version>${config.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>netty-timer-config</artifactId>
-        <version>${config.version}</version>
-      </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>networkconfig.bridgedomain.northbound</artifactId>
@@ -1236,11 +1165,6 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
-        <artifactId>config-netty-config</artifactId>
-        <version>${config.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
         <artifactId>md-sal-config</artifactId>
         <version>${mdsal.version}</version>
       </dependency>
@@ -1343,16 +1267,6 @@
 
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
-        <artifactId>shutdown-api</artifactId>
-        <version>${config.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>shutdown-impl</artifactId>
-        <version>${config.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
         <artifactId>statistics.northbound</artifactId>
         <version>${statistics.northbound.version}</version>
       </dependency>
@@ -1387,17 +1301,6 @@
         <version>${switchmanager.northbound.version}</version>
       </dependency>
 
-      <!-- threadpool -->
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>threadpool-config-api</artifactId>
-        <version>${config.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>threadpool-config-impl</artifactId>
-        <version>${config.version}</version>
-      </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>topology.northbound</artifactId>
@@ -1444,22 +1347,6 @@
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>web</artifactId>
         <version>${web.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>yang-jmx-generator</artifactId>
-        <version>${config.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>yang-jmx-generator</artifactId>
-        <version>${config.version}</version>
-        <type>test-jar</type>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>yang-test</artifactId>
-        <version>${config.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller.md</groupId>
@@ -1550,14 +1437,6 @@
         <groupId>org.opendaylight.controller.samples</groupId>
         <artifactId>features-toaster</artifactId>
         <version>${mdsal.version}</version>
-        <classifier>features</classifier>
-        <type>xml</type>
-        <scope>runtime</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>features-config-netty</artifactId>
-        <version>${config.version}</version>
         <classifier>features</classifier>
         <type>xml</type>
         <scope>runtime</scope>
@@ -1674,32 +1553,8 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
-        <artifactId>features-config</artifactId>
-        <version>${config.version}</version>
-        <classifier>features</classifier>
-        <type>xml</type>
-        <scope>runtime</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
         <artifactId>features-protocol-framework</artifactId>
         <version>${protocol-framework.version}</version>
-        <classifier>features</classifier>
-        <type>xml</type>
-        <scope>runtime</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>features-config-persister</artifactId>
-        <version>${config.version}</version>
-        <classifier>features</classifier>
-        <type>xml</type>
-        <scope>runtime</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>config-netty-features</artifactId>
-        <version>${config.version}</version>
         <classifier>features</classifier>
         <type>xml</type>
         <scope>runtime</scope>
