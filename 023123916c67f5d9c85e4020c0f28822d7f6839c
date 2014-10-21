@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_3b3790e5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStoreFactory.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-21T22:15:33Z",
+      "side": 1,
+      "message": "ShardManager is per datastore so this should be fine.",
+      "parentUuid": "ba8cc1f7_a04fef91",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_0077bbd5",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistence/NonPersistentJournal.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-10-21T19:45:47Z",
       "side": 1,
       "message": "How come we need to store the entry counts? What would fail or what would we lose if we didn\u0027t?",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_5b57f402",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistence/NonPersistentJournal.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-21T22:15:33Z",
+      "side": 1,
+      "message": "It\u0027s not really counts we need to keep track of but rather the id of the last item.",
+      "parentUuid": "ba8cc1f7_0077bbd5",
       "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_7b5c3826",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistence/NonPersistentJournal.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-21T22:15:33Z",
+      "side": 1,
+      "message": "Should be private but I do not see any advantage to making this a ConcurrentHashMap.",
+      "parentUuid": "ba8cc1f7_80bc2b6e",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_607247e7",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistence/NonPersistentJournal.java",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2014-10-21T19:45:47Z",
       "side": 1,
       "message": "Can we make \"new Long(-1)\" a static final constant?",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_1b416c39",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistence/NonPersistentJournal.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-21T22:15:33Z",
+      "side": 1,
+      "message": "Yes",
+      "parentUuid": "ba8cc1f7_607247e7",
       "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_9b4d7c75",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistence/NonPersistentJournal.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-21T22:15:33Z",
+      "side": 1,
+      "message": "you\u0027re right a put is missing",
+      "parentUuid": "ba8cc1f7_c0a9d325",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_e0a65753",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistence/NonPersistentJournal.java",
         "patchSetId": 2
@@ -98,6 +188,24 @@
       "writtenOn": "2014-10-21T19:45:47Z",
       "side": 1,
       "message": "Should this be implemented?",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_bb52c011",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistence/NonPersistentJournal.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-21T22:15:33Z",
+      "side": 1,
+      "message": "No. We just maintain a sequence number so even if you deleted all the entries in the log we would still need to maintain that sequence number at the same value.",
+      "parentUuid": "ba8cc1f7_e0a65753",
       "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_1b688cb9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1099,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-21T22:15:33Z",
+      "side": 1,
+      "message": "You are right. This test should have used a different configuration.",
+      "parentUuid": "ba8cc1f7_c080f38d",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_e07df7b2",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
         "patchSetId": 2
@@ -132,6 +258,24 @@
       "writtenOn": "2014-10-21T19:45:47Z",
       "side": 1,
       "message": "Can you use the direct writeToStore method here?",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_9b749c9d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1121,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-21T22:15:33Z",
+      "side": 1,
+      "message": "writeToStore would not write to the journal, thus the addTestData",
+      "parentUuid": "ba8cc1f7_e07df7b2",
       "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_3b6550e1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1123,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-21T22:15:33Z",
+      "side": 1,
+      "message": "There was a timing issue. Needs to be fixed.",
+      "parentUuid": "ba8cc1f7_804aeb81",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_20743fce",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
         "patchSetId": 2
@@ -172,6 +334,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_db4a2455",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1130,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-21T22:15:33Z",
+      "side": 1,
+      "message": "yes",
+      "parentUuid": "ba8cc1f7_20743fce",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_406dc303",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTestKit.java",
         "patchSetId": 2
@@ -183,6 +363,24 @@
       "writtenOn": "2014-10-21T19:45:47Z",
       "side": 1,
       "message": "Instead of using Tx\u0027s to store data, can you use the direct writeToStore method in ShardTest?",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_5b6e14cb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTestKit.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-21T22:15:33Z",
+      "side": 1,
+      "message": "Adding data this way involves the journal.",
+      "parentUuid": "ba8cc1f7_406dc303",
       "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
