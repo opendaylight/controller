@@ -32,20 +32,6 @@ public class NodeIdentifierFactory {
         return value;
     }
 
-    public static YangInstanceIdentifier.PathArgument getArgument(String id, DataSchemaNode schemaNode){
-        YangInstanceIdentifier.PathArgument value = cache.get(id);
-        if(value == null){
-            synchronized (cache){
-                value = cache.get(id);
-                if(value == null) {
-                    value = createPathArgument(id, schemaNode);
-                    cache.put(id, value);
-                }
-            }
-        }
-        return value;
-    }
-
     public static YangInstanceIdentifier.PathArgument createPathArgument(String id, DataSchemaNode schemaNode){
         final NodeIdentifierWithPredicatesGenerator
             nodeIdentifierWithPredicatesGenerator = new NodeIdentifierWithPredicatesGenerator(id, schemaNode);
