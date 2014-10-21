@@ -30,6 +30,8 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
     private static final int SLEEP = 10000;
     private static XSQLAdapter a = new XSQLAdapter();
     private static PrintStream l = null;
+    private static String tmpDir = null;
+    private static File xqlLog = null;
     public boolean stopped = false;
     private List<String> elementHosts = new ArrayList<String>();
     private String username;
@@ -79,6 +81,12 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
         return a;
     }
 
+    public static File getXQLLogfile() {
+        tmpDir = System.getProperty("java.io.tmpdir");
+        xqlLog = new File(tmpDir + "/xql.log");
+        return xqlLog;
+    }
+
     public static void main(String args[]) {
         XSQLAdapter adapter = new XSQLAdapter();
         adapter.start();
@@ -90,7 +98,7 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
                 synchronized (XSQLAdapter.class) {
                     if (l == null) {
                         l = new PrintStream(
-                                new FileOutputStream("/tmp/xql.log"));
+                                new FileOutputStream(getXQLLogfile()));
                     }
                 }
             }
@@ -108,7 +116,7 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
                 synchronized (XSQLAdapter.class) {
                     if (l == null) {
                         l = new PrintStream(
-                                new FileOutputStream("/tmp/xql.log"));
+                                new FileOutputStream(getXQLLogfile()));
                     }
                 }
             }
