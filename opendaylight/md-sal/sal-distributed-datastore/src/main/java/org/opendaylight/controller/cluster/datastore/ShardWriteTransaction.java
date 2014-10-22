@@ -53,14 +53,28 @@ public class ShardWriteTransaction extends ShardTransaction {
 
     @Override
     public void handleReceive(Object message) throws Exception {
-        if(WriteData.SERIALIZABLE_CLASS.equals(message.getClass())) {
+
+        if (message instanceof WriteData) {
+            writeData(transaction, (WriteData) message);
+
+        } else if (message instanceof MergeData) {
+            mergeData(transaction, (MergeData) message);
+
+        } else if (message instanceof DeleteData) {
+            deleteData(transaction, (DeleteData) message);
+
+        } else if(WriteData.SERIALIZABLE_CLASS.equals(message.getClass())) {
             writeData(transaction, WriteData.fromSerializable(message, getSchemaContext()));
+
         } else if(MergeData.SERIALIZABLE_CLASS.equals(message.getClass())) {
             mergeData(transaction, MergeData.fromSerializable(message, getSchemaContext()));
+
         } else if(DeleteData.SERIALIZABLE_CLASS.equals(message.getClass())) {
             deleteData(transaction, DeleteData.fromSerializable(message));
+
         } else if(ReadyTransaction.SERIALIZABLE_CLASS.equals(message.getClass())) {
             readyTransaction(transaction, new ReadyTransaction());
+
         } else if (message instanceof GetCompositedModification) {
             // This is here for testing only
             getSender().tell(new GetCompositeModificationReply(

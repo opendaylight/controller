@@ -37,6 +37,7 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionRe
 import org.opendaylight.controller.cluster.datastore.messages.WriteData;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.DataStoreUtils;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
@@ -157,7 +158,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                 for(ActorSelection actor : remoteTransactionActors) {
                     LOG.trace("Sending CloseTransaction to {}", actor);
                     actorContext.sendOperationAsync(actor,
-                            new CloseTransaction().toSerializable());
+                        new CloseTransaction().toSerializable());
                 }
             }
         }
@@ -385,8 +386,8 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             }
 
             Object response = actorContext.executeOperation(primaryShard.get(),
-                    new CreateTransaction(identifier.toString(), this.transactionType.ordinal(),
-                            getTransactionChainId()).toSerializable());
+                new CreateTransaction(identifier.toString(), this.transactionType.ordinal(),
+                    getTransactionChainId()).toSerializable());
             if (response.getClass().equals(CreateTransactionReply.SERIALIZABLE_CLASS)) {
                 CreateTransactionReply reply =
                     CreateTransactionReply.fromSerializable(response);
@@ -408,8 +409,14 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                     remoteTransactionActorsMB.set(true);
                 }
 
+                // TxActor is always created where the leader of the shard is.
+                // Check if TxActor is created in the same node
+                boolean isTxActorLocal = DataStoreUtils.getInstance().doPathsCoExist(
+                    actorContext.getClusterWrapper().getSelfAddress(),
+                    transactionPath);
+
                 transactionContext = new TransactionContextImpl(shardName, transactionPath,
-                    transactionActor, identifier, actorContext, schemaContext);
+                    transactionActor, identifier, actorContext, schemaContext, isTxActorLocal);
 
                 remoteTransactionPaths.put(shardName, transactionContext);
             } else {
@@ -483,15 +490,17 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         private final SchemaContext schemaContext;
         private final String actorPath;
         private final ActorSelection actor;
+        private final boolean isTxActorLocal;
 
         private TransactionContextImpl(String shardName, String actorPath,
                 ActorSelection actor, TransactionIdentifier identifier, ActorContext actorContext,
-                SchemaContext schemaContext) {
+                SchemaContext schemaContext, boolean isTxActorLocal) {
             super(shardName, identifier);
             this.actorPath = actorPath;
             this.actor = actor;
             this.actorContext = actorContext;
             this.schemaContext = schemaContext;
+            this.isTxActorLocal = isTxActorLocal;
         }
 
         private ActorSelection getActor() {
@@ -515,7 +524,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             // Send the ReadyTransaction message to the Tx actor.
 
             final Future<Object> replyFuture = actorContext.executeOperationAsync(getActor(),
-                    new ReadyTransaction().toSerializable());
+                new ReadyTransaction().toSerializable());
 
             // Combine all the previously recorded put/merge/delete operation reply Futures and the
             // ReadyTransactionReply Future into one Future. If any one fails then the combined
@@ -570,8 +579,10 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Tx {} deleteData called path = {}", identifier, path);
             }
+
+            DeleteData deleteData = new DeleteData(path);
             recordedOperationFutures.add(actorContext.executeOperationAsync(getActor(),
-                    new DeleteData(path).toSerializable()));
+                isTxActorLocal ? deleteData : deleteData.toSerializable()));
         }
 
         @Override
@@ -579,8 +590,10 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Tx {} mergeData called path = {}", identifier, path);
             }
+
+            MergeData mergeData = new MergeData(path, data, schemaContext);
             recordedOperationFutures.add(actorContext.executeOperationAsync(getActor(),
-                    new MergeData(path, data, schemaContext).toSerializable()));
+                isTxActorLocal ? mergeData : mergeData.toSerializable()));
         }
 
         @Override
@@ -588,8 +601,10 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Tx {} writeData called path = {}", identifier, path);
             }
+
+            WriteData writeData = new WriteData(path, data, schemaContext);
             recordedOperationFutures.add(actorContext.executeOperationAsync(getActor(),
-                    new WriteData(path, data, schemaContext).toSerializable()));
+                isTxActorLocal ? writeData : writeData.toSerializable()));
         }
 
         @Override
@@ -680,8 +695,10 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                 }
             };
 
+            ReadData readData = new ReadData(path);
             Future<Object> readFuture = actorContext.executeOperationAsync(getActor(),
-                    new ReadData(path).toSerializable());
+                isTxActorLocal ? readData : readData.toSerializable());
+
             readFuture.onComplete(onComplete, actorContext.getActorSystem().dispatcher());
         }
 
@@ -768,7 +785,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             };
 
             Future<Object> future = actorContext.executeOperationAsync(getActor(),
-                    new DataExists(path).toSerializable());
+                new DataExists(path).toSerializable());
             future.onComplete(onComplete, actorContext.getActorSystem().dispatcher());
         }
     }

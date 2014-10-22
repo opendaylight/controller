@@ -13,6 +13,7 @@ import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.ReceiveTimeout;
 import akka.japi.Creator;
+import akka.serialization.Serialization;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
@@ -24,6 +25,7 @@ import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.DataExistsReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 import org.opendaylight.controller.cluster.datastore.messages.ReadDataReply;
+import org.opendaylight.controller.cluster.datastore.utils.DataStoreUtils;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
@@ -122,16 +124,19 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
         final CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> future =
                 transaction.read(path);
 
+        final boolean isLocal = DataStoreUtils.getInstance().doPathsCoExist(
+            Serialization.serializedActorPath(sender),
+            Serialization.serializedActorPath(self));
+
         future.addListener(new Runnable() {
             @Override
             public void run() {
                 try {
                     Optional<NormalizedNode<?, ?>> optional = future.checkedGet();
-                    if (optional.isPresent()) {
-                        sender.tell(new ReadDataReply(schemaContext,optional.get()).toSerializable(), self);
-                    } else {
-                        sender.tell(new ReadDataReply(schemaContext,null).toSerializable(), self);
-                    }
+                    ReadDataReply readDataReply = new ReadDataReply(schemaContext, optional.orNull());
+
+                    sender.tell((isLocal ? readDataReply : readDataReply.toSerializable()), self);
+
                 } catch (Exception e) {
                     shardStats.incrementFailedReadTransactionsCount();
                     sender.tell(new akka.actor.Status.Failure(e), self);
