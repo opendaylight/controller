@@ -33,13 +33,18 @@ import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
+import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.duration.Duration;
+
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class ShardTransactionTest extends AbstractActorTest {
@@ -77,37 +82,26 @@ public class ShardTransactionTest extends AbstractActorTest {
                     testSchemaContext, datastoreContext, shardStats, "txn");
             final ActorRef subject = getSystem().actorOf(props, "testReadData");
 
-            new Within(duration("1 seconds")) {
-                @Override
-                protected void run() {
+            //serialized read
+            subject.tell(new ReadData(YangInstanceIdentifier.builder().build()).toSerializable(),
+                getRef());
 
-                    subject.tell(
-                        new ReadData(YangInstanceIdentifier.builder().build()).toSerializable(),
-                        getRef());
+            ShardTransactionMessages.ReadDataReply replySerialized =
+                expectMsgClass(duration("5 seconds"), ReadDataReply.SERIALIZABLE_CLASS);
 
-                    final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
-                        // do not put code outside this method, will run afterwards
-                        @Override
-                        protected String match(Object in) {
-                            if (in.getClass().equals(ReadDataReply.SERIALIZABLE_CLASS)) {
-                              if (ReadDataReply.fromSerializable(testSchemaContext,YangInstanceIdentifier.builder().build(), in)
-                                  .getNormalizedNode()!= null) {
-                                    return "match";
-                                }
-                                return null;
-                            } else {
-                                throw noMatch();
-                            }
-                        }
-                    }.get(); // this extracts the received message
+            assertNotNull(ReadDataReply.fromSerializable(
+                testSchemaContext,YangInstanceIdentifier.builder().build(), replySerialized)
+                .getNormalizedNode());
 
-                    assertEquals("match", out);
+            // unserialized read
+            subject.tell(new ReadData(YangInstanceIdentifier.builder().build()),getRef());
 
-                    expectNoMsg();
-                }
+            ReadDataReply reply = expectMsgClass(duration("5 seconds"), ReadDataReply.class);
 
+            assertNotNull(reply.getNormalizedNode());
 
-            };
+            expectNoMsg();
+
         }};
     }
 
@@ -119,38 +113,25 @@ public class ShardTransactionTest extends AbstractActorTest {
                     testSchemaContext, datastoreContext, shardStats, "txn");
             final ActorRef subject = getSystem().actorOf(props, "testReadDataWhenDataNotFound");
 
-            new Within(duration("1 seconds")) {
-                @Override
-                protected void run() {
+            subject.tell(
+                new ReadData(TestModel.TEST_PATH).toSerializable(),
+                getRef());
 
-                    subject.tell(
-                        new ReadData(TestModel.TEST_PATH).toSerializable(),
-                        getRef());
+            ShardTransactionMessages.ReadDataReply replySerialized =
+                expectMsgClass(duration("5 seconds"), ReadDataReply.SERIALIZABLE_CLASS);
 
-                    final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
-                        // do not put code outside this method, will run afterwards
-                        @Override
-                        protected String match(Object in) {
-                            if (in.getClass().equals(ReadDataReply.SERIALIZABLE_CLASS)) {
-                                if (ReadDataReply.fromSerializable(testSchemaContext,TestModel.TEST_PATH, in)
-                                    .getNormalizedNode()
-                                    == null) {
-                                    return "match";
-                                }
-                                return null;
-                            } else {
-                                throw noMatch();
-                            }
-                        }
-                    }.get(); // this extracts the received message
+            assertTrue(ReadDataReply.fromSerializable(
+                testSchemaContext, TestModel.TEST_PATH, replySerialized)
+                .getNormalizedNode() == null);
 
-                    assertEquals("match", out);
+            // unserialized read
+            subject.tell(new ReadData(TestModel.TEST_PATH),getRef());
 
-                    expectNoMsg();
-                }
+            ReadDataReply reply = expectMsgClass(duration("5 seconds"), ReadDataReply.class);
 
+            assertTrue(reply.getNormalizedNode() == null);
 
-            };
+            expectNoMsg();
         }};
     }
 
@@ -162,37 +143,23 @@ public class ShardTransactionTest extends AbstractActorTest {
                     testSchemaContext, datastoreContext, shardStats, "txn");
             final ActorRef subject = getSystem().actorOf(props, "testDataExistsPositive");
 
-            new Within(duration("1 seconds")) {
-                @Override
-                protected void run() {
+            subject.tell(
+                new DataExists(YangInstanceIdentifier.builder().build()).toSerializable(),
+                getRef());
 
-                    subject.tell(
-                        new DataExists(YangInstanceIdentifier.builder().build()).toSerializable(),
-                        getRef());
+            ShardTransactionMessages.DataExistsReply replySerialized =
+                expectMsgClass(duration("5 seconds"), ShardTransactionMessages.DataExistsReply.class);
 
-                    final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
-                        // do not put code outside this method, will run afterwards
-                        @Override
-                        protected String match(Object in) {
-                            if (in.getClass().equals(DataExistsReply.SERIALIZABLE_CLASS)) {
-                                if (DataExistsReply.fromSerializable(in)
-                                    .exists()) {
-                                    return "match";
-                                }
-                                return null;
-                            } else {
-                                throw noMatch();
-                            }
-                        }
-                    }.get(); // this extracts the received message
+            assertTrue(DataExistsReply.fromSerializable(replySerialized).exists());
 
-                    assertEquals("match", out);
+            // unserialized read
+            subject.tell(new DataExists(YangInstanceIdentifier.builder().build()),getRef());
 
-                    expectNoMsg();
-                }
+            DataExistsReply reply = expectMsgClass(duration("5 seconds"), DataExistsReply.class);
 
+            assertTrue(reply.exists());
 
-            };
+            expectNoMsg();
         }};
     }
 
@@ -204,37 +171,24 @@ public class ShardTransactionTest extends AbstractActorTest {
                     testSchemaContext, datastoreContext, shardStats, "txn");
             final ActorRef subject = getSystem().actorOf(props, "testDataExistsNegative");
 
-            new Within(duration("1 seconds")) {
-                @Override
-                protected void run() {
+            subject.tell(
+                new DataExists(TestModel.TEST_PATH).toSerializable(),
+                getRef());
 
-                    subject.tell(
-                        new DataExists(TestModel.TEST_PATH).toSerializable(),
-                        getRef());
+            ShardTransactionMessages.DataExistsReply replySerialized =
+                expectMsgClass(duration("5 seconds"), ShardTransactionMessages.DataExistsReply.class);
 
-                    final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
-                        // do not put code outside this method, will run afterwards
-                        @Override
-                        protected String match(Object in) {
-                            if (in.getClass().equals(DataExistsReply.SERIALIZABLE_CLASS)) {
-                                if (!DataExistsReply.fromSerializable(in)
-                                    .exists()) {
-                                    return "match";
-                                }
-                                return null;
-                            } else {
-                                throw noMatch();
-                            }
-                        }
-                    }.get(); // this extracts the received message
+            assertFalse(DataExistsReply.fromSerializable(replySerialized).exists());
 
-                    assertEquals("match", out);
+            // unserialized read
+            subject.tell(new DataExists(TestModel.TEST_PATH),getRef());
 
-                    expectNoMsg();
-                }
+            DataExistsReply reply = expectMsgClass(duration("5 seconds"), DataExistsReply.class);
 
+            assertFalse(reply.exists());
 
-            };
+            expectNoMsg();
+
         }};
     }
 
@@ -282,34 +236,24 @@ public class ShardTransactionTest extends AbstractActorTest {
             final ActorRef subject =
                 getSystem().actorOf(props, "testWriteData");
 
-            new Within(duration("1 seconds")) {
-                @Override
-                protected void run() {
+            subject.tell(new WriteData(TestModel.TEST_PATH,
+                ImmutableNodes.containerNode(TestModel.TEST_QNAME), TestModel.createTestContext()).toSerializable(),
+                getRef());
 
-                    subject.tell(new WriteData(TestModel.TEST_PATH,
-                        ImmutableNodes.containerNode(TestModel.TEST_QNAME), TestModel.createTestContext()).toSerializable(),
-                        getRef());
+            ShardTransactionMessages.WriteDataReply replySerialized =
+                expectMsgClass(duration("5 seconds"), ShardTransactionMessages.WriteDataReply.class);
 
-                    final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
-                        // do not put code outside this method, will run afterwards
-                        @Override
-                        protected String match(Object in) {
-                            if (in.getClass().equals(WriteDataReply.SERIALIZABLE_CLASS)) {
-                                return "match";
-                            } else {
-                                throw noMatch();
-                            }
-                        }
-                    }.get(); // this extracts the received message
+            assertModification(subject, WriteModification.class);
 
-                    assertEquals("match", out);
+            //unserialized write
+            subject.tell(new WriteData(TestModel.TEST_PATH,
+                ImmutableNodes.containerNode(TestModel.TEST_QNAME),
+                TestModel.createTestContext()),
+                getRef());
 
-                    assertModification(subject, WriteModification.class);
-                    expectNoMsg();
-                }
+            expectMsgClass(duration("5 seconds"), WriteDataReply.class);
 
-
-            };
+            expectNoMsg();
         }};
     }
 
@@ -322,35 +266,23 @@ public class ShardTransactionTest extends AbstractActorTest {
             final ActorRef subject =
                 getSystem().actorOf(props, "testMergeData");
 
-            new Within(duration("1 seconds")) {
-                @Override
-                protected void run() {
+            subject.tell(new MergeData(TestModel.TEST_PATH,
+                ImmutableNodes.containerNode(TestModel.TEST_QNAME), testSchemaContext).toSerializable(),
+                getRef());
 
-                    subject.tell(new MergeData(TestModel.TEST_PATH,
-                        ImmutableNodes.containerNode(TestModel.TEST_QNAME), testSchemaContext).toSerializable(),
-                        getRef());
+            ShardTransactionMessages.MergeDataReply replySerialized =
+                expectMsgClass(duration("5 seconds"), ShardTransactionMessages.MergeDataReply.class);
 
-                    final String out = new ExpectMsg<String>(duration("500 milliseconds"), "match hint") {
-                        // do not put code outside this method, will run afterwards
-                        @Override
-                        protected String match(Object in) {
-                            if (in.getClass().equals(MergeDataReply.SERIALIZABLE_CLASS)) {
-                                return "match";
-                            } else {
-                                throw noMatch();
-                            }
-                        }
-                    }.get(); // this extracts the received message
+            assertModification(subject, MergeModification.class);
 
-                    assertEquals("match", out);
+            //unserialized merge
+            subject.tell(new MergeData(TestModel.TEST_PATH,
+                ImmutableNodes.containerNode(TestModel.TEST_QNAME), testSchemaContext),
+                getRef());
 
-                    assertModification(subject, MergeModification.class);
+            expectMsgClass(duration("5 seconds"), MergeDataReply.class);
 
-                    expectNoMsg();
-                }
-
-
-            };
+            expectNoMsg();
         }};
     }
 
@@ -363,32 +295,20 @@ public class ShardTransactionTest extends AbstractActorTest {
             final ActorRef subject =
                 getSystem().actorOf(props, "testDeleteData");
 
-            new Within(duration("1 seconds")) {
-                @Override
-                protected void run() {
+            subject.tell(new DeleteData(TestModel.TEST_PATH).toSerializable(), getRef());
 
-                    subject.tell(new DeleteData(TestModel.TEST_PATH).toSerializable(), getRef());
+            ShardTransactionMessages.DeleteDataReply replySerialized =
+                expectMsgClass(duration("5 seconds"), ShardTransactionMessages.DeleteDataReply.class);
 
-                    final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
-                        // do not put code outside this method, will run afterwards
-                        @Override
-                        protected String match(Object in) {
-                            if (in.getClass().equals(DeleteDataReply.SERIALIZABLE_CLASS)) {
-                                return "match";
-                            } else {
-                                throw noMatch();
-                            }
-                        }
-                    }.get(); // this extracts the received message
+            assertModification(subject, DeleteModification.class);
 
-                    assertEquals("match", out);
+            //unserialized merge
+            subject.tell(new DeleteData(TestModel.TEST_PATH), getRef());
 
-                    assertModification(subject, DeleteModification.class);
-                    expectNoMsg();
-                }
+            expectMsgClass(duration("5 seconds"), DeleteDataReply.class);
 
+            expectNoMsg();
 
-            };
         }};
     }
 
@@ -402,31 +322,28 @@ public class ShardTransactionTest extends AbstractActorTest {
             final ActorRef subject =
                 getSystem().actorOf(props, "testReadyTransaction");
 
-            new Within(duration("1 seconds")) {
-                @Override
-                protected void run() {
+            subject.tell(new ReadyTransaction().toSerializable(), getRef());
 
-                    subject.tell(new ReadyTransaction().toSerializable(), getRef());
+            expectMsgClass(duration("5 seconds"), ReadyTransactionReply.SERIALIZABLE_CLASS);
 
-                    final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
-                        // do not put code outside this method, will run afterwards
-                        @Override
-                        protected String match(Object in) {
-                            if (in.getClass().equals(ReadyTransactionReply.SERIALIZABLE_CLASS)) {
-                                return "match";
-                            } else {
-                                throw noMatch();
-                            }
-                        }
-                    }.get(); // this extracts the received message
-
-                    assertEquals("match", out);
-
-                    expectNoMsg();
-                }
+            expectNoMsg();
 
 
-            };
+        }};
+
+        // test
+        new JavaTestKit(getSystem()) {{
+            final ActorRef shard = createShard();
+            final Props props = ShardTransaction.props( store.newReadWriteTransaction(), shard,
+                testSchemaContext, datastoreContext, shardStats, "txn");
+            final ActorRef subject =
+                getSystem().actorOf(props, "testReadyTransaction2");
+
+            subject.tell(new ReadyTransaction(), getRef());
+
+            expectMsgClass(duration("5 seconds"), ReadyTransactionReply.class);
+
+            expectNoMsg();
         }};
 
     }

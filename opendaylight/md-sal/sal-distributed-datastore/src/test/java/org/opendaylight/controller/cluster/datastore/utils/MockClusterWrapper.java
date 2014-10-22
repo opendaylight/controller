@@ -28,6 +28,10 @@ public class MockClusterWrapper implements ClusterWrapper{
         return "member-1";
     }
 
+    @Override public String getSelfAddress() {
+        return "akka.tcp://test@127.0.0.1:2550/user/member-1-shard-test-config";
+    }
+
     public static void sendMemberUp(ActorRef to, String memberName, String address){
         to.tell(createMemberUp(memberName, address), null);
     }
