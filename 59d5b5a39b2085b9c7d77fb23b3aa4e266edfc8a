@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_bbe2c0d3",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamWriter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-22T02:52:46Z",
+      "side": 1,
+      "message": "I think we should use DataOutputStream and avoid ObjectOutputStream and writeObject - see below.",
+      "revId": "59d5b5a39b2085b9c7d77fb23b3aa4e266edfc8a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_bbbba0c3",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamWriter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-22T02:52:46Z",
+      "side": 1,
+      "message": "Rather than writing the enum object, it would be less overhead to just write a single byte to encode the type. So instead of defining enums for the node types, define byte constants.",
+      "revId": "59d5b5a39b2085b9c7d77fb23b3aa4e266edfc8a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_1bcacc4f",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamWriter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-22T02:52:46Z",
+      "side": 1,
+      "message": "Since QNames are the largest overhead, the NormalizedNodeSerializer optimizes QNames with special encoding, i.e. it splits the QName into its 3 parts and only serializes each String once and other occurrences serialize an integer code representing the String. However, by serializing the QName object, there will be a lot of duplication of \"stringified\" QName parts which is what we had before the optimizations and it yield a lot of bloat. \n\nSo I think we need to do something similar here. Break the QName into the 3 parts and maintain a code map (Map\u003cObject,Integer\u003e). For the first occurrence of a String, write to the stream (via writeUTF), allocate a new int code and put into the map. Subsequent occurrences will find the code in the map and write it to the stream. You\u0027ll probably have to write a byte indicating if a String was written or a code for reading back.",
+      "revId": "59d5b5a39b2085b9c7d77fb23b3aa4e266edfc8a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_fbc0482c",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamWriter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-22T02:52:46Z",
+      "side": 1,
+      "message": "I think we want to avoid the overhead of writeObject and do the same or similar as the current ValueSerializer does.",
+      "revId": "59d5b5a39b2085b9c7d77fb23b3aa4e266edfc8a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_9bdd7c17",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamWriter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-22T02:52:46Z",
+      "side": 1,
+      "message": "Same as above.",
+      "revId": "59d5b5a39b2085b9c7d77fb23b3aa4e266edfc8a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_dbc30437",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamWriter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-22T02:52:46Z",
+      "side": 1,
+      "message": "Encode each QName separately.",
+      "revId": "59d5b5a39b2085b9c7d77fb23b3aa4e266edfc8a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_7b9e7858",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/NormalizedNodeStreamWriter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-22T02:52:46Z",
+      "side": 1,
+      "message": "This interface looks like a duplicate of NormalizedNodeStreamWriter in yang tools. Why not use the existing interface?",
+      "revId": "59d5b5a39b2085b9c7d77fb23b3aa4e266edfc8a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_3ba0f08f",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/NormalizedNodeWriter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-22T02:52:46Z",
+      "side": 1,
+      "message": "This class looks like it\u0027s duplicated from yang tools.",
+      "revId": "59d5b5a39b2085b9c7d77fb23b3aa4e266edfc8a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
