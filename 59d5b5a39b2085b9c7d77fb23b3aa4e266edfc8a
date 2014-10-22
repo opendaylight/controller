@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_76ed2d8b",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamReader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-10-22T17:20:59Z",
+      "side": 1,
+      "message": "Yes, agree, I can make that change",
+      "parentUuid": "ba8cc1f7_dbf1c496",
+      "revId": "59d5b5a39b2085b9c7d77fb23b3aa4e266edfc8a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_56ca69a2",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamReader.java",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_36ffa536",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamReader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-10-22T17:20:59Z",
+      "side": 1,
+      "message": "Agree, we won\u0027t have to create a list in such case. \n\nMy only concern with such case is the getDataContainerChildren method will update the passed Builder object. Its like an API changed the state of the object passed to it. No harm in doing it, but i usually avoid it.",
+      "parentUuid": "ba8cc1f7_56ca69a2",
+      "revId": "59d5b5a39b2085b9c7d77fb23b3aa4e266edfc8a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_d65439cc",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamReader.java",
         "patchSetId": 2
@@ -47,6 +83,24 @@
       "writtenOn": "2014-10-22T12:57:46Z",
       "side": 1,
       "message": "It would be optimal if we could avoid creating builder instances as this can create a lot of garbage.  The builders end up creating Immutable*Node classes which, unfortunately, aren\u0027t exposed as public classes. \n\nHowever, I think we can compromise by re-using builder instances. A cursory look at some of the builders indicates they are currently designed to be re-usable (e.g. ImmutableContainerNodeBuilder sets a dirty flag on build()) although further verification is needed (Robert/Tony). The idea would be to store a builder of each type as a class member and lazily create an instance as needed, otherwise re-use the existing one. This would significantly cut down on the number of builder instances, particularly with a deep tree.",
+      "revId": "59d5b5a39b2085b9c7d77fb23b3aa4e266edfc8a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_969551e6",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamReader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-10-22T17:20:59Z",
+      "side": 1,
+      "message": "Excellent suggestion, I\u0027ll look further into it.",
+      "parentUuid": "ba8cc1f7_d65439cc",
       "revId": "59d5b5a39b2085b9c7d77fb23b3aa4e266edfc8a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -88,6 +142,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_d692f9f5",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamReader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-10-22T17:20:59Z",
+      "side": 1,
+      "message": "Most of the cases, Child count is 1, this was done to avoid empty memory usage, but Tom has another suggestion, which will avoid this altogether.",
+      "parentUuid": "ba8cc1f7_3b3c702f",
+      "revId": "59d5b5a39b2085b9c7d77fb23b3aa4e266edfc8a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_9b2b3ceb",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamReader.java",
         "patchSetId": 2
@@ -99,6 +171,24 @@
       "writtenOn": "2014-10-22T03:43:22Z",
       "side": 1,
       "message": "Would we able to move the if-null condition to the while() and avoid the break logic",
+      "revId": "59d5b5a39b2085b9c7d77fb23b3aa4e266edfc8a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_f68ffdca",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamReader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-10-22T17:20:59Z",
+      "side": 1,
+      "message": "I think i can do that.",
+      "parentUuid": "ba8cc1f7_9b2b3ceb",
       "revId": "59d5b5a39b2085b9c7d77fb23b3aa4e266edfc8a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -173,6 +263,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_96bc716e",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamWriter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-10-22T17:20:59Z",
+      "side": 1,
+      "message": "ok, can be done.",
+      "parentUuid": "ba8cc1f7_bbbba0c3",
+      "revId": "59d5b5a39b2085b9c7d77fb23b3aa4e266edfc8a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_1bcacc4f",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamWriter.java",
         "patchSetId": 2
@@ -190,6 +298,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_16b0618a",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamWriter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-10-22T17:20:59Z",
+      "side": 1,
+      "message": "I was doing something similar, taking Qname\u0027s namespace, localname and version as separate string and put them to the stream and construct the Qname on the other side. I\u0027ll handle it.",
+      "parentUuid": "ba8cc1f7_1bcacc4f",
+      "revId": "59d5b5a39b2085b9c7d77fb23b3aa4e266edfc8a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_fbc0482c",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamWriter.java",
         "patchSetId": 2
@@ -201,6 +327,24 @@
       "writtenOn": "2014-10-22T02:52:46Z",
       "side": 1,
       "message": "I think we want to avoid the overhead of writeObject and do the same or similar as the current ValueSerializer does.",
+      "revId": "59d5b5a39b2085b9c7d77fb23b3aa4e266edfc8a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_f67dbdb2",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamWriter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-10-22T17:20:59Z",
+      "side": 1,
+      "message": "ValueSerializer use toString with the object, while serialization, Am i correct? Is that the way you are proposing? It will assume toString is providing complete object state. \n\nOther option is to get Byte array from the object and send that byte array, but that is pretty much the ObjectStreamWriter does",
+      "parentUuid": "ba8cc1f7_fbc0482c",
       "revId": "59d5b5a39b2085b9c7d77fb23b3aa4e266edfc8a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -258,6 +402,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_d6a99925",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/NormalizedNodeStreamWriter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-10-22T17:20:59Z",
+      "side": 1,
+      "message": "Yes, it was picked up from there. I was using that one previously, but then, because of leafSetEntryNode method, I could not use the yang tools interface. They are not passing NodeWithValue object, they are dependent on schema context tracker to find the identifier. Because of that one method change, I had to copy the interface on this side.",
+      "parentUuid": "ba8cc1f7_7b9e7858",
+      "revId": "59d5b5a39b2085b9c7d77fb23b3aa4e266edfc8a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_3ba0f08f",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/NormalizedNodeWriter.java",
         "patchSetId": 2
@@ -269,6 +431,24 @@
       "writtenOn": "2014-10-22T02:52:46Z",
       "side": 1,
       "message": "This class looks like it\u0027s duplicated from yang tools.",
+      "revId": "59d5b5a39b2085b9c7d77fb23b3aa4e266edfc8a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_b66895f6",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/NormalizedNodeWriter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-10-22T17:20:59Z",
+      "side": 1,
+      "message": "Same reason, as NormalizedNodeStreamWriter interface, I can probably avoid writing whole class here, by just extending the class from yang tools, as its just for testing purpose anyway.",
+      "parentUuid": "ba8cc1f7_3ba0f08f",
       "revId": "59d5b5a39b2085b9c7d77fb23b3aa4e266edfc8a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
