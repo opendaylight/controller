@@ -172,6 +172,57 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_5657c902",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/DataStoreUtils.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-22T12:02:49Z",
+      "side": 1,
+      "message": "Please put return on separate line with braces. This is part of the ODL coding style.",
+      "revId": "0d76bd628fa3f96aca9eea7efb99ae47e8890fec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_765c4d26",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/DataStoreUtils.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-22T12:02:49Z",
+      "side": 1,
+      "message": "Please put return on separate line with braces.",
+      "revId": "0d76bd628fa3f96aca9eea7efb99ae47e8890fec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_16414139",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/DataStoreUtils.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-22T12:02:49Z",
+      "side": 1,
+      "message": "Please put return on separate line with braces.",
+      "revId": "0d76bd628fa3f96aca9eea7efb99ae47e8890fec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_fbee08b4",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/TransactionProxyTest.java",
         "patchSetId": 4
