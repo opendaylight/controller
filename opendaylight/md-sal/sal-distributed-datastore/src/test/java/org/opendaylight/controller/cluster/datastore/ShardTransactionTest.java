@@ -91,7 +91,13 @@ public class ShardTransactionTest extends AbstractActorTest {
                         protected String match(Object in) {
                             if (in.getClass().equals(ReadDataReply.SERIALIZABLE_CLASS)) {
                               if (ReadDataReply.fromSerializable(testSchemaContext,YangInstanceIdentifier.builder().build(), in)
-                                  .getNormalizedNode()!= null) {
+                                  .getNormalizedNode() != null) {
+                                    return "match";
+                                }
+                                return null;
+                            } else if (in instanceof ReadDataReply) {
+                                ReadDataReply reply = (ReadDataReply) in;
+                                if (reply.getNormalizedNode() != null) {
                                     return "match";
                                 }
                                 return null;
@@ -131,10 +137,14 @@ public class ShardTransactionTest extends AbstractActorTest {
                         // do not put code outside this method, will run afterwards
                         @Override
                         protected String match(Object in) {
-                            if (in.getClass().equals(ReadDataReply.SERIALIZABLE_CLASS)) {
+                            if (in instanceof ReadDataReply) {
+                                if (((ReadDataReply)in).getNormalizedNode() == null) {
+                                    return "match";
+                                }
+                                return null;
+                            } else if (in.getClass().equals(ReadDataReply.SERIALIZABLE_CLASS)) {
                                 if (ReadDataReply.fromSerializable(testSchemaContext,TestModel.TEST_PATH, in)
-                                    .getNormalizedNode()
-                                    == null) {
+                                    .getNormalizedNode() == null) {
                                     return "match";
                                 }
                                 return null;
@@ -174,9 +184,13 @@ public class ShardTransactionTest extends AbstractActorTest {
                         // do not put code outside this method, will run afterwards
                         @Override
                         protected String match(Object in) {
-                            if (in.getClass().equals(DataExistsReply.SERIALIZABLE_CLASS)) {
-                                if (DataExistsReply.fromSerializable(in)
-                                    .exists()) {
+                            if (in instanceof DataExistsReply) {
+                               if (((DataExistsReply)in).exists()) {
+                                   return "match";
+                               }
+                               return null;
+                            } else if (in.getClass().equals(DataExistsReply.SERIALIZABLE_CLASS)) {
+                                if (DataExistsReply.fromSerializable(in).exists()) {
                                     return "match";
                                 }
                                 return null;
@@ -216,7 +230,12 @@ public class ShardTransactionTest extends AbstractActorTest {
                         // do not put code outside this method, will run afterwards
                         @Override
                         protected String match(Object in) {
-                            if (in.getClass().equals(DataExistsReply.SERIALIZABLE_CLASS)) {
+                            if (in instanceof DataExistsReply) {
+                                if (((DataExistsReply)in).exists()) {
+                                    return "match";
+                                }
+                                return null;
+                            } else if (in.getClass().equals(DataExistsReply.SERIALIZABLE_CLASS)) {
                                 if (!DataExistsReply.fromSerializable(in)
                                     .exists()) {
                                     return "match";

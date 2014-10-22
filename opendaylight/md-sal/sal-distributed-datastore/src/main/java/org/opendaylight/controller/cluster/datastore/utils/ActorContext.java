@@ -237,6 +237,10 @@ public class ActorContext {
         actorSystem.shutdown();
     }
 
+    public ClusterWrapper getClusterWrapper() {
+        return clusterWrapper;
+    }
+
     public String getCurrentMemberName(){
         return clusterWrapper.getCurrentMemberName();
     }

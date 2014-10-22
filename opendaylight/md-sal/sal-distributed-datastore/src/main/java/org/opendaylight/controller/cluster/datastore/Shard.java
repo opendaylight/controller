@@ -34,9 +34,9 @@ import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardTransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardMBeanFactory;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
-import org.opendaylight.controller.cluster.datastore.messages.ActorInitialized;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
+import org.opendaylight.controller.cluster.datastore.messages.ActorInitialized;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChain;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
@@ -74,6 +74,8 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
+
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -81,7 +83,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nonnull;
 
 /**
  * A Shard represents a portion of the logical data tree <br/>
@@ -383,8 +384,11 @@ public class Shard extends RaftActor {
                 ready.getModification());
 
         // Return our actor path as we'll handle the three phase commit.
-        getSender().tell(new ReadyTransactionReply(Serialization.serializedActorPath(self())).
-                toSerializable(), getSelf());
+        ReadyTransactionReply readyTransactionReply =
+            new ReadyTransactionReply(Serialization.serializedActorPath(self()));
+        getSender().tell(
+            ready.isReturnSerialized() ? readyTransactionReply.toSerializable() : readyTransactionReply,
+            getSelf());
     }
 
     private void handleAbortTransaction(AbortTransaction abort) {

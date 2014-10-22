@@ -1,12 +1,12 @@
 package org.opendaylight.controller.cluster.datastore;
 
-import com.google.common.util.concurrent.CheckedFuture;
-
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
+import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
 import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
@@ -83,6 +83,9 @@ public class TransactionProxyTest extends AbstractActorTest {
 
     private SchemaContext schemaContext;
 
+    @Mock
+    private ClusterWrapper mockClusterWrapper;
+
     String memberName = "mock-member";
 
     @Before
@@ -94,6 +97,7 @@ public class TransactionProxyTest extends AbstractActorTest {
         doReturn(getSystem()).when(mockActorContext).getActorSystem();
         doReturn(memberName).when(mockActorContext).getCurrentMemberName();
         doReturn(schemaContext).when(mockActorContext).getSchemaContext();
+        doReturn(mockClusterWrapper).when(mockActorContext).getClusterWrapper();
 
         ShardStrategyFactory.setConfiguration(configuration);
     }
@@ -124,7 +128,7 @@ public class TransactionProxyTest extends AbstractActorTest {
         return argThat(matcher);
     }
 
-    private ReadData eqReadData() {
+    private ReadData eqSerializedReadData() {
         ArgumentMatcher<ReadData> matcher = new ArgumentMatcher<ReadData>() {
             @Override
             public boolean matches(Object argument) {
@@ -136,7 +140,19 @@ public class TransactionProxyTest extends AbstractActorTest {
         return argThat(matcher);
     }
 
-    private WriteData eqWriteData(final NormalizedNode<?, ?> nodeToWrite) {
+    private ReadData eqReadData() {
+        ArgumentMatcher<ReadData> matcher = new ArgumentMatcher<ReadData>() {
+            @Override
+            public boolean matches(Object argument) {
+                return (argument instanceof ReadData) &&
+                    ((ReadData)argument).getPath().equals(TestModel.TEST_PATH);
+            }
+        };
+
+        return argThat(matcher);
+    }
+
+    private WriteData eqSerializedWriteData(final NormalizedNode<?, ?> nodeToWrite) {
         ArgumentMatcher<WriteData> matcher = new ArgumentMatcher<WriteData>() {
             @Override
             public boolean matches(Object argument) {
@@ -147,6 +163,22 @@ public class TransactionProxyTest extends AbstractActorTest {
                 WriteData obj = WriteData.fromSerializable(argument, schemaContext);
                 return obj.getPath().equals(TestModel.TEST_PATH) &&
                        obj.getData().equals(nodeToWrite);
+            }
+        };
+
+        return argThat(matcher);
+    }
+
+    private WriteData eqWriteData(final NormalizedNode<?, ?> nodeToWrite) {
+        ArgumentMatcher<WriteData> matcher = new ArgumentMatcher<WriteData>() {
+            @Override
+            public boolean matches(Object argument) {
+                if(argument instanceof WriteData) {
+                    WriteData obj = (WriteData) argument;
+                    return obj.getPath().equals(TestModel.TEST_PATH) &&
+                        obj.getData().equals(nodeToWrite);
+                }
+                return false;
             }
         };
 
@@ -194,8 +226,12 @@ public class TransactionProxyTest extends AbstractActorTest {
         return Futures.successful(new DataExistsReply(exists).toSerializable());
     }
 
-    private Future<Object> writeDataReply() {
+    private Future<Object> writeSerializedDataReply() {
         return Futures.successful(new WriteDataReply().toSerializable());
+    }
+
+    private Future<WriteDataReply> writeDataReply() {
+        return Futures.successful(new WriteDataReply());
     }
 
     private Future<Object> mergeDataReply() {
@@ -216,17 +252,20 @@ public class TransactionProxyTest extends AbstractActorTest {
             .setTransactionId("txn-1").build();
     }
 
-    private ActorRef setupActorContextWithInitialCreateTransaction(TransactionType type) {
-        ActorRef actorRef = getSystem().actorOf(Props.create(DoNothingActor.class));
-        doReturn(getSystem().actorSelection(actorRef.path())).
+    private ActorRef setupActorContextWithInitialCreateTransaction(ActorSystem actorSystem, TransactionType type) {
+        ActorRef actorRef = actorSystem.actorOf(Props.create(DoNothingActor.class));
+        doReturn(actorSystem.actorSelection(actorRef.path())).
                 when(mockActorContext).actorSelection(actorRef.path().toString());
 
-        doReturn(Optional.of(getSystem().actorSelection(actorRef.path()))).
+        doReturn(Optional.of(actorSystem.actorSelection(actorRef.path()))).
                 when(mockActorContext).findPrimaryShard(eq(DefaultShardStrategy.DEFAULT_SHARD));
 
         doReturn(createTransactionReply(actorRef)).when(mockActorContext).
-                executeOperation(eq(getSystem().actorSelection(actorRef.path())),
+                executeOperation(eq(actorSystem.actorSelection(actorRef.path())),
                         eqCreateTransaction(memberName, type));
+
+        doReturn(actorRef.path().toString()).when(mockClusterWrapper).getSelfAddress();
+
         return actorRef;
     }
 
@@ -243,13 +282,13 @@ public class TransactionProxyTest extends AbstractActorTest {
 
     @Test
     public void testRead() throws Exception {
-        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(READ_ONLY);
+        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_ONLY);
 
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
                 READ_ONLY);
 
         doReturn(readDataReply(null)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqReadData());
+                eq(actorSelection(actorRef)), eqSerializedReadData());
 
         Optional<NormalizedNode<?, ?>> readOptional = transactionProxy.read(
                 TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
@@ -259,7 +298,7 @@ public class TransactionProxyTest extends AbstractActorTest {
         NormalizedNode<?, ?> expectedNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         doReturn(readDataReply(expectedNode)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqReadData());
+                eq(actorSelection(actorRef)), eqSerializedReadData());
 
         readOptional = transactionProxy.read(TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
 
@@ -270,7 +309,7 @@ public class TransactionProxyTest extends AbstractActorTest {
 
     @Test(expected = ReadFailedException.class)
     public void testReadWithInvalidReplyMessageType() throws Exception {
-        setupActorContextWithInitialCreateTransaction(READ_ONLY);
+        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_ONLY);
 
         doReturn(Futures.successful(new Object())).when(mockActorContext).
                 executeOperationAsync(any(ActorSelection.class), any());
@@ -283,7 +322,7 @@ public class TransactionProxyTest extends AbstractActorTest {
 
     @Test(expected = TestException.class)
     public void testReadWithAsyncRemoteOperatonFailure() throws Throwable {
-        setupActorContextWithInitialCreateTransaction(READ_ONLY);
+        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_ONLY);
 
         doReturn(Futures.failed(new TestException())).when(mockActorContext).
                 executeOperationAsync(any(ActorSelection.class), any());
@@ -338,18 +377,18 @@ public class TransactionProxyTest extends AbstractActorTest {
 
     @Test(expected = TestException.class)
     public void testReadWithPriorRecordingOperationFailure() throws Throwable {
-        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(READ_WRITE);
+        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
 
         NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-        doReturn(writeDataReply()).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqWriteData(nodeToWrite));
+        doReturn(writeSerializedDataReply()).when(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), eqSerializedWriteData(nodeToWrite));
 
         doReturn(Futures.failed(new TestException())).when(mockActorContext).
                 executeOperationAsync(eq(actorSelection(actorRef)), eqDeleteData());
 
         doReturn(readDataReply(null)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqReadData());
+                eq(actorSelection(actorRef)), eqSerializedReadData());
 
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
                 READ_WRITE);
@@ -362,21 +401,21 @@ public class TransactionProxyTest extends AbstractActorTest {
             propagateReadFailedExceptionCause(transactionProxy.read(TestModel.TEST_PATH));
         } finally {
             verify(mockActorContext, times(0)).executeOperationAsync(
-                    eq(actorSelection(actorRef)), eqReadData());
+                    eq(actorSelection(actorRef)), eqSerializedReadData());
         }
     }
 
     @Test
     public void testReadWithPriorRecordingOperationSuccessful() throws Throwable {
-        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(READ_WRITE);
+        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
 
         NormalizedNode<?, ?> expectedNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-        doReturn(writeDataReply()).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqWriteData(expectedNode));
+        doReturn(writeSerializedDataReply()).when(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), eqSerializedWriteData(expectedNode));
 
         doReturn(readDataReply(expectedNode)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqReadData());
+                eq(actorSelection(actorRef)), eqSerializedReadData());
 
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
                 READ_WRITE);
@@ -402,7 +441,7 @@ public class TransactionProxyTest extends AbstractActorTest {
 
     @Test
     public void testExists() throws Exception {
-        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(READ_ONLY);
+        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_ONLY);
 
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
                 READ_ONLY);
@@ -434,7 +473,7 @@ public class TransactionProxyTest extends AbstractActorTest {
 
     @Test(expected = ReadFailedException.class)
     public void testExistsWithInvalidReplyMessageType() throws Exception {
-        setupActorContextWithInitialCreateTransaction(READ_ONLY);
+        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_ONLY);
 
         doReturn(Futures.successful(new Object())).when(mockActorContext).
                 executeOperationAsync(any(ActorSelection.class), any());
@@ -447,7 +486,7 @@ public class TransactionProxyTest extends AbstractActorTest {
 
     @Test(expected = TestException.class)
     public void testExistsWithAsyncRemoteOperatonFailure() throws Throwable {
-        setupActorContextWithInitialCreateTransaction(READ_ONLY);
+        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_ONLY);
 
         doReturn(Futures.failed(new TestException())).when(mockActorContext).
                 executeOperationAsync(any(ActorSelection.class), any());
@@ -460,12 +499,12 @@ public class TransactionProxyTest extends AbstractActorTest {
 
     @Test(expected = TestException.class)
     public void testExistsWithPriorRecordingOperationFailure() throws Throwable {
-        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(READ_WRITE);
+        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
 
         NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-        doReturn(writeDataReply()).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqWriteData(nodeToWrite));
+        doReturn(writeSerializedDataReply()).when(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), eqSerializedWriteData(nodeToWrite));
 
         doReturn(Futures.failed(new TestException())).when(mockActorContext).
                 executeOperationAsync(eq(actorSelection(actorRef)), eqDeleteData());
@@ -490,12 +529,12 @@ public class TransactionProxyTest extends AbstractActorTest {
 
     @Test
     public void testExistsWithPriorRecordingOperationSuccessful() throws Throwable {
-        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(READ_WRITE);
+        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
 
         NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-        doReturn(writeDataReply()).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqWriteData(nodeToWrite));
+        doReturn(writeSerializedDataReply()).when(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), eqSerializedWriteData(nodeToWrite));
 
         doReturn(dataExistsReply(true)).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqDataExists());
@@ -544,12 +583,12 @@ public class TransactionProxyTest extends AbstractActorTest {
 
     @Test
     public void testWrite() throws Exception {
-        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(WRITE_ONLY);
+        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY);
 
         NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-        doReturn(writeDataReply()).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqWriteData(nodeToWrite));
+        doReturn(writeSerializedDataReply()).when(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), eqSerializedWriteData(nodeToWrite));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
                 WRITE_ONLY);
@@ -557,7 +596,7 @@ public class TransactionProxyTest extends AbstractActorTest {
         transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
 
         verify(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqWriteData(nodeToWrite));
+                eq(actorSelection(actorRef)), eqSerializedWriteData(nodeToWrite));
 
         verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
                 WriteDataReply.SERIALIZABLE_CLASS);
@@ -587,7 +626,7 @@ public class TransactionProxyTest extends AbstractActorTest {
 
     @Test
     public void testMerge() throws Exception {
-        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(WRITE_ONLY);
+        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY);
 
         NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
@@ -608,7 +647,7 @@ public class TransactionProxyTest extends AbstractActorTest {
 
     @Test
     public void testDelete() throws Exception {
-        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(WRITE_ONLY);
+        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY);
 
         doReturn(deleteDataReply()).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqDeleteData());
@@ -653,18 +692,20 @@ public class TransactionProxyTest extends AbstractActorTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testReady() throws Exception {
-        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(READ_WRITE);
+        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
 
         NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         doReturn(readDataReply(null)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqReadData());
+                eq(actorSelection(actorRef)), eqSerializedReadData());
 
-        doReturn(writeDataReply()).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqWriteData(nodeToWrite));
+        doReturn(writeSerializedDataReply()).when(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), eqSerializedWriteData(nodeToWrite));
 
         doReturn(readyTxReply(actorRef.path().toString())).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), isA(ReadyTransaction.SERIALIZABLE_CLASS));
+
+        doReturn(actorRef.path().toString()).when(mockClusterWrapper).getSelfAddress();
 
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
                 READ_WRITE);
@@ -688,7 +729,7 @@ public class TransactionProxyTest extends AbstractActorTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testReadyWithRecordingOperationFailure() throws Exception {
-        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(WRITE_ONLY);
+        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY);
 
         NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
@@ -696,10 +737,12 @@ public class TransactionProxyTest extends AbstractActorTest {
                 eq(actorSelection(actorRef)), eqMergeData(nodeToWrite));
 
         doReturn(Futures.failed(new TestException())).when(mockActorContext).
-                executeOperationAsync(eq(actorSelection(actorRef)), eqWriteData(nodeToWrite));
+                executeOperationAsync(eq(actorSelection(actorRef)), eqSerializedWriteData(nodeToWrite));
 
         doReturn(readyTxReply(actorRef.path().toString())).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), isA(ReadyTransaction.SERIALIZABLE_CLASS));
+
+        doReturn(actorRef.path().toString()).when(mockClusterWrapper).getSelfAddress();
 
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
                 WRITE_ONLY);
@@ -723,7 +766,7 @@ public class TransactionProxyTest extends AbstractActorTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testReadyWithReplyFailure() throws Exception {
-        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(WRITE_ONLY);
+        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY);
 
         NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
@@ -781,12 +824,12 @@ public class TransactionProxyTest extends AbstractActorTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testReadyWithInvalidReplyMessageType() throws Exception {
-        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(WRITE_ONLY);
+        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY);
 
         NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-        doReturn(writeDataReply()).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqWriteData(nodeToWrite));
+        doReturn(writeSerializedDataReply()).when(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), eqSerializedWriteData(nodeToWrite));
 
         doReturn(Futures.successful(new Object())).when(mockActorContext).
                 executeOperationAsync(eq(actorSelection(actorRef)),
@@ -808,7 +851,7 @@ public class TransactionProxyTest extends AbstractActorTest {
 
     @Test
     public void testGetIdentifier() {
-        setupActorContextWithInitialCreateTransaction(READ_ONLY);
+        setupActorContextWithInitialCreateTransaction(getSystem(), READ_ONLY);
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
                 TransactionProxy.TransactionType.READ_ONLY);
 
@@ -820,10 +863,10 @@ public class TransactionProxyTest extends AbstractActorTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testClose() throws Exception{
-        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(READ_WRITE);
+        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
 
         doReturn(readDataReply(null)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqReadData());
+                eq(actorSelection(actorRef)), eqSerializedReadData());
 
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
                 READ_WRITE);
@@ -834,5 +877,103 @@ public class TransactionProxyTest extends AbstractActorTest {
 
         verify(mockActorContext).sendOperationAsync(
                 eq(actorSelection(actorRef)), isA(CloseTransaction.SERIALIZABLE_CLASS));
+    }
+
+
+    /**
+     * Method to test a local Tx actor. The Tx paths are matched to decide if the
+     * Tx actor is local or not. This is done by mocking the Tx actor path
+     * and the caller paths and ensuring that the paths have the remote-address format
+     *
+     * Note: Since the default akka provider for test is not a RemoteActorRefProvider,
+     * the paths returned for the actors for all the tests are not qualified remote paths.
+     * Hence are treated as non-local/remote actors. In short, all tests except
+     * few below run for remote actors
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testLocalTxActorRead() throws Exception {
+        ActorSystem actorSystem = getSystem();
+        ActorRef shardActorRef = actorSystem.actorOf(Props.create(DoNothingActor.class));
+
+        doReturn(actorSystem.actorSelection(shardActorRef.path())).
+            when(mockActorContext).actorSelection(shardActorRef.path().toString());
+
+        doReturn(Optional.of(actorSystem.actorSelection(shardActorRef.path()))).
+            when(mockActorContext).findPrimaryShard(eq(DefaultShardStrategy.DEFAULT_SHARD));
+
+        CreateTransactionReply createTransactionReply = CreateTransactionReply.newBuilder()
+            .setTransactionId("txn-1")
+            .setTransactionActorPath("akka.tcp://system@127.0.0.1:2550/user/tx-actor")
+            .build();
+
+        doReturn(createTransactionReply).when(mockActorContext).
+            executeOperation(eq(actorSystem.actorSelection(shardActorRef.path())),
+                eqCreateTransaction(memberName, READ_ONLY));
+
+        doReturn("akka.tcp://system@127.0.0.1:2550/user/client-actor").when(mockClusterWrapper).getSelfAddress();
+
+        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,READ_ONLY);
+
+        // negative test case with null as the reply
+        doReturn(readDataReply(null)).when(mockActorContext).executeOperationAsync(
+            any(ActorSelection.class), eqReadData());
+
+        Optional<NormalizedNode<?, ?>> readOptional = transactionProxy.read(
+            TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
+
+        assertEquals("NormalizedNode isPresent", false, readOptional.isPresent());
+
+
+        // test case with node as read data reply
+        NormalizedNode<?, ?> expectedNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+
+        doReturn(readDataReply(expectedNode)).when(mockActorContext).executeOperationAsync(
+            any(ActorSelection.class), eqReadData());
+
+        readOptional = transactionProxy.read(TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
+
+        assertEquals("NormalizedNode isPresent", true, readOptional.isPresent());
+
+        assertEquals("Response NormalizedNode", expectedNode, readOptional.get());
+    }
+
+    @Test
+    public void testLocalTxActorWrite() throws Exception {
+        ActorSystem actorSystem = getSystem();
+        ActorRef shardActorRef = actorSystem.actorOf(Props.create(DoNothingActor.class));
+
+        doReturn(actorSystem.actorSelection(shardActorRef.path())).
+            when(mockActorContext).actorSelection(shardActorRef.path().toString());
+
+        doReturn(Optional.of(actorSystem.actorSelection(shardActorRef.path()))).
+            when(mockActorContext).findPrimaryShard(eq(DefaultShardStrategy.DEFAULT_SHARD));
+
+        CreateTransactionReply createTransactionReply = CreateTransactionReply.newBuilder()
+            .setTransactionId("txn-1")
+            .setTransactionActorPath("akka.tcp://system@127.0.0.1:2550/user/tx-actor")
+            .build();
+
+        doReturn(createTransactionReply).when(mockActorContext).
+            executeOperation(eq(actorSystem.actorSelection(shardActorRef.path())),
+                eqCreateTransaction(memberName, WRITE_ONLY));
+
+        doReturn("akka.tcp://system@127.0.0.1:2550/user/client-actor").when(mockClusterWrapper).getSelfAddress();
+
+        NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+
+        doReturn(writeDataReply()).when(mockActorContext).executeOperationAsync(
+            any(ActorSelection.class), eqWriteData(nodeToWrite));
+
+        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, WRITE_ONLY);
+
+        transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
+
+        verify(mockActorContext).executeOperationAsync(
+            any(ActorSelection.class), eqWriteData(nodeToWrite));
+
+        verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
+            WriteDataReply.class);
     }
 }
