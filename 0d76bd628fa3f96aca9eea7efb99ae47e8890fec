@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "ba8cc1f7_9b181c86",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardReadTransaction.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-22T11:58:43Z",
+      "side": 1,
+      "message": "I think we should handle unserialized DataExists as well for consistency and return unserialized reply.",
+      "revId": "0d76bd628fa3f96aca9eea7efb99ae47e8890fec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_bb1de075",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardReadWriteTransaction.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-22T11:58:43Z",
+      "side": 1,
+      "message": "I think we should handle unserialized DataExists as well for consistency and return unserialized reply.",
+      "revId": "0d76bd628fa3f96aca9eea7efb99ae47e8890fec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_fb45a8b3",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
         "patchSetId": 4
@@ -19,6 +53,57 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_7b175852",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardWriteTransaction.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-22T11:58:43Z",
+      "side": 1,
+      "message": "I think we should handle unserialized ReadyTransaction as well and return unserialized ReadyTransactionReply.",
+      "revId": "0d76bd628fa3f96aca9eea7efb99ae47e8890fec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_5609092b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 527,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-22T11:58:43Z",
+      "side": 1,
+      "message": "Should pass unserialized if isTxActorLocal.",
+      "revId": "0d76bd628fa3f96aca9eea7efb99ae47e8890fec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_5620299b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 566,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-22T11:58:43Z",
+      "side": 1,
+      "message": "Should also handle for unserialized ReadyTransactionReply",
+      "revId": "0d76bd628fa3f96aca9eea7efb99ae47e8890fec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_bb308057",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
         "patchSetId": 4
@@ -30,6 +115,40 @@
       "writtenOn": "2014-10-22T03:40:22Z",
       "side": 1,
       "message": "Need to also handle if readResponse is a ReadDataReply.",
+      "revId": "0d76bd628fa3f96aca9eea7efb99ae47e8890fec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_964d5175",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 779,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-22T11:58:43Z",
+      "side": 1,
+      "message": "Should also handle for unserialized DataExistsReply",
+      "revId": "0d76bd628fa3f96aca9eea7efb99ae47e8890fec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_db054415",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 788,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-22T11:58:43Z",
+      "side": 1,
+      "message": "Should pass unserialized if isTxActorLocal.",
       "revId": "0d76bd628fa3f96aca9eea7efb99ae47e8890fec",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -64,6 +183,24 @@
       "writtenOn": "2014-10-22T03:40:22Z",
       "side": 1,
       "message": "Can this be moved into setupActorContextWithInitialCreateTransaction so every test doesn\u0027t have to do it?",
+      "revId": "0d76bd628fa3f96aca9eea7efb99ae47e8890fec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_db2ea4a5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/TransactionProxyTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-22T11:58:43Z",
+      "side": 1,
+      "message": "So have setupActorContextWithInitialCreateTransaction set up the mock cluster wrapper to return the actorRef from getSelfAddress(). For tests where you want to override what getSelfAddress(), it will probably be easier to use the MockClusterWrapper class and add a setter rather than using a Mockito mock.",
+      "parentUuid": "ba8cc1f7_fbee08b4",
       "revId": "0d76bd628fa3f96aca9eea7efb99ae47e8890fec",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
