@@ -33,9 +33,7 @@ import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
-
 import java.util.concurrent.TimeUnit;
-
 import static akka.pattern.Patterns.ask;
 
 /**
@@ -237,6 +235,10 @@ public class ActorContext {
         actorSystem.shutdown();
     }
 
+    public ClusterWrapper getClusterWrapper() {
+        return clusterWrapper;
+    }
+
     public String getCurrentMemberName(){
         return clusterWrapper.getCurrentMemberName();
     }
@@ -261,5 +263,31 @@ public class ActorContext {
 
     public FiniteDuration getOperationDuration() {
         return operationDuration;
+    }
+
+    public boolean isLocalPath(String path) {
+        String selfAddress = clusterWrapper.getSelfAddress();
+        if (path == null || selfAddress == null) {
+            return false;
+        }
+
+        int atIndex1 = path.indexOf("@");
+        int atIndex2 = selfAddress.indexOf("@");
+
+        if (atIndex1 == -1 || atIndex2 == -1) {
+            return false;
+        }
+
+        int slashIndex1 = path.indexOf("/", atIndex1);
+        int slashIndex2 = selfAddress.indexOf("/", atIndex2);
+
+        if (slashIndex1 == -1 || slashIndex2 == -1) {
+            return false;
+        }
+
+        String hostPort1 = path.substring(atIndex1, slashIndex1);
+        String hostPort2 = selfAddress.substring(atIndex2, slashIndex2);
+
+        return hostPort1.equals(hostPort2);
     }
 }

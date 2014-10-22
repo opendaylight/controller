@@ -13,4 +13,5 @@ import akka.actor.ActorRef;
 public interface ClusterWrapper {
     void subscribeToMemberEvents(ActorRef actorRef);
     String getCurrentMemberName();
+    String getSelfAddress();
 }
