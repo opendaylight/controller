@@ -662,7 +662,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
         assertEquals(8 * 4, getElementsSize(response, "inner-inner-running-data"));
         assertEquals(8 * 4, getElementsSize(response, "deep3"));
         assertEquals(8 * 4 * 2, getElementsSize(response, "list-of-strings"));
-        assertEquals(8, getElementsSize(response, "inner-running-data-additional"));
+        assertEquals(8, getElementsSize(response, "inner-running-data-additional", "urn:opendaylight:params:xml:ns:yang:controller:test:impl"));
         assertEquals(8, getElementsSize(response, "deep4"));
         // TODO assert keys
 
@@ -691,6 +691,10 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
     private int getElementsSize(Document response, String elementName) {
         return response.getElementsByTagName(elementName).getLength();
+    }
+
+    private int getElementsSize(Document response, String elementName, String namespace) {
+        return response.getElementsByTagNameNS(namespace, elementName).getLength();
     }
 
     private Document executeOp(final NetconfOperation op, final String filename) throws ParserConfigurationException,
