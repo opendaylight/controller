@@ -1,0 +1,8 @@
+Verified+1: jenkins-controller <jenkins-controller@opendaylight.org>
+Code-Review+1: Flavio Fernandes <ffernand@redhat.com>
+Code-Review+2: Devin Avery <devin.avery@brocade.com>
+Submitted-by: Devin Avery <devin.avery@brocade.com>
+Submitted-at: Wed, 22 Oct 2014 20:14:56 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/12132
+Project: controller
+Branch: refs/heads/stable/helium
