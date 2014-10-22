@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_bba640c0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStoreFactory.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-22T01:44:20Z",
+      "side": 1,
+      "message": "Harman, I believe that is done correctly. The actorSystemReference changes based on the value of persistent. It makes sense to change the values of the other variables there as well.",
+      "parentUuid": "ba8cc1f7_fb8cc881",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_0077bbd5",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistence/NonPersistentJournal.java",
         "patchSetId": 2
@@ -125,6 +143,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_bbd88054",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistence/NonPersistentJournal.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-22T01:44:20Z",
+      "side": 1,
+      "message": "It\u0027s really to make akka persistence happy. I wanted to ensure that doAsyncReadHighestSequenceNr is properly implemented so that when we try to create snapshots things work properly. That is why in ShardTest I am testing if the snapshot gets generated. Snapshotting working is important because we trim our in-memory Raft Journal based on the snapshotting logic. This is one of the reasons I did not want to make invasive changes to the code and instead chose to just do a custom journal and snapshot store so there is minimal impact.",
+      "parentUuid": "ba8cc1f7_db8f8474",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_80bc2b6e",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistence/NonPersistentJournal.java",
         "patchSetId": 2
@@ -172,6 +208,24 @@
       "side": 1,
       "message": "Optimization to gain concurrent access below to avoid exclusive locking, specifically when writing. With ConcurrentMap, you can remove the synchronized blocks below.",
       "parentUuid": "ba8cc1f7_7b5c3826",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_7be2f804",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistence/NonPersistentJournal.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-22T01:44:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_9be9fc1c",
       "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -266,6 +320,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_1be72c14",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistence/NonPersistentJournal.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-22T01:44:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_5bf3740a",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_e0a65753",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistence/NonPersistentJournal.java",
         "patchSetId": 2
@@ -348,6 +420,24 @@
       "side": 1,
       "message": "You mean it should use the \"real\" NonPersistentJournal? If so, is the purpose of this test to verify the NonPersistentJournal/NonPersistentSnapshot impls interact with akka correctly?",
       "parentUuid": "ba8cc1f7_1b688cb9",
+      "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_dbf0e4cb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1099,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-22T01:44:20Z",
+      "side": 1,
+      "message": "Yes",
+      "parentUuid": "ba8cc1f7_fbba8809",
       "revId": "023123916c67f5d9c85e4020c0f28822d7f6839c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
