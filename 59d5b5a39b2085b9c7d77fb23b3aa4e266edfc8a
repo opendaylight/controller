@@ -19,6 +19,40 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_56ca69a2",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamReader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-22T12:57:46Z",
+      "side": 1,
+      "message": "It would be more efficient to pass the Builder instance to getDataContainerChildren and have getDataContainerChildren call Builder#withChild rather than building an intermediate List instance and calling Builder#withValue.\n\nSame with the other container/list types.",
+      "revId": "59d5b5a39b2085b9c7d77fb23b3aa4e266edfc8a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_d65439cc",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamReader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-22T12:57:46Z",
+      "side": 1,
+      "message": "It would be optimal if we could avoid creating builder instances as this can create a lot of garbage.  The builders end up creating Immutable*Node classes which, unfortunately, aren\u0027t exposed as public classes. \n\nHowever, I think we can compromise by re-using builder instances. A cursory look at some of the builders indicates they are currently designed to be re-usable (e.g. ImmutableContainerNodeBuilder sets a dirty flag on build()) although further verification is needed (Robert/Tony). The idea would be to store a builder of each type as a class member and lazily create an instance as needed, otherwise re-use the existing one. This would significantly cut down on the number of builder instances, particularly with a deep tree.",
+      "revId": "59d5b5a39b2085b9c7d77fb23b3aa4e266edfc8a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_3b3c702f",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamReader.java",
         "patchSetId": 2
@@ -30,6 +64,24 @@
       "writtenOn": "2014-10-22T03:43:22Z",
       "side": 1,
       "message": "What is the reason for capacity to be 1? If children can be more than 1, then keeping the capacity to 1 might cause re-allocations",
+      "revId": "59d5b5a39b2085b9c7d77fb23b3aa4e266edfc8a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_16c4e190",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamReader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-22T12:57:46Z",
+      "side": 1,
+      "message": "If we call Builder#withChild than we don\u0027t need to build an intermediate list at all as I commented above,",
+      "parentUuid": "ba8cc1f7_3b3c702f",
       "revId": "59d5b5a39b2085b9c7d77fb23b3aa4e266edfc8a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
