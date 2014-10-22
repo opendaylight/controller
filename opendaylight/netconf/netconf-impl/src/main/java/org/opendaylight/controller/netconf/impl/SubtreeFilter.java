@@ -10,6 +10,7 @@ package org.opendaylight.controller.netconf.impl;
 
 import com.google.common.base.Optional;
 import java.io.IOException;
+import java.util.Map;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.mapping.AbstractNetconfOperation.OperationNameAndNamespace;
@@ -73,7 +74,7 @@ public class SubtreeFilter {
         return result;
     }
 
-    private static void addSubtree(XmlElement filter, XmlElement src, XmlElement dst) {
+    private static void addSubtree(XmlElement filter, XmlElement src, XmlElement dst) throws NetconfDocumentedException {
         for (XmlElement srcChild : src.getChildElements()) {
             for (XmlElement filterChild : filter.getChildElements()) {
                 addSubtree2(filterChild, srcChild, dst);
@@ -81,7 +82,7 @@ public class SubtreeFilter {
         }
     }
 
-    private static MatchingResult addSubtree2(XmlElement filter, XmlElement src, XmlElement dstParent) {
+    private static MatchingResult addSubtree2(XmlElement filter, XmlElement src, XmlElement dstParent) throws NetconfDocumentedException {
         Document document = dstParent.getDomElement().getOwnerDocument();
         MatchingResult matches = matches(src, filter);
         if (matches != MatchingResult.NO_MATCH && matches != MatchingResult.CONTENT_MISMATCH) {
@@ -123,7 +124,7 @@ public class SubtreeFilter {
      * Shallow compare src node to filter: tag name and namespace must match.
      * If filter node has no children and has text content, it also must match.
      */
-    private static MatchingResult matches(XmlElement src, XmlElement filter) {
+    private static MatchingResult matches(XmlElement src, XmlElement filter) throws NetconfDocumentedException {
         boolean tagMatch = src.getName().equals(filter.getName()) &&
                 src.getNamespaceOptionally().equals(filter.getNamespaceOptionally());
         MatchingResult result = null;
@@ -131,7 +132,7 @@ public class SubtreeFilter {
             // match text content
             Optional<String> maybeText = filter.getOnlyTextContentOptionally();
             if (maybeText.isPresent()) {
-                if (maybeText.equals(src.getOnlyTextContentOptionally())) {
+                if (maybeText.equals(src.getOnlyTextContentOptionally()) || prefixedContentMatches(filter, src)) {
                     result = MatchingResult.CONTENT_MATCH;
                 } else {
                     result = MatchingResult.CONTENT_MISMATCH;
@@ -159,8 +160,28 @@ public class SubtreeFilter {
         if (result == null) {
             result = MatchingResult.NO_MATCH;
         }
-        logger.debug("Matching {} to {} resulted in {}", src, filter, tagMatch);
+        logger.debug("Matching {} to {} resulted in {}", src, filter, result);
         return result;
+    }
+
+    private static boolean prefixedContentMatches(final XmlElement filter, final XmlElement src) throws NetconfDocumentedException {
+        final Map.Entry<String, String> prefixToNamespaceOfFilter = filter.findNamespaceOfTextContent();
+        final Map.Entry<String, String> prefixToNamespaceOfSrc = src.findNamespaceOfTextContent();
+
+        final String prefix = prefixToNamespaceOfFilter.getKey();
+        // If this is not a prefixed content, we do not need to continue since content do not match
+        if(prefix.equals(XmlElement.DEFAULT_NAMESPACE_PREFIX)) {
+            return false;
+        }
+        // Namespace mismatch
+        if(!prefixToNamespaceOfFilter.getValue().equals(prefixToNamespaceOfSrc.getValue())) {
+            return false;
+        }
+
+        final String unprefixedFilterContent = filter.getTextContent().substring(prefix.length());
+        final String unprefixedSrcCOntnet = src.getTextContent().substring(prefix.length());
+        // Finally compare unprefixed content
+        return unprefixedFilterContent.equals(unprefixedSrcCOntnet);
     }
 
     enum MatchingResult {
