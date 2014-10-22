@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_fb45a8b3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-22T03:40:22Z",
+      "side": 1,
+      "message": "We don\u0027t need the overhead of this check. If the caller sent an unserialized message then reply with and unserialized message and vice versa. You could pass in a \"returnSerialized\" flag and/or have 2 readData methods, one that takes ReadData and the other that takes the serialized class (these could call a common private method that takes a \"returnSerialized\" flag ).",
+      "revId": "0d76bd628fa3f96aca9eea7efb99ae47e8890fec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_bb308057",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 690,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-22T03:40:22Z",
+      "side": 1,
+      "message": "Need to also handle if readResponse is a ReadDataReply.",
+      "revId": "0d76bd628fa3f96aca9eea7efb99ae47e8890fec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_3bf55083",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/DataStoreUtils.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-22T03:40:22Z",
+      "side": 1,
+      "message": "Since this is a utility class, we don\u0027t need to create a static instance. Just make the method below static.",
+      "revId": "0d76bd628fa3f96aca9eea7efb99ae47e8890fec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_fbee08b4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/TransactionProxyTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-22T03:40:22Z",
+      "side": 1,
+      "message": "Can this be moved into setupActorContextWithInitialCreateTransaction so every test doesn\u0027t have to do it?",
+      "revId": "0d76bd628fa3f96aca9eea7efb99ae47e8890fec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_7b3af837",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/TransactionProxyTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 270,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-22T03:40:22Z",
+      "side": 1,
+      "message": "Since the Tx actor is local, this should mimic the real behavior and return an unserialized ReadDataReply.",
+      "revId": "0d76bd628fa3f96aca9eea7efb99ae47e8890fec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_1b3f2c27",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/TransactionProxyTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-22T03:40:22Z",
+      "side": 1,
+      "message": "Need to add a read test where the Tx actor isn\u0027t local and the test should return a serialized ReadDataReply.",
+      "revId": "0d76bd628fa3f96aca9eea7efb99ae47e8890fec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
