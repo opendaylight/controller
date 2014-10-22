@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_11af0be5",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamReader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-22T20:44:50Z",
+      "side": 1,
+      "message": "It\u0027s internal methods not a public API.",
+      "parentUuid": "ba8cc1f7_36ffa536",
+      "revId": "59d5b5a39b2085b9c7d77fb23b3aa4e266edfc8a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_d65439cc",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamReader.java",
         "patchSetId": 2
@@ -351,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_f1b5c731",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamWriter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-22T20:44:50Z",
+      "side": 1,
+      "message": "Yeah it does serialize toString. I was thinking using writeInt, writeLong, writeBoolean, writeUTF etc based on the value type and special casing instance ID and bit set. I think that would be better than doing writeObject but hard to say w/o testing it.",
+      "parentUuid": "ba8cc1f7_f67dbdb2",
+      "revId": "59d5b5a39b2085b9c7d77fb23b3aa4e266edfc8a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_9bdd7c17",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamWriter.java",
         "patchSetId": 2
@@ -414,6 +450,24 @@
       "side": 1,
       "message": "Yes, it was picked up from there. I was using that one previously, but then, because of leafSetEntryNode method, I could not use the yang tools interface. They are not passing NodeWithValue object, they are dependent on schema context tracker to find the identifier. Because of that one method change, I had to copy the interface on this side.",
       "parentUuid": "ba8cc1f7_7b9e7858",
+      "revId": "59d5b5a39b2085b9c7d77fb23b3aa4e266edfc8a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_7181b749",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/NormalizedNodeStreamWriter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-22T20:44:50Z",
+      "side": 1,
+      "message": "Sounds like a deficiency in the yang tools interface. Can we change the yang tools interface appropriately? It would be a shame to have to duplicate the code.",
+      "parentUuid": "ba8cc1f7_d6a99925",
       "revId": "59d5b5a39b2085b9c7d77fb23b3aa4e266edfc8a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
