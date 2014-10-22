@@ -53,14 +53,31 @@ public class ShardWriteTransaction extends ShardTransaction {
 
     @Override
     public void handleReceive(Object message) throws Exception {
-        if(WriteData.SERIALIZABLE_CLASS.equals(message.getClass())) {
-            writeData(transaction, WriteData.fromSerializable(message, getSchemaContext()));
+
+        if (message instanceof WriteData) {
+            writeData(transaction, (WriteData) message, !SERIALIZED_REPLY);
+
+        } else if (message instanceof MergeData) {
+            mergeData(transaction, (MergeData) message, !SERIALIZED_REPLY);
+
+        } else if (message instanceof DeleteData) {
+            deleteData(transaction, (DeleteData) message, !SERIALIZED_REPLY);
+
+        } else if (message instanceof ReadyTransaction) {
+            readyTransaction(transaction, new ReadyTransaction(), !SERIALIZED_REPLY);
+
+        } else if(WriteData.SERIALIZABLE_CLASS.equals(message.getClass())) {
+            writeData(transaction, WriteData.fromSerializable(message, getSchemaContext()), SERIALIZED_REPLY);
+
         } else if(MergeData.SERIALIZABLE_CLASS.equals(message.getClass())) {
-            mergeData(transaction, MergeData.fromSerializable(message, getSchemaContext()));
+            mergeData(transaction, MergeData.fromSerializable(message, getSchemaContext()), SERIALIZED_REPLY);
+
         } else if(DeleteData.SERIALIZABLE_CLASS.equals(message.getClass())) {
-            deleteData(transaction, DeleteData.fromSerializable(message));
+            deleteData(transaction, DeleteData.fromSerializable(message), SERIALIZED_REPLY);
+
         } else if(ReadyTransaction.SERIALIZABLE_CLASS.equals(message.getClass())) {
-            readyTransaction(transaction, new ReadyTransaction());
+            readyTransaction(transaction, new ReadyTransaction(), SERIALIZED_REPLY);
+
         } else if (message instanceof GetCompositedModification) {
             // This is here for testing only
             getSender().tell(new GetCompositeModificationReply(
@@ -70,7 +87,7 @@ public class ShardWriteTransaction extends ShardTransaction {
         }
     }
 
-    private void writeData(DOMStoreWriteTransaction transaction, WriteData message) {
+    private void writeData(DOMStoreWriteTransaction transaction, WriteData message, boolean returnSerialized) {
         modification.addModification(
                 new WriteModification(message.getPath(), message.getData(), getSchemaContext()));
         if(LOG.isDebugEnabled()) {
@@ -78,13 +95,15 @@ public class ShardWriteTransaction extends ShardTransaction {
         }
         try {
             transaction.write(message.getPath(), message.getData());
-            getSender().tell(new WriteDataReply().toSerializable(), getSelf());
+            WriteDataReply writeDataReply = new WriteDataReply();
+            getSender().tell(returnSerialized ? writeDataReply.toSerializable() : writeDataReply,
+                getSelf());
         }catch(Exception e){
             getSender().tell(new akka.actor.Status.Failure(e), getSelf());
         }
     }
 
-    private void mergeData(DOMStoreWriteTransaction transaction, MergeData message) {
+    private void mergeData(DOMStoreWriteTransaction transaction, MergeData message, boolean returnSerialized) {
         modification.addModification(
                 new MergeModification(message.getPath(), message.getData(), getSchemaContext()));
         if(LOG.isDebugEnabled()) {
@@ -92,29 +111,34 @@ public class ShardWriteTransaction extends ShardTransaction {
         }
         try {
             transaction.merge(message.getPath(), message.getData());
-            getSender().tell(new MergeDataReply().toSerializable(), getSelf());
+            MergeDataReply mergeDataReply = new MergeDataReply();
+            getSender().tell(returnSerialized ? mergeDataReply.toSerializable() : mergeDataReply ,
+                getSelf());
         }catch(Exception e){
             getSender().tell(new akka.actor.Status.Failure(e), getSelf());
         }
     }
 
-    private void deleteData(DOMStoreWriteTransaction transaction, DeleteData message) {
+    private void deleteData(DOMStoreWriteTransaction transaction, DeleteData message, boolean returnSerialized) {
         if(LOG.isDebugEnabled()) {
             LOG.debug("deleteData at path : " + message.getPath().toString());
         }
         modification.addModification(new DeleteModification(message.getPath()));
         try {
             transaction.delete(message.getPath());
-            getSender().tell(new DeleteDataReply().toSerializable(), getSelf());
+            DeleteDataReply deleteDataReply = new DeleteDataReply();
+            getSender().tell(returnSerialized ? deleteDataReply.toSerializable() : deleteDataReply,
+                getSelf());
         }catch(Exception e){
             getSender().tell(new akka.actor.Status.Failure(e), getSelf());
         }
     }
 
-    private void readyTransaction(DOMStoreWriteTransaction transaction, ReadyTransaction message) {
+    private void readyTransaction(DOMStoreWriteTransaction transaction, ReadyTransaction message, boolean returnSerialized) {
         DOMStoreThreePhaseCommitCohort cohort =  transaction.ready();
 
-        getShardActor().forward(new ForwardedReadyTransaction(getTransactionID(), cohort, modification),
+        getShardActor().forward(new ForwardedReadyTransaction(
+            getTransactionID(), cohort, modification, returnSerialized),
                 getContext());
     }
 
