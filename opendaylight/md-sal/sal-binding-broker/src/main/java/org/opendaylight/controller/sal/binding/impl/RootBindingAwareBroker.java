@@ -35,6 +35,7 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableClassToInstanceMap;
 
 public class RootBindingAwareBroker implements //
@@ -56,24 +57,41 @@ public class RootBindingAwareBroker implements //
 
     private DataBroker dataBroker;
 
-    private MountPointManagerImpl mountManager;
+    private MountProviderService publicMountManager;
+    private final MountPointManagerImpl mountManagerImpl;
 
     public MountPointManagerImpl getMountManager() {
-        return mountManager;
+        return mountManagerImpl;
     }
 
-    public void setMountManager(final MountPointManagerImpl mountManager) {
-        this.mountManager = mountManager;
+    /**
+     * This method is used to override mount manager from subclasses.
+     * To override mount manager this method must be called before
+     * start method and supplied instance should decorate
+     * {@link MountPointManagerImpl} provided by {@link #getMountManager()}.
+     *
+     * FIXME: This should be properly decomposed, current version is only
+     * minimal fix for decoration of mount point manager.
+     *
+     * @param mountManager
+     */
+    protected void setPublicMountManager(final MountProviderService mountManager) {
+        Preconditions.checkState(supportedProviderServices == null, "Service already started.");
+        this.publicMountManager = mountManager;
     }
 
     private ImmutableClassToInstanceMap<BindingAwareService> supportedConsumerServices;
 
     private ImmutableClassToInstanceMap<BindingAwareService> supportedProviderServices;
 
+
+
     public RootBindingAwareBroker(final String instanceName) {
         this.identifier = instanceName;
-        mountManager = new MountPointManagerImpl();
+        mountManagerImpl = new MountPointManagerImpl();
+        publicMountManager = mountManagerImpl;
     }
+
 
     @Override
     public String getIdentifier() {
@@ -118,7 +136,7 @@ public class RootBindingAwareBroker implements //
 
         controllerRoot = new RootSalInstance(getRpcProviderRegistry(), getNotificationBroker(), getDataBroker());
 
-        ImmutableClassToInstanceMap.Builder<BindingAwareService> consBuilder = ImmutableClassToInstanceMap.builder();
+        final ImmutableClassToInstanceMap.Builder<BindingAwareService> consBuilder = ImmutableClassToInstanceMap.builder();
 
         consBuilder.put(NotificationService.class, getRoot());
         consBuilder.put(DataBrokerService.class, getRoot());
@@ -126,12 +144,12 @@ public class RootBindingAwareBroker implements //
         if(dataBroker != null) {
             consBuilder.put(DataBroker.class, dataBroker);
         }
-        consBuilder.put(MountService.class, mountManager).build();
+        consBuilder.put(MountService.class, publicMountManager).build();
         supportedConsumerServices = consBuilder.build();
         supportedProviderServices = ImmutableClassToInstanceMap.<BindingAwareService> builder()
                 .putAll(supportedConsumerServices).put(NotificationProviderService.class, getRoot())
                 .put(DataProviderService.class, getRoot()).put(RpcProviderRegistry.class, getRoot())
-                .put(MountProviderService.class, mountManager).build();
+                .put(MountProviderService.class, publicMountManager).build();
     }
 
     @Override
