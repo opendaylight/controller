@@ -15,24 +15,25 @@ import org.opendaylight.yangtools.util.ListenerRegistry;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
+@Deprecated
 public class DataTransactionImpl extends AbstractDataTransaction<InstanceIdentifier<? extends DataObject>, DataObject>
     implements DataModificationTransaction {
     private final ListenerRegistry<DataTransactionListener> listeners = new ListenerRegistry<DataTransactionListener>();
 
 
 
-    public DataTransactionImpl(Object identifier,DataBrokerImpl dataBroker) {
+    public DataTransactionImpl(final Object identifier,final DataBrokerImpl dataBroker) {
         super(identifier,dataBroker);
     }
 
     @Override
-    public ListenerRegistration<DataTransactionListener> registerListener(DataTransactionListener listener) {
+    public ListenerRegistration<DataTransactionListener> registerListener(final DataTransactionListener listener) {
         return listeners.register(listener);
     }
 
     @Override
-    protected void onStatusChange(TransactionStatus status) {
-        for (ListenerRegistration<DataTransactionListener> listenerRegistration : listeners) {
+    protected void onStatusChange(final TransactionStatus status) {
+        for (final ListenerRegistration<DataTransactionListener> listenerRegistration : listeners) {
             listenerRegistration.getInstance().onStatusUpdated(this, status);
         }
     }

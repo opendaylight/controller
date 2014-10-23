@@ -37,6 +37,11 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableClassToInstanceMap;
 
+/**
+ *
+ * FIXME: Remove hardcoded support for legacy mount point manager.
+ *
+ */
 public class RootBindingAwareBroker implements //
         Mutable, //
         Identifiable<String>, //
@@ -118,7 +123,7 @@ public class RootBindingAwareBroker implements //
 
         controllerRoot = new RootSalInstance(getRpcProviderRegistry(), getNotificationBroker(), getDataBroker());
 
-        ImmutableClassToInstanceMap.Builder<BindingAwareService> consBuilder = ImmutableClassToInstanceMap.builder();
+        final ImmutableClassToInstanceMap.Builder<BindingAwareService> consBuilder = ImmutableClassToInstanceMap.builder();
 
         consBuilder.put(NotificationService.class, getRoot());
         consBuilder.put(DataBrokerService.class, getRoot());

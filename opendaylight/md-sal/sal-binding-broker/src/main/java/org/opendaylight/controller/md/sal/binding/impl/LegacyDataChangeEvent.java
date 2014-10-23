@@ -17,6 +17,12 @@ import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
+/**
+ * FIXME: Move to separate package to distinguish legacy support implementation
+ * from normal implementation.
+ *
+ */
+@SuppressWarnings("deprecation")
 public abstract class LegacyDataChangeEvent implements
         DataChangeEvent<InstanceIdentifier<? extends DataObject>, DataObject> {
 
@@ -93,7 +99,6 @@ public abstract class LegacyDataChangeEvent implements
         return null;
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     private final static class OperationalChangeEvent extends LegacyDataChangeEvent {
 
         private final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> delegate;
@@ -125,15 +130,15 @@ public abstract class LegacyDataChangeEvent implements
 
         @Override
         public Map<InstanceIdentifier<?>, DataObject> getOriginalOperationalData() {
-            return (Map) delegate.getOriginalData();
+            return delegate.getOriginalData();
         }
 
         @Override
         public Map<InstanceIdentifier<?>, DataObject> getUpdatedOperationalData() {
             if(updatedCache == null) {
-                Map<InstanceIdentifier<?>, DataObject> created = delegate.getCreatedData();
-                Map<InstanceIdentifier<?>, DataObject> updated = delegate.getUpdatedData();
-                HashMap<InstanceIdentifier<?>, DataObject> updatedComposite = new HashMap<>(created.size() + updated.size());
+                final Map<InstanceIdentifier<?>, DataObject> created = delegate.getCreatedData();
+                final Map<InstanceIdentifier<?>, DataObject> updated = delegate.getUpdatedData();
+                final HashMap<InstanceIdentifier<?>, DataObject> updatedComposite = new HashMap<>(created.size() + updated.size());
                 updatedComposite.putAll(created);
                 updatedComposite.putAll(updated);
                 updatedCache = Collections.unmodifiableMap(updatedComposite);
@@ -148,7 +153,6 @@ public abstract class LegacyDataChangeEvent implements
 
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     private final static class ConfigurationChangeEvent extends LegacyDataChangeEvent {
 
         private final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> delegate;
@@ -180,15 +184,15 @@ public abstract class LegacyDataChangeEvent implements
 
         @Override
         public Map<InstanceIdentifier<?>, DataObject> getOriginalConfigurationData() {
-            return (Map) delegate.getOriginalData();
+            return delegate.getOriginalData();
         }
 
         @Override
         public Map<InstanceIdentifier<?>, DataObject> getUpdatedConfigurationData() {
             if(updatedCache == null) {
-                Map<InstanceIdentifier<?>, DataObject> created = delegate.getCreatedData();
-                Map<InstanceIdentifier<?>, DataObject> updated = delegate.getUpdatedData();
-                HashMap<InstanceIdentifier<?>, DataObject> updatedComposite = new HashMap<>(created.size() + updated.size());
+                final Map<InstanceIdentifier<?>, DataObject> created = delegate.getCreatedData();
+                final Map<InstanceIdentifier<?>, DataObject> updated = delegate.getUpdatedData();
+                final HashMap<InstanceIdentifier<?>, DataObject> updatedComposite = new HashMap<>(created.size() + updated.size());
                 updatedComposite.putAll(created);
                 updatedComposite.putAll(updated);
                 updatedCache = Collections.unmodifiableMap(updatedComposite);
