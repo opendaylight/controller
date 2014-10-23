@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_1102ab3e",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 1717,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-10-23T08:14:08Z",
+      "side": 1,
+      "message": "Could you add additional comments, which will explain what are we doing here? for other maintainers it will be easier to understand scope import.",
+      "revId": "07a4880843bf0168638dd5646c46d07b9495c5d0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
