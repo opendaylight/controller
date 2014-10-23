@@ -13,6 +13,15 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 
+/**
+ *
+ * FIXME: Remove after Mount point code path is fully migrated to non-legacy APIs.
+ *
+ * @deprecated This is legacy implementation for legacy APIs. Was replaced
+ * by {@link org.opendaylight.controller.md.sal.binding.impl.ForwardedBackwardsCompatibleDataBroker}.
+ *
+ */
+@Deprecated
 class BindingToDomTransaction implements
     DataCommitHandler.DataCommitTransaction<InstanceIdentifier<? extends DataObject>, DataObject> {
 
@@ -22,7 +31,7 @@ class BindingToDomTransaction implements
 
     public BindingToDomTransaction(final DataModificationTransaction backing,
         final DataModification<InstanceIdentifier<? extends DataObject>, DataObject> modification,
-        ConcurrentMap<Object, BindingToDomTransaction> domOpenedTransactions) {
+        final ConcurrentMap<Object, BindingToDomTransaction> domOpenedTransactions) {
         this.backing = backing;
         this.modification = modification;
         this.domOpenedTransactions = domOpenedTransactions;
@@ -36,15 +45,15 @@ class BindingToDomTransaction implements
 
     @Override
     public RpcResult<Void> finish() throws IllegalStateException {
-        Future<RpcResult<TransactionStatus>> result = backing.commit();
+        final Future<RpcResult<TransactionStatus>> result = backing.commit();
         try {
-            RpcResult<TransactionStatus> biResult = result.get();
+            final RpcResult<TransactionStatus> biResult = result.get();
             domOpenedTransactions.remove(backing.getIdentifier());
             return RpcResultBuilder.<Void> status(biResult.isSuccessful())
                                              .withRpcErrors(biResult.getErrors()).build();
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             throw new IllegalStateException("", e);
-        } catch (ExecutionException e) {
+        } catch (final ExecutionException e) {
             throw new IllegalStateException("", e);
         } finally {
             domOpenedTransactions.remove(backing.getIdentifier());

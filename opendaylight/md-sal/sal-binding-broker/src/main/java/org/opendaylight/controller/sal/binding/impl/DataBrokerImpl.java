@@ -29,6 +29,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.Maps;
 
+/**
+ *
+ * @deprecated This class implements legacy deprecated APIs, thus implementation is deprecated.
+ */
+@Deprecated
 public class DataBrokerImpl extends
         AbstractDataBroker<InstanceIdentifier<? extends DataObject>, DataObject, DataChangeListener> //
         implements DataProviderService, AutoCloseable {
@@ -80,7 +85,7 @@ public class DataBrokerImpl extends
 
     @Override
     public DataTransactionImpl beginTransaction() {
-        String transactionId = "BA-" + nextTransaction.getAndIncrement();
+        final String transactionId = "BA-" + nextTransaction.getAndIncrement();
         createdTransactionsCount.getAndIncrement();
         return new DataTransactionImpl(transactionId, this);
     }
@@ -107,14 +112,14 @@ public class DataBrokerImpl extends
     protected Map<InstanceIdentifier<? extends DataObject>, DataObject> deepGetBySubpath(
             final Map<InstanceIdentifier<? extends DataObject>, DataObject> dataSet,
             final InstanceIdentifier<? extends DataObject> path) {
-        Builder<InstanceIdentifier<? extends DataObject>, DataObject> builder = ImmutableMap.builder();
-        Map<InstanceIdentifier<? extends DataObject>, DataObject> potential = Maps.filterKeys(dataSet,
+        final Builder<InstanceIdentifier<? extends DataObject>, DataObject> builder = ImmutableMap.builder();
+        final Map<InstanceIdentifier<? extends DataObject>, DataObject> potential = Maps.filterKeys(dataSet,
                 createIsContainedPredicate(path));
-        for (Entry<InstanceIdentifier<? extends DataObject>, DataObject> entry : potential.entrySet()) {
+        for (final Entry<InstanceIdentifier<? extends DataObject>, DataObject> entry : potential.entrySet()) {
             try {
                 builder.putAll(DataObjectReadingUtil.readData(entry.getValue(), (InstanceIdentifier) entry.getKey(),
                         path));
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 // FIXME : Log exception;
             }
         }
@@ -164,7 +169,7 @@ public class DataBrokerImpl extends
     @Override
     protected ImmutableList<DataCommitHandler<InstanceIdentifier<? extends DataObject>, DataObject>> affectedCommitHandlers(
             final Set<InstanceIdentifier<? extends DataObject>> paths) {
-        ImmutableList.Builder<DataCommitHandler<InstanceIdentifier<? extends DataObject>, DataObject>> handlersBuilder = ImmutableList.builder();
+        final ImmutableList.Builder<DataCommitHandler<InstanceIdentifier<? extends DataObject>, DataObject>> handlersBuilder = ImmutableList.builder();
         return handlersBuilder //
                 .add(rootCommitHandler) //
                 .addAll(super.affectedCommitHandlers(paths)) //

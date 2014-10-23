@@ -12,9 +12,9 @@ import static com.google.common.base.Preconditions.checkState;
 
 import java.util.Collection;
 import java.util.Collections;
-
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
 import org.opendaylight.controller.md.sal.binding.impl.AbstractForwardedDataBroker;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangePublisher;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
@@ -39,7 +39,12 @@ import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMapping
 import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ *
+ * FIXME: Remove support for legacy Data APIs once mount point path is migrated
+ * to new DataBroker.
+ *
+ */
 public class BindingIndependentConnector implements //
         RuntimeDataProvider, //
         Provider, //
@@ -88,10 +93,10 @@ public class BindingIndependentConnector implements //
     @Override
     public DataObject readOperationalData(final InstanceIdentifier<? extends DataObject> path) {
         try {
-            org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier biPath = mappingService.toDataDom(path);
-            CompositeNode result = biDataService.readOperationalData(biPath);
+            final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier biPath = mappingService.toDataDom(path);
+            final CompositeNode result = biDataService.readOperationalData(biPath);
             return potentialAugmentationRead(path, biPath, result);
-        } catch (DeserializationException e) {
+        } catch (final DeserializationException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -99,11 +104,11 @@ public class BindingIndependentConnector implements //
     private DataObject potentialAugmentationRead(InstanceIdentifier<? extends DataObject> path,
             final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier biPath, final CompositeNode result)
             throws DeserializationException {
-        Class<? extends DataObject> targetType = path.getTargetType();
+        final Class<? extends DataObject> targetType = path.getTargetType();
         if (Augmentation.class.isAssignableFrom(targetType)) {
             path = mappingService.fromDataDom(biPath);
-            Class<? extends Augmentation<?>> augmentType = (Class<? extends Augmentation<?>>) targetType;
-            DataObject parentTo = mappingService.dataObjectFromDataDom(path, result);
+            final Class<? extends Augmentation<?>> augmentType = (Class<? extends Augmentation<?>>) targetType;
+            final DataObject parentTo = mappingService.dataObjectFromDataDom(path, result);
             if (parentTo instanceof Augmentable<?>) {
                 return (DataObject) ((Augmentable) parentTo).getAugmentation(augmentType);
             }
@@ -114,10 +119,10 @@ public class BindingIndependentConnector implements //
     @Override
     public DataObject readConfigurationData(final InstanceIdentifier<? extends DataObject> path) {
         try {
-            org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier biPath = mappingService.toDataDom(path);
-            CompositeNode result = biDataService.readConfigurationData(biPath);
+            final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier biPath = mappingService.toDataDom(path);
+            final CompositeNode result = biDataService.readConfigurationData(biPath);
             return potentialAugmentationRead(path, biPath, result);
-        } catch (DeserializationException e) {
+        } catch (final DeserializationException e) {
             throw new IllegalStateException(e);
         }
     }

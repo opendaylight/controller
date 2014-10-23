@@ -7,11 +7,10 @@
  */
 package org.opendaylight.controller.sal.binding.impl;
 
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
+
 import org.opendaylight.controller.md.sal.binding.util.AbstractBindingSalProviderInstance;
 import org.opendaylight.controller.sal.binding.api.mount.MountProviderInstance;
 import org.opendaylight.controller.sal.binding.api.mount.MountProviderService;
@@ -21,6 +20,16 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
+
+/**
+ *
+ *
+ * @deprecated This class implements legacy mount point APIs and should
+ *   be replaced with newer one.
+ */
+@Deprecated
 public class MountPointManagerImpl implements MountProviderService {
 
     public final Logger LOG = LoggerFactory.getLogger(MountPointManagerImpl.class);
@@ -53,7 +62,7 @@ public class MountPointManagerImpl implements MountProviderService {
 
     @Override
     public synchronized BindingMountPointImpl createMountPoint(final InstanceIdentifier<?> path) {
-        BindingMountPointImpl potential = mountPoints.get(path);
+        final BindingMountPointImpl potential = mountPoints.get(path);
         if (potential != null) {
             throw new IllegalStateException("Mount point already exists.");
         }
@@ -62,7 +71,7 @@ public class MountPointManagerImpl implements MountProviderService {
 
     @Override
     public BindingMountPointImpl createOrGetMountPoint(final InstanceIdentifier<?> path) {
-        BindingMountPointImpl potential = getMountPoint(path);
+        final BindingMountPointImpl potential = getMountPoint(path);
         if (potential != null) {
             return potential;
         }
@@ -75,15 +84,15 @@ public class MountPointManagerImpl implements MountProviderService {
     }
 
     private synchronized BindingMountPointImpl createOrGetMountPointImpl(final InstanceIdentifier<?> path) {
-        BindingMountPointImpl potential = getMountPoint(path);
+        final BindingMountPointImpl potential = getMountPoint(path);
         if (potential != null) {
             return potential;
         }
-        RpcProviderRegistryImpl rpcRegistry = new RpcProviderRegistryImpl("mount");
-        NotificationBrokerImpl notificationBroker = new NotificationBrokerImpl(getNotificationExecutor());
-        DataBrokerImpl dataBroker = new DataBrokerImpl();
+        final RpcProviderRegistryImpl rpcRegistry = new RpcProviderRegistryImpl("mount");
+        final NotificationBrokerImpl notificationBroker = new NotificationBrokerImpl(getNotificationExecutor());
+        final DataBrokerImpl dataBroker = new DataBrokerImpl();
         dataBroker.setExecutor(MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor()));
-        BindingMountPointImpl mountInstance = new BindingMountPointImpl(path, rpcRegistry, notificationBroker,
+        final BindingMountPointImpl mountInstance = new BindingMountPointImpl(path, rpcRegistry, notificationBroker,
                 dataBroker);
         mountPoints.putIfAbsent(path, mountInstance);
         notifyMountPointCreated(path);
@@ -91,10 +100,10 @@ public class MountPointManagerImpl implements MountProviderService {
     }
 
     private void notifyMountPointCreated(final InstanceIdentifier<?> path) {
-        for (ListenerRegistration<MountProvisionListener> listener : listeners) {
+        for (final ListenerRegistration<MountProvisionListener> listener : listeners) {
             try {
                 listener.getInstance().onMountPointCreated(path);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LOG.error("Unhandled exception during invoking listener.", e);
             }
         }

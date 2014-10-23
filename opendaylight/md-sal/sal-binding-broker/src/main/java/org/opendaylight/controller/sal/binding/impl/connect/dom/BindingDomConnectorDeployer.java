@@ -12,54 +12,60 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
-import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
 import org.opendaylight.controller.sal.binding.impl.RootBindingAwareBroker;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
 import org.opendaylight.controller.sal.core.api.notify.NotificationPublishService;
+import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
 
 public class BindingDomConnectorDeployer {
 
     private static BindingIndependentMappingService mappingService;
 
-    public static BindingIndependentConnector tryToDeployConnector(RootBindingAwareBroker baBroker,
-            ProviderSession domSession) {
+    public static BindingIndependentConnector tryToDeployConnector(final RootBindingAwareBroker baBroker,
+            final ProviderSession domSession) {
         checkNotNull(baBroker);
         checkNotNull(domSession);
-        BindingIndependentConnector connector = createConnector(mappingService);
+        final BindingIndependentConnector connector = createConnector(mappingService);
         return connector;
     }
 
-    public static BindingIndependentConnector createConnector(BindingIndependentMappingService mappingService) {
-        BindingIndependentConnector connector = new BindingIndependentConnector();
+    public static BindingIndependentConnector createConnector(final BindingIndependentMappingService mappingService) {
+        final BindingIndependentConnector connector = new BindingIndependentConnector();
         connector.setMappingService(mappingService);
         return connector;
     }
 
-    public static BindingIndependentConnector createConnector(BindingIndependentConnector source) {
-        BindingIndependentConnector connector = new BindingIndependentConnector();
+    public static BindingIndependentConnector createConnector(final BindingIndependentConnector source) {
+        final BindingIndependentConnector connector = new BindingIndependentConnector();
         connector.setMappingService(source.getMappingService());
         return connector;
     }
 
-    public static void startDataForwarding(BindingIndependentConnector connector, DataProviderService baService,
-            ProviderSession domContext) {
+    /**
+     * FIXME: Remove after Mount point code path is fully migrated to non-legacy APIs.
+     * @deprecated This method provides forwarding for deprecated APIs, thus should be used only
+     * from legacy support code.
+     */
+    @Deprecated
+    public static void startDataForwarding(final BindingIndependentConnector connector, final DataProviderService baService,
+            final ProviderSession domContext) {
         startDataForwarding(connector, baService,
                 domContext.getService(org.opendaylight.controller.sal.core.api.data.DataProviderService.class));
     }
 
-    public static void startRpcForwarding(BindingIndependentConnector connector,
-            RpcProviderRegistry rpcProviderRegistry, ProviderSession domProviderContext) {
+    public static void startRpcForwarding(final BindingIndependentConnector connector,
+            final RpcProviderRegistry rpcProviderRegistry, final ProviderSession domProviderContext) {
         startRpcForwarding(connector, rpcProviderRegistry, domProviderContext.getService(RpcProvisionRegistry.class));
 
     }
 
-    public static void startNotificationForwarding(BindingIndependentConnector connector, NotificationProviderService provider,ProviderSession domProviderContext) {
+    public static void startNotificationForwarding(final BindingIndependentConnector connector, final NotificationProviderService provider,final ProviderSession domProviderContext) {
         startNotificationForwarding(connector, provider, domProviderContext.getService(NotificationPublishService.class));
     }
 
-    public static void startRpcForwarding(BindingIndependentConnector connector, RpcProviderRegistry baService,
-            RpcProvisionRegistry domService) {
+    public static void startRpcForwarding(final BindingIndependentConnector connector, final RpcProviderRegistry baService,
+            final RpcProvisionRegistry domService) {
         if (connector.isRpcForwarding()) {
             return;
         }
@@ -69,8 +75,14 @@ public class BindingDomConnectorDeployer {
         connector.startRpcForwarding();
     }
 
-    public static void startDataForwarding(BindingIndependentConnector connector, DataProviderService baService,
-            org.opendaylight.controller.sal.core.api.data.DataProviderService domService) {
+    /**
+     * FIXME: Remove after Mount point code path is fully migrated to non-legacy APIs.
+     * @deprecated This method provides forwarding for deprecated APIs, thus should be used only
+     * from legacy support code. Was replaced by {@link org.opendaylight.controller.md.sal.binding.impl.ForwardedBackwardsCompatibleDataBroker}.
+     **/
+    @Deprecated
+    public static void startDataForwarding(final BindingIndependentConnector connector, final DataProviderService baService,
+            final org.opendaylight.controller.sal.core.api.data.DataProviderService domService) {
         if (connector.isDataForwarding()) {
             return;
         }
@@ -80,8 +92,8 @@ public class BindingDomConnectorDeployer {
         connector.startDataForwarding();
     }
 
-    public static void startNotificationForwarding(BindingIndependentConnector connector,
-            NotificationProviderService baService, NotificationPublishService domService) {
+    public static void startNotificationForwarding(final BindingIndependentConnector connector,
+            final NotificationProviderService baService, final NotificationPublishService domService) {
         if(connector.isNotificationForwarding()) {
             return;
         }
