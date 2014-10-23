@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_52f6f2d8",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 388,
+      "author": {
+        "id": 2508
+      },
+      "writtenOn": "2014-10-23T17:48:15Z",
+      "side": 1,
+      "message": "Switched to substitution and renamed to \"from behavior\". But state (RaftState) is the friendly name for behavior so I kept those args.",
+      "parentUuid": "ba8cc1f7_d1da0317",
+      "revId": "aeabefa1961584a141eb8ade06ed1cd13ba4ee1e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_912b1beb",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2014-10-23T08:03:26Z",
       "side": 1,
       "message": "The return needs to be outside the try/catch as we don\u0027t want a failure to close the current behavior to prevent us from switching to the new behavior.",
+      "revId": "aeabefa1961584a141eb8ade06ed1cd13ba4ee1e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_b22c1e4c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 391,
+      "author": {
+        "id": 2508
+      },
+      "writtenOn": "2014-10-23T17:48:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_912b1beb",
       "revId": "aeabefa1961584a141eb8ade06ed1cd13ba4ee1e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_12006aa9",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 395,
+      "author": {
+        "id": 2508
+      },
+      "writtenOn": "2014-10-23T17:48:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_7103f773",
+      "revId": "aeabefa1961584a141eb8ade06ed1cd13ba4ee1e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_b1309f57",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
         "patchSetId": 3
@@ -64,6 +118,24 @@
       "writtenOn": "2014-10-23T08:03:26Z",
       "side": 1,
       "message": "return \"behavior\" here",
+      "revId": "aeabefa1961584a141eb8ade06ed1cd13ba4ee1e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_f202a6b3",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 397,
+      "author": {
+        "id": 2508
+      },
+      "writtenOn": "2014-10-23T17:48:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_b1309f57",
       "revId": "aeabefa1961584a141eb8ade06ed1cd13ba4ee1e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_32c48e91",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Candidate.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 2508
+      },
+      "writtenOn": "2014-10-23T17:48:15Z",
+      "side": 1,
+      "message": "Updated all occurrences in this patchset and other files in sal-akka-raft package to be consistent.",
+      "parentUuid": "ba8cc1f7_d1ac438f",
+      "revId": "aeabefa1961584a141eb8ade06ed1cd13ba4ee1e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_71b537cc",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Candidate.java",
         "patchSetId": 3
@@ -98,6 +188,24 @@
       "writtenOn": "2014-10-23T08:03:26Z",
       "side": 1,
       "message": "Avoid toString overhead when debug is not enabled, e.g.\n  \n   LOG.debug(\"handleAppendEntries: {}\", appendEntries);",
+      "revId": "aeabefa1961584a141eb8ade06ed1cd13ba4ee1e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_f2bdc603",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Candidate.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 2508
+      },
+      "writtenOn": "2014-10-23T17:48:15Z",
+      "side": 1,
+      "message": "Updated all occurrences in this patchset and other files in sal-akka-raft package to be consistent.",
+      "parentUuid": "ba8cc1f7_71b537cc",
       "revId": "aeabefa1961584a141eb8ade06ed1cd13ba4ee1e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_12bb8a0f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Candidate.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 2508
+      },
+      "writtenOn": "2014-10-23T17:48:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_d1c3e336",
+      "revId": "aeabefa1961584a141eb8ade06ed1cd13ba4ee1e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_b1e2dfd3",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
         "patchSetId": 3
@@ -138,6 +264,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_b2373eb0",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 2508
+      },
+      "writtenOn": "2014-10-23T17:48:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_b1e2dfd3",
+      "revId": "aeabefa1961584a141eb8ade06ed1cd13ba4ee1e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_31cecf5b",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
         "patchSetId": 3
@@ -149,6 +293,24 @@
       "writtenOn": "2014-10-23T08:03:26Z",
       "side": 1,
       "message": "I know this is pre-existing but for the akka log API, to include the ex stack trace, you pass \u0027e\u0027 as the first param.",
+      "revId": "aeabefa1961584a141eb8ade06ed1cd13ba4ee1e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_9246ba22",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 2508
+      },
+      "writtenOn": "2014-10-23T17:48:15Z",
+      "side": 1,
+      "message": "Updated all occurrences in this patchset and other files in sal-akka-raft package so we don\u0027t miss this.",
+      "parentUuid": "ba8cc1f7_31cecf5b",
       "revId": "aeabefa1961584a141eb8ade06ed1cd13ba4ee1e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
