@@ -56,13 +56,13 @@ public class RootBindingAwareBroker implements //
 
     private DataBroker dataBroker;
 
-    private MountPointManagerImpl mountManager;
+    private MountProviderService mountManager;
 
-    public MountPointManagerImpl getMountManager() {
+    public MountProviderService getMountManager() {
         return mountManager;
     }
 
-    public void setMountManager(final MountPointManagerImpl mountManager) {
+    public void setMountManager(final MountProviderService mountManager) {
         this.mountManager = mountManager;
     }
 
@@ -71,8 +71,12 @@ public class RootBindingAwareBroker implements //
     private ImmutableClassToInstanceMap<BindingAwareService> supportedProviderServices;
 
     public RootBindingAwareBroker(final String instanceName) {
+        this(instanceName,new MountPointManagerImpl());
+    }
+
+    protected RootBindingAwareBroker(final String instanceName,final MountPointManagerImpl manager) {
         this.identifier = instanceName;
-        mountManager = new MountPointManagerImpl();
+        mountManager = manager;
     }
 
     @Override
@@ -118,7 +122,7 @@ public class RootBindingAwareBroker implements //
 
         controllerRoot = new RootSalInstance(getRpcProviderRegistry(), getNotificationBroker(), getDataBroker());
 
-        ImmutableClassToInstanceMap.Builder<BindingAwareService> consBuilder = ImmutableClassToInstanceMap.builder();
+        final ImmutableClassToInstanceMap.Builder<BindingAwareService> consBuilder = ImmutableClassToInstanceMap.builder();
 
         consBuilder.put(NotificationService.class, getRoot());
         consBuilder.put(DataBrokerService.class, getRoot());
