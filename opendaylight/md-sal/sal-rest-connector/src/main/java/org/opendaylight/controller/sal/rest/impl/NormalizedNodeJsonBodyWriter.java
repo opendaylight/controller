@@ -81,7 +81,7 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
             initialNs = schema.getQName().getNamespace();
         }
         NormalizedNodeStreamWriter jsonWriter = JSONNormalizedNodeStreamWriter.create(context.getSchemaContext(),path,initialNs,outputWriter);
-        NormalizedNodeWriter nnWriter = NormalizedNodeWriter.forStreamWriter(jsonWriter);
+        NormalizedNodeWriter nnWriter = NormalizedNodeWriter.forStreamWriter(jsonWriter, t.getDepth());
         if(isDataRoot) {
             writeDataRoot(outputWriter,nnWriter,(ContainerNode) data);
         } else {
