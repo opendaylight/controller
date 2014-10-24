@@ -31,6 +31,9 @@ import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStre
 import org.opendaylight.yangtools.yang.data.codec.gson.JsonParserStream;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.impl.schema.NormalizedNodeResult;
+import org.opendaylight.yangtools.yang.model.api.SchemaNode;
+import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +59,7 @@ public class JsonNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPr
             Optional<InstanceIdentifierContext> path = getIdentifierWithSchema();
             NormalizedNodeResult resultHolder = new NormalizedNodeResult();
             NormalizedNodeStreamWriter writer = ImmutableNormalizedNodeStreamWriter.from(resultHolder);
-            JsonParserStream jsonParser = JsonParserStream.create(writer, path.get().getSchemaContext());
+            JsonParserStream jsonParser = JsonParserStream.create(writer, path.get().getSchemaContext(), parentSchemaNode(path));
             JsonReader reader = new JsonReader(new InputStreamReader(entityStream));
             jsonParser.parse(reader);
             return new NormalizedNodeContext(path.get(),resultHolder.getResult());
@@ -66,6 +69,19 @@ public class JsonNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPr
             throw new RestconfDocumentedException("Error parsing input: " + e.getMessage(), ErrorType.PROTOCOL,
                     ErrorTag.MALFORMED_MESSAGE);
         }
+    }
+
+    /**
+     * This method resolve parent schema node or schema context if schema node from {@code path} is top level
+     * @param path
+     * @return
+     */
+    private SchemaNode parentSchemaNode(final Optional<InstanceIdentifierContext> path) {
+        final SchemaPath currentNodeParentPath = path.get().getSchemaNode().getPath().getParent();
+        if (currentNodeParentPath.getPathFromRoot().iterator().hasNext()) {
+            return SchemaContextUtil.findDataSchemaNode(path.get().getSchemaContext(), currentNodeParentPath);
+        }
+        return path.get().getSchemaContext();
     }
 }
 

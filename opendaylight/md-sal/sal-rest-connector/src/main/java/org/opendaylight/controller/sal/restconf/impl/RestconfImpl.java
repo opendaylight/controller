@@ -648,7 +648,8 @@ public class RestconfImpl implements RestconfService {
             normalizedII = controllerContext.toNormalized(iiWithData.getInstanceIdentifier());
             data = broker.readConfigurationData(normalizedII);
         }
-        return new NormalizedNodeContext(iiWithData, data);
+        Integer depth = parseDepthParameter(uriInfo);
+        return new NormalizedNodeContext(iiWithData, data, depth);
     }
 
     @SuppressWarnings("unchecked")
@@ -671,10 +672,10 @@ public class RestconfImpl implements RestconfService {
         }
     }
 
-    private Integer parseDepthParameter(final UriInfo info) {
+    private int parseDepthParameter(final UriInfo info) {
         String param = info.getQueryParameters(false).getFirst(UriParameters.DEPTH.toString());
         if (Strings.isNullOrEmpty(param) || "unbounded".equals(param)) {
-            return null;
+            return Integer.MAX_VALUE;
         }
 
         try {
@@ -708,7 +709,8 @@ public class RestconfImpl implements RestconfService {
             data = broker.readOperationalData(normalizedII);
         }
 
-        return new NormalizedNodeContext(iiWithData, data);
+        Integer depth = parseDepthParameter(info);
+        return new NormalizedNodeContext(iiWithData, data, depth);
     }
 
     private boolean parsePrettyPrintParameter(final UriInfo info) {
