@@ -169,7 +169,7 @@ class FlowCapableTopologyExporter implements FlowTopologyDiscoveryListener, Open
             public void applyOperation(final ReadWriteTransaction transaction) {
                 final Link link = toTopologyLink(notification);
                 final InstanceIdentifier<Link> path = linkPath(link);
-                transaction.put(LogicalDatastoreType.OPERATIONAL, path, link, true);
+                transaction.merge(LogicalDatastoreType.OPERATIONAL, path, link, true);
             }
 
             @Override
