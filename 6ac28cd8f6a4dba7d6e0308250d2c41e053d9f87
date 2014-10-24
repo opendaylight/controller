@@ -34,6 +34,24 @@
       "revId": "6ac28cd8f6a4dba7d6e0308250d2c41e053d9f87",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_f83367f4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 414,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-10-24T20:47:48Z",
+      "side": 1,
+      "message": "The reason this was initially put in a new Utils class was to use this doPathsCoExist method in actors.\nSince ActorContext is not supposed to be shared with actors, it seemed beneficial to have a separate Utils.",
+      "parentUuid": "ba8cc1f7_9549c48d",
+      "revId": "6ac28cd8f6a4dba7d6e0308250d2c41e053d9f87",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
