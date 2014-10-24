@@ -98,7 +98,7 @@ public class NormalizedNodeXmlBodyWriter implements MessageBodyWriter<Normalized
 
         NormalizedNodeStreamWriter jsonWriter = XMLStreamNormalizedNodeStreamWriter.create(xmlWriter,
                 pathContext.getSchemaContext(), schemaPath);
-        NormalizedNodeWriter nnWriter = NormalizedNodeWriter.forStreamWriter(jsonWriter);
+        NormalizedNodeWriter nnWriter = NormalizedNodeWriter.forStreamWriter(jsonWriter, t.getDepth());
         if (isDataRoot) {
             writeRootElement(xmlWriter, nnWriter, (ContainerNode) data);
         } else {
