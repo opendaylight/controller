@@ -7,7 +7,6 @@ import akka.actor.UntypedActor;
 import akka.japi.Creator;
 import akka.testkit.JavaTestKit;
 import com.google.common.base.Optional;
-
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
@@ -18,9 +17,7 @@ import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
-
 import java.util.concurrent.TimeUnit;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -99,23 +96,15 @@ public class ActorContextTest extends AbstractActorTest{
     @Test
     public void testFindLocalShardWithShardNotFound(){
         new JavaTestKit(getSystem()) {{
+            ActorRef shardManagerActorRef = getSystem()
+                    .actorOf(MockShardManager.props(false, null));
 
-            new Within(duration("1 seconds")) {
-                @Override
-                protected void run() {
-
-                    ActorRef shardManagerActorRef = getSystem()
-                        .actorOf(MockShardManager.props(false, null));
-
-                    ActorContext actorContext =
-                        new ActorContext(getSystem(), shardManagerActorRef , mock(ClusterWrapper.class),
+            ActorContext actorContext =
+                    new ActorContext(getSystem(), shardManagerActorRef , mock(ClusterWrapper.class),
                             mock(Configuration.class));
 
-                    Optional<ActorRef> out = actorContext.findLocalShard("default");
-                    assertTrue(!out.isPresent());
-                    expectNoMsg();
-                }
-            };
+            Optional<ActorRef> out = actorContext.findLocalShard("default");
+            assertTrue(!out.isPresent());
         }};
 
     }
@@ -123,63 +112,74 @@ public class ActorContextTest extends AbstractActorTest{
     @Test
     public void testExecuteRemoteOperation() {
         new JavaTestKit(getSystem()) {{
+            ActorRef shardActorRef = getSystem().actorOf(Props.create(EchoActor.class));
 
-            new Within(duration("3 seconds")) {
-                @Override
-                protected void run() {
+            ActorRef shardManagerActorRef = getSystem()
+                    .actorOf(MockShardManager.props(true, shardActorRef));
 
-                    ActorRef shardActorRef = getSystem().actorOf(Props.create(EchoActor.class));
-
-                    ActorRef shardManagerActorRef = getSystem()
-                        .actorOf(MockShardManager.props(true, shardActorRef));
-
-                    ActorContext actorContext =
-                        new ActorContext(getSystem(), shardManagerActorRef , mock(ClusterWrapper.class),
+            ActorContext actorContext =
+                    new ActorContext(getSystem(), shardManagerActorRef , mock(ClusterWrapper.class),
                             mock(Configuration.class));
 
-                    ActorSelection actor = actorContext.actorSelection(shardActorRef.path());
+            ActorSelection actor = actorContext.actorSelection(shardActorRef.path());
 
-                    Object out = actorContext.executeOperation(actor, "hello");
+            Object out = actorContext.executeOperation(actor, "hello");
 
-                    assertEquals("hello", out);
-
-                    expectNoMsg();
-                }
-            };
+            assertEquals("hello", out);
         }};
     }
 
     @Test
     public void testExecuteRemoteOperationAsync() {
         new JavaTestKit(getSystem()) {{
+            ActorRef shardActorRef = getSystem().actorOf(Props.create(EchoActor.class));
 
-            new Within(duration("3 seconds")) {
-                @Override
-                protected void run() {
+            ActorRef shardManagerActorRef = getSystem()
+                    .actorOf(MockShardManager.props(true, shardActorRef));
 
-                    ActorRef shardActorRef = getSystem().actorOf(Props.create(EchoActor.class));
-
-                    ActorRef shardManagerActorRef = getSystem()
-                        .actorOf(MockShardManager.props(true, shardActorRef));
-
-                    ActorContext actorContext =
-                        new ActorContext(getSystem(), shardManagerActorRef , mock(ClusterWrapper.class),
+            ActorContext actorContext =
+                    new ActorContext(getSystem(), shardManagerActorRef , mock(ClusterWrapper.class),
                             mock(Configuration.class));
 
-                    ActorSelection actor = actorContext.actorSelection(shardActorRef.path());
+            ActorSelection actor = actorContext.actorSelection(shardActorRef.path());
 
-                    Future<Object> future = actorContext.executeOperationAsync(actor, "hello");
+            Future<Object> future = actorContext.executeOperationAsync(actor, "hello");
 
-                    try {
-                        Object result = Await.result(future, Duration.create(3, TimeUnit.SECONDS));
-                        assertEquals("Result", "hello", result);
-                    } catch(Exception e) {
-                        throw new AssertionError(e);
-                    }
-
-                    expectNoMsg();
-                }
-            };
+            try {
+                Object result = Await.result(future, Duration.create(3, TimeUnit.SECONDS));
+                assertEquals("Result", "hello", result);
+            } catch(Exception e) {
+                throw new AssertionError(e);
+            }
         }};
+    }
+
+    @Test
+    public void testIsLocalPath() {
+        MockClusterWrapper clusterWrapper = new MockClusterWrapper();
+        ActorContext actorContext =
+                new ActorContext(getSystem(), null, clusterWrapper, mock(Configuration.class));
+
+        clusterWrapper.setSelfAddress("");
+        assertEquals(false, actorContext.isLocalPath(null));
+        assertEquals(false, actorContext.isLocalPath(""));
+
+        clusterWrapper.setSelfAddress(null);
+        assertEquals(false, actorContext.isLocalPath(""));
+
+        clusterWrapper.setSelfAddress("akka://test/user/$b");
+        assertEquals(false, actorContext.isLocalPath("akka://test/user/$a"));
+
+        clusterWrapper.setSelfAddress("akka.tcp://system@127.0.0.1:2550/");
+        assertEquals(true, actorContext.isLocalPath("akka.tcp://system@127.0.0.1:2550/"));
+
+        clusterWrapper.setSelfAddress("akka.tcp://system@127.0.0.1:2550");
+        assertEquals(false, actorContext.isLocalPath("akka.tcp://system@127.0.0.1:2550/"));
+
+        clusterWrapper.setSelfAddress("akka.tcp://system@128.0.0.1:2550/");
+        assertEquals(false, actorContext.isLocalPath("akka.tcp://system@127.0.0.1:2550/"));
+
+        clusterWrapper.setSelfAddress("akka.tcp://system@127.0.0.1:2551/");
+        assertEquals(false, actorContext.isLocalPath("akka.tcp://system@127.0.0.1:2550/"));
     }
 }

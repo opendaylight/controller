@@ -17,6 +17,7 @@ import com.google.common.base.Preconditions;
 public class ClusterWrapperImpl implements ClusterWrapper {
     private final Cluster cluster;
     private final String currentMemberName;
+    private final String selfAddress;
 
     public ClusterWrapperImpl(ActorSystem actorSystem){
         Preconditions.checkNotNull(actorSystem, "actorSystem should not be null");
@@ -31,6 +32,7 @@ public class ClusterWrapperImpl implements ClusterWrapper {
         );
 
         currentMemberName = (String) cluster.getSelfRoles().toArray()[0];
+        selfAddress = cluster.selfAddress().toString();
 
     }
 
@@ -44,5 +46,9 @@ public class ClusterWrapperImpl implements ClusterWrapper {
 
     public String getCurrentMemberName() {
         return currentMemberName;
+    }
+
+    public String getSelfAddress() {
+        return selfAddress;
     }
 }

@@ -61,6 +61,7 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
     private final SchemaContext schemaContext;
     private final ShardStats shardStats;
     private final String transactionID;
+    protected static final boolean SERIALIZED_REPLY = true;
 
     protected ShardTransaction(ActorRef shardActor, SchemaContext schemaContext,
             ShardStats shardStats, String transactionID) {
@@ -115,23 +116,24 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
         getSelf().tell(PoisonPill.getInstance(), getSelf());
     }
 
-    protected void readData(DOMStoreReadTransaction transaction,ReadData message) {
+    protected void readData(DOMStoreReadTransaction transaction, ReadData message, final boolean returnSerialized) {
         final ActorRef sender = getSender();
         final ActorRef self = getSelf();
         final YangInstanceIdentifier path = message.getPath();
         final CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> future =
                 transaction.read(path);
 
+
         future.addListener(new Runnable() {
             @Override
             public void run() {
                 try {
                     Optional<NormalizedNode<?, ?>> optional = future.checkedGet();
-                    if (optional.isPresent()) {
-                        sender.tell(new ReadDataReply(schemaContext,optional.get()).toSerializable(), self);
-                    } else {
-                        sender.tell(new ReadDataReply(schemaContext,null).toSerializable(), self);
-                    }
+                    ReadDataReply readDataReply = new ReadDataReply(schemaContext, optional.orNull());
+
+                    sender.tell((returnSerialized ? readDataReply.toSerializable():
+                        readDataReply), self);
+
                 } catch (Exception e) {
                     shardStats.incrementFailedReadTransactionsCount();
                     sender.tell(new akka.actor.Status.Failure(e), self);
@@ -141,12 +143,15 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
         }, getContext().dispatcher());
     }
 
-    protected void dataExists(DOMStoreReadTransaction transaction, DataExists message) {
+    protected void dataExists(DOMStoreReadTransaction transaction, DataExists message,
+        final boolean returnSerialized) {
         final YangInstanceIdentifier path = message.getPath();
 
         try {
             Boolean exists = transaction.exists(path).checkedGet();
-            getSender().tell(new DataExistsReply(exists).toSerializable(), getSelf());
+            DataExistsReply dataExistsReply = new DataExistsReply(exists);
+            getSender().tell(returnSerialized ? dataExistsReply.toSerializable() :
+                dataExistsReply, getSelf());
         } catch (ReadFailedException e) {
             getSender().tell(new akka.actor.Status.Failure(e),getSelf());
         }
