@@ -250,52 +250,6 @@ public class ServerTest {
         assertFalse(session.isSuccess());
     }
 
-    @Test
-    public void testNegotiationFailedNoReconnect() throws Exception {
-        final Promise<Boolean> p = new DefaultPromise<>(GlobalEventExecutor.INSTANCE);
-
-        this.dispatcher = getServerDispatcher(p);
-
-        this.server = this.dispatcher.createServer(this.serverAddress, new SessionListenerFactory<SimpleSessionListener>() {
-            @Override
-            public SimpleSessionListener getSessionListener() {
-                return new SimpleSessionListener();
-            }
-        });
-
-        this.server.get();
-
-        this.clientDispatcher = new SimpleDispatcher(new SessionNegotiatorFactory<SimpleMessage, SimpleSession, SimpleSessionListener>() {
-            @Override
-            public SessionNegotiator<SimpleSession> getSessionNegotiator(final SessionListenerFactory<SimpleSessionListener> factory,
-                                                                         final Channel channel, final Promise<SimpleSession> promise) {
-
-                return new SimpleSessionNegotiator(promise, channel) {
-                    @Override
-                    protected void startNegotiation() throws Exception {
-                        negotiationFailed(new IllegalStateException("Negotiation failed"));
-                    }
-                };
-            }
-        }, new DefaultPromise<SimpleSession>(GlobalEventExecutor.INSTANCE), eventLoopGroup);
-
-        final ReconnectStrategyFactory reconnectStrategyFactory = mock(ReconnectStrategyFactory.class);
-        final ReconnectStrategy reconnectStrategy = getMockedReconnectStrategy();
-        doReturn(reconnectStrategy).when(reconnectStrategyFactory).createReconnectStrategy();
-
-        this.clientDispatcher.createReconnectingClient(this.serverAddress,
-                reconnectStrategyFactory, new SessionListenerFactory<SimpleSessionListener>() {
-                    @Override
-                    public SimpleSessionListener getSessionListener() {
-                        return new SimpleSessionListener();
-                    }
-                });
-
-
-        // Only one strategy should be created for initial connect, no more = no reconnects
-        verify(reconnectStrategyFactory, times(1)).createReconnectStrategy();
-    }
-
     private SimpleDispatcher getClientDispatcher() {
         return new SimpleDispatcher(new SessionNegotiatorFactory<SimpleMessage, SimpleSession, SimpleSessionListener>() {
             @Override
