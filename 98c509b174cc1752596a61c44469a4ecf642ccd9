@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_95d6a4c4",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamReader.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-10-24T15:31:06Z",
+      "side": 1,
+      "message": "I can change it, it was done, if we are doing more than one thing in constructor. Easier to read",
+      "parentUuid": "ba8cc1f7_3513185e",
+      "revId": "98c509b174cc1752596a61c44469a4ecf642ccd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_55101c4e",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamReader.java",
         "patchSetId": 4
@@ -70,6 +88,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_35db18ef",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamReader.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-10-24T15:31:06Z",
+      "side": 1,
+      "message": "will fix it",
+      "parentUuid": "ba8cc1f7_f51cd06c",
+      "revId": "98c509b174cc1752596a61c44469a4ecf642ccd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_151a946e",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamReader.java",
         "patchSetId": 4
@@ -81,6 +117,24 @@
       "writtenOn": "2014-10-24T02:22:24Z",
       "side": 1,
       "message": "I think these debug log statements are a bit too much. Do we really need them in here?",
+      "revId": "98c509b174cc1752596a61c44469a4ecf642ccd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_55d81cef",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamReader.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-10-24T15:31:06Z",
+      "side": 1,
+      "message": "Hmm, not really, i can remove them, if you want, i added them to track recursive calls.",
+      "parentUuid": "ba8cc1f7_151a946e",
       "revId": "98c509b174cc1752596a61c44469a4ecf642ccd9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -122,6 +176,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_f5e4d0ad",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamReader.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-10-24T15:31:06Z",
+      "side": 1,
+      "message": "I can do that.",
+      "parentUuid": "ba8cc1f7_15aa9470",
+      "revId": "98c509b174cc1752596a61c44469a4ecf642ccd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_b52648b9",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamReader.java",
         "patchSetId": 4
@@ -139,6 +211,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_15e2949f",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamReader.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-10-24T15:31:06Z",
+      "side": 1,
+      "message": "will check that factory",
+      "parentUuid": "ba8cc1f7_b52648b9",
+      "revId": "98c509b174cc1752596a61c44469a4ecf642ccd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_952544ad",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamReader.java",
         "patchSetId": 4
@@ -150,6 +240,24 @@
       "writtenOn": "2014-10-24T02:22:24Z",
       "side": 1,
       "message": "You should use a switch here - would be more optimal\n\nswitch(ValueType.values[objectType]) {\n}\n\nsee ValueSerializer.",
+      "revId": "98c509b174cc1752596a61c44469a4ecf642ccd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_b5ee488a",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamReader.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 244,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-10-24T15:31:06Z",
+      "side": 1,
+      "message": "Sure, will fix it",
+      "parentUuid": "ba8cc1f7_952544ad",
       "revId": "98c509b174cc1752596a61c44469a4ecf642ccd9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -190,6 +298,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_d5f3cc71",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamReader.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 323,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-10-24T15:31:06Z",
+      "side": 1,
+      "message": "Besides Builders, the child objects are of different types",
+      "parentUuid": "ba8cc1f7_5537bce3",
+      "revId": "98c509b174cc1752596a61c44469a4ecf642ccd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_75b0c0dd",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamWriter.java",
         "patchSetId": 4
@@ -201,6 +327,24 @@
       "writtenOn": "2014-10-24T13:56:22Z",
       "side": 1,
       "message": "We can save space by only writing a byte for the type. You could cast ordinal to a byte or change the enums defs to bytes. I would suggest the latter to make it easier as NodeTypes is internal and there\u0027s no compelling reason to define enums.",
+      "revId": "98c509b174cc1752596a61c44469a4ecf642ccd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_95ed448e",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamWriter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-10-24T15:31:06Z",
+      "side": 1,
+      "message": "I wanted to do that, but then ValueTypes and pathArgument types are using Enum and use ordinal value in those, I ended up keeping Enum for nodetypes too, just for consistency. But i can change it",
+      "parentUuid": "ba8cc1f7_75b0c0dd",
       "revId": "98c509b174cc1752596a61c44469a4ecf642ccd9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -224,6 +368,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_75e8c07c",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamWriter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-10-24T15:31:06Z",
+      "side": 1,
+      "message": "good idea",
+      "parentUuid": "ba8cc1f7_15c1342e",
+      "revId": "98c509b174cc1752596a61c44469a4ecf642ccd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_75e760e5",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamWriter.java",
         "patchSetId": 4
@@ -235,6 +397,24 @@
       "writtenOn": "2014-10-24T13:56:22Z",
       "side": 1,
       "message": "In NormalizedNodeSerializer, Moiz encoded all 3 QName components - I think we should do the same here, similar to QNameSerializationContextImpl except we don\u0027t need the codes List. So for each component, it it\u0027s not in the codeMap, write the String representation (via writeUTF), otherwise write the int code (via writeInt). When reading back, we need to also indicate if it\u0027s a String or int so prepend a boolean (true if String, false if int).",
+      "revId": "98c509b174cc1752596a61c44469a4ecf642ccd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_3502383f",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamWriter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-10-24T15:31:06Z",
+      "side": 1,
+      "message": "Date, i can understand, but why localname? would not it differ most of the time?",
+      "parentUuid": "ba8cc1f7_75e760e5",
       "revId": "98c509b174cc1752596a61c44469a4ecf642ccd9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -287,6 +467,24 @@
       "writtenOn": "2014-10-24T13:56:22Z",
       "side": 1,
       "message": "Similar to NodeTypes, we can save space by writing a single byte instead of the ordinal.",
+      "revId": "98c509b174cc1752596a61c44469a4ecf642ccd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_55ffbc34",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamWriter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-10-24T15:31:06Z",
+      "side": 1,
+      "message": "Should i change the older class, which will impact older code too, or write a new one, that will be used for streaming only? OR u mean just cast int to byte because that does not affect anything?",
+      "parentUuid": "ba8cc1f7_15d8541c",
       "revId": "98c509b174cc1752596a61c44469a4ecf642ccd9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
