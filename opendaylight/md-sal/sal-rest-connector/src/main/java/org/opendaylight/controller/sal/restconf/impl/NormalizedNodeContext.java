@@ -6,6 +6,12 @@ public class NormalizedNodeContext {
 
     private final InstanceIdentifierContext context;
     private final NormalizedNode<?,?> data;
+    private int depth = Integer.MAX_VALUE;
+
+    public NormalizedNodeContext(InstanceIdentifierContext context, NormalizedNode<?, ?> data, final int depth) {
+        this(context,data);
+        this.depth = depth;
+    }
 
     public NormalizedNodeContext(InstanceIdentifierContext context, NormalizedNode<?, ?> data) {
         this.context = context;
@@ -18,5 +24,9 @@ public class NormalizedNodeContext {
 
     public NormalizedNode<?, ?> getData() {
         return data;
+    }
+
+    public int getDepth() {
+        return depth;
     }
 }
