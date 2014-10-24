@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_52a03290",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardReadTransaction.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-10-24T08:16:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_912c7b4c",
+      "revId": "f497ee504f542ba633cf1aeeabe5a6058ec80eae",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_b1317fa4",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardReadWriteTransaction.java",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2014-10-23T02:37:44Z",
       "side": 1,
       "message": "Define as static in ShardTransaction.",
+      "revId": "f497ee504f542ba633cf1aeeabe5a6058ec80eae",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_f2ace68e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardReadWriteTransaction.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-10-24T08:16:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_b1317fa4",
       "revId": "f497ee504f542ba633cf1aeeabe5a6058ec80eae",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_12aaaa70",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardWriteTransaction.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-10-24T08:16:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_5126f369",
+      "revId": "f497ee504f542ba633cf1aeeabe5a6058ec80eae",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_d119a323",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTransactionTest.java",
         "patchSetId": 5
@@ -64,6 +118,24 @@
       "writtenOn": "2014-10-23T02:37:44Z",
       "side": 1,
       "message": "Since the test passes a serialized ReadData instance, we should expect a serialized reply and fail if we receive an unserialized reply. This is much easier and compact if you use expectMsgClass, ie\n\n ReadDataReply reply \u003d ReadDataReply.fromSerializable( ....,\n        expectMsgClass(duration(\"5 seconds\"),\n                                   ReadDataReply.SERIALIZABLE_CLASS));\n\nSo expectMsgClass would fail if ReadDataReply was returned.\n\nAlso, please add a test call with unserialized ReadData as well, expecting unserialized ReadDataReply, i.e.\n\n reply \u003d expectMsgClass(duration(\"5 seconds\"), ReadDataReply.class);\n\nYou could add a separate test method but I would just add it to this test to avoid all the duplicate setup.\n\nAlso, I know this is pre-existing code, but we really don\u0027t need the Within block above.\n\nIt would be great if you could modify the other test methods in this class similarly.",
+      "revId": "f497ee504f542ba633cf1aeeabe5a6058ec80eae",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_95aa24d3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTransactionTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-10-24T08:16:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_d119a323",
       "revId": "f497ee504f542ba633cf1aeeabe5a6058ec80eae",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_55ac9ced",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/TransactionProxyTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 922,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-10-24T08:16:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_91d31b38",
+      "revId": "f497ee504f542ba633cf1aeeabe5a6058ec80eae",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_b1d89f54",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/TransactionProxyTest.java",
         "patchSetId": 5
@@ -98,6 +188,24 @@
       "writtenOn": "2014-10-23T02:37:44Z",
       "side": 1,
       "message": "This should return unserialized reply",
+      "revId": "f497ee504f542ba633cf1aeeabe5a6058ec80eae",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_f5b8502c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/TransactionProxyTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 933,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-10-24T08:16:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_b1d89f54",
       "revId": "f497ee504f542ba633cf1aeeabe5a6058ec80eae",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_d5ee6c22",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/TransactionProxyTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 939,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-10-24T08:16:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_51dd9341",
+      "revId": "f497ee504f542ba633cf1aeeabe5a6058ec80eae",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_71e21705",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/TransactionProxyTest.java",
         "patchSetId": 5
@@ -138,6 +264,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_b5e9681c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/TransactionProxyTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 972,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-10-24T08:16:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_71e21705",
+      "revId": "f497ee504f542ba633cf1aeeabe5a6058ec80eae",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_11e70b14",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/TransactionProxyTest.java",
         "patchSetId": 5
@@ -149,6 +293,24 @@
       "writtenOn": "2014-10-23T02:37:44Z",
       "side": 1,
       "message": "Should also test local ready as well (could add it to this method).",
+      "revId": "f497ee504f542ba633cf1aeeabe5a6058ec80eae",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_158db47b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/TransactionProxyTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 973,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-10-24T08:16:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_11e70b14",
       "revId": "f497ee504f542ba633cf1aeeabe5a6058ec80eae",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
