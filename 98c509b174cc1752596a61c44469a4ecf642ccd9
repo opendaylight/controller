@@ -351,6 +351,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_35b0f88a",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamWriter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-24T16:12:29Z",
+      "side": 1,
+      "message": "You can keep NodeTypes as an enum for consistency and write the ordinal as a byte.",
+      "parentUuid": "ba8cc1f7_95ed448e",
+      "revId": "98c509b174cc1752596a61c44469a4ecf642ccd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_15c1342e",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamWriter.java",
         "patchSetId": 4
@@ -421,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_55ad7c30",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamWriter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-24T16:12:29Z",
+      "side": 1,
+      "message": "Maybe but it will be duplicated for lists in large trees (e.g. Node). The encoding worked well for the NormalizedNodeSerializer so I think we should implement it similarly here as well.",
+      "parentUuid": "ba8cc1f7_3502383f",
+      "revId": "98c509b174cc1752596a61c44469a4ecf642ccd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_f53370f4",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamWriter.java",
         "patchSetId": 4
@@ -485,6 +521,24 @@
       "side": 1,
       "message": "Should i change the older class, which will impact older code too, or write a new one, that will be used for streaming only? OR u mean just cast int to byte because that does not affect anything?",
       "parentUuid": "ba8cc1f7_15d8541c",
+      "revId": "98c509b174cc1752596a61c44469a4ecf642ccd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_b563a819",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamWriter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-24T16:12:29Z",
+      "side": 1,
+      "message": "Hmm... I imagine the older code might be deprecated in favor of this code but the enum classes are general so I imagine we\u0027d keep them. It\u0027s easiest to cast ordinal to a byte - that\u0027s safe, as long as we don\u0027t exceed 255 enums :).",
+      "parentUuid": "ba8cc1f7_55ffbc34",
       "revId": "98c509b174cc1752596a61c44469a4ecf642ccd9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
