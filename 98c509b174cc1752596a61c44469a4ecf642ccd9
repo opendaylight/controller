@@ -104,6 +104,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_15aa9470",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamReader.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-24T13:56:22Z",
+      "side": 1,
+      "message": "Agree. Also I think we should encode all 3 components of QName - see my comments in DDSNormalizedNodeStreamWriter.\n\nFor de-serialization, we\u0027d need a codeMap (Map\u003cInteger,String\u003e). First read the boolean. If it\u0027s true (a String), then it\u0027s the first occurrence so readUTF and put it in the codeMap with key codeMap.size(). If it\u0027s false (an int), readInt and lookup in the codeMap. Do the same for all 3 components then create the full String form as PathArgumentSerializer#qNameToString does and lookup in the QNameFactory.",
+      "parentUuid": "ba8cc1f7_d52bcc80",
+      "revId": "98c509b174cc1752596a61c44469a4ecf642ccd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_b52648b9",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamReader.java",
         "patchSetId": 4
@@ -172,6 +190,57 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_75b0c0dd",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamWriter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-24T13:56:22Z",
+      "side": 1,
+      "message": "We can save space by only writing a byte for the type. You could cast ordinal to a byte or change the enums defs to bytes. I would suggest the latter to make it easier as NodeTypes is internal and there\u0027s no compelling reason to define enums.",
+      "revId": "98c509b174cc1752596a61c44469a4ecf642ccd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_15c1342e",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamWriter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-24T13:56:22Z",
+      "side": 1,
+      "message": "Use get here and check for null to avoid 2 map lookups.",
+      "revId": "98c509b174cc1752596a61c44469a4ecf642ccd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_75e760e5",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamWriter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-24T13:56:22Z",
+      "side": 1,
+      "message": "In NormalizedNodeSerializer, Moiz encoded all 3 QName components - I think we should do the same here, similar to QNameSerializationContextImpl except we don\u0027t need the codes List. So for each component, it it\u0027s not in the codeMap, write the String representation (via writeUTF), otherwise write the int code (via writeInt). When reading back, we need to also indicate if it\u0027s a String or int so prepend a boolean (true if String, false if int).",
+      "revId": "98c509b174cc1752596a61c44469a4ecf642ccd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_f53370f4",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamWriter.java",
         "patchSetId": 4
@@ -183,6 +252,75 @@
       "writtenOn": "2014-10-24T02:22:24Z",
       "side": 1,
       "message": "I\u0027m wondering if you could save yourself this code by just using Iterables.size()?",
+      "revId": "98c509b174cc1752596a61c44469a4ecf642ccd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_d5098c96",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamWriter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-24T13:56:22Z",
+      "side": 1,
+      "message": "Yes - Iterables.size() does this for you.",
+      "parentUuid": "ba8cc1f7_f53370f4",
+      "revId": "98c509b174cc1752596a61c44469a4ecf642ccd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_15d8541c",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamWriter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-24T13:56:22Z",
+      "side": 1,
+      "message": "Similar to NodeTypes, we can save space by writing a single byte instead of the ordinal.",
+      "revId": "98c509b174cc1752596a61c44469a4ecf642ccd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_95ec64c9",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamWriter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 314,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-24T13:56:22Z",
+      "side": 1,
+      "message": "Similar to NodeTypes, we can save space by writing a single byte instead of the ordinal.",
+      "revId": "98c509b174cc1752596a61c44469a4ecf642ccd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_55cedc5b",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/stream/DDSNormalizedNodeStreamWriter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 337,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-24T13:56:22Z",
+      "side": 1,
+      "message": "We\u0027ve already called ValueType.getSerializableType above to get the type code so we can use that in a switch statement here which would be more efficient than checking instanceof.",
       "revId": "98c509b174cc1752596a61c44469a4ecf642ccd9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
