@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_583e13ba",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataChangeListenerRegistrationProxy.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-24T22:57:33Z",
+      "side": 1,
+      "message": "Why would findLocalShardAsync result in a PrimaryNotFoundException? Right now I see it thrown only in TransactionProxy#createTransactionIfMissing when findPrimary fails.",
+      "revId": "9645e31609582eeec7759aad00e3aa389ddab73c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_f8bda703",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-24T22:57:33Z",
+      "side": 1,
+      "message": "Could you explain these changes please?",
+      "revId": "9645e31609582eeec7759aad00e3aa389ddab73c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_185f2b10",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 699,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-24T22:57:33Z",
+      "side": 1,
+      "message": "What are we doing here?",
+      "revId": "9645e31609582eeec7759aad00e3aa389ddab73c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_18bbab0f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-24T22:57:33Z",
+      "side": 1,
+      "message": "Should this be another exception like \"LocalShardNotFoundException\"?",
+      "revId": "9645e31609582eeec7759aad00e3aa389ddab73c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_b8371fb0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DataChangeListenerRegistrationProxyTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-24T22:57:33Z",
+      "side": 1,
+      "message": "Why not just use expectNoMsg with a duration?",
+      "revId": "9645e31609582eeec7759aad00e3aa389ddab73c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
