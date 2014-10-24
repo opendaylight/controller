@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_9549c48d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 414,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-24T18:19:01Z",
+      "side": 1,
+      "message": "Since ActorContext already has a lot of utility methods wouldn\u0027t it make sense to simply add a isLocalPath to the actorContext to it instead of this static method on DataStoreUtils?",
+      "revId": "6ac28cd8f6a4dba7d6e0308250d2c41e053d9f87",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
