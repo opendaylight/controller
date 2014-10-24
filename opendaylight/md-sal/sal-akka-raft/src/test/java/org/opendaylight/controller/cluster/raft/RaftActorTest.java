@@ -181,7 +181,7 @@ public class RaftActorTest extends AbstractActorTest {
                         return true;
                     }
                 }.from(raftActor.path().toString())
-                    .message("Switching from state Candidate to Leader")
+                    .message("Switching from behavior Candidate to Leader")
                     .occurrences(1).exec();
 
 
