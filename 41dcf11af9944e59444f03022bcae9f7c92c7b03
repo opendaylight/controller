@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_58929358",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/DDSNormalizedNodeStreamReader.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-25T14:40:06Z",
+      "side": 1,
+      "message": "It may not be clear to people what DDS means. Since this is an implementation of NormalizedNodeStreamReader that basically reads the data from a serialized input stream, can we name it Serialized NormalizedNodeStreamReader?",
+      "revId": "41dcf11af9944e59444f03022bcae9f7c92c7b03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_b8887f23",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/DDSNormalizedNodeStreamReader.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-25T14:40:06Z",
+      "side": 1,
+      "message": "We can just use 1 Map here to store all 3.",
+      "revId": "41dcf11af9944e59444f03022bcae9f7c92c7b03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_d88d4333",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/DDSNormalizedNodeStreamReader.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-25T14:40:06Z",
+      "side": 1,
+      "message": "Please use Integer.valueOf(codeMap.size()) for Integer object re-use.",
+      "revId": "41dcf11af9944e59444f03022bcae9f7c92c7b03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_f89e0763",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/DDSNormalizedNodeStreamWriter.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-25T14:40:06Z",
+      "side": 1,
+      "message": "Similar to DDSNormalizedNodeStreamReader, can we rename this to SerializedNormalizedNodeStreamWriter?",
+      "revId": "41dcf11af9944e59444f03022bcae9f7c92c7b03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_189c0b69",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/DDSNormalizedNodeStreamWriter.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-25T14:40:06Z",
+      "side": 1,
+      "message": "We can just use 1 Map here to store all 3 (Map\u003cObject,Integer\u003e). Take a look at QNameSerializationContextImpl (codeMap) - we can do it similarly.",
+      "revId": "41dcf11af9944e59444f03022bcae9f7c92c7b03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_7882f701",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/DDSNormalizedNodeStreamWriter.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-25T14:40:06Z",
+      "side": 1,
+      "message": "Please use Integer.valueOf(map.size()) for Integer object re-use.",
+      "revId": "41dcf11af9944e59444f03022bcae9f7c92c7b03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_9887bb0f",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/test/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/DDSNormalizedNodeStreamTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-25T14:40:06Z",
+      "side": 1,
+      "message": "This leaves the objectTest file on disk so it is picked up by git - obviously we don\u0027t want people to accidentally check it in. We could delete the file after the test or put it in \"target/objectTest\" so it\u0027s ignored. However it would be easiest to avoid files and their related errors altogether by streaming to a ByteArrayOutputStream and using a ByteArrayInputStream to read it back.",
+      "revId": "41dcf11af9944e59444f03022bcae9f7c92c7b03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
