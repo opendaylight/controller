@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_58e4d30c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-25T01:27:27Z",
+      "side": 1,
+      "message": "Apparently if you do not handle RecoveryFailure the actor gets stopped. Since we are handling it the actor will not be stopped but then it might be in an inconsistent state.",
+      "parentUuid": "ba8cc1f7_d831c3a3",
+      "revId": "9645e31609582eeec7759aad00e3aa389ddab73c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_185f2b10",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
         "patchSetId": 7
@@ -101,6 +119,24 @@
       "side": 1,
       "message": "I assume you mean the null check. This method is now also called if recovery fails. If recovery fails, I\u0027m not sure if akka would also send RecoveryComplete in addition to RecoveryFailed. I wouldn\u0027t think so but I was just trying to cover it in case - we wouldn\u0027t want two txCommitTimeoutCheckSchedules created.",
       "parentUuid": "ba8cc1f7_185f2b10",
+      "revId": "9645e31609582eeec7759aad00e3aa389ddab73c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_f8f047cb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 699,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-25T01:27:27Z",
+      "side": 1,
+      "message": "Sounds good but RecoveryFailure sounds like we have a catastrophic failure. We need to think of an appropriate way to handle that scenario.",
+      "parentUuid": "ba8cc1f7_982b3b30",
       "revId": "9645e31609582eeec7759aad00e3aa389ddab73c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
