@@ -143,6 +143,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_d8bf83cf",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 699,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-25T01:59:57Z",
+      "side": 1,
+      "message": "RecoveryFailure would probably mean the journal is corrupt or we modified serialization in a non-backwards compatible way so we lose the persisted data.",
+      "parentUuid": "ba8cc1f7_f8f047cb",
+      "revId": "9645e31609582eeec7759aad00e3aa389ddab73c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_18bbab0f",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
         "patchSetId": 7
