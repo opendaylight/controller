@@ -14,6 +14,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionFactory;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
@@ -28,8 +29,8 @@ class DOMForwardedReadOnlyTransaction extends
         DOMDataReadOnlyTransaction {
 
     protected DOMForwardedReadOnlyTransaction(final Object identifier,
-            final Map<LogicalDatastoreType, DOMStoreReadTransaction> backingTxs) {
-        super(identifier, backingTxs);
+            final Map<LogicalDatastoreType, ? extends DOMStoreTransactionFactory> storeTxFactories) {
+        super(identifier, storeTxFactories);
     }
 
     @Override
@@ -48,5 +49,10 @@ class DOMForwardedReadOnlyTransaction extends
     @Override
     public void close() {
         closeSubtransactions();
+    }
+
+    @Override
+    protected DOMStoreReadTransaction createTransaction(DOMStoreTransactionFactory storeTxFactory) {
+        return storeTxFactory.newReadOnlyTransaction();
     }
 }

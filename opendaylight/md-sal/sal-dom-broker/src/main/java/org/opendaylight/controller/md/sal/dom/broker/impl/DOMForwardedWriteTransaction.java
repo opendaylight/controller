@@ -22,6 +22,7 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFaile
 import org.opendaylight.controller.md.sal.common.impl.service.AbstractDataTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionFactory;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -79,8 +80,9 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
     private volatile Future<?> commitFuture;
 
     protected DOMForwardedWriteTransaction(final Object identifier,
-            final Map<LogicalDatastoreType, T> backingTxs, final DOMDataCommitImplementation commitImpl) {
-        super(identifier, backingTxs);
+            final Map<LogicalDatastoreType, ? extends DOMStoreTransactionFactory> storeTxFactories,
+            final DOMDataCommitImplementation commitImpl) {
+        super(identifier, storeTxFactories);
         this.commitImpl = Preconditions.checkNotNull(commitImpl, "commitImpl must not be null.");
     }
 
@@ -146,5 +148,11 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
 
     private void checkRunning(final DOMDataCommitImplementation impl) {
         Preconditions.checkState(impl != null, "Transaction %s is no longer running", getIdentifier());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected T createTransaction(DOMStoreTransactionFactory storeTxFactory) {
+        return (T) storeTxFactory.newWriteOnlyTransaction();
     }
 }

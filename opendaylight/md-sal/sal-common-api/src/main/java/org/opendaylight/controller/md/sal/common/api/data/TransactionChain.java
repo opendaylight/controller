@@ -47,7 +47,8 @@ public interface TransactionChain<P extends Path<P>, D> extends AutoCloseable,
      * <p>
      * The previous write transaction has to be either SUBMITTED
      * ({@link AsyncWriteTransaction#submit submit} was invoked) or CANCELLED
-     * ({@link #close close} was invoked).
+     * ({@link #close close} was invoked). Any operation on this transaction will fail with an
+     * IllegalStateException if the previous transaction was not SUBMITTED or CANCELLED.
      * <p>
      * The returned read-only transaction presents an isolated view of the data if the previous
      * write transaction was successful - in other words, this read-only transaction will see the
@@ -56,8 +57,6 @@ public interface TransactionChain<P extends Path<P>, D> extends AutoCloseable,
      * the previous transaction is not visible.
      *
      * @return New transaction in the chain.
-     * @throws IllegalStateException
-     *             if the previous transaction was not SUBMITTED or CANCELLED.
      * @throws TransactionChainClosedException
      *             if the chain has been closed.
      */
@@ -70,7 +69,8 @@ public interface TransactionChain<P extends Path<P>, D> extends AutoCloseable,
      * <p>
      * The previous write transaction has to be either SUBMITTED
      * ({@link AsyncWriteTransaction#submit submit} was invoked) or CANCELLED
-     * ({@link #close close} was invoked).
+     * ({@link #close close} was invoked). Any operation on this transaction will fail with an
+     * IllegalStateException if the previous transaction was not SUBMITTED or CANCELLED.
      * <p>
      * The returned read-write transaction presents an isolated view of the data if the previous
      * write transaction was successful - in other words, this read-write transaction will see the
@@ -83,8 +83,6 @@ public interface TransactionChain<P extends Path<P>, D> extends AutoCloseable,
      * transaction in this chain and also to any transaction outside this chain.
      *
      * @return New transaction in the chain.
-     * @throws IllegalStateException
-     *             if the previous transaction was not SUBMITTED or CANCELLED.
      * @throws TransactionChainClosedException
      *             if the chain has been closed.
      */
@@ -97,7 +95,8 @@ public interface TransactionChain<P extends Path<P>, D> extends AutoCloseable,
      * <p>
      * The previous write transaction has to be either SUBMITTED
      * ({@link AsyncWriteTransaction#submit submit} was invoked) or CANCELLED
-     * ({@link #close close} was invoked).
+     * ({@link #close close} was invoked). Any operation on this transaction will fail with an
+     * IllegalStateException if the previous transaction was not SUBMITTED or CANCELLED.
      * <p>
      * The returned write-only transaction presents an isolated view of the data if the previous
      * write transaction was successful - in other words, this write-only transaction will see the
@@ -110,8 +109,6 @@ public interface TransactionChain<P extends Path<P>, D> extends AutoCloseable,
      * transaction in this chain and also to any transaction outside this chain.
      *
      * @return New transaction in the chain.
-     * @throws IllegalStateException
-     *             if the previous transaction was not SUBMITTED or CANCELLED.
      * @throws TransactionChainClosedException
      *             if the chain has been closed.
      */
