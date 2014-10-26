@@ -13,6 +13,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionFactory;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
@@ -36,9 +37,9 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  */
 final class DOMForwardedReadWriteTransaction extends DOMForwardedWriteTransaction<DOMStoreReadWriteTransaction> implements DOMDataReadWriteTransaction {
     protected DOMForwardedReadWriteTransaction(final Object identifier,
-            final Map<LogicalDatastoreType, DOMStoreReadWriteTransaction> backingTxs,
+            final Map<LogicalDatastoreType, ? extends DOMStoreTransactionFactory> storeTxFactories,
             final DOMDataCommitImplementation commitImpl) {
-        super(identifier, backingTxs, commitImpl);
+        super(identifier, storeTxFactories, commitImpl);
     }
 
     @Override
@@ -52,5 +53,10 @@ final class DOMForwardedReadWriteTransaction extends DOMForwardedWriteTransactio
         final LogicalDatastoreType store,
         final YangInstanceIdentifier path) {
         return getSubtransaction(store).exists(path);
+    }
+
+    @Override
+    protected DOMStoreReadWriteTransaction createTransaction(DOMStoreTransactionFactory storeTxFactory) {
+        return storeTxFactory.newReadWriteTransaction();
     }
 }

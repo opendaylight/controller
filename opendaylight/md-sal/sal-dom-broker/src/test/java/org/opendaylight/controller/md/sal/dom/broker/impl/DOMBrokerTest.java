@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitDeadlockException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
@@ -38,6 +39,11 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.md.sal.dom.store.impl.TestModel;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.util.concurrent.DeadlockDetectingListeningExecutorService;
 import org.opendaylight.yangtools.util.concurrent.SpecialExecutors;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -52,22 +58,28 @@ public class DOMBrokerTest {
     private ListeningExecutorService executor;
     private ExecutorService futureExecutor;
     private CommitExecutorService commitExecutor;
+    private ForwardingDOMStore operDOMStore;
+    private ForwardingDOMStore configDOMStore;
+    private InMemoryDOMDataStore operStore;
+    private InMemoryDOMDataStore configStore;
 
     @Before
     public void setupStore() {
 
-        InMemoryDOMDataStore operStore = new InMemoryDOMDataStore("OPER",
+        operStore = new InMemoryDOMDataStore("OPER",
                 MoreExecutors.sameThreadExecutor(), MoreExecutors.sameThreadExecutor());
-        InMemoryDOMDataStore configStore = new InMemoryDOMDataStore("CFG",
+        configStore = new InMemoryDOMDataStore("CFG",
                 MoreExecutors.sameThreadExecutor(), MoreExecutors.sameThreadExecutor());
         schemaContext = TestModel.createTestContext();
 
         operStore.onGlobalContextUpdated(schemaContext);
         configStore.onGlobalContextUpdated(schemaContext);
 
+        operDOMStore = new ForwardingDOMStore(operStore);
+        configDOMStore = new ForwardingDOMStore(configStore);
         ImmutableMap<LogicalDatastoreType, DOMStore> stores = ImmutableMap.<LogicalDatastoreType, DOMStore> builder() //
-                .put(CONFIGURATION, configStore) //
-                .put(OPERATIONAL, operStore) //
+                .put(CONFIGURATION, configDOMStore) //
+                .put(OPERATIONAL, operDOMStore) //
                 .build();
 
         commitExecutor = new CommitExecutorService(Executors.newSingleThreadExecutor());
@@ -168,6 +180,159 @@ public class DOMBrokerTest {
         writeTx.put( OPERATIONAL, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME) );
 
         writeTx.submit().checkedGet( 5, TimeUnit.SECONDS );
+    }
+
+    private DOMStore setupMockDataStore(DOMStore realStore) {
+        DOMStore mockStore = Mockito.mock(DOMStore.class);
+        Mockito.doReturn(realStore.newWriteOnlyTransaction()).when(mockStore).newWriteOnlyTransaction();
+        Mockito.doReturn(realStore.newReadWriteTransaction()).when(mockStore).newReadWriteTransaction();
+        Mockito.doReturn(realStore.newReadOnlyTransaction()).when(mockStore).newReadOnlyTransaction();
+        return mockStore;
+    }
+
+    private DOMStore setupMockConfigDataStore() {
+        configDOMStore.delegate = setupMockDataStore(configStore);
+        return configDOMStore.delegate;
+    }
+
+    private DOMStore setupMockOperDataStore() {
+        operDOMStore.delegate = setupMockDataStore(operStore);
+        return operDOMStore.delegate;
+    }
+
+    @Test
+    public void testWriteOnlyTxAccessingBothDataStores() throws Exception {
+        DOMStore mockConfigStore = setupMockConfigDataStore();
+        DOMStore mockOperStore = setupMockOperDataStore();
+
+        DOMDataWriteTransaction writeTx = domBroker.newWriteOnlyTransaction();
+        assertNotNull(writeTx);
+
+        writeTx.put(OPERATIONAL, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+        writeTx.put(CONFIGURATION, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+
+        writeTx.submit().get();
+
+        assertEquals("isPresent", true, configStore.newReadOnlyTransaction()
+                .read(TestModel.TEST_PATH).get().isPresent());
+        assertEquals("isPresent", true, operStore.newReadOnlyTransaction()
+                .read(TestModel.TEST_PATH).get().isPresent());
+
+        Mockito.verify(mockConfigStore).newWriteOnlyTransaction();
+        Mockito.verify(mockOperStore).newWriteOnlyTransaction();
+        Mockito.verifyNoMoreInteractions(mockConfigStore, mockOperStore);
+    }
+
+    @Test
+    public void testWriteOnlyTxAccessingOneDataStore() throws Exception {
+        DOMStore mockConfigStore = setupMockConfigDataStore();
+        DOMStore mockOperStore = setupMockOperDataStore();
+
+        DOMDataWriteTransaction writeTx = domBroker.newWriteOnlyTransaction();
+        assertNotNull(writeTx);
+
+        writeTx.put(CONFIGURATION, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+        writeTx.put(CONFIGURATION, TestModel.TEST2_PATH, ImmutableNodes.containerNode(TestModel.TEST2_QNAME));
+
+        writeTx.submit().get();
+
+        DOMStoreReadTransaction readTx = configStore.newReadOnlyTransaction();
+        assertEquals("isPresent", true, readTx.read(TestModel.TEST_PATH).get().isPresent());
+        assertEquals("isPresent", true, readTx.read(TestModel.TEST2_PATH).get().isPresent());
+
+        Mockito.verify(mockConfigStore, Mockito.times(1)).newWriteOnlyTransaction();
+        Mockito.verifyNoMoreInteractions(mockConfigStore);
+        Mockito.verifyZeroInteractions(mockOperStore);
+    }
+
+    @Test
+    public void testWriteTxAccessingNoDataStore() throws Exception {
+        DOMStore mockConfigStore = setupMockConfigDataStore();
+        DOMStore mockOperStore = setupMockOperDataStore();
+
+        DOMDataWriteTransaction writeTx = domBroker.newWriteOnlyTransaction();
+        assertNotNull(writeTx);
+
+        writeTx.submit().get();
+
+        Mockito.verifyZeroInteractions(mockConfigStore, mockOperStore);
+    }
+
+    @Test
+    public void testReadWriteTxAccessingBothDataStores() throws Exception {
+        DOMStore mockConfigStore = setupMockConfigDataStore();
+        DOMStore mockOperStore = setupMockOperDataStore();
+
+        DOMDataWriteTransaction writeTx = domBroker.newReadWriteTransaction();
+        assertNotNull(writeTx);
+
+        writeTx.put(OPERATIONAL, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+        writeTx.put(CONFIGURATION, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+
+        writeTx.submit().get();
+
+        assertEquals("isPresent", true, configStore.newReadOnlyTransaction()
+                .read(TestModel.TEST_PATH).get().isPresent());
+        assertEquals("isPresent", true, operStore.newReadOnlyTransaction()
+                .read(TestModel.TEST_PATH).get().isPresent());
+
+        Mockito.verify(mockConfigStore, Mockito.times(1)).newReadWriteTransaction();
+        Mockito.verify(mockOperStore, Mockito.times(1)).newReadWriteTransaction();
+        Mockito.verifyNoMoreInteractions(mockConfigStore, mockOperStore);
+    }
+
+    @Test
+    public void testReadWriteTxAccessingOneDataStore() throws Exception {
+        DOMStore mockConfigStore = setupMockConfigDataStore();
+        DOMStore mockOperStore = setupMockOperDataStore();
+
+        DOMDataReadWriteTransaction writeTx = domBroker.newReadWriteTransaction();
+        assertNotNull(writeTx);
+
+        writeTx.put(CONFIGURATION, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+        writeTx.put(CONFIGURATION, TestModel.TEST2_PATH, ImmutableNodes.containerNode(TestModel.TEST2_QNAME));
+
+        writeTx.submit().get();
+
+        DOMStoreReadTransaction readTx = configStore.newReadOnlyTransaction();
+        assertEquals("isPresent", true, readTx.read(TestModel.TEST_PATH).get().isPresent());
+        assertEquals("isPresent", true, readTx.read(TestModel.TEST2_PATH).get().isPresent());
+
+        Mockito.verify(mockConfigStore, Mockito.times(1)).newReadWriteTransaction();
+        Mockito.verifyNoMoreInteractions(mockConfigStore);
+        Mockito.verifyZeroInteractions(mockOperStore);
+    }
+
+    @Test
+    public void testReadOnlyTxAccessingBothDataStores() throws Exception {
+        DOMStore mockConfigStore = setupMockConfigDataStore();
+        DOMStore mockOperStore = setupMockOperDataStore();
+
+        DOMDataReadTransaction writeTx = domBroker.newReadOnlyTransaction();
+        assertNotNull(writeTx);
+
+        writeTx.read(CONFIGURATION, TestModel.TEST_PATH).get();
+        writeTx.read(OPERATIONAL, TestModel.TEST_PATH).get();
+
+        Mockito.verify(mockConfigStore).newReadOnlyTransaction();
+        Mockito.verify(mockOperStore).newReadOnlyTransaction();
+        Mockito.verifyNoMoreInteractions(mockConfigStore, mockOperStore);
+    }
+
+    @Test
+    public void testReadOnlyTxAccessingOneDataStore() throws Exception {
+        DOMStore mockConfigStore = setupMockConfigDataStore();
+        DOMStore mockOperStore = setupMockOperDataStore();
+
+        DOMDataReadTransaction writeTx = domBroker.newReadOnlyTransaction();
+        assertNotNull(writeTx);
+
+        writeTx.read(OPERATIONAL, TestModel.TEST_PATH).get();
+        writeTx.read(OPERATIONAL, TestModel.TEST2_PATH).get();
+
+        Mockito.verify(mockOperStore, Mockito.times(1)).newReadOnlyTransaction();
+        Mockito.verifyNoMoreInteractions(mockOperStore);
+        Mockito.verifyZeroInteractions(mockConfigStore);
     }
 
     /**
@@ -351,6 +516,41 @@ public class DOMBrokerTest {
         @Override
         protected ExecutorService delegate() {
             return delegate;
+        }
+    }
+
+    static class ForwardingDOMStore implements DOMStore {
+
+        DOMStore delegate;
+
+        ForwardingDOMStore(DOMStore delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public DOMStoreReadTransaction newReadOnlyTransaction() {
+            return delegate.newReadOnlyTransaction();
+        }
+
+        @Override
+        public DOMStoreWriteTransaction newWriteOnlyTransaction() {
+            return delegate.newWriteOnlyTransaction();
+        }
+
+        @Override
+        public DOMStoreReadWriteTransaction newReadWriteTransaction() {
+            return delegate.newReadWriteTransaction();
+        }
+
+        @Override
+        public <L extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> ListenerRegistration<L> registerChangeListener(
+                YangInstanceIdentifier path, L listener, DataChangeScope scope) {
+            return delegate.registerChangeListener(path, listener, scope);
+        }
+
+        @Override
+        public DOMStoreTransactionChain createTransactionChain() {
+            return delegate.createTransactionChain();
         }
     }
 }

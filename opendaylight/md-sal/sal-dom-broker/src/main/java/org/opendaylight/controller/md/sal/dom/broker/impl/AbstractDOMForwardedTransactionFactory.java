@@ -10,14 +10,11 @@ package org.opendaylight.controller.md.sal.dom.broker.impl;
 import com.google.common.base.Preconditions;
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionFactory;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 
@@ -75,11 +72,7 @@ abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreTransact
     public final DOMDataReadOnlyTransaction newReadOnlyTransaction() {
         checkNotClosed();
 
-        final Map<LogicalDatastoreType, DOMStoreReadTransaction> txns = new EnumMap<>(LogicalDatastoreType.class);
-        for (Entry<LogicalDatastoreType, T> store : storeTxFactories.entrySet()) {
-            txns.put(store.getKey(), store.getValue().newReadOnlyTransaction());
-        }
-        return new DOMForwardedReadOnlyTransaction(newTransactionIdentifier(), txns);
+        return new DOMForwardedReadOnlyTransaction(newTransactionIdentifier(), storeTxFactories);
     }
 
     /**
@@ -124,11 +117,8 @@ abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreTransact
     public final DOMDataWriteTransaction newWriteOnlyTransaction() {
         checkNotClosed();
 
-        final Map<LogicalDatastoreType, DOMStoreWriteTransaction> txns = new EnumMap<>(LogicalDatastoreType.class);
-        for (Entry<LogicalDatastoreType, T> store : storeTxFactories.entrySet()) {
-            txns.put(store.getKey(), store.getValue().newWriteOnlyTransaction());
-        }
-        return new DOMForwardedWriteTransaction<DOMStoreWriteTransaction>(newTransactionIdentifier(), txns, this);
+        return new DOMForwardedWriteTransaction<DOMStoreWriteTransaction>(newTransactionIdentifier(),
+                storeTxFactories, this);
     }
 
     /**
@@ -178,11 +168,7 @@ abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreTransact
     public final DOMDataReadWriteTransaction newReadWriteTransaction() {
         checkNotClosed();
 
-        final Map<LogicalDatastoreType, DOMStoreReadWriteTransaction> txns = new EnumMap<>(LogicalDatastoreType.class);
-        for (Entry<LogicalDatastoreType, T> store : storeTxFactories.entrySet()) {
-            txns.put(store.getKey(), store.getValue().newReadWriteTransaction());
-        }
-        return new DOMForwardedReadWriteTransaction(newTransactionIdentifier(), txns, this);
+        return new DOMForwardedReadWriteTransaction(newTransactionIdentifier(), storeTxFactories, this);
     }
 
     /**

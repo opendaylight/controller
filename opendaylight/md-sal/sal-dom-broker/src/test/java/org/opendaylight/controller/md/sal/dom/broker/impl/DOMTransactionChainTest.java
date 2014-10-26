@@ -155,9 +155,10 @@ public class DOMTransactionChainTest {
          * IllegalStateException.
          */
         try {
-            txChain.newReadOnlyTransaction();
+            txChain.newReadOnlyTransaction().read(OPERATIONAL, TestModel.TEST_PATH);
             fail("Allocation of secondReadTx should fail with IllegalStateException");
         } catch (Exception e) {
+            e.printStackTrace();
             assertTrue(e instanceof IllegalStateException);
         }
     }

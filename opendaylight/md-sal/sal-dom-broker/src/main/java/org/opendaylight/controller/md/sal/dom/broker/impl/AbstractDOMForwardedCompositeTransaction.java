@@ -7,10 +7,12 @@
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import java.util.Collection;
 import java.util.Map;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionFactory;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
@@ -29,7 +31,8 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 abstract class AbstractDOMForwardedCompositeTransaction<K, T extends DOMStoreTransaction> implements
         AsyncTransaction<YangInstanceIdentifier, NormalizedNode<?, ?>> {
 
-    private final Map<K, T> backingTxs;
+    private final Map<K, ? extends DOMStoreTransactionFactory> storeTxFactories;
+    private final Map<K, T> backingTxs = Maps.newHashMap();
     private final Object identifier;
 
     /**
@@ -41,10 +44,14 @@ abstract class AbstractDOMForwardedCompositeTransaction<K, T extends DOMStoreTra
      * @param backingTxs
      *            Key,value map of backing transactions.
      */
-    protected AbstractDOMForwardedCompositeTransaction(final Object identifier, final Map<K, T> backingTxs) {
+    protected AbstractDOMForwardedCompositeTransaction(final Object identifier,
+            final Map<K, ? extends DOMStoreTransactionFactory> storeTxFactories) {
         this.identifier = Preconditions.checkNotNull(identifier, "Identifier should not be null");
-        this.backingTxs = Preconditions.checkNotNull(backingTxs, "Backing transactions should not be null");
+        this.storeTxFactories = Preconditions.checkNotNull(storeTxFactories,
+                "Store Tx factories should not be null");
     }
+
+    protected abstract T createTransaction(DOMStoreTransactionFactory storeTxFactory);
 
     /**
      * Returns subtransaction associated with supplied key.
@@ -59,9 +66,16 @@ abstract class AbstractDOMForwardedCompositeTransaction<K, T extends DOMStoreTra
     protected final T getSubtransaction(final K key) {
         Preconditions.checkNotNull(key, "key must not be null.");
 
-        final T ret = backingTxs.get(key);
-        Preconditions.checkArgument(ret != null, "No subtransaction associated with %s", key);
-        return ret;
+        T storeTx = backingTxs.get(key);
+        if(storeTx == null) {
+            DOMStoreTransactionFactory storeTxFactory = storeTxFactories.get(key);
+            Preconditions.checkArgument(storeTxFactory != null,
+                    "No transaction factory associated with %s", key);
+            storeTx = createTransaction(storeTxFactory);
+            backingTxs.put(key, storeTx);
+        }
+
+        return storeTx;
     }
 
     /**
