@@ -16,6 +16,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.controller.md.statistics.manager.StatPermCollector.StatCapabTypes;
 import org.opendaylight.controller.md.statistics.manager.StatRpcMsgManager.TransactionCacheContainer;
 import org.opendaylight.controller.md.statistics.manager.StatisticsManager;
 import org.opendaylight.controller.md.statistics.manager.StatisticsManager.StatDataStoreOperation;
@@ -29,7 +30,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupDescStats;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupDescStatsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupFeatures;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupFeaturesBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupStatistics;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupStatisticsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.OpendaylightGroupStatisticsListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.group.desc.GroupDescBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.group.features.GroupFeatures;
@@ -51,6 +54,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
 /**
  * statistics-manager
@@ -90,31 +94,48 @@ public class StatListenCommitGroup extends StatAbstractListenCommit<Group, Opend
         final TransactionId transId = notification.getTransactionId();
         final NodeId nodeId = notification.getId();
         if ( ! isExpectedStatistics(transId, nodeId)) {
-            LOG.debug("STAT-MANAGER - GroupDescStatsUpdated: unregistred notification detect TransactionId {}", transId);
+            LOG.debug("Unregistred notification detect TransactionId {}", transId);
             return;
         }
+        manager.getRpcMsgManager().addNotification(notification, nodeId);
         if (notification.isMoreReplies()) {
-            manager.getRpcMsgManager().addNotification(notification, nodeId);
             return;
         }
-        final List<GroupDescStats> groupStats = notification.getGroupDescStats() != null
-                ? new ArrayList<>(notification.getGroupDescStats()) : new ArrayList<GroupDescStats>(10);
-        final Optional<TransactionCacheContainer<?>> txContainer = getTransactionCacheContainer(transId, nodeId);
-        if (txContainer.isPresent()) {
-            final List<? extends TransactionAware> cacheNotifs =
-                    txContainer.get().getNotifications();
-            for (final TransactionAware notif : cacheNotifs) {
-                if (notif instanceof GroupDescStatsUpdated) {
-                    groupStats.addAll(((GroupDescStatsUpdated) notif).getGroupDescStats());
-                }
-            }
-        }
-        final InstanceIdentifier<Node> nodeIdent = InstanceIdentifier
-                .create(Nodes.class).child(Node.class, new NodeKey(nodeId));
+
+        /* Don't block RPC Notification thread */
         manager.enqueue(new StatDataStoreOperation() {
             @Override
             public void applyOperation(final ReadWriteTransaction tx) {
-                statGroupDescCommit(groupStats, nodeIdent, tx);
+                final InstanceIdentifier<Node> nodeIdent = InstanceIdentifier
+                        .create(Nodes.class).child(Node.class, new NodeKey(nodeId));
+                /* Validate exist FlowCapableNode */
+                final InstanceIdentifier<FlowCapableNode> fNodeIdent = nodeIdent.augmentation(FlowCapableNode.class);
+                Optional<FlowCapableNode> fNode = Optional.absent();
+                try {
+                    fNode = tx.read(LogicalDatastoreType.OPERATIONAL,fNodeIdent).checkedGet();
+                }
+                catch (final ReadFailedException e) {
+                    LOG.debug("Read Operational/DS for FlowCapableNode fail! {}", fNodeIdent, e);
+                }
+                if ( ! fNode.isPresent()) {
+                    return;
+                }
+                /* Get and Validate TransactionCacheContainer */
+                final Optional<TransactionCacheContainer<?>> txContainer = getTransactionCacheContainer(transId, nodeId);
+                if ( ! isTransactionCacheContainerValid(txContainer)) {
+                    return;
+                }
+                /* Prepare List actual Groups and not updated Groups will be removed */
+                final List<Group> existGroups = fNode.get().getGroup() != null
+                        ? fNode.get().getGroup() : Collections.<Group> emptyList();
+                final List<GroupKey> existGroupKeys = new ArrayList<>();
+                for (final Group group : existGroups) {
+                    existGroupKeys.add(group.getKey());
+                }
+                /* GroupDesc processing */
+                statGroupDescCommit(txContainer, tx, fNodeIdent, existGroupKeys);
+                /* Delete all not presented Group Nodes */
+                deleteAllNotPresentNode(fNodeIdent, tx, Collections.unmodifiableList(existGroupKeys));
                 /* Notification for continue collecting statistics */
                 notifyToCollectNextStatistics(nodeIdent);
             }
@@ -123,39 +144,53 @@ public class StatListenCommitGroup extends StatAbstractListenCommit<Group, Opend
 
     @Override
     public void onGroupFeaturesUpdated(final GroupFeaturesUpdated notification) {
+        Preconditions.checkNotNull(notification);
         final TransactionId transId = notification.getTransactionId();
         final NodeId nodeId = notification.getId();
         if ( ! isExpectedStatistics(transId, nodeId)) {
-            LOG.debug("STAT-MANAGER - MeterFeaturesUpdated: unregistred notification detect TransactionId {}", transId);
+            LOG.debug("Unregistred notification detect TransactionId {}", transId);
             return;
         }
+        manager.getRpcMsgManager().addNotification(notification, nodeId);
         if (notification.isMoreReplies()) {
-            manager.getRpcMsgManager().addNotification(notification, nodeId);
             return;
         }
-        final Optional<TransactionCacheContainer<?>> txContainer = getTransactionCacheContainer(transId, nodeId);
-        if ( ! txContainer.isPresent()) {
-            return;
-        }
-        final InstanceIdentifier<Node> nodeIdent = InstanceIdentifier
-                .create(Nodes.class).child(Node.class, new NodeKey(nodeId));
 
+        /* Don't block RPC Notification thread */
         manager.enqueue(new StatDataStoreOperation() {
             @Override
             public void applyOperation(final ReadWriteTransaction tx) {
-                notifyToCollectNextStatistics(nodeIdent);
-                final GroupFeatures stats = new GroupFeaturesBuilder(notification).build();
-                final InstanceIdentifier<GroupFeatures> groupFeatureIdent = nodeIdent
-                        .augmentation(NodeGroupFeatures.class).child(GroupFeatures.class);
-                Optional<Node> node = Optional.absent();
-                try {
-                    node = tx.read(LogicalDatastoreType.OPERATIONAL, nodeIdent).checkedGet();
+                /* Get and Validate TransactionCacheContainer */
+                final Optional<TransactionCacheContainer<?>> txContainer = getTransactionCacheContainer(transId, nodeId);
+                if ( ! isTransactionCacheContainerValid(txContainer)) {
+                    return;
                 }
-                catch (final ReadFailedException e) {
-                    LOG.debug("Read Operational/DS for Node fail! {}", nodeIdent, e);
-                }
-                if (node.isPresent()) {
-                    tx.put(LogicalDatastoreType.OPERATIONAL, groupFeatureIdent, stats);
+
+                final InstanceIdentifier<Node> nodeIdent = InstanceIdentifier
+                        .create(Nodes.class).child(Node.class, new NodeKey(nodeId));
+
+                final List<? extends TransactionAware> cacheNotifs = txContainer.get().getNotifications();
+                for (final TransactionAware notif : cacheNotifs) {
+                    if ( ! (notif instanceof GroupFeaturesUpdated)) {
+                        break;
+                    }
+                    final GroupFeatures stats = new GroupFeaturesBuilder((GroupFeaturesUpdated)notif).build();
+                    final InstanceIdentifier<NodeGroupFeatures> nodeGroupFeatureIdent =
+                            nodeIdent.augmentation(NodeGroupFeatures.class);
+                    final InstanceIdentifier<GroupFeatures> groupFeatureIdent = nodeGroupFeatureIdent
+                            .child(GroupFeatures.class);
+                    Optional<Node> node = Optional.absent();
+                    try {
+                        node = tx.read(LogicalDatastoreType.OPERATIONAL, nodeIdent).checkedGet();
+                    }
+                    catch (final ReadFailedException e) {
+                        LOG.debug("Read Operational/DS for Node fail! {}", nodeIdent, e);
+                    }
+                    if (node.isPresent()) {
+                        tx.merge(LogicalDatastoreType.OPERATIONAL, nodeGroupFeatureIdent, new NodeGroupFeaturesBuilder().build(), true);
+                        tx.put(LogicalDatastoreType.OPERATIONAL, groupFeatureIdent, stats);
+                        manager.registerAdditionalNodeFeature(nodeIdent, StatCapabTypes.GROUP_STATS);
+                    }
                 }
             }
         });
@@ -163,123 +198,140 @@ public class StatListenCommitGroup extends StatAbstractListenCommit<Group, Opend
 
     @Override
     public void onGroupStatisticsUpdated(final GroupStatisticsUpdated notification) {
+        Preconditions.checkNotNull(notification);
         final TransactionId transId = notification.getTransactionId();
         final NodeId nodeId = notification.getId();
         if ( ! isExpectedStatistics(transId, nodeId)) {
             LOG.debug("STAT-MANAGER - GroupStatisticsUpdated: unregistred notification detect TransactionId {}", transId);
             return;
         }
+        manager.getRpcMsgManager().addNotification(notification, nodeId);
         if (notification.isMoreReplies()) {
-            manager.getRpcMsgManager().addNotification(notification, nodeId);
             return;
         }
-        final List<GroupStats> groupStats = notification.getGroupStats() != null
-                ? new ArrayList<>(notification.getGroupStats()) : new ArrayList<GroupStats>(10);
-        Optional<Group> notifGroup = Optional.absent();
-        final Optional<TransactionCacheContainer<?>> txContainer = getTransactionCacheContainer(transId, nodeId);
-        if (txContainer.isPresent()) {
-            final Optional<? extends DataObject> inputObj = txContainer.get().getConfInput();
-            if (inputObj.isPresent() && inputObj.get() instanceof Group) {
-                notifGroup = Optional.<Group> of((Group)inputObj.get());
-            }
-            final List<? extends TransactionAware> cacheNotifs =
-                    txContainer.get().getNotifications();
-            for (final TransactionAware notif : cacheNotifs) {
-                if (notif instanceof GroupStatisticsUpdated) {
-                    groupStats.addAll(((GroupStatisticsUpdated) notif).getGroupStats());
-                }
-            }
-        }
-        final Optional<Group> group = notifGroup;
-        final InstanceIdentifier<Node> nodeIdent = InstanceIdentifier
-                .create(Nodes.class).child(Node.class, new NodeKey(nodeId));
+
+        /* Don't block RPC Notification thread */
         manager.enqueue(new StatDataStoreOperation() {
             @Override
             public void applyOperation(final ReadWriteTransaction tx) {
-                /* Notification for continue collecting statistics */
-                if ( ! group.isPresent()) {
+
+                final InstanceIdentifier<Node> nodeIdent = InstanceIdentifier
+                        .create(Nodes.class).child(Node.class, new NodeKey(nodeId));
+                /* Node exist check */
+                Optional<Node> node = Optional.absent();
+                try {
+                    node = tx.read(LogicalDatastoreType.OPERATIONAL, nodeIdent).checkedGet();
+                }
+                catch (final ReadFailedException e) {
+                    LOG.debug("Read Operational/DS for Node fail! {}", nodeIdent, e);
+                }
+                if ( ! node.isPresent()) {
+                    return;
+                }
+
+                /* Get and Validate TransactionCacheContainer */
+                final Optional<TransactionCacheContainer<?>> txContainer = getTransactionCacheContainer(transId, nodeId);
+                if ( ! isTransactionCacheContainerValid(txContainer)) {
+                    return;
+                }
+                final List<? extends TransactionAware> cacheNotifs = txContainer.get().getNotifications();
+
+                Optional<Group> notifGroup = Optional.absent();
+                final Optional<? extends DataObject> inputObj = txContainer.get().getConfInput();
+                if (inputObj.isPresent() && inputObj.get() instanceof Group) {
+                    notifGroup = Optional.<Group> of((Group)inputObj.get());
+                }
+                for (final TransactionAware notif : cacheNotifs) {
+                    if ( ! (notif instanceof GroupStatisticsUpdated)) {
+                        break;
+                    }
+                    statGroupCommit(((GroupStatisticsUpdated) notif).getGroupStats(), nodeIdent, tx);
+                }
+                if (notifGroup.isPresent()) {
                     notifyToCollectNextStatistics(nodeIdent);
                 }
-                statGroupCommit(groupStats, nodeIdent, group, tx);
             }
         });
     }
 
     private void statGroupCommit(final List<GroupStats> groupStats, final InstanceIdentifier<Node> nodeIdent,
-            final Optional<Group> group, final ReadWriteTransaction trans) {
+            final ReadWriteTransaction tx) {
+
+        Preconditions.checkNotNull(groupStats);
+        Preconditions.checkNotNull(nodeIdent);
+        Preconditions.checkNotNull(tx);
+
         final InstanceIdentifier<FlowCapableNode> fNodeIdent = nodeIdent.augmentation(FlowCapableNode.class);
 
-        for (final GroupStats groupStat : groupStats) {
-            final GroupStatistics stats = new GroupStatisticsBuilder(groupStat).build();
+        for (final GroupStats gStat : groupStats) {
+            final GroupStatistics stats = new GroupStatisticsBuilder(gStat).build();
 
-            final GroupKey groupKey = new GroupKey(groupStat.getGroupId());
-            final InstanceIdentifier<GroupStatistics> gsIdent = fNodeIdent
-                    .child(Group.class,groupKey).augmentation(NodeGroupStatistics.class)
-                    .child(GroupStatistics.class);
+            final InstanceIdentifier<Group> groupIdent = fNodeIdent.child(Group.class, new GroupKey(gStat.getGroupId()));
+            final InstanceIdentifier<NodeGroupStatistics> nGroupStatIdent =groupIdent
+                    .augmentation(NodeGroupStatistics.class);
+            final InstanceIdentifier<GroupStatistics> gsIdent = nGroupStatIdent.child(GroupStatistics.class);
             /* Statistics Writing */
-            Optional<FlowCapableNode> fNode = Optional.absent();
+            Optional<Group> group = Optional.absent();
             try {
-                fNode = trans.read(LogicalDatastoreType.OPERATIONAL, fNodeIdent).checkedGet();
+                group = tx.read(LogicalDatastoreType.OPERATIONAL, groupIdent).checkedGet();
             }
             catch (final ReadFailedException e) {
-                LOG.debug("Read Operational/DS for FlowCapableNode fail! {}", fNodeIdent, e);
+                LOG.debug("Read Operational/DS for Group node fail! {}", groupIdent, e);
             }
-            if (fNode.isPresent()) {
-                trans.put(LogicalDatastoreType.OPERATIONAL, gsIdent, stats);
+            if (group.isPresent()) {
+                tx.merge(LogicalDatastoreType.OPERATIONAL, nGroupStatIdent, new NodeGroupStatisticsBuilder().build(), true);
+                tx.put(LogicalDatastoreType.OPERATIONAL, gsIdent, stats);
             }
         }
     }
 
-    private void statGroupDescCommit(final List<GroupDescStats> groupStats, final InstanceIdentifier<Node> nodeIdent,
-            final ReadWriteTransaction trans) {
-        final InstanceIdentifier<FlowCapableNode> fNodeIdent = nodeIdent.augmentation(FlowCapableNode.class);
+    private void statGroupDescCommit(final Optional<TransactionCacheContainer<?>> txContainer, final ReadWriteTransaction tx,
+            final InstanceIdentifier<FlowCapableNode> fNodeIdent, final List<GroupKey> existGroupKeys) {
 
-        final List<GroupKey> deviceGroupKeys = new ArrayList<>();
+        Preconditions.checkNotNull(existGroupKeys);
+        Preconditions.checkNotNull(txContainer);
+        Preconditions.checkNotNull(fNodeIdent);
+        Preconditions.checkNotNull(tx);
 
-        for (final GroupDescStats group : groupStats) {
-            if (group.getGroupId() != null) {
-                final GroupBuilder groupBuilder = new GroupBuilder(group);
-                final GroupKey groupKey = new GroupKey(group.getGroupId());
-                final InstanceIdentifier<Group> groupRef = fNodeIdent.child(Group.class,groupKey);
+        final List<? extends TransactionAware> cacheNotifs = txContainer.get().getNotifications();
+        for (final TransactionAware notif : cacheNotifs) {
+            if ( ! (notif instanceof GroupDescStatsUpdated)) {
+                break;
+            }
+            final List<GroupDescStats> groupStats = ((GroupDescStatsUpdated) notif).getGroupDescStats();
+            if (groupStats == null) {
+                break;
+            }
+            for (final GroupDescStats group : groupStats) {
+                if (group.getGroupId() != null) {
+                    final GroupBuilder groupBuilder = new GroupBuilder(group);
+                    final GroupKey groupKey = new GroupKey(group.getGroupId());
+                    final InstanceIdentifier<Group> groupRef = fNodeIdent.child(Group.class,groupKey);
 
-                final NodeGroupDescStatsBuilder groupDesc= new NodeGroupDescStatsBuilder();
-                groupDesc.setGroupDesc(new GroupDescBuilder(group).build());
-                //Update augmented data
-                groupBuilder.addAugmentation(NodeGroupDescStats.class, groupDesc.build());
-                deviceGroupKeys.add(groupKey);
-                Optional<FlowCapableNode> hashIdUpd = Optional.absent();
-                try {
-                    hashIdUpd = trans.read(LogicalDatastoreType.OPERATIONAL,fNodeIdent).checkedGet();
-                }
-                catch (final ReadFailedException e) {
-                    LOG.debug("Read Operational/DS for FlowCapableNode fail! {}", fNodeIdent, e);
-                }
-                if (hashIdUpd.isPresent()) {
-                    trans.put(LogicalDatastoreType.OPERATIONAL, groupRef, groupBuilder.build());
+                    final NodeGroupDescStatsBuilder groupDesc= new NodeGroupDescStatsBuilder();
+                    groupDesc.setGroupDesc(new GroupDescBuilder(group).build());
+                    //Update augmented data
+                    groupBuilder.addAugmentation(NodeGroupDescStats.class, groupDesc.build());
+                    existGroupKeys.remove(groupKey);
+                    tx.put(LogicalDatastoreType.OPERATIONAL, groupRef, groupBuilder.build());
                 }
             }
         }
-        /* Delete all not presented Group Nodes */
-        deleteAllNotPresentNode(fNodeIdent, trans, deviceGroupKeys);
     }
 
     private void deleteAllNotPresentNode(final InstanceIdentifier<FlowCapableNode> fNodeIdent,
             final ReadWriteTransaction trans, final List<GroupKey> deviceGroupKeys) {
 
-        final Optional<FlowCapableNode> fNode = readLatestConfiguration(fNodeIdent);
-        if ( ! fNode.isPresent()) {
-            LOG.trace("Read Operational/DS for FlowCapableNode fail! Node {} doesn't exist.", fNodeIdent);
+        Preconditions.checkNotNull(fNodeIdent);
+        Preconditions.checkNotNull(trans);
+
+        if (deviceGroupKeys == null) {
             return;
         }
-        final List<Group> existGroups = fNode.get().getGroup() != null
-                ? fNode.get().getGroup() : Collections.<Group> emptyList();
-        /* Add all existed groups paths - no updated paths has to be removed */
-        for (final Group group : existGroups) {
-            if (deviceGroupKeys.remove(group.getKey())) {
-                break; // group still exist on device
-            }
-            LOG.trace("Group {} has to removed.", group);
-            final InstanceIdentifier<Group> delGroupIdent = fNodeIdent.child(Group.class, group.getKey());
+
+        for (final GroupKey key : deviceGroupKeys) {
+            final InstanceIdentifier<Group> delGroupIdent = fNodeIdent.child(Group.class, key);
+            LOG.trace("Group {} has to removed.", key);
             Optional<Group> delGroup = Optional.absent();
             try {
                 delGroup = trans.read(LogicalDatastoreType.OPERATIONAL, delGroupIdent).checkedGet();
