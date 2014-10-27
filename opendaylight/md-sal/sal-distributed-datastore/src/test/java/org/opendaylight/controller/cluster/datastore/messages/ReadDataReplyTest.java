@@ -16,21 +16,28 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 
 /**
- * Unit tests for WriteData.
+ * Unit tests for ReadDataReply.
  *
  * @author Thomas Pantelis
  */
-public class WriteDataTest {
+public class ReadDataReplyTest {
 
     @Test
-    public void testSerialization() {
-        WriteData expected = new WriteData(TestModel.TEST_PATH,
+    public void testSerializationWithNodePresent() {
+        ReadDataReply expected = new ReadDataReply(
                 ImmutableContainerNodeBuilder.create().withNodeIdentifier(
                         new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
                         withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build());
 
-        WriteData actual = (WriteData) SerializationUtils.clone(expected);
-        Assert.assertEquals("getPath", expected.getPath(), actual.getPath());
-        Assert.assertEquals("getData", expected.getData(), actual.getData());
+        ReadDataReply actual = (ReadDataReply) SerializationUtils.clone(expected);
+        Assert.assertEquals("getNormalizedNode", expected.getNormalizedNode(), actual.getNormalizedNode());
+    }
+
+    @Test
+    public void testSerializationWithNodeNodePresent() {
+        ReadDataReply expected = new ReadDataReply(null);
+
+        ReadDataReply actual = (ReadDataReply) SerializationUtils.clone(expected);
+        Assert.assertNull("Expected null", actual.getNormalizedNode());
     }
 }
