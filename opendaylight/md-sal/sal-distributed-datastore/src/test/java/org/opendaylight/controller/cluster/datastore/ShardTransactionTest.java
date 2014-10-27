@@ -233,21 +233,11 @@ public class ShardTransactionTest extends AbstractActorTest {
                 getSystem().actorOf(props, "testWriteData");
 
             subject.tell(new WriteData(TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME), TestModel.createTestContext()).toSerializable(),
-                getRef());
-
-            ShardTransactionMessages.WriteDataReply replySerialized =
-                expectMsgClass(duration("5 seconds"), ShardTransactionMessages.WriteDataReply.class);
-
-            assertModification(subject, WriteModification.class);
-
-            //unserialized write
-            subject.tell(new WriteData(TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME),
-                TestModel.createTestContext()),
-                getRef());
+                ImmutableNodes.containerNode(TestModel.TEST_QNAME)), getRef());
 
             expectMsgClass(duration("5 seconds"), WriteDataReply.class);
+
+            assertModification(subject, WriteModification.class);
         }};
     }
 
@@ -261,20 +251,11 @@ public class ShardTransactionTest extends AbstractActorTest {
                 getSystem().actorOf(props, "testMergeData");
 
             subject.tell(new MergeData(TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME), testSchemaContext).toSerializable(),
-                getRef());
-
-            ShardTransactionMessages.MergeDataReply replySerialized =
-                expectMsgClass(duration("5 seconds"), ShardTransactionMessages.MergeDataReply.class);
-
-            assertModification(subject, MergeModification.class);
-
-            //unserialized merge
-            subject.tell(new MergeData(TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME), testSchemaContext),
-                getRef());
+                ImmutableNodes.containerNode(TestModel.TEST_QNAME)), getRef());
 
             expectMsgClass(duration("5 seconds"), MergeDataReply.class);
+
+            assertModification(subject, MergeModification.class);
         }};
     }
 

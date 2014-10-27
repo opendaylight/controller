@@ -162,23 +162,6 @@ public class TransactionProxyTest extends AbstractActorTest {
         return argThat(matcher);
     }
 
-    private WriteData eqSerializedWriteData(final NormalizedNode<?, ?> nodeToWrite) {
-        ArgumentMatcher<WriteData> matcher = new ArgumentMatcher<WriteData>() {
-            @Override
-            public boolean matches(Object argument) {
-                if(!WriteData.SERIALIZABLE_CLASS.equals(argument.getClass())) {
-                    return false;
-                }
-
-                WriteData obj = WriteData.fromSerializable(argument, schemaContext);
-                return obj.getPath().equals(TestModel.TEST_PATH) &&
-                       obj.getData().equals(nodeToWrite);
-            }
-        };
-
-        return argThat(matcher);
-    }
-
     private WriteData eqWriteData(final NormalizedNode<?, ?> nodeToWrite) {
         ArgumentMatcher<WriteData> matcher = new ArgumentMatcher<WriteData>() {
             @Override
@@ -189,23 +172,6 @@ public class TransactionProxyTest extends AbstractActorTest {
                         obj.getData().equals(nodeToWrite);
                 }
                 return false;
-            }
-        };
-
-        return argThat(matcher);
-    }
-
-    private MergeData eqSerializedMergeData(final NormalizedNode<?, ?> nodeToWrite) {
-        ArgumentMatcher<MergeData> matcher = new ArgumentMatcher<MergeData>() {
-            @Override
-            public boolean matches(Object argument) {
-                if(!MergeData.SERIALIZABLE_CLASS.equals(argument.getClass())) {
-                    return false;
-                }
-
-                MergeData obj = MergeData.fromSerializable(argument, schemaContext);
-                return obj.getPath().equals(TestModel.TEST_PATH) &&
-                       obj.getData().equals(nodeToWrite);
             }
         };
 
@@ -278,16 +244,8 @@ public class TransactionProxyTest extends AbstractActorTest {
         return Futures.successful(new DataExistsReply(exists));
     }
 
-    private Future<Object> writeSerializedDataReply() {
-        return Futures.successful(new WriteDataReply().toSerializable());
-    }
-
     private Future<WriteDataReply> writeDataReply() {
         return Futures.successful(new WriteDataReply());
-    }
-
-    private Future<Object> mergeSerializedDataReply() {
-        return Futures.successful(new MergeDataReply().toSerializable());
     }
 
     private Future<MergeDataReply> mergeDataReply() {
@@ -441,8 +399,8 @@ public class TransactionProxyTest extends AbstractActorTest {
 
         NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-        doReturn(writeSerializedDataReply()).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedWriteData(nodeToWrite));
+        doReturn(writeDataReply()).when(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), eqWriteData(nodeToWrite));
 
         doReturn(Futures.failed(new TestException())).when(mockActorContext).
                 executeOperationAsync(eq(actorSelection(actorRef)), eqSerializedDeleteData());
@@ -471,8 +429,8 @@ public class TransactionProxyTest extends AbstractActorTest {
 
         NormalizedNode<?, ?> expectedNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-        doReturn(writeSerializedDataReply()).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedWriteData(expectedNode));
+        doReturn(writeDataReply()).when(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), eqWriteData(expectedNode));
 
         doReturn(readSerializedDataReply(expectedNode)).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqSerializedReadData());
@@ -563,8 +521,8 @@ public class TransactionProxyTest extends AbstractActorTest {
 
         NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-        doReturn(writeSerializedDataReply()).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedWriteData(nodeToWrite));
+        doReturn(writeDataReply()).when(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), eqWriteData(nodeToWrite));
 
         doReturn(Futures.failed(new TestException())).when(mockActorContext).
                 executeOperationAsync(eq(actorSelection(actorRef)), eqSerializedDeleteData());
@@ -593,8 +551,8 @@ public class TransactionProxyTest extends AbstractActorTest {
 
         NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-        doReturn(writeSerializedDataReply()).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedWriteData(nodeToWrite));
+        doReturn(writeDataReply()).when(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), eqWriteData(nodeToWrite));
 
         doReturn(dataExistsSerializedReply(true)).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqSerializedDataExists());
@@ -647,8 +605,8 @@ public class TransactionProxyTest extends AbstractActorTest {
 
         NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-        doReturn(writeSerializedDataReply()).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedWriteData(nodeToWrite));
+        doReturn(writeDataReply()).when(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), eqWriteData(nodeToWrite));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
                 WRITE_ONLY);
@@ -656,10 +614,10 @@ public class TransactionProxyTest extends AbstractActorTest {
         transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
 
         verify(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedWriteData(nodeToWrite));
+                eq(actorSelection(actorRef)), eqWriteData(nodeToWrite));
 
         verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
-                WriteDataReply.SERIALIZABLE_CLASS);
+                WriteDataReply.class);
     }
 
     @Test(expected=IllegalStateException.class)
@@ -690,8 +648,8 @@ public class TransactionProxyTest extends AbstractActorTest {
 
         NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-        doReturn(mergeSerializedDataReply()).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedMergeData(nodeToWrite));
+        doReturn(mergeDataReply()).when(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), eqMergeData(nodeToWrite));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
                 WRITE_ONLY);
@@ -699,10 +657,10 @@ public class TransactionProxyTest extends AbstractActorTest {
         transactionProxy.merge(TestModel.TEST_PATH, nodeToWrite);
 
         verify(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedMergeData(nodeToWrite));
+                eq(actorSelection(actorRef)), eqMergeData(nodeToWrite));
 
         verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
-                MergeDataReply.SERIALIZABLE_CLASS);
+                MergeDataReply.class);
     }
 
     @Test
@@ -759,8 +717,8 @@ public class TransactionProxyTest extends AbstractActorTest {
         doReturn(readSerializedDataReply(null)).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqSerializedReadData());
 
-        doReturn(writeSerializedDataReply()).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedWriteData(nodeToWrite));
+        doReturn(writeDataReply()).when(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), eqWriteData(nodeToWrite));
 
         doReturn(readySerializedTxReply(actorRef.path().toString())).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), isA(ReadyTransaction.SERIALIZABLE_CLASS));
@@ -779,7 +737,7 @@ public class TransactionProxyTest extends AbstractActorTest {
         ThreePhaseCommitCohortProxy proxy = (ThreePhaseCommitCohortProxy) ready;
 
         verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
-                WriteDataReply.SERIALIZABLE_CLASS);
+                WriteDataReply.class);
 
         verifyCohortFutures(proxy, getSystem().actorSelection(actorRef.path()));
     }
@@ -791,11 +749,11 @@ public class TransactionProxyTest extends AbstractActorTest {
 
         NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-        doReturn(mergeSerializedDataReply()).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedMergeData(nodeToWrite));
+        doReturn(mergeDataReply()).when(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), eqMergeData(nodeToWrite));
 
         doReturn(Futures.failed(new TestException())).when(mockActorContext).
-                executeOperationAsync(eq(actorSelection(actorRef)), eqSerializedWriteData(nodeToWrite));
+                executeOperationAsync(eq(actorSelection(actorRef)), eqWriteData(nodeToWrite));
 
         doReturn(readySerializedTxReply(actorRef.path().toString())).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), isA(ReadyTransaction.SERIALIZABLE_CLASS));
@@ -816,7 +774,7 @@ public class TransactionProxyTest extends AbstractActorTest {
         ThreePhaseCommitCohortProxy proxy = (ThreePhaseCommitCohortProxy) ready;
 
         verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
-                MergeDataReply.SERIALIZABLE_CLASS, TestException.class);
+                MergeDataReply.class, TestException.class);
 
         verifyCohortFutures(proxy, TestException.class);
     }
@@ -828,8 +786,8 @@ public class TransactionProxyTest extends AbstractActorTest {
 
         NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-        doReturn(mergeSerializedDataReply()).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedMergeData(nodeToWrite));
+        doReturn(mergeDataReply()).when(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), eqMergeData(nodeToWrite));
 
         doReturn(Futures.failed(new TestException())).when(mockActorContext).
                 executeOperationAsync(eq(actorSelection(actorRef)),
@@ -847,7 +805,7 @@ public class TransactionProxyTest extends AbstractActorTest {
         ThreePhaseCommitCohortProxy proxy = (ThreePhaseCommitCohortProxy) ready;
 
         verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
-                MergeDataReply.SERIALIZABLE_CLASS);
+                MergeDataReply.class);
 
         verifyCohortFutures(proxy, TestException.class);
     }
@@ -886,8 +844,8 @@ public class TransactionProxyTest extends AbstractActorTest {
 
         NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-        doReturn(writeSerializedDataReply()).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedWriteData(nodeToWrite));
+        doReturn(writeDataReply()).when(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), eqWriteData(nodeToWrite));
 
         doReturn(Futures.successful(new Object())).when(mockActorContext).
                 executeOperationAsync(eq(actorSelection(actorRef)),

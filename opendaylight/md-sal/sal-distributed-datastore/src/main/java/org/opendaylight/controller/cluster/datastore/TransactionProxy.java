@@ -589,9 +589,8 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                 LOG.debug("Tx {} mergeData called path = {}", identifier, path);
             }
 
-            MergeData mergeData = new MergeData(path, data, schemaContext);
-            recordedOperationFutures.add(actorContext.executeOperationAsync(getActor(),
-                isTxActorLocal ? mergeData : mergeData.toSerializable()));
+            MergeData mergeData = new MergeData(path, data);
+            recordedOperationFutures.add(actorContext.executeOperationAsync(getActor(), mergeData));
         }
 
         @Override
@@ -600,9 +599,8 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                 LOG.debug("Tx {} writeData called path = {}", identifier, path);
             }
 
-            WriteData writeData = new WriteData(path, data, schemaContext);
-            recordedOperationFutures.add(actorContext.executeOperationAsync(getActor(),
-                isTxActorLocal ? writeData : writeData.toSerializable()));
+            WriteData writeData = new WriteData(path, data);
+            recordedOperationFutures.add(actorContext.executeOperationAsync(getActor(), writeData));
         }
 
         @Override

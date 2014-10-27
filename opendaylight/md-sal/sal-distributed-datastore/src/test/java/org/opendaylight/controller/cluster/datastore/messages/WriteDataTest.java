@@ -7,11 +7,13 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import org.apache.commons.lang.SerializationUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 
 /**
  * Unit tests for WriteData.
@@ -22,11 +24,12 @@ public class WriteDataTest {
 
     @Test
     public void testSerialization() {
-        SchemaContext schemaContext = TestModel.createTestContext();
-        WriteData expected = new WriteData(TestModel.TEST_PATH, ImmutableNodes
-            .containerNode(TestModel.TEST_QNAME), schemaContext);
+        WriteData expected = new WriteData(TestModel.TEST_PATH,
+                ImmutableContainerNodeBuilder.create().withNodeIdentifier(
+                        new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
+                        withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build());
 
-        WriteData actual = WriteData.fromSerializable(expected.toSerializable(), schemaContext);
+        WriteData actual = (WriteData) SerializationUtils.clone(expected);
         Assert.assertEquals("getPath", expected.getPath(), actual.getPath());
         Assert.assertEquals("getData", expected.getData(), actual.getData());
     }

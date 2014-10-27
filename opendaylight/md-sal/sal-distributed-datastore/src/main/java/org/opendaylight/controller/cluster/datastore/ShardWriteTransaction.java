@@ -66,12 +66,6 @@ public class ShardWriteTransaction extends ShardTransaction {
         } else if (message instanceof ReadyTransaction) {
             readyTransaction(transaction, new ReadyTransaction(), !SERIALIZED_REPLY);
 
-        } else if(WriteData.SERIALIZABLE_CLASS.equals(message.getClass())) {
-            writeData(transaction, WriteData.fromSerializable(message, getSchemaContext()), SERIALIZED_REPLY);
-
-        } else if(MergeData.SERIALIZABLE_CLASS.equals(message.getClass())) {
-            mergeData(transaction, MergeData.fromSerializable(message, getSchemaContext()), SERIALIZED_REPLY);
-
         } else if(DeleteData.SERIALIZABLE_CLASS.equals(message.getClass())) {
             deleteData(transaction, DeleteData.fromSerializable(message), SERIALIZED_REPLY);
 
@@ -96,8 +90,7 @@ public class ShardWriteTransaction extends ShardTransaction {
         try {
             transaction.write(message.getPath(), message.getData());
             WriteDataReply writeDataReply = new WriteDataReply();
-            getSender().tell(returnSerialized ? writeDataReply.toSerializable() : writeDataReply,
-                getSelf());
+            getSender().tell(writeDataReply, getSelf());
         }catch(Exception e){
             getSender().tell(new akka.actor.Status.Failure(e), getSelf());
         }
@@ -112,8 +105,7 @@ public class ShardWriteTransaction extends ShardTransaction {
         try {
             transaction.merge(message.getPath(), message.getData());
             MergeDataReply mergeDataReply = new MergeDataReply();
-            getSender().tell(returnSerialized ? mergeDataReply.toSerializable() : mergeDataReply ,
-                getSelf());
+            getSender().tell(mergeDataReply, getSelf());
         }catch(Exception e){
             getSender().tell(new akka.actor.Status.Failure(e), getSelf());
         }
@@ -134,7 +126,8 @@ public class ShardWriteTransaction extends ShardTransaction {
         }
     }
 
-    private void readyTransaction(DOMStoreWriteTransaction transaction, ReadyTransaction message, boolean returnSerialized) {
+    private void readyTransaction(DOMStoreWriteTransaction transaction, ReadyTransaction message,
+            boolean returnSerialized) {
         DOMStoreThreePhaseCommitCohort cohort =  transaction.ready();
 
         getShardActor().forward(new ForwardedReadyTransaction(
