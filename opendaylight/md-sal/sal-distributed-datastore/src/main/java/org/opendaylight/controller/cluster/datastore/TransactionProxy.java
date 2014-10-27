@@ -408,12 +408,8 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                     remoteTransactionActorsMB.set(true);
                 }
 
-                // TxActor is always created where the leader of the shard is.
-                // Check if TxActor is created in the same node
-                boolean isTxActorLocal = actorContext.isLocalPath(transactionPath);
-
                 transactionContext = new TransactionContextImpl(shardName, transactionPath,
-                    transactionActor, identifier, actorContext, schemaContext, isTxActorLocal);
+                    transactionActor, identifier, actorContext);
 
                 remoteTransactionPaths.put(shardName, transactionContext);
             } else {
@@ -484,20 +480,15 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         private final Logger LOG = LoggerFactory.getLogger(TransactionContextImpl.class);
 
         private final ActorContext actorContext;
-        private final SchemaContext schemaContext;
         private final String actorPath;
         private final ActorSelection actor;
-        private final boolean isTxActorLocal;
 
         private TransactionContextImpl(String shardName, String actorPath,
-                ActorSelection actor, TransactionIdentifier identifier, ActorContext actorContext,
-                SchemaContext schemaContext, boolean isTxActorLocal) {
+                ActorSelection actor, TransactionIdentifier identifier, ActorContext actorContext) {
             super(shardName, identifier);
             this.actorPath = actorPath;
             this.actor = actor;
             this.actorContext = actorContext;
-            this.schemaContext = schemaContext;
-            this.isTxActorLocal = isTxActorLocal;
         }
 
         private ActorSelection getActor() {
@@ -522,7 +513,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
             ReadyTransaction readyTransaction = new ReadyTransaction();
             final Future<Object> replyFuture = actorContext.executeOperationAsync(getActor(),
-                isTxActorLocal ? readyTransaction : readyTransaction.toSerializable());
+                    readyTransaction);
 
             // Combine all the previously recorded put/merge/delete operation reply Futures and the
             // ReadyTransactionReply Future into one Future. If any one fails then the combined
@@ -559,10 +550,6 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                     if (serializedReadyReply instanceof ReadyTransactionReply) {
                         return actorContext.actorSelection(((ReadyTransactionReply)serializedReadyReply).getCohortPath());
 
-                    } else if(serializedReadyReply.getClass().equals(ReadyTransactionReply.SERIALIZABLE_CLASS)) {
-                        ReadyTransactionReply reply = ReadyTransactionReply.fromSerializable(serializedReadyReply);
-                        return actorContext.actorSelection(reply.getCohortPath());
-
                     } else {
                         // Throwing an exception here will fail the Future.
                         throw new IllegalArgumentException(String.format("Invalid reply type {}",
@@ -579,8 +566,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             }
 
             DeleteData deleteData = new DeleteData(path);
-            recordedOperationFutures.add(actorContext.executeOperationAsync(getActor(),
-                isTxActorLocal ? deleteData : deleteData.toSerializable()));
+            recordedOperationFutures.add(actorContext.executeOperationAsync(getActor(), deleteData));
         }
 
         @Override
@@ -589,9 +575,8 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                 LOG.debug("Tx {} mergeData called path = {}", identifier, path);
             }
 
-            MergeData mergeData = new MergeData(path, data, schemaContext);
-            recordedOperationFutures.add(actorContext.executeOperationAsync(getActor(),
-                isTxActorLocal ? mergeData : mergeData.toSerializable()));
+            MergeData mergeData = new MergeData(path, data);
+            recordedOperationFutures.add(actorContext.executeOperationAsync(getActor(), mergeData));
         }
 
         @Override
@@ -600,9 +585,8 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                 LOG.debug("Tx {} writeData called path = {}", identifier, path);
             }
 
-            WriteData writeData = new WriteData(path, data, schemaContext);
-            recordedOperationFutures.add(actorContext.executeOperationAsync(getActor(),
-                isTxActorLocal ? writeData : writeData.toSerializable()));
+            WriteData writeData = new WriteData(path, data);
+            recordedOperationFutures.add(actorContext.executeOperationAsync(getActor(), writeData));
         }
 
         @Override
@@ -682,10 +666,6 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                             ReadDataReply reply = (ReadDataReply) readResponse;
                             returnFuture.set(Optional.<NormalizedNode<?, ?>>fromNullable(reply.getNormalizedNode()));
 
-                        } else if (readResponse.getClass().equals(ReadDataReply.SERIALIZABLE_CLASS)) {
-                            ReadDataReply reply = ReadDataReply.fromSerializable(schemaContext, path, readResponse);
-                            returnFuture.set(Optional.<NormalizedNode<?, ?>>fromNullable(reply.getNormalizedNode()));
-
                         } else {
                             returnFuture.setException(new ReadFailedException(
                                 "Invalid response reading data for path " + path));
@@ -695,8 +675,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             };
 
             ReadData readData = new ReadData(path);
-            Future<Object> readFuture = actorContext.executeOperationAsync(getActor(),
-                isTxActorLocal ? readData : readData.toSerializable());
+            Future<Object> readFuture = actorContext.executeOperationAsync(getActor(), readData);
 
             readFuture.onComplete(onComplete, actorContext.getActorSystem().dispatcher());
         }
@@ -776,9 +755,6 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                         if (response instanceof DataExistsReply) {
                             returnFuture.set(Boolean.valueOf(((DataExistsReply) response).exists()));
 
-                        } else if (response.getClass().equals(DataExistsReply.SERIALIZABLE_CLASS)) {
-                            returnFuture.set(Boolean.valueOf(DataExistsReply.fromSerializable(response).exists()));
-
                         } else {
                             returnFuture.setException(new ReadFailedException(
                                     "Invalid response checking exists for path " + path));
@@ -788,8 +764,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             };
 
             DataExists dataExists = new DataExists(path);
-            Future<Object> future = actorContext.executeOperationAsync(getActor(),
-                isTxActorLocal ? dataExists : dataExists.toSerializable());
+            Future<Object> future = actorContext.executeOperationAsync(getActor(), dataExists);
 
             future.onComplete(onComplete, actorContext.getActorSystem().dispatcher());
         }

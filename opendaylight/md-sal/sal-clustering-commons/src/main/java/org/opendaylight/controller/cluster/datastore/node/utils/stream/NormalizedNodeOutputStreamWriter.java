@@ -17,7 +17,6 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -196,15 +195,17 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
             writer.writeBoolean(true);
             writer.writeInt(value);
         } else {
+            writer.writeBoolean(false);
             if(key != null) {
                 stringCodeMap.put(key, Integer.valueOf(stringCodeMap.size()));
+                writer.writeUTF(key);
+            } else {
+                writer.writeUTF("");
             }
-            writer.writeBoolean(false);
-            writer.writeUTF(key);
         }
     }
 
-    private void writeObjSet(Set set) throws IOException {
+    private void writeObjSet(Set<?> set) throws IOException {
         if(!set.isEmpty()){
             writer.writeInt(set.size());
             for(Object o : set){
@@ -220,7 +221,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
         }
     }
 
-    private void writeYangInstanceIdentifier(YangInstanceIdentifier identifier) throws IOException {
+    public void writeYangInstanceIdentifier(YangInstanceIdentifier identifier) throws IOException {
         Iterable<YangInstanceIdentifier.PathArgument> pathArguments = identifier.getPathArguments();
         int size = Iterables.size(pathArguments);
         writer.writeInt(size);
@@ -303,6 +304,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
         }
     }
 
+    @SuppressWarnings("rawtypes")
     private void writeObject(Object value) throws IOException {
 
         byte type = ValueTypes.getSerializableType(value);

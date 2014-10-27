@@ -15,20 +15,28 @@ import org.apache.commons.lang.SerializationUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.util.TestModel;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
-
+import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 public class NormalizedNodeStreamReaderWriterTest {
 
-    final NormalizedNode<?, ?> input = TestModel.createTestContainer();
-
     @Test
     public void testNormalizedNodeStreamReaderWriter() throws IOException {
+
+        testNormalizedNodeStreamReaderWriter(TestModel.createTestContainer());
+
+        testNormalizedNodeStreamReaderWriter(Builders.containerBuilder().withNodeIdentifier(
+                new NodeIdentifier(SchemaContext.NAME)).build());
+    }
+
+    private void testNormalizedNodeStreamReaderWriter(NormalizedNode<?, ?> input) throws IOException {
 
         byte[] byteData = null;
 
@@ -52,7 +60,8 @@ public class NormalizedNodeStreamReaderWriterTest {
 
     @Test
     public void testWithSerializable() {
-        SampleNormalizedNodeSerializable serializable = new SampleNormalizedNodeSerializable(input);
+        NormalizedNode<?, ?> input = TestModel.createTestContainer();
+        SampleNormalizedNodeSerializable serializable = new SampleNormalizedNodeSerializable(input );
         SampleNormalizedNodeSerializable clone = (SampleNormalizedNodeSerializable)SerializationUtils.clone(serializable);
 
         Assert.assertEquals(input, clone.getInput());
