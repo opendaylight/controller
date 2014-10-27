@@ -61,7 +61,6 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
     private final SchemaContext schemaContext;
     private final ShardStats shardStats;
     private final String transactionID;
-    protected static final boolean SERIALIZED_REPLY = true;
 
     protected ShardTransaction(ActorRef shardActor, SchemaContext schemaContext,
             ShardStats shardStats, String transactionID) {
@@ -117,7 +116,7 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         getSelf().tell(PoisonPill.getInstance(), getSelf());
     }
 
-    protected void readData(DOMStoreReadTransaction transaction, ReadData message, final boolean returnSerialized) {
+    protected void readData(DOMStoreReadTransaction transaction, ReadData message) {
         final ActorRef sender = getSender();
         final ActorRef self = getSelf();
         final YangInstanceIdentifier path = message.getPath();
@@ -130,10 +129,9 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
             public void run() {
                 try {
                     Optional<NormalizedNode<?, ?>> optional = future.checkedGet();
-                    ReadDataReply readDataReply = new ReadDataReply(schemaContext, optional.orNull());
+                    ReadDataReply readDataReply = new ReadDataReply(optional.orNull());
 
-                    sender.tell((returnSerialized ? readDataReply.toSerializable():
-                        readDataReply), self);
+                    sender.tell((readDataReply), self);
 
                 } catch (Exception e) {
                     shardStats.incrementFailedReadTransactionsCount();
@@ -144,15 +142,13 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         }, getContext().dispatcher());
     }
 
-    protected void dataExists(DOMStoreReadTransaction transaction, DataExists message,
-        final boolean returnSerialized) {
+    protected void dataExists(DOMStoreReadTransaction transaction, DataExists message) {
         final YangInstanceIdentifier path = message.getPath();
 
         try {
             Boolean exists = transaction.exists(path).checkedGet();
             DataExistsReply dataExistsReply = new DataExistsReply(exists);
-            getSender().tell(returnSerialized ? dataExistsReply.toSerializable() :
-                dataExistsReply, getSelf());
+            getSender().tell(dataExistsReply, getSelf());
         } catch (ReadFailedException e) {
             getSender().tell(new akka.actor.Status.Failure(e),getSelf());
         }

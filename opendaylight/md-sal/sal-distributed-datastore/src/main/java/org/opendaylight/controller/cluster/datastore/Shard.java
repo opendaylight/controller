@@ -56,6 +56,7 @@ import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContex
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeOutputStreamWriter;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
@@ -72,11 +73,13 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
-
 import javax.annotation.Nonnull;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -235,8 +238,8 @@ public class Shard extends RaftActor {
             LOG.debug("onReceiveCommand: Received message {} from {}", message, getSender());
         }
 
-        if(message.getClass().equals(ReadDataReply.SERIALIZABLE_CLASS)) {
-            handleReadDataReply(message);
+        if(message instanceof ReadDataReply) {
+            handleReadDataReply((ReadDataReply) message);
         } else if (message.getClass().equals(CreateTransaction.SERIALIZABLE_CLASS)) {
             handleCreateTransaction(message);
         } else if(message instanceof ForwardedReadyTransaction) {
@@ -393,9 +396,7 @@ public class Shard extends RaftActor {
         // Return our actor path as we'll handle the three phase commit.
         ReadyTransactionReply readyTransactionReply =
             new ReadyTransactionReply(Serialization.serializedActorPath(self()));
-        getSender().tell(
-            ready.isReturnSerialized() ? readyTransactionReply.toSerializable() : readyTransactionReply,
-            getSelf());
+        getSender().tell(readyTransactionReply, getSelf());
     }
 
     private void handleAbortTransaction(AbortTransaction abort) {
@@ -450,12 +451,19 @@ public class Shard extends RaftActor {
         }
     }
 
-    private void handleReadDataReply(Object message) {
+    private void handleReadDataReply(ReadDataReply reply) {
         // This must be for install snapshot. Don't want to open this up and trigger
         // deSerialization
 
-        self().tell(new CaptureSnapshotReply(ReadDataReply.getNormalizedNodeByteString(message)),
-                self());
+        // FIXME: temporary - need to send unserialized NormalizedNode
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try {
+            NormalizedNodeWriter.forStreamWriter(new NormalizedNodeOutputStreamWriter(bos)).write(
+                    reply.getNormalizedNode());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        self().tell(new CaptureSnapshotReply(ByteString.copyFrom(bos.toByteArray())), self());
 
         createSnapshotTransaction = null;
 
@@ -776,7 +784,7 @@ public class Shard extends RaftActor {
                 "createSnapshot" + ++createSnapshotTransactionCounter, "");
 
             createSnapshotTransaction.tell(
-                new ReadData(YangInstanceIdentifier.builder().build()).toSerializable(), self());
+                new ReadData(YangInstanceIdentifier.builder().build()), self());
 
         }
     }

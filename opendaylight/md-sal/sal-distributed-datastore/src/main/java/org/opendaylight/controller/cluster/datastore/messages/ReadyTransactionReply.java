@@ -8,13 +8,13 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
+import java.io.IOException;
+import java.io.Serializable;
 
-public class ReadyTransactionReply implements SerializableMessage {
-    public static final Class<ShardTransactionMessages.ReadyTransactionReply> SERIALIZABLE_CLASS =
-            ShardTransactionMessages.ReadyTransactionReply.class;
+public class ReadyTransactionReply implements Serializable {
+    private static final long serialVersionUID = 1L;
 
-    private final String cohortPath;
+    private transient String cohortPath;
 
     public ReadyTransactionReply(String cohortPath) {
 
@@ -25,16 +25,11 @@ public class ReadyTransactionReply implements SerializableMessage {
         return cohortPath;
     }
 
-    @Override
-    public ShardTransactionMessages.ReadyTransactionReply toSerializable() {
-        return ShardTransactionMessages.ReadyTransactionReply.newBuilder().
-                setActorPath(cohortPath).build();
+    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+        out.writeUTF(cohortPath);
     }
 
-    public static ReadyTransactionReply fromSerializable(Object serializable) {
-        ShardTransactionMessages.ReadyTransactionReply o =
-                (ShardTransactionMessages.ReadyTransactionReply) serializable;
-
-        return new ReadyTransactionReply(o.getActorPath());
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        cohortPath = in.readUTF();
     }
 }

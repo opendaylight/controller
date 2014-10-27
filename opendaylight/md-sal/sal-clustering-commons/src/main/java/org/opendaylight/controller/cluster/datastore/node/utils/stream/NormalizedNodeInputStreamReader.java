@@ -11,6 +11,7 @@
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import org.opendaylight.controller.cluster.datastore.node.utils.QNameFactory;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.Node;
@@ -205,9 +206,10 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
         String localName = readCodedString();
         String namespace = readCodedString();
         String revision = readCodedString();
-        String qName;
+
         // Not using stringbuilder as compiler optimizes string concatenation of +
-        if(revision != null){
+        String qName;
+        if(!Strings.isNullOrEmpty(revision)) {
             qName = "(" + namespace+ REVISION_ARG + revision + ")" +localName;
         } else {
             qName = "(" + namespace + ")" +localName;
@@ -285,18 +287,22 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
                 return new BigInteger(reader.readUTF());
 
             case ValueTypes.YANG_IDENTIFIER_TYPE :
-                int size = reader.readInt();
-
-                List<YangInstanceIdentifier.PathArgument> pathArguments = new ArrayList<>(size);
-
-                for(int i=0; i<size; i++) {
-                    pathArguments.add(readPathArgument());
-                }
-                return YangInstanceIdentifier.create(pathArguments);
+            return readYangInstanceIdentifier();
 
             default :
                 return null;
         }
+    }
+
+    public YangInstanceIdentifier readYangInstanceIdentifier() throws IOException {
+        int size = reader.readInt();
+
+        List<YangInstanceIdentifier.PathArgument> pathArguments = new ArrayList<>(size);
+
+        for(int i=0; i<size; i++) {
+            pathArguments.add(readPathArgument());
+        }
+        return YangInstanceIdentifier.create(pathArguments);
     }
 
     private Set<String> readObjSet() throws IOException {

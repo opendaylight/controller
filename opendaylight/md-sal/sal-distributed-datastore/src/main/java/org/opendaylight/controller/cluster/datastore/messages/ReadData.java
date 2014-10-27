@@ -8,30 +8,33 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import org.opendaylight.controller.cluster.datastore.util.InstanceIdentifierUtils;
-import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
+import java.io.IOException;
+import java.io.Serializable;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputStreamReader;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeOutputStreamWriter;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
-public class ReadData {
-  public static final Class SERIALIZABLE_CLASS = ShardTransactionMessages.ReadData.class;
-  private final YangInstanceIdentifier path;
+public class ReadData implements Serializable {
+    private static final long serialVersionUID = 1L;
 
-  public ReadData(YangInstanceIdentifier path) {
-    this.path = path;
-  }
+    private transient YangInstanceIdentifier path;
 
-  public YangInstanceIdentifier getPath() {
-    return path;
-  }
+    public ReadData(YangInstanceIdentifier path) {
+        this.path = path;
+    }
 
-  public Object toSerializable(){
-    return ShardTransactionMessages.ReadData.newBuilder()
-        .setInstanceIdentifierPathArguments(InstanceIdentifierUtils.toSerializable(path))
-        .build();
-  }
+    public YangInstanceIdentifier getPath() {
+        return path;
+    }
 
-  public static ReadData fromSerializable(Object serializable){
-    ShardTransactionMessages.ReadData o = (ShardTransactionMessages.ReadData) serializable;
-    return new ReadData(InstanceIdentifierUtils.fromSerializable(o.getInstanceIdentifierPathArguments()));
-  }
+    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+        @SuppressWarnings("resource")
+        NormalizedNodeOutputStreamWriter streamWriter = new NormalizedNodeOutputStreamWriter(out);
+        streamWriter.writeYangInstanceIdentifier(getPath());
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        NormalizedNodeInputStreamReader streamReader = new NormalizedNodeInputStreamReader(in);
+        path = streamReader.readYangInstanceIdentifier();
+    }
 }
