@@ -11,12 +11,14 @@ package org.opendaylight.controller.md.statistics.manager.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.statistics.manager.StatNodeRegistration;
 import org.opendaylight.controller.md.statistics.manager.StatPermCollector.StatCapabTypes;
 import org.opendaylight.controller.md.statistics.manager.StatisticsManager;
@@ -36,9 +38,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeCon
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRemoved;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeUpdated;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.NodeMeterFeatures;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +63,7 @@ import com.google.common.base.Preconditions;
  *
  * Created: Aug 28, 2014
  */
-public class StatNodeRegistrationImpl implements StatNodeRegistration {
+public class StatNodeRegistrationImpl implements StatNodeRegistration, DataChangeListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(StatNodeRegistrationImpl.class);
 
@@ -74,6 +77,11 @@ public class StatNodeRegistrationImpl implements StatNodeRegistration {
         Preconditions.checkArgument(db != null, "DataBroker can not be null!");
         Preconditions.checkArgument(notificationService != null, "NotificationProviderService can not be null!");
         notifListenerRegistration = notificationService.registerNotificationListener(this);
+        /* Build Path */
+        final InstanceIdentifier<FlowCapableNode> flowNodeWildCardIdentifier = InstanceIdentifier.create(Nodes.class)
+                .child(Node.class).augmentation(FlowCapableNode.class);
+        listenerRegistration = db.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL,
+                flowNodeWildCardIdentifier, StatNodeRegistrationImpl.this, DataChangeScope.BASE);
     }
 
     @Override
@@ -131,21 +139,6 @@ public class StatNodeRegistrationImpl implements StatNodeRegistration {
                 maxCapTables = data.getMaxTables();
 
                 final Optional<Short> maxTables = Optional.<Short> of(maxCapTables);
-
-                /* Meters management */
-                final InstanceIdentifier<NodeMeterFeatures> meterFeaturesIdent = nodeIdent.augmentation(NodeMeterFeatures.class);
-
-
-                Optional<NodeMeterFeatures> meterFeatures = Optional.absent();
-                try {
-                    meterFeatures = tx.read(LogicalDatastoreType.OPERATIONAL, meterFeaturesIdent).checkedGet();
-                }
-                catch (final ReadFailedException e) {
-                    LOG.warn("Read NodeMeterFeatures {} fail!", meterFeaturesIdent, e);
-                }
-                if (meterFeatures.isPresent()) {
-                    statCapabTypes.add(StatCapabTypes.METER_STATS);
-                }
                 manager.connectedNodeRegistration(nodeIdent,
                         Collections.unmodifiableList(statCapabTypes), maxTables.get());
             }
@@ -178,6 +171,7 @@ public class StatNodeRegistrationImpl implements StatNodeRegistration {
 
     @Override
     public void onNodeRemoved(final NodeRemoved notification) {
+        Preconditions.checkNotNull(notification);
         final NodeRef nodeRef = notification.getNodeRef();
         final InstanceIdentifier<?> nodeRefIdent = nodeRef.getValue();
         final InstanceIdentifier<Node> nodeIdent =
@@ -189,6 +183,7 @@ public class StatNodeRegistrationImpl implements StatNodeRegistration {
 
     @Override
     public void onNodeUpdated(final NodeUpdated notification) {
+        Preconditions.checkNotNull(notification);
         final FlowCapableNodeUpdated newFlowNode =
                 notification.getAugmentation(FlowCapableNodeUpdated.class);
         if (newFlowNode != null && newFlowNode.getSwitchFeatures() != null) {
@@ -201,6 +196,26 @@ public class StatNodeRegistrationImpl implements StatNodeRegistration {
                     nodeIdent.augmentation(FlowCapableNode.class).child(SwitchFeatures.class);
             final SwitchFeatures switchFeatures = newFlowNode.getSwitchFeatures();
             connectFlowCapableNode(swichFeaturesIdent, switchFeatures, nodeIdent);
+        }
+    }
+
+    @Override
+    public void onDataChanged(final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changeEvent) {
+        Preconditions.checkNotNull(changeEvent,"Async ChangeEvent can not be null!");
+        /* All DataObjects for create */
+        final Set<InstanceIdentifier<?>>  createdData = changeEvent.getCreatedData() != null
+                ? changeEvent.getCreatedData().keySet() : Collections.<InstanceIdentifier<?>> emptySet();
+
+        for (final InstanceIdentifier<?> entryKey : createdData) {
+            final InstanceIdentifier<Node> nodeIdent = entryKey
+                    .firstIdentifierOf(Node.class);
+            if ( ! nodeIdent.isWildcarded()) {
+                final NodeRef nodeRef = new NodeRef(nodeIdent);
+                // FIXME: these calls is a job for handshake or for inventory manager
+                /* check Group and Meter future */
+                manager.getRpcMsgManager().getGroupFeaturesStat(nodeRef);
+                manager.getRpcMsgManager().getMeterFeaturesStat(nodeRef);
+            }
         }
     }
 }
