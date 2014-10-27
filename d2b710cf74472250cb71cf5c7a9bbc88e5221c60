@@ -53,6 +53,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_263f7027",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/test/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/NormalizedNodeStreamReaderWriterTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-10-27T22:11:36Z",
+      "side": 1,
+      "message": "Lets fix all of these now.",
+      "parentUuid": "ba8cc1f7_46f5d481",
+      "revId": "d2b710cf74472250cb71cf5c7a9bbc88e5221c60",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_e6f18896",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/test/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/NormalizedNodeStreamReaderWriterTest.java",
         "patchSetId": 6
@@ -64,6 +82,24 @@
       "writtenOn": "2014-10-27T21:59:15Z",
       "side": 1,
       "message": "Should we catch exceptions and let the test succeed? It seems we should let IOException be thrown and fail the test.",
+      "revId": "d2b710cf74472250cb71cf5c7a9bbc88e5221c60",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_463cf42f",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/test/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/NormalizedNodeStreamReaderWriterTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-10-27T22:11:36Z",
+      "side": 1,
+      "message": "We should fail test on exception",
+      "parentUuid": "ba8cc1f7_e6f18896",
       "revId": "d2b710cf74472250cb71cf5c7a9bbc88e5221c60",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
