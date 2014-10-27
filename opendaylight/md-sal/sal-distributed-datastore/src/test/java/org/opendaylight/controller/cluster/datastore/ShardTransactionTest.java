@@ -232,20 +232,11 @@ public class ShardTransactionTest extends AbstractActorTest {
             final ActorRef transaction = getSystem().actorOf(props, "testWriteData");
 
             transaction.tell(new WriteData(TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME), TestModel.createTestContext()).toSerializable(),
-                getRef());
-
-            expectMsgClass(duration("5 seconds"), ShardTransactionMessages.WriteDataReply.class);
-
-            assertModification(transaction, WriteModification.class);
-
-            //unserialized write
-            transaction.tell(new WriteData(TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME),
-                TestModel.createTestContext()),
-                getRef());
+                ImmutableNodes.containerNode(TestModel.TEST_QNAME)), getRef());
 
             expectMsgClass(duration("5 seconds"), WriteDataReply.class);
+
+            assertModification(transaction, WriteModification.class);
         }};
     }
 
@@ -258,19 +249,11 @@ public class ShardTransactionTest extends AbstractActorTest {
             final ActorRef transaction = getSystem().actorOf(props, "testMergeData");
 
             transaction.tell(new MergeData(TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME), testSchemaContext).toSerializable(),
-                getRef());
-
-            expectMsgClass(duration("5 seconds"), ShardTransactionMessages.MergeDataReply.class);
-
-            assertModification(transaction, MergeModification.class);
-
-            //unserialized merge
-            transaction.tell(new MergeData(TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME), testSchemaContext),
-                getRef());
+                ImmutableNodes.containerNode(TestModel.TEST_QNAME)), getRef());
 
             expectMsgClass(duration("5 seconds"), MergeDataReply.class);
+
+            assertModification(transaction, MergeModification.class);
         }};
     }
 
@@ -282,16 +265,11 @@ public class ShardTransactionTest extends AbstractActorTest {
                     testSchemaContext, datastoreContext, shardStats, "txn");
             final ActorRef transaction = getSystem().actorOf(props, "testDeleteData");
 
-            transaction.tell(new DeleteData(TestModel.TEST_PATH).toSerializable(), getRef());
-
-            expectMsgClass(duration("5 seconds"), ShardTransactionMessages.DeleteDataReply.class);
-
-            assertModification(transaction, DeleteModification.class);
-
-            //unserialized merge
             transaction.tell(new DeleteData(TestModel.TEST_PATH), getRef());
 
             expectMsgClass(duration("5 seconds"), DeleteDataReply.class);
+
+            assertModification(transaction, DeleteModification.class);
         }};
     }
 
@@ -358,7 +336,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                 testSchemaContext, datastoreContext, shardStats, "txn");
         final TestActorRef<ShardTransaction> transaction = TestActorRef.apply(props,getSystem());
 
-        transaction.receive(new DeleteData(TestModel.TEST_PATH).toSerializable(), ActorRef.noSender());
+        transaction.receive(new DeleteData(TestModel.TEST_PATH), ActorRef.noSender());
     }
 
     @Test

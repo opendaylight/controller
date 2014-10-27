@@ -285,18 +285,22 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
                 return new BigInteger(reader.readUTF());
 
             case ValueTypes.YANG_IDENTIFIER_TYPE :
-                int size = reader.readInt();
-
-                List<YangInstanceIdentifier.PathArgument> pathArguments = new ArrayList<>(size);
-
-                for(int i=0; i<size; i++) {
-                    pathArguments.add(readPathArgument());
-                }
-                return YangInstanceIdentifier.create(pathArguments);
+            return readYangInstanceIdentifier();
 
             default :
                 return null;
         }
+    }
+
+    public YangInstanceIdentifier readYangInstanceIdentifier() throws IOException {
+        int size = reader.readInt();
+
+        List<YangInstanceIdentifier.PathArgument> pathArguments = new ArrayList<>(size);
+
+        for(int i=0; i<size; i++) {
+            pathArguments.add(readPathArgument());
+        }
+        return YangInstanceIdentifier.create(pathArguments);
     }
 
     private Set<String> readObjSet() throws IOException {

@@ -16,21 +16,17 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 
 /**
- * Unit tests for WriteData.
+ * Unit tests for DeleteData.
  *
  * @author Thomas Pantelis
  */
-public class WriteDataTest {
+public class DeleteDataTest {
 
     @Test
     public void testSerialization() {
-        WriteData expected = new WriteData(TestModel.TEST_PATH,
-                ImmutableContainerNodeBuilder.create().withNodeIdentifier(
-                        new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
-                        withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build());
+        DeleteData expected = new DeleteData(TestModel.TEST_PATH);
 
-        WriteData actual = (WriteData) SerializationUtils.clone(expected);
+        DeleteData actual = (DeleteData) SerializationUtils.clone(expected);
         Assert.assertEquals("getPath", expected.getPath(), actual.getPath());
-        Assert.assertEquals("getData", expected.getData(), actual.getData());
     }
 }

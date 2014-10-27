@@ -20,6 +20,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
+import org.opendaylight.controller.cluster.datastore.messages.MergeData;
+import org.opendaylight.controller.cluster.datastore.messages.WriteData;
 import org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeSerializer;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
@@ -28,6 +30,7 @@ import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessa
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
+import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -175,14 +178,8 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
             akka.pattern.Patterns.ask(subject, readyTransaction, 3000);
         Await.result(future, Duration.create(3, TimeUnit.SECONDS));
 
-        ShardTransactionMessages.WriteData writeData =
-            ShardTransactionMessages.WriteData.newBuilder()
-                .setInstanceIdentifierPathArguments(
-                    NormalizedNodeMessages.InstanceIdentifier.newBuilder()
-                        .build()).setNormalizedNode(
-                buildNormalizedNode()
-
-            ).build();
+        WriteData writeData = new WriteData(TestModel.TEST_PATH,
+                ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
         future = akka.pattern.Patterns.ask(subject, writeData, 3000);
         Await.result(future, Duration.create(3, TimeUnit.SECONDS));
@@ -207,14 +204,8 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
             akka.pattern.Patterns.ask(subject, readyTransaction, 3000);
         Await.result(future, Duration.create(3, TimeUnit.SECONDS));
 
-        ShardTransactionMessages.WriteData writeData =
-            ShardTransactionMessages.WriteData.newBuilder()
-                .setInstanceIdentifierPathArguments(
-                    NormalizedNodeMessages.InstanceIdentifier.newBuilder()
-                        .build()
-                )
-                .setNormalizedNode(buildNormalizedNode())
-                .build();
+        WriteData writeData = new WriteData(TestModel.TEST_PATH,
+                ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
         future = akka.pattern.Patterns.ask(subject, writeData, 3000);
         Await.result(future, Duration.create(3, TimeUnit.SECONDS));
@@ -243,14 +234,8 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
             akka.pattern.Patterns.ask(subject, readyTransaction, 3000);
         Await.result(future, Duration.create(3, TimeUnit.SECONDS));
 
-        ShardTransactionMessages.MergeData mergeData =
-            ShardTransactionMessages.MergeData.newBuilder()
-                .setInstanceIdentifierPathArguments(
-                    NormalizedNodeMessages.InstanceIdentifier.newBuilder()
-                        .build()).setNormalizedNode(
-                buildNormalizedNode()
-
-            ).build();
+        MergeData mergeData = new MergeData(TestModel.TEST_PATH,
+                ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
         future = akka.pattern.Patterns.ask(subject, mergeData, 3000);
         Await.result(future, Duration.create(3, TimeUnit.SECONDS));

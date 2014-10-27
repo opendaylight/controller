@@ -56,25 +56,16 @@ public class ShardWriteTransaction extends ShardTransaction {
     public void handleReceive(Object message) throws Exception {
 
         if (message instanceof WriteData) {
-            writeData(transaction, (WriteData) message, !SERIALIZED_REPLY);
+            writeData(transaction, (WriteData) message);
 
         } else if (message instanceof MergeData) {
-            mergeData(transaction, (MergeData) message, !SERIALIZED_REPLY);
+            mergeData(transaction, (MergeData) message);
 
         } else if (message instanceof DeleteData) {
-            deleteData(transaction, (DeleteData) message, !SERIALIZED_REPLY);
+            deleteData(transaction, (DeleteData) message);
 
         } else if (message instanceof ReadyTransaction) {
             readyTransaction(transaction, new ReadyTransaction(), !SERIALIZED_REPLY);
-
-        } else if(WriteData.SERIALIZABLE_CLASS.equals(message.getClass())) {
-            writeData(transaction, WriteData.fromSerializable(message, getSchemaContext()), SERIALIZED_REPLY);
-
-        } else if(MergeData.SERIALIZABLE_CLASS.equals(message.getClass())) {
-            mergeData(transaction, MergeData.fromSerializable(message, getSchemaContext()), SERIALIZED_REPLY);
-
-        } else if(DeleteData.SERIALIZABLE_CLASS.equals(message.getClass())) {
-            deleteData(transaction, DeleteData.fromSerializable(message), SERIALIZED_REPLY);
 
         } else if(ReadyTransaction.SERIALIZABLE_CLASS.equals(message.getClass())) {
             readyTransaction(transaction, new ReadyTransaction(), SERIALIZED_REPLY);
@@ -88,8 +79,7 @@ public class ShardWriteTransaction extends ShardTransaction {
         }
     }
 
-    private void writeData(DOMStoreWriteTransaction transaction, WriteData message,
-            boolean returnSerialized) {
+    private void writeData(DOMStoreWriteTransaction transaction, WriteData message) {
         LOG.debug("writeData at path : {}", message.getPath());
 
         modification.addModification(
@@ -97,15 +87,13 @@ public class ShardWriteTransaction extends ShardTransaction {
         try {
             transaction.write(message.getPath(), message.getData());
             WriteDataReply writeDataReply = new WriteDataReply();
-            getSender().tell(returnSerialized ? writeDataReply.toSerializable() : writeDataReply,
-                getSelf());
+            getSender().tell(writeDataReply, getSelf());
         }catch(Exception e){
             getSender().tell(new akka.actor.Status.Failure(e), getSelf());
         }
     }
 
-    private void mergeData(DOMStoreWriteTransaction transaction, MergeData message,
-            boolean returnSerialized) {
+    private void mergeData(DOMStoreWriteTransaction transaction, MergeData message) {
         LOG.debug("mergeData at path : {}", message.getPath());
 
         modification.addModification(
@@ -114,23 +102,20 @@ public class ShardWriteTransaction extends ShardTransaction {
         try {
             transaction.merge(message.getPath(), message.getData());
             MergeDataReply mergeDataReply = new MergeDataReply();
-            getSender().tell(returnSerialized ? mergeDataReply.toSerializable() : mergeDataReply ,
-                getSelf());
+            getSender().tell(mergeDataReply, getSelf());
         }catch(Exception e){
             getSender().tell(new akka.actor.Status.Failure(e), getSelf());
         }
     }
 
-    private void deleteData(DOMStoreWriteTransaction transaction, DeleteData message,
-            boolean returnSerialized) {
+    private void deleteData(DOMStoreWriteTransaction transaction, DeleteData message) {
         LOG.debug("deleteData at path : {}", message.getPath());
 
         modification.addModification(new DeleteModification(message.getPath()));
         try {
             transaction.delete(message.getPath());
             DeleteDataReply deleteDataReply = new DeleteDataReply();
-            getSender().tell(returnSerialized ? deleteDataReply.toSerializable() : deleteDataReply,
-                getSelf());
+            getSender().tell(deleteDataReply, getSelf());
         }catch(Exception e){
             getSender().tell(new akka.actor.Status.Failure(e), getSelf());
         }

@@ -8,15 +8,16 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import org.opendaylight.controller.cluster.datastore.util.InstanceIdentifierUtils;
-import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
+import java.io.IOException;
+import java.io.Serializable;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputStreamReader;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeOutputStreamWriter;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
-public class DeleteData implements SerializableMessage {
+public class DeleteData implements Serializable {
+    private static final long serialVersionUID = 1L;
 
-    public static final Class SERIALIZABLE_CLASS = ShardTransactionMessages.DeleteData.class;
-
-    private final YangInstanceIdentifier path;
+    private YangInstanceIdentifier path;
 
     public DeleteData(YangInstanceIdentifier path) {
         this.path = path;
@@ -26,13 +27,15 @@ public class DeleteData implements SerializableMessage {
         return path;
     }
 
-    @Override public Object toSerializable() {
-        return ShardTransactionMessages.DeleteData.newBuilder()
-            .setInstanceIdentifierPathArguments(InstanceIdentifierUtils.toSerializable(path)).build();
+    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+        @SuppressWarnings("resource")
+        NormalizedNodeOutputStreamWriter streamWriter = new NormalizedNodeOutputStreamWriter(out);
+        streamWriter.writeYangInstanceIdentifier(getPath());
     }
 
-    public static DeleteData fromSerializable(Object serializable){
-        ShardTransactionMessages.DeleteData o = (ShardTransactionMessages.DeleteData) serializable;
-        return new DeleteData(InstanceIdentifierUtils.fromSerializable(o.getInstanceIdentifierPathArguments()));
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        try(NormalizedNodeInputStreamReader streamReader = new NormalizedNodeInputStreamReader(in)) {
+            path = streamReader.readYangInstanceIdentifier();
+        }
     }
 }

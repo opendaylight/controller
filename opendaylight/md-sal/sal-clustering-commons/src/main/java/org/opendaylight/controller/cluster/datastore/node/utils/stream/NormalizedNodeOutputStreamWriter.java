@@ -220,7 +220,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
         }
     }
 
-    private void writeYangInstanceIdentifier(YangInstanceIdentifier identifier) throws IOException {
+    public void writeYangInstanceIdentifier(YangInstanceIdentifier identifier) throws IOException {
         Iterable<YangInstanceIdentifier.PathArgument> pathArguments = identifier.getPathArguments();
         int size = Iterables.size(pathArguments);
         writer.writeInt(size);
