@@ -16,19 +16,19 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.util.TestModel;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
+import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-
-import static org.junit.Assert.fail;
 
 public class NormalizedNodeStreamReaderWriterTest {
 
     final NormalizedNode<?, ?> input = TestModel.createTestContainer();
 
     @Test
-    public void testNormalizedNodeStreamReaderWriter() {
+    public void testNormalizedNodeStreamReaderWriter() throws IOException {
 
         byte[] byteData = null;
 
@@ -39,17 +39,14 @@ public class NormalizedNodeStreamReaderWriterTest {
             normalizedNodeWriter.write(input);
             byteData = byteArrayOutputStream.toByteArray();
 
-        } catch (IOException e) {
-            fail("Writing to OutputStream failed :" + e.toString());
         }
 
-        try(NormalizedNodeInputStreamReader reader = new NormalizedNodeInputStreamReader(new ByteArrayInputStream(byteData))) {
+        try(NormalizedNodeInputStreamReader reader = new NormalizedNodeInputStreamReader(
+                new ByteArrayInputStream(byteData))) {
 
             NormalizedNode<?,?> node = reader.readNormalizedNode();
             Assert.assertEquals(input, node);
 
-        } catch (IOException e) {
-            fail("Reading from InputStream failed :" + e.toString());
         }
     }
 
