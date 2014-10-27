@@ -38,6 +38,8 @@
     <module>netconf-auth</module>
     <module>netconf-usermanager</module>
     <module>netconf-testtool</module>
+
+    <module>netconf-artifacts</module>
   </modules>
 
   <dependencies>
