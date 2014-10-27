@@ -82,17 +82,27 @@ public interface StatPermCollector extends Runnable, AutoCloseable {
 
     /**
      * All disconnected Nodes need be removed from stat list Nodes
+     *
      * @param flowNode
      * @return true/false if the {@link Node} removed successful
      */
     boolean disconnectedNodeUnregistration(InstanceIdentifier<Node> nodeIdent);
 
     /**
+     * Method add new feature {@link StatCapabTypes} to Node identified by
+     * nodeIdent -> InstanceIdentifier<Node>
+     *
+     * @param flowNode
+     * @return true/false if the {@link StatCapabTypes} add successful
+     */
+    boolean registerAdditionalNodeFeature(InstanceIdentifier<Node> nodeIdent, StatCapabTypes statCapab);
+
+    /**
      * Method return true only and only if {@link StatPermCollector} contain
      * valid node registration in its internal {@link Node} map.
      * Otherwise return false.
      *
-     * @param InstanceIdentifier<FlowCapableNode> flowNode
+     * @param flowNode
      * @return
      */
     boolean isProvidedFlowNodeActive(InstanceIdentifier<Node> nodeIdent);
