@@ -36,7 +36,7 @@ public class SubtreeFilterTest {
     @Parameters
     public static Collection<Object[]> data() {
         List<Object[]> result = new ArrayList<>();
-        for (int i = 0; i <= 8; i++) {
+        for (int i = 0; i <= 9; i++) {
             result.add(new Object[]{i});
         }
         return result;

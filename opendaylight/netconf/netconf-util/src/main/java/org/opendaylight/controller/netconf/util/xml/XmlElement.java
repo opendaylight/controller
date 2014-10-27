@@ -37,6 +37,8 @@ import org.xml.sax.SAXException;
 
 public final class XmlElement {
 
+    public static final String DEFAULT_NAMESPACE_PREFIX = "";
+
     private final Element element;
     private static final Logger logger = LoggerFactory.getLogger(XmlElement.class);
 
@@ -72,16 +74,16 @@ public final class XmlElement {
         return xmlElement;
     }
 
-    private static Map<String, String> extractNamespaces(Element typeElement) throws NetconfDocumentedException {
+    private Map<String, String> extractNamespaces() throws NetconfDocumentedException {
         Map<String, String> namespaces = new HashMap<>();
-        NamedNodeMap attributes = typeElement.getAttributes();
+        NamedNodeMap attributes = element.getAttributes();
         for (int i = 0; i < attributes.getLength(); i++) {
             Node attribute = attributes.item(i);
             String attribKey = attribute.getNodeName();
             if (attribKey.startsWith(XmlUtil.XMLNS_ATTRIBUTE_KEY)) {
                 String prefix;
                 if (attribKey.equals(XmlUtil.XMLNS_ATTRIBUTE_KEY)) {
-                    prefix = "";
+                    prefix = DEFAULT_NAMESPACE_PREFIX;
                 } else {
                     if (!attribKey.startsWith(XmlUtil.XMLNS_ATTRIBUTE_KEY + ":")){
                         throw new NetconfDocumentedException("Attribute doesn't start with :",
@@ -94,6 +96,15 @@ public final class XmlElement {
                 namespaces.put(prefix, attribute.getNodeValue());
             }
         }
+
+        // namespace does not have to be defined on this element but inherited
+        if(!namespaces.containsKey(DEFAULT_NAMESPACE_PREFIX)) {
+            Optional<String> namespaceOptionally = getNamespaceOptionally();
+            if(namespaceOptionally.isPresent()) {
+                namespaces.put(DEFAULT_NAMESPACE_PREFIX, namespaceOptionally.get());
+            }
+        }
+
         return namespaces;
     }
 
@@ -132,7 +143,7 @@ public final class XmlElement {
     }
 
     public String getName() {
-        if (element.getLocalName()!=null && !element.getLocalName().equals("")){
+        if (element.getLocalName()!=null && !element.getLocalName().equals(DEFAULT_NAMESPACE_PREFIX)){
             return element.getLocalName();
         }
         return element.getTagName();
@@ -327,7 +338,7 @@ public final class XmlElement {
     public String getTextContent() throws NetconfDocumentedException {
         NodeList childNodes = element.getChildNodes();
         if (childNodes.getLength() == 0) {
-            return "";
+            return DEFAULT_NAMESPACE_PREFIX;
         }
         for(int i = 0; i < childNodes.getLength(); i++) {
             Node textChild = childNodes.item(i);
@@ -356,7 +367,7 @@ public final class XmlElement {
 
     public String getNamespaceAttribute() throws MissingNameSpaceException {
         String attribute = element.getAttribute(XmlUtil.XMLNS_ATTRIBUTE_KEY);
-        if (attribute == null || attribute.equals("")){
+        if (attribute == null || attribute.equals(DEFAULT_NAMESPACE_PREFIX)){
             throw new MissingNameSpaceException(String.format("Element %s must specify namespace",
                     toString()),
                     NetconfDocumentedException.ErrorType.application,
@@ -415,14 +426,14 @@ public final class XmlElement {
      * is found value will be null.
      */
     public Map.Entry<String/* prefix */, String/* namespace */> findNamespaceOfTextContent() throws NetconfDocumentedException {
-        Map<String, String> namespaces = extractNamespaces(element);
+        Map<String, String> namespaces = extractNamespaces();
         String textContent = getTextContent();
         int indexOfColon = textContent.indexOf(':');
         String prefix;
         if (indexOfColon > -1) {
             prefix = textContent.substring(0, indexOfColon);
         } else {
-            prefix = "";
+            prefix = DEFAULT_NAMESPACE_PREFIX;
         }
         if (!namespaces.containsKey(prefix)) {
             throw new IllegalArgumentException("Cannot find namespace for " + XmlUtil.toString(element) + ". Prefix from content is "
