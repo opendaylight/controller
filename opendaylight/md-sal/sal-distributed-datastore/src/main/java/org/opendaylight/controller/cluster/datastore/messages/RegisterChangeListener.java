@@ -8,24 +8,26 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import akka.actor.ActorPath;
-import akka.actor.ActorSystem;
-import org.opendaylight.controller.cluster.datastore.util.InstanceIdentifierUtils;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputStreamReader;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeOutputStreamWriter;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
-import org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
-public class RegisterChangeListener implements SerializableMessage {
-    public static final Class<ListenerRegistrationMessages.RegisterChangeListener> SERIALIZABLE_CLASS =
-            ListenerRegistrationMessages.RegisterChangeListener.class;
+public class RegisterChangeListener implements Externalizable {
+    private static final long serialVersionUID = 1L;
 
-    private final YangInstanceIdentifier path;
-    private final ActorPath dataChangeListenerPath;
-    private final AsyncDataBroker.DataChangeScope scope;
+    private transient YangInstanceIdentifier path;
+    private transient String dataChangeListenerPath;
+    private transient AsyncDataBroker.DataChangeScope scope;
 
+    public RegisterChangeListener() {
+    }
 
-    public RegisterChangeListener(YangInstanceIdentifier path,
-        ActorPath dataChangeListenerPath,
+    public RegisterChangeListener(YangInstanceIdentifier path, String dataChangeListenerPath,
         AsyncDataBroker.DataChangeScope scope) {
         this.path = path;
         this.dataChangeListenerPath = dataChangeListenerPath;
@@ -41,25 +43,25 @@ public class RegisterChangeListener implements SerializableMessage {
         return scope;
     }
 
-    public ActorPath getDataChangeListenerPath() {
+    public String getDataChangeListenerPath() {
         return dataChangeListenerPath;
     }
 
-
     @Override
-    public ListenerRegistrationMessages.RegisterChangeListener toSerializable() {
-      return ListenerRegistrationMessages.RegisterChangeListener.newBuilder()
-          .setInstanceIdentifierPath(InstanceIdentifierUtils.toSerializable(path))
-          .setDataChangeListenerActorPath(dataChangeListenerPath.toString())
-          .setDataChangeScope(scope.ordinal()).build();
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        NormalizedNodeInputStreamReader streamReader = new NormalizedNodeInputStreamReader(in);
+        path = streamReader.readYangInstanceIdentifier();
+        dataChangeListenerPath = in.readUTF();
+        scope = AsyncDataBroker.DataChangeScope.values()[in.readInt()];
     }
 
-  public static RegisterChangeListener fromSerializable(ActorSystem actorSystem,Object serializable){
-    ListenerRegistrationMessages.RegisterChangeListener o = (ListenerRegistrationMessages.RegisterChangeListener) serializable;
-    return new RegisterChangeListener(InstanceIdentifierUtils.fromSerializable(o.getInstanceIdentifierPath()),
-                                                actorSystem.actorFor(o.getDataChangeListenerActorPath()).path(),
-                                              AsyncDataBroker.DataChangeScope.values()[o.getDataChangeScope()]);
-  }
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        @SuppressWarnings("resource")
+        NormalizedNodeOutputStreamWriter streamWriter = new NormalizedNodeOutputStreamWriter(out);
+        streamWriter.writeYangInstanceIdentifier(getPath());
+        out.writeUTF(dataChangeListenerPath);
+        out.writeInt(scope.ordinal());
 
-
+    }
 }

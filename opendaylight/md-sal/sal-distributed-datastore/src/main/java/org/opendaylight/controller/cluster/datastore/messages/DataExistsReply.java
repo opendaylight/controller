@@ -8,14 +8,18 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 
-public class DataExistsReply implements SerializableMessage{
+public class DataExistsReply implements Externalizable {
+    private static final long serialVersionUID = 1L;
 
+    private transient boolean exists;
 
-    public static final Class SERIALIZABLE_CLASS = ShardTransactionMessages.DataExistsReply.class;
-
-    private final boolean exists;
+    public DataExistsReply() {
+    }
 
     public DataExistsReply(boolean exists) {
         this.exists = exists;
@@ -25,14 +29,13 @@ public class DataExistsReply implements SerializableMessage{
         return exists;
     }
 
-    @Override public Object toSerializable() {
-        return ShardTransactionMessages.DataExistsReply.newBuilder()
-            .setExists(exists).build();
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        exists = in.readBoolean();
     }
 
-    public static DataExistsReply fromSerializable(Object serializable){
-        ShardTransactionMessages.DataExistsReply o = (ShardTransactionMessages.DataExistsReply) serializable;
-        return new DataExistsReply(o.getExists());
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeBoolean(exists);
     }
-
 }

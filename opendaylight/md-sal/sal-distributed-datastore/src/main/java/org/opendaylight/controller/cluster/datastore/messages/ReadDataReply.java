@@ -8,24 +8,26 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import com.google.protobuf.ByteString;
-import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
-import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputStreamReader;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeOutputStreamWriter;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
 
-public class ReadDataReply implements SerializableMessage {
-    public static final Class<ShardTransactionMessages.ReadDataReply> SERIALIZABLE_CLASS =
-            ShardTransactionMessages.ReadDataReply.class;
+public class ReadDataReply implements Externalizable {
+    private static final long serialVersionUID = 1L;
 
-    private final NormalizedNode<?, ?> normalizedNode;
-    private final SchemaContext schemaContext;
+    private transient NormalizedNode<?, ?> normalizedNode;
 
-    public ReadDataReply(SchemaContext context,NormalizedNode<?, ?> normalizedNode){
+    public ReadDataReply() {
+    }
+
+    public ReadDataReply(NormalizedNode<?, ?> normalizedNode){
 
         this.normalizedNode = normalizedNode;
-        this.schemaContext = context;
     }
 
     public NormalizedNode<?, ?> getNormalizedNode() {
@@ -33,26 +35,22 @@ public class ReadDataReply implements SerializableMessage {
     }
 
     @Override
-    public Object toSerializable(){
-        if(normalizedNode != null) {
-            return ShardTransactionMessages.ReadDataReply.newBuilder()
-                    .setNormalizedNode(new NormalizedNodeToNodeCodec(schemaContext)
-                        .encode(normalizedNode).getNormalizedNode()).build();
-        } else {
-            return ShardTransactionMessages.ReadDataReply.newBuilder().build();
-
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        boolean present = in.readBoolean();
+        if(present) {
+            NormalizedNodeInputStreamReader streamReader = new NormalizedNodeInputStreamReader(in);
+            normalizedNode = streamReader.readNormalizedNode();
         }
     }
 
-    public static ReadDataReply fromSerializable(SchemaContext schemaContext,
-            YangInstanceIdentifier id, Object serializable) {
-        ShardTransactionMessages.ReadDataReply o = (ShardTransactionMessages.ReadDataReply) serializable;
-        return new ReadDataReply(schemaContext, new NormalizedNodeToNodeCodec(schemaContext).decode(
-                o.getNormalizedNode()));
-    }
-
-    public static ByteString getNormalizedNodeByteString(Object serializable){
-        ShardTransactionMessages.ReadDataReply o = (ShardTransactionMessages.ReadDataReply) serializable;
-        return ((ShardTransactionMessages.ReadDataReply) serializable).getNormalizedNode().toByteString();
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        if(normalizedNode != null) {
+            out.writeBoolean(true);
+            NormalizedNodeOutputStreamWriter streamWriter = new NormalizedNodeOutputStreamWriter(out);
+            NormalizedNodeWriter.forStreamWriter(streamWriter).write(normalizedNode);
+        } else {
+            out.writeBoolean(false);
+        }
     }
 }

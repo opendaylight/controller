@@ -56,6 +56,7 @@ import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContex
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeOutputStreamWriter;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
@@ -72,11 +73,13 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
-
 import javax.annotation.Nonnull;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -92,7 +95,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class Shard extends RaftActor {
 
-    private static final Object COMMIT_TRANSACTION_REPLY = new CommitTransactionReply().toSerializable();
+    private static final Object COMMIT_TRANSACTION_REPLY = new CommitTransactionReply();
 
     private static final Object TX_COMMIT_TIMEOUT_CHECK_MESSAGE = "txCommitTimeoutCheck";
 
@@ -235,20 +238,20 @@ public class Shard extends RaftActor {
             LOG.debug("onReceiveCommand: Received message {} from {}", message, getSender());
         }
 
-        if(message.getClass().equals(ReadDataReply.SERIALIZABLE_CLASS)) {
-            handleReadDataReply(message);
-        } else if (message.getClass().equals(CreateTransaction.SERIALIZABLE_CLASS)) {
-            handleCreateTransaction(message);
+        if(message instanceof ReadDataReply) {
+            handleReadDataReply((ReadDataReply) message);
+        } else if (message instanceof CreateTransaction) {
+            handleCreateTransaction((CreateTransaction)message);
         } else if(message instanceof ForwardedReadyTransaction) {
             handleForwardedReadyTransaction((ForwardedReadyTransaction)message);
-        } else if(message.getClass().equals(CanCommitTransaction.SERIALIZABLE_CLASS)) {
-            handleCanCommitTransaction(CanCommitTransaction.fromSerializable(message));
-        } else if(message.getClass().equals(CommitTransaction.SERIALIZABLE_CLASS)) {
-            handleCommitTransaction(CommitTransaction.fromSerializable(message));
-        } else if(message.getClass().equals(AbortTransaction.SERIALIZABLE_CLASS)) {
-            handleAbortTransaction(AbortTransaction.fromSerializable(message));
-        } else if (message.getClass().equals(CloseTransactionChain.SERIALIZABLE_CLASS)){
-            closeTransactionChain(CloseTransactionChain.fromSerializable(message));
+        } else if(message instanceof CanCommitTransaction) {
+            handleCanCommitTransaction((CanCommitTransaction)message);
+        } else if(message instanceof CommitTransaction) {
+            handleCommitTransaction((CommitTransaction)message);
+        } else if(message instanceof AbortTransaction) {
+            handleAbortTransaction((AbortTransaction)message);
+        } else if (message instanceof CloseTransactionChain) {
+            closeTransactionChain((CloseTransactionChain)message);
         } else if (message instanceof RegisterChangeListener) {
             registerChangeListener((RegisterChangeListener) message);
         } else if (message instanceof UpdateSchemaContext) {
@@ -393,9 +396,7 @@ public class Shard extends RaftActor {
         // Return our actor path as we'll handle the three phase commit.
         ReadyTransactionReply readyTransactionReply =
             new ReadyTransactionReply(Serialization.serializedActorPath(self()));
-        getSender().tell(
-            ready.isReturnSerialized() ? readyTransactionReply.toSerializable() : readyTransactionReply,
-            getSelf());
+        getSender().tell(readyTransactionReply, getSelf());
     }
 
     private void handleAbortTransaction(AbortTransaction abort) {
@@ -421,7 +422,7 @@ public class Shard extends RaftActor {
                     shardMBean.incrementAbortTransactionsCount();
 
                     if(sender != null) {
-                        sender.tell(new AbortTransactionReply().toSerializable(), self);
+                        sender.tell(new AbortTransactionReply(), self);
                     }
                 }
 
@@ -437,11 +438,11 @@ public class Shard extends RaftActor {
         }
     }
 
-    private void handleCreateTransaction(Object message) {
+    private void handleCreateTransaction(CreateTransaction create) {
         if (isLeader()) {
-            createTransaction(CreateTransaction.fromSerializable(message));
+            createTransaction(create);
         } else if (getLeader() != null) {
-            getLeader().forward(message, getContext());
+            getLeader().forward(create, getContext());
         } else {
             getSender().tell(new akka.actor.Status.Failure(new NoShardLeaderException(
                 "Could not find shard leader so transaction cannot be created. This typically happens" +
@@ -450,12 +451,19 @@ public class Shard extends RaftActor {
         }
     }
 
-    private void handleReadDataReply(Object message) {
+    private void handleReadDataReply(ReadDataReply reply) {
         // This must be for install snapshot. Don't want to open this up and trigger
         // deSerialization
 
-        self().tell(new CaptureSnapshotReply(ReadDataReply.getNormalizedNodeByteString(message)),
-                self());
+        // FIXME: temporary - need to send unserialized NormalizedNode
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try {
+            NormalizedNodeWriter.forStreamWriter(new NormalizedNodeOutputStreamWriter(bos)).write(
+                    reply.getNormalizedNode());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        self().tell(new CaptureSnapshotReply(ByteString.copyFrom(bos.toByteArray())), self());
 
         createSnapshotTransaction = null;
 
@@ -534,21 +542,18 @@ public class Shard extends RaftActor {
 
     private ActorRef createTransaction(int transactionType, String remoteTransactionId, String transactionChainId) {
 
-        ShardTransactionIdentifier transactionId =
-            ShardTransactionIdentifier.builder()
-                .remoteTransactionId(remoteTransactionId)
-                .build();
+        ShardTransactionIdentifier transactionId = ShardTransactionIdentifier.builder().
+                remoteTransactionId(remoteTransactionId).build();
+
         if(LOG.isDebugEnabled()) {
             LOG.debug("Creating transaction : {} ", transactionId);
         }
+
         ActorRef transactionActor =
             createTypedTransactionActor(transactionType, transactionId, transactionChainId);
 
-        getSender()
-            .tell(new CreateTransactionReply(
-                    Serialization.serializedActorPath(transactionActor),
-                    remoteTransactionId).toSerializable(),
-                getSelf());
+        getSender().tell(new CreateTransactionReply(Serialization.serializedActorPath(transactionActor),
+                    remoteTransactionId), getSelf());
 
         return transactionActor;
     }
@@ -575,13 +580,7 @@ public class Shard extends RaftActor {
 
     private void updateSchemaContext(UpdateSchemaContext message) {
         this.schemaContext = message.getSchemaContext();
-        updateSchemaContext(message.getSchemaContext());
         store.onGlobalContextUpdated(message.getSchemaContext());
-    }
-
-    @VisibleForTesting
-    void updateSchemaContext(SchemaContext schemaContext) {
-        store.onGlobalContextUpdated(schemaContext);
     }
 
     private void registerChangeListener(RegisterChangeListener registerChangeListener) {
@@ -607,7 +606,8 @@ public class Shard extends RaftActor {
         LOG.debug("registerDataChangeListener sending reply, listenerRegistrationPath = {} ",
                     listenerRegistration.path());
 
-        getSender().tell(new RegisterChangeListenerReply(listenerRegistration.path()),getSelf());
+        getSender().tell(new RegisterChangeListenerReply(
+                Serialization.serializedActorPath(listenerRegistration)),getSelf());
     }
 
     private ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
@@ -627,7 +627,7 @@ public class Shard extends RaftActor {
         dataChangeListeners.add(dataChangeListenerPath);
 
         AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener =
-                new DataChangeListenerProxy(schemaContext, dataChangeListenerPath);
+                new DataChangeListenerProxy(dataChangeListenerPath);
 
         LOG.debug("Registering for path {}", registerChangeListener.getPath());
 
@@ -776,7 +776,7 @@ public class Shard extends RaftActor {
                 "createSnapshot" + ++createSnapshotTransactionCounter, "");
 
             createSnapshotTransaction.tell(
-                new ReadData(YangInstanceIdentifier.builder().build()).toSerializable(), self());
+                new ReadData(YangInstanceIdentifier.builder().build()), self());
 
         }
     }

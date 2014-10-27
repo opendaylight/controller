@@ -12,7 +12,8 @@ package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
-
+import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -33,12 +34,12 @@ public class SampleNormalizedNodeSerializable implements Serializable {
     }
 
     private void readObject(final ObjectInputStream stream) throws IOException, ClassNotFoundException, URISyntaxException {
-        NormalizedNodeStreamReader reader = new NormalizedNodeInputStreamReader(stream);
+        NormalizedNodeStreamReader reader = new NormalizedNodeInputStreamReader((DataInput)stream);
         this.input = reader.readNormalizedNode();
     }
 
     private void writeObject(final ObjectOutputStream stream) throws IOException {
-        NormalizedNodeStreamWriter writer = new NormalizedNodeOutputStreamWriter(stream);
+        NormalizedNodeStreamWriter writer = new NormalizedNodeOutputStreamWriter((DataOutput)stream);
         NormalizedNodeWriter normalizedNodeWriter = NormalizedNodeWriter.forStreamWriter(writer);
 
         normalizedNodeWriter.write(this.input);

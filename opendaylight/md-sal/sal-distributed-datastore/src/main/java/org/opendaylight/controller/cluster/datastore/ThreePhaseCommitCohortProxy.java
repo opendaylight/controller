@@ -108,7 +108,7 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
         // their canCommit processing. If any one fails then we'll fail canCommit.
 
         Future<Iterable<Object>> combinedFuture =
-                invokeCohorts(new CanCommitTransaction(transactionId).toSerializable());
+                invokeCohorts(new CanCommitTransaction(transactionId));
 
         combinedFuture.onComplete(new OnComplete<Iterable<Object>>() {
             @Override
@@ -123,9 +123,8 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
 
                 boolean result = true;
                 for(Object response: responses) {
-                    if (response.getClass().equals(CanCommitTransactionReply.SERIALIZABLE_CLASS)) {
-                        CanCommitTransactionReply reply =
-                                CanCommitTransactionReply.fromSerializable(response);
+                    if (response instanceof CanCommitTransactionReply) {
+                        CanCommitTransactionReply reply = (CanCommitTransactionReply)response;
                         if (!reply.getCanCommit()) {
                             result = false;
                             break;
@@ -173,14 +172,14 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
         // exception then that exception will supersede and suppress the original exception. But
         // it's the original exception that is the root cause and of more interest to the client.
 
-        return voidOperation("abort", new AbortTransaction(transactionId).toSerializable(),
-                AbortTransactionReply.SERIALIZABLE_CLASS, false);
+        return voidOperation("abort", new AbortTransaction(transactionId),
+                AbortTransactionReply.class, false);
     }
 
     @Override
     public ListenableFuture<Void> commit() {
-        return voidOperation("commit",  new CommitTransaction(transactionId).toSerializable(),
-                CommitTransactionReply.SERIALIZABLE_CLASS, true);
+        return voidOperation("commit",  new CommitTransaction(transactionId),
+                CommitTransactionReply.class, true);
     }
 
     private ListenableFuture<Void> voidOperation(final String operationName, final Object message,

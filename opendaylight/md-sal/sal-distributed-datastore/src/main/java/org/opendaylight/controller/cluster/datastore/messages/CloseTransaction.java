@@ -8,12 +8,8 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
+public class CloseTransaction extends EmptyExternalizableMessage {
+    private static final long serialVersionUID = 1L;
 
-public class CloseTransaction implements SerializableMessage{
-  public static final Class SERIALIZABLE_CLASS = ShardTransactionMessages.CloseTransaction.class;
-  @Override
-  public Object toSerializable() {
-    return ShardTransactionMessages.CloseTransaction.newBuilder().build();
-  }
+    public static final CloseTransaction INSTANCE = new CloseTransaction();
 }

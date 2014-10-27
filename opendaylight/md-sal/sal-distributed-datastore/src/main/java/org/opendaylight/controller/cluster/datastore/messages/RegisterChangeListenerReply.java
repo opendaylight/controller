@@ -8,32 +8,34 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import akka.actor.ActorPath;
-import akka.actor.ActorSystem;
-import org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 
-public class RegisterChangeListenerReply implements SerializableMessage{
-  public static final Class SERIALIZABLE_CLASS = ListenerRegistrationMessages.RegisterChangeListenerReply.class;
-  private final ActorPath listenerRegistrationPath;
+public class RegisterChangeListenerReply implements Externalizable{
+    private static final long serialVersionUID = 1L;
 
-  public RegisterChangeListenerReply(ActorPath listenerRegistrationPath) {
-    this.listenerRegistrationPath = listenerRegistrationPath;
-  }
+    private transient String listenerRegistrationPath;
 
-  public ActorPath getListenerRegistrationPath() {
-    return listenerRegistrationPath;
-  }
+    public RegisterChangeListenerReply() {
+    }
 
-  @Override
-  public ListenerRegistrationMessages.RegisterChangeListenerReply toSerializable() {
-    return ListenerRegistrationMessages.RegisterChangeListenerReply.newBuilder()
-            .setListenerRegistrationPath(listenerRegistrationPath.toString()).build();
-  }
+    public RegisterChangeListenerReply(String listenerRegistrationPath) {
+        this.listenerRegistrationPath = listenerRegistrationPath;
+    }
 
-  public static RegisterChangeListenerReply fromSerializable(ActorSystem actorSystem,Object serializable){
-    ListenerRegistrationMessages.RegisterChangeListenerReply o = (ListenerRegistrationMessages.RegisterChangeListenerReply) serializable;
-    return new RegisterChangeListenerReply(
-        actorSystem.actorFor(o.getListenerRegistrationPath()).path()
-        );
-  }
+    public String getListenerRegistrationPath() {
+        return listenerRegistrationPath;
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        listenerRegistrationPath = in.readUTF();
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeUTF(listenerRegistrationPath);
+    }
 }

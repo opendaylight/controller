@@ -8,15 +8,21 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import org.opendaylight.controller.cluster.datastore.util.InstanceIdentifierUtils;
-import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputStreamReader;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeOutputStreamWriter;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
-public class DataExists implements SerializableMessage{
+public class DataExists implements Externalizable {
+    private static final long serialVersionUID = 1L;
 
-    public static final Class SERIALIZABLE_CLASS = ShardTransactionMessages.DataExists.class;
+    private transient YangInstanceIdentifier path;
 
-    private final YangInstanceIdentifier path;
+    public DataExists() {
+    }
 
     public DataExists(YangInstanceIdentifier path) {
         this.path = path;
@@ -26,15 +32,16 @@ public class DataExists implements SerializableMessage{
         return path;
     }
 
-    @Override public Object toSerializable() {
-        return ShardTransactionMessages.DataExists.newBuilder()
-            .setInstanceIdentifierPathArguments(
-                InstanceIdentifierUtils.toSerializable(path)).build();
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        NormalizedNodeInputStreamReader streamReader = new NormalizedNodeInputStreamReader(in);
+        path = streamReader.readYangInstanceIdentifier();
     }
 
-    public static DataExists fromSerializable(Object serializable){
-        ShardTransactionMessages.DataExists o = (ShardTransactionMessages.DataExists) serializable;
-        return new DataExists(InstanceIdentifierUtils.fromSerializable(o.getInstanceIdentifierPathArguments()));
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        @SuppressWarnings("resource")
+        NormalizedNodeOutputStreamWriter streamWriter = new NormalizedNodeOutputStreamWriter(out);
+        streamWriter.writeYangInstanceIdentifier(getPath());
     }
-
 }

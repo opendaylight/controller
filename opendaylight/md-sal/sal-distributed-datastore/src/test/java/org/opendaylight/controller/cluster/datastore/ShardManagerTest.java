@@ -80,10 +80,9 @@ public class ShardManagerTest extends AbstractActorTest {
 
             shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
 
-            shardManager.tell(new FindPrimary("non-existent", false).toSerializable(), getRef());
+            shardManager.tell(new FindPrimary("non-existent", false), getRef());
 
-            expectMsgEquals(duration("5 seconds"),
-                    new PrimaryNotFound("non-existent").toSerializable());
+            expectMsgEquals(duration("5 seconds"), new PrimaryNotFound("non-existent"));
         }};
     }
 
@@ -95,9 +94,9 @@ public class ShardManagerTest extends AbstractActorTest {
             shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
             shardManager.tell(new ActorInitialized(), mockShardActor);
 
-            shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, false).toSerializable(), getRef());
+            shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, false), getRef());
 
-            expectMsgClass(duration("5 seconds"), PrimaryFound.SERIALIZABLE_CLASS);
+            expectMsgClass(duration("5 seconds"), PrimaryFound.class);
         }};
     }
 
@@ -108,7 +107,7 @@ public class ShardManagerTest extends AbstractActorTest {
 
             shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
 
-            shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, false).toSerializable(), getRef());
+            shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, false), getRef());
 
             expectMsgClass(duration("5 seconds"), ActorNotInitialized.class);
         }};
@@ -204,10 +203,9 @@ public class ShardManagerTest extends AbstractActorTest {
 
             MockClusterWrapper.sendMemberUp(shardManager, "member-2", getRef().path().toString());
 
-            shardManager.tell(new FindPrimary("astronauts", false).toSerializable(), getRef());
+            shardManager.tell(new FindPrimary("astronauts", false), getRef());
 
-            PrimaryFound found = PrimaryFound.fromSerializable(expectMsgClass(duration("5 seconds"),
-                    PrimaryFound.SERIALIZABLE_CLASS));
+            PrimaryFound found = expectMsgClass(duration("5 seconds"), PrimaryFound.class);
             String path = found.getPrimaryPath();
             assertTrue("Found path contains " + path, path.contains("member-2-shard-astronauts-config"));
         }};
@@ -221,15 +219,15 @@ public class ShardManagerTest extends AbstractActorTest {
 
             MockClusterWrapper.sendMemberUp(shardManager, "member-2", getRef().path().toString());
 
-            shardManager.tell(new FindPrimary("astronauts", false).toSerializable(), getRef());
+            shardManager.tell(new FindPrimary("astronauts", false), getRef());
 
-            expectMsgClass(duration("5 seconds"), PrimaryFound.SERIALIZABLE_CLASS);
+            expectMsgClass(duration("5 seconds"), PrimaryFound.class);
 
             MockClusterWrapper.sendMemberRemoved(shardManager, "member-2", getRef().path().toString());
 
-            shardManager.tell(new FindPrimary("astronauts", false).toSerializable(), getRef());
+            shardManager.tell(new FindPrimary("astronauts", false), getRef());
 
-            expectMsgClass(duration("5 seconds"), PrimaryNotFound.SERIALIZABLE_CLASS);
+            expectMsgClass(duration("5 seconds"), PrimaryNotFound.class);
         }};
     }
 

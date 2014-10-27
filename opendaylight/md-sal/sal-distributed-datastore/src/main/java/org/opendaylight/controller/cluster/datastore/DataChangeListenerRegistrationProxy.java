@@ -12,6 +12,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.PoisonPill;
 import akka.dispatch.OnComplete;
+import akka.serialization.Serialization;
 import org.opendaylight.controller.cluster.datastore.exceptions.LocalShardNotFoundException;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataChangeListenerRegistration;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
@@ -85,8 +86,8 @@ public class DataChangeListenerRegistrationProxy implements ListenerRegistration
         }
 
         if(sendCloseMessage) {
-            listenerRegistrationActor.tell(new
-                CloseDataChangeListenerRegistration().toSerializable(), null);
+            listenerRegistrationActor.tell(CloseDataChangeListenerRegistration.INSTANCE,
+                    ActorRef.noSender());
         }
     }
 
@@ -116,7 +117,8 @@ public class DataChangeListenerRegistrationProxy implements ListenerRegistration
             DataChangeScope scope) {
 
         Future<Object> future = actorContext.executeOperationAsync(shard,
-                new RegisterChangeListener(path, dataChangeListenerActor.path(), scope),
+                new RegisterChangeListener(path, Serialization.serializedActorPath(
+                        dataChangeListenerActor), scope),
                 actorContext.getDatastoreContext().getShardInitializationTimeout());
 
         future.onComplete(new OnComplete<Object>(){
@@ -144,7 +146,7 @@ public class DataChangeListenerRegistrationProxy implements ListenerRegistration
         }
 
         if(sendCloseMessage) {
-            listenerRegistrationActor.tell(new CloseDataChangeListenerRegistration().toSerializable(),
+            listenerRegistrationActor.tell(CloseDataChangeListenerRegistration.INSTANCE,
                     ActorRef.noSender());
             listenerRegistrationActor = null;
         }

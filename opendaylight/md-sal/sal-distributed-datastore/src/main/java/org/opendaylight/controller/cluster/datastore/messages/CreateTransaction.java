@@ -9,27 +9,31 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 
-import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import com.google.common.base.Preconditions;
 
+public class CreateTransaction implements Externalizable {
+    private static final long serialVersionUID = 1L;
 
-public class CreateTransaction implements SerializableMessage {
-    public static final Class SERIALIZABLE_CLASS = ShardTransactionMessages.CreateTransaction.class;
-    private final String transactionId;
-    private final int transactionType;
-    private final String transactionChainId;
+    private transient String transactionId;
+    private transient int transactionType;
+    private transient String transactionChainId;
+
+    public CreateTransaction() {
+    }
 
     public CreateTransaction(String transactionId, int transactionType) {
         this(transactionId, transactionType, "");
     }
 
     public CreateTransaction(String transactionId, int transactionType, String transactionChainId) {
-
-        this.transactionId = transactionId;
-        this.transactionType = transactionType;
-        this.transactionChainId = transactionChainId;
-
+        this.transactionId = Preconditions.checkNotNull(transactionId);
+        this.transactionType = Preconditions.checkNotNull(transactionType);
+        this.transactionChainId = Preconditions.checkNotNull(transactionChainId);
     }
-
 
     public String getTransactionId() {
         return transactionId;
@@ -39,22 +43,21 @@ public class CreateTransaction implements SerializableMessage {
         return transactionType;
     }
 
-    @Override
-    public Object toSerializable() {
-        return ShardTransactionMessages.CreateTransaction.newBuilder()
-            .setTransactionId(transactionId)
-            .setTransactionType(transactionType)
-            .setTransactionChainId(transactionChainId).build();
-    }
-
-    public static CreateTransaction fromSerializable(Object message) {
-        ShardTransactionMessages.CreateTransaction createTransaction =
-            (ShardTransactionMessages.CreateTransaction) message;
-        return new CreateTransaction(createTransaction.getTransactionId(),
-            createTransaction.getTransactionType(), createTransaction.getTransactionChainId());
-    }
-
     public String getTransactionChainId() {
         return transactionChainId;
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        transactionId = in.readUTF();
+        transactionType = in.readInt();
+        transactionChainId = in.readUTF();
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeUTF(transactionId);
+        out.writeInt(transactionType);
+        out.writeUTF(transactionChainId);
     }
 }

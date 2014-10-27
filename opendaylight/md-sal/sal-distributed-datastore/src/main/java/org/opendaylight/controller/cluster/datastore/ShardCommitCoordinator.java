@@ -31,11 +31,9 @@ public class ShardCommitCoordinator {
 
     private static final Logger LOG = LoggerFactory.getLogger(ShardCommitCoordinator.class);
 
-    private static final Object CAN_COMMIT_REPLY_TRUE =
-            new CanCommitTransactionReply(Boolean.TRUE).toSerializable();
+    private static final Object CAN_COMMIT_REPLY_TRUE = new CanCommitTransactionReply(Boolean.TRUE);
 
-    private static final Object CAN_COMMIT_REPLY_FALSE =
-            new CanCommitTransactionReply(Boolean.FALSE).toSerializable();
+    private static final Object CAN_COMMIT_REPLY_FALSE = new CanCommitTransactionReply(Boolean.FALSE);
 
     private final Cache<String, CohortEntry> cohortCache;
 
