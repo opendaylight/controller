@@ -9,9 +9,12 @@
 package org.opendaylight.controller.sal.restconf.impl;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicates;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -63,6 +66,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.InstanceI
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.ModifiedNodeDoesNotExistException;
 import org.opendaylight.yangtools.yang.data.composite.node.schema.cnsn.parser.CnSnToNormalizedNodeParserFactory;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
@@ -976,9 +980,13 @@ public class RestconfImpl implements RestconfService {
                 broker.commitConfigurationDataDelete(normalizedII).get();
             }
         } catch (Exception e) {
-            throw new RestconfDocumentedException("Error creating data", e);
+            final Optional<Throwable> searchedException = Iterables.tryFind(Throwables.getCausalChain(e),
+                    Predicates.instanceOf(ModifiedNodeDoesNotExistException.class));
+            if (searchedException.isPresent()) {
+                throw new RestconfDocumentedException("Data specified for deleting doesn't exist.", ErrorType.APPLICATION, ErrorTag.DATA_MISSING);
+            }
+            throw new RestconfDocumentedException("Error while deleting data", e);
         }
-
         return Response.status(Status.OK).build();
     }
 
