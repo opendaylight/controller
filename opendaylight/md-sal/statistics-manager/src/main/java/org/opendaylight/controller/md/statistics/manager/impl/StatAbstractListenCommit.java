@@ -51,6 +51,7 @@ public abstract class StatAbstractListenCommit<T extends DataObject, N extends N
     private ListenerRegistration<DataChangeListener> listenerRegistration;
 
     protected final Map<InstanceIdentifier<Node>, Map<InstanceIdentifier<T>, Integer>> mapNodesForDelete = new ConcurrentHashMap<>();
+    protected final Map<InstanceIdentifier<Node>, Integer> mapNodeFeautureRepeater = new ConcurrentHashMap<>();
 
     private final Class<T> clazz;
 
@@ -127,6 +128,11 @@ public abstract class StatAbstractListenCommit<T extends DataObject, N extends N
         super.close();
     }
 
+    /**
+     * Method return actual DataObject identified by InstanceIdentifier from Config/DS
+     * @param path
+     * @return
+     */
     protected final <K extends DataObject> Optional<K> readLatestConfiguration(final InstanceIdentifier<K> path) {
         if(currentReadTx == null) {
              currentReadTx = dataBroker.newReadOnlyTransaction();
