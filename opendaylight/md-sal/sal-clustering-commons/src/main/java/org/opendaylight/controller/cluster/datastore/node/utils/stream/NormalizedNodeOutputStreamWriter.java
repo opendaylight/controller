@@ -14,6 +14,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,11 +42,11 @@ import java.util.Set;
 
 public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWriter{
 
-    private DataOutputStream writer;
-
     private static final Logger LOG = LoggerFactory.getLogger(NormalizedNodeOutputStreamWriter.class);
 
-    private Map<String, Integer> stringCodeMap = new HashMap<>();
+    private final DataOutputStream writer;
+    
+    private final Map<String, Integer> stringCodeMap = new HashMap<>();
 
     public NormalizedNodeOutputStreamWriter(OutputStream stream) throws IOException {
         Preconditions.checkNotNull(stream);
@@ -70,12 +71,10 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
     }
 
     @Override
-    public void leafSetEntryNode(YangInstanceIdentifier.NodeWithValue name, Object value) throws IOException, IllegalArgumentException {
-        Preconditions.checkNotNull(name, "Node identifier should not be null");
-
+    public void leafSetEntryNode(Object value) throws IOException, IllegalArgumentException {
         LOG.debug("Writing a new leaf set entry node");
-        startNode(name.getNodeType(), NodeTypes.LEAF_SET_ENTRY_NODE);
 
+        writer.writeByte(NodeTypes.LEAF_SET_ENTRY_NODE);
         writeObject(value);
     }
 

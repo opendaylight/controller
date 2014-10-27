@@ -10,6 +10,8 @@ package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
 
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
+import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -18,6 +20,7 @@ import java.io.Serializable;
 import java.net.URISyntaxException;
 
 public class SampleNormalizedNodeSerializable implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private NormalizedNode<?, ?> input;
 
