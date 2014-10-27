@@ -1,5 +1,6 @@
 package org.opendaylight.controller.md.statistics.manager.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -81,6 +82,11 @@ public class StatPermCollectorImpl implements StatPermCollector {
     }
 
     @Override
+    public boolean hasActiveNodes() {
+        return ( ! statNodeHolder.isEmpty());
+    }
+
+    @Override
     public boolean isProvidedFlowNodeActive(
             final InstanceIdentifier<Node> flowNode) {
         return statNodeHolder.containsKey(flowNode);
@@ -89,9 +95,7 @@ public class StatPermCollectorImpl implements StatPermCollector {
     @Override
     public boolean connectedNodeRegistration(final InstanceIdentifier<Node> ident,
             final List<StatCapabTypes> statTypes, final Short nrOfSwitchTables) {
-        if (ident.isWildcarded()) {
-            LOG.warn("FlowCapableNode IstanceIdentifier {} registration can not be wildcarded!", ident);
-        } else {
+        if (isNodeIdentValidForUse(ident)) {
             if ( ! statNodeHolder.containsKey(ident)) {
                 synchronized (statNodeHolderLock) {
                     final boolean startStatCollecting = statNodeHolder.size() == 0;
@@ -119,9 +123,7 @@ public class StatPermCollectorImpl implements StatPermCollector {
 
     @Override
     public boolean disconnectedNodeUnregistration(final InstanceIdentifier<Node> ident) {
-        if (ident.isWildcarded()) {
-            LOG.warn("FlowCapableNode IstanceIdentifier {} unregistration can not be wildcarded!", ident);
-        } else {
+        if (isNodeIdentValidForUse(ident)) {
             if (statNodeHolder.containsKey(ident)) {
                 synchronized (statNodeHolderLock) {
                     if (statNodeHolder.containsKey(ident)) {
@@ -140,6 +142,33 @@ public class StatPermCollectorImpl implements StatPermCollector {
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean registerAdditionalNodeFeature(final InstanceIdentifier<Node> ident,
+            final StatCapabTypes statCapab) {
+        if (isNodeIdentValidForUse(ident)) {
+            if ( ! statNodeHolder.containsKey(ident)) {
+                return false;
+            }
+            final StatNodeInfoHolder statNode = statNodeHolder.get(ident);
+            if ( ! statNode.getStatMarkers().contains(statCapab)) {
+                synchronized (statNodeHolderLock) {
+                    if ( ! statNode.getStatMarkers().contains(statCapab)) {
+                        final List<StatCapabTypes> statCapabForEdit = new ArrayList<>(statNode.getStatMarkers());
+                        statCapabForEdit.add(statCapab);
+                        final StatNodeInfoHolder nodeInfoHolder = new StatNodeInfoHolder(statNode.getNodeRef(),
+                                Collections.unmodifiableList(statCapabForEdit), statNode.getMaxTables());
+
+                        final Map<InstanceIdentifier<Node>, StatNodeInfoHolder> statNodes =
+                                new HashMap<>(statNodeHolder);
+                        statNodes.put(ident, nodeInfoHolder);
+                        statNodeHolder = Collections.unmodifiableMap(statNodes);
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     @Override
@@ -238,8 +267,6 @@ public class StatPermCollectorImpl implements StatPermCollector {
                     break;
                 case GROUP_STATS:
                     LOG.trace("STAT-MANAGER-collecting GROUP-STATS for NodeRef {}", actualNodeRef);
-                    manager.getRpcMsgManager().getGroupFeaturesStat(actualNodeRef);
-                    waitingForNotification();
                     manager.getRpcMsgManager().getAllGroupsConfStats(actualNodeRef);
                     waitingForNotification();
                     manager.getRpcMsgManager().getAllGroupsStat(actualNodeRef);
@@ -247,8 +274,6 @@ public class StatPermCollectorImpl implements StatPermCollector {
                     break;
                 case METER_STATS:
                     LOG.trace("STAT-MANAGER-collecting METER-STATS for NodeRef {}", actualNodeRef);
-                    manager.getRpcMsgManager().getMeterFeaturesStat(actualNodeRef);
-                    waitingForNotification();
                     manager.getRpcMsgManager().getAllMeterConfigStat(actualNodeRef);
                     waitingForNotification();
                     manager.getRpcMsgManager().getAllMetersStat(actualNodeRef);
@@ -297,9 +322,16 @@ public class StatPermCollectorImpl implements StatPermCollector {
         }
     }
 
-    @Override
-    public boolean hasActiveNodes() {
-        return ( ! statNodeHolder.isEmpty());
+    private boolean isNodeIdentValidForUse(final InstanceIdentifier<Node> ident) {
+        if (ident == null) {
+            LOG.warn("FlowCapableNode InstanceIdentifier {} can not be null!");
+            return false;
+        }
+        if (ident.isWildcarded()) {
+            LOG.warn("FlowCapableNode InstanceIdentifier {} can not be wildcarded!", ident);
+            return false;
+        }
+        return true;
     }
 }
 

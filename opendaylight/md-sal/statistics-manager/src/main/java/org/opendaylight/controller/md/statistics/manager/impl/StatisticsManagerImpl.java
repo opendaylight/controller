@@ -300,7 +300,18 @@ public class StatisticsManagerImpl implements StatisticsManager, Runnable {
                return;
            }
        }
-       LOG.debug("Node {} has not removed.", nodeIdent);
+       LOG.debug("Node {} has not been removed.", nodeIdent);
+   }
+
+   @Override
+   public void registerAdditionalNodeFeature(final InstanceIdentifier<Node> nodeIdent,
+           final StatCapabTypes statCapab) {
+       for (final StatPermCollector collector : statCollectors) {
+           if (collector.registerAdditionalNodeFeature(nodeIdent, statCapab)) {
+               return;
+           }
+       }
+       LOG.debug("Node {} has not been extended for feature {}!", nodeIdent, statCapab);
    }
 
    /* Getter internal Statistic Manager Job Classes */

@@ -454,7 +454,6 @@ public class StatRpcMsgManagerImpl implements StatRpcMsgManager {
 
             @Override
             public Void call() throws Exception {
-                Preconditions.checkArgument(nodeRef != null, "NodeRef can not be null!");
                 final GetGroupDescriptionInputBuilder builder =
                         new GetGroupDescriptionInputBuilder();
                 builder.setNode(nodeRef);
