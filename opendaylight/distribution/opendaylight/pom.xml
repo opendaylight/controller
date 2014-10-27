@@ -1153,10 +1153,6 @@
           <version>${mdsal.version}</version>
         </dependency>
         <dependency>
-          <groupId>org.opendaylight.controller.thirdparty</groupId>
-          <artifactId>ganymed</artifactId>
-        </dependency>
-        <dependency>
           <groupId>org.apache.sshd</groupId>
           <artifactId>sshd-core</artifactId>
         </dependency>
