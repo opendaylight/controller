@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.spi.rpc;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
@@ -14,17 +16,14 @@ import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
 
-import com.google.common.base.Optional;
-
 public abstract class RpcRoutingStrategy implements Identifiable<QName> {
 
+    private static final QName CONTEXT_REFERENCE = QName.cachedReference(QName.create("urn:opendaylight:yang:extension:yang-ext",
+            "2013-07-09", "context-reference"));
     private final QName identifier;
-    private static final QName CONTEXT_REFERENCE = QName.create("urn:opendaylight:yang:extension:yang-ext",
-            "2013-07-09", "context-reference");
 
     private RpcRoutingStrategy(final QName identifier) {
-        super();
-        this.identifier = identifier;
+        this.identifier = Preconditions.checkNotNull(identifier);
     }
 
     /**
@@ -47,7 +46,7 @@ public abstract class RpcRoutingStrategy implements Identifiable<QName> {
     public abstract QName getContext();
 
     @Override
-    public QName getIdentifier() {
+    public final QName getIdentifier() {
         return identifier;
     }
 
@@ -64,14 +63,14 @@ public abstract class RpcRoutingStrategy implements Identifiable<QName> {
             for (DataSchemaNode schemaNode : input.getChildNodes()) {
                 Optional<QName> context = getRoutingContext(schemaNode);
                 if (context.isPresent()) {
-                    return createRoutedStrategy(rpc, context.get(), schemaNode.getQName());
+                    return new RoutedRpcStrategy(rpc.getQName(), context.get(), schemaNode.getQName());
                 }
             }
         }
-        return createGlobalStrategy(rpc);
+        return new GlobalRpcStrategy(rpc.getQName());
     }
 
-    public static  Optional<QName> getRoutingContext(final DataSchemaNode schemaNode) {
+    public static Optional<QName> getRoutingContext(final DataSchemaNode schemaNode) {
         for (UnknownSchemaNode extension : schemaNode.getUnknownSchemaNodes()) {
             if (CONTEXT_REFERENCE.equals(extension.getNodeType())) {
                 return Optional.fromNullable(extension.getQName());
@@ -80,26 +79,14 @@ public abstract class RpcRoutingStrategy implements Identifiable<QName> {
         return Optional.absent();
     }
 
-    private static RpcRoutingStrategy createRoutedStrategy(final RpcDefinition rpc, final QName context, final QName leafNode) {
-        return new RoutedRpcStrategy(rpc.getQName(), context, leafNode);
-    }
-
-
-
-    private static RpcRoutingStrategy createGlobalStrategy(final RpcDefinition rpc) {
-        GlobalRpcStrategy ret = new GlobalRpcStrategy(rpc.getQName());
-        return ret;
-    }
-
-    private static class RoutedRpcStrategy extends RpcRoutingStrategy {
-
-        final QName context;
+    private static final class RoutedRpcStrategy extends RpcRoutingStrategy {
+        private final QName context;
         private final QName leaf;
 
         private RoutedRpcStrategy(final QName identifier, final QName ctx, final QName leaf) {
             super(identifier);
-            this.context = ctx;
-            this.leaf = leaf;
+            this.context = Preconditions.checkNotNull(ctx);
+            this.leaf = Preconditions.checkNotNull(leaf);
         }
 
         @Override
@@ -118,7 +105,7 @@ public abstract class RpcRoutingStrategy implements Identifiable<QName> {
         }
     }
 
-    private static class GlobalRpcStrategy extends RpcRoutingStrategy {
+    private static final class GlobalRpcStrategy extends RpcRoutingStrategy {
 
         public GlobalRpcStrategy(final QName identifier) {
             super(identifier);
@@ -131,12 +118,12 @@ public abstract class RpcRoutingStrategy implements Identifiable<QName> {
 
         @Override
         public QName getContext() {
-            throw new UnsupportedOperationException("Not routed strategy does not have context.");
+            throw new UnsupportedOperationException("Non-routed strategy does not have a context");
         }
 
         @Override
         public QName getLeaf() {
-            throw new UnsupportedOperationException("Not routed strategy does not have context.");
+            throw new UnsupportedOperationException("Non-routed strategy does not have a context");
         }
     }
 }
