@@ -132,8 +132,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     @Override
     public void handleCommand(Object message) throws Exception {
-        if (message.getClass().equals(FindPrimary.SERIALIZABLE_CLASS)) {
-            findPrimary(FindPrimary.fromSerializable(message));
+        if (message instanceof FindPrimary) {
+            findPrimary((FindPrimary)message);
         } else if(message instanceof FindLocalShard){
             findLocalShard((FindLocalShard) message);
         } else if (message instanceof UpdateSchemaContext) {
@@ -312,7 +312,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             sendResponse(info, message.isWaitUntilInitialized(), new Supplier<Object>() {
                 @Override
                 public Object get() {
-                    return new PrimaryFound(info.getActorPath().toString()).toSerializable();
+                    return new PrimaryFound(info.getActorPath().toString());
                 }
             });
 
@@ -336,11 +336,11 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             if(address != null){
                 String path =
                     getShardActorPath(shardName, memberName);
-                getSender().tell(new PrimaryFound(path).toSerializable(), getSelf());
+                getSender().tell(new PrimaryFound(path), getSelf());
                 return;
             }
         }
-        getSender().tell(new PrimaryNotFound(shardName).toSerializable(), getSelf());
+        getSender().tell(new PrimaryNotFound(shardName), getSelf());
     }
 
     private String getShardActorPath(String shardName, String memberName) {

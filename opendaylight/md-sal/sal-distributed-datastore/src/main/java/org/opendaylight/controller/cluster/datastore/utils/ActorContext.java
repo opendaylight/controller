@@ -148,15 +148,14 @@ public class ActorContext {
     }
 
     public Future<ActorSelection> findPrimaryShardAsync(final String shardName) {
-        Future<Object> future = executeOperationAsync(shardManager,
-                new FindPrimary(shardName, true).toSerializable(),
+        Future<Object> future = executeOperationAsync(shardManager, new FindPrimary(shardName, true),
                 datastoreContext.getShardInitializationTimeout());
 
         return future.transform(new Mapper<Object, ActorSelection>() {
             @Override
             public ActorSelection checkedApply(Object response) throws Exception {
-                if(response.getClass().equals(PrimaryFound.SERIALIZABLE_CLASS)) {
-                    PrimaryFound found = PrimaryFound.fromSerializable(response);
+                if(response instanceof PrimaryFound) {
+                    PrimaryFound found = (PrimaryFound)response;
 
                     LOG.debug("Primary found {}", found.getPrimaryPath());
                     return actorSystem.actorSelection(found.getPrimaryPath());
@@ -227,10 +226,10 @@ public class ActorContext {
     }
 
     private String findPrimaryPathOrNull(String shardName) {
-        Object result = executeOperation(shardManager, new FindPrimary(shardName, false).toSerializable());
+        Object result = executeOperation(shardManager, new FindPrimary(shardName, false));
 
-        if (result.getClass().equals(PrimaryFound.SERIALIZABLE_CLASS)) {
-            PrimaryFound found = PrimaryFound.fromSerializable(result);
+        if (result.getClass().equals(PrimaryFound.class)) {
+            PrimaryFound found = (PrimaryFound)result;
 
             LOG.debug("Primary found {}", found.getPrimaryPath());
             return found.getPrimaryPath();

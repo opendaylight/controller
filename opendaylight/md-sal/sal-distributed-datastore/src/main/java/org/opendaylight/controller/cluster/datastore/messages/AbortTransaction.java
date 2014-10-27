@@ -8,13 +8,18 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 
-public class AbortTransaction implements SerializableMessage {
-    public static final Class<ThreePhaseCommitCohortMessages.AbortTransaction> SERIALIZABLE_CLASS =
-            ThreePhaseCommitCohortMessages.AbortTransaction.class;
+public class AbortTransaction implements Externalizable {
+    private static final long serialVersionUID = 1L;
 
-    private final String transactionID;
+    private transient String transactionID;
+
+    public AbortTransaction() {
+    }
 
     public AbortTransaction(String transactionID) {
         this.transactionID = transactionID;
@@ -25,13 +30,12 @@ public class AbortTransaction implements SerializableMessage {
     }
 
     @Override
-    public Object toSerializable() {
-        return ThreePhaseCommitCohortMessages.AbortTransaction.newBuilder().
-                setTransactionId(transactionID).build();
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        transactionID = in.readUTF();
     }
 
-    public static AbortTransaction fromSerializable(Object message) {
-        return new AbortTransaction(((ThreePhaseCommitCohortMessages.AbortTransaction)message).
-                getTransactionId());
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeUTF(transactionID);
     }
 }

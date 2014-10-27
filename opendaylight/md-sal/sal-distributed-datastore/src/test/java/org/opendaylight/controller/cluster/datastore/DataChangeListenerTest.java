@@ -4,12 +4,12 @@ import akka.actor.ActorRef;
 import akka.actor.DeadLetter;
 import akka.actor.Props;
 import akka.testkit.JavaTestKit;
+import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.datastore.messages.DataChanged;
 import org.opendaylight.controller.cluster.datastore.messages.DataChangedReply;
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
-import org.opendaylight.controller.md.cluster.datastore.model.CompositeModel;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 
@@ -27,8 +27,7 @@ public class DataChangeListenerTest extends AbstractActorTest {
             // Let the DataChangeListener know that notifications should be enabled
             subject.tell(new EnableNotification(true), getRef());
 
-            subject.tell(new DataChanged(CompositeModel.createTestContext(), mockChangeEvent),
-                    getRef());
+            subject.tell(new DataChanged(mockChangeEvent), getRef());
 
             expectMsgClass(DataChangedReply.class);
 
@@ -46,8 +45,7 @@ public class DataChangeListenerTest extends AbstractActorTest {
             final ActorRef subject =
                 getSystem().actorOf(props, "testDataChangedNotificationsDisabled");
 
-            subject.tell(new DataChanged(CompositeModel.createTestContext(), mockChangeEvent),
-                    getRef());
+            subject.tell(new DataChanged(mockChangeEvent), getRef());
 
             new Within(duration("1 seconds")) {
                 @Override
@@ -70,19 +68,27 @@ public class DataChangeListenerTest extends AbstractActorTest {
             final Props props = DataChangeListener.props(mockListener);
             final ActorRef subject = getSystem().actorOf(props, "testDataChangedWithNoSender");
 
+            getSystem().eventStream().subscribe(getRef(), DeadLetter.class);
+
             // Let the DataChangeListener know that notifications should be enabled
             subject.tell(new EnableNotification(true), ActorRef.noSender());
 
-            subject.tell(new DataChanged(CompositeModel.createTestContext(), mockChangeEvent),
-                    ActorRef.noSender());
+            subject.tell(new DataChanged(mockChangeEvent), ActorRef.noSender());
 
-            getSystem().eventStream().subscribe(getRef(), DeadLetter.class);
-            new Within(duration("1 seconds")) {
-                @Override
-                protected void run() {
-                    expectNoMsg();
+            // Make sure no DataChangedReply is sent to DeadLetters.
+            while(true) {
+                DeadLetter deadLetter;
+                try {
+                    deadLetter = expectMsgClass(duration("1 seconds"), DeadLetter.class);
+                } catch (AssertionError e) {
+                    // Timed out - got no DeadLetter - this is good
+                    break;
                 }
-            };
+
+                // We may get DeadLetters for other messages we don't care about.
+                Assert.assertFalse("Unexpected DataChangedReply",
+                        deadLetter.message() instanceof DataChangedReply);
+            }
         }};
     }
 }

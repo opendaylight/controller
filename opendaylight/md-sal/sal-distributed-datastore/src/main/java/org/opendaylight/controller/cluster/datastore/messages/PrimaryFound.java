@@ -8,50 +8,65 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-
-public class PrimaryFound implements SerializableMessage {
-  public static final Class SERIALIZABLE_CLASS = PrimaryFound.class;
-  private final String primaryPath;
-
-  public PrimaryFound(String primaryPath) {
-    this.primaryPath = primaryPath;
-  }
-
-  public String getPrimaryPath() {
-    return primaryPath;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-
-    PrimaryFound that = (PrimaryFound) o;
-
-    if (!primaryPath.equals(that.primaryPath)) return false;
-
-    return true;
-  }
-
-  @Override
-  public int hashCode() {
-    return primaryPath.hashCode();
-  }
-
-  @Override
-  public String toString() {
-    return "PrimaryFound{" +
-            "primaryPath='" + primaryPath + '\'' +
-            '}';
-  }
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 
 
-  @Override
-  public Object toSerializable() {
-    return  this;
-  }
+public class PrimaryFound implements Externalizable {
+    private static final long serialVersionUID = 1L;
 
-  public static PrimaryFound fromSerializable(Object message){
-    return (PrimaryFound) message;
-  }
+    private String primaryPath;
+
+    public PrimaryFound() {
+    }
+
+    public PrimaryFound(String primaryPath) {
+        this.primaryPath = primaryPath;
+    }
+
+    public String getPrimaryPath() {
+        return primaryPath;
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        primaryPath = in.readUTF();
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeUTF(primaryPath);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        PrimaryFound that = (PrimaryFound) o;
+
+        if (!primaryPath.equals(that.primaryPath)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return primaryPath.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "PrimaryFound{" +
+                "primaryPath='" + primaryPath + '\'' +
+                '}';
+    }
 }

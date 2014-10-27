@@ -34,7 +34,6 @@ import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
-import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -89,18 +88,6 @@ public class ShardTransactionTest extends AbstractActorTest {
         }
 
         private void testOnReceiveReadData(final ActorRef transaction) {
-            //serialized read
-            transaction.tell(new ReadData(YangInstanceIdentifier.builder().build()).toSerializable(),
-                getRef());
-
-            ShardTransactionMessages.ReadDataReply replySerialized =
-                expectMsgClass(duration("5 seconds"), ReadDataReply.SERIALIZABLE_CLASS);
-
-            assertNotNull(ReadDataReply.fromSerializable(
-                testSchemaContext,YangInstanceIdentifier.builder().build(), replySerialized)
-                .getNormalizedNode());
-
-            // unserialized read
             transaction.tell(new ReadData(YangInstanceIdentifier.builder().build()),getRef());
 
             ReadDataReply reply = expectMsgClass(duration("5 seconds"), ReadDataReply.class);
@@ -127,16 +114,6 @@ public class ShardTransactionTest extends AbstractActorTest {
         }
 
         private void testOnReceiveReadDataWhenDataNotFound(final ActorRef transaction) {
-            // serialized read
-            transaction.tell(new ReadData(TestModel.TEST_PATH).toSerializable(), getRef());
-
-            ShardTransactionMessages.ReadDataReply replySerialized =
-                expectMsgClass(duration("5 seconds"), ReadDataReply.SERIALIZABLE_CLASS);
-
-            assertTrue(ReadDataReply.fromSerializable(
-                testSchemaContext, TestModel.TEST_PATH, replySerialized).getNormalizedNode() == null);
-
-            // unserialized read
             transaction.tell(new ReadData(TestModel.TEST_PATH),getRef());
 
             ReadDataReply reply = expectMsgClass(duration("5 seconds"), ReadDataReply.class);
@@ -161,15 +138,6 @@ public class ShardTransactionTest extends AbstractActorTest {
         }
 
         private void testOnReceiveDataExistsPositive(final ActorRef transaction) {
-            transaction.tell(new DataExists(YangInstanceIdentifier.builder().build()).toSerializable(),
-                getRef());
-
-            ShardTransactionMessages.DataExistsReply replySerialized =
-                expectMsgClass(duration("5 seconds"), ShardTransactionMessages.DataExistsReply.class);
-
-            assertTrue(DataExistsReply.fromSerializable(replySerialized).exists());
-
-            // unserialized read
             transaction.tell(new DataExists(YangInstanceIdentifier.builder().build()),getRef());
 
             DataExistsReply reply = expectMsgClass(duration("5 seconds"), DataExistsReply.class);
@@ -194,14 +162,6 @@ public class ShardTransactionTest extends AbstractActorTest {
         }
 
         private void testOnReceiveDataExistsNegative(final ActorRef transaction) {
-            transaction.tell(new DataExists(TestModel.TEST_PATH).toSerializable(), getRef());
-
-            ShardTransactionMessages.DataExistsReply replySerialized =
-                expectMsgClass(duration("5 seconds"), ShardTransactionMessages.DataExistsReply.class);
-
-            assertFalse(DataExistsReply.fromSerializable(replySerialized).exists());
-
-            // unserialized read
             transaction.tell(new DataExists(TestModel.TEST_PATH),getRef());
 
             DataExistsReply reply = expectMsgClass(duration("5 seconds"), DataExistsReply.class);
@@ -232,20 +192,11 @@ public class ShardTransactionTest extends AbstractActorTest {
             final ActorRef transaction = getSystem().actorOf(props, "testWriteData");
 
             transaction.tell(new WriteData(TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME), TestModel.createTestContext()).toSerializable(),
-                getRef());
-
-            expectMsgClass(duration("5 seconds"), ShardTransactionMessages.WriteDataReply.class);
-
-            assertModification(transaction, WriteModification.class);
-
-            //unserialized write
-            transaction.tell(new WriteData(TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME),
-                TestModel.createTestContext()),
-                getRef());
+                ImmutableNodes.containerNode(TestModel.TEST_QNAME)), getRef());
 
             expectMsgClass(duration("5 seconds"), WriteDataReply.class);
+
+            assertModification(transaction, WriteModification.class);
         }};
     }
 
@@ -258,19 +209,11 @@ public class ShardTransactionTest extends AbstractActorTest {
             final ActorRef transaction = getSystem().actorOf(props, "testMergeData");
 
             transaction.tell(new MergeData(TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME), testSchemaContext).toSerializable(),
-                getRef());
-
-            expectMsgClass(duration("5 seconds"), ShardTransactionMessages.MergeDataReply.class);
-
-            assertModification(transaction, MergeModification.class);
-
-            //unserialized merge
-            transaction.tell(new MergeData(TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME), testSchemaContext),
-                getRef());
+                ImmutableNodes.containerNode(TestModel.TEST_QNAME)), getRef());
 
             expectMsgClass(duration("5 seconds"), MergeDataReply.class);
+
+            assertModification(transaction, MergeModification.class);
         }};
     }
 
@@ -282,16 +225,11 @@ public class ShardTransactionTest extends AbstractActorTest {
                     testSchemaContext, datastoreContext, shardStats, "txn");
             final ActorRef transaction = getSystem().actorOf(props, "testDeleteData");
 
-            transaction.tell(new DeleteData(TestModel.TEST_PATH).toSerializable(), getRef());
-
-            expectMsgClass(duration("5 seconds"), ShardTransactionMessages.DeleteDataReply.class);
-
-            assertModification(transaction, DeleteModification.class);
-
-            //unserialized merge
             transaction.tell(new DeleteData(TestModel.TEST_PATH), getRef());
 
             expectMsgClass(duration("5 seconds"), DeleteDataReply.class);
+
+            assertModification(transaction, DeleteModification.class);
         }};
     }
 
@@ -306,12 +244,10 @@ public class ShardTransactionTest extends AbstractActorTest {
 
             watch(transaction);
 
-            transaction.tell(new ReadyTransaction().toSerializable(), getRef());
+            transaction.tell(new ReadyTransaction(), getRef());
 
-            expectMsgAnyClassOf(duration("5 seconds"), ReadyTransactionReply.SERIALIZABLE_CLASS,
-                    Terminated.class);
-            expectMsgAnyClassOf(duration("5 seconds"), ReadyTransactionReply.SERIALIZABLE_CLASS,
-                    Terminated.class);
+            expectMsgAnyClassOf(duration("5 seconds"), ReadyTransactionReply.class, Terminated.class);
+            expectMsgAnyClassOf(duration("5 seconds"), ReadyTransactionReply.class, Terminated.class);
         }};
 
         // test
@@ -344,9 +280,9 @@ public class ShardTransactionTest extends AbstractActorTest {
 
             watch(transaction);
 
-            transaction.tell(new CloseTransaction().toSerializable(), getRef());
+            transaction.tell(new CloseTransaction(), getRef());
 
-            expectMsgClass(duration("3 seconds"), CloseTransactionReply.SERIALIZABLE_CLASS);
+            expectMsgClass(duration("3 seconds"), CloseTransactionReply.class);
             expectTerminated(duration("3 seconds"), transaction);
         }};
     }
@@ -358,7 +294,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                 testSchemaContext, datastoreContext, shardStats, "txn");
         final TestActorRef<ShardTransaction> transaction = TestActorRef.apply(props,getSystem());
 
-        transaction.receive(new DeleteData(TestModel.TEST_PATH).toSerializable(), ActorRef.noSender());
+        transaction.receive(new DeleteData(TestModel.TEST_PATH), ActorRef.noSender());
     }
 
     @Test

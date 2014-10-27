@@ -8,25 +8,28 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import com.google.common.base.Preconditions;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputStreamReader;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeOutputStreamWriter;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
 
-public abstract class ModifyData implements SerializableMessage {
-    protected final YangInstanceIdentifier path;
-    protected final NormalizedNode<?, ?> data;
-    protected final SchemaContext schemaContext;
+public abstract class ModifyData implements Externalizable {
+    private static final long serialVersionUID = 1L;
 
-    public ModifyData(YangInstanceIdentifier path, NormalizedNode<?, ?> data,
-        SchemaContext context) {
-        Preconditions.checkNotNull(context,
-            "Cannot serialize an object which does not have a schema schemaContext");
+    private transient YangInstanceIdentifier path;
+    private transient NormalizedNode<?, ?> data;
 
+    public ModifyData() {
+    }
 
+    public ModifyData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
         this.path = path;
         this.data = data;
-        this.schemaContext = context;
     }
 
     public YangInstanceIdentifier getPath() {
@@ -37,4 +40,17 @@ public abstract class ModifyData implements SerializableMessage {
         return data;
     }
 
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        NormalizedNodeInputStreamReader streamReader = new NormalizedNodeInputStreamReader(in);
+        data = streamReader.readNormalizedNode();
+        path = streamReader.readYangInstanceIdentifier();
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        NormalizedNodeOutputStreamWriter streamWriter = new NormalizedNodeOutputStreamWriter(out);
+        NormalizedNodeWriter.forStreamWriter(streamWriter).write(getData());
+        streamWriter.writeYangInstanceIdentifier(getPath());
+    }
 }

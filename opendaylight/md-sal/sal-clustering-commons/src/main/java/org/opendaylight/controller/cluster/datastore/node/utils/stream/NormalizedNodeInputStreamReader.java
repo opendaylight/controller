@@ -11,6 +11,7 @@
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import org.opendaylight.controller.cluster.datastore.node.utils.QNameFactory;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.Node;
@@ -34,6 +35,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.ListNodeBuil
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeAttrBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,7 +61,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
 
     private static final String REVISION_ARG = "?revision=";
 
-    private final DataInputStream reader;
+    private final DataInput input;
 
     private final Map<Integer, String> codedStringMap = new HashMap<>();
 
@@ -67,7 +69,11 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
 
     public NormalizedNodeInputStreamReader(InputStream stream) throws IOException {
         Preconditions.checkNotNull(stream);
-        reader = new DataInputStream(stream);
+        input = new DataInputStream(stream);
+    }
+
+    public NormalizedNodeInputStreamReader(DataInput input) throws IOException {
+        this.input = Preconditions.checkNotNull(input);
     }
 
     @Override
@@ -75,7 +81,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
         NormalizedNode<?, ?> node = null;
 
         // each node should start with a byte
-        byte nodeType = reader.readByte();
+        byte nodeType = input.readByte();
 
         if(nodeType == NodeTypes.END_NODE) {
             LOG.debug("End node reached. return");
@@ -205,9 +211,10 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
         String localName = readCodedString();
         String namespace = readCodedString();
         String revision = readCodedString();
-        String qName;
+
         // Not using stringbuilder as compiler optimizes string concatenation of +
-        if(revision != null){
+        String qName;
+        if(!Strings.isNullOrEmpty(revision)) {
             qName = "(" + namespace+ REVISION_ARG + revision + ")" +localName;
         } else {
             qName = "(" + namespace + ")" +localName;
@@ -218,11 +225,11 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
 
 
     private String readCodedString() throws IOException {
-        boolean readFromMap = reader.readBoolean();
+        boolean readFromMap = input.readBoolean();
         if(readFromMap) {
-            return codedStringMap.get(reader.readInt());
+            return codedStringMap.get(input.readInt());
         } else {
-            String value = reader.readUTF();
+            String value = input.readUTF();
             if(value != null) {
                 codedStringMap.put(Integer.valueOf(codedStringMap.size()), value);
             }
@@ -232,7 +239,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
 
     private Set<QName> readQNameSet() throws IOException{
         // Read the children count
-        int count = reader.readInt();
+        int count = input.readInt();
         Set<QName> children = new HashSet<>(count);
         for(int i = 0; i<count; i++) {
             children.add(readQName());
@@ -241,7 +248,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
     }
 
     private Map<QName, Object> readKeyValueMap() throws IOException {
-        int count = reader.readInt();
+        int count = input.readInt();
         Map<QName, Object> keyValueMap = new HashMap<>(count);
 
         for(int i = 0; i<count; i++) {
@@ -252,55 +259,59 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
     }
 
     private Object readObject() throws IOException {
-        byte objectType = reader.readByte();
+        byte objectType = input.readByte();
         switch(objectType) {
             case ValueTypes.BITS_TYPE:
                 return readObjSet();
 
             case ValueTypes.BOOL_TYPE :
-                return reader.readBoolean();
+                return input.readBoolean();
 
             case ValueTypes.BYTE_TYPE :
-                return reader.readByte();
+                return input.readByte();
 
             case ValueTypes.INT_TYPE :
-                return reader.readInt();
+                return input.readInt();
 
             case ValueTypes.LONG_TYPE :
-                return reader.readLong();
+                return input.readLong();
 
             case ValueTypes.QNAME_TYPE :
                 return readQName();
 
             case ValueTypes.SHORT_TYPE :
-                return reader.readShort();
+                return input.readShort();
 
             case ValueTypes.STRING_TYPE :
-                return reader.readUTF();
+                return input.readUTF();
 
             case ValueTypes.BIG_DECIMAL_TYPE :
-                return new BigDecimal(reader.readUTF());
+                return new BigDecimal(input.readUTF());
 
             case ValueTypes.BIG_INTEGER_TYPE :
-                return new BigInteger(reader.readUTF());
+                return new BigInteger(input.readUTF());
 
             case ValueTypes.YANG_IDENTIFIER_TYPE :
-                int size = reader.readInt();
-
-                List<YangInstanceIdentifier.PathArgument> pathArguments = new ArrayList<>(size);
-
-                for(int i=0; i<size; i++) {
-                    pathArguments.add(readPathArgument());
-                }
-                return YangInstanceIdentifier.create(pathArguments);
+            return readYangInstanceIdentifier();
 
             default :
                 return null;
         }
     }
 
+    public YangInstanceIdentifier readYangInstanceIdentifier() throws IOException {
+        int size = input.readInt();
+
+        List<YangInstanceIdentifier.PathArgument> pathArguments = new ArrayList<>(size);
+
+        for(int i=0; i<size; i++) {
+            pathArguments.add(readPathArgument());
+        }
+        return YangInstanceIdentifier.create(pathArguments);
+    }
+
     private Set<String> readObjSet() throws IOException {
-        int count = reader.readInt();
+        int count = input.readInt();
         Set<String> children = new HashSet<>(count);
         for(int i = 0; i<count; i++) {
             children.add(readCodedString());
@@ -310,7 +321,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
 
     private YangInstanceIdentifier.PathArgument readPathArgument() throws IOException {
         // read Type
-        int type = reader.readByte();
+        int type = input.readByte();
 
         switch(type) {
 
@@ -390,11 +401,4 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
 
         return builder;
     }
-
-
-    @Override
-    public void close() throws IOException {
-        reader.close();
-    }
-
 }

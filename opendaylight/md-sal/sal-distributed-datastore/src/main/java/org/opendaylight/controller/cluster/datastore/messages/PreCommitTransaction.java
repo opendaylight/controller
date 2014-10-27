@@ -8,14 +8,6 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages;
-
-public class PreCommitTransaction implements SerializableMessage{
-
-  public static final Class SERIALIZABLE_CLASS = ThreePhaseCommitCohortMessages.PreCommitTransaction.class;
-
-  @Override
-  public Object toSerializable() {
-    return  ThreePhaseCommitCohortMessages.PreCommitTransaction.newBuilder().build();
-  }
+public class PreCommitTransaction extends EmptyExternalizableMessage {
+    private static final long serialVersionUID = 1L;
 }

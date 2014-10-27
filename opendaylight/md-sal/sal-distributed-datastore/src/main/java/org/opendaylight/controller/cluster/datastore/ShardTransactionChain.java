@@ -41,12 +41,12 @@ public class ShardTransactionChain extends AbstractUntypedActor {
 
     @Override
     public void handleReceive(Object message) throws Exception {
-        if (message.getClass().equals(CreateTransaction.SERIALIZABLE_CLASS)) {
-            CreateTransaction createTransaction = CreateTransaction.fromSerializable( message);
+        if (message instanceof CreateTransaction) {
+            CreateTransaction createTransaction = (CreateTransaction)message;
             createTransaction(createTransaction);
-        } else if (message.getClass().equals(CloseTransactionChain.SERIALIZABLE_CLASS)) {
+        } else if (message instanceof CloseTransactionChain) {
             chain.close();
-            getSender().tell(new CloseTransactionChainReply().toSerializable(), getSelf());
+            getSender().tell(new CloseTransactionChainReply(), getSelf());
         }else{
             unknownMessage(message);
         }
@@ -87,7 +87,7 @@ public class ShardTransactionChain extends AbstractUntypedActor {
 
         ActorRef transactionActor = createTypedTransactionActor(createTransaction);
         getSender().tell(new CreateTransactionReply(transactionActor.path().toString(),
-                createTransaction.getTransactionId()).toSerializable(), getSelf());
+                createTransaction.getTransactionId()), getSelf());
     }
 
     public static Props props(DOMStoreTransactionChain chain, SchemaContext schemaContext,

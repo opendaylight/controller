@@ -8,12 +8,19 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import com.google.common.base.Preconditions;
 
-public class PrimaryNotFound implements SerializableMessage {
-  public static final Class SERIALIZABLE_CLASS = PrimaryNotFound.class;
+public class PrimaryNotFound implements Externalizable {
+    private static final long serialVersionUID = 1L;
 
-    private final String shardName;
+    private String shardName;
+
+    public PrimaryNotFound() {
+    }
 
     public PrimaryNotFound(String shardName){
 
@@ -22,14 +29,24 @@ public class PrimaryNotFound implements SerializableMessage {
         this.shardName = shardName;
     }
 
+    public String getShardName() {
+        return shardName;
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         PrimaryNotFound that = (PrimaryNotFound) o;
 
-        if (shardName != null ? !shardName.equals(that.shardName) : that.shardName != null) return false;
+        if (shardName != null ? !shardName.equals(that.shardName) : that.shardName != null) {
+            return false;
+        }
 
         return true;
     }
@@ -39,12 +56,13 @@ public class PrimaryNotFound implements SerializableMessage {
         return shardName != null ? shardName.hashCode() : 0;
     }
 
-  @Override
-  public Object toSerializable() {
-    return this;
-  }
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        shardName = in.readUTF();
+    }
 
-  public static PrimaryNotFound fromSerializable(Object message){
-    return (PrimaryNotFound) message;
-  }
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeUTF(shardName);
+    }
 }

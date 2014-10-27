@@ -8,31 +8,34 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 
-public class CloseTransactionChain implements SerializableMessage {
-    public static final Class SERIALIZABLE_CLASS =
-        ShardTransactionChainMessages.CloseTransactionChain.class;
-    private final String transactionChainId;
+public class CloseTransactionChain implements Externalizable {
+    private static final long serialVersionUID = 1L;
+
+    private transient String transactionChainId;
+
+    public CloseTransactionChain() {
+    }
 
     public CloseTransactionChain(String transactionChainId){
         this.transactionChainId = transactionChainId;
     }
 
-    @Override
-    public Object toSerializable() {
-        return ShardTransactionChainMessages.CloseTransactionChain.newBuilder()
-            .setTransactionChainId(transactionChainId).build();
-    }
-
-    public static CloseTransactionChain fromSerializable(Object message){
-        ShardTransactionChainMessages.CloseTransactionChain closeTransactionChain
-            = (ShardTransactionChainMessages.CloseTransactionChain) message;
-
-        return new CloseTransactionChain(closeTransactionChain.getTransactionChainId());
-    }
-
     public String getTransactionChainId() {
         return transactionChainId;
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        transactionChainId = in.readUTF();
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeUTF(transactionChainId);
     }
 }

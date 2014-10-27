@@ -17,7 +17,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import java.io.IOException;
 
 
-public interface NormalizedNodeStreamReader extends AutoCloseable {
+public interface NormalizedNodeStreamReader {
 
     NormalizedNode<?, ?> readNormalizedNode() throws IOException;
 }

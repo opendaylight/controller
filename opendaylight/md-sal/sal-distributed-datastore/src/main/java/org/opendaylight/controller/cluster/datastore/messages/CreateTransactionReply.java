@@ -8,16 +8,21 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 
-public class CreateTransactionReply implements SerializableMessage {
+public class CreateTransactionReply implements Externalizable {
+    private static final long serialVersionUID = 1L;
 
-    public static final Class SERIALIZABLE_CLASS = ShardTransactionMessages.CreateTransactionReply.class;
-    private final String transactionPath;
-    private final String transactionId;
+    private transient String transactionPath;
+    private transient String transactionId;
 
-    public CreateTransactionReply(String transactionPath,
-        String transactionId) {
+    public CreateTransactionReply() {
+    }
+
+    public CreateTransactionReply(String transactionPath, String transactionId) {
         this.transactionPath = transactionPath;
         this.transactionId = transactionId;
     }
@@ -30,16 +35,16 @@ public class CreateTransactionReply implements SerializableMessage {
         return transactionId;
     }
 
-    public Object toSerializable(){
-        return ShardTransactionMessages.CreateTransactionReply.newBuilder()
-            .setTransactionActorPath(transactionPath)
-            .setTransactionId(transactionId)
-            .build();
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        transactionId = in.readUTF();
+        transactionPath = in.readUTF();
     }
 
-    public static CreateTransactionReply fromSerializable(Object serializable){
-        ShardTransactionMessages.CreateTransactionReply o = (ShardTransactionMessages.CreateTransactionReply) serializable;
-        return new CreateTransactionReply(o.getTransactionActorPath(), o.getTransactionId());
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeUTF(transactionId);
+        out.writeUTF(transactionPath);
     }
 
 }

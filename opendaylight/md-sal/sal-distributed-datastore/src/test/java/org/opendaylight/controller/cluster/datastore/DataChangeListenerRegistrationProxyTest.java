@@ -14,6 +14,7 @@ import akka.actor.Props;
 import akka.actor.Terminated;
 import akka.dispatch.ExecutionContexts;
 import akka.dispatch.Futures;
+import akka.serialization.Serialization;
 import akka.testkit.JavaTestKit;
 import akka.util.Timeout;
 import org.junit.Assert;
@@ -96,21 +97,18 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
             Assert.assertEquals("getPath", path, registerMsg.getPath());
             Assert.assertEquals("getScope", scope, registerMsg.getScope());
 
-            reply(new RegisterChangeListenerReply(getRef().path()));
+            reply(new RegisterChangeListenerReply(Serialization.serializedActorPath(getRef())));
 
             for(int i = 0; (i < 20 * 5) && proxy.getListenerRegistrationActor() == null; i++) {
                 Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
             }
-
-            Assert.assertEquals("getListenerRegistrationActor", getSystem().actorSelection(getRef().path()),
-                    proxy.getListenerRegistrationActor());
 
             watch(proxy.getDataChangeListenerActor());
 
             proxy.close();
 
             // The listener registration actor should get a Close message
-            expectMsgClass(timeout, CloseDataChangeListenerRegistration.SERIALIZABLE_CLASS);
+            expectMsgClass(timeout, CloseDataChangeListenerRegistration.class);
 
             // The DataChangeListener actor should be terminated
             expectMsgClass(timeout, Terminated.class);
@@ -217,7 +215,6 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
         }};
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testCloseBeforeRegistration() {
         new JavaTestKit(getSystem()) {{
@@ -230,7 +227,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
             doReturn(DatastoreContext.newBuilder().build()).when(actorContext).getDatastoreContext();
             doReturn(getSystem()).when(actorContext).getActorSystem();
             doReturn(getSystem().actorSelection(getRef().path())).
-                    when(actorContext).actorSelection(getRef().path());
+                    when(actorContext).actorSelection(Serialization.serializedActorPath(getRef()));
             doReturn(duration("5 seconds")).when(actorContext).getOperationDuration();
             doReturn(Futures.successful(getRef())).when(actorContext).findLocalShardAsync(eq(shardName));
 
@@ -238,7 +235,8 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
                 @Override
                 public Future<Object> answer(InvocationOnMock invocation) {
                     proxy.close();
-                    return Futures.successful((Object)new RegisterChangeListenerReply(getRef().path()));
+                    return Futures.<Object>successful(new RegisterChangeListenerReply(
+                            Serialization.serializedActorPath(getRef())));
                 }
             };
 
@@ -248,7 +246,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
             proxy.init(YangInstanceIdentifier.of(TestModel.TEST_QNAME),
                     AsyncDataBroker.DataChangeScope.ONE);
 
-            expectMsgClass(duration("5 seconds"), CloseDataChangeListenerRegistration.SERIALIZABLE_CLASS);
+            expectMsgClass(duration("5 seconds"), CloseDataChangeListenerRegistration.class);
 
             Assert.assertEquals("getListenerRegistrationActor", null,
                     proxy.getListenerRegistrationActor());

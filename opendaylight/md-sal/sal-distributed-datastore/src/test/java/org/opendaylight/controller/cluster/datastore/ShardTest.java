@@ -7,6 +7,7 @@ import akka.dispatch.Dispatchers;
 import akka.dispatch.OnComplete;
 import akka.japi.Creator;
 import akka.pattern.Patterns;
+import akka.serialization.Serialization;
 import akka.testkit.TestActorRef;
 import akka.util.Timeout;
 import com.google.common.base.Function;
@@ -30,6 +31,7 @@ import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransacti
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
+import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.ForwardedReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolved;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
@@ -65,7 +67,6 @@ import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreFactory;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
-import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.CreateTransactionReply;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
@@ -148,7 +149,8 @@ public class ShardTest extends AbstractActorTest {
                     "testRegisterChangeListener-DataChangeListener");
 
             shard.tell(new RegisterChangeListener(TestModel.TEST_PATH,
-                    dclActor.path(), AsyncDataBroker.DataChangeScope.BASE), getRef());
+                    Serialization.serializedActorPath(dclActor),
+                    AsyncDataBroker.DataChangeScope.BASE), getRef());
 
             RegisterChangeListenerReply reply = expectMsgClass(duration("3 seconds"),
                     RegisterChangeListenerReply.class);
@@ -236,7 +238,7 @@ public class ShardTest extends AbstractActorTest {
                     onFirstElectionTimeout.await(5, TimeUnit.SECONDS));
 
             // Now send the RegisterChangeListener and wait for the reply.
-            shard.tell(new RegisterChangeListener(path, dclActor.path(),
+            shard.tell(new RegisterChangeListener(path, Serialization.serializedActorPath(dclActor),
                     AsyncDataBroker.DataChangeScope.SUBTREE), getRef());
 
             RegisterChangeListenerReply reply = expectMsgClass(duration("5 seconds"),
@@ -272,12 +274,12 @@ public class ShardTest extends AbstractActorTest {
             shard.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
 
             shard.tell(new CreateTransaction("txn-1",
-                    TransactionProxy.TransactionType.READ_ONLY.ordinal() ).toSerializable(), getRef());
+                    TransactionProxy.TransactionType.READ_ONLY.ordinal() ), getRef());
 
             CreateTransactionReply reply = expectMsgClass(duration("3 seconds"),
                     CreateTransactionReply.class);
 
-            String path = reply.getTransactionActorPath().toString();
+            String path = reply.getTransactionPath().toString();
             assertTrue("Unexpected transaction path " + path,
                     path.contains("akka://test/user/testCreateTransaction/shard-txn-1"));
 
@@ -293,13 +295,12 @@ public class ShardTest extends AbstractActorTest {
             waitUntilLeader(shard);
 
             shard.tell(new CreateTransaction("txn-1",
-                    TransactionProxy.TransactionType.READ_ONLY.ordinal() , "foobar").toSerializable(),
-                    getRef());
+                    TransactionProxy.TransactionType.READ_ONLY.ordinal() , "foobar"), getRef());
 
             CreateTransactionReply reply = expectMsgClass(duration("3 seconds"),
                     CreateTransactionReply.class);
 
-            String path = reply.getTransactionActorPath().toString();
+            String path = reply.getTransactionPath().toString();
             assertTrue("Unexpected transaction path " + path,
                     path.contains("akka://test/user/testCreateTransactionOnChain/shard-txn-1"));
 
@@ -611,40 +612,39 @@ public class ShardTest extends AbstractActorTest {
             // Simulate the ForwardedReadyTransaction message for the first Tx that would be sent
             // by the ShardTransaction.
 
-            shard.tell(new ForwardedReadyTransaction(transactionID1, cohort1, modification1, true), getRef());
-            ReadyTransactionReply readyReply = ReadyTransactionReply.fromSerializable(
-                    expectMsgClass(duration, ReadyTransactionReply.SERIALIZABLE_CLASS));
+            shard.tell(new ForwardedReadyTransaction(transactionID1, cohort1, modification1), getRef());
+            ReadyTransactionReply readyReply = expectMsgClass(duration, ReadyTransactionReply.class);
             assertEquals("Cohort path", shard.path().toString(), readyReply.getCohortPath());
 
             // Send the CanCommitTransaction message for the first Tx.
 
-            shard.tell(new CanCommitTransaction(transactionID1).toSerializable(), getRef());
-            CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
-                    expectMsgClass(duration, CanCommitTransactionReply.SERIALIZABLE_CLASS));
+            shard.tell(new CanCommitTransaction(transactionID1), getRef());
+            CanCommitTransactionReply canCommitReply =
+                    expectMsgClass(duration, CanCommitTransactionReply.class);
             assertEquals("Can commit", true, canCommitReply.getCanCommit());
 
             // Send the ForwardedReadyTransaction for the next 2 Tx's.
 
-            shard.tell(new ForwardedReadyTransaction(transactionID2, cohort2, modification2, true), getRef());
-            expectMsgClass(duration, ReadyTransactionReply.SERIALIZABLE_CLASS);
+            shard.tell(new ForwardedReadyTransaction(transactionID2, cohort2, modification2), getRef());
+            expectMsgClass(duration, ReadyTransactionReply.class);
 
-            shard.tell(new ForwardedReadyTransaction(transactionID3, cohort3, modification3, true), getRef());
-            expectMsgClass(duration, ReadyTransactionReply.SERIALIZABLE_CLASS);
+            shard.tell(new ForwardedReadyTransaction(transactionID3, cohort3, modification3), getRef());
+            expectMsgClass(duration, ReadyTransactionReply.class);
 
             // Send the CanCommitTransaction message for the next 2 Tx's. These should get queued and
             // processed after the first Tx completes.
 
             Future<Object> canCommitFuture1 = Patterns.ask(shard,
-                    new CanCommitTransaction(transactionID2).toSerializable(), timeout);
+                    new CanCommitTransaction(transactionID2), timeout);
 
             Future<Object> canCommitFuture2 = Patterns.ask(shard,
-                    new CanCommitTransaction(transactionID3).toSerializable(), timeout);
+                    new CanCommitTransaction(transactionID3), timeout);
 
             // Send the CommitTransaction message for the first Tx. After it completes, it should
             // trigger the 2nd Tx to proceed which should in turn then trigger the 3rd.
 
-            shard.tell(new CommitTransaction(transactionID1).toSerializable(), getRef());
-            expectMsgClass(duration, CommitTransactionReply.SERIALIZABLE_CLASS);
+            shard.tell(new CommitTransaction(transactionID1), getRef());
+            expectMsgClass(duration, CommitTransactionReply.class);
 
             // Wait for the next 2 Tx's to complete.
 
@@ -678,7 +678,7 @@ public class ShardTest extends AbstractActorTest {
 
             class OnCommitFutureComplete extends OnFutureComplete {
                 OnCommitFutureComplete() {
-                    super(CommitTransactionReply.SERIALIZABLE_CLASS);
+                    super(CommitTransactionReply.class);
                 }
 
                 @Override
@@ -692,18 +692,17 @@ public class ShardTest extends AbstractActorTest {
                 private final String transactionID;
 
                 OnCanCommitFutureComplete(String transactionID) {
-                    super(CanCommitTransactionReply.SERIALIZABLE_CLASS);
+                    super(CanCommitTransactionReply.class);
                     this.transactionID = transactionID;
                 }
 
                 @Override
                 void onSuccess(Object resp) throws Exception {
-                    CanCommitTransactionReply canCommitReply =
-                            CanCommitTransactionReply.fromSerializable(resp);
+                    CanCommitTransactionReply canCommitReply = (CanCommitTransactionReply)resp;
                     assertEquals("Can commit", true, canCommitReply.getCanCommit());
 
                     Future<Object> commitFuture = Patterns.ask(shard,
-                            new CommitTransaction(transactionID).toSerializable(), timeout);
+                            new CommitTransaction(transactionID), timeout);
                     commitFuture.onComplete(new OnCommitFutureComplete(), getSystem().dispatcher());
                 }
             }
@@ -792,29 +791,29 @@ public class ShardTest extends AbstractActorTest {
             // Simulate the ForwardedReadyTransaction messages that would be sent
             // by the ShardTransaction.
 
-            shard.tell(new ForwardedReadyTransaction(transactionID1, cohort1, modification1, true), getRef());
-            expectMsgClass(duration, ReadyTransactionReply.SERIALIZABLE_CLASS);
+            shard.tell(new ForwardedReadyTransaction(transactionID1, cohort1, modification1), getRef());
+            expectMsgClass(duration, ReadyTransactionReply.class);
 
-            shard.tell(new ForwardedReadyTransaction(transactionID2, cohort2, modification2, true), getRef());
-            expectMsgClass(duration, ReadyTransactionReply.SERIALIZABLE_CLASS);
+            shard.tell(new ForwardedReadyTransaction(transactionID2, cohort2, modification2), getRef());
+            expectMsgClass(duration, ReadyTransactionReply.class);
 
             // Send the CanCommitTransaction message for the first Tx.
 
-            shard.tell(new CanCommitTransaction(transactionID1).toSerializable(), getRef());
-            CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
-                    expectMsgClass(duration, CanCommitTransactionReply.SERIALIZABLE_CLASS));
+            shard.tell(new CanCommitTransaction(transactionID1), getRef());
+            CanCommitTransactionReply canCommitReply =
+                    expectMsgClass(duration, CanCommitTransactionReply.class);
             assertEquals("Can commit", true, canCommitReply.getCanCommit());
 
             // Send the CanCommitTransaction message for the 2nd Tx. This should get queued and
             // processed after the first Tx completes.
 
             Future<Object> canCommitFuture = Patterns.ask(shard,
-                    new CanCommitTransaction(transactionID2).toSerializable(), timeout);
+                    new CanCommitTransaction(transactionID2), timeout);
 
             // Send the CommitTransaction message for the first Tx. This should send back an error
             // and trigger the 2nd Tx to proceed.
 
-            shard.tell(new CommitTransaction(transactionID1).toSerializable(), getRef());
+            shard.tell(new CommitTransaction(transactionID1), getRef());
             expectMsgClass(duration, akka.actor.Status.Failure.class);
 
             // Wait for the 2nd Tx to complete the canCommit phase.
@@ -859,20 +858,20 @@ public class ShardTest extends AbstractActorTest {
             // Simulate the ForwardedReadyTransaction messages that would be sent
             // by the ShardTransaction.
 
-            shard.tell(new ForwardedReadyTransaction(transactionID, cohort, modification, true), getRef());
-            expectMsgClass(duration, ReadyTransactionReply.SERIALIZABLE_CLASS);
+            shard.tell(new ForwardedReadyTransaction(transactionID, cohort, modification), getRef());
+            expectMsgClass(duration, ReadyTransactionReply.class);
 
             // Send the CanCommitTransaction message.
 
-            shard.tell(new CanCommitTransaction(transactionID).toSerializable(), getRef());
-            CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
-                    expectMsgClass(duration, CanCommitTransactionReply.SERIALIZABLE_CLASS));
+            shard.tell(new CanCommitTransaction(transactionID), getRef());
+            CanCommitTransactionReply canCommitReply =
+                    expectMsgClass(duration, CanCommitTransactionReply.class);
             assertEquals("Can commit", true, canCommitReply.getCanCommit());
 
             // Send the CommitTransaction message. This should send back an error
             // for preCommit failure.
 
-            shard.tell(new CommitTransaction(transactionID).toSerializable(), getRef());
+            shard.tell(new CommitTransaction(transactionID), getRef());
             expectMsgClass(duration, akka.actor.Status.Failure.class);
 
             InOrder inOrder = inOrder(cohort);
@@ -902,12 +901,12 @@ public class ShardTest extends AbstractActorTest {
             // Simulate the ForwardedReadyTransaction messages that would be sent
             // by the ShardTransaction.
 
-            shard.tell(new ForwardedReadyTransaction(transactionID, cohort, modification, true), getRef());
-            expectMsgClass(duration, ReadyTransactionReply.SERIALIZABLE_CLASS);
+            shard.tell(new ForwardedReadyTransaction(transactionID, cohort, modification), getRef());
+            expectMsgClass(duration, ReadyTransactionReply.class);
 
             // Send the CanCommitTransaction message.
 
-            shard.tell(new CanCommitTransaction(transactionID).toSerializable(), getRef());
+            shard.tell(new CanCommitTransaction(transactionID), getRef());
             expectMsgClass(duration, akka.actor.Status.Failure.class);
 
             shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
@@ -937,7 +936,7 @@ public class ShardTest extends AbstractActorTest {
                     ListenableFuture<Void> preCommitFuture = cohort.preCommit();
 
                     Future<Object> abortFuture = Patterns.ask(shard,
-                            new AbortTransaction(transactionID).toSerializable(), timeout);
+                            new AbortTransaction(transactionID), timeout);
                     abortFuture.onComplete(new OnComplete<Object>() {
                         @Override
                         public void onComplete(Throwable e, Object resp) {
@@ -954,16 +953,16 @@ public class ShardTest extends AbstractActorTest {
                     TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME),
                     modification, preCommit);
 
-            shard.tell(new ForwardedReadyTransaction(transactionID, cohort, modification, true), getRef());
-            expectMsgClass(duration, ReadyTransactionReply.SERIALIZABLE_CLASS);
+            shard.tell(new ForwardedReadyTransaction(transactionID, cohort, modification), getRef());
+            expectMsgClass(duration, ReadyTransactionReply.class);
 
-            shard.tell(new CanCommitTransaction(transactionID).toSerializable(), getRef());
-            CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
-                    expectMsgClass(duration, CanCommitTransactionReply.SERIALIZABLE_CLASS));
+            shard.tell(new CanCommitTransaction(transactionID), getRef());
+            CanCommitTransactionReply canCommitReply =
+                    expectMsgClass(duration, CanCommitTransactionReply.class);
             assertEquals("Can commit", true, canCommitReply.getCanCommit());
 
             Future<Object> commitFuture = Patterns.ask(shard,
-                    new CommitTransaction(transactionID).toSerializable(), timeout);
+                    new CommitTransaction(transactionID), timeout);
 
             assertEquals("Abort complete", true, abortComplete.await(5, TimeUnit.SECONDS));
 
@@ -1018,26 +1017,26 @@ public class ShardTest extends AbstractActorTest {
 
             // Ready the Tx's
 
-            shard.tell(new ForwardedReadyTransaction(transactionID1, cohort1, modification1, true), getRef());
-            expectMsgClass(duration, ReadyTransactionReply.SERIALIZABLE_CLASS);
+            shard.tell(new ForwardedReadyTransaction(transactionID1, cohort1, modification1), getRef());
+            expectMsgClass(duration, ReadyTransactionReply.class);
 
-            shard.tell(new ForwardedReadyTransaction(transactionID2, cohort2, modification2, true), getRef());
-            expectMsgClass(duration, ReadyTransactionReply.SERIALIZABLE_CLASS);
+            shard.tell(new ForwardedReadyTransaction(transactionID2, cohort2, modification2), getRef());
+            expectMsgClass(duration, ReadyTransactionReply.class);
 
             // canCommit 1st Tx. We don't send the commit so it should timeout.
 
-            shard.tell(new CanCommitTransaction(transactionID1).toSerializable(), getRef());
-            expectMsgClass(duration, CanCommitTransactionReply.SERIALIZABLE_CLASS);
+            shard.tell(new CanCommitTransaction(transactionID1), getRef());
+            expectMsgClass(duration, CanCommitTransactionReply.class);
 
             // canCommit the 2nd Tx - it should complete after the 1st Tx times out.
 
-            shard.tell(new CanCommitTransaction(transactionID2).toSerializable(), getRef());
-            expectMsgClass(duration, CanCommitTransactionReply.SERIALIZABLE_CLASS);
+            shard.tell(new CanCommitTransaction(transactionID2), getRef());
+            expectMsgClass(duration, CanCommitTransactionReply.class);
 
             // Commit the 2nd Tx.
 
-            shard.tell(new CommitTransaction(transactionID2).toSerializable(), getRef());
-            expectMsgClass(duration, CommitTransactionReply.SERIALIZABLE_CLASS);
+            shard.tell(new CommitTransaction(transactionID2), getRef());
+            expectMsgClass(duration, CommitTransactionReply.class);
 
             NormalizedNode<?, ?> node = readStore(shard, listNodePath);
             assertNotNull(listNodePath + " not found", node);
@@ -1080,27 +1079,27 @@ public class ShardTest extends AbstractActorTest {
 
             // Ready the Tx's
 
-            shard.tell(new ForwardedReadyTransaction(transactionID1, cohort1, modification1, true), getRef());
-            expectMsgClass(duration, ReadyTransactionReply.SERIALIZABLE_CLASS);
+            shard.tell(new ForwardedReadyTransaction(transactionID1, cohort1, modification1), getRef());
+            expectMsgClass(duration, ReadyTransactionReply.class);
 
-            shard.tell(new ForwardedReadyTransaction(transactionID2, cohort2, modification2, true), getRef());
-            expectMsgClass(duration, ReadyTransactionReply.SERIALIZABLE_CLASS);
+            shard.tell(new ForwardedReadyTransaction(transactionID2, cohort2, modification2), getRef());
+            expectMsgClass(duration, ReadyTransactionReply.class);
 
-            shard.tell(new ForwardedReadyTransaction(transactionID3, cohort3, modification3, true), getRef());
-            expectMsgClass(duration, ReadyTransactionReply.SERIALIZABLE_CLASS);
+            shard.tell(new ForwardedReadyTransaction(transactionID3, cohort3, modification3), getRef());
+            expectMsgClass(duration, ReadyTransactionReply.class);
 
             // canCommit 1st Tx.
 
-            shard.tell(new CanCommitTransaction(transactionID1).toSerializable(), getRef());
-            expectMsgClass(duration, CanCommitTransactionReply.SERIALIZABLE_CLASS);
+            shard.tell(new CanCommitTransaction(transactionID1), getRef());
+            expectMsgClass(duration, CanCommitTransactionReply.class);
 
             // canCommit the 2nd Tx - it should get queued.
 
-            shard.tell(new CanCommitTransaction(transactionID2).toSerializable(), getRef());
+            shard.tell(new CanCommitTransaction(transactionID2), getRef());
 
             // canCommit the 3rd Tx - should exceed queue capacity and fail.
 
-            shard.tell(new CanCommitTransaction(transactionID3).toSerializable(), getRef());
+            shard.tell(new CanCommitTransaction(transactionID3), getRef());
             expectMsgClass(duration, akka.actor.Status.Failure.class);
 
             shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
@@ -1114,7 +1113,7 @@ public class ShardTest extends AbstractActorTest {
                     newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
                     "testCanCommitBeforeReadyFailure");
 
-            shard.tell(new CanCommitTransaction("tx").toSerializable(), getRef());
+            shard.tell(new CanCommitTransaction("tx"), getRef());
             expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
 
             shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
@@ -1149,30 +1148,30 @@ public class ShardTest extends AbstractActorTest {
             // Simulate the ForwardedReadyTransaction messages that would be sent
             // by the ShardTransaction.
 
-            shard.tell(new ForwardedReadyTransaction(transactionID1, cohort1, modification1, true), getRef());
-            expectMsgClass(duration, ReadyTransactionReply.SERIALIZABLE_CLASS);
+            shard.tell(new ForwardedReadyTransaction(transactionID1, cohort1, modification1), getRef());
+            expectMsgClass(duration, ReadyTransactionReply.class);
 
-            shard.tell(new ForwardedReadyTransaction(transactionID2, cohort2, modification2, true), getRef());
-            expectMsgClass(duration, ReadyTransactionReply.SERIALIZABLE_CLASS);
+            shard.tell(new ForwardedReadyTransaction(transactionID2, cohort2, modification2), getRef());
+            expectMsgClass(duration, ReadyTransactionReply.class);
 
             // Send the CanCommitTransaction message for the first Tx.
 
-            shard.tell(new CanCommitTransaction(transactionID1).toSerializable(), getRef());
-            CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
-                    expectMsgClass(duration, CanCommitTransactionReply.SERIALIZABLE_CLASS));
+            shard.tell(new CanCommitTransaction(transactionID1), getRef());
+            CanCommitTransactionReply canCommitReply =
+                    expectMsgClass(duration, CanCommitTransactionReply.class);
             assertEquals("Can commit", true, canCommitReply.getCanCommit());
 
             // Send the CanCommitTransaction message for the 2nd Tx. This should get queued and
             // processed after the first Tx completes.
 
             Future<Object> canCommitFuture = Patterns.ask(shard,
-                    new CanCommitTransaction(transactionID2).toSerializable(), timeout);
+                    new CanCommitTransaction(transactionID2), timeout);
 
             // Send the AbortTransaction message for the first Tx. This should trigger the 2nd
             // Tx to proceed.
 
-            shard.tell(new AbortTransaction(transactionID1).toSerializable(), getRef());
-            expectMsgClass(duration, AbortTransactionReply.SERIALIZABLE_CLASS);
+            shard.tell(new AbortTransaction(transactionID1), getRef());
+            expectMsgClass(duration, AbortTransactionReply.class);
 
             // Wait for the 2nd Tx to complete the canCommit phase.
 

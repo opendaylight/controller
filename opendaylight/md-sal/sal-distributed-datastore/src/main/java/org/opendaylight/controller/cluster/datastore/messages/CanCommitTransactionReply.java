@@ -8,15 +8,18 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 
-public class CanCommitTransactionReply implements SerializableMessage {
-    public static Class<ThreePhaseCommitCohortMessages.CanCommitTransactionReply> SERIALIZABLE_CLASS =
-            ThreePhaseCommitCohortMessages.CanCommitTransactionReply.class;
+public class CanCommitTransactionReply implements Externalizable {
+    private transient boolean canCommit;
 
-    private final Boolean canCommit;
+    public CanCommitTransactionReply() {
+    }
 
-    public CanCommitTransactionReply(Boolean canCommit) {
+    public CanCommitTransactionReply(boolean canCommit) {
         this.canCommit = canCommit;
     }
 
@@ -25,12 +28,12 @@ public class CanCommitTransactionReply implements SerializableMessage {
     }
 
     @Override
-    public Object toSerializable() {
-        return ThreePhaseCommitCohortMessages.CanCommitTransactionReply.newBuilder().setCanCommit(canCommit).build();
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        canCommit = in.readBoolean();
     }
 
-    public static CanCommitTransactionReply fromSerializable(Object message) {
-        return new CanCommitTransactionReply(
-                ((ThreePhaseCommitCohortMessages.CanCommitTransactionReply) message).getCanCommit());
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeBoolean(canCommit);
     }
 }

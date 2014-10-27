@@ -19,7 +19,6 @@ import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.PreCommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.PreCommitTransactionReply;
-import org.opendaylight.controller.cluster.datastore.messages.SerializableMessage;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.DoNothingActor;
 import scala.concurrent.Future;
@@ -77,14 +76,14 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
     }
 
     private void setupMockActorContext(Class<?> requestType, Object... responses) {
-        Stubber stubber = doReturn(responses[0] instanceof Throwable ? Futures
-                .failed((Throwable) responses[0]) : Futures
-                .successful(((SerializableMessage) responses[0]).toSerializable()));
+        Stubber stubber = doReturn(responses[0] instanceof Throwable ?
+                Futures.failed((Throwable) responses[0]) :
+                Futures.successful(responses[0]));
 
         for(int i = 1; i < responses.length; i++) {
-            stubber = stubber.doReturn(responses[i] instanceof Throwable ? Futures
-                    .failed((Throwable) responses[i]) : Futures
-                    .successful(((SerializableMessage) responses[i]).toSerializable()));
+            stubber = stubber.doReturn(responses[i] instanceof Throwable ?
+                    Futures.failed((Throwable) responses[i]) :
+                    Futures.successful(responses[i]));
         }
 
         stubber.when(actorContext).executeOperationAsync(any(ActorSelection.class),
@@ -111,21 +110,21 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
 
         ThreePhaseCommitCohortProxy proxy = setupProxy(1);
 
-        setupMockActorContext(CanCommitTransaction.SERIALIZABLE_CLASS,
+        setupMockActorContext(CanCommitTransaction.class,
                 new CanCommitTransactionReply(true));
 
         ListenableFuture<Boolean> future = proxy.canCommit();
 
         assertEquals("canCommit", true, future.get(5, TimeUnit.SECONDS));
 
-        setupMockActorContext(CanCommitTransaction.SERIALIZABLE_CLASS,
+        setupMockActorContext(CanCommitTransaction.class,
                 new CanCommitTransactionReply(false));
 
         future = proxy.canCommit();
 
         assertEquals("canCommit", false, future.get(5, TimeUnit.SECONDS));
 
-        verifyCohortInvocations(2, CanCommitTransaction.SERIALIZABLE_CLASS);
+        verifyCohortInvocations(2, CanCommitTransaction.class);
     }
 
     @Test
@@ -133,14 +132,14 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
 
         ThreePhaseCommitCohortProxy proxy = setupProxy(2);
 
-        setupMockActorContext(CanCommitTransaction.SERIALIZABLE_CLASS,
+        setupMockActorContext(CanCommitTransaction.class,
                 new CanCommitTransactionReply(true), new CanCommitTransactionReply(true));
 
         ListenableFuture<Boolean> future = proxy.canCommit();
 
         assertEquals("canCommit", true, future.get(5, TimeUnit.SECONDS));
 
-        verifyCohortInvocations(2, CanCommitTransaction.SERIALIZABLE_CLASS);
+        verifyCohortInvocations(2, CanCommitTransaction.class);
     }
 
     @Test
@@ -148,7 +147,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
 
         ThreePhaseCommitCohortProxy proxy = setupProxy(3);
 
-        setupMockActorContext(CanCommitTransaction.SERIALIZABLE_CLASS,
+        setupMockActorContext(CanCommitTransaction.class,
                 new CanCommitTransactionReply(true), new CanCommitTransactionReply(false),
                 new CanCommitTransactionReply(true));
 
@@ -156,7 +155,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
 
         assertEquals("canCommit", false, future.get(5, TimeUnit.SECONDS));
 
-        verifyCohortInvocations(3, CanCommitTransaction.SERIALIZABLE_CLASS);
+        verifyCohortInvocations(3, CanCommitTransaction.class);
     }
 
     @Test(expected = TestException.class)
@@ -164,7 +163,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
 
         ThreePhaseCommitCohortProxy proxy = setupProxy(1);
 
-        setupMockActorContext(CanCommitTransaction.SERIALIZABLE_CLASS, new TestException());
+        setupMockActorContext(CanCommitTransaction.class, new TestException());
 
         propagateExecutionExceptionCause(proxy.canCommit());
     }
@@ -174,7 +173,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
 
         ThreePhaseCommitCohortProxy proxy = setupProxy(1);
 
-        setupMockActorContext(CanCommitTransaction.SERIALIZABLE_CLASS,
+        setupMockActorContext(CanCommitTransaction.class,
                 new PreCommitTransactionReply());
 
         proxy.canCommit().get(5, TimeUnit.SECONDS);
@@ -188,7 +187,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
         try {
             propagateExecutionExceptionCause(proxy.canCommit());
         } finally {
-            verifyCohortInvocations(0, CanCommitTransaction.SERIALIZABLE_CLASS);
+            verifyCohortInvocations(0, CanCommitTransaction.class);
         }
     }
 
@@ -197,7 +196,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
         // Precommit is currently a no-op
         ThreePhaseCommitCohortProxy proxy = setupProxy(1);
 
-        setupMockActorContext(PreCommitTransaction.SERIALIZABLE_CLASS,
+        setupMockActorContext(PreCommitTransaction.class,
                 new PreCommitTransactionReply());
 
         proxy.preCommit().get(5, TimeUnit.SECONDS);
@@ -207,23 +206,23 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
     public void testAbort() throws Exception {
         ThreePhaseCommitCohortProxy proxy = setupProxy(1);
 
-        setupMockActorContext(AbortTransaction.SERIALIZABLE_CLASS, new AbortTransactionReply());
+        setupMockActorContext(AbortTransaction.class, new AbortTransactionReply());
 
         proxy.abort().get(5, TimeUnit.SECONDS);
 
-        verifyCohortInvocations(1, AbortTransaction.SERIALIZABLE_CLASS);
+        verifyCohortInvocations(1, AbortTransaction.class);
     }
 
     @Test
     public void testAbortWithFailure() throws Exception {
         ThreePhaseCommitCohortProxy proxy = setupProxy(1);
 
-        setupMockActorContext(AbortTransaction.SERIALIZABLE_CLASS, new RuntimeException("mock"));
+        setupMockActorContext(AbortTransaction.class, new RuntimeException("mock"));
 
         // The exception should not get propagated.
         proxy.abort().get(5, TimeUnit.SECONDS);
 
-        verifyCohortInvocations(1, AbortTransaction.SERIALIZABLE_CLASS);
+        verifyCohortInvocations(1, AbortTransaction.class);
     }
 
     @Test
@@ -234,7 +233,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
         // The exception should not get propagated.
         proxy.abort().get(5, TimeUnit.SECONDS);
 
-        verifyCohortInvocations(0, AbortTransaction.SERIALIZABLE_CLASS);
+        verifyCohortInvocations(0, AbortTransaction.class);
     }
 
     @Test
@@ -242,12 +241,12 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
 
         ThreePhaseCommitCohortProxy proxy = setupProxy(2);
 
-        setupMockActorContext(CommitTransaction.SERIALIZABLE_CLASS, new CommitTransactionReply(),
+        setupMockActorContext(CommitTransaction.class, new CommitTransactionReply(),
                 new CommitTransactionReply());
 
         proxy.commit().get(5, TimeUnit.SECONDS);
 
-        verifyCohortInvocations(2, CommitTransaction.SERIALIZABLE_CLASS);
+        verifyCohortInvocations(2, CommitTransaction.class);
     }
 
     @Test(expected = TestException.class)
@@ -255,7 +254,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
 
         ThreePhaseCommitCohortProxy proxy = setupProxy(2);
 
-        setupMockActorContext(CommitTransaction.SERIALIZABLE_CLASS, new CommitTransactionReply(),
+        setupMockActorContext(CommitTransaction.class, new CommitTransactionReply(),
                 new TestException());
 
         propagateExecutionExceptionCause(proxy.commit());
@@ -266,7 +265,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
 
         ThreePhaseCommitCohortProxy proxy = setupProxy(1);
 
-        setupMockActorContext(CommitTransaction.SERIALIZABLE_CLASS, new PreCommitTransactionReply());
+        setupMockActorContext(CommitTransaction.class, new PreCommitTransactionReply());
 
         proxy.commit().get(5, TimeUnit.SECONDS);
     }
@@ -279,7 +278,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
         try {
             propagateExecutionExceptionCause(proxy.commit());
         } finally {
-            verifyCohortInvocations(0, CommitTransaction.SERIALIZABLE_CLASS);
+            verifyCohortInvocations(0, CommitTransaction.class);
         }
     }
 
@@ -288,20 +287,20 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
 
         ThreePhaseCommitCohortProxy proxy = setupProxy(2);
 
-        setupMockActorContext(CanCommitTransaction.SERIALIZABLE_CLASS,
+        setupMockActorContext(CanCommitTransaction.class,
                 new CanCommitTransactionReply(true), new CanCommitTransactionReply(true));
 
-        setupMockActorContext(PreCommitTransaction.SERIALIZABLE_CLASS,
+        setupMockActorContext(PreCommitTransaction.class,
                 new PreCommitTransactionReply(), new PreCommitTransactionReply());
 
-        setupMockActorContext(CommitTransaction.SERIALIZABLE_CLASS,
+        setupMockActorContext(CommitTransaction.class,
                 new CommitTransactionReply(), new CommitTransactionReply());
 
         proxy.canCommit().get(5, TimeUnit.SECONDS);
         proxy.preCommit().get(5, TimeUnit.SECONDS);
         proxy.commit().get(5, TimeUnit.SECONDS);
 
-        verifyCohortInvocations(2, CanCommitTransaction.SERIALIZABLE_CLASS);
-        verifyCohortInvocations(2, CommitTransaction.SERIALIZABLE_CLASS);
+        verifyCohortInvocations(2, CanCommitTransaction.class);
+        verifyCohortInvocations(2, CommitTransaction.class);
     }
 }

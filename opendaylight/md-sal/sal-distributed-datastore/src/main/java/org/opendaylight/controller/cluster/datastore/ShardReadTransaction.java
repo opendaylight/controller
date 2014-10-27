@@ -34,16 +34,10 @@ public class ShardReadTransaction extends ShardTransaction {
     @Override
     public void handleReceive(Object message) throws Exception {
         if(message instanceof ReadData) {
-            readData(transaction, (ReadData) message, !SERIALIZED_REPLY);
+            readData(transaction, (ReadData) message);
 
         } else if (message instanceof DataExists) {
-            dataExists(transaction, (DataExists) message, !SERIALIZED_REPLY);
-
-        } else if(ReadData.SERIALIZABLE_CLASS.equals(message.getClass())) {
-            readData(transaction, ReadData.fromSerializable(message), SERIALIZED_REPLY);
-
-        } else if(DataExists.SERIALIZABLE_CLASS.equals(message.getClass())) {
-            dataExists(transaction, DataExists.fromSerializable(message), SERIALIZED_REPLY);
+            dataExists(transaction, (DataExists) message);
 
         } else {
             super.handleReceive(message);
