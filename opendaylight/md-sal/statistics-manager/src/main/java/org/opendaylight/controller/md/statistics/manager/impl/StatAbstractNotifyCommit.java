@@ -111,6 +111,29 @@ public abstract class StatAbstractNotifyCommit<N extends NotificationListener> i
     }
 
     /**
+     * Method validate TransactionCacheContainer. It needs to call before every txCacheContainer processing.
+     *
+     * @param txCacheContainer
+     * @return
+     */
+    protected boolean isTransactionCacheContainerValid(final Optional<TransactionCacheContainer<?>> txCacheContainer) {
+        if ( ! txCacheContainer.isPresent()) {
+            LOG.debug("Transaction Cache Container is not presented!");
+            return false;
+        }
+        if (txCacheContainer.get().getNodeId() == null) {
+            LOG.debug("Transaction Cache Container {} don't have Node ID!", txCacheContainer.get().getId());
+            return false;
+        }
+        if (txCacheContainer.get().getNotifications() == null) {
+            LOG.debug("Transaction Cache Container {} for {} node don't have Notifications!",
+                    txCacheContainer.get().getId(), txCacheContainer.get().getNodeId());
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Wrapping Future object call to {@link org.opendaylight.controller.md.statistics.manager.StatRpcMsgManager}
      * isExpectedStatistics with 10sec TimeOut.
      * Method has checked registration for provided {@link TransactionId} and {@link NodeId}
