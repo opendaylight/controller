@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_66fed86d",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/test/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/NormalizedNodeStreamReaderWriterTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-27T21:59:15Z",
+      "side": 1,
+      "message": "I don\u0027t think the code can throw FileNotFoundException now.",
+      "revId": "d2b710cf74472250cb71cf5c7a9bbc88e5221c60",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_26f8d07b",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/test/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/NormalizedNodeStreamReaderWriterTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-27T21:59:15Z",
+      "side": 1,
+      "message": "I don\u0027t think the code can throw FileNotFoundException.",
+      "revId": "d2b710cf74472250cb71cf5c7a9bbc88e5221c60",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_46f5d481",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/test/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/NormalizedNodeStreamReaderWriterTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-27T21:59:15Z",
+      "side": 1,
+      "message": "I don\u0027t think the code can throw ClassNotFoundException or URISyntaxException now.",
+      "revId": "d2b710cf74472250cb71cf5c7a9bbc88e5221c60",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_e6f18896",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/test/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/NormalizedNodeStreamReaderWriterTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-27T21:59:15Z",
+      "side": 1,
+      "message": "Should we catch exceptions and let the test succeed? It seems we should let IOException be thrown and fail the test.",
+      "revId": "d2b710cf74472250cb71cf5c7a9bbc88e5221c60",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
