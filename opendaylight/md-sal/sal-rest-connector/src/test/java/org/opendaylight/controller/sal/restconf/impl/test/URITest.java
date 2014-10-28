@@ -123,7 +123,7 @@ public class URITest {
         InstanceIdentifierContext instanceIdentifier = controllerContext
                 .toInstanceIdentifier("simple-nodes:users/yang-ext:mount/test-interface2:class/student/name");
         assertEquals(
-                "[(urn:ietf:params:xml:ns:yang:test-interface2?revision=2014-08-01)class, (urn:ietf:params:xml:ns:yang:test-interface2?revision=2014-08-01)student[{(urn:ietf:params:xml:ns:yang:test-interface2?revision=2014-08-01)name=name}]]",
+                "[(urn:ietf:params:xml:ns:yang:test-interface2?revision=2014-08-01)class, (urn:ietf:params:xml:ns:yang:test-interface2?revision=2014-08-01)student[(urn:ietf:params:xml:ns:yang:test-interface2?revision=2014-08-01)name='name']]",
                 instanceIdentifier.getInstanceIdentifier().getPath().toString());
     }
 

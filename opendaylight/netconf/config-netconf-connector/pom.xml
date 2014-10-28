@@ -106,32 +106,7 @@
                             org.opendaylight.controller.netconf.confignetconfconnector.util,
                             org.opendaylight.controller.netconf.confignetconfconnector.osgi,
                             org.opendaylight.controller.netconf.confignetconfconnector.exception,</Private-Package>
-            <Import-Package>com.google.common.base,
-                            com.google.common.collect,
-                            javax.annotation,
-                            javax.management,
-                            javax.management.openmbean,
-                            org.opendaylight.controller.config.api,
-                            org.opendaylight.controller.config.api.jmx,
-                            org.opendaylight.controller.config.yangjmxgenerator,
-                            org.opendaylight.controller.config.yangjmxgenerator.attribute,
-                            org.opendaylight.controller.netconf.api,
-                            org.opendaylight.controller.netconf.mapping.api,
-                            org.opendaylight.controller.netconf.util.mapping,
-                            org.opendaylight.controller.netconf.util.xml,
-                            org.opendaylight.controller.netconf.util.exception,
-                            org.opendaylight.yangtools.yang.common,
-                            org.opendaylight.yangtools.yang.model.api,
-                            org.osgi.framework,
-                            org.osgi.util.tracker,
-                            org.slf4j,
-                            org.w3c.dom,
-                            com.google.common.io,
-                            org.opendaylight.yangtools.yang.model.api.type,
-                            org.opendaylight.yangtools.sal.binding.generator.spi,
-                            org.opendaylight.yangtools.sal.binding.yang.types,
-                            org.opendaylight.controller.config.util
-              </Import-Package>
+            <Import-Package>*</Import-Package>
             <Export-Package></Export-Package>
           </instructions>
         </configuration>
