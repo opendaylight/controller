@@ -61,7 +61,6 @@ import org.opendaylight.controller.cluster.datastore.node.utils.stream.Normalize
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationPayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
@@ -96,7 +95,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class Shard extends RaftActor {
 
-    private static final Object COMMIT_TRANSACTION_REPLY = new CommitTransactionReply();
+    private static final YangInstanceIdentifier DATA_TREE_ROOT_PATH = YangInstanceIdentifier.builder().build();
 
     private static final Object TX_COMMIT_TIMEOUT_CHECK_MESSAGE = "txCommitTimeoutCheck";
 
@@ -138,7 +137,7 @@ public class Shard extends RaftActor {
      * Coordinates persistence recovery on startup.
      */
     private ShardRecoveryCoordinator recoveryCoordinator;
-    private List<Object> currentLogRecoveryBatch;
+    private List<MutableCompositeModification> currentLogRecoveryBatch;
 
     private final Map<String, DOMStoreTransactionChain> transactionChains = new HashMap<>();
 
@@ -307,8 +306,7 @@ public class Shard extends RaftActor {
             // currently uses a same thread executor anyway.
             cohortEntry.getCohort().preCommit().get();
 
-            Shard.this.persistData(getSender(), transactionID,
-                    new CompositeModificationPayload(cohortEntry.getModification().toSerializable()));
+            Shard.this.persistData(getSender(), transactionID, cohortEntry.getModification());
         } catch (InterruptedException | ExecutionException e) {
             LOG.error(e, "An exception occurred while preCommitting transaction {}",
                     cohortEntry.getTransactionID());
@@ -334,7 +332,7 @@ public class Shard extends RaftActor {
             cohortEntry = commitCoordinator.getAndRemoveCohortEntry(transactionID);
             if(cohortEntry != null) {
                 commitWithNewTransaction(cohortEntry.getModification());
-                sender.tell(COMMIT_TRANSACTION_REPLY, getSelf());
+                sender.tell(CommitTransactionReply.INSTANCE, getSelf());
             } else {
                 // This really shouldn't happen - it likely means that persistence or replication
                 // took so long to complete such that the cohort entry was expired from the cache.
@@ -356,7 +354,7 @@ public class Shard extends RaftActor {
             // currently uses a same thread executor anyway.
             cohortEntry.getCohort().commit().get();
 
-            sender.tell(COMMIT_TRANSACTION_REPLY, getSelf());
+            sender.tell(CommitTransactionReply.INSTANCE, getSelf());
 
             shardMBean.incrementCommittedTransactionCount();
             shardMBean.setLastCommittedTransactionTime(System.currentTimeMillis());
@@ -414,7 +412,7 @@ public class Shard extends RaftActor {
                     shardMBean.incrementAbortTransactionsCount();
 
                     if(sender != null) {
-                        sender.tell(new AbortTransactionReply(), self);
+                        sender.tell(AbortTransactionReply.INSTANCE, self);
                     }
                 }
 
@@ -455,6 +453,7 @@ public class Shard extends RaftActor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         self().tell(new CaptureSnapshotReply(ByteString.copyFrom(bos.toByteArray())), self());
 
         createSnapshotTransaction = null;
@@ -644,8 +643,8 @@ public class Shard extends RaftActor {
 
     @Override
     protected void appendRecoveredLogEntry(Payload data) {
-        if (data instanceof CompositeModificationPayload) {
-            currentLogRecoveryBatch.add(((CompositeModificationPayload) data).getModification());
+        if (data instanceof MutableCompositeModification) {
+            currentLogRecoveryBatch.add((MutableCompositeModification)data);
         } else {
             LOG.error("Unknown state received {} during recovery", data);
         }
@@ -719,26 +718,20 @@ public class Shard extends RaftActor {
     @Override
     protected void applyState(ActorRef clientActor, String identifier, Object data) {
 
-        if (data instanceof CompositeModificationPayload) {
-            Object modification = ((CompositeModificationPayload) data).getModification();
+        if (data instanceof Modification) {
+            Modification modification = (Modification)data;
 
-            if(modification == null) {
-                LOG.error(
-                     "modification is null - this is very unexpected, clientActor = {}, identifier = {}",
-                     identifier, clientActor != null ? clientActor.path().toString() : null);
-            } else if(clientActor == null) {
+            if(clientActor == null) {
                 // There's no clientActor to which to send a commit reply so we must be applying
                 // replicated state from the leader.
-                commitWithNewTransaction(MutableCompositeModification.fromSerializable(
-                        modification, schemaContext));
+                commitWithNewTransaction(modification);
             } else {
                 // This must be the OK to commit after replication consensus.
                 finishCommit(clientActor, identifier);
             }
         } else {
             LOG.error("Unknown state received {} Class loader = {} CompositeNodeMod.ClassLoader = {}",
-                    data, data.getClass().getClassLoader(),
-                    CompositeModificationPayload.class.getClassLoader());
+                    data, data.getClass().getClassLoader(), Modification.class.getClassLoader());
         }
 
         updateJournalStats();
@@ -767,8 +760,7 @@ public class Shard extends RaftActor {
                 TransactionProxy.TransactionType.READ_ONLY.ordinal(),
                 "createSnapshot" + ++createSnapshotTransactionCounter, "");
 
-            createSnapshotTransaction.tell(
-                new ReadData(YangInstanceIdentifier.builder().build()), self());
+            createSnapshotTransaction.tell(new ReadData(DATA_TREE_ROOT_PATH), self());
 
         }
     }
@@ -788,10 +780,10 @@ public class Shard extends RaftActor {
                 .decode(serializedNode);
 
             // delete everything first
-            transaction.delete(YangInstanceIdentifier.builder().build());
+            transaction.delete(DATA_TREE_ROOT_PATH);
 
             // Add everything from the remote node back
-            transaction.write(YangInstanceIdentifier.builder().build(), node);
+            transaction.write(DATA_TREE_ROOT_PATH, node);
             syncCommitTransaction(transaction);
         } catch (InvalidProtocolBufferException | InterruptedException | ExecutionException e) {
             LOG.error(e, "An exception occurred when applying snapshot");

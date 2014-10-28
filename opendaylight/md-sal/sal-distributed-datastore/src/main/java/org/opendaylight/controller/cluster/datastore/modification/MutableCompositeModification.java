@@ -8,10 +8,10 @@
 
 package org.opendaylight.controller.cluster.datastore.modification;
 
-import org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -20,10 +20,8 @@ import java.util.List;
  * MutableCompositeModification is just a mutable version of a
  * CompositeModification {@link org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification#addModification(Modification)}
  */
-public class MutableCompositeModification
-    implements CompositeModification {
-
-    private static final long serialVersionUID = 1163377899140186790L;
+public class MutableCompositeModification implements CompositeModification {
+    private static final long serialVersionUID = 1L;
 
     private final List<Modification> modifications = new ArrayList<>();
 
@@ -44,38 +42,24 @@ public class MutableCompositeModification
         modifications.add(modification);
     }
 
+    @Override
     public List<Modification> getModifications() {
         return Collections.unmodifiableList(modifications);
     }
 
-    @Override public Object toSerializable() {
-        PersistentMessages.CompositeModification.Builder builder =
-            PersistentMessages.CompositeModification.newBuilder();
-
-        builder.setTimeStamp(System.nanoTime());
-
-        for (Modification m : modifications) {
-            builder.addModification(
-                (PersistentMessages.Modification) m.toSerializable());
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        int size = in.readInt();
+        for(int i = 0; i < size; i++) {
+            modifications.add((Modification) in.readObject());
         }
-
-        return builder.build();
     }
 
-    public static MutableCompositeModification fromSerializable(Object serializable, SchemaContext schemaContext){
-        PersistentMessages.CompositeModification o = (PersistentMessages.CompositeModification) serializable;
-        MutableCompositeModification compositeModification = new MutableCompositeModification();
-
-        for(PersistentMessages.Modification m : o.getModificationList()){
-            if(m.getType().equals(DeleteModification.class.toString())){
-                compositeModification.addModification(DeleteModification.fromSerializable(m));
-            } else if(m.getType().equals(WriteModification.class.toString())){
-                compositeModification.addModification(WriteModification.fromSerializable(m, schemaContext));
-            } else if(m.getType().equals(MergeModification.class.toString())){
-                compositeModification.addModification(MergeModification.fromSerializable(m, schemaContext));
-            }
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeInt(modifications.size());
+        for(Modification mod: modifications) {
+            out.writeObject(mod);
         }
-
-        return compositeModification;
     }
 }

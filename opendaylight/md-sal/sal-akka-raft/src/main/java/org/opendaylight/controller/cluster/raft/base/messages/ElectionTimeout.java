@@ -8,7 +8,19 @@
 
 package org.opendaylight.controller.cluster.raft.base.messages;
 
-import java.io.Serializable;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 
-public class ElectionTimeout implements Serializable {
+public class ElectionTimeout implements Externalizable {
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+    }
 }

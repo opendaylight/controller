@@ -10,4 +10,6 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 public class AbortTransactionReply extends EmptyExternalizableMessage {
     private static final long serialVersionUID = 1L;
+
+    public static final AbortTransactionReply INSTANCE = new AbortTransactionReply();
 }

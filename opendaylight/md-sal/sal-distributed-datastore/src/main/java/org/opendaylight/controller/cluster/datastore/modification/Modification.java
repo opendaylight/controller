@@ -8,7 +8,8 @@
 
 package org.opendaylight.controller.cluster.datastore.modification;
 
-import org.opendaylight.controller.cluster.datastore.messages.SerializableMessage;
+import java.io.Externalizable;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 
 /**
@@ -25,10 +26,10 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
  * which can then be applied to a write transaction
  * </p>
  */
-public interface Modification extends SerializableMessage {
-  /**
-   * Apply the modification to the specified transaction
-   * @param transaction
-   */
-  void apply(DOMStoreWriteTransaction transaction);
+public interface Modification extends Payload, Externalizable {
+    /**
+     * Apply the modification to the specified transaction
+     * @param transaction
+     */
+    void apply(DOMStoreWriteTransaction transaction);
 }

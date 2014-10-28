@@ -79,13 +79,13 @@ public class ShardWriteTransaction extends ShardTransaction {
     private void writeData(DOMStoreWriteTransaction transaction, WriteData message) {
         LOG.debug("writeData at path : {}", message.getPath());
 
-        modification.addModification(
-                new WriteModification(message.getPath(), message.getData(), getSchemaContext()));
+        modification.addModification(new WriteModification(message.getPath(), message.getData()));
+
         try {
             transaction.write(message.getPath(), message.getData());
             WriteDataReply writeDataReply = new WriteDataReply();
             getSender().tell(writeDataReply, getSelf());
-        }catch(Exception e){
+        } catch(Exception e) {
             getSender().tell(new akka.actor.Status.Failure(e), getSelf());
         }
     }
@@ -93,14 +93,13 @@ public class ShardWriteTransaction extends ShardTransaction {
     private void mergeData(DOMStoreWriteTransaction transaction, MergeData message) {
         LOG.debug("mergeData at path : {}", message.getPath());
 
-        modification.addModification(
-                new MergeModification(message.getPath(), message.getData(), getSchemaContext()));
+        modification.addModification(new MergeModification(message.getPath(), message.getData()));
 
         try {
             transaction.merge(message.getPath(), message.getData());
             MergeDataReply mergeDataReply = new MergeDataReply();
             getSender().tell(mergeDataReply, getSelf());
-        }catch(Exception e){
+        } catch(Exception e) {
             getSender().tell(new akka.actor.Status.Failure(e), getSelf());
         }
     }

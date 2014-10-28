@@ -43,6 +43,7 @@ import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeOutputStreamWriter;
 import org.opendaylight.controller.cluster.datastore.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.datastore.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.datastore.utils.MockDataChangeListener;
@@ -56,7 +57,6 @@ import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationPayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
@@ -75,12 +75,13 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgum
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
-
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
@@ -91,7 +92,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -390,8 +390,8 @@ public class ShardTest extends AbstractActorTest {
         NormalizedNode<?, ?> node = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         MutableCompositeModification compMod = new MutableCompositeModification();
-        compMod.addModification(new WriteModification(TestModel.TEST_PATH, node, SCHEMA_CONTEXT));
-        Payload payload = new CompositeModificationPayload(compMod.toSerializable());
+        compMod.addModification(new WriteModification(TestModel.TEST_PATH, node));
+        Payload payload = compMod;
         ApplyState applyState = new ApplyState(null, "test",
                 new ReplicatedLogImplEntry(1, 2, payload));
 
@@ -421,18 +421,16 @@ public class ShardTest extends AbstractActorTest {
         DOMStoreReadTransaction readTx = testStore.newReadOnlyTransaction();
         NormalizedNode<?, ?> root = readTx.read(YangInstanceIdentifier.builder().build()).get().get();
 
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        NormalizedNodeWriter.forStreamWriter(new NormalizedNodeOutputStreamWriter(bos)).write(root);
         InMemorySnapshotStore.addSnapshot(shardID.toString(), Snapshot.create(
-                new NormalizedNodeToNodeCodec(SCHEMA_CONTEXT).encode(
-                        root).
-                                getNormalizedNode().toByteString().toByteArray(),
-                                Collections.<ReplicatedLogEntry>emptyList(), 0, 1, -1, -1));
+                bos.toByteArray(), Collections.<ReplicatedLogEntry>emptyList(), 0, 1, -1, -1));
 
         // Set up the InMemoryJournal.
 
         InMemoryJournal.addEntry(shardID.toString(), 0, new ReplicatedLogImplEntry(0, 1, newPayload(
                   new WriteModification(TestModel.OUTER_LIST_PATH,
-                          ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build(),
-                          SCHEMA_CONTEXT))));
+                          ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build()))));
 
         int nListEntries = 11;
         Set<Integer> listEntryKeys = new HashSet<>();
@@ -441,8 +439,7 @@ public class ShardTest extends AbstractActorTest {
             YangInstanceIdentifier path = YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
                     .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, i).build();
             Modification mod = new MergeModification(path,
-                    ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, i),
-                    SCHEMA_CONTEXT);
+                    ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, i));
             InMemoryJournal.addEntry(shardID.toString(), i, new ReplicatedLogImplEntry(i, 1,
                     newPayload(mod)));
         }
@@ -509,13 +506,13 @@ public class ShardTest extends AbstractActorTest {
         shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
     }
 
-    private CompositeModificationPayload newPayload(Modification... mods) {
+    private Payload newPayload(Modification... mods) {
         MutableCompositeModification compMod = new MutableCompositeModification();
         for(Modification mod: mods) {
             compMod.addModification(mod);
         }
 
-        return new CompositeModificationPayload(compMod.toSerializable());
+        return compMod;
     }
 
     private DOMStoreThreePhaseCommitCohort setupMockWriteTransaction(String cohortName,
@@ -566,7 +563,7 @@ public class ShardTest extends AbstractActorTest {
             }
         }).when(cohort).abort();
 
-        modification.addModification(new WriteModification(path, data, SCHEMA_CONTEXT));
+        modification.addModification(new WriteModification(path, data));
 
         return cohort;
     }

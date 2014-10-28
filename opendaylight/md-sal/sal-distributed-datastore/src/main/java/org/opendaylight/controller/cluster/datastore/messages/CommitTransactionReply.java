@@ -10,4 +10,6 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 public class CommitTransactionReply extends EmptyExternalizableMessage {
     private static final long serialVersionUID = 1L;
+
+    public static final CommitTransactionReply INSTANCE = new CommitTransactionReply();
 }

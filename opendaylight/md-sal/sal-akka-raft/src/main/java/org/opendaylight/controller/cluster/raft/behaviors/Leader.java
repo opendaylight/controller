@@ -73,10 +73,10 @@ public class Leader extends AbstractRaftActorBehavior {
     private final Set<String> followers;
 
     private Cancellable heartbeatSchedule = null;
-    private Cancellable appendEntriesSchedule = null;
+    private final Cancellable appendEntriesSchedule = null;
     private Cancellable installSnapshotSchedule = null;
 
-    private List<ClientRequestTracker> trackerList = new ArrayList<>();
+    private final List<ClientRequestTracker> trackerList = new ArrayList<>();
 
     private final int minReplicationCount;
 
@@ -197,6 +197,7 @@ public class Leader extends AbstractRaftActorBehavior {
         return this;
     }
 
+    @Override
     protected ClientRequestTracker removeClientRequestTracker(long logIndex) {
 
         ClientRequestTracker toRemove = findClientRequestTracker(logIndex);
@@ -207,6 +208,7 @@ public class Leader extends AbstractRaftActorBehavior {
         return toRemove;
     }
 
+    @Override
     protected ClientRequestTracker findClientRequestTracker(long logIndex) {
         for (ClientRequestTracker tracker : trackerList) {
             if (tracker.getIndex() == logIndex) {
@@ -362,7 +364,7 @@ public class Leader extends AbstractRaftActorBehavior {
                             new AppendEntries(currentTerm(), context.getId(),
                                 prevLogIndex(followerNextIndex),
                                 prevLogTerm(followerNextIndex), entries,
-                                context.getCommitIndex()).toSerializable(),
+                                context.getCommitIndex()),
                             actor()
                         );
 
@@ -387,7 +389,7 @@ public class Leader extends AbstractRaftActorBehavior {
                                 new AppendEntries(currentTerm(), context.getId(),
                                     prevLogIndex(followerNextIndex),
                                     prevLogTerm(followerNextIndex), entries,
-                                    context.getCommitIndex()).toSerializable(),
+                                    context.getCommitIndex()),
                                 actor()
                             );
                         }
@@ -537,14 +539,14 @@ public class Leader extends AbstractRaftActorBehavior {
      * snapshot chunks
      */
     protected class FollowerToSnapshot {
-        private ByteString snapshotBytes;
+        private final ByteString snapshotBytes;
         private int offset = 0;
         // the next snapshot chunk is sent only if the replyReceivedForOffset matches offset
         private int replyReceivedForOffset;
         // if replyStatus is false, the previous chunk is attempted
         private boolean replyStatus = false;
         private int chunkIndex;
-        private int totalChunks;
+        private final int totalChunks;
 
         public FollowerToSnapshot(ByteString snapshotBytes) {
             this.snapshotBytes = snapshotBytes;

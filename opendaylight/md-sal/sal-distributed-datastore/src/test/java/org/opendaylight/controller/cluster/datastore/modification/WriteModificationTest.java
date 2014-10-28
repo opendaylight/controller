@@ -1,13 +1,13 @@
 package org.opendaylight.controller.cluster.datastore.modification;
 
 import com.google.common.base.Optional;
+import org.apache.commons.lang.SerializationUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class WriteModificationTest extends AbstractModificationTest{
 
@@ -16,7 +16,7 @@ public class WriteModificationTest extends AbstractModificationTest{
         //Write something into the datastore
         DOMStoreReadWriteTransaction writeTransaction = store.newReadWriteTransaction();
         WriteModification writeModification = new WriteModification(TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME), TestModel.createTestContext());
+                ImmutableNodes.containerNode(TestModel.TEST_QNAME));
         writeModification.apply(writeTransaction);
         commitTransaction(writeTransaction);
 
@@ -27,16 +27,10 @@ public class WriteModificationTest extends AbstractModificationTest{
 
     @Test
     public void testSerialization() {
-        SchemaContext schemaContext = TestModel.createTestContext();
         NormalizedNode<?, ?> node = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
-        WriteModification writeModification = new WriteModification(TestModel.TEST_PATH,
-                node, schemaContext);
-
-        Object serialized = writeModification.toSerializable();
-
-        WriteModification newModification = WriteModification.fromSerializable(serialized, schemaContext);
-
-        Assert.assertEquals("getPath", TestModel.TEST_PATH, newModification.getPath());
-        Assert.assertEquals("getData", node, newModification.getData());
+        WriteModification expected = new WriteModification(TestModel.TEST_PATH, node);
+        WriteModification actual = (WriteModification) SerializationUtils.clone(expected);
+        Assert.assertEquals("getPath", TestModel.TEST_PATH, actual.getPath());
+        Assert.assertEquals("getData", node, actual.getData());
     }
 }

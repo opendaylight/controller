@@ -7,27 +7,25 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
-import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
-import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputStreamReader;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
 
 /**
  * Coordinates persistence recovery of journal log entries and snapshots for a shard. Each snapshot
@@ -64,7 +62,7 @@ class ShardRecoveryCoordinator {
      * @param logEntries the serialized journal log entries
      * @param resultingTx the write Tx to which to apply the entries
      */
-    void submit(List<Object> logEntries, DOMStoreWriteTransaction resultingTx) {
+    void submit(List<MutableCompositeModification> logEntries, DOMStoreWriteTransaction resultingTx) {
         LogRecoveryTask task = new LogRecoveryTask(logEntries, resultingTx);
         resultingTxList.add(resultingTx);
         executor.execute(task);
@@ -110,9 +108,10 @@ class ShardRecoveryCoordinator {
 
     private class LogRecoveryTask extends ShardRecoveryTask {
 
-        private final List<Object> logEntries;
+        private final List<MutableCompositeModification> logEntries;
 
-        LogRecoveryTask(List<Object> logEntries, DOMStoreWriteTransaction resultingTx) {
+        LogRecoveryTask(List<MutableCompositeModification> logEntries,
+                DOMStoreWriteTransaction resultingTx) {
             super(resultingTx);
             this.logEntries = logEntries;
         }
@@ -120,8 +119,8 @@ class ShardRecoveryCoordinator {
         @Override
         public void run() {
             for(int i = 0; i < logEntries.size(); i++) {
-                MutableCompositeModification.fromSerializable(
-                        logEntries.get(i), schemaContext).apply(resultingTx);
+                logEntries.get(i).apply(resultingTx);
+
                 // Null out to GC quicker.
                 logEntries.set(i, null);
             }
@@ -140,16 +139,16 @@ class ShardRecoveryCoordinator {
         @Override
         public void run() {
             try {
-                NormalizedNodeMessages.Node serializedNode = NormalizedNodeMessages.Node.parseFrom(snapshot);
-                NormalizedNode<?, ?> node = new NormalizedNodeToNodeCodec(schemaContext).decode(
-                        serializedNode);
+                NormalizedNodeInputStreamReader streamReader = new NormalizedNodeInputStreamReader(
+                        new ByteArrayInputStream(snapshot.toByteArray()));
+                NormalizedNode<?, ?> node = streamReader.readNormalizedNode();
 
                 // delete everything first
                 resultingTx.delete(YangInstanceIdentifier.builder().build());
 
                 // Add everything from the remote node back
                 resultingTx.write(YangInstanceIdentifier.builder().build(), node);
-            } catch (InvalidProtocolBufferException e) {
+            } catch (IOException e) {
                 LOG.error("Error deserializing snapshot", e);
             }
         }

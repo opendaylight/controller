@@ -8,10 +8,16 @@
 
 package org.opendaylight.controller.cluster.raft.messages;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
 /**
  * Invoked by candidates to gather votes (§5.2).
  */
-public class RequestVote extends AbstractRaftRPC {
+public class RequestVote extends AbstractRaftRPC implements Externalizable {
+    private static final long serialVersionUID = 1L;
 
     // candidate requesting vote
     private String candidateId;
@@ -30,12 +36,8 @@ public class RequestVote extends AbstractRaftRPC {
         this.lastLogTerm = lastLogTerm;
     }
 
-    // added for testing while serialize-messages=on
+    // needed for de-serialization
     public RequestVote() {
-    }
-
-    public long getTerm() {
-        return term;
     }
 
     public String getCandidateId() {
@@ -60,6 +62,22 @@ public class RequestVote extends AbstractRaftRPC {
 
     public void setLastLogTerm(long lastLogTerm) {
         this.lastLogTerm = lastLogTerm;
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        candidateId = in.readUTF();
+        setTerm(in.readLong());
+        lastLogIndex = in.readLong();
+        lastLogTerm = in.readLong();
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeUTF(candidateId);
+        out.writeLong(getTerm());
+        out.writeLong(lastLogIndex);
+        out.writeLong(lastLogTerm);
     }
 
     @Override public String toString() {
