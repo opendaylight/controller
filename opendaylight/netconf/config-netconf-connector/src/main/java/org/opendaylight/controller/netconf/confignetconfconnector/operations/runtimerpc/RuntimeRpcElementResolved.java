@@ -8,20 +8,20 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.runtimerpc;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
-
-import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.rpc.ModuleRpcs;
-
-import javax.management.ObjectName;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.management.ObjectName;
+import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.rpc.ModuleRpcs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.rev130405.Modules;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.rev130405.modules.Module;
+import org.opendaylight.yangtools.yang.common.QName;
 
 /**
  * Represents parsed xpath to runtime bean instance
@@ -44,6 +44,11 @@ public final class RuntimeRpcElementResolved {
 
     public String getModuleName() {
         return moduleName;
+    }
+
+    @VisibleForTesting
+    Map<String, String> getAdditionalAttributes() {
+        return additionalAttributes;
     }
 
     public String getInstanceName() {
@@ -70,22 +75,54 @@ public final class RuntimeRpcElementResolved {
         return ObjectNameUtil.createRuntimeBeanName(moduleName, instanceName, additionalAttributesJavaNames);
     }
 
+    private static final QName TYPE_IN_MODULE_QNAME = QName.cachedReference(QName.create(Module.QNAME, "type"));
+    private static final QName NAME_IN_MODULE_QNAME = QName.cachedReference(QName.create(Module.QNAME, "name"));
+
+    /**
+     * Pattern for an absolute instance identifier xpath pointing to a runtime bean instance e.g:
+     * <pre>
+     * /modules/module[name=instanceName][type=moduleType]
+     * </pre>
+     *
+     * The pattern is however more complicated than the first example, since we have to match the identifier also with namespaces e.g:
+     *
+     * <pre>
+     * /(urn:opendaylight:params:xml:ns:yang:controller:config?revision=2013-04-05)modules/module[{(urn:opendaylight:params:xml:ns:yang:controller:config?revision=2013-04-05)name='instanceName'} and {(urn:opendaylight:params:xml:ns:yang:controller:config?revision=2013-04-05)type=moduleType}]
+     * </pre>
+     * or
+     * <pre>
+     * /(urn:opendaylight:params:xml:ns:yang:controller:config?revision=2013-04-05)modules/module[{(urn:opendaylight:params:xml:ns:yang:controller:config?revision=2013-04-05)name=instanceName}][{(urn:opendaylight:params:xml:ns:yang:controller:config?revision=2013-04-05)type='moduleType'}]
+     * </pre>
+     */
     private static final String xpathPatternBlueprint =
-            "/" + XmlNetconfConstants.MODULES_KEY
-            + "/" + XmlNetconfConstants.MODULE_KEY
-            + "\\["
+            "/" + getRegExForQName(Modules.QNAME)+ "/" + getRegExForQName(Module.QNAME)
 
-            + "(?<key1>type|name)"
-            + "='(?<value1>[^']+)'"
-            + "( and |\\]\\[)"
-            + "(?<key2>type|name)"
-            + "='(?<value2>[^']+)'"
+                    + "\\[\\{?"
+                    + "(?<key1>" + getRegExForQName(TYPE_IN_MODULE_QNAME) + "|" + getRegExForQName(NAME_IN_MODULE_QNAME) + ")"
+                    + "=('|\")?(?<value1>[^'\"\\}\\]]+)('|\")?\\}?"
+                    + "( and |\\]\\[)"
+                    + "(?<key2>\\{?" + getRegExForQName(TYPE_IN_MODULE_QNAME) + "|" + getRegExForQName(NAME_IN_MODULE_QNAME) + "\\}?)"
+                    + "=('|\")?(?<value2>[^'\"\\}\\]]+)('|\")?\\}?"
+                    + "\\]"
 
-            + "\\]"
-            + "(?<additional>.*)";
+                    + "(?<additional>.*)";
+
+    /**
+     * Return reg ex that matches either the full QName, QName without revision or just local name
+     */
+    private static String getRegExForQName(final QName qName) {
+        return "(" + Pattern.quote(qName.toString()) + "|" + Pattern.quote(qName.withoutRevision().toString()) + "|" + qName.getLocalName() + ")";
+    }
 
     private static final Pattern xpathPattern = Pattern.compile(xpathPatternBlueprint);
-    private static final String additionalPatternBlueprint = "(?<additionalKey>.+)\\[(.+)='(?<additionalValue>.+)'\\]";
+
+    /**
+     * Pattern for additional path elements inside xpath for instance identifier pointing to an inner runtime bean e.g:
+     * <pre>
+     * /modules/module[name=instanceName and type=moduleType]/inner[key=b]
+     * </pre>
+     */
+    private static final String additionalPatternBlueprint = "(?<keyNamespaceRevision>\\([^\\)]+\\))?(?<additionalKey>.+)\\[(?<valueNamespaceRevision>\\{\\([^\\)]+\\))?(.+)=('|\")?(?<additionalValue>[^'\"\\}\\]]+)('|\")?\\}?\\]";
     private static final Pattern additionalPattern = Pattern.compile(additionalPatternBlueprint);
 
     public static RuntimeRpcElementResolved fromXpath(String xpath, String elementName, String namespace) {
@@ -115,19 +152,32 @@ public final class RuntimeRpcElementResolved {
         PatternGroupResolver(String key1, String value1,  String value2, String additional) {
             this.key1 = Preconditions.checkNotNull(key1);
             this.value1 = Preconditions.checkNotNull(value1);
-
             this.value2 = Preconditions.checkNotNull(value2);
-
             this.additional = Preconditions.checkNotNull(additional);
         }
 
         String getModuleName() {
-            return key1.equals(XmlNetconfConstants.TYPE_KEY) ? value1 : value2;
+            return isType(key1) ? value1 : value2;
         }
 
         String getInstanceName() {
-            return key1.equals(XmlNetconfConstants.NAME_KEY) ? value1 : value2;
+            return isName(key1) ? value1 : value2;
         }
+
+        private boolean isType(final String key1) {
+            return matchesQName(key1, TYPE_IN_MODULE_QNAME);
+        }
+
+        private boolean isName(final String key1) {
+            return matchesQName(key1, NAME_IN_MODULE_QNAME);
+        }
+
+        private boolean matchesQName(final String key1, final QName qname) {
+            return key1.equals(qname.getLocalName()) ||
+                   key1.equals(qname.toString()) ||
+                   key1.equals(qname.withoutRevision().toString());
+        }
+
 
         Map<String, String> getAdditionalKeys(String elementName, String moduleName) {
             HashMap<String, String> additionalAttributes = Maps.newHashMap();
@@ -141,7 +191,7 @@ public final class RuntimeRpcElementResolved {
                 Preconditions
                         .checkState(
                                 matcher.matches(),
-                                "Attribute %s not in required form on rpc element %s, required format for additional attributes is  %s",
+                                "Attribute %s not in required form on rpc element %s, required format for additional attributes is: %s",
                                 additionalKeyValue, elementName, additionalPatternBlueprint);
                 String name = matcher.group("additionalKey");
                 runtimeBeanYangName = name;
