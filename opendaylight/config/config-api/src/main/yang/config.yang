@@ -138,7 +138,7 @@ module config {
             "Top level container encapsulating configuration of all modules.";
 
         list module {
-            key "name";
+            key "type name";
             leaf name {
                 description "Unique module instance name";
                 type string;
