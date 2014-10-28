@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_815f4672",
+        "filename": "opendaylight/md-sal/statistics-manager-config/pom.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-10-28T21:55:48Z",
+      "side": 1,
+      "message": "Is there a reason the standard \u003cclassifier\u003econfig\u003c/classifier\u003e was not used here?",
+      "revId": "e91fae0c4d5f373a638f98f42ca623acc1dc1e20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_21543a53",
+        "filename": "opendaylight/md-sal/statistics-manager-config/src/main/resources/initial/30-statistics-manager.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-10-28T21:55:48Z",
+      "side": 1,
+      "message": "Is there a reason we didn\u0027t just inject the Broker as was done in restconf here?",
+      "revId": "e91fae0c4d5f373a638f98f42ca623acc1dc1e20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_41513e61",
+        "filename": "opendaylight/md-sal/statistics-manager/src/main/yang/statistics-manager.yang",
+        "patchSetId": 9
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-10-28T21:55:48Z",
+      "side": 1,
+      "message": "Is there a reason we are injecting rpc-registry and notification-service directly here rather than just injecting a Broker and using a Provider?",
+      "revId": "e91fae0c4d5f373a638f98f42ca623acc1dc1e20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_e14df2c5",
+        "filename": "opendaylight/md-sal/statistics-manager/src/test/java/test/mock/FlowStatisticsTest.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-10-28T21:55:48Z",
+      "side": 1,
+      "message": "Why are these all commented out?",
+      "revId": "e91fae0c4d5f373a638f98f42ca623acc1dc1e20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_014b36b1",
+        "filename": "opendaylight/md-sal/statistics-manager/src/test/java/test/mock/GroupStatisticsTest.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-10-28T21:55:48Z",
+      "side": 1,
+      "message": "Why are these all commented out?",
+      "revId": "e91fae0c4d5f373a638f98f42ca623acc1dc1e20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_a1c7ea11",
+        "filename": "opendaylight/md-sal/statistics-manager/src/test/java/test/mock/MeterStatisticsTest.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-10-28T21:55:48Z",
+      "side": 1,
+      "message": "Why are these all commented out?",
+      "revId": "e91fae0c4d5f373a638f98f42ca623acc1dc1e20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_c1cc6e38",
+        "filename": "opendaylight/md-sal/statistics-manager/src/test/java/test/mock/NodeRegistrationTest.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-10-28T21:55:48Z",
+      "side": 1,
+      "message": "Why are these all commented out?",
+      "revId": "e91fae0c4d5f373a638f98f42ca623acc1dc1e20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_61d1e2cc",
+        "filename": "opendaylight/md-sal/statistics-manager/src/test/java/test/mock/PortStatisticsTest.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-10-28T21:55:48Z",
+      "side": 1,
+      "message": "Why are these all commented out?",
+      "revId": "e91fae0c4d5f373a638f98f42ca623acc1dc1e20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_81d666c4",
+        "filename": "opendaylight/md-sal/statistics-manager/src/test/java/test/mock/QueueStatisticsTest.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-10-28T21:55:48Z",
+      "side": 1,
+      "message": "Why are these all commented out?",
+      "revId": "e91fae0c4d5f373a638f98f42ca623acc1dc1e20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_21dbdaee",
+        "filename": "opendaylight/md-sal/statistics-manager/src/test/java/test/mock/TableStatisticsTest.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-10-28T21:55:48Z",
+      "side": 1,
+      "message": "Why are these all commented out?",
+      "revId": "e91fae0c4d5f373a638f98f42ca623acc1dc1e20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
