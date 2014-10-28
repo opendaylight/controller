@@ -56,7 +56,6 @@ import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationPayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
@@ -390,8 +389,8 @@ public class ShardTest extends AbstractActorTest {
         NormalizedNode<?, ?> node = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         MutableCompositeModification compMod = new MutableCompositeModification();
-        compMod.addModification(new WriteModification(TestModel.TEST_PATH, node, SCHEMA_CONTEXT));
-        Payload payload = new CompositeModificationPayload(compMod.toSerializable());
+        compMod.addModification(new WriteModification(TestModel.TEST_PATH, node));
+        Payload payload = compMod;
         ApplyState applyState = new ApplyState(null, "test",
                 new ReplicatedLogImplEntry(1, 2, payload));
 
@@ -431,8 +430,7 @@ public class ShardTest extends AbstractActorTest {
 
         InMemoryJournal.addEntry(shardID.toString(), 0, new ReplicatedLogImplEntry(0, 1, newPayload(
                   new WriteModification(TestModel.OUTER_LIST_PATH,
-                          ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build(),
-                          SCHEMA_CONTEXT))));
+                          ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build()))));
 
         int nListEntries = 11;
         Set<Integer> listEntryKeys = new HashSet<>();
@@ -441,8 +439,7 @@ public class ShardTest extends AbstractActorTest {
             YangInstanceIdentifier path = YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
                     .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, i).build();
             Modification mod = new MergeModification(path,
-                    ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, i),
-                    SCHEMA_CONTEXT);
+                    ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, i));
             InMemoryJournal.addEntry(shardID.toString(), i, new ReplicatedLogImplEntry(i, 1,
                     newPayload(mod)));
         }
@@ -509,13 +506,13 @@ public class ShardTest extends AbstractActorTest {
         shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
     }
 
-    private CompositeModificationPayload newPayload(Modification... mods) {
+    private Payload newPayload(Modification... mods) {
         MutableCompositeModification compMod = new MutableCompositeModification();
         for(Modification mod: mods) {
             compMod.addModification(mod);
         }
 
-        return new CompositeModificationPayload(compMod.toSerializable());
+        return compMod;
     }
 
     private DOMStoreThreePhaseCommitCohort setupMockWriteTransaction(String cohortName,
@@ -566,7 +563,7 @@ public class ShardTest extends AbstractActorTest {
             }
         }).when(cohort).abort();
 
-        modification.addModification(new WriteModification(path, data, SCHEMA_CONTEXT));
+        modification.addModification(new WriteModification(path, data));
 
         return cohort;
     }

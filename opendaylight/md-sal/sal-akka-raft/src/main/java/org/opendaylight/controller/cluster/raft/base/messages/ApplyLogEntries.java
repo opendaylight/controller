@@ -7,7 +7,10 @@
  */
 package org.opendaylight.controller.cluster.raft.base.messages;
 
-import java.io.Serializable;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 
 /**
  * ApplyLogEntries serves as a message which is stored in the akka's persistent
@@ -19,8 +22,13 @@ import java.io.Serializable;
  * RaftActor to persist the ApplyLogEntries
  *
  */
-public class ApplyLogEntries implements Serializable {
-    private final int toIndex;
+public class ApplyLogEntries implements Externalizable {
+    private static final long serialVersionUID = 1L;
+
+    private transient int toIndex;
+
+    public ApplyLogEntries() {
+    }
 
     public ApplyLogEntries(int toIndex) {
         this.toIndex = toIndex;
@@ -28,5 +36,15 @@ public class ApplyLogEntries implements Serializable {
 
     public int getToIndex() {
         return toIndex;
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        toIndex = in.readInt();
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeInt(toIndex);
     }
 }

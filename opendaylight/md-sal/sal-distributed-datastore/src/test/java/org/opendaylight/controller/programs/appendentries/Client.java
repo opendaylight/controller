@@ -13,16 +13,15 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import com.typesafe.config.ConfigFactory;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationPayload;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.example.messages.KeyValue;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.ReplicatedLogImplEntry;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,10 +46,9 @@ public class Client {
         AppendEntries appendEntries = modificationAppendEntries();
 
         Payload data = appendEntries.getEntries().get(0).getData();
-        if(data instanceof CompositeModificationPayload) {
+        if(data instanceof MutableCompositeModification) {
             System.out.println(
-                "Sending : " + ((CompositeModificationPayload) data)
-                    .getModification());
+                "Sending : " + data);
         } else {
             System.out.println(
                 "Sending : " + ((KeyValue) data)
@@ -58,10 +56,7 @@ public class Client {
 
         }
 
-        actorSelection.tell(appendEntries.toSerializable(), null);
-
-
-
+        actorSelection.tell(appendEntries, null);
 
         actorSystem.actorOf(Props.create(ClientActor.class), "client");
     }
@@ -69,31 +64,16 @@ public class Client {
     public static AppendEntries modificationAppendEntries() {
         List<ReplicatedLogEntry> modification = new ArrayList<>();
 
-        modification.add(0, new ReplicatedLogEntry() {
-            @Override public Payload getData() {
-                WriteModification writeModification =
-                    new WriteModification(TestModel.TEST_PATH, ImmutableNodes
-                        .containerNode(TestModel.TEST_QNAME),
-                        TestModel.createTestContext()
-                    );
+        WriteModification writeModification =
+                new WriteModification(TestModel.TEST_PATH, ImmutableNodes
+                        .containerNode(TestModel.TEST_QNAME));
 
-                MutableCompositeModification compositeModification =
-                    new MutableCompositeModification();
+        MutableCompositeModification compositeModification =
+                new MutableCompositeModification();
 
-                compositeModification.addModification(writeModification);
+        compositeModification.addModification(writeModification);
 
-                return new CompositeModificationPayload(
-                    compositeModification.toSerializable());
-            }
-
-            @Override public long getTerm() {
-                return 1;
-            }
-
-            @Override public long getIndex() {
-                return 1;
-            }
-        });
+        modification.add(0, new ReplicatedLogImplEntry(1, 1, compositeModification));
 
         return new AppendEntries(1, "member-1", 0, 100, modification, 1);
     }
@@ -101,20 +81,7 @@ public class Client {
     public static AppendEntries keyValueAppendEntries() {
         List<ReplicatedLogEntry> modification = new ArrayList<>();
 
-        modification.add(0, new ReplicatedLogEntry() {
-            @Override public Payload getData() {
-                return new KeyValue("moiz", "test");
-            }
-
-            @Override public long getTerm() {
-                return 1;
-            }
-
-            @Override public long getIndex() {
-                return 1;
-            }
-        });
-
+        modification.add(0, new ReplicatedLogImplEntry(1, 1, new KeyValue("moiz", "test")));
         return new AppendEntries(1, "member-1", 0, 100, modification, 1);
     }
 }

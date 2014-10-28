@@ -44,6 +44,10 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
 
     private static final Logger LOG = LoggerFactory.getLogger(NormalizedNodeOutputStreamWriter.class);
 
+    static final byte IS_CODE_VALUE = 1;
+    static final byte IS_STRING_VALUE = 2;
+    static final byte IS_NULL_VALUE = 3;
+
     private final DataOutput output;
 
     private final Map<String, Integer> stringCodeMap = new HashMap<>();
@@ -193,17 +197,16 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
 
     private void writeCodedString(String key) throws IOException {
         Integer value = stringCodeMap.get(key);
-
         if(value != null) {
-            output.writeBoolean(true);
+            output.writeByte(IS_CODE_VALUE);
             output.writeInt(value);
         } else {
-            output.writeBoolean(false);
             if(key != null) {
+                output.writeByte(IS_STRING_VALUE);
                 stringCodeMap.put(key, Integer.valueOf(stringCodeMap.size()));
                 output.writeUTF(key);
             } else {
-                output.writeUTF("");
+                output.writeByte(IS_NULL_VALUE);
             }
         }
     }

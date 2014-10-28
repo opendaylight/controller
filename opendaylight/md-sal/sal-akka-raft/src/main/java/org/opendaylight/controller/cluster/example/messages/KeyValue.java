@@ -8,16 +8,11 @@
 
 package org.opendaylight.controller.cluster.example.messages;
 
-import com.google.protobuf.GeneratedMessage;
-import org.opendaylight.controller.protobuff.messages.cluster.example.KeyValueMessages;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
-import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+public class KeyValue implements Payload {
+    private static final long serialVersionUID = 1L;
 
-public class KeyValue extends Payload implements Serializable {
     private String key;
     private String value;
 
@@ -45,29 +40,11 @@ public class KeyValue extends Payload implements Serializable {
         this.value = value;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return "KeyValue{" +
             "key='" + key + '\'' +
             ", value='" + value + '\'' +
             '}';
     }
-
-    // override this method to return  the protobuff related extension fields and their values
-    @Override public Map<GeneratedMessage.GeneratedExtension, String> encode() {
-        Map<GeneratedMessage.GeneratedExtension, String> map = new HashMap<>();
-        map.put(KeyValueMessages.key, getKey());
-        map.put(KeyValueMessages.value, getValue());
-        return map;
-    }
-
-    // override this method to assign the values from protobuff
-    @Override public Payload decode(
-        AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Payload payloadProtoBuff) {
-        String key = payloadProtoBuff.getExtension(KeyValueMessages.key);
-        String value = payloadProtoBuff.getExtension(KeyValueMessages.value);
-        this.setKey(key);
-        this.setValue(value);
-        return this;
-    }
-
 }

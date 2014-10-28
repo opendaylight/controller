@@ -25,11 +25,11 @@ import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
+import org.opendaylight.controller.cluster.raft.messages.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.cluster.raft.utils.MockAkkaJournal;
 import org.opendaylight.controller.cluster.raft.utils.MockSnapshotStore;
 import scala.concurrent.duration.FiniteDuration;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -42,7 +42,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.mock;
@@ -358,6 +357,11 @@ public class RaftActorTest extends AbstractActorTest {
                 TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(), MockRaftActor.props(persistenceId,
                         Collections.EMPTY_MAP, Optional.<ConfigParams>of(config)), persistenceId);
 
+                MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
+
+                // Wait for akka's recovery to complete first so it doesn't interfere.
+                mockRaftActor.waitForRecoveryComplete();
+
                 ByteString snapshotBytes  = fromObject(Arrays.asList(
                         new MockRaftActorContext.MockPayload("A"),
                         new MockRaftActorContext.MockPayload("B"),
@@ -366,8 +370,6 @@ public class RaftActorTest extends AbstractActorTest {
 
                 Snapshot snapshot = Snapshot.create(snapshotBytes.toByteArray(),
                         Lists.<ReplicatedLogEntry>newArrayList(), 3, 1 ,3, 1);
-
-                MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 
                 mockRaftActor.onReceiveRecover(new SnapshotOffer(new SnapshotMetadata(persistenceId, 100, 100), snapshot));
 
@@ -391,7 +393,7 @@ public class RaftActorTest extends AbstractActorTest {
 
                 // The snapshot had 4 items + we added 2 more items during the test
                 // We start removing from 5 and we should get 1 item in the replicated log
-                mockRaftActor.onReceiveRecover(new RaftActor.DeleteEntries(5));
+                mockRaftActor.onReceiveRecover(new DeleteEntries(5));
 
                 assertEquals("remove log entries", 1, replicatedLog.size());
 
@@ -401,8 +403,6 @@ public class RaftActorTest extends AbstractActorTest {
                 assertEquals("voted for", "foobar", mockRaftActor.getRaftActorContext().getTermInformation().getVotedFor());
 
                 mockRaftActor.onReceiveRecover(mock(RecoveryCompleted.class));
-
-                mockRaftActor.waitForRecoveryComplete();
 
                 mockActorRef.tell(PoisonPill.getInstance(), getRef());
 
@@ -429,6 +429,9 @@ public class RaftActorTest extends AbstractActorTest {
                         Collections.EMPTY_MAP, Optional.<ConfigParams>of(config), new DataPersistenceProviderMonitor()), persistenceId);
 
                 MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
+
+                // Wait for akka's recovery to complete first so it doesn't interfere.
+                mockRaftActor.waitForRecoveryComplete();
 
                 ByteString snapshotBytes  = fromObject(Arrays.asList(
                         new MockRaftActorContext.MockPayload("A"),
@@ -459,7 +462,7 @@ public class RaftActorTest extends AbstractActorTest {
 
                 assertEquals("commit index -1", -1, mockRaftActor.getRaftActorContext().getCommitIndex());
 
-                mockRaftActor.onReceiveRecover(new RaftActor.DeleteEntries(2));
+                mockRaftActor.onReceiveRecover(new DeleteEntries(2));
 
                 assertEquals("remove log entries", 0, replicatedLog.size());
 
@@ -469,8 +472,6 @@ public class RaftActorTest extends AbstractActorTest {
                 assertNotEquals("voted for", "foobar", mockRaftActor.getRaftActorContext().getTermInformation().getVotedFor());
 
                 mockRaftActor.onReceiveRecover(mock(RecoveryCompleted.class));
-
-                mockRaftActor.waitForRecoveryComplete();
 
                 mockActorRef.tell(PoisonPill.getInstance(), getRef());
             }};

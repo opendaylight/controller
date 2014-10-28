@@ -8,8 +8,11 @@
 
 package org.opendaylight.controller.cluster.datastore.modification;
 
-import org.opendaylight.controller.cluster.datastore.util.InstanceIdentifierUtils;
-import org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputStreamReader;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeOutputStreamWriter;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
@@ -19,23 +22,27 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 public class DeleteModification extends AbstractModification {
     private static final long serialVersionUID = 1L;
 
+    public DeleteModification() {
+    }
+
     public DeleteModification(YangInstanceIdentifier path) {
         super(path);
     }
 
     @Override
     public void apply(DOMStoreWriteTransaction transaction) {
-        transaction.delete(path);
+        transaction.delete(getPath());
     }
 
     @Override
-    public Object toSerializable() {
-        return PersistentMessages.Modification.newBuilder().setType(this.getClass().toString())
-                .setPath(InstanceIdentifierUtils.toSerializable(this.path)).build();
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        NormalizedNodeInputStreamReader streamReader = new NormalizedNodeInputStreamReader(in);
+        setPath(streamReader.readYangInstanceIdentifier());
     }
 
-    public static DeleteModification fromSerializable(Object serializable) {
-        PersistentMessages.Modification o = (PersistentMessages.Modification) serializable;
-        return new DeleteModification(InstanceIdentifierUtils.fromSerializable(o.getPath()));
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        NormalizedNodeOutputStreamWriter streamWriter = new NormalizedNodeOutputStreamWriter(out);
+        streamWriter.writeYangInstanceIdentifier(getPath());
     }
 }

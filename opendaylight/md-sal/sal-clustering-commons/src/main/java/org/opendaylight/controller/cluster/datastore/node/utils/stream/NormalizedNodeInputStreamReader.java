@@ -225,16 +225,16 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
 
 
     private String readCodedString() throws IOException {
-        boolean readFromMap = input.readBoolean();
-        if(readFromMap) {
+        byte valueType = input.readByte();
+        if(valueType == NormalizedNodeOutputStreamWriter.IS_CODE_VALUE) {
             return codedStringMap.get(input.readInt());
-        } else {
+        } else if(valueType == NormalizedNodeOutputStreamWriter.IS_STRING_VALUE) {
             String value = input.readUTF();
-            if(value != null) {
-                codedStringMap.put(Integer.valueOf(codedStringMap.size()), value);
-            }
+            codedStringMap.put(Integer.valueOf(codedStringMap.size()), value);
             return value;
         }
+
+        return null;
     }
 
     private Set<QName> readQNameSet() throws IOException{

@@ -8,14 +8,19 @@
 
 package org.opendaylight.controller.cluster.datastore.modification;
 
-import org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
-
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.List;
 
 public class ImmutableCompositeModification implements CompositeModification {
+    private static final long serialVersionUID = 1L;
 
-    private final CompositeModification modification;
+    private transient CompositeModification modification;
+
+    public ImmutableCompositeModification() {
+    }
 
     public ImmutableCompositeModification(CompositeModification modification) {
         this.modification = modification;
@@ -31,16 +36,14 @@ public class ImmutableCompositeModification implements CompositeModification {
         modification.apply(transaction);
     }
 
-    @Override public Object toSerializable() {
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        modification = new MutableCompositeModification();
+        modification.readExternal(in);
+    }
 
-        PersistentMessages.CompositeModification.Builder builder =
-            PersistentMessages.CompositeModification.newBuilder();
-
-        for (Modification m : modification.getModifications()) {
-            builder.addModification(
-                (PersistentMessages.Modification) m.toSerializable());
-        }
-
-        return builder.build();
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        modification.writeExternal(out);
     }
 }

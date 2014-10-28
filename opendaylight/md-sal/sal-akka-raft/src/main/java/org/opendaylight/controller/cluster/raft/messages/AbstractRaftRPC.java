@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.raft.messages;
 
 public class AbstractRaftRPC implements RaftRPC {
     // term
-    protected long term;
+    private long term;
 
     protected AbstractRaftRPC(long term){
         this.term = term;
@@ -20,6 +20,7 @@ public class AbstractRaftRPC implements RaftRPC {
     public AbstractRaftRPC() {
     }
 
+    @Override
     public long getTerm() {
         return term;
     }

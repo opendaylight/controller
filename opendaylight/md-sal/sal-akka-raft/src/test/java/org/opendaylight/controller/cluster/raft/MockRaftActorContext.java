@@ -15,12 +15,11 @@ import akka.actor.Props;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import com.google.common.base.Preconditions;
-import com.google.protobuf.GeneratedMessage;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
-import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
-import org.opendaylight.controller.protobuff.messages.cluster.raft.test.MockPayloadMessages;
-
-import java.io.Serializable;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,14 +55,17 @@ public class MockRaftActorContext implements RaftActorContext {
             private long currentTerm = 0;
             private String votedFor = "";
 
+            @Override
             public long getCurrentTerm() {
                 return currentTerm;
             }
 
+            @Override
             public String getVotedFor() {
                 return votedFor;
             }
 
+            @Override
             public void update(long currentTerm, String votedFor){
                 this.currentTerm = currentTerm;
                 this.votedFor = votedFor;
@@ -128,6 +130,7 @@ public class MockRaftActorContext implements RaftActorContext {
         return lastApplied;
     }
 
+    @Override
     public void setReplicatedLog(ReplicatedLog replicatedLog) {
         this.replicatedLog = replicatedLog;
     }
@@ -197,7 +200,9 @@ public class MockRaftActorContext implements RaftActorContext {
         }
     }
 
-    public static class MockPayload extends Payload implements Serializable {
+    public static class MockPayload implements Payload, Externalizable {
+        private static final long serialVersionUID = 1L;
+
         private String value = "";
 
         public MockPayload(){
@@ -208,56 +213,65 @@ public class MockRaftActorContext implements RaftActorContext {
             this.value = s;
         }
 
-        @Override public  Map<GeneratedMessage.GeneratedExtension, String> encode() {
-            Map<GeneratedMessage.GeneratedExtension, String> map = new HashMap<GeneratedMessage.GeneratedExtension, String>();
-            map.put(MockPayloadMessages.value, value);
-            return map;
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((value == null) ? 0 : value.hashCode());
+            return result;
         }
 
-        @Override public Payload decode(
-            AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Payload payloadProtoBuff) {
-            String value = payloadProtoBuff.getExtension(MockPayloadMessages.value);
-            this.value = value;
-            return this;
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            MockPayload other = (MockPayload) obj;
+            if (value == null) {
+                if (other.value != null) {
+                    return false;
+                }
+            } else if (!value.equals(other.value)) {
+                return false;
+            }
+            return true;
         }
 
-        @Override public String getClientPayloadClassName() {
-            return MockPayload.class.getName();
-        }
-
+        @Override
         public String toString() {
             return value;
         }
+
+        @Override
+        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+            value = in.readUTF();
+        }
+
+        @Override
+        public void writeExternal(ObjectOutput out) throws IOException {
+            out.writeUTF(value);
+        }
     }
 
-    public static class MockReplicatedLogEntry implements ReplicatedLogEntry, Serializable {
+    public static class MockReplicatedLogEntry extends ReplicatedLogImplEntry {
 
-        private final long term;
-        private final long index;
-        private final Payload data;
-
-        public MockReplicatedLogEntry(long term, long index, Payload data){
-
-            this.term = term;
-            this.index = index;
-            this.data = data;
+        public MockReplicatedLogEntry() {
+            super();
         }
 
-        @Override public Payload getData() {
-            return data;
-        }
-
-        @Override public long getTerm() {
-            return term;
-        }
-
-        @Override public long getIndex() {
-            return index;
+        public MockReplicatedLogEntry(long term, long index, Payload payload) {
+            super(index, term, payload);
         }
     }
 
     public static class MockReplicatedLogBuilder {
-        private ReplicatedLog mockLog = new SimpleReplicatedLog();
+        private final ReplicatedLog mockLog = new SimpleReplicatedLog();
 
         public  MockReplicatedLogBuilder createEntries(int start, int end, int term) {
             for (int i=start; i<end; i++) {

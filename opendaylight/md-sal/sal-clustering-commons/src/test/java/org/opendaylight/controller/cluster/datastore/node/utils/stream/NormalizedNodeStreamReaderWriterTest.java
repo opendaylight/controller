@@ -15,11 +15,14 @@ import org.apache.commons.lang.SerializationUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.util.TestModel;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
+import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -32,8 +35,15 @@ public class NormalizedNodeStreamReaderWriterTest {
 
         testNormalizedNodeStreamReaderWriter(TestModel.createTestContainer());
 
-        testNormalizedNodeStreamReaderWriter(Builders.containerBuilder().withNodeIdentifier(
-                new NodeIdentifier(SchemaContext.NAME)).build());
+        QName toaster = QName.create("http://netconfcentral.org/ns/toaster","2009-11-20","toaster");
+        QName darknessFactor = QName.create("http://netconfcentral.org/ns/toaster","2009-11-20","darknessFactor");
+        ContainerNode toasterNode = Builders.containerBuilder().
+                withNodeIdentifier(new NodeIdentifier(toaster)).
+                withChild(ImmutableNodes.leafNode(darknessFactor, "1000")).build();
+
+        testNormalizedNodeStreamReaderWriter(Builders.containerBuilder().
+                withNodeIdentifier(new NodeIdentifier(SchemaContext.NAME)).
+                withChild(toasterNode).build());
     }
 
     private void testNormalizedNodeStreamReaderWriter(NormalizedNode<?, ?> input) throws IOException {

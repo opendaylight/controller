@@ -8,52 +8,52 @@
 
 package org.opendaylight.controller.cluster.datastore.modification;
 
-import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
-import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec.Decoded;
-import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec.Encoded;
-import org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputStreamReader;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeOutputStreamWriter;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
 
 /**
  * WriteModification stores all the parameters required to write data to the specified path
  */
 public class WriteModification extends AbstractModification {
+    private static final long serialVersionUID = 1L;
 
-    protected final NormalizedNode data;
-    private final SchemaContext schemaContext;
+    private transient NormalizedNode<?, ?> data;
 
-    public WriteModification(YangInstanceIdentifier path, NormalizedNode data, SchemaContext schemaContext) {
+    public WriteModification() {
+    }
+
+    public WriteModification(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
         super(path);
         this.data = data;
-        this.schemaContext = schemaContext;
     }
 
     @Override
     public void apply(DOMStoreWriteTransaction transaction) {
-        transaction.write(path, data);
+        transaction.write(getPath(), data);
     }
 
-    public NormalizedNode getData() {
+    public NormalizedNode<?, ?> getData() {
         return data;
     }
 
     @Override
-    public Object toSerializable() {
-        Encoded encoded = new NormalizedNodeToNodeCodec(schemaContext).encode(path, data);
-
-        return PersistentMessages.Modification.newBuilder()
-                .setType(this.getClass().toString())
-                .setPath(encoded.getEncodedPath())
-                .setData(encoded.getEncodedNode().getNormalizedNode())
-                .build();
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        NormalizedNodeInputStreamReader streamReader = new NormalizedNodeInputStreamReader(in);
+        data = streamReader.readNormalizedNode();
+        setPath(streamReader.readYangInstanceIdentifier());
     }
 
-    public static WriteModification fromSerializable(Object serializable, SchemaContext schemaContext) {
-        PersistentMessages.Modification o = (PersistentMessages.Modification) serializable;
-        Decoded decoded = new NormalizedNodeToNodeCodec(schemaContext).decode(o.getPath(), o.getData());
-        return new WriteModification(decoded.getDecodedPath(), decoded.getDecodedNode(), schemaContext);
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        NormalizedNodeOutputStreamWriter streamWriter = new NormalizedNodeOutputStreamWriter(out);
+        NormalizedNodeWriter.forStreamWriter(streamWriter).write(getData());
+        streamWriter.writeYangInstanceIdentifier(getPath());
     }
 }

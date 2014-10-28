@@ -36,8 +36,9 @@ public class MeteredBoundedMailboxTest {
 
     @After
     public void tearDown() throws Exception {
-       if (actorSystem != null)
-           actorSystem.shutdown();
+       if (actorSystem != null) {
+        actorSystem.shutdown();
+    }
     }
 
     @Test
@@ -80,22 +81,31 @@ public class MeteredBoundedMailboxTest {
         }
 
         public static Props props(final ReentrantLock lock){
-            return Props.create(new Creator<PingPongActor>(){
-                @Override
-                public PingPongActor create() throws Exception {
-                    return new PingPongActor(lock);
-                }
-            });
+            return Props.create(new PingPongActorCreator(lock));
         }
 
         @Override
         public void onReceive(Object message) throws Exception {
             lock.lock();
             try {
-                if ("ping".equals(message))
+                if ("ping".equals(message)) {
                     getSender().tell("pong", getSelf());
+                }
             } finally {
                 lock.unlock();
+            }
+        }
+
+        private static class PingPongActorCreator implements Creator<PingPongActor> {
+            ReentrantLock lock;
+
+            private PingPongActorCreator(ReentrantLock lock){
+                this.lock = lock;
+            }
+
+            @Override
+            public PingPongActor create() throws Exception {
+                return new PingPongActor(lock);
             }
         }
     }
