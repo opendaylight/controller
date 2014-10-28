@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_a6638019",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/test/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/NormalizedNodeStreamReaderWriterTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-28T01:51:29Z",
+      "side": 1,
+      "message": "By catching IOException here and calling fail, we lose the stack trace. You could throw your own AssertionError with the IOException as the cause but it\u0027s easiest to just let the IOExeption be thrown from this method - Junit will fail the test and print the stack trace. \n\nBut we don\u0027t need to hold up this patch for that. We\u0027ll be modifying this class in future patch set(s) anyway.",
+      "revId": "cd2d5090ad2e0712d532acf3a624bdf5414af350",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
