@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_46f634d9",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/DataPersistence.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-28T10:41:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_e61c286d",
+      "revId": "1fa8d25da07d54dddaab0720336ad31ef98c7442",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_4610744e",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2014-10-27T19:19:36Z",
       "side": 1,
       "message": "If there is data persisted (i.e. it was just disabled), we would get multiple messages and thus call onRecoveryComplete and chafes state multiple times. I think we should handle RecoveryComplete normally and ignore all other messages although I think we want to delete the messages as they come in so they\u0027re not recovered again and to cleanup the DB. I think leaving stale messages in the DB may cause a consistency issue if persistence was disabled and then re-enabled at a later time.",
+      "revId": "1fa8d25da07d54dddaab0720336ad31ef98c7442",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_26f9b0c8",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-28T10:41:31Z",
+      "side": 1,
+      "message": "good catch.",
+      "parentUuid": "ba8cc1f7_4610744e",
       "revId": "1fa8d25da07d54dddaab0720336ad31ef98c7442",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_86b0bcf5",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 582,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-28T10:41:31Z",
+      "side": 1,
+      "message": "It\u0027s not straightforward because some of the implementations of DataPersistence have to be embedded (non-static) classes as they are using protected methods PersistentActor so it\u0027s not possible to pass DataPersistence to the constructor. Unless you can show me how to make that happen :)",
+      "parentUuid": "ba8cc1f7_c6eec422",
+      "revId": "1fa8d25da07d54dddaab0720336ad31ef98c7442",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_2613f05d",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 5
@@ -64,6 +118,24 @@
       "writtenOn": "2014-10-27T19:19:36Z",
       "side": 1,
       "message": "Why isn\u0027t this a no-op? Can add a comment explaining?",
+      "revId": "1fa8d25da07d54dddaab0720336ad31ef98c7442",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_e602e8b3",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 867,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-28T10:41:31Z",
+      "side": 1,
+      "message": "The way snapshotting works is,\n1. RaftActor calls createSnapshot on the Shard\n2. Shard sends a CaptureSnapshotReply and RaftActor then calls saveSnapshot\n3. When saveSnapshot is invoked on the akka-persistence API it uses the SnapshotStore to save the snapshot. The SnapshotStore sends SaveSnapshotSuccess or SaveSnapshotFailure. When the RaftActor gets SaveSnapshot success it commits the snapshot to the in-memory journal.\nThis commitSnapshot is mimicking what is done in SaveSnapshotSuccess.",
+      "parentUuid": "ba8cc1f7_2613f05d",
       "revId": "1fa8d25da07d54dddaab0720336ad31ef98c7442",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_06002ca9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-28T10:41:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_66f3380b",
+      "revId": "1fa8d25da07d54dddaab0720336ad31ef98c7442",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_86f8bce6",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/resources/application.conf",
         "patchSetId": 5
@@ -98,6 +188,24 @@
       "writtenOn": "2014-10-27T19:19:36Z",
       "side": 1,
       "message": "Should this be removed since we\u0027re not configuring persistence at the actor system level?",
+      "revId": "1fa8d25da07d54dddaab0720336ad31ef98c7442",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_a62ce04b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/resources/application.conf",
+        "patchSetId": 5
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-28T10:41:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_86f8bce6",
       "revId": "1fa8d25da07d54dddaab0720336ad31ef98c7442",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_6626d86a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/yang/distributed-datastore-provider.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-28T10:41:31Z",
+      "side": 1,
+      "message": "or alternately should I also make ShardManager persistent?",
+      "parentUuid": "ba8cc1f7_26dd3071",
+      "revId": "1fa8d25da07d54dddaab0720336ad31ef98c7442",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_46dab479",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DistributedDataStoreFactoryTest.java",
         "patchSetId": 5
@@ -132,6 +258,24 @@
       "writtenOn": "2014-10-27T19:19:36Z",
       "side": 1,
       "message": "Should this file have EPL license?",
+      "revId": "1fa8d25da07d54dddaab0720336ad31ef98c7442",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_862bdc2f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DistributedDataStoreFactoryTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-28T10:41:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_46dab479",
       "revId": "1fa8d25da07d54dddaab0720336ad31ef98c7442",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -189,6 +333,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_a6d38037",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 1036,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-28T10:41:31Z",
+      "side": 1,
+      "message": "sloppy :)",
+      "parentUuid": "ba8cc1f7_a63700b0",
+      "revId": "1fa8d25da07d54dddaab0720336ad31ef98c7442",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_06bb4c0f",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
         "patchSetId": 5
@@ -217,6 +379,24 @@
       "writtenOn": "2014-10-27T19:19:36Z",
       "side": 1,
       "message": "It would be good to assert something here specific to persistence enabled/disabled. One thought is to override saveSnapshot in the Shard as it did before and ensure via AtomicBoolean that it isn\u0027t called.",
+      "revId": "1fa8d25da07d54dddaab0720336ad31ef98c7442",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_c6d80456",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 1061,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-28T10:41:31Z",
+      "side": 1,
+      "message": "I\u0027m not done with unit-testing yet. I\u0027ll be returning a custom data persistence  instance and check how that is being called.",
+      "parentUuid": "ba8cc1f7_c63c8496",
       "revId": "1fa8d25da07d54dddaab0720336ad31ef98c7442",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
