@@ -8,12 +8,13 @@
 
 package org.opendaylight.controller.cluster.raft;
 
+import java.io.Externalizable;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 
 /**
  * Represents one entry in the replicated log
  */
-public interface ReplicatedLogEntry {
+public interface ReplicatedLogEntry extends Externalizable {
     /**
      * The data stored in that entry
      *

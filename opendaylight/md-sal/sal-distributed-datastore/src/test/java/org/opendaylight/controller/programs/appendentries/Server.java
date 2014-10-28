@@ -12,7 +12,6 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import com.typesafe.config.ConfigFactory;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationPayload;
 import org.opendaylight.controller.cluster.example.messages.KeyValue;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
@@ -24,19 +23,15 @@ public class Server {
     public static class ServerActor extends UntypedActor {
 
         @Override public void onReceive(Object message) throws Exception {
-            if(AppendEntries.SERIALIZABLE_CLASS.equals(message.getClass())){
-                AppendEntries appendEntries =
-                    AppendEntries.fromSerializable(message);
+            if(message instanceof AppendEntries){
+                AppendEntries appendEntries = (AppendEntries)message;
 
                 Payload data = appendEntries.getEntries()
                     .get(0).getData();
                 if(data instanceof KeyValue){
                     System.out.println("Received : " + ((KeyValue) appendEntries.getEntries().get(0).getData()).getKey());
                 } else {
-                    System.out.println("Received :" +
-                        ((CompositeModificationPayload) appendEntries
-                            .getEntries()
-                            .get(0).getData()).getModification().toString());
+                    System.out.println("Received :" + appendEntries.getEntries().get(0));
                 }
             } else if(message instanceof String){
                 System.out.println(message);

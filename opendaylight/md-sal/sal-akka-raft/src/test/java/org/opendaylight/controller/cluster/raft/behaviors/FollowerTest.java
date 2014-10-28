@@ -48,6 +48,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         return createActorContext(followerActor);
     }
 
+    @Override
     protected  RaftActorContext createActorContext(ActorRef actorRef){
         return new MockRaftActorContext("test", getSystem(), actorRef);
     }
@@ -57,12 +58,14 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         new JavaTestKit(getSystem()) {{
 
             new Within(DefaultConfigParamsImpl.HEART_BEAT_INTERVAL.$times(6)) {
+                @Override
                 protected void run() {
 
                     Follower follower = new Follower(createActorContext(getTestActor()));
 
                     final Boolean out = new ExpectMsg<Boolean>(DefaultConfigParamsImpl.HEART_BEAT_INTERVAL.$times(6), "ElectionTimeout") {
                         // do not put code outside this method, will run afterwards
+                        @Override
                         protected Boolean match(Object in) {
                             if (in instanceof ElectionTimeout) {
                                 return true;
@@ -95,6 +98,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         new JavaTestKit(getSystem()) {{
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     RaftActorContext context = createActorContext(getTestActor());
@@ -107,6 +111,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
 
                     final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"), "RequestVoteReply") {
                         // do not put code outside this method, will run afterwards
+                        @Override
                         protected Boolean match(Object in) {
                             if (in instanceof RequestVoteReply) {
                                 RequestVoteReply reply = (RequestVoteReply) in;
@@ -128,6 +133,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         new JavaTestKit(getSystem()) {{
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     RaftActorContext context = createActorContext(getTestActor());
@@ -140,6 +146,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
 
                     final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"), "RequestVoteReply") {
                         // do not put code outside this method, will run afterwards
+                        @Override
                         protected Boolean match(Object in) {
                             if (in instanceof RequestVoteReply) {
                                 RequestVoteReply reply = (RequestVoteReply) in;
@@ -232,23 +239,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
 
             assertEquals(expected, raftBehavior);
 
-            // Also expect an AppendEntriesReply to be sent where success is false
-            final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"),
-                "AppendEntriesReply") {
-                // do not put code outside this method, will run afterwards
-                protected Boolean match(Object in) {
-                    if (in instanceof AppendEntriesReply) {
-                        AppendEntriesReply reply = (AppendEntriesReply) in;
-                        return reply.isSuccess();
-                    } else {
-                        throw noMatch();
-                    }
-                }
-            }.get();
-
-            assertEquals(false, out);
-
-
+            AppendEntriesReply reply = expectMsgClass(duration("5 seconds"), AppendEntriesReply.class);
+            assertEquals("isSuccess", false, reply.isSuccess());
         }};
     }
 
@@ -311,27 +303,10 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             assertNotNull(log.get(3));
             assertNotNull(log.get(4));
 
-            // Also expect an AppendEntriesReply to be sent where success is false
-            final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"),
-                "AppendEntriesReply") {
-                // do not put code outside this method, will run afterwards
-                protected Boolean match(Object in) {
-                    if (in instanceof AppendEntriesReply) {
-                        AppendEntriesReply reply = (AppendEntriesReply) in;
-                        return reply.isSuccess();
-                    } else {
-                        throw noMatch();
-                    }
-                }
-            }.get();
-
-            assertEquals(true, out);
-
-
+            AppendEntriesReply reply = expectMsgClass(duration("5 seconds"), AppendEntriesReply.class);
+            assertEquals("isSuccess", true, reply.isSuccess());
         }};
     }
-
-
 
     /**
      * This test verifies that when a new AppendEntries message is received with
@@ -404,23 +379,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
 
             assertNotNull(log.get(3));
 
-            // Also expect an AppendEntriesReply to be sent where success is false
-            final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"),
-                "AppendEntriesReply") {
-                // do not put code outside this method, will run afterwards
-                protected Boolean match(Object in) {
-                    if (in instanceof AppendEntriesReply) {
-                        AppendEntriesReply reply = (AppendEntriesReply) in;
-                        return reply.isSuccess();
-                    } else {
-                        throw noMatch();
-                    }
-                }
-            }.get();
-
-            assertEquals(true, out);
-
-
+            AppendEntriesReply reply = expectMsgClass(duration("5 seconds"), AppendEntriesReply.class);
+            assertEquals("isSuccess", true, reply.isSuccess());
         }};
     }
 
