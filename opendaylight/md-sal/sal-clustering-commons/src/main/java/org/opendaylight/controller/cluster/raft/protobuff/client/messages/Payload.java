@@ -9,10 +9,7 @@
 package org.opendaylight.controller.cluster.raft.protobuff.client.messages;
 
 
-import com.google.protobuf.GeneratedMessage;
-import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
-
-import java.util.Map;
+import java.io.Serializable;
 
 /**
  * An instance of a Payload class is meant to be used as the Payload for
@@ -51,36 +48,6 @@ import java.util.Map;
  * </pre>
  *
  */
-public abstract class Payload {
-    private String clientPayloadClassName;
-
-    public String getClientPayloadClassName() {
-        return this.getClass().getName();
-    }
-
-    public void setClientPayloadClassName(String clientPayloadClassName) {
-        this.clientPayloadClassName = clientPayloadClassName;
-    }
-
-    /**
-     * Encode the payload data as a protocol buffer extension.
-     * <p>
-     * TODO: Add more meat in here
-     * @param <T>
-     * @return Map of <GeneratedMessage.GeneratedExtension, T>
-     */
-    public abstract <T extends Object> Map<GeneratedMessage.GeneratedExtension, T> encode();
-
-    /**
-     * Decode the protocol buffer payload into a specific Payload as defined
-     * by the class extending RaftActor
-     *
-     * @param payload The payload in protocol buffer format
-     * @return
-     */
-    public abstract Payload decode(
-        AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Payload payload);
-
-
-
+public abstract class Payload implements Serializable {
+    private static final long serialVersionUID = 1L;
 }

@@ -31,7 +31,7 @@ public class CompositeModificationPayload extends Payload implements
         this.modification = (PersistentMessages.CompositeModification) Preconditions.checkNotNull(modification, "modification should not be null");
     }
 
-    @Override public Map<GeneratedMessage.GeneratedExtension, PersistentMessages.CompositeModification> encode() {
+    public Map<GeneratedMessage.GeneratedExtension, PersistentMessages.CompositeModification> encode() {
         Preconditions.checkState(modification!=null);
         Map<GeneratedMessage.GeneratedExtension, PersistentMessages.CompositeModification> map = new HashMap<>();
         map.put(
@@ -39,7 +39,7 @@ public class CompositeModificationPayload extends Payload implements
         return map;
     }
 
-    @Override public Payload decode(
+    public Payload decode(
         AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Payload payload) {
         PersistentMessages.CompositeModification modification = payload
             .getExtension(

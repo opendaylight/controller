@@ -36,6 +36,7 @@ import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
 import org.opendaylight.controller.cluster.raft.client.messages.RemoveRaftPeer;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
+import org.opendaylight.controller.cluster.raft.messages.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
 import java.io.Serializable;
@@ -722,20 +723,6 @@ public abstract class RaftActor extends UntypedPersistentActor {
         }
 
     }
-
-    private static class DeleteEntries implements Serializable {
-        private final int fromIndex;
-
-
-        public DeleteEntries(int fromIndex) {
-            this.fromIndex = fromIndex;
-        }
-
-        public int getFromIndex() {
-            return fromIndex;
-        }
-    }
-
 
     private class ElectionTermImpl implements ElectionTerm {
         /**
