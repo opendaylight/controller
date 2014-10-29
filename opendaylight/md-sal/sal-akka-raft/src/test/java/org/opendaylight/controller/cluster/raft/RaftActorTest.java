@@ -358,6 +358,11 @@ public class RaftActorTest extends AbstractActorTest {
                 TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(), MockRaftActor.props(persistenceId,
                         Collections.EMPTY_MAP, Optional.<ConfigParams>of(config)), persistenceId);
 
+                MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
+
+                // Wait for akka's recovery to complete so it doesn't interfere.
+                mockRaftActor.waitForRecoveryComplete();
+
                 ByteString snapshotBytes  = fromObject(Arrays.asList(
                         new MockRaftActorContext.MockPayload("A"),
                         new MockRaftActorContext.MockPayload("B"),
@@ -366,8 +371,6 @@ public class RaftActorTest extends AbstractActorTest {
 
                 Snapshot snapshot = Snapshot.create(snapshotBytes.toByteArray(),
                         Lists.<ReplicatedLogEntry>newArrayList(), 3, 1 ,3, 1);
-
-                MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 
                 mockRaftActor.onReceiveRecover(new SnapshotOffer(new SnapshotMetadata(persistenceId, 100, 100), snapshot));
 
@@ -402,8 +405,6 @@ public class RaftActorTest extends AbstractActorTest {
 
                 mockRaftActor.onReceiveRecover(mock(RecoveryCompleted.class));
 
-                mockRaftActor.waitForRecoveryComplete();
-
                 mockActorRef.tell(PoisonPill.getInstance(), getRef());
 
             }};
@@ -429,6 +430,9 @@ public class RaftActorTest extends AbstractActorTest {
                         Collections.EMPTY_MAP, Optional.<ConfigParams>of(config), new DataPersistenceProviderMonitor()), persistenceId);
 
                 MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
+
+                // Wait for akka's recovery to complete so it doesn't interfere.
+                mockRaftActor.waitForRecoveryComplete();
 
                 ByteString snapshotBytes  = fromObject(Arrays.asList(
                         new MockRaftActorContext.MockPayload("A"),
@@ -469,8 +473,6 @@ public class RaftActorTest extends AbstractActorTest {
                 assertNotEquals("voted for", "foobar", mockRaftActor.getRaftActorContext().getTermInformation().getVotedFor());
 
                 mockRaftActor.onReceiveRecover(mock(RecoveryCompleted.class));
-
-                mockRaftActor.waitForRecoveryComplete();
 
                 mockActorRef.tell(PoisonPill.getInstance(), getRef());
             }};
