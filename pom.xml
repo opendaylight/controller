@@ -48,14 +48,6 @@
     <module>opendaylight/security</module>
     <module>opendaylight/karaf-tomcat-security</module>
 
-    <!-- third-parties uncomment them if you need snapshot version of it -->
-    <!-- <module>third-party/openflowj</module> -->
-    <!-- <module>third-party/net.sf.jung2</module> -->
-    <!-- <module>third-party/jersey-servlet</module> -->
-    <!-- <module>third-party/org.apache.catalina.filters.CorsFilter</module> -->
-
-    <module>third-party/commons/thirdparty</module>
-
     <!-- SAL bundles -->
     <module>opendaylight/sal/api</module>
     <module>opendaylight/sal/implementation</module>
