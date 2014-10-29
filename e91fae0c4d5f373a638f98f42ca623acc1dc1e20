@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_67a57203",
+        "filename": "opendaylight/md-sal/statistics-manager-config/pom.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 2470
+      },
+      "writtenOn": "2014-10-29T15:46:55Z",
+      "side": 1,
+      "message": "This was a mistake on my part. It will be changed back to \u003cclassifier\u003econfig\u003c/classifier\u003e in the next patchset.",
+      "parentUuid": "ba8cc1f7_815f4672",
+      "revId": "e91fae0c4d5f373a638f98f42ca623acc1dc1e20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_21543a53",
         "filename": "opendaylight/md-sal/statistics-manager-config/src/main/resources/initial/30-statistics-manager.xml",
         "patchSetId": 9
@@ -30,6 +48,24 @@
       "writtenOn": "2014-10-28T21:55:48Z",
       "side": 1,
       "message": "Is there a reason we didn\u0027t just inject the Broker as was done in restconf here?",
+      "revId": "e91fae0c4d5f373a638f98f42ca623acc1dc1e20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_a79b7ac8",
+        "filename": "opendaylight/md-sal/statistics-manager-config/src/main/resources/initial/30-statistics-manager.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 2470
+      },
+      "writtenOn": "2014-10-29T15:46:55Z",
+      "side": 1,
+      "message": "Is there a valid reason to do so? Because now we see right away what kind of services our module depends on. Also testing is a bit easier. Official samples and other projects also configure dependencies this way. I am asking because I do not know if  there is any benefit to injecting whole broker vs. injecting separate modules.",
+      "parentUuid": "ba8cc1f7_21543a53",
       "revId": "e91fae0c4d5f373a638f98f42ca623acc1dc1e20",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -81,6 +117,24 @@
       "writtenOn": "2014-10-28T21:55:48Z",
       "side": 1,
       "message": "Why are these all commented out?",
+      "revId": "e91fae0c4d5f373a638f98f42ca623acc1dc1e20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_c7a0fef6",
+        "filename": "opendaylight/md-sal/statistics-manager/src/test/java/test/mock/GroupStatisticsTest.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 2470
+      },
+      "writtenOn": "2014-10-29T15:46:55Z",
+      "side": 1,
+      "message": "Tests were commented out because of the frequent changes being made inside statistics-manager code. I had tests commited in a separate change. To prevent merge complications I will upload updated tests as a new patchset to this change.",
+      "parentUuid": "ba8cc1f7_014b36b1",
       "revId": "e91fae0c4d5f373a638f98f42ca623acc1dc1e20",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
