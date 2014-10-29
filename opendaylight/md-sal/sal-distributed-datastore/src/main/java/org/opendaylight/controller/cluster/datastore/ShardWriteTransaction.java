@@ -11,6 +11,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
+import akka.actor.PoisonPill;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.DeleteData;
 import org.opendaylight.controller.cluster.datastore.messages.DeleteDataReply;
@@ -87,12 +88,12 @@ public class ShardWriteTransaction extends ShardTransaction {
         }
     }
 
-    private void writeData(DOMStoreWriteTransaction transaction, WriteData message, boolean returnSerialized) {
+    private void writeData(DOMStoreWriteTransaction transaction, WriteData message,
+            boolean returnSerialized) {
+        LOG.debug("writeData at path : {}", message.getPath());
+
         modification.addModification(
                 new WriteModification(message.getPath(), message.getData(), getSchemaContext()));
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("writeData at path : " + message.getPath().toString());
-        }
         try {
             transaction.write(message.getPath(), message.getData());
             WriteDataReply writeDataReply = new WriteDataReply();
@@ -103,12 +104,13 @@ public class ShardWriteTransaction extends ShardTransaction {
         }
     }
 
-    private void mergeData(DOMStoreWriteTransaction transaction, MergeData message, boolean returnSerialized) {
+    private void mergeData(DOMStoreWriteTransaction transaction, MergeData message,
+            boolean returnSerialized) {
+        LOG.debug("mergeData at path : {}", message.getPath());
+
         modification.addModification(
                 new MergeModification(message.getPath(), message.getData(), getSchemaContext()));
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("mergeData at path : " + message.getPath().toString());
-        }
+
         try {
             transaction.merge(message.getPath(), message.getData());
             MergeDataReply mergeDataReply = new MergeDataReply();
@@ -119,10 +121,10 @@ public class ShardWriteTransaction extends ShardTransaction {
         }
     }
 
-    private void deleteData(DOMStoreWriteTransaction transaction, DeleteData message, boolean returnSerialized) {
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("deleteData at path : " + message.getPath().toString());
-        }
+    private void deleteData(DOMStoreWriteTransaction transaction, DeleteData message,
+            boolean returnSerialized) {
+        LOG.debug("deleteData at path : {}", message.getPath());
+
         modification.addModification(new DeleteModification(message.getPath()));
         try {
             transaction.delete(message.getPath());
@@ -134,12 +136,19 @@ public class ShardWriteTransaction extends ShardTransaction {
         }
     }
 
-    private void readyTransaction(DOMStoreWriteTransaction transaction, ReadyTransaction message, boolean returnSerialized) {
+    private void readyTransaction(DOMStoreWriteTransaction transaction, ReadyTransaction message,
+            boolean returnSerialized) {
+        String transactionID = getTransactionID();
+
+        LOG.debug("readyTransaction : {}", transactionID);
+
         DOMStoreThreePhaseCommitCohort cohort =  transaction.ready();
 
-        getShardActor().forward(new ForwardedReadyTransaction(
-            getTransactionID(), cohort, modification, returnSerialized),
-                getContext());
+        getShardActor().forward(new ForwardedReadyTransaction(transactionID, cohort, modification,
+                returnSerialized), getContext());
+
+        // The shard will handle the commit from here so we're no longer needed - self-destruct.
+        getSelf().tell(PoisonPill.getInstance(), getSelf());
     }
 
     // These classes are in here for test purposes only

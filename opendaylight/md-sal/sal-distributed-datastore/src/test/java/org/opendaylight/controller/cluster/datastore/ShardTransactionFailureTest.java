@@ -12,6 +12,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
 import akka.actor.Props;
+import akka.pattern.AskTimeoutException;
 import akka.testkit.TestActorRef;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -155,7 +156,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
         Await.result(future, Duration.create(3, TimeUnit.SECONDS));
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test(expected = AskTimeoutException.class)
     public void testNegativeWriteWithTransactionReady() throws Exception {
 
 
@@ -187,7 +188,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
         Await.result(future, Duration.create(3, TimeUnit.SECONDS));
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test(expected = AskTimeoutException.class)
     public void testNegativeReadWriteWithTransactionReady() throws Exception {
 
 
@@ -224,7 +225,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
             .serialize(Builders.containerBuilder().withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).build());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test(expected = AskTimeoutException.class)
     public void testNegativeMergeTransactionReady() throws Exception {
 
 
@@ -256,7 +257,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
     }
 
 
-    @Test(expected = IllegalStateException.class)
+    @Test(expected = AskTimeoutException.class)
     public void testNegativeDeleteDataWhenTransactionReady() throws Exception {
 
 
