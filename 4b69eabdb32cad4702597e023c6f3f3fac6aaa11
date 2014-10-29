@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_997c9a74",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/DataPersistenceProviderMonitor.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-10-29T21:21:08Z",
+      "side": 1,
+      "message": "This class should be under src/test/java - I tried moving it to raft as it already builds a test-jar but ran into strange test errors when trying to use it in ShardManagerTest. So we can leave it here but please add javadocs:\n\n/**\n * This class is intended for testing purposes. It just triggers CountDownLatch\u0027s in each method.\n * This class really should be under src/test/java but it was problematic trying to uses it in other projects.\n */",
+      "revId": "4b69eabdb32cad4702597e023c6f3f3fac6aaa11",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
