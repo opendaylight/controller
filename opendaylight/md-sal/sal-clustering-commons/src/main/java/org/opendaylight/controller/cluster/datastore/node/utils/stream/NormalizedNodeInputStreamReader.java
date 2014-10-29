@@ -55,19 +55,22 @@ import java.util.Set;
 
 public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamReader {
 
-    private DataInputStream reader;
-
     private static final Logger LOG = LoggerFactory.getLogger(NormalizedNodeInputStreamReader.class);
 
-    private Map<Integer, String> codedStringMap = new HashMap<>();
     private static final String REVISION_ARG = "?revision=";
+
+    private final DataInputStream reader;
+
+    private final Map<Integer, String> codedStringMap = new HashMap<>();
+
+    private QName lastLeafSetQName;
 
     public NormalizedNodeInputStreamReader(InputStream stream) throws IOException {
         Preconditions.checkNotNull(stream);
         reader = new DataInputStream(stream);
     }
 
-
+    @Override
     public NormalizedNode<?, ?> readNormalizedNode() throws IOException {
         NormalizedNode<?, ?> node = null;
 
@@ -89,20 +92,21 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
             node = augmentationBuilder.build();
 
         } else {
-            QName qName = readQName();
-
             if(nodeType == NodeTypes.LEAF_SET_ENTRY_NODE) {
                 LOG.debug("Reading leaf set entry node. Will create NodeWithValue instance identifier");
 
                 // Read the object value
                 Object value = readObject();
 
-                YangInstanceIdentifier.NodeWithValue nodeWithValue = new YangInstanceIdentifier.NodeWithValue(qName, value);
-                node =  Builders.leafSetEntryBuilder().withNodeIdentifier(nodeWithValue).withValue(value).build();
+                YangInstanceIdentifier.NodeWithValue nodeWithValue = new YangInstanceIdentifier.NodeWithValue(
+                        lastLeafSetQName, value);
+                node =  Builders.leafSetEntryBuilder().withNodeIdentifier(nodeWithValue).
+                        withValue(value).build();
 
             } else if(nodeType == NodeTypes.MAP_ENTRY_NODE) {
                 LOG.debug("Reading map entry node. Will create node identifier with predicates.");
 
+                QName qName = readQName();
                 YangInstanceIdentifier.NodeIdentifierWithPredicates nodeIdentifier =
                     new YangInstanceIdentifier.NodeIdentifierWithPredicates(qName, readKeyValueMap());
                 DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> mapEntryBuilder
@@ -114,6 +118,8 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
 
             } else {
                 LOG.debug("Creating standard node identifier. ");
+
+                QName qName = readQName();
                 YangInstanceIdentifier.NodeIdentifier identifier = new YangInstanceIdentifier.NodeIdentifier(qName);
                 node = readNodeIdentifierDependentNode(nodeType, identifier);
 
@@ -186,7 +192,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
                 LOG.debug("Read leaf set node");
                 ListNodeBuilder<Object, LeafSetEntryNode<Object>> leafSetBuilder =
                     Builders.leafSetBuilder().withNodeIdentifier(identifier);
-                leafSetBuilder = addLeafSetChildren(leafSetBuilder);
+                leafSetBuilder = addLeafSetChildren(identifier.getNodeType(), leafSetBuilder);
                 return leafSetBuilder.build();
 
             default :
@@ -325,11 +331,14 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
         }
     }
 
-    private ListNodeBuilder<Object, LeafSetEntryNode<Object>> addLeafSetChildren(ListNodeBuilder<Object,
-        LeafSetEntryNode<Object>> builder)
+    private ListNodeBuilder<Object, LeafSetEntryNode<Object>> addLeafSetChildren(QName nodeType,
+            ListNodeBuilder<Object, LeafSetEntryNode<Object>> builder)
         throws IOException {
 
         LOG.debug("Reading children of leaf set");
+
+        lastLeafSetQName = nodeType;
+
         LeafSetEntryNode<Object> child = (LeafSetEntryNode<Object>)readNormalizedNode();
 
         while(child != null) {
