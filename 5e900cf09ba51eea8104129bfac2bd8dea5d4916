@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_9957ba02",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/TransactionProxyTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 371,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-10-29T20:50:41Z",
+      "side": 1,
+      "message": "Is this left in here on purpose?",
+      "revId": "5e900cf09ba51eea8104129bfac2bd8dea5d4916",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
