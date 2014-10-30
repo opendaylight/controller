@@ -11,7 +11,6 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
-
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
@@ -27,8 +26,8 @@ public class ShardReadWriteTransaction extends ShardWriteTransaction {
 
     public ShardReadWriteTransaction(DOMStoreReadWriteTransaction transaction, ActorRef shardActor,
             SchemaContext schemaContext, ShardStats shardStats, String transactionID,
-            int txnClientVersion) {
-        super(transaction, shardActor, schemaContext, shardStats, transactionID, txnClientVersion);
+            short clientTxVersion) {
+        super(transaction, shardActor, schemaContext, shardStats, transactionID, clientTxVersion);
         this.transaction = transaction;
     }
 
