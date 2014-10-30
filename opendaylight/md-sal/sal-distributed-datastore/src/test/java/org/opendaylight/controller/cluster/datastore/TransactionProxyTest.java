@@ -202,7 +202,7 @@ public class TransactionProxyTest {
                     return false;
                 }
 
-                WriteData obj = WriteData.fromSerializable(argument, schemaContext);
+                WriteData obj = WriteData.fromSerializable(argument);
                 return obj.getPath().equals(TestModel.TEST_PATH) &&
                        obj.getData().equals(nodeToWrite);
             }
@@ -235,7 +235,7 @@ public class TransactionProxyTest {
                     return false;
                 }
 
-                MergeData obj = MergeData.fromSerializable(argument, schemaContext);
+                MergeData obj = MergeData.fromSerializable(argument);
                 return obj.getPath().equals(TestModel.TEST_PATH) &&
                        obj.getData().equals(nodeToWrite);
             }

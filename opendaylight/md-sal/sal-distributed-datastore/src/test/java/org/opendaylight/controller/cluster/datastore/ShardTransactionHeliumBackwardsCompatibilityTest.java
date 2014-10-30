@@ -7,6 +7,12 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
+import akka.actor.PoisonPill;
+import akka.actor.Props;
+import akka.dispatch.Dispatchers;
+import akka.testkit.TestActorRef;
 import java.util.Collections;
 import org.junit.Assert;
 import org.junit.Test;
@@ -27,12 +33,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.duration.FiniteDuration;
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.PoisonPill;
-import akka.actor.Props;
-import akka.dispatch.Dispatchers;
-import akka.testkit.TestActorRef;
 
 /**
  * Tests backwards compatibility support from Helium-1 to Helium.
@@ -78,7 +78,7 @@ public class ShardTransactionHeliumBackwardsCompatibilityTest extends AbstractAc
             // Write data to the Tx
 
             txActor.tell(new WriteData(TestModel.TEST_PATH,
-                    ImmutableNodes.containerNode(TestModel.TEST_QNAME), schemaContext), getRef());
+                    ImmutableNodes.containerNode(TestModel.TEST_QNAME)), getRef());
 
             expectMsgClass(duration, WriteDataReply.class);
 
@@ -151,7 +151,7 @@ public class ShardTransactionHeliumBackwardsCompatibilityTest extends AbstractAc
             // Write data to the Tx
 
             txActor.tell(new WriteData(TestModel.TEST_PATH,
-                    ImmutableNodes.containerNode(TestModel.TEST_QNAME), schemaContext), getRef());
+                    ImmutableNodes.containerNode(TestModel.TEST_QNAME)), getRef());
 
             expectMsgClass(duration, WriteDataReply.class);
 
