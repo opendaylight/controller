@@ -11,29 +11,25 @@
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import org.opendaylight.controller.cluster.datastore.node.utils.QNameFactory;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.AugmentationNode;
-import org.opendaylight.yangtools.yang.data.api.schema.ChoiceNode;
-import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
-import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
-import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
-import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.api.schema.OrderedMapNode;
-import org.opendaylight.yangtools.yang.data.api.schema.UnkeyedListEntryNode;
-import org.opendaylight.yangtools.yang.data.api.schema.UnkeyedListNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeAttrBuilder;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.ListNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeAttrBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeContainerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,141 +55,135 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
 
     private static final String REVISION_ARG = "?revision=";
 
-    private final DataInputStream reader;
+    private final DataInput input;
 
     private final Map<Integer, String> codedStringMap = new HashMap<>();
 
     private QName lastLeafSetQName;
 
+    private NormalizedNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier,
+                                      Object, LeafNode<Object>> leafBuilder;
+
+    private NormalizedNodeAttrBuilder<NodeWithValue, Object,
+                                      LeafSetEntryNode<Object>> leafSetEntryBuilder;
+
     public NormalizedNodeInputStreamReader(InputStream stream) throws IOException {
         Preconditions.checkNotNull(stream);
-        reader = new DataInputStream(stream);
+        input = new DataInputStream(stream);
+    }
+
+    public NormalizedNodeInputStreamReader(DataInput input) throws IOException {
+        this.input = Preconditions.checkNotNull(input);
     }
 
     @Override
     public NormalizedNode<?, ?> readNormalizedNode() throws IOException {
-        NormalizedNode<?, ?> node = null;
-
         // each node should start with a byte
-        byte nodeType = reader.readByte();
+        byte nodeType = input.readByte();
 
         if(nodeType == NodeTypes.END_NODE) {
             LOG.debug("End node reached. return");
             return null;
         }
-        else if(nodeType == NodeTypes.AUGMENTATION_NODE) {
-            LOG.debug("Reading augmentation node. will create augmentation identifier");
 
-            YangInstanceIdentifier.AugmentationIdentifier identifier =
-                new YangInstanceIdentifier.AugmentationIdentifier(readQNameSet());
-            DataContainerNodeBuilder<YangInstanceIdentifier.AugmentationIdentifier, AugmentationNode> augmentationBuilder =
-                Builders.augmentationBuilder().withNodeIdentifier(identifier);
-            augmentationBuilder = addDataContainerChildren(augmentationBuilder);
-            node = augmentationBuilder.build();
+        switch(nodeType) {
+            case NodeTypes.AUGMENTATION_NODE :
+                YangInstanceIdentifier.AugmentationIdentifier augIdentifier =
+                    new YangInstanceIdentifier.AugmentationIdentifier(readQNameSet());
 
-        } else {
-            if(nodeType == NodeTypes.LEAF_SET_ENTRY_NODE) {
-                LOG.debug("Reading leaf set entry node. Will create NodeWithValue instance identifier");
+                LOG.debug("Reading augmentation node {} ", augIdentifier);
 
-                // Read the object value
+                return addDataContainerChildren(Builders.augmentationBuilder().
+                        withNodeIdentifier(augIdentifier)).build();
+
+            case NodeTypes.LEAF_SET_ENTRY_NODE :
                 Object value = readObject();
+                NodeWithValue leafIdentifier = new NodeWithValue(lastLeafSetQName, value);
 
-                YangInstanceIdentifier.NodeWithValue nodeWithValue = new YangInstanceIdentifier.NodeWithValue(
-                        lastLeafSetQName, value);
-                node =  Builders.leafSetEntryBuilder().withNodeIdentifier(nodeWithValue).
-                        withValue(value).build();
+                LOG.debug("Reading leaf set entry node {}, value {}", leafIdentifier, value);
 
-            } else if(nodeType == NodeTypes.MAP_ENTRY_NODE) {
-                LOG.debug("Reading map entry node. Will create node identifier with predicates.");
+                return leafSetEntryBuilder().withNodeIdentifier(leafIdentifier).withValue(value).build();
 
-                QName qName = readQName();
-                YangInstanceIdentifier.NodeIdentifierWithPredicates nodeIdentifier =
-                    new YangInstanceIdentifier.NodeIdentifierWithPredicates(qName, readKeyValueMap());
-                DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> mapEntryBuilder
-                    = Builders.mapEntryBuilder().withNodeIdentifier(nodeIdentifier);
+            case NodeTypes.MAP_ENTRY_NODE :
+                NodeIdentifierWithPredicates entryIdentifier = new NodeIdentifierWithPredicates(
+                        readQName(), readKeyValueMap());
 
-                mapEntryBuilder = (DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifierWithPredicates,
-                    MapEntryNode>)addDataContainerChildren(mapEntryBuilder);
-                node = mapEntryBuilder.build();
+                LOG.debug("Reading map entry node {} ", entryIdentifier);
 
-            } else {
-                LOG.debug("Creating standard node identifier. ");
+                return addDataContainerChildren(Builders.mapEntryBuilder().
+                        withNodeIdentifier(entryIdentifier)).build();
 
-                QName qName = readQName();
-                YangInstanceIdentifier.NodeIdentifier identifier = new YangInstanceIdentifier.NodeIdentifier(qName);
-                node = readNodeIdentifierDependentNode(nodeType, identifier);
-
-            }
+            default :
+                return readNodeIdentifierDependentNode(nodeType, new NodeIdentifier(readQName()));
         }
-        return node;
     }
 
-    private NormalizedNode<?, ?> readNodeIdentifierDependentNode(byte nodeType, YangInstanceIdentifier.NodeIdentifier identifier)
+    private NormalizedNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier,
+                                      Object, LeafNode<Object>> leafBuilder() {
+        if(leafBuilder == null) {
+            leafBuilder = Builders.leafBuilder();
+        }
+
+        return leafBuilder;
+    }
+
+    private NormalizedNodeAttrBuilder<NodeWithValue, Object,
+                                      LeafSetEntryNode<Object>> leafSetEntryBuilder() {
+        if(leafSetEntryBuilder == null) {
+            leafSetEntryBuilder = Builders.leafSetEntryBuilder();
+        }
+
+        return leafSetEntryBuilder;
+    }
+
+    private NormalizedNode<?, ?> readNodeIdentifierDependentNode(byte nodeType, NodeIdentifier identifier)
         throws IOException {
 
         switch(nodeType) {
             case NodeTypes.LEAF_NODE :
-                LOG.debug("Read leaf node");
+                LOG.debug("Read leaf node {}", identifier);
                 // Read the object value
-                NormalizedNodeAttrBuilder leafBuilder = Builders.leafBuilder();
-                return leafBuilder.withNodeIdentifier(identifier).withValue(readObject()).build();
+                return leafBuilder().withNodeIdentifier(identifier).withValue(readObject()).build();
 
             case NodeTypes.ANY_XML_NODE :
                 LOG.debug("Read xml node");
                 Node<?> value = (Node<?>) readObject();
-                return Builders.anyXmlBuilder().withValue(value).build();
+                return Builders.anyXmlBuilder().withValue((Node<?>) readObject()).build();
 
             case NodeTypes.MAP_NODE :
-                LOG.debug("Read map node");
-                CollectionNodeBuilder<MapEntryNode, MapNode> mapBuilder = Builders.mapBuilder().withNodeIdentifier(identifier);
-                mapBuilder = addMapNodeChildren(mapBuilder);
-                return mapBuilder.build();
+                LOG.debug("Read map node {}", identifier);
+                return addDataContainerChildren(Builders.mapBuilder().
+                        withNodeIdentifier(identifier)).build();
 
             case NodeTypes.CHOICE_NODE :
-                LOG.debug("Read choice node");
-                DataContainerNodeBuilder<YangInstanceIdentifier.NodeIdentifier, ChoiceNode> choiceBuilder =
-                    Builders.choiceBuilder().withNodeIdentifier(identifier);
-                choiceBuilder = addDataContainerChildren(choiceBuilder);
-                return choiceBuilder.build();
+                LOG.debug("Read choice node {}", identifier);
+                return addDataContainerChildren(Builders.choiceBuilder().
+                        withNodeIdentifier(identifier)).build();
 
             case NodeTypes.ORDERED_MAP_NODE :
-                LOG.debug("Reading ordered map node");
-                CollectionNodeBuilder<MapEntryNode, OrderedMapNode> orderedMapBuilder =
-                    Builders.orderedMapBuilder().withNodeIdentifier(identifier);
-                orderedMapBuilder = addMapNodeChildren(orderedMapBuilder);
-                return orderedMapBuilder.build();
+                LOG.debug("Reading ordered map node {}", identifier);
+                return addDataContainerChildren(Builders.orderedMapBuilder().
+                        withNodeIdentifier(identifier)).build();
 
             case NodeTypes.UNKEYED_LIST :
-                LOG.debug("Read unkeyed list node");
-                CollectionNodeBuilder<UnkeyedListEntryNode, UnkeyedListNode> unkeyedListBuilder =
-                    Builders.unkeyedListBuilder().withNodeIdentifier(identifier);
-                unkeyedListBuilder = addUnkeyedListChildren(unkeyedListBuilder);
-                return unkeyedListBuilder.build();
+                LOG.debug("Read unkeyed list node {}", identifier);
+                return addDataContainerChildren(Builders.unkeyedListBuilder().
+                        withNodeIdentifier(identifier)).build();
 
             case NodeTypes.UNKEYED_LIST_ITEM :
-                LOG.debug("Read unkeyed list item node");
-                DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, UnkeyedListEntryNode> unkeyedListEntryBuilder
-                    = Builders.unkeyedListEntryBuilder().withNodeIdentifier(identifier);
-
-                unkeyedListEntryBuilder = (DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, UnkeyedListEntryNode>)
-                    addDataContainerChildren(unkeyedListEntryBuilder);
-                return unkeyedListEntryBuilder.build();
+                LOG.debug("Read unkeyed list item node {}", identifier);
+                return addDataContainerChildren(Builders.unkeyedListEntryBuilder().
+                        withNodeIdentifier(identifier)).build();
 
             case NodeTypes.CONTAINER_NODE :
-                LOG.debug("Read container node");
-                DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode> containerBuilder =
-                    Builders.containerBuilder().withNodeIdentifier(identifier);
-
-                containerBuilder = (DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode>)
-                    addDataContainerChildren(containerBuilder);
-                return containerBuilder.build();
+                LOG.debug("Read container node {}", identifier);
+                return addDataContainerChildren(Builders.containerBuilder().
+                        withNodeIdentifier(identifier)).build();
 
             case NodeTypes.LEAF_SET :
-                LOG.debug("Read leaf set node");
-                ListNodeBuilder<Object, LeafSetEntryNode<Object>> leafSetBuilder =
-                    Builders.leafSetBuilder().withNodeIdentifier(identifier);
-                leafSetBuilder = addLeafSetChildren(identifier.getNodeType(), leafSetBuilder);
-                return leafSetBuilder.build();
+                LOG.debug("Read leaf set node {}", identifier);
+                return addLeafSetChildren(identifier.getNodeType(),
+                        Builders.leafSetBuilder().withNodeIdentifier(identifier)).build();
 
             default :
                 return null;
@@ -205,12 +195,13 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
         String localName = readCodedString();
         String namespace = readCodedString();
         String revision = readCodedString();
-        String qName;
+
         // Not using stringbuilder as compiler optimizes string concatenation of +
-        if(revision != null){
-            qName = "(" + namespace+ REVISION_ARG + revision + ")" +localName;
+        String qName;
+        if(!Strings.isNullOrEmpty(revision)) {
+            qName = "(" + namespace + REVISION_ARG + revision + ")" +localName;
         } else {
-            qName = "(" + namespace + ")" +localName;
+            qName = "(" + namespace + ")" + localName;
         }
 
         return QNameFactory.create(qName);
@@ -218,33 +209,33 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
 
 
     private String readCodedString() throws IOException {
-        boolean readFromMap = reader.readBoolean();
-        if(readFromMap) {
-            return codedStringMap.get(reader.readInt());
-        } else {
-            String value = reader.readUTF();
-            if(value != null) {
-                codedStringMap.put(Integer.valueOf(codedStringMap.size()), value);
-            }
+        byte valueType = input.readByte();
+        if(valueType == NormalizedNodeOutputStreamWriter.IS_CODE_VALUE) {
+            return codedStringMap.get(input.readInt());
+        } else if(valueType == NormalizedNodeOutputStreamWriter.IS_STRING_VALUE) {
+            String value = input.readUTF();
+            codedStringMap.put(Integer.valueOf(codedStringMap.size()), value);
             return value;
         }
+
+        return null;
     }
 
     private Set<QName> readQNameSet() throws IOException{
         // Read the children count
-        int count = reader.readInt();
+        int count = input.readInt();
         Set<QName> children = new HashSet<>(count);
-        for(int i = 0; i<count; i++) {
+        for(int i = 0; i < count; i++) {
             children.add(readQName());
         }
         return children;
     }
 
     private Map<QName, Object> readKeyValueMap() throws IOException {
-        int count = reader.readInt();
+        int count = input.readInt();
         Map<QName, Object> keyValueMap = new HashMap<>(count);
 
-        for(int i = 0; i<count; i++) {
+        for(int i = 0; i < count; i++) {
             keyValueMap.put(readQName(), readObject());
         }
 
@@ -252,65 +243,69 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
     }
 
     private Object readObject() throws IOException {
-        byte objectType = reader.readByte();
+        byte objectType = input.readByte();
         switch(objectType) {
             case ValueTypes.BITS_TYPE:
                 return readObjSet();
 
             case ValueTypes.BOOL_TYPE :
-                return reader.readBoolean();
+                return input.readBoolean();
 
             case ValueTypes.BYTE_TYPE :
-                return reader.readByte();
+                return input.readByte();
 
             case ValueTypes.INT_TYPE :
-                return reader.readInt();
+                return input.readInt();
 
             case ValueTypes.LONG_TYPE :
-                return reader.readLong();
+                return input.readLong();
 
             case ValueTypes.QNAME_TYPE :
                 return readQName();
 
             case ValueTypes.SHORT_TYPE :
-                return reader.readShort();
+                return input.readShort();
 
             case ValueTypes.STRING_TYPE :
-                return reader.readUTF();
+                return input.readUTF();
 
             case ValueTypes.BIG_DECIMAL_TYPE :
-                return new BigDecimal(reader.readUTF());
+                return new BigDecimal(input.readUTF());
 
             case ValueTypes.BIG_INTEGER_TYPE :
-                return new BigInteger(reader.readUTF());
+                return new BigInteger(input.readUTF());
 
             case ValueTypes.YANG_IDENTIFIER_TYPE :
-                int size = reader.readInt();
-
-                List<YangInstanceIdentifier.PathArgument> pathArguments = new ArrayList<>(size);
-
-                for(int i=0; i<size; i++) {
-                    pathArguments.add(readPathArgument());
-                }
-                return YangInstanceIdentifier.create(pathArguments);
+            return readYangInstanceIdentifier();
 
             default :
                 return null;
         }
     }
 
+    public YangInstanceIdentifier readYangInstanceIdentifier() throws IOException {
+        int size = input.readInt();
+
+        List<PathArgument> pathArguments = new ArrayList<>(size);
+
+        for(int i = 0; i < size; i++) {
+            pathArguments.add(readPathArgument());
+        }
+        return YangInstanceIdentifier.create(pathArguments);
+    }
+
     private Set<String> readObjSet() throws IOException {
-        int count = reader.readInt();
+        int count = input.readInt();
         Set<String> children = new HashSet<>(count);
-        for(int i = 0; i<count; i++) {
+        for(int i = 0; i < count; i++) {
             children.add(readCodedString());
         }
         return children;
     }
 
-    private YangInstanceIdentifier.PathArgument readPathArgument() throws IOException {
+    private PathArgument readPathArgument() throws IOException {
         // read Type
-        int type = reader.readByte();
+        int type = input.readByte();
 
         switch(type) {
 
@@ -318,22 +313,22 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
                 return new YangInstanceIdentifier.AugmentationIdentifier(readQNameSet());
 
             case PathArgumentTypes.NODE_IDENTIFIER :
-            return new YangInstanceIdentifier.NodeIdentifier(readQName());
+            return new NodeIdentifier(readQName());
 
             case PathArgumentTypes.NODE_IDENTIFIER_WITH_PREDICATES :
-            return new YangInstanceIdentifier.NodeIdentifierWithPredicates(readQName(), readKeyValueMap());
+            return new NodeIdentifierWithPredicates(readQName(), readKeyValueMap());
 
             case PathArgumentTypes.NODE_IDENTIFIER_WITH_VALUE :
-            return new YangInstanceIdentifier.NodeWithValue(readQName(), readObject());
+            return new NodeWithValue(readQName(), readObject());
 
             default :
                 return null;
         }
     }
 
+    @SuppressWarnings("unchecked")
     private ListNodeBuilder<Object, LeafSetEntryNode<Object>> addLeafSetChildren(QName nodeType,
-            ListNodeBuilder<Object, LeafSetEntryNode<Object>> builder)
-        throws IOException {
+            ListNodeBuilder<Object, LeafSetEntryNode<Object>> builder) throws IOException {
 
         LOG.debug("Reading children of leaf set");
 
@@ -348,53 +343,17 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
         return builder;
     }
 
-    private CollectionNodeBuilder<UnkeyedListEntryNode, UnkeyedListNode> addUnkeyedListChildren(
-        CollectionNodeBuilder<UnkeyedListEntryNode, UnkeyedListNode> builder)
-        throws IOException{
-
-        LOG.debug("Reading children of unkeyed list");
-        UnkeyedListEntryNode child = (UnkeyedListEntryNode)readNormalizedNode();
-
-        while(child != null) {
-            builder.withChild(child);
-            child = (UnkeyedListEntryNode)readNormalizedNode();
-        }
-        return builder;
-    }
-
-    private DataContainerNodeBuilder addDataContainerChildren(DataContainerNodeBuilder builder)
-        throws IOException {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private NormalizedNodeContainerBuilder addDataContainerChildren(
+            NormalizedNodeContainerBuilder builder) throws IOException {
         LOG.debug("Reading data container (leaf nodes) nodes");
 
-        DataContainerChild<? extends YangInstanceIdentifier.PathArgument, ?> child =
-            (DataContainerChild<? extends YangInstanceIdentifier.PathArgument, ?>) readNormalizedNode();
+        NormalizedNode<?, ?> child = readNormalizedNode();
 
         while(child != null) {
-            builder.withChild(child);
-            child =
-                (DataContainerChild<? extends YangInstanceIdentifier.PathArgument, ?>) readNormalizedNode();
+            builder.addChild(child);
+            child = readNormalizedNode();
         }
         return builder;
     }
-
-
-    private CollectionNodeBuilder addMapNodeChildren(CollectionNodeBuilder builder)
-        throws IOException {
-        LOG.debug("Reading map node children");
-        MapEntryNode child = (MapEntryNode)readNormalizedNode();
-
-        while(child != null){
-            builder.withChild(child);
-            child = (MapEntryNode)readNormalizedNode();
-        }
-
-        return builder;
-    }
-
-
-    @Override
-    public void close() throws IOException {
-        reader.close();
-    }
-
 }

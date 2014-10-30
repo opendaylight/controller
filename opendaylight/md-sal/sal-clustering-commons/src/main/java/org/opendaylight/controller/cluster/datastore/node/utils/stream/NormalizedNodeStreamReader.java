@@ -11,13 +11,13 @@
 
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
-
+import java.io.IOException;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-import java.io.IOException;
-
-
-public interface NormalizedNodeStreamReader extends AutoCloseable {
+/**
+ * Interface for a class that can read serialized NormalizedNode instances from a stream.
+ */
+public interface NormalizedNodeStreamReader {
 
     NormalizedNode<?, ?> readNormalizedNode() throws IOException;
 }
