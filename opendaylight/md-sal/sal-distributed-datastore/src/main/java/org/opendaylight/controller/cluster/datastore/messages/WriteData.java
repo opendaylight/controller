@@ -14,29 +14,28 @@ import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCo
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class WriteData extends ModifyData {
 
     public static final Class<ShardTransactionMessages.WriteData> SERIALIZABLE_CLASS =
             ShardTransactionMessages.WriteData.class;
 
-    public WriteData(YangInstanceIdentifier path, NormalizedNode<?, ?> data, SchemaContext schemaContext) {
-        super(path, data, schemaContext);
+    public WriteData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
+        super(path, data);
     }
 
     @Override
     public Object toSerializable() {
-        Encoded encoded = new NormalizedNodeToNodeCodec(schemaContext).encode(path, data);
+        Encoded encoded = new NormalizedNodeToNodeCodec(null).encode(path, data);
         return ShardTransactionMessages.WriteData.newBuilder()
                 .setInstanceIdentifierPathArguments(encoded.getEncodedPath())
                 .setNormalizedNode(encoded.getEncodedNode().getNormalizedNode()).build();
     }
 
-    public static WriteData fromSerializable(Object serializable, SchemaContext schemaContext){
+    public static WriteData fromSerializable(Object serializable){
         ShardTransactionMessages.WriteData o = (ShardTransactionMessages.WriteData) serializable;
-        Decoded decoded = new NormalizedNodeToNodeCodec(schemaContext).decode(
+        Decoded decoded = new NormalizedNodeToNodeCodec(null).decode(
                 o.getInstanceIdentifierPathArguments(), o.getNormalizedNode());
-        return new WriteData(decoded.getDecodedPath(), decoded.getDecodedNode(), schemaContext);
+        return new WriteData(decoded.getDecodedPath(), decoded.getDecodedNode());
     }
 }

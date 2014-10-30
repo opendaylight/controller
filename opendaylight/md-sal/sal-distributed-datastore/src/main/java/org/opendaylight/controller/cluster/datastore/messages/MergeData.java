@@ -14,30 +14,28 @@ import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCo
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
-public class MergeData extends ModifyData{
+public class MergeData extends ModifyData {
 
     public static final Class<ShardTransactionMessages.MergeData> SERIALIZABLE_CLASS =
             ShardTransactionMessages.MergeData.class;
 
-    public MergeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data,
-        SchemaContext context) {
-        super(path, data, context);
+    public MergeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
+        super(path, data);
     }
 
     @Override
     public Object toSerializable() {
-        Encoded encoded = new NormalizedNodeToNodeCodec(schemaContext).encode(path, data);
+        Encoded encoded = new NormalizedNodeToNodeCodec(null).encode(path, data);
         return ShardTransactionMessages.MergeData.newBuilder()
             .setInstanceIdentifierPathArguments(encoded.getEncodedPath())
             .setNormalizedNode(encoded.getEncodedNode().getNormalizedNode()).build();
     }
 
-    public static MergeData fromSerializable(Object serializable, SchemaContext schemaContext){
+    public static MergeData fromSerializable(Object serializable){
         ShardTransactionMessages.MergeData o = (ShardTransactionMessages.MergeData) serializable;
-        Decoded decoded = new NormalizedNodeToNodeCodec(schemaContext).decode(
+        Decoded decoded = new NormalizedNodeToNodeCodec(null).decode(
                 o.getInstanceIdentifierPathArguments(), o.getNormalizedNode());
-        return new MergeData(decoded.getDecodedPath(), decoded.getDecodedNode(), schemaContext);
+        return new MergeData(decoded.getDecodedPath(), decoded.getDecodedNode());
     }
 }
