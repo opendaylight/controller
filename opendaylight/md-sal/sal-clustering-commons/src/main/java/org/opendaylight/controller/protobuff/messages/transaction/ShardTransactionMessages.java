@@ -4823,14 +4823,26 @@ public final class ShardTransactionMessages {
     // required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;
     /**
      * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+     *
+     * <pre>
+     * base Helium version
+     * </pre>
      */
     boolean hasInstanceIdentifierPathArguments();
     /**
      * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+     *
+     * <pre>
+     * base Helium version
+     * </pre>
      */
     org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier getInstanceIdentifierPathArguments();
     /**
      * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+     *
+     * <pre>
+     * base Helium version
+     * </pre>
      */
     org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder getInstanceIdentifierPathArgumentsOrBuilder();
 
@@ -4970,18 +4982,30 @@ public final class ShardTransactionMessages {
     private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier instanceIdentifierPathArguments_;
     /**
      * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+     *
+     * <pre>
+     * base Helium version
+     * </pre>
      */
     public boolean hasInstanceIdentifierPathArguments() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
      * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+     *
+     * <pre>
+     * base Helium version
+     * </pre>
      */
     public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier getInstanceIdentifierPathArguments() {
       return instanceIdentifierPathArguments_;
     }
     /**
      * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+     *
+     * <pre>
+     * base Helium version
+     * </pre>
      */
     public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder getInstanceIdentifierPathArgumentsOrBuilder() {
       return instanceIdentifierPathArguments_;
@@ -5309,12 +5333,20 @@ public final class ShardTransactionMessages {
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder> instanceIdentifierPathArgumentsBuilder_;
       /**
        * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       *
+       * <pre>
+       * base Helium version
+       * </pre>
        */
       public boolean hasInstanceIdentifierPathArguments() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
        * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       *
+       * <pre>
+       * base Helium version
+       * </pre>
        */
       public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier getInstanceIdentifierPathArguments() {
         if (instanceIdentifierPathArgumentsBuilder_ == null) {
@@ -5325,6 +5357,10 @@ public final class ShardTransactionMessages {
       }
       /**
        * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       *
+       * <pre>
+       * base Helium version
+       * </pre>
        */
       public Builder setInstanceIdentifierPathArguments(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier value) {
         if (instanceIdentifierPathArgumentsBuilder_ == null) {
@@ -5341,6 +5377,10 @@ public final class ShardTransactionMessages {
       }
       /**
        * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       *
+       * <pre>
+       * base Helium version
+       * </pre>
        */
       public Builder setInstanceIdentifierPathArguments(
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder builderForValue) {
@@ -5355,6 +5395,10 @@ public final class ShardTransactionMessages {
       }
       /**
        * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       *
+       * <pre>
+       * base Helium version
+       * </pre>
        */
       public Builder mergeInstanceIdentifierPathArguments(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier value) {
         if (instanceIdentifierPathArgumentsBuilder_ == null) {
@@ -5374,6 +5418,10 @@ public final class ShardTransactionMessages {
       }
       /**
        * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       *
+       * <pre>
+       * base Helium version
+       * </pre>
        */
       public Builder clearInstanceIdentifierPathArguments() {
         if (instanceIdentifierPathArgumentsBuilder_ == null) {
@@ -5387,6 +5435,10 @@ public final class ShardTransactionMessages {
       }
       /**
        * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       *
+       * <pre>
+       * base Helium version
+       * </pre>
        */
       public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder getInstanceIdentifierPathArgumentsBuilder() {
         bitField0_ |= 0x00000001;
@@ -5395,6 +5447,10 @@ public final class ShardTransactionMessages {
       }
       /**
        * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       *
+       * <pre>
+       * base Helium version
+       * </pre>
        */
       public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder getInstanceIdentifierPathArgumentsOrBuilder() {
         if (instanceIdentifierPathArgumentsBuilder_ != null) {
@@ -5405,6 +5461,10 @@ public final class ShardTransactionMessages {
       }
       /**
        * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       *
+       * <pre>
+       * base Helium version
+       * </pre>
        */
       private com.google.protobuf.SingleFieldBuilder<
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder>
@@ -5860,31 +5920,43 @@ public final class ShardTransactionMessages {
   public interface MergeDataOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
-    // required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;
+    // optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;
     /**
-     * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+     *
+     * <pre>
+     * base Helium version
+     * </pre>
      */
     boolean hasInstanceIdentifierPathArguments();
     /**
-     * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+     *
+     * <pre>
+     * base Helium version
+     * </pre>
      */
     org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier getInstanceIdentifierPathArguments();
     /**
-     * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+     *
+     * <pre>
+     * base Helium version
+     * </pre>
      */
     org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder getInstanceIdentifierPathArgumentsOrBuilder();
 
-    // required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;
+    // optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;
     /**
-     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
      */
     boolean hasNormalizedNode();
     /**
-     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
      */
     org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node getNormalizedNode();
     /**
-     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
      */
     org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder getNormalizedNodeOrBuilder();
   }
@@ -6005,45 +6077,57 @@ public final class ShardTransactionMessages {
     }
 
     private int bitField0_;
-    // required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;
+    // optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;
     public static final int INSTANCEIDENTIFIERPATHARGUMENTS_FIELD_NUMBER = 1;
     private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier instanceIdentifierPathArguments_;
     /**
-     * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+     *
+     * <pre>
+     * base Helium version
+     * </pre>
      */
     public boolean hasInstanceIdentifierPathArguments() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+     *
+     * <pre>
+     * base Helium version
+     * </pre>
      */
     public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier getInstanceIdentifierPathArguments() {
       return instanceIdentifierPathArguments_;
     }
     /**
-     * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+     *
+     * <pre>
+     * base Helium version
+     * </pre>
      */
     public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder getInstanceIdentifierPathArgumentsOrBuilder() {
       return instanceIdentifierPathArguments_;
     }
 
-    // required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;
+    // optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;
     public static final int NORMALIZEDNODE_FIELD_NUMBER = 2;
     private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node normalizedNode_;
     /**
-     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
      */
     public boolean hasNormalizedNode() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
-     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
      */
     public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node getNormalizedNode() {
       return normalizedNode_;
     }
     /**
-     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
      */
     public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder getNormalizedNodeOrBuilder() {
       return normalizedNode_;
@@ -6058,21 +6142,17 @@ public final class ShardTransactionMessages {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
 
-      if (!hasInstanceIdentifierPathArguments()) {
-        memoizedIsInitialized = 0;
-        return false;
+      if (hasInstanceIdentifierPathArguments()) {
+        if (!getInstanceIdentifierPathArguments().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
       }
-      if (!hasNormalizedNode()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!getInstanceIdentifierPathArguments().isInitialized()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!getNormalizedNode().isInitialized()) {
-        memoizedIsInitialized = 0;
-        return false;
+      if (hasNormalizedNode()) {
+        if (!getNormalizedNode().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
       }
       memoizedIsInitialized = 1;
       return true;
@@ -6305,21 +6385,17 @@ public final class ShardTransactionMessages {
       }
 
       public final boolean isInitialized() {
-        if (!hasInstanceIdentifierPathArguments()) {
+        if (hasInstanceIdentifierPathArguments()) {
+          if (!getInstanceIdentifierPathArguments().isInitialized()) {
 
-          return false;
+            return false;
+          }
         }
-        if (!hasNormalizedNode()) {
+        if (hasNormalizedNode()) {
+          if (!getNormalizedNode().isInitialized()) {
 
-          return false;
-        }
-        if (!getInstanceIdentifierPathArguments().isInitialized()) {
-
-          return false;
-        }
-        if (!getNormalizedNode().isInitialized()) {
-
-          return false;
+            return false;
+          }
         }
         return true;
       }
@@ -6343,18 +6419,26 @@ public final class ShardTransactionMessages {
       }
       private int bitField0_;
 
-      // required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;
+      // optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;
       private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier instanceIdentifierPathArguments_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder> instanceIdentifierPathArgumentsBuilder_;
       /**
-       * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       *
+       * <pre>
+       * base Helium version
+       * </pre>
        */
       public boolean hasInstanceIdentifierPathArguments() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       *
+       * <pre>
+       * base Helium version
+       * </pre>
        */
       public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier getInstanceIdentifierPathArguments() {
         if (instanceIdentifierPathArgumentsBuilder_ == null) {
@@ -6364,7 +6448,11 @@ public final class ShardTransactionMessages {
         }
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       *
+       * <pre>
+       * base Helium version
+       * </pre>
        */
       public Builder setInstanceIdentifierPathArguments(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier value) {
         if (instanceIdentifierPathArgumentsBuilder_ == null) {
@@ -6380,7 +6468,11 @@ public final class ShardTransactionMessages {
         return this;
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       *
+       * <pre>
+       * base Helium version
+       * </pre>
        */
       public Builder setInstanceIdentifierPathArguments(
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder builderForValue) {
@@ -6394,7 +6486,11 @@ public final class ShardTransactionMessages {
         return this;
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       *
+       * <pre>
+       * base Helium version
+       * </pre>
        */
       public Builder mergeInstanceIdentifierPathArguments(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier value) {
         if (instanceIdentifierPathArgumentsBuilder_ == null) {
@@ -6413,7 +6509,11 @@ public final class ShardTransactionMessages {
         return this;
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       *
+       * <pre>
+       * base Helium version
+       * </pre>
        */
       public Builder clearInstanceIdentifierPathArguments() {
         if (instanceIdentifierPathArgumentsBuilder_ == null) {
@@ -6426,7 +6526,11 @@ public final class ShardTransactionMessages {
         return this;
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       *
+       * <pre>
+       * base Helium version
+       * </pre>
        */
       public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder getInstanceIdentifierPathArgumentsBuilder() {
         bitField0_ |= 0x00000001;
@@ -6434,7 +6538,11 @@ public final class ShardTransactionMessages {
         return getInstanceIdentifierPathArgumentsFieldBuilder().getBuilder();
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       *
+       * <pre>
+       * base Helium version
+       * </pre>
        */
       public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder getInstanceIdentifierPathArgumentsOrBuilder() {
         if (instanceIdentifierPathArgumentsBuilder_ != null) {
@@ -6444,7 +6552,11 @@ public final class ShardTransactionMessages {
         }
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       *
+       * <pre>
+       * base Helium version
+       * </pre>
        */
       private com.google.protobuf.SingleFieldBuilder<
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder>
@@ -6460,18 +6572,18 @@ public final class ShardTransactionMessages {
         return instanceIdentifierPathArgumentsBuilder_;
       }
 
-      // required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;
+      // optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;
       private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder> normalizedNodeBuilder_;
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
       public boolean hasNormalizedNode() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
       public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node getNormalizedNode() {
         if (normalizedNodeBuilder_ == null) {
@@ -6481,7 +6593,7 @@ public final class ShardTransactionMessages {
         }
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
       public Builder setNormalizedNode(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node value) {
         if (normalizedNodeBuilder_ == null) {
@@ -6497,7 +6609,7 @@ public final class ShardTransactionMessages {
         return this;
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
       public Builder setNormalizedNode(
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder builderForValue) {
@@ -6511,7 +6623,7 @@ public final class ShardTransactionMessages {
         return this;
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
       public Builder mergeNormalizedNode(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node value) {
         if (normalizedNodeBuilder_ == null) {
@@ -6530,7 +6642,7 @@ public final class ShardTransactionMessages {
         return this;
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
       public Builder clearNormalizedNode() {
         if (normalizedNodeBuilder_ == null) {
@@ -6543,7 +6655,7 @@ public final class ShardTransactionMessages {
         return this;
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
       public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder getNormalizedNodeBuilder() {
         bitField0_ |= 0x00000002;
@@ -6551,7 +6663,7 @@ public final class ShardTransactionMessages {
         return getNormalizedNodeFieldBuilder().getBuilder();
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
       public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder getNormalizedNodeOrBuilder() {
         if (normalizedNodeBuilder_ != null) {
@@ -6561,7 +6673,7 @@ public final class ShardTransactionMessages {
         }
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder>
@@ -7937,9 +8049,9 @@ public final class ShardTransactionMessages {
       "ormalizedNode\030\002 \002(\0132\'.org.opendaylight.c" +
       "ontroller.mdsal.Node\"\020\n\016WriteDataReply\"\254" +
       "\001\n\tMergeData\022^\n\037instanceIdentifierPathAr" +
-      "guments\030\001 \002(\01325.org.opendaylight.control" +
+      "guments\030\001 \001(\01325.org.opendaylight.control" +
       "ler.mdsal.InstanceIdentifier\022?\n\016normaliz" +
-      "edNode\030\002 \002(\0132\'.org.opendaylight.controll" +
+      "edNode\030\002 \001(\0132\'.org.opendaylight.controll" +
       "er.mdsal.Node\"\020\n\016MergeDataReply\"l\n\nDataE" +
       "xists\022^\n\037instanceIdentifierPathArguments" +
       "\030\001 \002(\01325.org.opendaylight.controller.mds",
