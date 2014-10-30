@@ -63,16 +63,16 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
     private final SchemaContext schemaContext;
     private final ShardStats shardStats;
     private final String transactionID;
-    private final int txnClientVersion;
+    private final int clientTxVersion;
 
     protected ShardTransaction(ActorRef shardActor, SchemaContext schemaContext,
-            ShardStats shardStats, String transactionID, int txnClientVersion) {
+            ShardStats shardStats, String transactionID, int clientTxVersion) {
         super("shard-tx"); //actor name override used for metering. This does not change the "real" actor name
         this.shardActor = shardActor;
         this.schemaContext = schemaContext;
         this.shardStats = shardStats;
         this.transactionID = transactionID;
-        this.txnClientVersion = txnClientVersion;
+        this.clientTxVersion = clientTxVersion;
     }
 
     public static Props props(DOMStoreTransaction transaction, ActorRef shardActor,
@@ -96,8 +96,8 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         return schemaContext;
     }
 
-    protected int getTxnClientVersion() {
-        return txnClientVersion;
+    protected int getClientTxVersion() {
+        return clientTxVersion;
     }
 
     @Override
@@ -124,22 +124,22 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         getSelf().tell(PoisonPill.getInstance(), getSelf());
     }
 
-    protected void readData(DOMStoreReadTransaction transaction, ReadData message, final boolean returnSerialized) {
+    protected void readData(DOMStoreReadTransaction transaction, ReadData message,
+            final boolean returnSerialized) {
         final ActorRef sender = getSender();
         final ActorRef self = getSelf();
         final YangInstanceIdentifier path = message.getPath();
         final CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> future =
                 transaction.read(path);
 
-
         future.addListener(new Runnable() {
             @Override
             public void run() {
                 try {
                     Optional<NormalizedNode<?, ?>> optional = future.checkedGet();
-                    ReadDataReply readDataReply = new ReadDataReply(schemaContext, optional.orNull());
+                    ReadDataReply readDataReply = new ReadDataReply(optional.orNull());
 
-                    sender.tell((returnSerialized ? readDataReply.toSerializable():
+                    sender.tell((returnSerialized ? readDataReply.toSerializable(clientTxVersion):
                         readDataReply), self);
 
                 } catch (Exception e) {
