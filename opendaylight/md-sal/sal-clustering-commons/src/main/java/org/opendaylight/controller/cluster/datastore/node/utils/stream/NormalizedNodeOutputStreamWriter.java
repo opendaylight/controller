@@ -17,7 +17,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -40,17 +40,25 @@ import java.util.Set;
  *
  */
 
-public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWriter{
+public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWriter {
 
     private static final Logger LOG = LoggerFactory.getLogger(NormalizedNodeOutputStreamWriter.class);
 
-    private final DataOutputStream writer;
+    static final byte IS_CODE_VALUE = 1;
+    static final byte IS_STRING_VALUE = 2;
+    static final byte IS_NULL_VALUE = 3;
+
+    private final DataOutput output;
 
     private final Map<String, Integer> stringCodeMap = new HashMap<>();
 
     public NormalizedNodeOutputStreamWriter(OutputStream stream) throws IOException {
         Preconditions.checkNotNull(stream);
-        writer = new DataOutputStream(stream);
+        output = new DataOutputStream(stream);
+    }
+
+    public NormalizedNodeOutputStreamWriter(DataOutput output) throws IOException {
+        this.output = Preconditions.checkNotNull(output);
     }
 
     @Override
@@ -74,7 +82,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
     public void leafSetEntryNode(Object value) throws IOException, IllegalArgumentException {
         LOG.debug("Writing a new leaf set entry node");
 
-        writer.writeByte(NodeTypes.LEAF_SET_ENTRY_NODE);
+        output.writeByte(NodeTypes.LEAF_SET_ENTRY_NODE);
         writeObject(value);
     }
 
@@ -142,7 +150,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
         Preconditions.checkNotNull(identifier, "Node identifier should not be null");
         LOG.debug("Starting a new augmentation node");
 
-        writer.writeByte(NodeTypes.AUGMENTATION_NODE);
+        output.writeByte(NodeTypes.AUGMENTATION_NODE);
         writeQNameSet(identifier.getPossibleChildNames());
     }
 
@@ -160,24 +168,22 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
     public void endNode() throws IOException, IllegalStateException {
         LOG.debug("Ending the node");
 
-        writer.writeByte(NodeTypes.END_NODE);
+        output.writeByte(NodeTypes.END_NODE);
     }
 
     @Override
     public void close() throws IOException {
-        writer.close();
     }
 
     @Override
     public void flush() throws IOException {
-        writer.flush();
     }
 
     private void startNode(final QName qName, byte nodeType) throws IOException {
 
         Preconditions.checkNotNull(qName, "QName of node identifier should not be null.");
         // First write the type of node
-        writer.writeByte(nodeType);
+        output.writeByte(nodeType);
         // Write Start Tag
         writeQName(qName);
     }
@@ -191,22 +197,23 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
 
     private void writeCodedString(String key) throws IOException {
         Integer value = stringCodeMap.get(key);
-
         if(value != null) {
-            writer.writeBoolean(true);
-            writer.writeInt(value);
+            output.writeByte(IS_CODE_VALUE);
+            output.writeInt(value);
         } else {
             if(key != null) {
+                output.writeByte(IS_STRING_VALUE);
                 stringCodeMap.put(key, Integer.valueOf(stringCodeMap.size()));
+                output.writeUTF(key);
+            } else {
+                output.writeByte(IS_NULL_VALUE);
             }
-            writer.writeBoolean(false);
-            writer.writeUTF(key);
         }
     }
 
     private void writeObjSet(Set<?> set) throws IOException {
         if(!set.isEmpty()){
-            writer.writeInt(set.size());
+            output.writeInt(set.size());
             for(Object o : set){
                 if(o instanceof String){
                     writeCodedString(o.toString());
@@ -216,14 +223,14 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
                 }
             }
         } else {
-            writer.writeInt(0);
+            output.writeInt(0);
         }
     }
 
-    private void writeYangInstanceIdentifier(YangInstanceIdentifier identifier) throws IOException {
+    public void writeYangInstanceIdentifier(YangInstanceIdentifier identifier) throws IOException {
         Iterable<YangInstanceIdentifier.PathArgument> pathArguments = identifier.getPathArguments();
         int size = Iterables.size(pathArguments);
-        writer.writeInt(size);
+        output.writeInt(size);
 
         for(YangInstanceIdentifier.PathArgument pathArgument : pathArguments) {
             writePathArgument(pathArgument);
@@ -234,7 +241,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
 
         byte type = PathArgumentTypes.getSerializablePathArgumentType(pathArgument);
 
-        writer.writeByte(type);
+        output.writeByte(type);
 
         switch(type) {
             case PathArgumentTypes.NODE_IDENTIFIER :
@@ -278,7 +285,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
 
     private void writeKeyValueMap(Map<QName, Object> keyValueMap) throws IOException {
         if(keyValueMap != null && !keyValueMap.isEmpty()) {
-            writer.writeInt(keyValueMap.size());
+            output.writeInt(keyValueMap.size());
             Set<QName> qNameSet = keyValueMap.keySet();
 
             for(QName qName : qNameSet) {
@@ -286,47 +293,48 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
                 writeObject(keyValueMap.get(qName));
             }
         } else {
-            writer.writeInt(0);
+            output.writeInt(0);
         }
     }
 
     private void writeQNameSet(Set<QName> children) throws IOException {
         // Write each child's qname separately, if list is empty send count as 0
         if(children != null && !children.isEmpty()) {
-            writer.writeInt(children.size());
+            output.writeInt(children.size());
             for(QName qName : children) {
                 writeQName(qName);
             }
         } else {
             LOG.debug("augmentation node does not have any child");
-            writer.writeInt(0);
+            output.writeInt(0);
         }
     }
 
+    @SuppressWarnings("rawtypes")
     private void writeObject(Object value) throws IOException {
 
         byte type = ValueTypes.getSerializableType(value);
         // Write object type first
-        writer.writeByte(type);
+        output.writeByte(type);
 
         switch(type) {
             case ValueTypes.BOOL_TYPE:
-                writer.writeBoolean((Boolean) value);
+                output.writeBoolean((Boolean) value);
                 break;
             case ValueTypes.QNAME_TYPE:
                 writeQName((QName) value);
                 break;
             case ValueTypes.INT_TYPE:
-                writer.writeInt((Integer) value);
+                output.writeInt((Integer) value);
                 break;
             case ValueTypes.BYTE_TYPE:
-                writer.writeByte((Byte) value);
+                output.writeByte((Byte) value);
                 break;
             case ValueTypes.LONG_TYPE:
-                writer.writeLong((Long) value);
+                output.writeLong((Long) value);
                 break;
             case ValueTypes.SHORT_TYPE:
-                writer.writeShort((Short) value);
+                output.writeShort((Short) value);
                 break;
             case ValueTypes.BITS_TYPE:
                 writeObjSet((Set<?>) value);
@@ -335,7 +343,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
                 writeYangInstanceIdentifier((YangInstanceIdentifier) value);
                 break;
             default:
-                writer.writeUTF(value.toString());
+                output.writeUTF(value.toString());
                 break;
         }
     }
