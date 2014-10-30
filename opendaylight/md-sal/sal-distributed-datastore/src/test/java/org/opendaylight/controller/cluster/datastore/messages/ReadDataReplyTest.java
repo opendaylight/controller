@@ -12,8 +12,6 @@ import java.io.Serializable;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
-import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier;
-import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -21,58 +19,54 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 
 /**
- * Unit tests for WriteData.
+ * Unit tests for ReadDataReply.
  *
  * @author Thomas Pantelis
  */
-public class WriteDataTest {
+public class ReadDataReplyTest {
 
     @Test
     public void testSerialization() {
-        YangInstanceIdentifier path = TestModel.TEST_PATH;
         NormalizedNode<?, ?> data = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
                 new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
                 withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
-        WriteData expected = new WriteData(path, data);
+        ReadDataReply expected = new ReadDataReply(data);
 
         Object serialized = expected.toSerializable(CreateTransaction.CURRENT_VERSION);
-        assertEquals("Serialized type", ExternalizableWriteData.class, serialized.getClass());
+        assertEquals("Serialized type", ExternalizableReadDataReply.class, serialized.getClass());
 
-        WriteData actual = WriteData.fromSerializable(SerializationUtils.clone((Serializable) serialized));
-        assertEquals("getPath", expected.getPath(), actual.getPath());
-        assertEquals("getData", expected.getData(), actual.getData());
+        ReadDataReply actual = ReadDataReply.fromSerializable(SerializationUtils.clone(
+                (Serializable) serialized));
+        assertEquals("getNormalizedNode", expected.getNormalizedNode(), actual.getNormalizedNode());
     }
 
     @Test
     public void testIsSerializedType() {
-        assertEquals("isSerializedType", true, WriteData.isSerializedType(
-                ShardTransactionMessages.WriteData.newBuilder()
-                    .setInstanceIdentifierPathArguments(InstanceIdentifier.getDefaultInstance())
-                    .setNormalizedNode(Node.getDefaultInstance()).build()));
+        assertEquals("isSerializedType", true, ReadDataReply.isSerializedType(
+                ShardTransactionMessages.ReadDataReply.newBuilder().build()));
         assertEquals("isSerializedType", true,
-                WriteData.isSerializedType(new ExternalizableWriteData()));
-        assertEquals("isSerializedType", false, WriteData.isSerializedType(new Object()));
+                ReadDataReply.isSerializedType(new ExternalizableReadDataReply()));
+        assertEquals("isSerializedType", false, ReadDataReply.isSerializedType(new Object()));
     }
 
     /**
-     * Tests backwards compatible serialization/deserialization of a WriteData message with the
-     * base and R1 Helium versions, which used the protobuff WriteData message.
+     * Tests backwards compatible serialization/deserialization of a ReadDataReply message with the
+     * base and R1 Helium versions, which used the protobuff ReadDataReply message.
      */
     @Test
     public void testSerializationWithHeliumR1Version() throws Exception {
-        YangInstanceIdentifier path = TestModel.TEST_PATH;
         NormalizedNode<?, ?> data = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
                 new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
                 withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
-        WriteData expected = new WriteData(path, data);
+        ReadDataReply expected = new ReadDataReply(data);
 
         Object serialized = expected.toSerializable(CreateTransaction.HELIUM_1_VERSION);
-        assertEquals("Serialized type", ShardTransactionMessages.WriteData.class, serialized.getClass());
+        assertEquals("Serialized type", ShardTransactionMessages.ReadDataReply.class, serialized.getClass());
 
-        WriteData actual = WriteData.fromSerializable(SerializationUtils.clone((Serializable) serialized));
-        assertEquals("getPath", expected.getPath(), actual.getPath());
-        assertEquals("getData", expected.getData(), actual.getData());
+        ReadDataReply actual = ReadDataReply.fromSerializable(SerializationUtils.clone(
+                (Serializable) serialized));
+        assertEquals("getNormalizedNode", expected.getNormalizedNode(), actual.getNormalizedNode());
     }
 }
