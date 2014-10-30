@@ -57,26 +57,29 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
  */
 public abstract class ShardTransaction extends AbstractUntypedActorWithMetering {
 
+    protected static final boolean SERIALIZED_REPLY = true;
+
     private final ActorRef shardActor;
     private final SchemaContext schemaContext;
     private final ShardStats shardStats;
     private final String transactionID;
-    protected static final boolean SERIALIZED_REPLY = true;
+    private final int txnClientVersion;
 
     protected ShardTransaction(ActorRef shardActor, SchemaContext schemaContext,
-            ShardStats shardStats, String transactionID) {
+            ShardStats shardStats, String transactionID, int txnClientVersion) {
         super("shard-tx"); //actor name override used for metering. This does not change the "real" actor name
         this.shardActor = shardActor;
         this.schemaContext = schemaContext;
         this.shardStats = shardStats;
         this.transactionID = transactionID;
+        this.txnClientVersion = txnClientVersion;
     }
 
     public static Props props(DOMStoreTransaction transaction, ActorRef shardActor,
             SchemaContext schemaContext,DatastoreContext datastoreContext, ShardStats shardStats,
-            String transactionID) {
+            String transactionID, int txnClientVersion) {
         return Props.create(new ShardTransactionCreator(transaction, shardActor, schemaContext,
-           datastoreContext, shardStats, transactionID));
+           datastoreContext, shardStats, transactionID, txnClientVersion));
     }
 
     protected abstract DOMStoreTransaction getDOMStoreTransaction();
@@ -91,6 +94,10 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
 
     protected SchemaContext getSchemaContext() {
         return schemaContext;
+    }
+
+    protected int getTxnClientVersion() {
+        return txnClientVersion;
     }
 
     @Override
@@ -169,16 +176,18 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         final DatastoreContext datastoreContext;
         final ShardStats shardStats;
         final String transactionID;
+        final int txnClientVersion;
 
         ShardTransactionCreator(DOMStoreTransaction transaction, ActorRef shardActor,
                 SchemaContext schemaContext, DatastoreContext datastoreContext,
-                ShardStats shardStats, String transactionID) {
+                ShardStats shardStats, String transactionID, int txnClientVersion) {
             this.transaction = transaction;
             this.shardActor = shardActor;
             this.shardStats = shardStats;
             this.schemaContext = schemaContext;
             this.datastoreContext = datastoreContext;
             this.transactionID = transactionID;
+            this.txnClientVersion = txnClientVersion;
         }
 
         @Override
@@ -186,13 +195,13 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
             ShardTransaction tx;
             if(transaction instanceof DOMStoreReadWriteTransaction) {
                 tx = new ShardReadWriteTransaction((DOMStoreReadWriteTransaction)transaction,
-                        shardActor, schemaContext, shardStats, transactionID);
+                        shardActor, schemaContext, shardStats, transactionID, txnClientVersion);
             } else if(transaction instanceof DOMStoreReadTransaction) {
                 tx = new ShardReadTransaction((DOMStoreReadTransaction)transaction, shardActor,
-                        schemaContext, shardStats, transactionID);
+                        schemaContext, shardStats, transactionID, txnClientVersion);
             } else {
                 tx = new ShardWriteTransaction((DOMStoreWriteTransaction)transaction,
-                        shardActor, schemaContext, shardStats, transactionID);
+                        shardActor, schemaContext, shardStats, transactionID, txnClientVersion);
             }
 
             tx.getContext().setReceiveTimeout(datastoreContext.getShardTransactionIdleTimeout());

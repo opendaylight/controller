@@ -11,17 +11,17 @@ public final class ThreePhaseCommitCohortMessages {
   public interface CanCommitTransactionOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
-    // required string transactionId = 1;
+    // optional string transactionId = 1;
     /**
-     * <code>required string transactionId = 1;</code>
+     * <code>optional string transactionId = 1;</code>
      */
     boolean hasTransactionId();
     /**
-     * <code>required string transactionId = 1;</code>
+     * <code>optional string transactionId = 1;</code>
      */
     java.lang.String getTransactionId();
     /**
-     * <code>required string transactionId = 1;</code>
+     * <code>optional string transactionId = 1;</code>
      */
     com.google.protobuf.ByteString
         getTransactionIdBytes();
@@ -122,17 +122,17 @@ public final class ThreePhaseCommitCohortMessages {
     }
 
     private int bitField0_;
-    // required string transactionId = 1;
+    // optional string transactionId = 1;
     public static final int TRANSACTIONID_FIELD_NUMBER = 1;
     private java.lang.Object transactionId_;
     /**
-     * <code>required string transactionId = 1;</code>
+     * <code>optional string transactionId = 1;</code>
      */
     public boolean hasTransactionId() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>required string transactionId = 1;</code>
+     * <code>optional string transactionId = 1;</code>
      */
     public java.lang.String getTransactionId() {
       java.lang.Object ref = transactionId_;
@@ -149,7 +149,7 @@ public final class ThreePhaseCommitCohortMessages {
       }
     }
     /**
-     * <code>required string transactionId = 1;</code>
+     * <code>optional string transactionId = 1;</code>
      */
     public com.google.protobuf.ByteString
         getTransactionIdBytes() {
@@ -173,10 +173,6 @@ public final class ThreePhaseCommitCohortMessages {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
 
-      if (!hasTransactionId()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -376,10 +372,6 @@ public final class ThreePhaseCommitCohortMessages {
       }
 
       public final boolean isInitialized() {
-        if (!hasTransactionId()) {
-
-          return false;
-        }
         return true;
       }
 
@@ -402,16 +394,16 @@ public final class ThreePhaseCommitCohortMessages {
       }
       private int bitField0_;
 
-      // required string transactionId = 1;
+      // optional string transactionId = 1;
       private java.lang.Object transactionId_ = "";
       /**
-       * <code>required string transactionId = 1;</code>
+       * <code>optional string transactionId = 1;</code>
        */
       public boolean hasTransactionId() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>required string transactionId = 1;</code>
+       * <code>optional string transactionId = 1;</code>
        */
       public java.lang.String getTransactionId() {
         java.lang.Object ref = transactionId_;
@@ -425,7 +417,7 @@ public final class ThreePhaseCommitCohortMessages {
         }
       }
       /**
-       * <code>required string transactionId = 1;</code>
+       * <code>optional string transactionId = 1;</code>
        */
       public com.google.protobuf.ByteString
           getTransactionIdBytes() {
@@ -441,7 +433,7 @@ public final class ThreePhaseCommitCohortMessages {
         }
       }
       /**
-       * <code>required string transactionId = 1;</code>
+       * <code>optional string transactionId = 1;</code>
        */
       public Builder setTransactionId(
           java.lang.String value) {
@@ -454,7 +446,7 @@ public final class ThreePhaseCommitCohortMessages {
         return this;
       }
       /**
-       * <code>required string transactionId = 1;</code>
+       * <code>optional string transactionId = 1;</code>
        */
       public Builder clearTransactionId() {
         bitField0_ = (bitField0_ & ~0x00000001);
@@ -463,7 +455,7 @@ public final class ThreePhaseCommitCohortMessages {
         return this;
       }
       /**
-       * <code>required string transactionId = 1;</code>
+       * <code>optional string transactionId = 1;</code>
        */
       public Builder setTransactionIdBytes(
           com.google.protobuf.ByteString value) {
@@ -894,17 +886,17 @@ public final class ThreePhaseCommitCohortMessages {
   public interface AbortTransactionOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
-    // required string transactionId = 1;
+    // optional string transactionId = 1;
     /**
-     * <code>required string transactionId = 1;</code>
+     * <code>optional string transactionId = 1;</code>
      */
     boolean hasTransactionId();
     /**
-     * <code>required string transactionId = 1;</code>
+     * <code>optional string transactionId = 1;</code>
      */
     java.lang.String getTransactionId();
     /**
-     * <code>required string transactionId = 1;</code>
+     * <code>optional string transactionId = 1;</code>
      */
     com.google.protobuf.ByteString
         getTransactionIdBytes();
@@ -1005,17 +997,17 @@ public final class ThreePhaseCommitCohortMessages {
     }
 
     private int bitField0_;
-    // required string transactionId = 1;
+    // optional string transactionId = 1;
     public static final int TRANSACTIONID_FIELD_NUMBER = 1;
     private java.lang.Object transactionId_;
     /**
-     * <code>required string transactionId = 1;</code>
+     * <code>optional string transactionId = 1;</code>
      */
     public boolean hasTransactionId() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>required string transactionId = 1;</code>
+     * <code>optional string transactionId = 1;</code>
      */
     public java.lang.String getTransactionId() {
       java.lang.Object ref = transactionId_;
@@ -1032,7 +1024,7 @@ public final class ThreePhaseCommitCohortMessages {
       }
     }
     /**
-     * <code>required string transactionId = 1;</code>
+     * <code>optional string transactionId = 1;</code>
      */
     public com.google.protobuf.ByteString
         getTransactionIdBytes() {
@@ -1056,10 +1048,6 @@ public final class ThreePhaseCommitCohortMessages {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
 
-      if (!hasTransactionId()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -1259,10 +1247,6 @@ public final class ThreePhaseCommitCohortMessages {
       }
 
       public final boolean isInitialized() {
-        if (!hasTransactionId()) {
-
-          return false;
-        }
         return true;
       }
 
@@ -1285,16 +1269,16 @@ public final class ThreePhaseCommitCohortMessages {
       }
       private int bitField0_;
 
-      // required string transactionId = 1;
+      // optional string transactionId = 1;
       private java.lang.Object transactionId_ = "";
       /**
-       * <code>required string transactionId = 1;</code>
+       * <code>optional string transactionId = 1;</code>
        */
       public boolean hasTransactionId() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>required string transactionId = 1;</code>
+       * <code>optional string transactionId = 1;</code>
        */
       public java.lang.String getTransactionId() {
         java.lang.Object ref = transactionId_;
@@ -1308,7 +1292,7 @@ public final class ThreePhaseCommitCohortMessages {
         }
       }
       /**
-       * <code>required string transactionId = 1;</code>
+       * <code>optional string transactionId = 1;</code>
        */
       public com.google.protobuf.ByteString
           getTransactionIdBytes() {
@@ -1324,7 +1308,7 @@ public final class ThreePhaseCommitCohortMessages {
         }
       }
       /**
-       * <code>required string transactionId = 1;</code>
+       * <code>optional string transactionId = 1;</code>
        */
       public Builder setTransactionId(
           java.lang.String value) {
@@ -1337,7 +1321,7 @@ public final class ThreePhaseCommitCohortMessages {
         return this;
       }
       /**
-       * <code>required string transactionId = 1;</code>
+       * <code>optional string transactionId = 1;</code>
        */
       public Builder clearTransactionId() {
         bitField0_ = (bitField0_ & ~0x00000001);
@@ -1346,7 +1330,7 @@ public final class ThreePhaseCommitCohortMessages {
         return this;
       }
       /**
-       * <code>required string transactionId = 1;</code>
+       * <code>optional string transactionId = 1;</code>
        */
       public Builder setTransactionIdBytes(
           com.google.protobuf.ByteString value) {
@@ -1682,17 +1666,17 @@ public final class ThreePhaseCommitCohortMessages {
   public interface CommitTransactionOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
-    // required string transactionId = 1;
+    // optional string transactionId = 1;
     /**
-     * <code>required string transactionId = 1;</code>
+     * <code>optional string transactionId = 1;</code>
      */
     boolean hasTransactionId();
     /**
-     * <code>required string transactionId = 1;</code>
+     * <code>optional string transactionId = 1;</code>
      */
     java.lang.String getTransactionId();
     /**
-     * <code>required string transactionId = 1;</code>
+     * <code>optional string transactionId = 1;</code>
      */
     com.google.protobuf.ByteString
         getTransactionIdBytes();
@@ -1793,17 +1777,17 @@ public final class ThreePhaseCommitCohortMessages {
     }
 
     private int bitField0_;
-    // required string transactionId = 1;
+    // optional string transactionId = 1;
     public static final int TRANSACTIONID_FIELD_NUMBER = 1;
     private java.lang.Object transactionId_;
     /**
-     * <code>required string transactionId = 1;</code>
+     * <code>optional string transactionId = 1;</code>
      */
     public boolean hasTransactionId() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>required string transactionId = 1;</code>
+     * <code>optional string transactionId = 1;</code>
      */
     public java.lang.String getTransactionId() {
       java.lang.Object ref = transactionId_;
@@ -1820,7 +1804,7 @@ public final class ThreePhaseCommitCohortMessages {
       }
     }
     /**
-     * <code>required string transactionId = 1;</code>
+     * <code>optional string transactionId = 1;</code>
      */
     public com.google.protobuf.ByteString
         getTransactionIdBytes() {
@@ -1844,10 +1828,6 @@ public final class ThreePhaseCommitCohortMessages {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
 
-      if (!hasTransactionId()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -2047,10 +2027,6 @@ public final class ThreePhaseCommitCohortMessages {
       }
 
       public final boolean isInitialized() {
-        if (!hasTransactionId()) {
-
-          return false;
-        }
         return true;
       }
 
@@ -2073,16 +2049,16 @@ public final class ThreePhaseCommitCohortMessages {
       }
       private int bitField0_;
 
-      // required string transactionId = 1;
+      // optional string transactionId = 1;
       private java.lang.Object transactionId_ = "";
       /**
-       * <code>required string transactionId = 1;</code>
+       * <code>optional string transactionId = 1;</code>
        */
       public boolean hasTransactionId() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>required string transactionId = 1;</code>
+       * <code>optional string transactionId = 1;</code>
        */
       public java.lang.String getTransactionId() {
         java.lang.Object ref = transactionId_;
@@ -2096,7 +2072,7 @@ public final class ThreePhaseCommitCohortMessages {
         }
       }
       /**
-       * <code>required string transactionId = 1;</code>
+       * <code>optional string transactionId = 1;</code>
        */
       public com.google.protobuf.ByteString
           getTransactionIdBytes() {
@@ -2112,7 +2088,7 @@ public final class ThreePhaseCommitCohortMessages {
         }
       }
       /**
-       * <code>required string transactionId = 1;</code>
+       * <code>optional string transactionId = 1;</code>
        */
       public Builder setTransactionId(
           java.lang.String value) {
@@ -2125,7 +2101,7 @@ public final class ThreePhaseCommitCohortMessages {
         return this;
       }
       /**
-       * <code>required string transactionId = 1;</code>
+       * <code>optional string transactionId = 1;</code>
        */
       public Builder clearTransactionId() {
         bitField0_ = (bitField0_ & ~0x00000001);
@@ -2134,7 +2110,7 @@ public final class ThreePhaseCommitCohortMessages {
         return this;
       }
       /**
-       * <code>required string transactionId = 1;</code>
+       * <code>optional string transactionId = 1;</code>
        */
       public Builder setTransactionIdBytes(
           com.google.protobuf.ByteString value) {
@@ -3136,11 +3112,11 @@ public final class ThreePhaseCommitCohortMessages {
     java.lang.String[] descriptorData = {
       "\n\014Cohort.proto\022!org.opendaylight.control" +
       "ler.mdsal\"-\n\024CanCommitTransaction\022\025\n\rtra" +
-      "nsactionId\030\001 \002(\t\".\n\031CanCommitTransaction" +
+      "nsactionId\030\001 \001(\t\".\n\031CanCommitTransaction" +
       "Reply\022\021\n\tcanCommit\030\001 \002(\010\")\n\020AbortTransac" +
-      "tion\022\025\n\rtransactionId\030\001 \002(\t\"\027\n\025AbortTran" +
+      "tion\022\025\n\rtransactionId\030\001 \001(\t\"\027\n\025AbortTran" +
       "sactionReply\"*\n\021CommitTransaction\022\025\n\rtra" +
-      "nsactionId\030\001 \002(\t\"\030\n\026CommitTransactionRep" +
+      "nsactionId\030\001 \001(\t\"\030\n\026CommitTransactionRep" +
       "ly\"\026\n\024PreCommitTransaction\"\033\n\031PreCommitT" +
       "ransactionReplyBZ\n8org.opendaylight.cont" +
       "roller.protobuff.messages.cohort3pcB\036Thr",
