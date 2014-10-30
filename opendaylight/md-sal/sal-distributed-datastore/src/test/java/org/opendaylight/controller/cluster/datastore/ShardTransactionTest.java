@@ -4,6 +4,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import akka.actor.ActorRef;
+import akka.actor.Props;
+import akka.actor.Terminated;
+import akka.testkit.JavaTestKit;
+import akka.testkit.TestActorRef;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import org.junit.BeforeClass;
@@ -19,6 +26,9 @@ import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.DataExistsReply;
 import org.opendaylight.controller.cluster.datastore.messages.DeleteData;
 import org.opendaylight.controller.cluster.datastore.messages.DeleteDataReply;
+import org.opendaylight.controller.cluster.datastore.messages.ExternalizableMergeData;
+import org.opendaylight.controller.cluster.datastore.messages.ExternalizableReadDataReply;
+import org.opendaylight.controller.cluster.datastore.messages.ExternalizableWriteData;
 import org.opendaylight.controller.cluster.datastore.messages.MergeData;
 import org.opendaylight.controller.cluster.datastore.messages.MergeDataReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
@@ -32,6 +42,8 @@ import org.opendaylight.controller.cluster.datastore.modification.DeleteModifica
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
+import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
+import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec.Encoded;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
@@ -39,13 +51,6 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.duration.Duration;
-import akka.actor.ActorRef;
-import akka.actor.Props;
-import akka.actor.Terminated;
-import akka.testkit.JavaTestKit;
-import akka.testkit.TestActorRef;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
 
 public class ShardTransactionTest extends AbstractActorTest {
     private static ListeningExecutorService storeExecutor =
@@ -96,12 +101,10 @@ public class ShardTransactionTest extends AbstractActorTest {
             transaction.tell(new ReadData(YangInstanceIdentifier.builder().build()).toSerializable(),
                 getRef());
 
-            ShardTransactionMessages.ReadDataReply replySerialized =
+            ExternalizableReadDataReply replySerialized =
                 expectMsgClass(duration("5 seconds"), ReadDataReply.SERIALIZABLE_CLASS);
 
-            assertNotNull(ReadDataReply.fromSerializable(
-                testSchemaContext,YangInstanceIdentifier.builder().build(), replySerialized)
-                .getNormalizedNode());
+            assertNotNull(ReadDataReply.fromSerializable(replySerialized).getNormalizedNode());
 
             // unserialized read
             transaction.tell(new ReadData(YangInstanceIdentifier.builder().build()),getRef());
@@ -135,11 +138,10 @@ public class ShardTransactionTest extends AbstractActorTest {
             // serialized read
             transaction.tell(new ReadData(TestModel.TEST_PATH).toSerializable(), getRef());
 
-            ShardTransactionMessages.ReadDataReply replySerialized =
-                expectMsgClass(duration("5 seconds"), ReadDataReply.SERIALIZABLE_CLASS);
+            ExternalizableReadDataReply replySerialized =
+                    expectMsgClass(duration("5 seconds"), ReadDataReply.SERIALIZABLE_CLASS);
 
-            assertTrue(ReadDataReply.fromSerializable(
-                testSchemaContext, TestModel.TEST_PATH, replySerialized).getNormalizedNode() == null);
+            assertTrue(ReadDataReply.fromSerializable(replySerialized).getNormalizedNode() == null);
 
             // unserialized read
             transaction.tell(new ReadData(TestModel.TEST_PATH),getRef());
@@ -147,6 +149,26 @@ public class ShardTransactionTest extends AbstractActorTest {
             ReadDataReply reply = expectMsgClass(duration("5 seconds"), ReadDataReply.class);
 
             assertTrue(reply.getNormalizedNode() == null);
+        }};
+    }
+
+    @Test
+    public void testOnReceiveReadDataHeliumR1() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            final ActorRef shard = createShard();
+            Props props = ShardTransaction.props(store.newReadOnlyTransaction(), shard,
+                    testSchemaContext, datastoreContext, shardStats, "txn",
+                    CreateTransaction.HELIUM_1_VERSION);
+
+            ActorRef transaction = getSystem().actorOf(props, "testOnReceiveReadDataHeliumR1");
+
+            transaction.tell(new ReadData(YangInstanceIdentifier.builder().build()).toSerializable(),
+                    getRef());
+
+            ShardTransactionMessages.ReadDataReply replySerialized =
+                    expectMsgClass(duration("5 seconds"), ShardTransactionMessages.ReadDataReply.class);
+
+            assertNotNull(ReadDataReply.fromSerializable(replySerialized).getNormalizedNode());
         }};
     }
 
@@ -239,23 +261,45 @@ public class ShardTransactionTest extends AbstractActorTest {
             final Props props = ShardTransaction.props(store.newWriteOnlyTransaction(), shard,
                     testSchemaContext, datastoreContext, shardStats, "txn",
                     CreateTransaction.CURRENT_VERSION);
-            final ActorRef transaction = getSystem().actorOf(props, "testWriteData");
+            final ActorRef transaction = getSystem().actorOf(props, "testOnReceiveWriteData");
 
-            transaction.tell(new WriteData(TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME), TestModel.createTestContext()).toSerializable(),
-                getRef());
+            transaction.tell(new ExternalizableWriteData(TestModel.TEST_PATH,
+                    ImmutableNodes.containerNode(TestModel.TEST_QNAME),
+                    CreateTransaction.CURRENT_VERSION), getRef());
 
             expectMsgClass(duration("5 seconds"), ShardTransactionMessages.WriteDataReply.class);
 
             assertModification(transaction, WriteModification.class);
 
-            //unserialized write
+            // unserialized write
             transaction.tell(new WriteData(TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME),
-                TestModel.createTestContext()),
+                ImmutableNodes.containerNode(TestModel.TEST_QNAME)),
                 getRef());
 
             expectMsgClass(duration("5 seconds"), WriteDataReply.class);
+        }};
+    }
+
+    @Test
+    public void testOnReceiveHeliumR1WriteData() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            final ActorRef shard = createShard();
+            final Props props = ShardTransaction.props(store.newWriteOnlyTransaction(), shard,
+                    testSchemaContext, datastoreContext, shardStats, "txn",
+                    CreateTransaction.HELIUM_1_VERSION);
+            final ActorRef transaction = getSystem().actorOf(props, "testOnReceiveHeliumR1WriteData");
+
+            Encoded encoded = new NormalizedNodeToNodeCodec(null).encode(TestModel.TEST_PATH,
+                    ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+            ShardTransactionMessages.WriteData serialized = ShardTransactionMessages.WriteData.newBuilder()
+                    .setInstanceIdentifierPathArguments(encoded.getEncodedPath())
+                    .setNormalizedNode(encoded.getEncodedNode().getNormalizedNode()).build();
+
+            transaction.tell(serialized, getRef());
+
+            expectMsgClass(duration("5 seconds"), ShardTransactionMessages.WriteDataReply.class);
+
+            assertModification(transaction, WriteModification.class);
         }};
     }
 
@@ -268,9 +312,9 @@ public class ShardTransactionTest extends AbstractActorTest {
                     CreateTransaction.CURRENT_VERSION);
             final ActorRef transaction = getSystem().actorOf(props, "testMergeData");
 
-            transaction.tell(new MergeData(TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME), testSchemaContext).toSerializable(),
-                getRef());
+            transaction.tell(new ExternalizableMergeData(TestModel.TEST_PATH,
+                    ImmutableNodes.containerNode(TestModel.TEST_QNAME),
+                    CreateTransaction.CURRENT_VERSION), getRef());
 
             expectMsgClass(duration("5 seconds"), ShardTransactionMessages.MergeDataReply.class);
 
@@ -278,10 +322,33 @@ public class ShardTransactionTest extends AbstractActorTest {
 
             //unserialized merge
             transaction.tell(new MergeData(TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME), testSchemaContext),
+                ImmutableNodes.containerNode(TestModel.TEST_QNAME)),
                 getRef());
 
             expectMsgClass(duration("5 seconds"), MergeDataReply.class);
+        }};
+    }
+
+    @Test
+    public void testOnReceiveHeliumR1MergeData() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            final ActorRef shard = createShard();
+            final Props props = ShardTransaction.props(store.newWriteOnlyTransaction(), shard,
+                    testSchemaContext, datastoreContext, shardStats, "txn",
+                    CreateTransaction.HELIUM_1_VERSION);
+            final ActorRef transaction = getSystem().actorOf(props, "testOnReceiveHeliumR1MergeData");
+
+            Encoded encoded = new NormalizedNodeToNodeCodec(null).encode(TestModel.TEST_PATH,
+                    ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+            ShardTransactionMessages.MergeData serialized = ShardTransactionMessages.MergeData.newBuilder()
+                    .setInstanceIdentifierPathArguments(encoded.getEncodedPath())
+                    .setNormalizedNode(encoded.getEncodedNode().getNormalizedNode()).build();
+
+            transaction.tell(serialized, getRef());
+
+            expectMsgClass(duration("5 seconds"), ShardTransactionMessages.MergeDataReply.class);
+
+            assertModification(transaction, MergeModification.class);
         }};
     }
 
