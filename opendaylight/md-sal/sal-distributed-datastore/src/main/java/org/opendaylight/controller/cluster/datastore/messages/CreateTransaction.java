@@ -17,7 +17,8 @@ public class CreateTransaction implements SerializableMessage {
             ShardTransactionMessages.CreateTransaction.class;
 
     public static final int HELIUM_1_VERSION = 1;
-    public static final int CURRENT_VERSION = HELIUM_1_VERSION;
+    public static final int HELIUM_2_VERSION = 2;
+    public static final int CURRENT_VERSION = HELIUM_2_VERSION;
 
     private final String transactionId;
     private final int transactionType;

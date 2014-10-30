@@ -8,14 +8,6 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
-import org.opendaylight.controller.cluster.datastore.util.InstanceIdentifierUtils;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
-import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
-import org.opendaylight.controller.protobuff.messages.datachange.notification.DataChangeListenerMessages;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,36 +15,38 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
+import org.opendaylight.controller.cluster.datastore.util.InstanceIdentifierUtils;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent;
+import org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent.Builder;
+import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
+import org.opendaylight.controller.protobuff.messages.datachange.notification.DataChangeListenerMessages;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class DataChanged implements SerializableMessage {
     public static final Class<DataChangeListenerMessages.DataChanged> SERIALIZABLE_CLASS =
         DataChangeListenerMessages.DataChanged.class;
 
-    final private SchemaContext schemaContext;
-    private final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>>
-        change;
+    private final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change;
 
-
-
-    public DataChanged(SchemaContext schemaContext,
-        AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
+    public DataChanged(AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
         this.change = change;
-        this.schemaContext = schemaContext;
     }
-
 
     public AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> getChange() {
         return change;
     }
 
-
     private NormalizedNodeMessages.Node convertToNodeTree(
         NormalizedNode<?, ?> normalizedNode) {
 
-        return new NormalizedNodeToNodeCodec(schemaContext)
+        return new NormalizedNodeToNodeCodec(null)
             .encode(normalizedNode)
             .getNormalizedNode();
-
     }
 
     private Iterable<NormalizedNodeMessages.InstanceIdentifier> convertToRemovePaths(
@@ -67,13 +61,12 @@ public class DataChanged implements SerializableMessage {
                 return removedPathInstanceIds.iterator();
             }
         };
-
     }
 
     private NormalizedNodeMessages.NodeMap convertToNodeMap(
         Map<YangInstanceIdentifier, NormalizedNode<?, ?>> data) {
         NormalizedNodeToNodeCodec normalizedNodeToNodeCodec =
-            new NormalizedNodeToNodeCodec(schemaContext);
+            new NormalizedNodeToNodeCodec(null);
         NormalizedNodeMessages.NodeMap.Builder nodeMapBuilder =
             NormalizedNodeMessages.NodeMap.newBuilder();
         NormalizedNodeMessages.NodeMapEntry.Builder builder =
@@ -107,11 +100,12 @@ public class DataChanged implements SerializableMessage {
             .build();
     }
 
-    public static DataChanged fromSerialize(SchemaContext sc, Object message,
-        YangInstanceIdentifier pathId) {
+    public static DataChanged fromSerializable(Object message) {
+        Builder builder = DOMImmutableDataChangeEvent.builder(DataChangeScope.SUBTREE);
+
         DataChangeListenerMessages.DataChanged dataChanged =
             (DataChangeListenerMessages.DataChanged) message;
-        DataChangedEvent event = new DataChangedEvent(sc);
+        DataChangedEvent event = new DataChangedEvent(null);
         if (dataChanged.getCreatedData() != null && dataChanged.getCreatedData()
             .isInitialized()) {
             event.setCreatedData(dataChanged.getCreatedData());
@@ -128,12 +122,12 @@ public class DataChanged implements SerializableMessage {
 
         if (dataChanged.getOriginalSubTree() != null && dataChanged
             .getOriginalSubTree().isInitialized()) {
-            event.setOriginalSubtree(dataChanged.getOriginalSubTree(), pathId);
+            event.setOriginalSubtree(dataChanged.getOriginalSubTree());
         }
 
         if (dataChanged.getUpdatedSubTree() != null && dataChanged
             .getUpdatedSubTree().isInitialized()) {
-            event.setUpdatedSubtree(dataChanged.getOriginalSubTree(), pathId);
+            event.setUpdatedSubtree(dataChanged.getUpdatedSubTree());
         }
 
         if (dataChanged.getRemovedPathsList() != null && !dataChanged
@@ -141,8 +135,7 @@ public class DataChanged implements SerializableMessage {
             event.setRemovedPaths(dataChanged.getRemovedPathsList());
         }
 
-        return new DataChanged(sc, event);
-
+        return new DataChanged(event);
     }
 
     static class DataChangedEvent implements
@@ -237,8 +230,7 @@ public class DataChanged implements SerializableMessage {
             return originalSubTree;
         }
 
-        DataChangedEvent setOriginalSubtree(NormalizedNodeMessages.Node node,
-            YangInstanceIdentifier instanceIdentifierPath) {
+        DataChangedEvent setOriginalSubtree(NormalizedNodeMessages.Node node) {
             originalSubTree = nodeCodec.decode(node);
             return this;
         }
@@ -248,15 +240,9 @@ public class DataChanged implements SerializableMessage {
             return updatedSubTree;
         }
 
-        DataChangedEvent setUpdatedSubtree(NormalizedNodeMessages.Node node,
-            YangInstanceIdentifier instanceIdentifierPath) {
+        DataChangedEvent setUpdatedSubtree(NormalizedNodeMessages.Node node) {
             updatedSubTree = nodeCodec.decode(node);
             return this;
         }
-
-
     }
-
-
-
 }
