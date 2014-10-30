@@ -8,29 +8,18 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.Cancellable;
-import akka.actor.PoisonPill;
-import akka.actor.Props;
-import akka.event.Logging;
-import akka.event.LoggingAdapter;
-import akka.japi.Creator;
-import akka.persistence.RecoveryFailure;
-import akka.serialization.Serialization;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
 import org.opendaylight.controller.cluster.common.actor.MeteringBehavior;
 import org.opendaylight.controller.cluster.datastore.ShardCommitCoordinator.CohortEntry;
+import org.opendaylight.controller.cluster.datastore.compat.BackwardsCompatibleThreePhaseCommitCohort;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardTransactionIdentifier;
@@ -76,14 +65,25 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
-
-import javax.annotation.Nonnull;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
+import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
+import akka.actor.Cancellable;
+import akka.actor.PoisonPill;
+import akka.actor.Props;
+import akka.event.Logging;
+import akka.event.LoggingAdapter;
+import akka.japi.Creator;
+import akka.persistence.RecoveryFailure;
+import akka.serialization.Serialization;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 /**
  * A Shard represents a portion of the logical data tree <br/>
@@ -92,6 +92,8 @@ import java.util.concurrent.TimeUnit;
  * </p>
  */
 public class Shard extends RaftActor {
+
+    private static final int HELIUM_1_TX_VERSION = 1;
 
     private static final Object COMMIT_TRANSACTION_REPLY = new CommitTransactionReply().toSerializable();
 
@@ -374,7 +376,8 @@ public class Shard extends RaftActor {
     }
 
     private void handleForwardedReadyTransaction(ForwardedReadyTransaction ready) {
-        LOG.debug("Readying transaction {}", ready.getTransactionID());
+        LOG.debug("Readying transaction {}, client version {}", ready.getTransactionID(),
+                ready.getTxnClientVersion());
 
         // This message is forwarded by the ShardTransaction on ready. We cache the cohort in the
         // commitCoordinator in preparation for the subsequent three phase commit initiated by
@@ -382,12 +385,22 @@ public class Shard extends RaftActor {
         commitCoordinator.transactionReady(ready.getTransactionID(), ready.getCohort(),
                 ready.getModification());
 
-        // Return our actor path as we'll handle the three phase commit.
-        ReadyTransactionReply readyTransactionReply =
-            new ReadyTransactionReply(Serialization.serializedActorPath(self()));
-        getSender().tell(
-            ready.isReturnSerialized() ? readyTransactionReply.toSerializable() : readyTransactionReply,
-            getSelf());
+        // Return our actor path as we'll handle the three phase commit, except if the Tx client
+        // version < 1 (Helium-1 version). This means the Tx was initiated by a base Helium version
+        // node. In that case, the subsequent 3-phase commit messages won't contain the
+        // transactionId so to maintain backwards compatibility, we create a separate cohort actor
+        // to provide the compatible behavior.
+        ActorRef replyActorPath = self();
+        if(ready.getTxnClientVersion() < HELIUM_1_TX_VERSION) {
+            LOG.debug("Creating BackwardsCompatibleThreePhaseCommitCohort");
+            replyActorPath = getContext().actorOf(BackwardsCompatibleThreePhaseCommitCohort.props(
+                    ready.getTransactionID()));
+        }
+
+        ReadyTransactionReply readyTransactionReply = new ReadyTransactionReply(
+                Serialization.serializedActorPath(replyActorPath));
+        getSender().tell(ready.isReturnSerialized() ? readyTransactionReply.toSerializable() :
+                readyTransactionReply, getSelf());
     }
 
     private void handleAbortTransaction(AbortTransaction abort) {
@@ -465,10 +478,8 @@ public class Shard extends RaftActor {
         }
     }
 
-    private ActorRef createTypedTransactionActor(
-        int transactionType,
-        ShardTransactionIdentifier transactionId,
-        String transactionChainId ) {
+    private ActorRef createTypedTransactionActor(int transactionType,
+            ShardTransactionIdentifier transactionId, String transactionChainId, int clientVersion ) {
 
         DOMStoreTransactionFactory factory = store;
 
@@ -492,7 +503,8 @@ public class Shard extends RaftActor {
             return getContext().actorOf(
                 ShardTransaction.props(factory.newReadOnlyTransaction(), getSelf(),
                         schemaContext,datastoreContext, shardMBean,
-                        transactionId.getRemoteTransactionId()), transactionId.toString());
+                        transactionId.getRemoteTransactionId(), clientVersion),
+                        transactionId.toString());
 
         } else if (transactionType == TransactionProxy.TransactionType.READ_WRITE.ordinal()) {
 
@@ -501,7 +513,8 @@ public class Shard extends RaftActor {
             return getContext().actorOf(
                 ShardTransaction.props(factory.newReadWriteTransaction(), getSelf(),
                         schemaContext, datastoreContext, shardMBean,
-                        transactionId.getRemoteTransactionId()), transactionId.toString());
+                        transactionId.getRemoteTransactionId(), clientVersion),
+                        transactionId.toString());
 
 
         } else if (transactionType == TransactionProxy.TransactionType.WRITE_ONLY.ordinal()) {
@@ -511,7 +524,8 @@ public class Shard extends RaftActor {
             return getContext().actorOf(
                 ShardTransaction.props(factory.newWriteOnlyTransaction(), getSelf(),
                         schemaContext, datastoreContext, shardMBean,
-                        transactionId.getRemoteTransactionId()), transactionId.toString());
+                        transactionId.getRemoteTransactionId(), clientVersion),
+                        transactionId.toString());
         } else {
             throw new IllegalArgumentException(
                 "Shard="+name + ":CreateTransaction message has unidentified transaction type="
@@ -521,10 +535,12 @@ public class Shard extends RaftActor {
 
     private void createTransaction(CreateTransaction createTransaction) {
         createTransaction(createTransaction.getTransactionType(),
-            createTransaction.getTransactionId(), createTransaction.getTransactionChainId());
+            createTransaction.getTransactionId(), createTransaction.getTransactionChainId(),
+            createTransaction.getClientVersion());
     }
 
-    private ActorRef createTransaction(int transactionType, String remoteTransactionId, String transactionChainId) {
+    private ActorRef createTransaction(int transactionType, String remoteTransactionId,
+            String transactionChainId, int clientVersion) {
 
         ShardTransactionIdentifier transactionId =
             ShardTransactionIdentifier.builder()
@@ -533,8 +549,8 @@ public class Shard extends RaftActor {
         if(LOG.isDebugEnabled()) {
             LOG.debug("Creating transaction : {} ", transactionId);
         }
-        ActorRef transactionActor =
-            createTypedTransactionActor(transactionType, transactionId, transactionChainId);
+        ActorRef transactionActor = createTypedTransactionActor(transactionType, transactionId,
+                transactionChainId, clientVersion);
 
         getSender()
             .tell(new CreateTransactionReply(
@@ -765,7 +781,8 @@ public class Shard extends RaftActor {
             // so that this actor does not get block building the snapshot
             createSnapshotTransaction = createTransaction(
                 TransactionProxy.TransactionType.READ_ONLY.ordinal(),
-                "createSnapshot" + ++createSnapshotTransactionCounter, "");
+                "createSnapshot" + ++createSnapshotTransactionCounter, "",
+                CreateTransaction.CURRENT_MESSAGE_VERSION);
 
             createSnapshotTransaction.tell(
                 new ReadData(YangInstanceIdentifier.builder().build()).toSerializable(), self());

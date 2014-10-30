@@ -16,6 +16,7 @@ message CreateTransaction{
   required string transactionId = 1;
   required int32  transactionType =2;
   optional string transactionChainId = 3;
+  optional int32 messageVersion = 4;
 }
 
 message CreateTransactionReply{
