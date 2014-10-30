@@ -48,9 +48,9 @@ message ReadDataReply{
 }
 
 message WriteData {
- required InstanceIdentifier instanceIdentifierPathArguments = 1;
-required Node normalizedNode =2;
-
+  // base Helium version
+  required InstanceIdentifier instanceIdentifierPathArguments = 1;
+  required Node normalizedNode = 2;
 }
 
 message WriteDataReply{
@@ -58,9 +58,12 @@ message WriteDataReply{
 }
 
 message MergeData {
- required InstanceIdentifier instanceIdentifierPathArguments = 1;
-required Node normalizedNode =2;
+  // base Helium version
+  optional InstanceIdentifier instanceIdentifierPathArguments = 1;
+  optional Node normalizedNode = 2;
 
+  // Helium-1 version
+  optional bytes serializedNodeAndPath = 3;
 }
 
 message MergeDataReply{

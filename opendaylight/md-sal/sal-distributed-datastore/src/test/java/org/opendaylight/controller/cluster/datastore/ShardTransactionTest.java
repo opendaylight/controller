@@ -232,7 +232,7 @@ public class ShardTransactionTest extends AbstractActorTest {
             final ActorRef transaction = getSystem().actorOf(props, "testWriteData");
 
             transaction.tell(new WriteData(TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME), TestModel.createTestContext()).toSerializable(),
+                ImmutableNodes.containerNode(TestModel.TEST_QNAME)).toSerializable(),
                 getRef());
 
             expectMsgClass(duration("5 seconds"), ShardTransactionMessages.WriteDataReply.class);
@@ -241,8 +241,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
             //unserialized write
             transaction.tell(new WriteData(TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME),
-                TestModel.createTestContext()),
+                ImmutableNodes.containerNode(TestModel.TEST_QNAME)),
                 getRef());
 
             expectMsgClass(duration("5 seconds"), WriteDataReply.class);
@@ -258,7 +257,7 @@ public class ShardTransactionTest extends AbstractActorTest {
             final ActorRef transaction = getSystem().actorOf(props, "testMergeData");
 
             transaction.tell(new MergeData(TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME), testSchemaContext).toSerializable(),
+                ImmutableNodes.containerNode(TestModel.TEST_QNAME)).toSerializable(),
                 getRef());
 
             expectMsgClass(duration("5 seconds"), ShardTransactionMessages.MergeDataReply.class);
@@ -267,7 +266,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
             //unserialized merge
             transaction.tell(new MergeData(TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME), testSchemaContext),
+                ImmutableNodes.containerNode(TestModel.TEST_QNAME)),
                 getRef());
 
             expectMsgClass(duration("5 seconds"), MergeDataReply.class);
