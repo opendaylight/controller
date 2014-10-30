@@ -21,6 +21,14 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
@@ -49,15 +57,6 @@ import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
 import scala.concurrent.duration.FiniteDuration;
-
-import javax.annotation.concurrent.GuardedBy;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * TransactionProxy acts as a proxy for one or more transactions that were created on a remote shard
@@ -748,9 +747,8 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
             // Send the ReadyTransaction message to the Tx actor.
 
-            ReadyTransaction readyTransaction = new ReadyTransaction();
             final Future<Object> replyFuture = actorContext.executeOperationAsync(getActor(),
-                isTxActorLocal ? readyTransaction : readyTransaction.toSerializable());
+                isTxActorLocal ? ReadyTransaction.INSTANCE : ReadyTransaction.SERIALIZED_INSTANCE);
 
             // Combine all the previously recorded put/merge/delete operation reply Futures and the
             // ReadyTransactionReply Future into one Future. If any one fails then the combined
@@ -825,18 +823,18 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         public void mergeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
             LOG.debug("Tx {} mergeData called path = {}", identifier, path);
 
-            MergeData mergeData = new MergeData(path, data, schemaContext);
+            MergeData mergeData = new MergeData(path, data);
             recordedOperationFutures.add(actorContext.executeOperationAsync(getActor(),
-                isTxActorLocal ? mergeData : mergeData.toSerializable()));
+                isTxActorLocal ? mergeData : mergeData.toSerializable(remoteTransactionVersion)));
         }
 
         @Override
         public void writeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
             LOG.debug("Tx {} writeData called path = {}", identifier, path);
 
-            WriteData writeData = new WriteData(path, data, schemaContext);
+            WriteData writeData = new WriteData(path, data);
             recordedOperationFutures.add(actorContext.executeOperationAsync(getActor(),
-                isTxActorLocal ? writeData : writeData.toSerializable()));
+                isTxActorLocal ? writeData : writeData.toSerializable(remoteTransactionVersion)));
         }
 
         @Override

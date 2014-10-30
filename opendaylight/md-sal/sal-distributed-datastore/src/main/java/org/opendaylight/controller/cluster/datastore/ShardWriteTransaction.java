@@ -66,19 +66,19 @@ public class ShardWriteTransaction extends ShardTransaction {
             deleteData(transaction, (DeleteData) message, !SERIALIZED_REPLY);
 
         } else if (message instanceof ReadyTransaction) {
-            readyTransaction(transaction, new ReadyTransaction(), !SERIALIZED_REPLY);
+            readyTransaction(transaction, !SERIALIZED_REPLY);
 
-        } else if(WriteData.SERIALIZABLE_CLASS.equals(message.getClass())) {
-            writeData(transaction, WriteData.fromSerializable(message, getSchemaContext()), SERIALIZED_REPLY);
+        } else if(WriteData.isSerializedType(message)) {
+            writeData(transaction, WriteData.fromSerializable(message), SERIALIZED_REPLY);
 
-        } else if(MergeData.SERIALIZABLE_CLASS.equals(message.getClass())) {
-            mergeData(transaction, MergeData.fromSerializable(message, getSchemaContext()), SERIALIZED_REPLY);
+        } else if(MergeData.isSerializedType(message)) {
+            mergeData(transaction, MergeData.fromSerializable(message), SERIALIZED_REPLY);
 
         } else if(DeleteData.SERIALIZABLE_CLASS.equals(message.getClass())) {
             deleteData(transaction, DeleteData.fromSerializable(message), SERIALIZED_REPLY);
 
         } else if(ReadyTransaction.SERIALIZABLE_CLASS.equals(message.getClass())) {
-            readyTransaction(transaction, new ReadyTransaction(), SERIALIZED_REPLY);
+            readyTransaction(transaction, SERIALIZED_REPLY);
 
         } else if (message instanceof GetCompositedModification) {
             // This is here for testing only
@@ -137,8 +137,7 @@ public class ShardWriteTransaction extends ShardTransaction {
         }
     }
 
-    private void readyTransaction(DOMStoreWriteTransaction transaction, ReadyTransaction message,
-            boolean returnSerialized) {
+    private void readyTransaction(DOMStoreWriteTransaction transaction, boolean returnSerialized) {
         String transactionID = getTransactionID();
 
         LOG.debug("readyTransaction : {}", transactionID);
