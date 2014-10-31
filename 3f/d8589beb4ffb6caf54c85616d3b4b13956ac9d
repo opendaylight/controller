@@ -1,0 +1,8 @@
+Verified+1: jenkins-controller <jenkins-controller@opendaylight.org>
+Code-Review+2: Tony Tkacik <ttkacik@cisco.com>
+Code-Review+1: Martin Bobak <mbobak@cisco.com>
+Submitted-by: Tony Tkacik <ttkacik@cisco.com>
+Submitted-at: Fri, 31 Oct 2014 12:10:28 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/12380
+Project: controller
+Branch: refs/heads/stable/helium
