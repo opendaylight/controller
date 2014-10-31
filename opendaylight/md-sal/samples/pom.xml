@@ -16,7 +16,6 @@
     <module>toaster-consumer</module>
     <module>toaster-provider</module>
     <module>toaster-config</module>
-    <module>l2switch</module>
     <module>clustering-test-app</module>
   </modules>
   <scm>
