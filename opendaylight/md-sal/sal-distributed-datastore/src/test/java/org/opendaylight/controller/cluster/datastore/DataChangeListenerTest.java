@@ -4,6 +4,7 @@ import akka.actor.ActorRef;
 import akka.actor.DeadLetter;
 import akka.actor.Props;
 import akka.testkit.JavaTestKit;
+import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.datastore.messages.DataChanged;
@@ -70,19 +71,25 @@ public class DataChangeListenerTest extends AbstractActorTest {
             final Props props = DataChangeListener.props(mockListener);
             final ActorRef subject = getSystem().actorOf(props, "testDataChangedWithNoSender");
 
-            // Let the DataChangeListener know that notifications should be enabled
-            subject.tell(new EnableNotification(true), ActorRef.noSender());
+            getSystem().eventStream().subscribe(getRef(), DeadLetter.class);
 
             subject.tell(new DataChanged(CompositeModel.createTestContext(), mockChangeEvent),
                     ActorRef.noSender());
 
-            getSystem().eventStream().subscribe(getRef(), DeadLetter.class);
-            new Within(duration("1 seconds")) {
-                @Override
-                protected void run() {
-                    expectNoMsg();
+            // Make sure no DataChangedReply is sent to DeadLetters.
+            while(true) {
+                DeadLetter deadLetter;
+                try {
+                    deadLetter = expectMsgClass(duration("1 seconds"), DeadLetter.class);
+                } catch (AssertionError e) {
+                    // Timed out - got no DeadLetter - this is good
+                    break;
                 }
-            };
+
+                // We may get DeadLetters for other messages we don't care about.
+                Assert.assertFalse("Unexpected DataChangedReply",
+                        deadLetter.message() instanceof DataChangedReply);
+            }
         }};
     }
 }
