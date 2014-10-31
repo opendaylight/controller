@@ -9,6 +9,8 @@
 package org.opendaylight.controller.networkconfig.neutron;
 
 import java.io.Serializable;
+import java.net.InetAddress;
+import java.net.Inet6Address;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -255,16 +257,45 @@ public class NeutronSubnet extends ConfigurationObject implements Serializable, 
      * a new subnet)
      */
     public boolean isValidCIDR() {
-        try {
-            SubnetUtils util = new SubnetUtils(cidr);
-            SubnetInfo info = util.getInfo();
-            if (!info.getNetworkAddress().equals(info.getAddress())) {
+        // fix for Bug 2290 - need to wrap the existing test as
+        // IPv4 because SubnetUtils doesn't support IPv6
+        if (ipVersion == 4) {
+            try {
+                SubnetUtils util = new SubnetUtils(cidr);
+                SubnetInfo info = util.getInfo();
+                if (!info.getNetworkAddress().equals(info.getAddress())) {
+                    return false;
+                }
+            } catch (Exception e) {
                 return false;
             }
-        } catch (Exception e) {
-            return false;
+            return true;
         }
-        return true;
+        if (ipVersion == 6) {
+            // fix for Bug2290 - this is custom code because no classes
+            // with ODL-friendly licenses have been found
+            // extract address (in front of /) and length (after /)
+            String[] parts = cidr.split("/");
+            if (parts.length != 2) {
+                return false;
+            }
+            try {
+                int length = Integer.parseInt(parts[1]);
+                //TODO?: limit check on length
+                // convert to byte array
+                byte[] addrBytes = ((Inet6Address) InetAddress.getByName(parts[0])).getAddress();
+                int i;
+                for (i=length; i<128; i++) { // offset is to ensure proper comparison
+                    if (((((int) addrBytes[i/8]) & 0x000000FF) & (1 << (7-(i%8)))) != 0) {
+                        return(false);
+                    }
+                }
+                return(true);
+            } catch (Exception e) {
+                return(false);
+            }
+        }
+        return false;
     }
 
     /* test to see if the gateway IP specified overlaps with specified
