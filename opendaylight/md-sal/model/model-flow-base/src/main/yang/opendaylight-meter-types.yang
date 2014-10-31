@@ -94,7 +94,7 @@ module opendaylight-meter-types {
                     type uint32;
                 }
                 
-                leaf perc_level {
+                leaf prec_level {
                     description "Number of drop precedence level to add";
                     type uint8;
                 }
