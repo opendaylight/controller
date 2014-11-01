@@ -36,6 +36,23 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_52d107fa",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-01T20:29:40Z",
+      "side": 1,
+      "message": "The words put and offer while conveying the notion of blocking does not quite convey the notion of how the notification will be delivered. I\u0027m wondering if we can find better names for these API. I\u0027ll offer a couple of names publishWithGuaranteedDelivery and publishWithBestEffortDelivery. Now I know these are long names but I\u0027d prefer the names of the API to convey meaning than read the docs.",
+      "revId": "6fc717ee7589ee680a126981a398def0cd70c049",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_d28f5722",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
         "patchSetId": 8
@@ -149,6 +166,40 @@
       "writtenOn": "2014-11-01T16:37:20Z",
       "side": 1,
       "message": "\"List of\" ?",
+      "revId": "6fc717ee7589ee680a126981a398def0cd70c049",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_b2ec13c9",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-01T20:29:40Z",
+      "side": 1,
+      "message": "I find it more natural to have a registration API register for a single notification and have it associated with a single listener. Having a single listener for multiple notification types would probably be an outlier. So, I would like to see an API which takes a single SchemaPath. I don\u0027t mind that being in addition to this API as a sort of helper API.",
+      "revId": "6fc717ee7589ee680a126981a398def0cd70c049",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_72ce8b5c",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-01T20:29:40Z",
+      "side": 1,
+      "message": "What is a DOMService? I can get it from a DOMMountPoint but what is it?",
       "revId": "6fc717ee7589ee680a126981a398def0cd70c049",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
