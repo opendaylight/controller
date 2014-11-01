@@ -2,12 +2,14 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -25,6 +27,7 @@ import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelpe
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionChainClosedException;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
@@ -601,7 +604,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
             // 7. Create a new read Tx from the chain to read the data from the last RW Tx to
             // verify it is visible.
 
-            readTx = txChain.newReadOnlyTransaction();
+            readTx = txChain.newReadWriteTransaction();
             optional = readTx.read(TestModel.OUTER_LIST_PATH).get(5, TimeUnit.SECONDS);
             assertEquals("isPresent", true, optional.isPresent());
             assertEquals("Data node", outerNode, optional.get());
@@ -627,6 +630,42 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
             assertEquals("Data node", outerNode, optional.get());
 
             cleanup(dataStore);
+        }};
+    }
+
+    @Test
+    public void testCreateChainedTransactionWhenPreviousNotReady() throws Throwable {
+        new IntegrationTestKit(getSystem()) {{
+            DistributedDataStore dataStore = setupDistributedDataStore(
+                    "testCreateChainedTransactionWhenPreviousNotReady", "test-1");
+
+            final DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
+
+            DOMStoreWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
+            assertNotNull("newWriteOnlyTransaction returned null", writeTx);
+
+            writeTx.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+
+            // Try to create another Tx of each type - each should fail b/c the previous Tx wasn't
+            // readied.
+
+            assertExceptionOnTxChainCreates(txChain, IllegalStateException.class);
+        }};
+    }
+
+    @Test
+    public void testCreateChainedTransactionAfterClose() throws Throwable {
+        new IntegrationTestKit(getSystem()) {{
+            DistributedDataStore dataStore = setupDistributedDataStore(
+                    "testCreateChainedTransactionAfterClose", "test-1");
+
+            DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
+
+            txChain.close();
+
+            // Try to create another Tx of each type - should fail b/c the previous Tx was closed.
+
+            assertExceptionOnTxChainCreates(txChain, TransactionChainClosedException.class);
         }};
     }
 
@@ -760,6 +799,43 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
 
         void cleanup(DistributedDataStore dataStore) {
             dataStore.getActorContext().getShardManager().tell(PoisonPill.getInstance(), null);
+        }
+
+        void assertExceptionOnCall(Callable<Void> callable, Class<? extends Exception> expType)
+                throws Exception {
+            try {
+                callable.call();
+                fail("Expected " + expType.getSimpleName());
+            } catch(Exception e) {
+                assertEquals("Exception type", expType, e.getClass());
+            }
+        }
+
+        void assertExceptionOnTxChainCreates(final DOMStoreTransactionChain txChain,
+                Class<? extends Exception> expType) throws Exception {
+            assertExceptionOnCall(new Callable<Void>() {
+                @Override
+                public Void call() throws Exception {
+                    txChain.newWriteOnlyTransaction();
+                    return null;
+                }
+            }, expType);
+
+            assertExceptionOnCall(new Callable<Void>() {
+                @Override
+                public Void call() throws Exception {
+                    txChain.newReadWriteTransaction();
+                    return null;
+                }
+            }, expType);
+
+            assertExceptionOnCall(new Callable<Void>() {
+                @Override
+                public Void call() throws Exception {
+                    txChain.newReadOnlyTransaction();
+                    return null;
+                }
+            }, expType);
         }
     }
 
