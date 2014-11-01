@@ -82,10 +82,24 @@ public class TransactionChainProxy implements DOMStoreTransactionChain{
         @Override
         protected Future<Object> sendCreateTransaction(final ActorSelection shard,
                 final Object serializedCreateMessage) {
-            // Check if there are any previous ready Futures. Also make sure the previous ready
-            // Futures aren't for this Tx as deadlock would occur if tried to wait on our own
-            // Futures. This may happen b/c the shard Tx creates are done async so it's possible
-            // for the client to ready this Tx before we've even attempted to create a shard Tx.
+            // Check if there are any previous ready Futures, otherwise let the super class handle it.
+            // The second check is done to ensure the the previous ready Futures aren't for this
+            // Tx instance as deadlock would occur if we tried to wait on our own Futures. This can
+            // occur in this scenario:
+            //
+            //     - the TransactionProxy is created and the client does a put.
+            //
+            //     - the TransactionProxy then attempts to create the shard Tx. However it first
+            //       sends a FindPrimaryShard message to the shard manager to find the local shard
+            //       This call is done async.
+            //
+            //     - the client submits the Tx and the TransactionProxy is readied and we cache
+            //       the ready Futures here.
+            //
+            //     - then the FindPrimaryShard call completes and this method is called to create
+            //       the shard Tx. However the cached Futures were from the ready on this Tx. If we
+            //       tried to wait on them, it would cause a form of deadlock as the ready Future
+            //       would be waiting on the Tx create Future and vice versa.
             if(previousTxReadyFutures == null ||
                     previousTxReadyFutures.getKey().equals(getIdentifier())) {
                 return super.sendCreateTransaction(shard, serializedCreateMessage);

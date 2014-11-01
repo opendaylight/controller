@@ -2,6 +2,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
@@ -627,6 +628,69 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
             assertEquals("Data node", outerNode, optional.get());
 
             cleanup(dataStore);
+        }};
+    }
+
+    @Test(expected=IllegalStateException.class)
+    public void testTransactionChainFailureWithInvalidCreateSequence() throws Throwable {
+        new IntegrationTestKit(getSystem()) {{
+            DistributedDataStore dataStore = setupDistributedDataStore(
+                    "testTransactionChainFailureWithInvalidCreateSequence", "test-1");
+
+            DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
+
+            DOMStoreWriteTransaction writeTx1 = txChain.newWriteOnlyTransaction();
+            assertNotNull("newWriteOnlyTransaction returned null", writeTx1);
+
+            NormalizedNode<?, ?> testNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            writeTx1.write(TestModel.TEST_PATH, testNode);
+
+            DOMStoreThreePhaseCommitCohort txCohort1 = writeTx1.ready();
+
+            // Create a new write Tx from the chain and perform a write.
+
+            TransactionProxy writeTx2 = (TransactionProxy) txChain.newWriteOnlyTransaction();
+            writeTx2.write(TestModel.TEST_PATH, testNode);
+
+            // Busy wait for the shard Tx to be created.
+            waitForShardTxCreated(writeTx2);
+
+            // Create a third Tx, do a write and try to commit it. This should fail b/c the second
+            // Tx wasn't readied.
+
+            TransactionProxy writeTx3 = (TransactionProxy) txChain.newWriteOnlyTransaction();
+            writeTx3.write(TestModel.TEST_PATH, testNode);
+
+            // Busy wait for the shard Tx to be created.
+            waitForShardTxCreated(writeTx3);
+
+            // Commit the first 2 Tx's - should succeed.
+
+            doCommit(txCohort1);
+            doCommit(writeTx2.ready());
+
+            // Try to commit the 3rd Tx - should fail with an IllegalStateException b/c the 2nd
+            // Tx wasn't readied prior to creating the 3rd Tx.
+
+            try {
+                doCommit(writeTx3.ready());
+            } catch(ExecutionException e) {
+                throw e.getCause();
+            } finally {
+                cleanup(dataStore);
+            }
+        }
+
+        private void waitForShardTxCreated(TransactionProxy tx) {
+            for(int i = 0; i < 20 * 5; i++) {
+                if(tx.hasTransactionContext()) {
+                    return;
+                }
+
+                Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
+            }
+
+            fail("Shard Tx was not created");
         }};
     }
 
