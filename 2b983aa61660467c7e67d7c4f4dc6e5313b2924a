@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_129fff60",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/notify/NotificationSubscriptionService.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-11-01T15:36:46Z",
+      "side": 1,
+      "message": "Thanks for the review. The cosmetic changes have been split into a separate patch.",
+      "parentUuid": "ba8cc1f7_b2b973eb",
+      "revId": "2b983aa61660467c7e67d7c4f4dc6e5313b2924a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_52cee784",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/AbstractDOMNotificationListenerRegistration.java",
         "patchSetId": 7
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_329c8369",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/AbstractDOMNotificationListenerRegistration.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-11-01T15:36:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_52cee784",
+      "revId": "2b983aa61660467c7e67d7c4f4dc6e5313b2924a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_72cbeb72",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/AbstractDOMNotificationListenerRegistration.java",
         "patchSetId": 7
@@ -47,6 +83,24 @@
       "writtenOn": "2014-11-01T14:19:19Z",
       "side": 1,
       "message": "Method javadocs?",
+      "revId": "2b983aa61660467c7e67d7c4f4dc6e5313b2924a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_d288b724",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/AbstractDOMNotificationListenerRegistration.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-11-01T15:36:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_72cbeb72",
       "revId": "2b983aa61660467c7e67d7c4f4dc6e5313b2924a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
