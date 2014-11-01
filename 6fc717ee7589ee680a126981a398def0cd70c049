@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_b287330f",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationListener.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-01T16:37:20Z",
+      "side": 1,
+      "message": "Minor thing but this should say \"interested in ...\"",
+      "revId": "6fc717ee7589ee680a126981a398def0cd70c049",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_527ca720",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationListener.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-01T16:37:20Z",
+      "side": 1,
+      "message": "\"matching the subscription\"",
+      "revId": "6fc717ee7589ee680a126981a398def0cd70c049",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_d28f5722",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-01T16:37:20Z",
+      "side": 1,
+      "message": "Does it block to ensure all end listeners received the notification? Does it block until all end listeners have completed their callback method (similar to an RPC)?",
+      "revId": "6fc717ee7589ee680a126981a398def0cd70c049",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_12761f3f",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-01T16:37:20Z",
+      "side": 1,
+      "message": "I\u0027m just curious how/why a caller would use the returned Object in the future w/o knowing the type and since it seems implementation dependent. How could a caller find out the type and implementation semantics. Also what general type of information could an implementation convey? Error/failure information? I assume it can be null?\n\nAre there any exceptions that could be returned from the future that the caller should expect? If so, what type(s) and should we declare that with a CheckedFuture like we did with Tx read and commit?",
+      "revId": "6fc717ee7589ee680a126981a398def0cd70c049",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_9299cf70",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-01T16:37:20Z",
+      "side": 1,
+      "message": "So this doesn\u0027t guarantee delivery to all end listeners, like \"set and forget\", i.e. caller uses this if they don\u0027t care if it\u0027s not delivered ?",
+      "revId": "6fc717ee7589ee680a126981a398def0cd70c049",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_f294db38",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-01T16:37:20Z",
+      "side": 1,
+      "message": "Just wondering if it\u0027s safe to return a null future. Not everyone reads javadocs that thoroughly and may miss this point, especially since APIs usually don\u0027t return null futures. Maybe return a non-null future with an exception set would be better?",
+      "revId": "6fc717ee7589ee680a126981a398def0cd70c049",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_b29e5355",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-01T16:37:20Z",
+      "side": 1,
+      "message": "extra \u0027.\u0027 here",
+      "revId": "6fc717ee7589ee680a126981a398def0cd70c049",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_52a3479e",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-01T16:37:20Z",
+      "side": 1,
+      "message": "\"allows its users ...\" ?",
+      "revId": "6fc717ee7589ee680a126981a398def0cd70c049",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_72a0cb90",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-01T16:37:20Z",
+      "side": 1,
+      "message": "\"List of\" ?",
+      "revId": "6fc717ee7589ee680a126981a398def0cd70c049",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
