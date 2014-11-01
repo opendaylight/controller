@@ -236,6 +236,18 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         return recordedOperationFutures;
     }
 
+    @VisibleForTesting
+    boolean hasTransactionContext() {
+        for(TransactionFutureCallback txFutureCallback : txFutureCallbackMap.values()) {
+            TransactionContext transactionContext = txFutureCallback.getTransactionContext();
+            if(transactionContext != null) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     @Override
     public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(
             final YangInstanceIdentifier path) {
@@ -640,29 +652,42 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             // respect to #addTxOperationOnComplete to handle timing issues and ensure no
             // TransactionOperation is missed and that they are processed in the order they occurred.
             synchronized(txOperationsOnComplete) {
+                // Store the new TransactionContext locally until we've completed invoking the
+                // TransactionOperations. This avoids thread timing issues which could cause
+                // out-of-order TransactionOperations. Eg, on a modification operation, if the
+                // TransactionContext is non-null, then we directly call the TransactionContext.
+                // However, at the same time, the code may be executing the cached
+                // TransactionOperations. So to avoid thus timing, we don't publish the
+                // TransactionContext until after we've executed all cached TransactionOperations.
+                TransactionContext localTransactionContext;
                 if(failure != null) {
                     LOG.debug("Tx {} Creating NoOpTransaction because of error: {}", identifier,
                             failure.getMessage());
 
-                    transactionContext = new NoOpTransactionContext(failure, identifier);
+                    localTransactionContext = new NoOpTransactionContext(failure, identifier);
                 } else if (response.getClass().equals(CreateTransactionReply.SERIALIZABLE_CLASS)) {
-                    createValidTransactionContext(CreateTransactionReply.fromSerializable(response));
+                    localTransactionContext = createValidTransactionContext(
+                            CreateTransactionReply.fromSerializable(response));
                 } else {
                     IllegalArgumentException exception = new IllegalArgumentException(String.format(
                         "Invalid reply type %s for CreateTransaction", response.getClass()));
 
-                    transactionContext = new NoOpTransactionContext(exception, identifier);
+                    localTransactionContext = new NoOpTransactionContext(exception, identifier);
                 }
 
                 for(TransactionOperation oper: txOperationsOnComplete) {
-                    oper.invoke(transactionContext);
+                    oper.invoke(localTransactionContext);
                 }
 
                 txOperationsOnComplete.clear();
+
+                // We're done invoking the TransactionOperations so we can now publish the
+                // TransactionContext.
+                transactionContext = localTransactionContext;
             }
         }
 
-        private void createValidTransactionContext(CreateTransactionReply reply) {
+        private TransactionContext createValidTransactionContext(CreateTransactionReply reply) {
             String transactionPath = reply.getTransactionPath();
 
             LOG.debug("Tx {} Received transaction actor path {}", identifier, transactionPath);
@@ -683,7 +708,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             // Check if TxActor is created in the same node
             boolean isTxActorLocal = actorContext.isLocalPath(transactionPath);
 
-            transactionContext = new TransactionContextImpl(transactionPath, transactionActor, identifier,
+            return new TransactionContextImpl(transactionPath, transactionActor, identifier,
                 actorContext, schemaContext, isTxActorLocal, reply.getVersion());
         }
     }
