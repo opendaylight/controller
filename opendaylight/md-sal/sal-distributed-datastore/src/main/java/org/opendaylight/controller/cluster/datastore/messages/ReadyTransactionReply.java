@@ -17,7 +17,6 @@ public class ReadyTransactionReply implements SerializableMessage {
     private final String cohortPath;
 
     public ReadyTransactionReply(String cohortPath) {
-
         this.cohortPath = cohortPath;
     }
 
@@ -27,8 +26,9 @@ public class ReadyTransactionReply implements SerializableMessage {
 
     @Override
     public ShardTransactionMessages.ReadyTransactionReply toSerializable() {
-        return ShardTransactionMessages.ReadyTransactionReply.newBuilder().
-                setActorPath(cohortPath).build();
+        return ShardTransactionMessages.ReadyTransactionReply.newBuilder()
+                .setActorPath(cohortPath)
+                .build();
     }
 
     public static ReadyTransactionReply fromSerializable(Object serializable) {

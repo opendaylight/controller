@@ -15,12 +15,20 @@ public class CreateTransactionReply implements SerializableMessage {
     public static final Class SERIALIZABLE_CLASS = ShardTransactionMessages.CreateTransactionReply.class;
     private final String transactionPath;
     private final String transactionId;
+    private final int version;
 
     public CreateTransactionReply(String transactionPath,
         String transactionId) {
+        this(transactionPath, transactionId, CreateTransaction.CURRENT_VERSION);
+    }
+
+    public CreateTransactionReply(String transactionPath,
+                                  String transactionId, int version) {
         this.transactionPath = transactionPath;
         this.transactionId = transactionId;
+        this.version = version;
     }
+
 
     public String getTransactionPath() {
         return transactionPath;
@@ -30,16 +38,21 @@ public class CreateTransactionReply implements SerializableMessage {
         return transactionId;
     }
 
+    public int getVersion() {
+        return version;
+    }
+
     public Object toSerializable(){
         return ShardTransactionMessages.CreateTransactionReply.newBuilder()
             .setTransactionActorPath(transactionPath)
             .setTransactionId(transactionId)
+            .setMessageVersion(version)
             .build();
     }
 
     public static CreateTransactionReply fromSerializable(Object serializable){
         ShardTransactionMessages.CreateTransactionReply o = (ShardTransactionMessages.CreateTransactionReply) serializable;
-        return new CreateTransactionReply(o.getTransactionActorPath(), o.getTransactionId());
+        return new CreateTransactionReply(o.getTransactionActorPath(), o.getTransactionId(), o.getMessageVersion());
     }
 
 }
