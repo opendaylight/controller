@@ -9,6 +9,8 @@ import akka.actor.PoisonPill;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -628,6 +630,60 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
             optional = readTx.read(TestModel.OUTER_LIST_PATH).get(5, TimeUnit.SECONDS);
             assertEquals("isPresent", true, optional.isPresent());
             assertEquals("Data node", outerNode, optional.get());
+
+            cleanup(dataStore);
+        }};
+    }
+
+    @Test
+    public void testCreateChainedTransactionsInQuickSuccession() throws Exception{
+        new IntegrationTestKit(getSystem()) {{
+            DistributedDataStore dataStore = setupDistributedDataStore(
+                    "testCreateChainedTransactionsInQuickSuccession", "test-1");
+
+            DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
+
+            NormalizedNode<?, ?> testNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+
+            int nTxs = 20;
+            List<DOMStoreThreePhaseCommitCohort> cohorts = new ArrayList<>(nTxs);
+            for(int i = 0; i < nTxs; i++) {
+                DOMStoreReadWriteTransaction rwTx = txChain.newReadWriteTransaction();
+
+                rwTx.merge(TestModel.TEST_PATH, testNode);
+
+                cohorts.add(rwTx.ready());
+
+            }
+
+            for(DOMStoreThreePhaseCommitCohort cohort: cohorts) {
+                doCommit(cohort);
+            }
+
+            txChain.close();
+
+            cleanup(dataStore);
+        }};
+    }
+
+    @Test
+    public void testCreateChainedTransactionAfterEmptyTxReadied() throws Exception{
+        new IntegrationTestKit(getSystem()) {{
+            DistributedDataStore dataStore = setupDistributedDataStore(
+                    "testCreateChainedTransactionAfterEmptyTxReadied", "test-1");
+
+            DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
+
+            DOMStoreReadWriteTransaction rwTx1 = txChain.newReadWriteTransaction();
+
+            rwTx1.ready();
+
+            DOMStoreReadWriteTransaction rwTx2 = txChain.newReadWriteTransaction();
+
+            Optional<NormalizedNode<?, ?>> optional = rwTx2.read(TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
+            assertEquals("isPresent", false, optional.isPresent());
+
+            txChain.close();
 
             cleanup(dataStore);
         }};
