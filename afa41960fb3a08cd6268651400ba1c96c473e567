@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_92446f75",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-02T23:41:10Z",
+      "side": 1,
+      "message": "sounds good",
+      "parentUuid": "ba8cc1f7_327ec3af",
+      "revId": "afa41960fb3a08cd6268651400ba1c96c473e567",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_12813f8f",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/ReadyTransactionReply.java",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2014-11-02T23:19:51Z",
       "side": 1,
       "message": "I was thinking we would use the CreateTransaction.CURRENT_VERSION as a general Tx version and it would apply to all messages. If we add version to CreateTransactionReply then we don\u0027t need it in other message classes.\n\nSo anytime any aTx-related message changes, we bump the CreateTransaction.CURRENT_VERSION.\n\nI was thinking in H2 when we change the serialization of WriteData, MergeData and ReadDataReply, we would use the version returned in the CreateTransactionReply to determine which serialized version of those messages to send for forwards compat.\n\nSo I think we can use the CreateTransactionReply version for the ReadyTransactionReply as well..",
+      "revId": "afa41960fb3a08cd6268651400ba1c96c473e567",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_b249738d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/ReadyTransactionReply.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-02T23:41:10Z",
+      "side": 1,
+      "message": "Makes sense.",
+      "parentUuid": "ba8cc1f7_12813f8f",
       "revId": "afa41960fb3a08cd6268651400ba1c96c473e567",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
