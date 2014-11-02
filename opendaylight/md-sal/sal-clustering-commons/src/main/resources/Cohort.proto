@@ -5,7 +5,7 @@ option java_outer_classname = "ThreePhaseCommitCohortMessages";
 
 
 message CanCommitTransaction{
-  required string transactionId = 1;
+  optional string transactionId = 1;
 }
 
 message CanCommitTransactionReply{
@@ -14,7 +14,7 @@ message CanCommitTransactionReply{
 }
 
 message AbortTransaction{
-  required string transactionId = 1;
+  optional string transactionId = 1;
 }
 
 message AbortTransactionReply {
@@ -22,7 +22,7 @@ message AbortTransactionReply {
 }
 
 message CommitTransaction{
-  required string transactionId = 1;
+  optional string transactionId = 1;
 }
 
 message CommitTransactionReply{
