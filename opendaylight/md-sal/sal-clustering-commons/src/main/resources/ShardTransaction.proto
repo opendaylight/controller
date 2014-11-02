@@ -20,9 +20,8 @@ message CreateTransaction{
 }
 
 message CreateTransactionReply{
-required string transactionActorPath = 1;
-required string transactionId = 2;
-
+  required string transactionActorPath = 1;
+  required string transactionId = 2;
 }
 
 message ReadyTransaction{
@@ -30,7 +29,8 @@ message ReadyTransaction{
 }
 
 message ReadyTransactionReply{
-required string actorPath = 1;
+  required string actorPath = 1;
+  optional int32 messageVersion = 2;
 }
 
 message DeleteData {

@@ -14,27 +14,40 @@ public class ReadyTransactionReply implements SerializableMessage {
     public static final Class<ShardTransactionMessages.ReadyTransactionReply> SERIALIZABLE_CLASS =
             ShardTransactionMessages.ReadyTransactionReply.class;
 
+    public static final int CURRENT_VERSION = 1;
+
     private final String cohortPath;
+    private final int version;
 
     public ReadyTransactionReply(String cohortPath) {
+        this(cohortPath, CURRENT_VERSION);
+    }
 
+    public ReadyTransactionReply(String cohortPath, int version) {
         this.cohortPath = cohortPath;
+        this.version = version;
     }
 
     public String getCohortPath() {
         return cohortPath;
     }
 
+    public int getVersion() {
+        return version;
+    }
+
     @Override
     public ShardTransactionMessages.ReadyTransactionReply toSerializable() {
-        return ShardTransactionMessages.ReadyTransactionReply.newBuilder().
-                setActorPath(cohortPath).build();
+        return ShardTransactionMessages.ReadyTransactionReply.newBuilder()
+                .setActorPath(cohortPath)
+                .setMessageVersion(version)
+                .build();
     }
 
     public static ReadyTransactionReply fromSerializable(Object serializable) {
         ShardTransactionMessages.ReadyTransactionReply o =
                 (ShardTransactionMessages.ReadyTransactionReply) serializable;
 
-        return new ReadyTransactionReply(o.getActorPath());
+        return new ReadyTransactionReply(o.getActorPath(), o.getMessageVersion());
     }
 }
