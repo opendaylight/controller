@@ -534,6 +534,10 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         return transactionChainId;
     }
 
+    protected ActorContext getActorContext() {
+        return actorContext;
+    }
+
     /**
      * Interface for a transaction operation to be invoked later.
      */
