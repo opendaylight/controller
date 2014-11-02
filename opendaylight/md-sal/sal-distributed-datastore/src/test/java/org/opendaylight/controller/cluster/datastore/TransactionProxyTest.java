@@ -816,6 +816,9 @@ public class TransactionProxyTest {
         doReturn(readySerializedTxReply(actorRef.path().toString())).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), isA(ReadyTransaction.SERIALIZABLE_CLASS));
 
+        doReturn(actorRef.path().toString()).when(mockActorContext).resolvePath(eq(actorRef.path().toString()),
+                eq(actorRef.path().toString()));
+
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
                 READ_WRITE);
 
