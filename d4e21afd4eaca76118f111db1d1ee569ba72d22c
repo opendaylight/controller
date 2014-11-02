@@ -16,6 +16,24 @@
       "revId": "d4e21afd4eaca76118f111db1d1ee569ba72d22c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_f2c13be5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/CreateTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-02T20:34:37Z",
+      "side": 1,
+      "message": "Yeah - that\u0027s fine.",
+      "parentUuid": "ba8cc1f7_329003ec",
+      "revId": "d4e21afd4eaca76118f111db1d1ee569ba72d22c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
