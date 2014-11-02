@@ -395,4 +395,28 @@ public class ActorContext {
 
         return hostPort1.equals(hostPort2);
     }
+
+    /**
+     * @deprecated This method is present only to support backward compatibility with Helium and should not be
+     * used any further
+     *
+     *
+     * @param primaryPath
+     * @param localPathOfRemoteActor
+     * @return
+    */
+    @Deprecated
+    public String resolvePath(final String primaryPath,
+                                            final String localPathOfRemoteActor) {
+        StringBuilder builder = new StringBuilder();
+        String[] primaryPathElements = primaryPath.split("/");
+        builder.append(primaryPathElements[0]).append("//")
+            .append(primaryPathElements[1]).append(primaryPathElements[2]);
+        String[] remotePathElements = localPathOfRemoteActor.split("/");
+        for (int i = 3; i < remotePathElements.length; i++) {
+                builder.append("/").append(remotePathElements[i]);
+            }
+
+        return builder.toString();
+    }
 }

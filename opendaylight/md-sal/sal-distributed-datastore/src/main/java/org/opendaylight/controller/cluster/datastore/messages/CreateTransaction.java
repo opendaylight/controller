@@ -16,27 +16,28 @@ public class CreateTransaction implements SerializableMessage {
     public static final Class<ShardTransactionMessages.CreateTransaction> SERIALIZABLE_CLASS =
             ShardTransactionMessages.CreateTransaction.class;
 
-    public static final int CURRENT_CLIENT_VERSION = 1;
+    public static final int HELIUM_1_VERSION = 1;
+    public static final int CURRENT_VERSION = HELIUM_1_VERSION;
 
     private final String transactionId;
     private final int transactionType;
     private final String transactionChainId;
-    private final int clientVersion;
+    private final int version;
 
     public CreateTransaction(String transactionId, int transactionType) {
         this(transactionId, transactionType, "");
     }
 
     public CreateTransaction(String transactionId, int transactionType, String transactionChainId) {
-        this(transactionId, transactionType, transactionChainId, CURRENT_CLIENT_VERSION);
+        this(transactionId, transactionType, transactionChainId, CURRENT_VERSION);
     }
 
     private CreateTransaction(String transactionId, int transactionType, String transactionChainId,
-            int clientVersion) {
+            int version) {
         this.transactionId = transactionId;
         this.transactionType = transactionType;
         this.transactionChainId = transactionChainId;
-        this.clientVersion = clientVersion;
+        this.version = version;
     }
 
     public String getTransactionId() {
@@ -47,8 +48,8 @@ public class CreateTransaction implements SerializableMessage {
         return transactionType;
     }
 
-    public int getClientVersion() {
-        return clientVersion;
+    public int getVersion() {
+        return version;
     }
 
     @Override
@@ -57,7 +58,7 @@ public class CreateTransaction implements SerializableMessage {
             .setTransactionId(transactionId)
             .setTransactionType(transactionType)
             .setTransactionChainId(transactionChainId)
-            .setMessageVersion(clientVersion).build();
+            .setMessageVersion(version).build();
     }
 
     public static CreateTransaction fromSerializable(Object message) {
