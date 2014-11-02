@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_329003ec",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/CreateTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-02T20:21:02Z",
+      "side": 1,
+      "message": "I\u0027m thinking of changing the name CURRENT_CLIENT_VERSION to just CURRENT_VERSION and the corresponding method name to getVersion() do you see any issues with that?",
+      "revId": "d4e21afd4eaca76118f111db1d1ee569ba72d22c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
