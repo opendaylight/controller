@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_4d208c49",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataChangeListenerProxy.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-03T19:58:15Z",
+      "side": 1,
+      "message": "Which java styles are you using? I constant see our import statements being swapped.",
+      "revId": "0a812ce7fee0fde69db582ec1d891d9d81020663",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_8dabf488",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/DataChanged.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-03T19:58:15Z",
+      "side": 1,
+      "message": "I\u0027m wondering if it makes sense to centralize the CURRENT_VERSION and all other versions into a utility class (DataStoreVersions) That way we do not need to go looking into specific messages for versions. What do you think?",
+      "revId": "0a812ce7fee0fde69db582ec1d891d9d81020663",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_eda640c1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/DataChanged.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-03T19:58:15Z",
+      "side": 1,
+      "message": "In Helium DataChanged events were local-only. So this method and fromSerializable would not have been used at all.",
+      "revId": "0a812ce7fee0fde69db582ec1d891d9d81020663",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_6d923059",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/ExternalizableDataChanged.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-03T19:58:15Z",
+      "side": 1,
+      "message": "version could be a short right since we are only reading a short?",
+      "revId": "0a812ce7fee0fde69db582ec1d891d9d81020663",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_0d9fe460",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/SerializationUtils.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-03T19:58:15Z",
+      "side": 1,
+      "message": "Input validations?",
+      "revId": "0a812ce7fee0fde69db582ec1d891d9d81020663",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_2d9c2869",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTransactionHeliumBackwardsCompatibilityTest.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-03T19:58:15Z",
+      "side": 1,
+      "message": "See here imports are alphabetically sorted and sometimes the java imports are on top.",
+      "revId": "0a812ce7fee0fde69db582ec1d891d9d81020663",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_cd881c25",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTransactionHeliumBackwardsCompatibilityTest.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-03T19:58:15Z",
+      "side": 1,
+      "message": "We should probably define a constant for HELIUM (In DataStoreVersions) and set it to 0 and use it in these cases.",
+      "revId": "0a812ce7fee0fde69db582ec1d891d9d81020663",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
