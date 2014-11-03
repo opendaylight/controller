@@ -71,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_adb038f5",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-03T19:19:13Z",
+      "side": 1,
+      "message": "The mouthfuls could be avoided if we simply called the method publish and pass it a DeliveryGuaranty as enum...",
+      "parentUuid": "ba8cc1f7_ed63a0af",
+      "revId": "6fc717ee7589ee680a126981a398def0cd70c049",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_d28f5722",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
         "patchSetId": 8
