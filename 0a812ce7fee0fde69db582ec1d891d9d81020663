@@ -54,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_cdb6dcdc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/DataChanged.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-03T20:57:41Z",
+      "side": 1,
+      "message": "Yup - I was thinking the same thing after I submitted this draft.",
+      "parentUuid": "ba8cc1f7_8dabf488",
+      "revId": "0a812ce7fee0fde69db582ec1d891d9d81020663",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_eda640c1",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/DataChanged.java",
         "patchSetId": 13
