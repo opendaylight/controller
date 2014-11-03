@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_0d76043f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataChangeListenerProxy.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-03T20:47:51Z",
+      "side": 1,
+      "message": "I know I noticed that too. My organize imports was moving akka to the bottom - I fixed that since. I\u0027ll put these back.",
+      "parentUuid": "ba8cc1f7_4d208c49",
+      "revId": "0a812ce7fee0fde69db582ec1d891d9d81020663",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_8dabf488",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/DataChanged.java",
         "patchSetId": 13
@@ -53,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_2d73c84e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/DataChanged.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-03T20:47:51Z",
+      "side": 1,
+      "message": "Right - I just added the streaming support when/if we have remove notifications.",
+      "parentUuid": "ba8cc1f7_eda640c1",
+      "revId": "0a812ce7fee0fde69db582ec1d891d9d81020663",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_6d923059",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/ExternalizableDataChanged.java",
         "patchSetId": 13
@@ -70,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_cd8fbc22",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/ExternalizableDataChanged.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-03T20:47:51Z",
+      "side": 1,
+      "message": "Yes - it can be.",
+      "parentUuid": "ba8cc1f7_6d923059",
+      "revId": "0a812ce7fee0fde69db582ec1d891d9d81020663",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_0d9fe460",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/SerializationUtils.java",
         "patchSetId": 13
@@ -81,6 +135,24 @@
       "writtenOn": "2014-11-03T19:58:15Z",
       "side": 1,
       "message": "Input validations?",
+      "revId": "0a812ce7fee0fde69db582ec1d891d9d81020663",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_ed940039",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/SerializationUtils.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-03T20:47:51Z",
+      "side": 1,
+      "message": "Yeah - I can do that although the node writer would throw an ex for null node.",
+      "parentUuid": "ba8cc1f7_0d9fe460",
       "revId": "0a812ce7fee0fde69db582ec1d891d9d81020663",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -115,6 +187,24 @@
       "writtenOn": "2014-11-03T19:58:15Z",
       "side": 1,
       "message": "We should probably define a constant for HELIUM (In DataStoreVersions) and set it to 0 and use it in these cases.",
+      "revId": "0a812ce7fee0fde69db582ec1d891d9d81020663",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_8d99b470",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTransactionHeliumBackwardsCompatibilityTest.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-03T20:47:51Z",
+      "side": 1,
+      "message": "Yes - I was thinking the same. Define the versions, including CURRENT_VERSION,  in a common place instead of in CreateTransaction and DataChanged. We don\u0027t really need separate  CURRENT_VERSION for CreateTransaction and DataChanged .",
+      "parentUuid": "ba8cc1f7_cd881c25",
       "revId": "0a812ce7fee0fde69db582ec1d891d9d81020663",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
