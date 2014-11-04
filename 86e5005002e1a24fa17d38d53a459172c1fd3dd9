@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_48f95ac7",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-04T15:21:46Z",
+      "side": 1,
+      "message": "Should be \"It provides...\"",
+      "revId": "86e5005002e1a24fa17d38d53a459172c1fd3dd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_68f69ed9",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-04T15:21:46Z",
+      "side": 1,
+      "message": "\"public static final\" is redundant - checkstyle will complain.\n\nI\u0027d rather this be a specific exception, as you know, throwing Throwable is usually not best practice and checkstyle/PMD will complain.\n\nHow about NotificationWouldBlockException, derived from a general NotificationException?\n\nAnd now that we have a known ex that can be thrown, we can change the ListenableFuture to CheckedFuture\u003cObject, NotificationException \u003e",
+      "revId": "86e5005002e1a24fa17d38d53a459172c1fd3dd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_48207a49",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-04T15:21:46Z",
+      "side": 1,
+      "message": "Re: your comment from patch set 8:\n\nIs/would NotificationDeliveryStatistics be a public API or implementation-specific? If the latter, how would a client know to even look for something like NotificationDeliveryStatistics? What other type(s) of info could be conveyed? As a client, why would I be interested in this info at the time that of publication?\n\nNot trying to nitpick here but these are my impressions from looking at the API for the first time and others may have the same questions. I realize the language in the docs is purposely vague but can we add more guidance as to what type of info could be conveyed and a why client might be interested in it? I think anything more we can add to help clients understand the usage or usefulness, the better.",
+      "revId": "86e5005002e1a24fa17d38d53a459172c1fd3dd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_080352b9",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-04T15:21:46Z",
+      "side": 1,
+      "message": "Can we add a little more info here similar to what you put in the class docs? e.g. \"Implementations of this method may block indefinitely until the notification can be accepted for delivery\".",
+      "revId": "86e5005002e1a24fa17d38d53a459172c1fd3dd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_280096a9",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-04T15:21:46Z",
+      "side": 1,
+      "message": "\"not to block...\"",
+      "revId": "86e5005002e1a24fa17d38d53a459172c1fd3dd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_c82c8a4d",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-04T15:21:46Z",
+      "side": 1,
+      "message": "It states it\u0027s guaranteed not to block but the timeout semantics indicate otherwise. I assume this is intended to be equivalent to BlockingQueue#offer(..., timeout), in which case it will block for the specified time.",
+      "revId": "86e5005002e1a24fa17d38d53a459172c1fd3dd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_88268267",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-04T15:21:46Z",
+      "side": 1,
+      "message": "With the blocking semantics of this method, WOULD_BLOCK wouldn\u0027t be thrown.",
+      "revId": "86e5005002e1a24fa17d38d53a459172c1fd3dd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_e8314ea3",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-04T15:21:46Z",
+      "side": 1,
+      "message": "I think this should also throw java.util.concurrent.TimeoutException as well.",
+      "revId": "86e5005002e1a24fa17d38d53a459172c1fd3dd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_a814a6f5",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationService.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-04T15:21:46Z",
+      "side": 1,
+      "message": "I like the varargs - covers single and multiple regs. Given that, do we still need the method that takes a Collection?",
+      "revId": "86e5005002e1a24fa17d38d53a459172c1fd3dd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
