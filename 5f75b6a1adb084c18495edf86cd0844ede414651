@@ -16,6 +16,24 @@
       "revId": "5f75b6a1adb084c18495edf86cd0844ede414651",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_6d6a301c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-04T03:57:06Z",
+      "side": 0,
+      "message": "I\u0027m fine with removing it even though I may be accused of \"waving it through\", but I\u0027m willing to roll the dice :)",
+      "parentUuid": "ba8cc1f7_ad035872",
+      "revId": "5f75b6a1adb084c18495edf86cd0844ede414651",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
