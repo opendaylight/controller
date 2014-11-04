@@ -183,8 +183,12 @@ public class TopologyServiceShim implements IDiscoveryListener,
                         // the edgePropsMap for a particular container may not have
                         // the connector.
                         // so check for null
+                        if (connector == null){
+                            logger.debug("The nodeconnector is null");
+                            continue;
+                        }
                         Pair<Edge, Set<Property>> edgeProp = edgePropsMap.get(connector);
-                        if(edgeProp != null) {
+                        if(edgeProp != null && connector != null) {
                             Edge edge = edgeProp.getLeft();
                             if (edge.getTailNodeConnector().equals(connector)) {
                                 ITopologyServiceShimListener topologServiceShimListener = topologyServiceShimListeners
@@ -508,13 +512,13 @@ public class TopologyServiceShim implements IDiscoveryListener,
         List<TopoEdgeUpdate> teuList = new ArrayList<TopoEdgeUpdate>();
         Map<NodeConnector, Pair<Edge, Set<Property>>> edgePropsMap = edgeMap
                 .get(container);
-        if (edgePropsMap == null) {
+        if (edgePropsMap == null ) {
             return;
         }
 
         // Remove edge in one direction
         Pair<Edge, Set<Property>> edgeProps = edgePropsMap.get(nodeConnector);
-        if (edgeProps == null) {
+        if (edgeProps == null || nodeConnector == null) {
             return;
         }
         teuList.add(new TopoEdgeUpdate(edgeProps.getLeft(), null,
@@ -559,12 +563,12 @@ public class TopologyServiceShim implements IDiscoveryListener,
         switch (type) {
         case ADDED:
         case CHANGED:
-            if (edgePropsMap == null) {
+            if (edgePropsMap == null || src == null) {
                 edgePropsMap = new ConcurrentHashMap<NodeConnector, Pair<Edge, Set<Property>>>();
                 rv = true;
             } else {
                 if (edgePropsMap.containsKey(src)
-                        && edgePropsMap.get(src).equals(edgeProps)) {
+                        && edgePropsMap.get(src).equals(edgeProps) && src != null) {
                     // Entry already exists. No update.
                     rv = false;
                 } else {
@@ -577,7 +581,7 @@ public class TopologyServiceShim implements IDiscoveryListener,
             }
             break;
         case REMOVED:
-            if ((edgePropsMap != null) && edgePropsMap.containsKey(src)) {
+            if ((edgePropsMap != null) && edgePropsMap.containsKey(src) && src != null) {
                 edgePropsMap.remove(src);
                 if (edgePropsMap.isEmpty()) {
                     edgeMap.remove(container);
