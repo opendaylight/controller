@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_68ff7e35",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-04T21:02:14Z",
+      "side": 1,
+      "message": "Adding waitUntilLeader and removing this method altogether.",
+      "parentUuid": "ba8cc1f7_6879be2e",
+      "revId": "a22a25dabead9e654a5dbd299618455f4f1de3fa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_a8b586ce",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
         "patchSetId": 2
@@ -47,6 +65,24 @@
       "writtenOn": "2014-11-04T17:36:25Z",
       "side": 1,
       "message": "This should call createSnapshot. Can we verify that via a latch? Another way to do this is to create an internal RaftActor mock in MockRaftActor and, for the abstract methods, forward to the mock and use Mockito#verify in the test. For methods that takes params, you can use an ArgumentCaptor to verify the correct input.",
+      "revId": "a22a25dabead9e654a5dbd299618455f4f1de3fa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_089352fb",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 680,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-04T21:02:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_a8b586ce",
       "revId": "a22a25dabead9e654a5dbd299618455f4f1de3fa",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -70,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_289096eb",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 688,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-04T21:02:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_08c4b23e",
+      "revId": "a22a25dabead9e654a5dbd299618455f4f1de3fa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_2873b64e",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
         "patchSetId": 2
@@ -81,6 +135,24 @@
       "writtenOn": "2014-11-04T17:36:25Z",
       "side": 1,
       "message": "Can we wait on the applyStateLatch here so we don\u0027t have to rely on a log message? Or use the underlying actor to call directly.\n\nAlso, to be complete, we probably should assert the correct params passed to applyState (as outlined above, using a Mockito mock would make this easier).",
+      "revId": "a22a25dabead9e654a5dbd299618455f4f1de3fa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_a8bb4671",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 709,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-04T21:02:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_2873b64e",
       "revId": "a22a25dabead9e654a5dbd299618455f4f1de3fa",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -104,6 +176,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_48b07a8b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 744,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-04T21:02:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_48a39a9e",
+      "revId": "a22a25dabead9e654a5dbd299618455f4f1de3fa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_08ad9288",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
         "patchSetId": 2
@@ -115,6 +205,24 @@
       "writtenOn": "2014-11-04T17:36:25Z",
       "side": 1,
       "message": "Can we verify expected data in the ReplicatedLog instead of just verifying a new instance?",
+      "revId": "a22a25dabead9e654a5dbd299618455f4f1de3fa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_68ad3e31",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 747,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-04T21:02:14Z",
+      "side": 1,
+      "message": "This is a unit test for just ApplySnapshot. ReplicatedLog was never populated and will be empty.",
+      "parentUuid": "ba8cc1f7_08ad9288",
       "revId": "a22a25dabead9e654a5dbd299618455f4f1de3fa",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -138,6 +246,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_68869ebb",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 798,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-04T21:02:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_e8e2aed4",
+      "revId": "a22a25dabead9e654a5dbd299618455f4f1de3fa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_c8dd6a16",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
         "patchSetId": 2
@@ -149,6 +275,24 @@
       "writtenOn": "2014-11-04T17:36:25Z",
       "side": 1,
       "message": "Can we verify expected data in the ReplicatedLog?",
+      "revId": "a22a25dabead9e654a5dbd299618455f4f1de3fa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_c84a4a83",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 826,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-04T21:02:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_c8dd6a16",
       "revId": "a22a25dabead9e654a5dbd299618455f4f1de3fa",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
