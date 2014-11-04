@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_cd4a5c83",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationListener.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-11-04T09:58:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_b287330f",
+      "revId": "6fc717ee7589ee680a126981a398def0cd70c049",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_527ca720",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationListener.java",
         "patchSetId": 8
@@ -30,6 +48,24 @@
       "writtenOn": "2014-11-01T16:37:20Z",
       "side": 1,
       "message": "\"matching the subscription\"",
+      "revId": "6fc717ee7589ee680a126981a398def0cd70c049",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_ed4f2091",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationListener.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-11-04T09:58:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_527ca720",
       "revId": "6fc717ee7589ee680a126981a398def0cd70c049",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -89,6 +125,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_cd31fc0c",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-11-04T09:58:28Z",
+      "side": 1,
+      "message": "That unfortunately would be a misnomer, as notification API makes not guarantees as where the notification will be delivered at all. The difference in put/offer is in the initiation phase, the implementation has enough room to keep track of it.",
+      "parentUuid": "ba8cc1f7_adb038f5",
+      "revId": "6fc717ee7589ee680a126981a398def0cd70c049",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_d28f5722",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
         "patchSetId": 8
@@ -100,6 +154,24 @@
       "writtenOn": "2014-11-01T16:37:20Z",
       "side": 1,
       "message": "Does it block to ensure all end listeners received the notification? Does it block until all end listeners have completed their callback method (similar to an RPC)?",
+      "revId": "6fc717ee7589ee680a126981a398def0cd70c049",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_ed364003",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-11-04T09:58:28Z",
+      "side": 1,
+      "message": "No. It potentially blocks on implementation queues only, e.g. to make sure the implementation is able to track the notification at all. Once enqueued, the call returns (and completes asynchronously), which is reported by the future.",
+      "parentUuid": "ba8cc1f7_d28f5722",
       "revId": "6fc717ee7589ee680a126981a398def0cd70c049",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -123,6 +195,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_8d3bf4ea",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-11-04T09:58:28Z",
+      "side": 1,
+      "message": "Future\u003c?\u003e f \u003d putNotification();\nObject o \u003d f.get();\nif (o instanceof NotificationDeliveryStatistics) {\n    ...\n}\n\nNot sure about exceptions yet. If they crop up, we can easily retrofit.",
+      "parentUuid": "ba8cc1f7_12761f3f",
+      "revId": "6fc717ee7589ee680a126981a398def0cd70c049",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_9299cf70",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
         "patchSetId": 8
@@ -134,6 +224,24 @@
       "writtenOn": "2014-11-01T16:37:20Z",
       "side": 1,
       "message": "So this doesn\u0027t guarantee delivery to all end listeners, like \"set and forget\", i.e. caller uses this if they don\u0027t care if it\u0027s not delivered ?",
+      "revId": "6fc717ee7589ee680a126981a398def0cd70c049",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_6d2230bb",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-11-04T09:58:28Z",
+      "side": 1,
+      "message": "No aspect of this API is construed to guarantee delivery to \"everyone\", simply because that set can change between the time the notification is enqueued and it is delivered.",
+      "parentUuid": "ba8cc1f7_9299cf70",
       "revId": "6fc717ee7589ee680a126981a398def0cd70c049",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -157,6 +265,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_ad403857",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-11-04T09:58:28Z",
+      "side": 1,
+      "message": "It will make users a bit more verbose",
+      "parentUuid": "ba8cc1f7_f294db38",
+      "revId": "6fc717ee7589ee680a126981a398def0cd70c049",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_b29e5355",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
         "patchSetId": 8
@@ -168,6 +294,24 @@
       "writtenOn": "2014-11-01T16:37:20Z",
       "side": 1,
       "message": "extra \u0027.\u0027 here",
+      "revId": "6fc717ee7589ee680a126981a398def0cd70c049",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_0d2fe4a2",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-11-04T09:58:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_b29e5355",
       "revId": "6fc717ee7589ee680a126981a398def0cd70c049",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -191,6 +335,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_2d03c810",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-11-04T09:58:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_52a3479e",
+      "revId": "6fc717ee7589ee680a126981a398def0cd70c049",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_72a0cb90",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationService.java",
         "patchSetId": 8
@@ -208,6 +370,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_0d060421",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-11-04T09:58:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_72a0cb90",
+      "revId": "6fc717ee7589ee680a126981a398def0cd70c049",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_b2ec13c9",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationService.java",
         "patchSetId": 8
@@ -219,6 +399,24 @@
       "writtenOn": "2014-11-01T20:29:40Z",
       "side": 1,
       "message": "I find it more natural to have a registration API register for a single notification and have it associated with a single listener. Having a single listener for multiple notification types would probably be an outlier. So, I would like to see an API which takes a single SchemaPath. I don\u0027t mind that being in addition to this API as a sort of helper API.",
+      "revId": "6fc717ee7589ee680a126981a398def0cd70c049",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_6d09d030",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-11-04T09:58:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_b2ec13c9",
       "revId": "6fc717ee7589ee680a126981a398def0cd70c049",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
