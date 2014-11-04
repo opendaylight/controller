@@ -13,11 +13,6 @@
     <maven>3.0</maven>
   </prerequisites>
   <modules>
-    <module>base</module>
-    <module>controller</module>
-    <module>adsal</module>
-    <module>nsf</module>
-    <module>extras</module>
     <module>config</module>
     <module>config-persister</module>
     <module>config-netty</module>
@@ -25,7 +20,6 @@
     <module>flow</module>
     <module>netconf</module>
     <module>protocol-framework</module>
-    <module>adsal-compatibility</module>
     <module>akka</module>
     <module>netconf-connector</module>
     <module>restconf</module>
