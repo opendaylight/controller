@@ -6,7 +6,6 @@ import com.google.common.base.Optional;
 import org.opendaylight.controller.cluster.example.messages.PrintRole;
 import org.opendaylight.controller.cluster.example.messages.PrintState;
 import org.opendaylight.controller.cluster.raft.ConfigParams;
-import org.opendaylight.controller.cluster.raft.client.messages.AddRaftPeer;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -35,7 +34,6 @@ public class TestDriver {
      * Commands
      *  bye
      *  createNodes:{num}
-     *  addNodes:{num}
      *  stopNode:{nodeName}
      *  reinstateNode:{nodeName}
      *  addClients:{num}
@@ -65,11 +63,6 @@ public class TestDriver {
                 String[] arr = command.split(":");
                 int n = Integer.parseInt(arr[1]);
                 td.createNodes(n);
-
-            } else if (command.startsWith("addNodes")) {
-                String[] arr = command.split(":");
-                int n = Integer.parseInt(arr[1]);
-                td.addNodes(n);
 
             } else if (command.startsWith("addClients")) {
                 String[] arr = command.split(":");
@@ -133,32 +126,6 @@ public class TestDriver {
 
         }
     }
-
-    // add new nodes , pass in the count
-    public void addNodes(int num) {
-        Map<String, String> newPeers = new HashMap<>();
-        for (int i=0; i < num; i++)  {
-            nameCounter = nameCounter + 1;
-            newPeers.put("example-"+nameCounter, "akka://default/user/example-"+nameCounter);
-            allPeers.put("example-"+nameCounter, "akka://default/user/example-"+nameCounter);
-
-        }
-        Map<String, ActorRef> newActorRefs = new HashMap<String, ActorRef>(num);
-        for (Map.Entry<String, String> entry : newPeers.entrySet())  {
-            ActorRef exampleActor = createExampleActor(entry.getKey());
-            newActorRefs.put(entry.getKey(), exampleActor);
-
-            //now also add these new nodes as peers from the previous nodes
-            for (ActorRef actor : actorRefs.values()) {
-                actor.tell(new AddRaftPeer(entry.getKey(), entry.getValue()), null);
-            }
-
-            System.out.println("Added node:" + entry);
-        }
-
-        actorRefs.putAll(newActorRefs);
-    }
-
 
     // add num clients to all nodes in the system
     public void addClients(int num) {
