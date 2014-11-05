@@ -62,6 +62,7 @@ public class TestModel {
 
   public static final QName DESC_QNAME = QName.create(TEST_QNAME, "desc");
   public static final QName POINTER_QNAME = QName.create(TEST_QNAME, "pointer");
+  public static final QName SOME_BINARY_DATE_QNAME = QName.create(TEST_QNAME, "some-binary-data");
   public static final QName SOME_REF_QNAME = QName.create(TEST_QNAME,
       "some-ref");
   public static final QName MYIDENTITY_QNAME = QName.create(TEST_QNAME,
@@ -282,114 +283,120 @@ public class TestModel {
 
   }
 
-  public static ContainerNode createTestContainer() {
+  public static DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode> createBaseTestContainerBuilder() {
+      // Create a list of shoes
+      // This is to test leaf list entry
+      final LeafSetEntryNode<Object> nike =
+              ImmutableLeafSetEntryNodeBuilder
+                      .create()
+                      .withNodeIdentifier(
+                              new YangInstanceIdentifier.NodeWithValue(QName.create(
+                                      TEST_QNAME, "shoe"), "nike")).withValue("nike").build();
+
+      final LeafSetEntryNode<Object> puma =
+              ImmutableLeafSetEntryNodeBuilder
+                      .create()
+                      .withNodeIdentifier(
+                              new YangInstanceIdentifier.NodeWithValue(QName.create(
+                                      TEST_QNAME, "shoe"), "puma")).withValue("puma").build();
+
+      final LeafSetNode<Object> shoes =
+              ImmutableLeafSetNodeBuilder
+                      .create()
+                      .withNodeIdentifier(
+                              new YangInstanceIdentifier.NodeIdentifier(QName.create(
+                                      TEST_QNAME, "shoe"))).withChild(nike).withChild(puma)
+                      .build();
 
 
-    // Create a list of shoes
-    // This is to test leaf list entry
-    final LeafSetEntryNode<Object> nike =
-        ImmutableLeafSetEntryNodeBuilder
-            .create()
-            .withNodeIdentifier(
-                new YangInstanceIdentifier.NodeWithValue(QName.create(
-                    TEST_QNAME, "shoe"), "nike")).withValue("nike").build();
+      // Test a leaf-list where each entry contains an identity
+      final LeafSetEntryNode<Object> cap1 =
+              ImmutableLeafSetEntryNodeBuilder
+                      .create()
+                      .withNodeIdentifier(
+                              new YangInstanceIdentifier.NodeWithValue(QName.create(
+                                      TEST_QNAME, "capability"), DESC_QNAME))
+                      .withValue(DESC_QNAME).build();
 
-    final LeafSetEntryNode<Object> puma =
-        ImmutableLeafSetEntryNodeBuilder
-            .create()
-            .withNodeIdentifier(
-                new YangInstanceIdentifier.NodeWithValue(QName.create(
-                    TEST_QNAME, "shoe"), "puma")).withValue("puma").build();
+      final LeafSetNode<Object> capabilities =
+              ImmutableLeafSetNodeBuilder
+                      .create()
+                      .withNodeIdentifier(
+                              new YangInstanceIdentifier.NodeIdentifier(QName.create(
+                                      TEST_QNAME, "capability"))).withChild(cap1).build();
 
-    final LeafSetNode<Object> shoes =
-        ImmutableLeafSetNodeBuilder
-            .create()
-            .withNodeIdentifier(
-                new YangInstanceIdentifier.NodeIdentifier(QName.create(
-                    TEST_QNAME, "shoe"))).withChild(nike).withChild(puma)
-            .build();
+      ContainerNode switchFeatures =
+              ImmutableContainerNodeBuilder
+                      .create()
+                      .withNodeIdentifier(
+                              new YangInstanceIdentifier.NodeIdentifier(SWITCH_FEATURES_QNAME))
+                      .withChild(capabilities).build();
 
-
-    // Test a leaf-list where each entry contains an identity
-    final LeafSetEntryNode<Object> cap1 =
-        ImmutableLeafSetEntryNodeBuilder
-            .create()
-            .withNodeIdentifier(
-                new YangInstanceIdentifier.NodeWithValue(QName.create(
-                    TEST_QNAME, "capability"), DESC_QNAME))
-            .withValue(DESC_QNAME).build();
-
-    final LeafSetNode<Object> capabilities =
-        ImmutableLeafSetNodeBuilder
-            .create()
-            .withNodeIdentifier(
-                new YangInstanceIdentifier.NodeIdentifier(QName.create(
-                    TEST_QNAME, "capability"))).withChild(cap1).build();
-
-    ContainerNode switchFeatures =
-        ImmutableContainerNodeBuilder
-            .create()
-            .withNodeIdentifier(
-                new YangInstanceIdentifier.NodeIdentifier(SWITCH_FEATURES_QNAME))
-            .withChild(capabilities).build();
-
-    // Create a leaf list with numbers
-    final LeafSetEntryNode<Object> five =
-        ImmutableLeafSetEntryNodeBuilder
-            .create()
-            .withNodeIdentifier(
-                (new YangInstanceIdentifier.NodeWithValue(QName.create(
-                    TEST_QNAME, "number"), 5))).withValue(5).build();
-    final LeafSetEntryNode<Object> fifteen =
-        ImmutableLeafSetEntryNodeBuilder
-            .create()
-            .withNodeIdentifier(
-                (new YangInstanceIdentifier.NodeWithValue(QName.create(
-                    TEST_QNAME, "number"), 15))).withValue(15).build();
-    final LeafSetNode<Object> numbers =
-        ImmutableLeafSetNodeBuilder
-            .create()
-            .withNodeIdentifier(
-                new YangInstanceIdentifier.NodeIdentifier(QName.create(
-                    TEST_QNAME, "number"))).withChild(five).withChild(fifteen)
-            .build();
+      // Create a leaf list with numbers
+      final LeafSetEntryNode<Object> five =
+              ImmutableLeafSetEntryNodeBuilder
+                      .create()
+                      .withNodeIdentifier(
+                              (new YangInstanceIdentifier.NodeWithValue(QName.create(
+                                      TEST_QNAME, "number"), 5))).withValue(5).build();
+      final LeafSetEntryNode<Object> fifteen =
+              ImmutableLeafSetEntryNodeBuilder
+                      .create()
+                      .withNodeIdentifier(
+                              (new YangInstanceIdentifier.NodeWithValue(QName.create(
+                                      TEST_QNAME, "number"), 15))).withValue(15).build();
+      final LeafSetNode<Object> numbers =
+              ImmutableLeafSetNodeBuilder
+                      .create()
+                      .withNodeIdentifier(
+                              new YangInstanceIdentifier.NodeIdentifier(QName.create(
+                                      TEST_QNAME, "number"))).withChild(five).withChild(fifteen)
+                      .build();
 
 
-    // Create augmentations
-    MapEntryNode mapEntry = createAugmentedListEntry(1, "First Test");
+      // Create augmentations
+      MapEntryNode mapEntry = createAugmentedListEntry(1, "First Test");
 
-    // Create a bits leaf
+      // Create a bits leaf
       NormalizedNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, Object, LeafNode<Object>>
-          myBits = Builders.leafBuilder().withNodeIdentifier(
-          new YangInstanceIdentifier.NodeIdentifier(
-              QName.create(TEST_QNAME, "my-bits"))).withValue(
-          ImmutableSet.of("foo", "bar"));
+              myBits = Builders.leafBuilder().withNodeIdentifier(
+              new YangInstanceIdentifier.NodeIdentifier(
+                      QName.create(TEST_QNAME, "my-bits"))).withValue(
+              ImmutableSet.of("foo", "bar"));
 
 
+      byte[] binaryData = new byte[5];
+      for(byte i=0;i<5;i++){
+          binaryData[i] = i;
+      }
       // Create the document
-    return ImmutableContainerNodeBuilder
-        .create()
-        .withNodeIdentifier(
-            new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME))
-        .withChild(myBits.build())
-        .withChild(ImmutableNodes.leafNode(DESC_QNAME, DESC))
-        .withChild(ImmutableNodes.leafNode(POINTER_QNAME, "pointer"))
-        .withChild(
-            ImmutableNodes.leafNode(SOME_REF_QNAME, YangInstanceIdentifier
-                .builder().build()))
-        .withChild(ImmutableNodes.leafNode(MYIDENTITY_QNAME, DESC_QNAME))
+      return ImmutableContainerNodeBuilder
+              .create()
+              .withNodeIdentifier(
+                      new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME))
+              .withChild(myBits.build())
+              .withChild(ImmutableNodes.leafNode(DESC_QNAME, DESC))
+              .withChild(ImmutableNodes.leafNode(POINTER_QNAME, "pointer"))
+              .withChild(
+                      ImmutableNodes.leafNode(SOME_REF_QNAME, YangInstanceIdentifier
+                              .builder().build()))
+              .withChild(ImmutableNodes.leafNode(MYIDENTITY_QNAME, DESC_QNAME))
 
-        // .withChild(augmentationNode)
-        .withChild(shoes)
-        .withChild(numbers)
-        .withChild(switchFeatures)
-        .withChild(
-            mapNodeBuilder(AUGMENTED_LIST_QNAME).withChild(mapEntry).build())
-        .withChild(
-            mapNodeBuilder(OUTER_LIST_QNAME)
-                .withChild(mapEntry(OUTER_LIST_QNAME, ID_QNAME, ONE_ID))
-                .withChild(BAR_NODE).build()).build();
+                      // .withChild(augmentationNode)
+              .withChild(shoes)
+              .withChild(numbers)
+              .withChild(switchFeatures)
+                      //.withChild(ImmutableNodes.leafNode(SOME_BINARY_DATE_QNAME, binaryData))
+              .withChild(
+                      mapNodeBuilder(AUGMENTED_LIST_QNAME).withChild(mapEntry).build())
+              .withChild(
+                      mapNodeBuilder(OUTER_LIST_QNAME)
+                              .withChild(mapEntry(OUTER_LIST_QNAME, ID_QNAME, ONE_ID))
+                              .withChild(BAR_NODE).build());
+  }
 
+  public static ContainerNode createTestContainer() {
+      return createBaseTestContainerBuilder().build();
   }
 
   public static MapEntryNode createAugmentedListEntry(int id, String name) {

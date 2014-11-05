@@ -1,15 +1,20 @@
 package org.opendaylight.controller.cluster.datastore.node.utils.serialization;
 
+import com.google.common.base.Optional;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.opendaylight.controller.cluster.datastore.util.TestModel;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
+import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class NormalizedNodeSerializerTest {
 
@@ -49,6 +54,38 @@ public class NormalizedNodeSerializerTest {
         // created by serializing the original node and deSerializing it back.
         assertEquals(expectedNode, actualNode);
 
+        byte[] binaryData = new byte[5];
+        for(byte i=0;i<5;i++){
+            binaryData[i] = i;
+        }
+
+        ContainerNode node1 = TestModel.createBaseTestContainerBuilder()
+                .withChild(ImmutableNodes.leafNode(TestModel.SOME_BINARY_DATE_QNAME, binaryData))
+                .build();
+
+        NormalizedNodeMessages.Node serializedNode1 = NormalizedNodeSerializer
+                .serialize(node1);
+
+        ContainerNode node2 =
+                (ContainerNode) NormalizedNodeSerializer.deSerialize(serializedNode1);
+
+
+        // FIXME: This will not work due to BUG 2326. Once that is fixed we can uncomment this assertion
+        // assertEquals(node1, node2);
+
+        Optional<DataContainerChild<? extends YangInstanceIdentifier.PathArgument, ?>> child = node2.getChild(new YangInstanceIdentifier.NodeIdentifier(TestModel.SOME_BINARY_DATE_QNAME));
+
+        Object value = child.get().getValue();
+
+        assertTrue("value should be of type byte[]", value instanceof byte[]);
+
+        byte[] bytesValue = (byte[]) value;
+
+        for(byte i=0;i<5;i++){
+            assertEquals(i, bytesValue[i]);
+        }
+
+        System.out.print("hello");
     }
 
     @Test(expected = NullPointerException.class)
