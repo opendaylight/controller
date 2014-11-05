@@ -61,5 +61,16 @@ public interface FollowerLogInformation {
      */
     public AtomicLong getMatchIndex();
 
+    /**
+     * Checks if the follower is active by comparing the last updated with the duration
+     * @return boolean
+     */
+    public boolean isFollowerActive();
+
+    /**
+     * restarts the timeout clock of the follower
+     */
+    public void markFollowerActive();
+
 
 }

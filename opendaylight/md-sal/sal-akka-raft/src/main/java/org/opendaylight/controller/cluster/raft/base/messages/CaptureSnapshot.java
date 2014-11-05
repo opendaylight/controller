@@ -13,13 +13,20 @@ public class CaptureSnapshot {
     private long lastAppliedTerm;
     private long lastIndex;
     private long lastTerm;
+    private boolean installSnapshotInitiated;
 
     public CaptureSnapshot(long lastIndex, long lastTerm,
         long lastAppliedIndex, long lastAppliedTerm) {
+        this(lastIndex, lastTerm, lastAppliedIndex, lastAppliedTerm, false);
+    }
+
+    public CaptureSnapshot(long lastIndex, long lastTerm,long lastAppliedIndex,
+        long lastAppliedTerm, boolean installSnapshotInitiated) {
         this.lastIndex = lastIndex;
         this.lastTerm = lastTerm;
         this.lastAppliedIndex = lastAppliedIndex;
         this.lastAppliedTerm = lastAppliedTerm;
+        this.installSnapshotInitiated = installSnapshotInitiated;
     }
 
     public long getLastAppliedIndex() {
@@ -36,5 +43,9 @@ public class CaptureSnapshot {
 
     public long getLastTerm() {
         return lastTerm;
+    }
+
+    public boolean isInstallSnapshotInitiated() {
+        return installSnapshotInitiated;
     }
 }
