@@ -174,6 +174,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_239c3769",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-05T12:28:18Z",
+      "side": 1,
+      "message": "So the impl is already written? Without seeing the impl I don\u0027t know why returning WOULD_BLOCK would be more efficient than throwing TOE.\n\nIt still seems a little odd to me that a method that blocks (for a period of time) may return a failure called WOULD_BLOCK. I would prefer this be consistent with other APIs and throw a TOE, but at least if a Future is returned then please call it TIMEOUT rather than WOULD_BLOCK.",
+      "parentUuid": "ba8cc1f7_23bbd70f",
+      "revId": "86e5005002e1a24fa17d38d53a459172c1fd3dd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_a814a6f5",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationService.java",
         "patchSetId": 10
