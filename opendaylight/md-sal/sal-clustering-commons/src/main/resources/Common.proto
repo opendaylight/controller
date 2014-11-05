@@ -63,6 +63,8 @@ message Node{
   repeated string bitsValue = 11; // intValueType = Bits
 
   repeated string code = 12; // A list of string codes which can be used for any repeated strings in the NormalizedNode
+
+  optional bytes bytesValue = 13;
 }
 
 message Container{

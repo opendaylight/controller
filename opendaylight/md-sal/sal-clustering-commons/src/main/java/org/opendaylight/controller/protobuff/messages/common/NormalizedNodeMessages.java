@@ -5410,6 +5410,16 @@ public final class NormalizedNodeMessages {
      */
     com.google.protobuf.ByteString
         getCodeBytes(int index);
+
+    // optional bytes bytesValue = 13;
+    /**
+     * <code>optional bytes bytesValue = 13;</code>
+     */
+    boolean hasBytesValue();
+    /**
+     * <code>optional bytes bytesValue = 13;</code>
+     */
+    com.google.protobuf.ByteString getBytesValue();
   }
   /**
    * Protobuf type {@code org.opendaylight.controller.mdsal.Node}
@@ -5548,6 +5558,11 @@ public final class NormalizedNodeMessages {
                 mutable_bitField0_ |= 0x00000800;
               }
               code_.add(input.readBytes());
+              break;
+            }
+            case 106: {
+              bitField0_ |= 0x00000100;
+              bytesValue_ = input.readBytes();
               break;
             }
           }
@@ -6070,6 +6085,22 @@ public final class NormalizedNodeMessages {
       return code_.getByteString(index);
     }
 
+    // optional bytes bytesValue = 13;
+    public static final int BYTESVALUE_FIELD_NUMBER = 13;
+    private com.google.protobuf.ByteString bytesValue_;
+    /**
+     * <code>optional bytes bytesValue = 13;</code>
+     */
+    public boolean hasBytesValue() {
+      return ((bitField0_ & 0x00000100) == 0x00000100);
+    }
+    /**
+     * <code>optional bytes bytesValue = 13;</code>
+     */
+    public com.google.protobuf.ByteString getBytesValue() {
+      return bytesValue_;
+    }
+
     private void initFields() {
       path_ = "";
       type_ = "";
@@ -6083,6 +6114,7 @@ public final class NormalizedNodeMessages {
       instanceIdentifierValue_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.getDefaultInstance();
       bitsValue_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       code_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      bytesValue_ = com.google.protobuf.ByteString.EMPTY;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -6156,6 +6188,9 @@ public final class NormalizedNodeMessages {
       for (int i = 0; i < code_.size(); i++) {
         output.writeBytes(12, code_.getByteString(i));
       }
+      if (((bitField0_ & 0x00000100) == 0x00000100)) {
+        output.writeBytes(13, bytesValue_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -6222,6 +6257,10 @@ public final class NormalizedNodeMessages {
         }
         size += dataSize;
         size += 1 * getCodeList().size();
+      }
+      if (((bitField0_ & 0x00000100) == 0x00000100)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(13, bytesValue_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -6383,6 +6422,8 @@ public final class NormalizedNodeMessages {
         bitField0_ = (bitField0_ & ~0x00000400);
         code_ = com.google.protobuf.LazyStringArrayList.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000800);
+        bytesValue_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00001000);
         return this;
       }
 
@@ -6481,6 +6522,10 @@ public final class NormalizedNodeMessages {
           bitField0_ = (bitField0_ & ~0x00000800);
         }
         result.code_ = code_;
+        if (((from_bitField0_ & 0x00001000) == 0x00001000)) {
+          to_bitField0_ |= 0x00000100;
+        }
+        result.bytesValue_ = bytesValue_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -6600,6 +6645,9 @@ public final class NormalizedNodeMessages {
             code_.addAll(other.code_);
           }
           onChanged();
+        }
+        if (other.hasBytesValue()) {
+          setBytesValue(other.getBytesValue());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -8106,6 +8154,42 @@ public final class NormalizedNodeMessages {
   }
   ensureCodeIsMutable();
         code_.add(value);
+        onChanged();
+        return this;
+      }
+
+      // optional bytes bytesValue = 13;
+      private com.google.protobuf.ByteString bytesValue_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes bytesValue = 13;</code>
+       */
+      public boolean hasBytesValue() {
+        return ((bitField0_ & 0x00001000) == 0x00001000);
+      }
+      /**
+       * <code>optional bytes bytesValue = 13;</code>
+       */
+      public com.google.protobuf.ByteString getBytesValue() {
+        return bytesValue_;
+      }
+      /**
+       * <code>optional bytes bytesValue = 13;</code>
+       */
+      public Builder setBytesValue(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00001000;
+        bytesValue_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes bytesValue = 13;</code>
+       */
+      public Builder clearBytesValue() {
+        bitField0_ = (bitField0_ & ~0x00001000);
+        bytesValue_ = getDefaultInstance().getBytesValue();
         onChanged();
         return this;
       }
@@ -10287,7 +10371,7 @@ public final class NormalizedNodeMessages {
       "ntroller.mdsal.Attribute\022\017\n\007intType\030\006 \001(" +
       "\005\"f\n\022InstanceIdentifier\022B\n\targuments\030\001 \003" +
       "(\0132/.org.opendaylight.controller.mdsal.P" +
-      "athArgument\022\014\n\004code\030\002 \003(\t\"\245\003\n\004Node\022\014\n\004pa" +
+      "athArgument\022\014\n\004code\030\002 \003(\t\"\271\003\n\004Node\022\014\n\004pa" +
       "th\030\001 \001(\t\022\014\n\004type\030\002 \001(\t\022E\n\014pathArgument\030\003" +
       " \001(\0132/.org.opendaylight.controller.mdsal" +
       ".PathArgument\022\017\n\007intType\030\004 \001(\005\022@\n\nattrib",
@@ -10298,17 +10382,18 @@ public final class NormalizedNodeMessages {
       "pe\030\t \001(\005\022V\n\027instanceIdentifierValue\030\n \001(" +
       "\01325.org.opendaylight.controller.mdsal.In" +
       "stanceIdentifier\022\021\n\tbitsValue\030\013 \003(\t\022\014\n\004c" +
-      "ode\030\014 \003(\t\"`\n\tContainer\022\022\n\nparentPath\030\001 \002" +
-      "(\t\022?\n\016normalizedNode\030\002 \001(\0132\'.org.openday" +
-      "light.controller.mdsal.Node\"\246\001\n\014NodeMapE",
-      "ntry\022U\n\026instanceIdentifierPath\030\001 \002(\01325.o" +
-      "rg.opendaylight.controller.mdsal.Instanc" +
-      "eIdentifier\022?\n\016normalizedNode\030\002 \001(\0132\'.or" +
-      "g.opendaylight.controller.mdsal.Node\"N\n\007" +
-      "NodeMap\022C\n\nmapEntries\030\001 \003(\0132/.org.openda" +
-      "ylight.controller.mdsal.NodeMapEntryBO\n5" +
-      "org.opendaylight.controller.protobuff.me" +
-      "ssages.commonB\026NormalizedNodeMessages"
+      "ode\030\014 \003(\t\022\022\n\nbytesValue\030\r \001(\014\"`\n\tContain" +
+      "er\022\022\n\nparentPath\030\001 \002(\t\022?\n\016normalizedNode" +
+      "\030\002 \001(\0132\'.org.opendaylight.controller.mds",
+      "al.Node\"\246\001\n\014NodeMapEntry\022U\n\026instanceIden" +
+      "tifierPath\030\001 \002(\01325.org.opendaylight.cont" +
+      "roller.mdsal.InstanceIdentifier\022?\n\016norma" +
+      "lizedNode\030\002 \001(\0132\'.org.opendaylight.contr" +
+      "oller.mdsal.Node\"N\n\007NodeMap\022C\n\nmapEntrie" +
+      "s\030\001 \003(\0132/.org.opendaylight.controller.md" +
+      "sal.NodeMapEntryBO\n5org.opendaylight.con" +
+      "troller.protobuff.messages.commonB\026Norma" +
+      "lizedNodeMessages"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -10350,7 +10435,7 @@ public final class NormalizedNodeMessages {
           internal_static_org_opendaylight_controller_mdsal_Node_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_org_opendaylight_controller_mdsal_Node_descriptor,
-              new java.lang.String[] { "Path", "Type", "PathArgument", "IntType", "Attributes", "Child", "Value", "ValueType", "IntValueType", "InstanceIdentifierValue", "BitsValue", "Code", });
+              new java.lang.String[] { "Path", "Type", "PathArgument", "IntType", "Attributes", "Child", "Value", "ValueType", "IntValueType", "InstanceIdentifierValue", "BitsValue", "Code", "BytesValue", });
           internal_static_org_opendaylight_controller_mdsal_Container_descriptor =
             getDescriptor().getMessageTypes().get(6);
           internal_static_org_opendaylight_controller_mdsal_Container_fieldAccessorTable = new
