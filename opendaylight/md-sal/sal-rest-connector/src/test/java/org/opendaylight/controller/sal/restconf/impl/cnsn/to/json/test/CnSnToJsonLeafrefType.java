@@ -63,7 +63,7 @@ public class CnSnToJsonLeafrefType extends YangAndXmlAndDataSchemaLoader {
     @Test
     public void leafrefToNotLeafTest() {
         String json = toJson("/cnsn-to-json/leafref/xml/data_ref_to_not_leaf.xml");
-        validateJson(".*\"cont-augment-module\\p{Blank}*:\\p{Blank}*lf6\":\\p{Blank}*\"44.33\".*", json);
+        validateJson(".*\"cont-augment-module\\p{Blank}*:\\p{Blank}*lf6\":\\p{Blank}*\"44\".*", json);
     }
 
     /**

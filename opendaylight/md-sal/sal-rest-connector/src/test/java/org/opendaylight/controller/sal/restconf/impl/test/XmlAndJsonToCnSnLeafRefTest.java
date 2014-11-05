@@ -12,16 +12,26 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+
 import javax.ws.rs.WebApplicationException;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.Node;
-import org.opendaylight.yangtools.yang.data.api.SimpleNode;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public class XmlAndJsonToCnSnLeafRefTest extends YangAndXmlAndDataSchemaLoader {
+
+    final QName refContQName = QName.create("referenced:module", "2014-04-17", "cont");
+    final QName refLf1QName = QName.create(refContQName, "lf1");
+    final QName contQName = QName.create("leafref:module", "2014-04-17", "cont");
+    final QName lf1QName = QName.create(contQName, "lf1");
+    final QName lf2QName = QName.create(contQName, "lf2");
+    final QName lf3QName = QName.create(contQName, "lf3");
 
     @BeforeClass
     public static void initialize() {
@@ -36,7 +46,11 @@ public class XmlAndJsonToCnSnLeafRefTest extends YangAndXmlAndDataSchemaLoader {
         CompositeNode cnSn = (CompositeNode)node;
 
         TestUtils.normalizeCompositeNode(cnSn, modules, schemaNodePath);
-        verifyContPredicate(cnSn, "/ns:cont/ns:lf1", "/cont/lf1", "/ns:cont/ns:lf1", "../lf1");
+
+        verifyContPredicate(cnSn, "lf4", YangInstanceIdentifier.builder().node(refContQName).node(refLf1QName).build());
+        verifyContPredicate(cnSn, "lf2", YangInstanceIdentifier.builder().node(contQName).node(lf1QName).build());
+        verifyContPredicate(cnSn, "lf3", YangInstanceIdentifier.builder().node(contQName).node(lf2QName).build());
+        verifyContPredicate(cnSn, "lf5", YangInstanceIdentifier.builder().node(contQName).node(lf3QName).build());
     }
 
     @Test
@@ -47,31 +61,23 @@ public class XmlAndJsonToCnSnLeafRefTest extends YangAndXmlAndDataSchemaLoader {
         CompositeNode cnSn = (CompositeNode)node;
 
         TestUtils.normalizeCompositeNode(cnSn, modules, schemaNodePath);
-        verifyContPredicate(cnSn, "/leafref-module:cont/leafref-module:lf1", "/leafref-module:cont/leafref-module:lf1",
-                "/referenced-module:cont/referenced-module:lf1", "/leafref-module:cont/leafref-module:lf1");
+
+        verifyContPredicate(cnSn, "lf4", YangInstanceIdentifier.builder().node(refContQName).node(refLf1QName).build());
+        verifyContPredicate(cnSn, "lf2", YangInstanceIdentifier.builder().node(contQName).node(lf1QName).build());
+        verifyContPredicate(cnSn, "lf3", YangInstanceIdentifier.builder().node(contQName).node(lf2QName).build());
+        verifyContPredicate(cnSn, "lf5", YangInstanceIdentifier.builder().node(contQName).node(lf3QName).build());
     }
 
-    private void verifyContPredicate(CompositeNode cnSn, String... values) throws URISyntaxException {
-        Object lf2Value = null;
-        Object lf3Value = null;
-        Object lf4Value = null;
-        Object lf5Value = null;
+    private void verifyContPredicate(CompositeNode cnSn, String leafName, Object value) throws URISyntaxException {
+        Object parsed = null;
 
-        for (Node<?> node : cnSn.getValue()) {
-            if (node.getNodeType().getLocalName().equals("lf2")) {
-                lf2Value = ((SimpleNode<?>) node).getValue();
-            } else if (node.getNodeType().getLocalName().equals("lf3")) {
-                lf3Value = ((SimpleNode<?>) node).getValue();
-            } else if (node.getNodeType().getLocalName().equals("lf4")) {
-                lf4Value = ((SimpleNode<?>) node).getValue();
-            } else if (node.getNodeType().getLocalName().equals("lf5")) {
-                lf5Value = ((SimpleNode<?>) node).getValue();
+        for (final Node<?> node : cnSn.getValue()) {
+            if (node.getNodeType().getLocalName().equals(leafName)) {
+                parsed = node.getValue();
             }
         }
-        assertEquals(values[0], lf2Value);
-        assertEquals(values[1], lf3Value);
-        assertEquals(values[2], lf4Value);
-        assertEquals(values[3], lf5Value);
+
+        assertEquals(value, parsed);
     }
 
 }

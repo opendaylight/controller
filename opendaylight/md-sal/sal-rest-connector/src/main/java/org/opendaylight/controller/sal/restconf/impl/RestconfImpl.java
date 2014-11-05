@@ -84,7 +84,9 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.type.LeafrefTypeDefinition;
 import org.opendaylight.yangtools.yang.model.util.EmptyType;
+import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil;
 import org.opendaylight.yangtools.yang.parser.builder.impl.ContainerSchemaNodeBuilder;
 import org.opendaylight.yangtools.yang.parser.builder.impl.LeafSchemaNodeBuilder;
 import org.slf4j.Logger;
@@ -1241,7 +1243,9 @@ public class RestconfImpl implements RestconfService {
                 try {
                     this.normalizeNode(nodeWrap, schema, null, mountPoint);
                 } catch (IllegalArgumentException e) {
-                    throw new RestconfDocumentedException(e.getMessage(), ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
+                    RestconfDocumentedException restconfDocumentedException = new RestconfDocumentedException(e.getMessage(), ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
+                    restconfDocumentedException.addSuppressed(e);
+                    throw restconfDocumentedException;
                 }
                 if (nodeWrap instanceof CompositeNodeWrapper) {
                     return ((CompositeNodeWrapper) nodeWrap).unwrap();
@@ -1319,11 +1323,14 @@ public class RestconfImpl implements RestconfService {
         final Object value = simpleNode.getValue();
         Object inputValue = value;
         TypeDefinition<? extends Object> typeDefinition = this.typeDefinition(schema);
-        if ((typeDefinition instanceof IdentityrefTypeDefinition)) {
-            if ((value instanceof String)) {
-                inputValue = new IdentityValuesDTO(simpleNode.getNamespace().toString(), (String) value, null,
-                        (String) value);
-            } // else value is already instance of IdentityValuesDTO
+
+        // For leafrefs, extract the type it is pointing to
+        if(typeDefinition instanceof LeafrefTypeDefinition) {
+            typeDefinition = SchemaContextUtil.getBaseTypeForLeafRef(((LeafrefTypeDefinition) typeDefinition), mountPoint == null ? this.controllerContext.getGlobalSchema() : mountPoint.getSchemaContext(), schema);
+        }
+
+        if (typeDefinition instanceof IdentityrefTypeDefinition) {
+            inputValue = parseToIdentityValuesDTO(simpleNode, value, inputValue);
         }
 
         Object outputValue = inputValue;
@@ -1334,6 +1341,14 @@ public class RestconfImpl implements RestconfService {
         }
 
         simpleNode.setValue(outputValue);
+    }
+
+    private Object parseToIdentityValuesDTO(final SimpleNodeWrapper simpleNode, final Object value, Object inputValue) {
+        if ((value instanceof String)) {
+            inputValue = new IdentityValuesDTO(simpleNode.getNamespace().toString(), (String) value, null,
+                    (String) value);
+        } // else value is already instance of IdentityValuesDTO
+        return inputValue;
     }
 
     private void normalizeCompositeNode(final CompositeNodeWrapper compositeNodeBuilder,
