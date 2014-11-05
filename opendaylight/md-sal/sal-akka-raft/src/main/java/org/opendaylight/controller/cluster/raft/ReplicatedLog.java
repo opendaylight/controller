@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.cluster.raft;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.ByteString;
 
 import java.util.List;
@@ -127,7 +128,7 @@ public interface ReplicatedLog {
      *
      * @return an object representing the snapshot if it exists. null otherwise
      */
-    ByteString getSnapshot();
+    Optional<ByteString> getSnapshot();
 
     /**
      * Get the index of the snapshot
@@ -172,12 +173,10 @@ public interface ReplicatedLog {
     /**
      * Handles all the bookkeeping in order to perform a rollback in the
      * event of SaveSnapshotFailure
-     * @param snapshot
      * @param snapshotCapturedIndex
      * @param snapshotCapturedTerm
      */
-    public void snapshotPreCommit(ByteString snapshot,
-        long snapshotCapturedIndex, long snapshotCapturedTerm);
+    public void snapshotPreCommit(long snapshotCapturedIndex, long snapshotCapturedTerm);
 
     /**
      * Sets the Replicated log to state after snapshot success.

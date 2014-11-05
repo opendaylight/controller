@@ -23,6 +23,7 @@ import org.opendaylight.controller.cluster.datastore.DataPersistenceProviderMoni
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
+import org.opendaylight.controller.cluster.raft.behaviors.Leader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
@@ -611,8 +612,9 @@ public class RaftActorTest extends AbstractActorTest {
                 DataPersistenceProviderMonitor dataPersistenceProviderMonitor = new DataPersistenceProviderMonitor();
                 dataPersistenceProviderMonitor.setSaveSnapshotLatch(persistLatch);
 
-                TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(), MockRaftActor.props(persistenceId,
-                        Collections.EMPTY_MAP, Optional.<ConfigParams>of(config), dataPersistenceProviderMonitor), persistenceId);
+                TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(),
+                    MockRaftActor.props(persistenceId, Collections.EMPTY_MAP,
+                        Optional.<ConfigParams>of(config), dataPersistenceProviderMonitor), persistenceId);
 
                 MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 
@@ -623,6 +625,10 @@ public class RaftActorTest extends AbstractActorTest {
                         new MockRaftActorContext.MockPayload("D")));
 
                 mockRaftActor.onReceiveCommand(new CaptureSnapshot(-1,1,-1,1));
+
+                RaftActorContext raftActorContext = mockRaftActor.getRaftActorContext();
+
+                mockRaftActor.setCurrentBehavior(new Leader(raftActorContext));
 
                 mockRaftActor.onReceiveCommand(new CaptureSnapshotReply(snapshotBytes));
 
@@ -660,6 +666,10 @@ public class RaftActorTest extends AbstractActorTest {
                         new MockRaftActorContext.MockPayload("B"),
                         new MockRaftActorContext.MockPayload("C"),
                         new MockRaftActorContext.MockPayload("D")));
+
+                RaftActorContext raftActorContext = mockRaftActor.getRaftActorContext();
+
+                mockRaftActor.setCurrentBehavior(new Leader(raftActorContext));
 
                 mockRaftActor.onReceiveCommand(new CaptureSnapshot(-1,1,-1,1));
 

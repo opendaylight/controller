@@ -20,6 +20,8 @@ import org.opendaylight.controller.cluster.raft.FollowerLogInformationImpl;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
+import org.opendaylight.controller.cluster.raft.base.messages.InitiateInstallSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapshot;
@@ -66,8 +68,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class Leader extends AbstractRaftActorBehavior {
 
 
-    protected final Map<String, FollowerLogInformation> followerToLog =
-        new HashMap();
+    protected final Map<String, FollowerLogInformation> followerToLog = new HashMap();
     protected final Map<String, FollowerToSnapshot> mapFollowerToSnapshot = new HashMap<>();
 
     private final Set<String> followers;
@@ -247,10 +248,17 @@ public class Leader extends AbstractRaftActorBehavior {
             if (message instanceof SendHeartBeat) {
                 sendHeartBeat();
                 return this;
-            } else if(message instanceof SendInstallSnapshot) {
+
+            } else if(message instanceof InitiateInstallSnapshot) {
                 installSnapshotIfNeeded();
+
+            } else if(message instanceof SendInstallSnapshot) {
+                // received from RaftActor
+                sendInstallSnapshot();
+
             } else if (message instanceof Replicate) {
                 replicate((Replicate) message);
+
             } else if (message instanceof InstallSnapshotReply){
                 handleInstallSnapshotReply(
                     (InstallSnapshotReply) message);
@@ -292,6 +300,12 @@ public class Leader extends AbstractRaftActorBehavior {
                     if(LOG.isDebugEnabled()) {
                         LOG.debug("followerToLog.get(followerId).getNextIndex().get()=" +
                             followerToLog.get(followerId).getNextIndex().get());
+                    }
+
+                    if (mapFollowerToSnapshot.isEmpty()) {
+                        // once there are no pending followers receiving snapshots
+                        // we can remove snapshot from the memory
+                        context.getReplicatedLog().setSnapshot(null);
                     }
 
                 } else {
@@ -374,14 +388,14 @@ public class Leader extends AbstractRaftActorBehavior {
                             // if the follower is just not starting and leader's index
                             // is more than followers index
                             if(LOG.isDebugEnabled()) {
-                                LOG.debug("SendInstallSnapshot to follower:{}," +
+                                LOG.debug("InitiateInstallSnapshot to follower:{}," +
                                         "follower-nextIndex:{}, leader-snapshot-index:{},  " +
                                         "leader-last-index:{}", followerId,
                                     followerNextIndex, leaderSnapShotIndex, leaderLastIndex
                                 );
                             }
 
-                            actor().tell(new SendInstallSnapshot(), actor());
+                            actor().tell(new InitiateInstallSnapshot(), actor());
                         } else {
                             followerActor.tell(
                                 new AppendEntries(currentTerm(), context.getId(),
@@ -401,6 +415,17 @@ public class Leader extends AbstractRaftActorBehavior {
      * An installSnapshot is scheduled at a interval that is a multiple of
      * a HEARTBEAT_INTERVAL. This is to avoid the need to check for installing
      * snapshots at every heartbeat.
+     *
+     * Install Snapshot works as follows
+     * 1. Leader sends a InitiateInstallSnapshot message to self
+     * 2. Leader then initiates the capture snapshot by sending a CaptureSnapshot message to actor
+     * 3. RaftActor on receipt of the CaptureSnapshotReply (from Shard), stores the received snapshot in the replicated log
+     * and makes a call to Leader's handleMessage , with SendInstallSnapshot message.
+     * 4. Leader , picks the snapshot from im-mem ReplicatedLog and sends it in chunks to the Follower
+     * 5. On complete, Follower sends back a InstallSnapshotReply.
+     * 6. On receipt of the InstallSnapshotReply for the last chunk, Leader marks the install complete for that follower
+     * and replenishes the memory by deleting the snapshot in Replicated log.
+     *
      */
     private void installSnapshotIfNeeded(){
         for (String followerId : followers) {
@@ -415,6 +440,58 @@ public class Leader extends AbstractRaftActorBehavior {
 
                 if (!context.getReplicatedLog().isPresent(nextIndex) &&
                     context.getReplicatedLog().isInSnapshot(nextIndex)) {
+                    if (context.getReplicatedLog().getSnapshot().isPresent()) {
+                        // if a snapshot is present in the memory, most likely another install is in progress
+                        // no need to capture snapshot
+                        sendSnapshotChunk(followerActor, followerId);
+
+                    } else {
+                        initiateCaptureSnapshot();
+                        //we just need 1 follower who would need snapshot to be installed.
+                        // when we have the snapshot captured, we would again check (in SendInstallSnapshot)
+                        // who needs an install and send to all who need
+                        break;
+                    }
+
+                }
+            }
+        }
+    }
+
+    // on every install snapshot, we try to capture the snapshot.
+    // Once a capture is going on, another one issued will get ignored by RaftActor.
+    private void initiateCaptureSnapshot() {
+        LOG.info("Initiating Snapshot Capture to Install Snapshot, Leader:{}", getLeaderId());
+        ReplicatedLogEntry lastAppliedEntry = context.getReplicatedLog().get(context.getLastApplied());
+        long lastAppliedIndex = -1;
+        long lastAppliedTerm = -1;
+        if (lastAppliedEntry != null) {
+            lastAppliedIndex = lastAppliedEntry.getIndex();
+            lastAppliedTerm = lastAppliedEntry.getTerm();
+        } else {
+            if (context.getReplicatedLog().getSnapshotIndex() > -1) {
+                lastAppliedIndex = context.getReplicatedLog().getSnapshotIndex();
+                lastAppliedTerm = context.getReplicatedLog().getSnapshotTerm();
+            }
+        }
+        boolean isInstallSnapshotInitiated = true;
+        actor().tell(new CaptureSnapshot(lastIndex(), lastTerm(),
+            lastAppliedIndex, lastAppliedTerm, isInstallSnapshotInitiated),
+            actor());
+    }
+
+
+    private void sendInstallSnapshot() {
+        for (String followerId : followers) {
+            ActorSelection followerActor = context.getPeerActorSelection(followerId);
+
+            if(followerActor != null) {
+                FollowerLogInformation followerLogInformation = followerToLog.get(followerId);
+                long nextIndex = followerLogInformation.getNextIndex().get();
+
+                if (!context.getReplicatedLog().isPresent(nextIndex) &&
+                    context.getReplicatedLog().isInSnapshot(nextIndex)) {
+
                     sendSnapshotChunk(followerActor, followerId);
                 }
             }
@@ -427,20 +504,22 @@ public class Leader extends AbstractRaftActorBehavior {
      */
     private void sendSnapshotChunk(ActorSelection followerActor, String followerId) {
         try {
-            followerActor.tell(
-                new InstallSnapshot(currentTerm(), context.getId(),
-                    context.getReplicatedLog().getSnapshotIndex(),
-                    context.getReplicatedLog().getSnapshotTerm(),
-                    getNextSnapshotChunk(followerId,
-                        context.getReplicatedLog().getSnapshot()),
-                    mapFollowerToSnapshot.get(followerId).incrementChunkIndex(),
-                    mapFollowerToSnapshot.get(followerId).getTotalChunks()
-                ).toSerializable(),
-                actor()
-            );
-            LOG.info("InstallSnapshot sent to follower {}, Chunk: {}/{}",
-                followerActor.path(), mapFollowerToSnapshot.get(followerId).getChunkIndex(),
-                mapFollowerToSnapshot.get(followerId).getTotalChunks());
+            if (context.getReplicatedLog().getSnapshot().isPresent()) {
+                followerActor.tell(
+                    new InstallSnapshot(currentTerm(), context.getId(),
+                        context.getReplicatedLog().getSnapshotIndex(),
+                        context.getReplicatedLog().getSnapshotTerm(),
+                        getNextSnapshotChunk(followerId,
+                            context.getReplicatedLog().getSnapshot().get()),
+                        mapFollowerToSnapshot.get(followerId).incrementChunkIndex(),
+                        mapFollowerToSnapshot.get(followerId).getTotalChunks()
+                    ).toSerializable(),
+                    actor()
+                );
+                LOG.info("InstallSnapshot sent to follower {}, Chunk: {}/{}",
+                    followerActor.path(), mapFollowerToSnapshot.get(followerId).getChunkIndex(),
+                    mapFollowerToSnapshot.get(followerId).getTotalChunks());
+            }
         } catch (IOException e) {
             LOG.error(e, "InstallSnapshot failed for Leader.");
         }
@@ -451,7 +530,8 @@ public class Leader extends AbstractRaftActorBehavior {
      * creates and return a ByteString chunk
      */
     private ByteString getNextSnapshotChunk(String followerId, ByteString snapshotBytes) throws IOException {
-        FollowerToSnapshot followerToSnapshot = mapFollowerToSnapshot.get(followerId);
+        FollowerToSnapshot followerToSnapshot =
+            mapFollowerToSnapshot.get(followerId);
         if (followerToSnapshot == null) {
             followerToSnapshot = new FollowerToSnapshot(snapshotBytes);
             mapFollowerToSnapshot.put(followerId, followerToSnapshot);
@@ -460,7 +540,6 @@ public class Leader extends AbstractRaftActorBehavior {
         if(LOG.isDebugEnabled()) {
             LOG.debug("Leader's snapshot nextChunk size:{}", nextChunk.size());
         }
-
         return nextChunk;
     }
 
