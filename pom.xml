@@ -14,7 +14,6 @@
     <maven>3.0</maven>
   </prerequisites>
   <modules>
-    <module>opendaylight/distribution/opendaylight</module>
 
     <!-- third-parties uncomment them if you need snapshot version of it -->
     <!-- <module>third-party/openflowj</module> -->
@@ -65,16 +64,4 @@
     <tag>HEAD</tag>
     <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
   </scm>
-
-  <profiles>
-    <profile>
-      <id>integrationtests</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
-      <modules>
-        <module>opendaylight/distribution/sanitytest/</module>
-      </modules>
-    </profile>
-  </profiles>
 </project>
