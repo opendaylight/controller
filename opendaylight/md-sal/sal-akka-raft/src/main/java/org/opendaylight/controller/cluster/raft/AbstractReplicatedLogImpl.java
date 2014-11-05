@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import com.google.protobuf.ByteString;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,27 +18,23 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
 
     // We define this as ArrayList so we can use ensureCapacity.
     protected ArrayList<ReplicatedLogEntry> journal;
-    protected ByteString snapshot;
+
     protected long snapshotIndex = -1;
     protected long snapshotTerm = -1;
 
     // to be used for rollback during save snapshot failure
     protected ArrayList<ReplicatedLogEntry> snapshottedJournal;
-    protected ByteString previousSnapshot;
     protected long previousSnapshotIndex = -1;
     protected long previousSnapshotTerm = -1;
 
-    public AbstractReplicatedLogImpl(ByteString state, long snapshotIndex,
+    public AbstractReplicatedLogImpl(long snapshotIndex,
         long snapshotTerm, List<ReplicatedLogEntry> unAppliedEntries) {
-        this.snapshot = state;
         this.snapshotIndex = snapshotIndex;
         this.snapshotTerm = snapshotTerm;
         this.journal = new ArrayList<>(unAppliedEntries);
     }
 
-
     public AbstractReplicatedLogImpl() {
-        this.snapshot = null;
         this.journal = new ArrayList<>();
     }
 
@@ -155,11 +149,6 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     }
 
     @Override
-    public ByteString getSnapshot() {
-        return snapshot;
-    }
-
-    @Override
     public long getSnapshotIndex() {
         return snapshotIndex;
     }
@@ -186,17 +175,12 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     }
 
     @Override
-    public void setSnapshot(ByteString snapshot) {
-        this.snapshot = snapshot;
-    }
-
-    @Override
     public void clear(int startIndex, int endIndex) {
         journal.subList(startIndex, endIndex).clear();
     }
 
     @Override
-    public void snapshotPreCommit(ByteString snapshot, long snapshotCapturedIndex, long snapshotCapturedTerm) {
+    public void snapshotPreCommit(long snapshotCapturedIndex, long snapshotCapturedTerm) {
         snapshottedJournal = new ArrayList<>(journal.size());
 
         snapshottedJournal.addAll(journal.subList(0, (int)(snapshotCapturedIndex - snapshotIndex)));
@@ -207,9 +191,6 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
 
         previousSnapshotTerm = snapshotTerm;
         setSnapshotTerm(snapshotCapturedTerm);
-
-        previousSnapshot = getSnapshot();
-        setSnapshot(snapshot);
     }
 
     @Override
@@ -217,7 +198,6 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
         snapshottedJournal = null;
         previousSnapshotIndex = -1;
         previousSnapshotTerm = -1;
-        previousSnapshot = null;
     }
 
     @Override
@@ -231,9 +211,5 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
 
         snapshotTerm = previousSnapshotTerm;
         previousSnapshotTerm = -1;
-
-        snapshot = previousSnapshot;
-        previousSnapshot = null;
-
     }
 }

@@ -8,18 +8,9 @@
 
 package org.opendaylight.controller.cluster.raft.base.messages;
 
-import com.google.protobuf.ByteString;
-
-import java.io.Serializable;
-
-public class SendInstallSnapshot implements Serializable {
-    private ByteString snapshot;
-
-    public SendInstallSnapshot(ByteString snapshot) {
-        this.snapshot = snapshot;
-    }
-
-    public ByteString getSnapshot() {
-        return snapshot;
-    }
+/**
+ * Internal message by Leader to initiate an install snapshot
+ */
+public class InitiateInstallSnapshot {
 }
+
