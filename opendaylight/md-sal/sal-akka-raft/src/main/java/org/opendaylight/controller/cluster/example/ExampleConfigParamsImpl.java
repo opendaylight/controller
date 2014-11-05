@@ -15,7 +15,7 @@ import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 public class ExampleConfigParamsImpl extends DefaultConfigParamsImpl {
     @Override
     public long getSnapshotBatchCount() {
-        return 50;
+        return 25;
     }
 
     @Override

@@ -1,15 +1,14 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.testkit.JavaTestKit;
+import com.google.common.base.Optional;
 import com.google.protobuf.ByteString;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
-import org.opendaylight.controller.cluster.raft.FollowerLogInformationImpl;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
@@ -17,6 +16,8 @@ import org.opendaylight.controller.cluster.raft.ReplicatedLogImplEntry;
 import org.opendaylight.controller.cluster.raft.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
+import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
+import org.opendaylight.controller.cluster.raft.base.messages.InitiateInstallSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapshot;
@@ -29,6 +30,7 @@ import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages;
+import scala.concurrent.duration.FiniteDuration;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -36,7 +38,7 @@ import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -72,8 +74,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
                     ActorRef followerActor = getTestActor();
 
-                    MockRaftActorContext actorContext =
-                        (MockRaftActorContext) createActorContext();
+                    MockRaftActorContext actorContext = (MockRaftActorContext) createActorContext();
 
                     Map<String, String> peerAddresses = new HashMap();
 
@@ -155,10 +156,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
                         }.get(); // this extracts the received message
 
                     assertEquals("match", out);
-
                 }
-
-
             };
         }};
     }
@@ -214,229 +212,360 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
     }
 
     @Test
-    public void testSendInstallSnapshot() {
-        new LeaderTestKit(getSystem()) {{
+    public void testSendAppendEntriesOnAnInProgressInstallSnapshot() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            ActorRef followerActor = getSystem().actorOf(Props.create(MessageCollectorActor.class));
 
-            new Within(duration("1 seconds")) {
-                protected void run() {
-                    ActorRef followerActor = getTestActor();
+            Map<String, String> peerAddresses = new HashMap();
+            peerAddresses.put(followerActor.path().toString(),
+                followerActor.path().toString());
 
-                    Map<String, String> peerAddresses = new HashMap();
-                    peerAddresses.put(followerActor.path().toString(),
-                        followerActor.path().toString());
+            MockRaftActorContext actorContext =
+                (MockRaftActorContext) createActorContext(leaderActor);
+            actorContext.setPeerAddresses(peerAddresses);
 
+            Map<String, String> leadersSnapshot = new HashMap<>();
+            leadersSnapshot.put("1", "A");
+            leadersSnapshot.put("2", "B");
+            leadersSnapshot.put("3", "C");
 
-                    MockRaftActorContext actorContext =
-                        (MockRaftActorContext) createActorContext(getRef());
-                    actorContext.setPeerAddresses(peerAddresses);
+            //clears leaders log
+            actorContext.getReplicatedLog().removeFrom(0);
 
+            final int followersLastIndex = 2;
+            final int snapshotIndex = 3;
+            final int newEntryIndex = 4;
+            final int snapshotTerm = 1;
+            final int currentTerm = 2;
 
-                    Map<String, String> leadersSnapshot = new HashMap<>();
-                    leadersSnapshot.put("1", "A");
-                    leadersSnapshot.put("2", "B");
-                    leadersSnapshot.put("3", "C");
+            // set the snapshot variables in replicatedlog
+            actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
+            actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
+            actorContext.setCommitIndex(followersLastIndex);
+            //set follower timeout to 2 mins, helps during debugging
+            actorContext.setConfigParams(new MockConfigParamsImpl(120000L, 10));
 
-                    //clears leaders log
-                    actorContext.getReplicatedLog().removeFrom(0);
+            MockLeader leader = new MockLeader(actorContext);
 
-                    final int followersLastIndex = 2;
-                    final int snapshotIndex = 3;
-                    final int newEntryIndex = 4;
-                    final int snapshotTerm = 1;
-                    final int currentTerm = 2;
+            // new entry
+            ReplicatedLogImplEntry entry =
+                new ReplicatedLogImplEntry(newEntryIndex, currentTerm,
+                    new MockRaftActorContext.MockPayload("D"));
 
-                    // set the snapshot variables in replicatedlog
-                    actorContext.getReplicatedLog().setSnapshot(
-                        toByteString(leadersSnapshot));
-                    actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
-                    actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
+            //update follower timestamp
+            leader.markFollowerActive(followerActor.path().toString());
 
-                    MockLeader leader = new MockLeader(actorContext);
-                    // set the follower info in leader
-                    leader.addToFollowerToLog(followerActor.path().toString(), followersLastIndex, -1);
+            ByteString bs = toByteString(leadersSnapshot);
+            leader.setSnapshot(Optional.of(bs));
+            leader.createFollowerToSnapshot(followerActor.path().toString(), bs);
 
-                    // new entry
-                    ReplicatedLogImplEntry entry =
-                        new ReplicatedLogImplEntry(newEntryIndex, currentTerm,
-                            new MockRaftActorContext.MockPayload("D"));
+            //send first chunk and no InstallSnapshotReply received yet
+            leader.getFollowerToSnapshot().getNextChunk();
+            leader.getFollowerToSnapshot().incrementChunkIndex();
 
-                    // this should invoke a sendinstallsnapshot as followersLastIndex < snapshotIndex
-                    RaftActorBehavior raftBehavior = leader.handleMessage(
-                        senderActor, new Replicate(null, "state-id", entry));
+            leader.handleMessage(leaderActor, new SendHeartBeat());
 
-                    assertTrue(raftBehavior instanceof Leader);
+            AppendEntriesMessages.AppendEntries aeproto = (AppendEntriesMessages.AppendEntries)MessageCollectorActor.getFirstMatching(
+                followerActor, AppendEntries.SERIALIZABLE_CLASS);
 
-                    // we might receive some heartbeat messages, so wait till we SendInstallSnapshot
-                    Boolean[] matches = new ReceiveWhile<Boolean>(Boolean.class, duration("2 seconds")) {
-                        @Override
-                        protected Boolean match(Object o) throws Exception {
-                            if (o instanceof SendInstallSnapshot) {
-                                return true;
-                            }
-                            return false;
-                        }
-                    }.get();
+            assertNotNull("AppendEntries should be sent even if InstallSnapshotReply is not " +
+                "received", aeproto);
 
-                    boolean sendInstallSnapshotReceived = false;
-                    for (Boolean b: matches) {
-                        sendInstallSnapshotReceived = b | sendInstallSnapshotReceived;
+            AppendEntries ae = (AppendEntries) SerializationUtils.fromSerializable(aeproto);
+
+            assertTrue("AppendEntries should be sent with empty entries", ae.getEntries().isEmpty());
+
+            //InstallSnapshotReply received
+            leader.getFollowerToSnapshot().markSendStatus(true);
+
+            leader.handleMessage(senderActor, new SendHeartBeat());
+
+            InstallSnapshotMessages.InstallSnapshot isproto = (InstallSnapshotMessages.InstallSnapshot)
+                MessageCollectorActor.getFirstMatching(followerActor,
+                    InstallSnapshot.SERIALIZABLE_CLASS);
+
+            assertNotNull("Installsnapshot should get called for sending the next chunk of snapshot",
+                isproto);
+
+            InstallSnapshot is = (InstallSnapshot) SerializationUtils.fromSerializable(isproto);
+
+            assertEquals(snapshotIndex, is.getLastIncludedIndex());
+
+        }};
+    }
+
+    @Test
+    public void testSendAppendEntriesSnapshotScenario() {
+        new JavaTestKit(getSystem()) {{
+
+            ActorRef followerActor = getTestActor();
+
+            Map<String, String> peerAddresses = new HashMap();
+            peerAddresses.put(followerActor.path().toString(),
+                followerActor.path().toString());
+
+            MockRaftActorContext actorContext =
+                (MockRaftActorContext) createActorContext(getRef());
+            actorContext.setPeerAddresses(peerAddresses);
+
+            Map<String, String> leadersSnapshot = new HashMap<>();
+            leadersSnapshot.put("1", "A");
+            leadersSnapshot.put("2", "B");
+            leadersSnapshot.put("3", "C");
+
+            //clears leaders log
+            actorContext.getReplicatedLog().removeFrom(0);
+
+            final int followersLastIndex = 2;
+            final int snapshotIndex = 3;
+            final int newEntryIndex = 4;
+            final int snapshotTerm = 1;
+            final int currentTerm = 2;
+
+            // set the snapshot variables in replicatedlog
+            actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
+            actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
+            actorContext.setCommitIndex(followersLastIndex);
+
+            Leader leader = new Leader(actorContext);
+
+            // new entry
+            ReplicatedLogImplEntry entry =
+                new ReplicatedLogImplEntry(newEntryIndex, currentTerm,
+                    new MockRaftActorContext.MockPayload("D"));
+
+            //update follower timestamp
+            leader.markFollowerActive(followerActor.path().toString());
+
+            // this should invoke a sendinstallsnapshot as followersLastIndex < snapshotIndex
+            RaftActorBehavior raftBehavior = leader.handleMessage(
+                senderActor, new Replicate(null, "state-id", entry));
+
+            assertTrue(raftBehavior instanceof Leader);
+
+            // we might receive some heartbeat messages, so wait till we InitiateInstallSnapshot
+            Boolean[] matches = new ReceiveWhile<Boolean>(Boolean.class, duration("2 seconds")) {
+                @Override
+                protected Boolean match(Object o) throws Exception {
+                    if (o instanceof InitiateInstallSnapshot) {
+                        return true;
                     }
-
-                    assertTrue(sendInstallSnapshotReceived);
-
+                    return false;
                 }
-            };
+            }.get();
+
+            boolean initiateInitiateInstallSnapshot = false;
+            for (Boolean b: matches) {
+                initiateInitiateInstallSnapshot = b | initiateInitiateInstallSnapshot;
+            }
+
+            assertTrue(initiateInitiateInstallSnapshot);
+        }};
+    }
+
+    @Test
+    public void testInitiateInstallSnapshot() throws Exception {
+        new JavaTestKit(getSystem()) {{
+
+            ActorRef leaderActor = getSystem().actorOf(Props.create(MessageCollectorActor.class));
+
+            ActorRef followerActor = getTestActor();
+
+            Map<String, String> peerAddresses = new HashMap();
+            peerAddresses.put(followerActor.path().toString(),
+                followerActor.path().toString());
+
+
+            MockRaftActorContext actorContext =
+                (MockRaftActorContext) createActorContext(leaderActor);
+            actorContext.setPeerAddresses(peerAddresses);
+
+            Map<String, String> leadersSnapshot = new HashMap<>();
+            leadersSnapshot.put("1", "A");
+            leadersSnapshot.put("2", "B");
+            leadersSnapshot.put("3", "C");
+
+            //clears leaders log
+            actorContext.getReplicatedLog().removeFrom(0);
+
+            final int followersLastIndex = 2;
+            final int snapshotIndex = 3;
+            final int newEntryIndex = 4;
+            final int snapshotTerm = 1;
+            final int currentTerm = 2;
+
+            // set the snapshot variables in replicatedlog
+            actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
+            actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
+            actorContext.setLastApplied(3);
+            actorContext.setCommitIndex(followersLastIndex);
+
+            Leader leader = new Leader(actorContext);
+            // set the snapshot as absent and check if capture-snapshot is invoked.
+            leader.setSnapshot(Optional.<ByteString>absent());
+
+            // new entry
+            ReplicatedLogImplEntry entry =
+                new ReplicatedLogImplEntry(newEntryIndex, currentTerm,
+                    new MockRaftActorContext.MockPayload("D"));
+
+            actorContext.getReplicatedLog().append(entry);
+
+            // this should invoke a sendinstallsnapshot as followersLastIndex < snapshotIndex
+            RaftActorBehavior raftBehavior = leader.handleMessage(
+                leaderActor, new InitiateInstallSnapshot());
+
+            CaptureSnapshot cs = (CaptureSnapshot) MessageCollectorActor.
+                getFirstMatching(leaderActor, CaptureSnapshot.class);
+
+            assertNotNull(cs);
+
+            assertTrue(cs.isInstallSnapshotInitiated());
+            assertEquals(3, cs.getLastAppliedIndex());
+            assertEquals(1, cs.getLastAppliedTerm());
+            assertEquals(4, cs.getLastIndex());
+            assertEquals(2, cs.getLastTerm());
         }};
     }
 
     @Test
     public void testInstallSnapshot() {
-        new LeaderTestKit(getSystem()) {{
+        new JavaTestKit(getSystem()) {{
 
-            new Within(duration("1 seconds")) {
-                protected void run() {
-                    ActorRef followerActor = getTestActor();
+            ActorRef followerActor = getTestActor();
 
-                    Map<String, String> peerAddresses = new HashMap();
-                    peerAddresses.put(followerActor.path().toString(),
-                        followerActor.path().toString());
+            Map<String, String> peerAddresses = new HashMap();
+            peerAddresses.put(followerActor.path().toString(),
+                followerActor.path().toString());
 
-                    MockRaftActorContext actorContext =
-                        (MockRaftActorContext) createActorContext();
-                    actorContext.setPeerAddresses(peerAddresses);
+            MockRaftActorContext actorContext =
+                (MockRaftActorContext) createActorContext();
+            actorContext.setPeerAddresses(peerAddresses);
 
 
-                    Map<String, String> leadersSnapshot = new HashMap<>();
-                    leadersSnapshot.put("1", "A");
-                    leadersSnapshot.put("2", "B");
-                    leadersSnapshot.put("3", "C");
+            Map<String, String> leadersSnapshot = new HashMap<>();
+            leadersSnapshot.put("1", "A");
+            leadersSnapshot.put("2", "B");
+            leadersSnapshot.put("3", "C");
 
-                    //clears leaders log
-                    actorContext.getReplicatedLog().removeFrom(0);
+            //clears leaders log
+            actorContext.getReplicatedLog().removeFrom(0);
 
-                    final int followersLastIndex = 2;
-                    final int snapshotIndex = 3;
-                    final int newEntryIndex = 4;
-                    final int snapshotTerm = 1;
-                    final int currentTerm = 2;
+            final int followersLastIndex = 2;
+            final int snapshotIndex = 3;
+            final int newEntryIndex = 4;
+            final int snapshotTerm = 1;
+            final int currentTerm = 2;
 
-                    // set the snapshot variables in replicatedlog
-                    actorContext.getReplicatedLog().setSnapshot(toByteString(leadersSnapshot));
-                    actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
-                    actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
+            // set the snapshot variables in replicatedlog
+            actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
+            actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
+            actorContext.getTermInformation().update(currentTerm, leaderActor.path().toString());
+            actorContext.setCommitIndex(followersLastIndex);
 
-                    actorContext.getTermInformation().update(currentTerm, leaderActor.path().toString());
+            Leader leader = new Leader(actorContext);
 
-                    MockLeader leader = new MockLeader(actorContext);
-                    // set the follower info in leader
-                    leader.addToFollowerToLog(followerActor.path().toString(), followersLastIndex, -1);
+            // new entry
+            ReplicatedLogImplEntry entry =
+                new ReplicatedLogImplEntry(newEntryIndex, currentTerm,
+                    new MockRaftActorContext.MockPayload("D"));
 
-                    // new entry
-                    ReplicatedLogImplEntry entry =
-                        new ReplicatedLogImplEntry(newEntryIndex, currentTerm,
-                            new MockRaftActorContext.MockPayload("D"));
+            RaftActorBehavior raftBehavior = leader.handleMessage(senderActor,
+                new SendInstallSnapshot(toByteString(leadersSnapshot)));
 
-                    RaftActorBehavior raftBehavior = leader.handleMessage(senderActor, new SendInstallSnapshot());
+            assertTrue(raftBehavior instanceof Leader);
 
-                    assertTrue(raftBehavior instanceof Leader);
-
-                    // check if installsnapshot gets called with the correct values.
-                    final String out =
-                        new ExpectMsg<String>(duration("1 seconds"), "match hint") {
-                            // do not put code outside this method, will run afterwards
-                            protected String match(Object in) {
-                                if (in instanceof InstallSnapshotMessages.InstallSnapshot) {
-                                    InstallSnapshot is = (InstallSnapshot)
-                                        SerializationUtils.fromSerializable(in);
-                                    if (is.getData() == null) {
-                                        return "InstallSnapshot data is null";
-                                    }
-                                    if (is.getLastIncludedIndex() != snapshotIndex) {
-                                        return is.getLastIncludedIndex() + "!=" + snapshotIndex;
-                                    }
-                                    if (is.getLastIncludedTerm() != snapshotTerm) {
-                                        return is.getLastIncludedTerm() + "!=" + snapshotTerm;
-                                    }
-                                    if (is.getTerm() == currentTerm) {
-                                        return is.getTerm() + "!=" + currentTerm;
-                                    }
-
-                                    return "match";
-
-                               } else {
-                                    return "message mismatch:" + in.getClass();
-                                }
+            // check if installsnapshot gets called with the correct values.
+            final String out =
+                new ExpectMsg<String>(duration("1 seconds"), "match hint") {
+                    // do not put code outside this method, will run afterwards
+                    protected String match(Object in) {
+                        if (in instanceof InstallSnapshotMessages.InstallSnapshot) {
+                            InstallSnapshot is = (InstallSnapshot)
+                                SerializationUtils.fromSerializable(in);
+                            if (is.getData() == null) {
+                                return "InstallSnapshot data is null";
                             }
-                        }.get(); // this extracts the received message
+                            if (is.getLastIncludedIndex() != snapshotIndex) {
+                                return is.getLastIncludedIndex() + "!=" + snapshotIndex;
+                            }
+                            if (is.getLastIncludedTerm() != snapshotTerm) {
+                                return is.getLastIncludedTerm() + "!=" + snapshotTerm;
+                            }
+                            if (is.getTerm() == currentTerm) {
+                                return is.getTerm() + "!=" + currentTerm;
+                            }
 
-                    assertEquals("match", out);
-                }
-            };
+                            return "match";
+
+                        } else {
+                            return "message mismatch:" + in.getClass();
+                        }
+                    }
+                }.get(); // this extracts the received message
+
+            assertEquals("match", out);
         }};
     }
 
     @Test
     public void testHandleInstallSnapshotReplyLastChunk() {
-        new LeaderTestKit(getSystem()) {{
-            new Within(duration("1 seconds")) {
-                protected void run() {
-                    ActorRef followerActor = getTestActor();
+        new JavaTestKit(getSystem()) {{
 
-                    Map<String, String> peerAddresses = new HashMap();
-                    peerAddresses.put(followerActor.path().toString(),
-                        followerActor.path().toString());
+            ActorRef followerActor = getTestActor();
 
-                    MockRaftActorContext actorContext =
-                        (MockRaftActorContext) createActorContext();
-                    actorContext.setPeerAddresses(peerAddresses);
+            Map<String, String> peerAddresses = new HashMap();
+            peerAddresses.put(followerActor.path().toString(),
+                followerActor.path().toString());
 
-                    final int followersLastIndex = 2;
-                    final int snapshotIndex = 3;
-                    final int newEntryIndex = 4;
-                    final int snapshotTerm = 1;
-                    final int currentTerm = 2;
+            final int followersLastIndex = 2;
+            final int snapshotIndex = 3;
+            final int newEntryIndex = 4;
+            final int snapshotTerm = 1;
+            final int currentTerm = 2;
 
-                    MockLeader leader = new MockLeader(actorContext);
-                    // set the follower info in leader
-                    leader.addToFollowerToLog(followerActor.path().toString(), followersLastIndex, -1);
+            MockRaftActorContext actorContext =
+                (MockRaftActorContext) createActorContext();
+            actorContext.setPeerAddresses(peerAddresses);
+            actorContext.setCommitIndex(followersLastIndex);
 
-                    Map<String, String> leadersSnapshot = new HashMap<>();
-                    leadersSnapshot.put("1", "A");
-                    leadersSnapshot.put("2", "B");
-                    leadersSnapshot.put("3", "C");
+            MockLeader leader = new MockLeader(actorContext);
 
-                    // set the snapshot variables in replicatedlog
-                    actorContext.getReplicatedLog().setSnapshot(
-                        toByteString(leadersSnapshot));
-                    actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
-                    actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
-                    actorContext.getTermInformation().update(currentTerm, leaderActor.path().toString());
+            Map<String, String> leadersSnapshot = new HashMap<>();
+            leadersSnapshot.put("1", "A");
+            leadersSnapshot.put("2", "B");
+            leadersSnapshot.put("3", "C");
 
-                    ByteString bs = toByteString(leadersSnapshot);
-                    leader.createFollowerToSnapshot(followerActor.path().toString(), bs);
-                    while(!leader.getFollowerToSnapshot().isLastChunk(leader.getFollowerToSnapshot().getChunkIndex())) {
-                        leader.getFollowerToSnapshot().getNextChunk();
-                        leader.getFollowerToSnapshot().incrementChunkIndex();
-                    }
+            // set the snapshot variables in replicatedlog
 
-                    //clears leaders log
-                    actorContext.getReplicatedLog().removeFrom(0);
+            actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
+            actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
+            actorContext.getTermInformation().update(currentTerm, leaderActor.path().toString());
 
-                    RaftActorBehavior raftBehavior = leader.handleMessage(senderActor,
-                        new InstallSnapshotReply(currentTerm, followerActor.path().toString(),
-                            leader.getFollowerToSnapshot().getChunkIndex(), true));
+            ByteString bs = toByteString(leadersSnapshot);
+            leader.setSnapshot(Optional.of(bs));
+            leader.createFollowerToSnapshot(followerActor.path().toString(), bs);
+            while(!leader.getFollowerToSnapshot().isLastChunk(leader.getFollowerToSnapshot().getChunkIndex())) {
+                leader.getFollowerToSnapshot().getNextChunk();
+                leader.getFollowerToSnapshot().incrementChunkIndex();
+            }
 
-                    assertTrue(raftBehavior instanceof Leader);
+            //clears leaders log
+            actorContext.getReplicatedLog().removeFrom(0);
 
-                    assertEquals(leader.mapFollowerToSnapshot.size(), 0);
-                    assertEquals(leader.followerToLog.size(), 1);
-                    assertNotNull(leader.followerToLog.get(followerActor.path().toString()));
-                    FollowerLogInformation fli = leader.followerToLog.get(followerActor.path().toString());
-                    assertEquals(snapshotIndex, fli.getMatchIndex().get());
-                    assertEquals(snapshotIndex, fli.getMatchIndex().get());
-                    assertEquals(snapshotIndex + 1, fli.getNextIndex().get());
-                }
-            };
+            RaftActorBehavior raftBehavior = leader.handleMessage(senderActor,
+                new InstallSnapshotReply(currentTerm, followerActor.path().toString(),
+                    leader.getFollowerToSnapshot().getChunkIndex(), true));
+
+            assertTrue(raftBehavior instanceof Leader);
+
+            assertEquals(leader.mapFollowerToSnapshot.size(), 0);
+            assertEquals(leader.followerToLog.size(), 1);
+            assertNotNull(leader.followerToLog.get(followerActor.path().toString()));
+            FollowerLogInformation fli = leader.followerToLog.get(followerActor.path().toString());
+            assertEquals(snapshotIndex, fli.getMatchIndex().get());
+            assertEquals(snapshotIndex, fli.getMatchIndex().get());
+            assertEquals(snapshotIndex + 1, fli.getNextIndex().get());
         }};
     }
 
@@ -584,6 +713,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
             followerActorContext.setCommitIndex(1);
 
             Leader leader = new Leader(leaderActorContext);
+            leader.markFollowerActive(followerActor.path().toString());
 
             leader.handleMessage(leaderActor, new SendHeartBeat());
 
@@ -652,6 +782,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
             followerActorContext.setCommitIndex(2);
 
             Leader leader = new Leader(leaderActorContext);
+            leader.markFollowerActive(followerActor.path().toString());
 
             leader.handleMessage(leaderActor, new SendHeartBeat());
 
@@ -816,44 +947,12 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
     }
 
-    private static class LeaderTestKit extends JavaTestKit {
-
-        private LeaderTestKit(ActorSystem actorSystem) {
-            super(actorSystem);
-        }
-
-        protected void waitForLogMessage(final Class logLevel, ActorRef subject, String logMessage){
-            // Wait for a specific log message to show up
-            final boolean result =
-            new JavaTestKit.EventFilter<Boolean>(logLevel
-            ) {
-                @Override
-                protected Boolean run() {
-                    return true;
-                }
-            }.from(subject.path().toString())
-                .message(logMessage)
-                .occurrences(1).exec();
-
-            Assert.assertEquals(true, result);
-
-        }
-    }
-
     class MockLeader extends Leader {
 
         FollowerToSnapshot fts;
 
         public MockLeader(RaftActorContext context){
             super(context);
-        }
-
-        public void addToFollowerToLog(String followerId, long nextIndex, long matchIndex) {
-            FollowerLogInformation followerLogInformation =
-                new FollowerLogInformationImpl(followerId,
-                    new AtomicLong(nextIndex),
-                    new AtomicLong(matchIndex));
-            followerToLog.put(followerId, followerLogInformation);
         }
 
         public FollowerToSnapshot getFollowerToSnapshot() {
@@ -864,6 +963,28 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
             fts = new FollowerToSnapshot(bs);
             mapFollowerToSnapshot.put(followerId, fts);
 
+        }
+    }
+
+    private class MockConfigParamsImpl extends DefaultConfigParamsImpl {
+
+        private long electionTimeOutIntervalMillis;
+        private int snapshotChunkSize;
+
+        public MockConfigParamsImpl(long electionTimeOutIntervalMillis, int snapshotChunkSize) {
+            super();
+            this.electionTimeOutIntervalMillis = electionTimeOutIntervalMillis;
+            this.snapshotChunkSize = snapshotChunkSize;
+        }
+
+        @Override
+        public FiniteDuration getElectionTimeOutInterval() {
+            return new FiniteDuration(electionTimeOutIntervalMillis, TimeUnit.MILLISECONDS);
+        }
+
+        @Override
+        public int getSnapshotChunkSize() {
+            return snapshotChunkSize;
         }
     }
 }
