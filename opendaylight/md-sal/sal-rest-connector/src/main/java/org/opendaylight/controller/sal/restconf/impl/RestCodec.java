@@ -88,11 +88,6 @@ public class RestCodec {
                             "Value is not instance of IdentityrefTypeDefinition but is {}. Therefore NULL is used as translation of  - {}",
                             input == null ? "null" : input.getClass(), String.valueOf(input));
                     return null;
-                } else if (type instanceof LeafrefTypeDefinition) {
-                    if (input instanceof IdentityValuesDTO) {
-                        return LEAFREF_DEFAULT_CODEC.deserialize(((IdentityValuesDTO) input).getOriginValue());
-                    }
-                    return LEAFREF_DEFAULT_CODEC.deserialize(input);
                 } else if (type instanceof InstanceIdentifierTypeDefinition) {
                     if (input instanceof IdentityValuesDTO) {
                         return instanceIdentifier.deserialize(input);
@@ -232,7 +227,7 @@ public class RestCodec {
             IdentityValue valueWithNamespace = data.getValuesWithNamespaces().get(0);
             Module module = getModuleByNamespace(valueWithNamespace.getNamespace(), mountPoint);
             if (module == null) {
-                logger.info("Module by namespace '{}' of first node in instance-identiefier was not found.",
+                logger.info("Module by namespace '{}' of first node in instance-identifier was not found.",
                         valueWithNamespace.getNamespace());
                 logger.info("Instance-identifier will be translated as NULL for data - {}",
                         String.valueOf(valueWithNamespace.getValue()));
