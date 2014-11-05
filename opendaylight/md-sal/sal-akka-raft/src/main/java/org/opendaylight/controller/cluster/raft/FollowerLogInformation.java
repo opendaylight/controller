@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.cluster.raft;
 
+import scala.concurrent.duration.FiniteDuration;
+
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -60,6 +62,18 @@ public interface FollowerLogInformation {
      *    (initialized to 0, increases monotonically)
      */
     public AtomicLong getMatchIndex();
+
+    /**
+     * Checks if the follower is active by comparing the last updated with the duration
+     * @param timeoutDuration - duration to check if the follower has timed out
+     * @return
+     */
+    public boolean isFollowerActive(FiniteDuration timeoutDuration);
+
+    /**
+     * restarts the timeout clock of the follower
+     */
+    public void markFollowerActive();
 
 
 }
