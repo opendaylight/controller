@@ -53,6 +53,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_03bed3ff",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-11-05T08:43:49Z",
+      "side": 1,
+      "message": "That type would probably come from a different API, so not necessarily directly from an implementation.\n\nThat API would contain a subinterface, which would override this method and upgrade the return type to ListenableFuture\u003c? extends NotificationDeliveryStatistics\u003e -- which is made possible by this construct.",
+      "parentUuid": "ba8cc1f7_48207a49",
+      "revId": "86e5005002e1a24fa17d38d53a459172c1fd3dd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_080352b9",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
         "patchSetId": 10
@@ -138,6 +156,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_23bbd70f",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-11-05T08:43:49Z",
+      "side": 1,
+      "message": "Actually, rather than throwing an exception we will return WOULD_BLOCK (yeah, I know, it\u0027s the wrong name), for performance reasons.",
+      "parentUuid": "ba8cc1f7_e8314ea3",
+      "revId": "86e5005002e1a24fa17d38d53a459172c1fd3dd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_a814a6f5",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationService.java",
         "patchSetId": 10
@@ -149,6 +185,24 @@
       "writtenOn": "2014-11-04T15:21:46Z",
       "side": 1,
       "message": "I like the varargs - covers single and multiple regs. Given that, do we still need the method that takes a Collection?",
+      "revId": "86e5005002e1a24fa17d38d53a459172c1fd3dd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_e3d5ef43",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationService.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-11-05T08:43:49Z",
+      "side": 1,
+      "message": "Yes we do need it, since we do not want to force users to convert collections into arrays. The primary implementation should work on Collection, and this one should work by doing just:\nregisterNotificationListener(listener, Arrays.asList(types));",
+      "parentUuid": "ba8cc1f7_a814a6f5",
       "revId": "86e5005002e1a24fa17d38d53a459172c1fd3dd9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
