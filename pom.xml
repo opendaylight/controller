@@ -14,7 +14,6 @@
     <maven>3.0</maven>
   </prerequisites>
   <modules>
-    <module>opendaylight/distribution/opendaylight</module>
     <module>opendaylight/forwarding/staticrouting</module>
     <module>opendaylight/clustering/services</module>
     <module>opendaylight/clustering/services_implementation</module>
@@ -164,7 +163,6 @@
         <module>opendaylight/statisticsmanager/integrationtest</module>
         <module>opendaylight/commons/integrationtest</module>
         <module>opendaylight/containermanager/it.implementation</module>
-        <module>opendaylight/distribution/sanitytest/</module>
       </modules>
     </profile>
     <profile>
