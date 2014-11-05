@@ -84,7 +84,9 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.type.LeafrefTypeDefinition;
 import org.opendaylight.yangtools.yang.model.util.EmptyType;
+import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil;
 import org.opendaylight.yangtools.yang.parser.builder.impl.ContainerSchemaNodeBuilder;
 import org.opendaylight.yangtools.yang.parser.builder.impl.LeafSchemaNodeBuilder;
 import org.slf4j.Logger;
@@ -1319,11 +1321,18 @@ public class RestconfImpl implements RestconfService {
         final Object value = simpleNode.getValue();
         Object inputValue = value;
         TypeDefinition<? extends Object> typeDefinition = this.typeDefinition(schema);
-        if ((typeDefinition instanceof IdentityrefTypeDefinition)) {
-            if ((value instanceof String)) {
-                inputValue = new IdentityValuesDTO(simpleNode.getNamespace().toString(), (String) value, null,
-                        (String) value);
-            } // else value is already instance of IdentityValuesDTO
+        if (typeDefinition instanceof IdentityrefTypeDefinition) {
+            inputValue = parseToIdentityValuesDTO(simpleNode, value, inputValue);
+        }
+
+        if(typeDefinition instanceof LeafrefTypeDefinition) {
+            // FIXME non absolute leafrefs do not work yet
+            if(((LeafrefTypeDefinition) typeDefinition).getPathStatement().isAbsolute()) {
+                TypeDefinition<?> baseTypeForLeafRef = SchemaContextUtil.getBaseTypeForLeafRef(((LeafrefTypeDefinition) typeDefinition), mountPoint == null ? this.controllerContext.getGlobalSchema() : mountPoint.getSchemaContext(), schema);
+                if (baseTypeForLeafRef instanceof IdentityrefTypeDefinition) {
+                    inputValue = parseToIdentityValuesDTO(simpleNode, value, inputValue);
+                }
+            }
         }
 
         Object outputValue = inputValue;
@@ -1334,6 +1343,14 @@ public class RestconfImpl implements RestconfService {
         }
 
         simpleNode.setValue(outputValue);
+    }
+
+    private Object parseToIdentityValuesDTO(final SimpleNodeWrapper simpleNode, final Object value, Object inputValue) {
+        if ((value instanceof String)) {
+            inputValue = new IdentityValuesDTO(simpleNode.getNamespace().toString(), (String) value, null,
+                    (String) value);
+        } // else value is already instance of IdentityValuesDTO
+        return inputValue;
     }
 
     private void normalizeCompositeNode(final CompositeNodeWrapper compositeNodeBuilder,
