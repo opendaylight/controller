@@ -253,37 +253,4 @@ public class NetconfToRpcRequestTest {
         assertEquals(streamName.getLocalName(), "stream-name");
     }
 
-    @Test
-    public void testNoSchemaContextToRpcRequest() throws Exception {
-        final String exampleNamespace = "http://example.net/me/my-own/1.0";
-        final String exampleRevision = "2014-07-22";
-        final QName myOwnMethodRpcQName = QName.create(exampleNamespace, exampleRevision, "my-own-method");
-
-        final CompositeNodeBuilder<ImmutableCompositeNode> rootBuilder = ImmutableCompositeNode.builder();
-        rootBuilder.setQName(myOwnMethodRpcQName);
-
-        final CompositeNodeBuilder<ImmutableCompositeNode> inputBuilder = ImmutableCompositeNode.builder();
-        inputBuilder.setQName(QName.create(exampleNamespace, exampleRevision, "input"));
-        inputBuilder.addLeaf(QName.create(exampleNamespace, exampleRevision, "my-first-parameter"), "14");
-        inputBuilder.addLeaf(QName.create(exampleNamespace, exampleRevision, "another-parameter"), "fred");
-
-        rootBuilder.add(inputBuilder.toInstance());
-        final ImmutableCompositeNode root = rootBuilder.toInstance();
-
-        final NetconfMessage message = messageTransformer.toRpcRequest(myOwnMethodRpcQName, root);
-        assertNotNull(message);
-
-        final Document xmlDoc = message.getDocument();
-        final org.w3c.dom.Node rpcChild = xmlDoc.getFirstChild();
-        assertEquals(rpcChild.getLocalName(), "rpc");
-
-        final org.w3c.dom.Node myOwnMethodNode = rpcChild.getFirstChild();
-        assertEquals(myOwnMethodNode.getLocalName(), "my-own-method");
-
-        final org.w3c.dom.Node firstParamNode = myOwnMethodNode.getFirstChild();
-        assertEquals(firstParamNode.getLocalName(), "my-first-parameter");
-
-        final org.w3c.dom.Node secParamNode = firstParamNode.getNextSibling();
-        assertEquals(secParamNode.getLocalName(), "another-parameter");
-    }
 }
