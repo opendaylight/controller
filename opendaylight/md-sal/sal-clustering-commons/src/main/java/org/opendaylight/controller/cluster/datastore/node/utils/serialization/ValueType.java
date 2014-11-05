@@ -29,7 +29,8 @@ public enum ValueType {
     YANG_IDENTIFIER_TYPE,
     STRING_TYPE,
     BIG_INTEGER_TYPE,
-    BIG_DECIMAL_TYPE;
+    BIG_DECIMAL_TYPE,
+    BINARY_TYPE;
 
     private static Map<Class, ValueType> types = new HashMap<>();
 
@@ -45,6 +46,7 @@ public enum ValueType {
         types.put(Short.class,SHORT_TYPE);
         types.put(BigInteger.class, BIG_INTEGER_TYPE);
         types.put(BigDecimal.class, BIG_DECIMAL_TYPE);
+        types.put(byte[].class, BINARY_TYPE);
     }
 
     public static final ValueType getSerializableType(Object node){
