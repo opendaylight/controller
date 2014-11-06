@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_5fbb4b0e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/FollowerLogInformation.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-06T17:17:59Z",
+      "side": 1,
+      "message": "would be better to name this isActive?",
+      "revId": "b50881e980605d5dd1b7f392e7c9316ef3ca4580",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_ff37bfae",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/FollowerLogInformation.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-06T17:17:59Z",
+      "side": 1,
+      "message": "markActive?",
+      "revId": "b50881e980605d5dd1b7f392e7c9316ef3ca4580",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_1f3dc38f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/FollowerLogInformationImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-06T17:17:59Z",
+      "side": 1,
+      "message": "will timeoutDuration be changing constantly? If not would it make sense to make it a field?",
+      "revId": "b50881e980605d5dd1b7f392e7c9316ef3ca4580",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_df5d1beb",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 652,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-06T17:17:59Z",
+      "side": 1,
+      "message": "Should the snapshot be set on the leader instead of replicated log? I think an elegant way of doing this may be add a method sendInstallSnapshot on Leader. You simply call it when snapshot needs to be installed. That method could save the snapshot in a field of the Leader class. If the behavior were to change we would automatically lose the snapshot that way.",
+      "revId": "b50881e980605d5dd1b7f392e7c9316ef3ca4580",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_9f48f32e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 662,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-06T17:17:59Z",
+      "side": 1,
+      "message": "It seems to me that if this method was inadvertently called for a non-leader behavior there would be no complaints. Do you think it makes sense to either take a parameter of type Leader and call handleMessage on it?",
+      "revId": "b50881e980605d5dd1b7f392e7c9316ef3ca4580",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_3f5527c6",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 859,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-06T17:17:59Z",
+      "side": 1,
+      "message": "Since setCurrentBehavior/getCurrentBehavior are Visible for testing how about making them package-private to limit access?",
+      "revId": "b50881e980605d5dd1b7f392e7c9316ef3ca4580",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_ff5edfe8",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 407,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-06T17:17:59Z",
+      "side": 1,
+      "message": "if we find that the follower is not active then we may want to send AppendEntries without the entries as an optimization. This will save on serialization costs.",
+      "revId": "b50881e980605d5dd1b7f392e7c9316ef3ca4580",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_7f72cf7d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 481,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-06T17:17:59Z",
+      "side": 1,
+      "message": "else if?",
+      "revId": "b50881e980605d5dd1b7f392e7c9316ef3ca4580",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_9f6f9392",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 544,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-06T17:17:59Z",
+      "side": 1,
+      "message": "split line",
+      "revId": "b50881e980605d5dd1b7f392e7c9316ef3ca4580",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_3f6c479c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 722,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-06T17:17:59Z",
+      "side": 1,
+      "message": "Since this is a public method I don\u0027t see why we need to annotate it with VisibleForTesting",
+      "revId": "b50881e980605d5dd1b7f392e7c9316ef3ca4580",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
