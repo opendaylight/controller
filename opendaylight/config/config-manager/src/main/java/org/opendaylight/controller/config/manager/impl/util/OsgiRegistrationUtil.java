@@ -9,7 +9,6 @@
 package org.opendaylight.controller.config.manager.impl.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -27,7 +26,7 @@ public class OsgiRegistrationUtil {
     }
 
     @SafeVarargs
-    public static <T> AutoCloseable registerService(BundleContext bundleContext, T service, Class<? super T> ... interfaces) {
+    public static <T> AutoCloseable registerService(final BundleContext bundleContext, final T service, final Class<? super T> ... interfaces) {
         checkNotNull(service);
         checkNotNull(interfaces);
         List<AutoCloseable> autoCloseableList = new ArrayList<>();
@@ -48,7 +47,7 @@ public class OsgiRegistrationUtil {
         };
     }
 
-    public static AutoCloseable wrap(final BundleTracker bundleTracker) {
+    public static AutoCloseable wrap(final BundleTracker<?> bundleTracker) {
         checkNotNull(bundleTracker);
         return new AutoCloseable() {
             @Override
