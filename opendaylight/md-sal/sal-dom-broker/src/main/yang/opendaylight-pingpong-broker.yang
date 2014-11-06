@@ -1,0 +1,39 @@
+module opendaylight-pingpong-broker {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:pingpong";
+    prefix "pingpong";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import opendaylight-md-sal-dom {prefix sal;}
+    import opendaylight-md-sal-common {prefix common;}
+    import opendaylight-config-dom-datastore {prefix config-dom-store-spi;}
+    import opendaylight-operational-dom-datastore {prefix operational-dom-store-spi;}
+
+    description
+        "Service definition for Ping-Pong DOM broker";
+
+    revision "2014-11-07" {
+        description
+            "Initial revision";
+    }
+
+    identity pingpong-data-broker {
+        base config:module-type;
+        config:provided-service sal:dom-async-data-broker;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case pingpong-data-broker {
+            when "/config:modules/config:module/config:type = 'pingpong-data-broker'";
+
+            container data-broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity sal:dom-async-data-broker;
+                    }
+                }
+            }
+        }
+    }
+}
