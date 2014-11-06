@@ -7,14 +7,16 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterables;
-import com.google.common.util.concurrent.CheckedFuture;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
+
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationException;
+import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationOperation;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
@@ -22,6 +24,11 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
+import com.google.common.util.concurrent.CheckedFuture;
 
 /**
  *
@@ -98,8 +105,8 @@ public abstract class AbstractWriteTransaction<T extends DOMDataWriteTransaction
     private void ensureListParentIfNeeded(final LogicalDatastoreType store, final InstanceIdentifier<?> path,
             final Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> normalized) {
         if (Identifiable.class.isAssignableFrom(path.getTargetType())) {
-            YangInstanceIdentifier parentMapPath = getParent(normalized.getKey()).get();
-            NormalizedNode<?, ?> emptyParent = getCodec().getDefaultNodeFor(parentMapPath);
+            final YangInstanceIdentifier parentMapPath = getParent(normalized.getKey()).get();
+            final NormalizedNode<?, ?> emptyParent = getCodec().getDefaultNodeFor(parentMapPath);
             getDelegate().merge(store, parentMapPath, emptyParent);
         }
     }
@@ -108,8 +115,8 @@ public abstract class AbstractWriteTransaction<T extends DOMDataWriteTransaction
     protected static Optional<YangInstanceIdentifier> getParent(
             final YangInstanceIdentifier child) {
 
-        Iterable<PathArgument> mapEntryItemPath = child.getPathArguments();
-        int parentPathSize = Iterables.size(mapEntryItemPath) - 1;
+        final Iterable<PathArgument> mapEntryItemPath = child.getPathArguments();
+        final int parentPathSize = Iterables.size(mapEntryItemPath) - 1;
         if (parentPathSize > 1) {
             return Optional.of(YangInstanceIdentifier.create(Iterables.limit(mapEntryItemPath,  parentPathSize)));
         } else if(parentPathSize == 0) {
@@ -127,8 +134,28 @@ public abstract class AbstractWriteTransaction<T extends DOMDataWriteTransaction
      * @param key
      * @param path
      */
-    protected abstract void ensureParentsByMerge(LogicalDatastoreType store,
-            YangInstanceIdentifier key, InstanceIdentifier<?> path);
+    protected final void ensureParentsByMerge(final LogicalDatastoreType store,
+            final YangInstanceIdentifier normalizedPath, final InstanceIdentifier<?> path) {
+        final List<PathArgument> currentArguments = new ArrayList<>();
+        DataNormalizationOperation<?> currentOp = getCodec().getDataNormalizer().getRootOperation();
+        final Iterator<PathArgument> iterator = normalizedPath.getPathArguments().iterator();
+        while (iterator.hasNext()) {
+            final PathArgument currentArg = iterator.next();
+            // We process up to last element, last element is inserted and provided by user
+            if (iterator.hasNext()) {
+                try {
+                    currentOp = currentOp.getChild(currentArg);
+                } catch (final DataNormalizationException e) {
+                    throw new IllegalArgumentException(String.format("Invalid child encountered in path %s", path), e);
+                }
+                currentArguments.add(currentArg);
+                final YangInstanceIdentifier currentPath = YangInstanceIdentifier.create(currentArguments);
+
+                getDelegate().merge(store, currentPath, currentOp.createDefault(currentArg));
+            }
+        }
+
+    }
 
     protected final void doDelete(final LogicalDatastoreType store,
             final InstanceIdentifier<?> path) {
