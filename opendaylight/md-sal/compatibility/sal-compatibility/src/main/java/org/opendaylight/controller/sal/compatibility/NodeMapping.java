@@ -199,21 +199,21 @@ public final class NodeMapping {
     }
 
     public static Object toADNodeConnectorId(final NodeConnectorId nodeConnectorId, final NodeId nodeId) {
-        if (nodeConnectorId.equals(toLocalNodeConnectorId(nodeId)) ||
-                nodeConnectorId.equals(toNormalNodeConnectorId(nodeId)) ||
-                nodeConnectorId.equals(toControllerNodeConnectorId(nodeId))) {
-            return org.opendaylight.controller.sal.core.NodeConnector.SPECIALNODECONNECTORID;
-        }
-
         String nodeConnectorIdStripped = ALL_CHARS_TO_COLON.matcher(nodeConnectorId.getValue()).replaceFirst("");
 
+        if (nodeConnectorIdStripped.equals(OutputPortValues.LOCAL.toString()) ||
+            nodeConnectorIdStripped.equals(OutputPortValues.NORMAL.toString()) ||
+            nodeConnectorIdStripped.equals(OutputPortValues.CONTROLLER.toString())) {
+            return org.opendaylight.controller.sal.core.NodeConnector.SPECIALNODECONNECTORID;
+        }
         if (NUMBERS_ONLY.matcher(nodeConnectorIdStripped).matches()) {
             Short nodeConnectorIdVal = null;
             try {
                 nodeConnectorIdVal = Short.valueOf(nodeConnectorIdStripped);
                 return nodeConnectorIdVal;
             } catch (NumberFormatException e) {
-                LOG.warn("nodeConnectorId not supported (long): {}", nodeConnectorIdStripped, e);
+                LOG.warn("nodeConnectorId not supported (long): {} for nodeId: {}",
+                         nodeConnectorIdStripped, nodeId, e);
             }
         }
         return nodeConnectorIdStripped;
