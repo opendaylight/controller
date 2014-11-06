@@ -1,11 +1,17 @@
 package org.opendaylight.controller.cluster.datastore;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
@@ -26,16 +32,10 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
 
@@ -566,31 +566,84 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
 
             // 2. Write some data
 
-            NormalizedNode<?, ?> containerNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
-            writeTx.write(TestModel.TEST_PATH, containerNode);
+            NormalizedNode<?, ?> testNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            writeTx.write(TestModel.TEST_PATH, testNode);
 
             // 3. Ready the Tx for commit
 
-            DOMStoreThreePhaseCommitCohort cohort = writeTx.ready();
+            final DOMStoreThreePhaseCommitCohort cohort1 = writeTx.ready();
 
-            // 4. Commit the Tx
+            // 4. Commit the Tx on another thread that first waits for the second read Tx.
 
-            Boolean canCommit = cohort.canCommit().get(5, TimeUnit.SECONDS);
-            assertEquals("canCommit", true, canCommit);
-            cohort.preCommit().get(5, TimeUnit.SECONDS);
-            cohort.commit().get(5, TimeUnit.SECONDS);
+            final CountDownLatch continueCommit1 = new CountDownLatch(1);
+            final CountDownLatch commit1Done = new CountDownLatch(1);
+            final AtomicReference<Exception> commit1Error = new AtomicReference<>();
+            new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        continueCommit1.await();
+                        doCommit(cohort1);
+                    } catch (Exception e) {
+                        commit1Error.set(e);
+                    } finally {
+                        commit1Done.countDown();
+                    }
+                }
+            }.start();
 
-            // 5. Verify the data in the store
+            // 5. Create a new read Tx from the chain to read and verify the data from the first
+            // Tx is visible after being readied.
 
             DOMStoreReadTransaction readTx = txChain.newReadOnlyTransaction();
-
             Optional<NormalizedNode<?, ?>> optional = readTx.read(TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
             assertEquals("isPresent", true, optional.isPresent());
-            assertEquals("Data node", containerNode, optional.get());
+            assertEquals("Data node", testNode, optional.get());
+
+            // 6. Create a new RW Tx from the chain, write more data, and ready it
+
+            DOMStoreReadWriteTransaction rwTx = txChain.newReadWriteTransaction();
+            MapNode outerNode = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build();
+            rwTx.write(TestModel.OUTER_LIST_PATH, outerNode);
+
+            DOMStoreThreePhaseCommitCohort cohort2 = rwTx.ready();
+
+            // 7. Create a new read Tx from the chain to read the data from the last RW Tx to
+            // verify it is visible.
+
+            readTx = txChain.newReadOnlyTransaction();
+            optional = readTx.read(TestModel.OUTER_LIST_PATH).get(5, TimeUnit.SECONDS);
+            assertEquals("isPresent", true, optional.isPresent());
+            assertEquals("Data node", outerNode, optional.get());
+
+            // 8. Wait for the 2 commits to complete and close the chain.
+
+            continueCommit1.countDown();
+            Uninterruptibles.awaitUninterruptibly(commit1Done, 5, TimeUnit.SECONDS);
+
+            if(commit1Error.get() != null) {
+                throw commit1Error.get();
+            }
+
+            doCommit(cohort2);
 
             txChain.close();
 
+            // 9. Create a new read Tx from the data store and verify committed data.
+
+            readTx = dataStore.newReadOnlyTransaction();
+            optional = readTx.read(TestModel.OUTER_LIST_PATH).get(5, TimeUnit.SECONDS);
+            assertEquals("isPresent", true, optional.isPresent());
+            assertEquals("Data node", outerNode, optional.get());
+
             cleanup(dataStore);
+        }
+
+        private void doCommit(final DOMStoreThreePhaseCommitCohort cohort1) throws Exception {
+            Boolean canCommit = cohort1.canCommit().get(5, TimeUnit.SECONDS);
+            assertEquals("canCommit", true, canCommit);
+            cohort1.preCommit().get(5, TimeUnit.SECONDS);
+            cohort1.commit().get(5, TimeUnit.SECONDS);
         }};
     }
 
