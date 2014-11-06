@@ -52,6 +52,24 @@
       "revId": "c8aee2e084dd45ba472180d1a7fbf4e249f3fafc",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_3e0c4c42",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionChainProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-06T03:32:16Z",
+      "side": 1,
+      "message": "That\u0027s why I added comments above. Maybe they\u0027re not clear enough?",
+      "parentUuid": "ba8cc1f7_de368003",
+      "revId": "c8aee2e084dd45ba472180d1a7fbf4e249f3fafc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
