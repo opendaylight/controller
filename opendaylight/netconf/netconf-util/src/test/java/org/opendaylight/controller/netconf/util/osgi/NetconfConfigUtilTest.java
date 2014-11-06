@@ -8,19 +8,17 @@
 
 package org.opendaylight.controller.netconf.util.osgi;
 
-import com.google.common.base.Optional;
-import io.netty.channel.local.LocalAddress;
-import java.net.InetSocketAddress;
-import org.junit.Before;
-import org.junit.Test;
-import org.opendaylight.controller.netconf.util.NetconfUtil;
-import org.osgi.framework.BundleContext;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import com.google.common.base.Optional;
+import io.netty.channel.local.LocalAddress;
+import java.net.InetSocketAddress;
+import org.junit.Before;
+import org.junit.Test;
+import org.osgi.framework.BundleContext;
 
 public class NetconfConfigUtilTest {
 

@@ -9,32 +9,32 @@
 package org.opendaylight.controller.netconf.util.messages;
 
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import com.google.common.base.Optional;
 import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.internal.util.collections.Sets;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 
 public class NetconfHelloMessageTest {
 
     Set<String> caps;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         caps = Sets.newSet("cap1");
     }
 
     @Test
-    public void testConstructor() throws Exception {
+    public void testConstructor() throws NetconfDocumentedException {
         NetconfHelloMessageAdditionalHeader additionalHeader = new NetconfHelloMessageAdditionalHeader("name","host","1","transp","id");
         NetconfHelloMessage message = NetconfHelloMessage.createClientHello(caps, Optional.of(additionalHeader));
-        assertTrue(message.isHelloMessage(message));
+        assertTrue(NetconfHelloMessage.isHelloMessage(message));
         assertEquals(Optional.of(additionalHeader), message.getAdditionalHeader());
 
         NetconfHelloMessage serverMessage = NetconfHelloMessage.createServerHello(caps, 100L);
-        assertTrue(serverMessage.isHelloMessage(serverMessage));
+        assertTrue(NetconfHelloMessage.isHelloMessage(serverMessage));
     }
 }
