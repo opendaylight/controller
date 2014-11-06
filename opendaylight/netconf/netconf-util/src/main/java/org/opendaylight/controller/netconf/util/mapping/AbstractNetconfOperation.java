@@ -8,8 +8,8 @@
 
 package org.opendaylight.controller.netconf.util.mapping;
 
+import com.google.common.base.Optional;
 import java.util.Map;
-
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
@@ -17,20 +17,15 @@ import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import com.google.common.base.Optional;
-
 public abstract class AbstractNetconfOperation implements NetconfOperation {
     private final String netconfSessionIdForReporting;
-    private static final Logger logger = LoggerFactory.getLogger(AbstractNetconfOperation.class);
 
-    protected AbstractNetconfOperation(String netconfSessionIdForReporting) {
+    protected AbstractNetconfOperation(final String netconfSessionIdForReporting) {
         this.netconfSessionIdForReporting = netconfSessionIdForReporting;
     }
 
@@ -39,7 +34,7 @@ public abstract class AbstractNetconfOperation implements NetconfOperation {
     }
 
     @Override
-    public HandlingPriority canHandle(Document message) throws NetconfDocumentedException {
+    public HandlingPriority canHandle(final Document message) throws NetconfDocumentedException {
         OperationNameAndNamespace operationNameAndNamespace = null;
         operationNameAndNamespace = new OperationNameAndNamespace(message);
         return canHandle(operationNameAndNamespace.getOperationName(), operationNameAndNamespace.getNamespace());
@@ -49,7 +44,7 @@ public abstract class AbstractNetconfOperation implements NetconfOperation {
         private final String operationName, namespace;
         private final XmlElement operationElement;
 
-        public OperationNameAndNamespace(Document message) throws NetconfDocumentedException {
+        public OperationNameAndNamespace(final Document message) throws NetconfDocumentedException {
             XmlElement requestElement = null;
             requestElement = getRequestElementWithCheck(message);
             operationElement = requestElement.getOnlyChildElement();
@@ -70,12 +65,12 @@ public abstract class AbstractNetconfOperation implements NetconfOperation {
         }
     }
 
-    protected static XmlElement getRequestElementWithCheck(Document message) throws NetconfDocumentedException {
+    protected static XmlElement getRequestElementWithCheck(final Document message) throws NetconfDocumentedException {
         return XmlElement.fromDomElementWithExpected(message.getDocumentElement(), XmlNetconfConstants.RPC_KEY,
                 XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
     }
 
-    protected HandlingPriority canHandle(String operationName, String operationNamespace) {
+    protected HandlingPriority canHandle(final String operationName, final String operationNamespace) {
         return operationName.equals(getOperationName()) && operationNamespace.equals(getOperationNamespace())
                 ? getHandlingPriority()
                 : HandlingPriority.CANNOT_HANDLE;
@@ -92,8 +87,8 @@ public abstract class AbstractNetconfOperation implements NetconfOperation {
     protected abstract String getOperationName();
 
     @Override
-    public Document handle(Document requestMessage,
-            NetconfOperationChainedExecution subsequentOperation) throws NetconfDocumentedException {
+    public Document handle(final Document requestMessage,
+            final NetconfOperationChainedExecution subsequentOperation) throws NetconfDocumentedException {
 
         XmlElement requestElement = getRequestElementWithCheck(requestMessage);
 
