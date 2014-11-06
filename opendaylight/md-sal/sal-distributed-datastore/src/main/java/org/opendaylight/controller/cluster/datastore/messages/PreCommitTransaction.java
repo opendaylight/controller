@@ -12,7 +12,8 @@ import org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommit
 
 public class PreCommitTransaction implements SerializableMessage{
 
-  public static final Class SERIALIZABLE_CLASS = ThreePhaseCommitCohortMessages.PreCommitTransaction.class;
+  public static final Class<ThreePhaseCommitCohortMessages.PreCommitTransaction> SERIALIZABLE_CLASS =
+          ThreePhaseCommitCohortMessages.PreCommitTransaction.class;
 
   @Override
   public Object toSerializable() {

@@ -14,11 +14,11 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public class DeleteData implements SerializableMessage {
 
-    public static final Class SERIALIZABLE_CLASS = ShardTransactionMessages.DeleteData.class;
+    public static final Class<ShardTransactionMessages.DeleteData> SERIALIZABLE_CLASS = ShardTransactionMessages.DeleteData.class;
 
     private final YangInstanceIdentifier path;
 
-    public DeleteData(YangInstanceIdentifier path) {
+    public DeleteData(final YangInstanceIdentifier path) {
         this.path = path;
     }
 
@@ -31,7 +31,7 @@ public class DeleteData implements SerializableMessage {
             .setInstanceIdentifierPathArguments(InstanceIdentifierUtils.toSerializable(path)).build();
     }
 
-    public static DeleteData fromSerializable(Object serializable){
+    public static DeleteData fromSerializable(final Object serializable){
         ShardTransactionMessages.DeleteData o = (ShardTransactionMessages.DeleteData) serializable;
         return new DeleteData(InstanceIdentifierUtils.fromSerializable(o.getInstanceIdentifierPathArguments()));
     }

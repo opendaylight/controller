@@ -11,7 +11,8 @@ package org.opendaylight.controller.cluster.datastore.messages;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 
 public class MergeDataReply implements SerializableMessage{
-  public static final Class SERIALIZABLE_CLASS = ShardTransactionMessages.MergeDataReply.class;
+  public static final Class<ShardTransactionMessages.MergeDataReply> SERIALIZABLE_CLASS =
+          ShardTransactionMessages.MergeDataReply.class;
 
   @Override
   public Object toSerializable() {

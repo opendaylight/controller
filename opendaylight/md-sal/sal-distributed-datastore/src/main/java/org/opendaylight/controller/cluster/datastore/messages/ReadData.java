@@ -13,10 +13,11 @@ import org.opendaylight.controller.protobuff.messages.transaction.ShardTransacti
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public class ReadData {
-  public static final Class SERIALIZABLE_CLASS = ShardTransactionMessages.ReadData.class;
+  public static final Class<ShardTransactionMessages.ReadData> SERIALIZABLE_CLASS =
+          ShardTransactionMessages.ReadData.class;
   private final YangInstanceIdentifier path;
 
-  public ReadData(YangInstanceIdentifier path) {
+  public ReadData(final YangInstanceIdentifier path) {
     this.path = path;
   }
 
@@ -30,7 +31,7 @@ public class ReadData {
         .build();
   }
 
-  public static ReadData fromSerializable(Object serializable){
+  public static ReadData fromSerializable(final Object serializable){
     ShardTransactionMessages.ReadData o = (ShardTransactionMessages.ReadData) serializable;
     return new ReadData(InstanceIdentifierUtils.fromSerializable(o.getInstanceIdentifierPathArguments()));
   }
