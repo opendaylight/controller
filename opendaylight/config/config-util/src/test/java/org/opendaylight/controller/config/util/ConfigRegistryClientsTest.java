@@ -7,28 +7,24 @@
  */
 package org.opendaylight.controller.config.util;
 
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
-import static org.junit.matchers.JUnitMatchers.hasItem;
-
+import com.google.common.collect.Sets;
 import java.lang.management.ManagementFactory;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.ConfigRegistry;
-
-import com.google.common.collect.Sets;
 
 public class ConfigRegistryClientsTest {
 
@@ -145,7 +141,7 @@ public class ConfigRegistryClientsTest {
         assertEquals(Sets.newHashSet(TestingConfigRegistry.run2, TestingConfigRegistry.run1, TestingConfigRegistry.run3), jmxLookup);
     }
 
-    private Set<ObjectName> lookupRuntimeBeans(ConfigRegistryClient client)
+    private Set<ObjectName> lookupRuntimeBeans(final ConfigRegistryClient client)
             throws Exception {
         Set<ObjectName> beans = client.lookupRuntimeBeans();
         for (ObjectName on : beans) {
@@ -178,7 +174,7 @@ public class ConfigRegistryClientsTest {
     }
 
     private Set<ObjectName> clientLookupRuntimeBeansWithModuleAndInstance(
-            ConfigRegistryClient client, String moduleName, String instanceName) {
+            final ConfigRegistryClient client, final String moduleName, final String instanceName) {
         Set<ObjectName> beans = client.lookupRuntimeBeans(moduleName, instanceName);
         if (beans.size() > 0) {
             assertEquals("RuntimeBean",
@@ -220,7 +216,7 @@ public class ConfigRegistryClientsTest {
         assertThat(clientLookupServiceInterfaceNames(testingRegistryON), hasItem(TestingConfigRegistry.serviceQName2));
     }
 
-    private Set<String> clientLookupServiceInterfaceNames(ObjectName client) throws InstanceNotFoundException{
+    private Set<String> clientLookupServiceInterfaceNames(final ObjectName client) throws InstanceNotFoundException{
         return jmxRegistryClient.lookupServiceInterfaceNames(client);
     }
 
