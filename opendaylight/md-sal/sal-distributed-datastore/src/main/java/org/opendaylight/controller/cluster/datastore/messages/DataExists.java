@@ -14,11 +14,12 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public class DataExists implements SerializableMessage{
 
-    public static final Class SERIALIZABLE_CLASS = ShardTransactionMessages.DataExists.class;
+    public static final Class<ShardTransactionMessages.DataExists> SERIALIZABLE_CLASS =
+            ShardTransactionMessages.DataExists.class;
 
     private final YangInstanceIdentifier path;
 
-    public DataExists(YangInstanceIdentifier path) {
+    public DataExists(final YangInstanceIdentifier path) {
         this.path = path;
     }
 
@@ -32,7 +33,7 @@ public class DataExists implements SerializableMessage{
                 InstanceIdentifierUtils.toSerializable(path)).build();
     }
 
-    public static DataExists fromSerializable(Object serializable){
+    public static DataExists fromSerializable(final Object serializable){
         ShardTransactionMessages.DataExists o = (ShardTransactionMessages.DataExists) serializable;
         return new DataExists(InstanceIdentifierUtils.fromSerializable(o.getInstanceIdentifierPathArguments()));
     }

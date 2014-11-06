@@ -11,13 +11,12 @@ package org.opendaylight.controller.cluster.datastore.messages;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 
 public class DataExistsReply implements SerializableMessage{
-
-
-    public static final Class SERIALIZABLE_CLASS = ShardTransactionMessages.DataExistsReply.class;
+    public static final Class<ShardTransactionMessages.DataExistsReply> SERIALIZABLE_CLASS =
+            ShardTransactionMessages.DataExistsReply.class;
 
     private final boolean exists;
 
-    public DataExistsReply(boolean exists) {
+    public DataExistsReply(final boolean exists) {
         this.exists = exists;
     }
 
@@ -30,7 +29,7 @@ public class DataExistsReply implements SerializableMessage{
             .setExists(exists).build();
     }
 
-    public static DataExistsReply fromSerializable(Object serializable){
+    public static DataExistsReply fromSerializable(final Object serializable){
         ShardTransactionMessages.DataExistsReply o = (ShardTransactionMessages.DataExistsReply) serializable;
         return new DataExistsReply(o.getExists());
     }

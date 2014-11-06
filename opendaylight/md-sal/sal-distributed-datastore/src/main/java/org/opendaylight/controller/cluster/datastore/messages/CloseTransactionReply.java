@@ -11,7 +11,8 @@ package org.opendaylight.controller.cluster.datastore.messages;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 
 public class CloseTransactionReply implements SerializableMessage {
-  public static final Class SERIALIZABLE_CLASS = ShardTransactionMessages.CloseTransactionReply.class;
+  public static final Class<ShardTransactionMessages.CloseTransactionReply> SERIALIZABLE_CLASS =
+          ShardTransactionMessages.CloseTransactionReply.class;
   @Override
   public Object toSerializable() {
     return ShardTransactionMessages.CloseTransactionReply.newBuilder().build();
