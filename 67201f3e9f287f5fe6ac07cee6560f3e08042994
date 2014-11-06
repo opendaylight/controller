@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_dc5d29eb",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/AbstractReadWriteTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-06T10:44:05Z",
+      "side": 0,
+      "message": "I can see that eliminating the exists and always merging results in the same round trips for CDS as before. However the merge carries a NN and serializing/deserializing NN has the highest penalties in CDS. That is why I do not like the constant merges. \n\nOne optimization that you can throw in may be to check for the existence of  the immediate parent of the path. If that exists then we may not need to merge parents at all. In most repetitive write cases (like statistics writing) this would be very useful because the immediate parent will most likely exist and you won\u0027t need to \"create\" them anyway.",
+      "revId": "67201f3e9f287f5fe6ac07cee6560f3e08042994",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
