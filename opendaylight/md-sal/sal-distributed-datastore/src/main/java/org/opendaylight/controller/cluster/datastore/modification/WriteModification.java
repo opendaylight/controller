@@ -21,22 +21,22 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
  * WriteModification stores all the parameters required to write data to the specified path
  */
 public class WriteModification extends AbstractModification {
-
-    protected final NormalizedNode data;
+    private static final long serialVersionUID = 1L;
+    protected final NormalizedNode<?, ?> data;
     private final SchemaContext schemaContext;
 
-    public WriteModification(YangInstanceIdentifier path, NormalizedNode data, SchemaContext schemaContext) {
+    public WriteModification(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data, final SchemaContext schemaContext) {
         super(path);
         this.data = data;
         this.schemaContext = schemaContext;
     }
 
     @Override
-    public void apply(DOMStoreWriteTransaction transaction) {
+    public void apply(final DOMStoreWriteTransaction transaction) {
         transaction.write(path, data);
     }
 
-    public NormalizedNode getData() {
+    public NormalizedNode<?, ?> getData() {
         return data;
     }
 
@@ -51,7 +51,7 @@ public class WriteModification extends AbstractModification {
                 .build();
     }
 
-    public static WriteModification fromSerializable(Object serializable, SchemaContext schemaContext) {
+    public static WriteModification fromSerializable(final Object serializable, final SchemaContext schemaContext) {
         PersistentMessages.Modification o = (PersistentMessages.Modification) serializable;
         Decoded decoded = new NormalizedNodeToNodeCodec(schemaContext).decode(o.getPath(), o.getData());
         return new WriteModification(decoded.getDecodedPath(), decoded.getDecodedNode(), schemaContext);

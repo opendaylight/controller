@@ -20,18 +20,19 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
  * MergeModification stores all the parameters required to merge data into the specified path
  */
 public class MergeModification extends WriteModification {
+    private static final long serialVersionUID = 1L;
 
-    public MergeModification(YangInstanceIdentifier path, NormalizedNode data,
-        SchemaContext schemaContext) {
+    public MergeModification(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data,
+        final SchemaContext schemaContext) {
         super(path, data, schemaContext);
     }
 
     @Override
-    public void apply(DOMStoreWriteTransaction transaction) {
+    public void apply(final DOMStoreWriteTransaction transaction) {
         transaction.merge(path, data);
     }
 
-    public static MergeModification fromSerializable(Object serializable, SchemaContext schemaContext) {
+    public static MergeModification fromSerializable(final Object serializable, final SchemaContext schemaContext) {
         PersistentMessages.Modification o = (PersistentMessages.Modification) serializable;
         Decoded decoded = new NormalizedNodeToNodeCodec(schemaContext).decode(o.getPath(), o.getData());
         return new MergeModification(decoded.getDecodedPath(), decoded.getDecodedNode(), schemaContext);
