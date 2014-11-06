@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_7f208f49",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/FollowerLogInformation.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-06T22:04:50Z",
+      "side": 1,
+      "message": "Considering the name of the class is FollowerToLogInformation, isActive() would convey as if the FollowerToLogInfo is active/inactive.\nIf the class would have been Follower, then isActive would seem appropriate to me :)",
+      "parentUuid": "ba8cc1f7_5fbb4b0e",
+      "revId": "b50881e980605d5dd1b7f392e7c9316ef3ca4580",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_ff37bfae",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/FollowerLogInformation.java",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2014-11-06T17:17:59Z",
       "side": 1,
       "message": "markActive?",
+      "revId": "b50881e980605d5dd1b7f392e7c9316ef3ca4580",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_9f1d5312",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/FollowerLogInformation.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-06T22:04:50Z",
+      "side": 1,
+      "message": "same as above",
+      "parentUuid": "ba8cc1f7_ff37bfae",
       "revId": "b50881e980605d5dd1b7f392e7c9316ef3ca4580",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_3f1a0718",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/FollowerLogInformationImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-06T22:04:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_1f3dc38f",
+      "revId": "b50881e980605d5dd1b7f392e7c9316ef3ca4580",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_df5d1beb",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 3
@@ -64,6 +118,24 @@
       "writtenOn": "2014-11-06T17:17:59Z",
       "side": 1,
       "message": "Should the snapshot be set on the leader instead of replicated log? I think an elegant way of doing this may be add a method sendInstallSnapshot on Leader. You simply call it when snapshot needs to be installed. That method could save the snapshot in a field of the Leader class. If the behavior were to change we would automatically lose the snapshot that way.",
+      "revId": "b50881e980605d5dd1b7f392e7c9316ef3ca4580",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_9f923356",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 652,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-06T22:04:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_df5d1beb",
       "revId": "b50881e980605d5dd1b7f392e7c9316ef3ca4580",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_7f95ef3e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 662,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-06T22:04:50Z",
+      "side": 1,
+      "message": "Removed this method and merged with the if(isLeader()) condition above",
+      "parentUuid": "ba8cc1f7_9f48f32e",
+      "revId": "b50881e980605d5dd1b7f392e7c9316ef3ca4580",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_3f5527c6",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 3
@@ -98,6 +188,24 @@
       "writtenOn": "2014-11-06T17:17:59Z",
       "side": 1,
       "message": "Since setCurrentBehavior/getCurrentBehavior are Visible for testing how about making them package-private to limit access?",
+      "revId": "b50881e980605d5dd1b7f392e7c9316ef3ca4580",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_df875b0e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 859,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-06T22:04:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_3f5527c6",
       "revId": "b50881e980605d5dd1b7f392e7c9316ef3ca4580",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_7ff88f7c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 407,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-06T22:04:50Z",
+      "side": 1,
+      "message": "Well, the entries in the else part would be an empty list, as it gets set in just one place.\nI have refactored this part of the code , in the hope of making it cleaner",
+      "parentUuid": "ba8cc1f7_ff5edfe8",
+      "revId": "b50881e980605d5dd1b7f392e7c9316ef3ca4580",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_7f72cf7d",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
         "patchSetId": 3
@@ -132,6 +258,24 @@
       "writtenOn": "2014-11-06T17:17:59Z",
       "side": 1,
       "message": "else if?",
+      "revId": "b50881e980605d5dd1b7f392e7c9316ef3ca4580",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_3f76873f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 481,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-06T22:04:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_7f72cf7d",
       "revId": "b50881e980605d5dd1b7f392e7c9316ef3ca4580",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_3fad2789",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 544,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-06T22:04:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_9f6f9392",
+      "revId": "b50881e980605d5dd1b7f392e7c9316ef3ca4580",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_3f6c479c",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
         "patchSetId": 3
@@ -166,6 +328,24 @@
       "writtenOn": "2014-11-06T17:17:59Z",
       "side": 1,
       "message": "Since this is a public method I don\u0027t see why we need to annotate it with VisibleForTesting",
+      "revId": "b50881e980605d5dd1b7f392e7c9316ef3ca4580",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_ffb6dfdb",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 722,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-06T22:04:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_3f6c479c",
       "revId": "b50881e980605d5dd1b7f392e7c9316ef3ca4580",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
