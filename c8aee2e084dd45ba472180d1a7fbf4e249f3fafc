@@ -70,6 +70,24 @@
       "revId": "c8aee2e084dd45ba472180d1a7fbf4e249f3fafc",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_1e038810",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionChainProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-06T04:04:00Z",
+      "side": 1,
+      "message": "Maybe we should document the scenario in the comments as you explained it. The ideal thing would be to simplify the code. Don\u0027t have suggestions for improvement right now though. I\u0027ll need to think a bit more.",
+      "parentUuid": "ba8cc1f7_3e0c4c42",
+      "revId": "c8aee2e084dd45ba472180d1a7fbf4e249f3fafc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
