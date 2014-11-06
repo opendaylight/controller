@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_7c3addce",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/AbstractReplicatedLogImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-06T05:40:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_def3e071",
+      "revId": "82cfbe0330aebfdc4731061311047f4cef0d8380",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_7ee8947c",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/FollowerLogInformationImpl.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-11-06T01:35:52Z",
       "side": 1,
       "message": "Can you put @Override on separate line?",
+      "revId": "82cfbe0330aebfdc4731061311047f4cef0d8380",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_dc2529ac",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/FollowerLogInformationImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-06T05:40:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_7ee8947c",
       "revId": "82cfbe0330aebfdc4731061311047f4cef0d8380",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_bc20659c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/FollowerLogInformationImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-06T05:40:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_bebcdc6d",
+      "revId": "82cfbe0330aebfdc4731061311047f4cef0d8380",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_3e020c3f",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/base/messages/CaptureSnapshot.java",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2014-11-06T01:35:52Z",
       "side": 1,
       "message": "Why is this now Serializable?",
+      "revId": "82cfbe0330aebfdc4731061311047f4cef0d8380",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_fe2ee4a4",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/base/messages/CaptureSnapshot.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-06T05:40:33Z",
+      "side": 1,
+      "message": "I had the serialize-messages\u003don in the test/resources/application.conf to test serialization. Hence all messages needed to be Serializable for the tests to pass. I have now made serialize-messages\u003doff.",
+      "parentUuid": "ba8cc1f7_3e020c3f",
       "revId": "82cfbe0330aebfdc4731061311047f4cef0d8380",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_5e2270ba",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/base/messages/InitiateInstallSnapshot.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-06T05:40:33Z",
+      "side": 1,
+      "message": "I had the serialize-messages\u003don in the test/resources/application.conf\nto test serialization. \nHence all messages needed to be Serializable for the tests to pass.\nI have now made serialize-messages\u003doff.",
+      "parentUuid": "ba8cc1f7_5effd034",
+      "revId": "82cfbe0330aebfdc4731061311047f4cef0d8380",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_5e86f0ba",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/FollowerLogInformationImplTest.java",
         "patchSetId": 2
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_be313c0d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/FollowerLogInformationImplTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-06T05:40:33Z",
+      "side": 1,
+      "message": "Done. \nI have tried to make the test deterministic by keeping the sleep significantly lower(200ms)  than the timeout (500ms).\nI guess a spillover should not span more than 300 ms",
+      "parentUuid": "ba8cc1f7_5e86f0ba",
+      "revId": "82cfbe0330aebfdc4731061311047f4cef0d8380",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_7eb6548c",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
         "patchSetId": 2
@@ -115,6 +223,24 @@
       "writtenOn": "2014-11-06T01:35:52Z",
       "side": 1,
       "message": "This doesn\u0027t really need to be separated onto 2 lines. Same with other lines in this file. Did your IDE do this automatically?",
+      "revId": "82cfbe0330aebfdc4731061311047f4cef0d8380",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_3e5e8c46",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 423,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-06T05:40:33Z",
+      "side": 1,
+      "message": "I dont recollect putting these in separate lines. I will get it same lines",
+      "parentUuid": "ba8cc1f7_7eb6548c",
       "revId": "82cfbe0330aebfdc4731061311047f4cef0d8380",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
