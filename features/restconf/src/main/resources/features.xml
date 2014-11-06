@@ -24,7 +24,6 @@
     -->
     <repository>mvn:org.opendaylight.controller/features-mdsal/${mdsal.version}/xml/features</repository>
     <repository>mvn:org.opendaylight.yangtools/features-yangtools/${yangtools.version}/xml/features</repository>
-    <repository>mvn:org.opendaylight.aaa/features-aaa/${aaa.version}/xml/features</repository>
     <feature name='odl-restconf-all' version='${project.version}' description='OpenDaylight :: Restconf :: All'>
         <!--
             Necessary TODO:
@@ -85,8 +84,9 @@
 
     -->
 
+    <!-- FIXME: This feature should be deprecated and recreated in aaa / integration project as packaging
+         of whole restconf. -->
     <feature name='odl-restconf' version='${project.version}' description="OpenDaylight :: Restconf">
-        <feature version='${aaa.version}'>odl-aaa-authn</feature>
         <feature version='${mdsal.version}'>odl-restconf-noauth</feature>
     </feature>
     <feature name='odl-restconf-noauth' version='${project.version}' description="OpenDaylight :: Restconf">
