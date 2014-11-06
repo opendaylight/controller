@@ -10,10 +10,10 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 
 public class PrimaryFound implements SerializableMessage {
-  public static final Class SERIALIZABLE_CLASS = PrimaryFound.class;
+  public static final Class<PrimaryFound> SERIALIZABLE_CLASS = PrimaryFound.class;
   private final String primaryPath;
 
-  public PrimaryFound(String primaryPath) {
+  public PrimaryFound(final String primaryPath) {
     this.primaryPath = primaryPath;
   }
 
@@ -22,13 +22,19 @@ public class PrimaryFound implements SerializableMessage {
   }
 
   @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+  public boolean equals(final Object o) {
+    if (this == o) {
+        return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+        return false;
+    }
 
     PrimaryFound that = (PrimaryFound) o;
 
-    if (!primaryPath.equals(that.primaryPath)) return false;
+    if (!primaryPath.equals(that.primaryPath)) {
+        return false;
+    }
 
     return true;
   }
@@ -51,7 +57,7 @@ public class PrimaryFound implements SerializableMessage {
     return  this;
   }
 
-  public static PrimaryFound fromSerializable(Object message){
+  public static PrimaryFound fromSerializable(final Object message){
     return (PrimaryFound) message;
   }
 }

@@ -12,18 +12,19 @@ import org.opendaylight.controller.protobuff.messages.transaction.ShardTransacti
 
 public class CreateTransactionReply implements SerializableMessage {
 
-    public static final Class SERIALIZABLE_CLASS = ShardTransactionMessages.CreateTransactionReply.class;
+    public static final Class<ShardTransactionMessages.CreateTransactionReply> SERIALIZABLE_CLASS =
+            ShardTransactionMessages.CreateTransactionReply.class;
     private final String transactionPath;
     private final String transactionId;
     private final int version;
 
-    public CreateTransactionReply(String transactionPath,
-        String transactionId) {
+    public CreateTransactionReply(final String transactionPath,
+        final String transactionId) {
         this(transactionPath, transactionId, CreateTransaction.CURRENT_VERSION);
     }
 
-    public CreateTransactionReply(String transactionPath,
-                                  String transactionId, int version) {
+    public CreateTransactionReply(final String transactionPath,
+                                  final String transactionId, final int version) {
         this.transactionPath = transactionPath;
         this.transactionId = transactionId;
         this.version = version;
@@ -42,6 +43,7 @@ public class CreateTransactionReply implements SerializableMessage {
         return version;
     }
 
+    @Override
     public Object toSerializable(){
         return ShardTransactionMessages.CreateTransactionReply.newBuilder()
             .setTransactionActorPath(transactionPath)
@@ -50,7 +52,7 @@ public class CreateTransactionReply implements SerializableMessage {
             .build();
     }
 
-    public static CreateTransactionReply fromSerializable(Object serializable){
+    public static CreateTransactionReply fromSerializable(final Object serializable){
         ShardTransactionMessages.CreateTransactionReply o = (ShardTransactionMessages.CreateTransactionReply) serializable;
         return new CreateTransactionReply(o.getTransactionActorPath(), o.getTransactionId(), o.getMessageVersion());
     }

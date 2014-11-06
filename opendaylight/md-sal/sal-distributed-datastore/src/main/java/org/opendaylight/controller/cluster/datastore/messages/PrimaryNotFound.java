@@ -11,11 +11,11 @@ package org.opendaylight.controller.cluster.datastore.messages;
 import com.google.common.base.Preconditions;
 
 public class PrimaryNotFound implements SerializableMessage {
-  public static final Class SERIALIZABLE_CLASS = PrimaryNotFound.class;
+  public static final Class<PrimaryNotFound> SERIALIZABLE_CLASS = PrimaryNotFound.class;
 
     private final String shardName;
 
-    public PrimaryNotFound(String shardName){
+    public PrimaryNotFound(final String shardName){
 
         Preconditions.checkNotNull(shardName, "shardName should not be null");
 
@@ -23,13 +23,19 @@ public class PrimaryNotFound implements SerializableMessage {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         PrimaryNotFound that = (PrimaryNotFound) o;
 
-        if (shardName != null ? !shardName.equals(that.shardName) : that.shardName != null) return false;
+        if (shardName != null ? !shardName.equals(that.shardName) : that.shardName != null) {
+            return false;
+        }
 
         return true;
     }
@@ -44,7 +50,7 @@ public class PrimaryNotFound implements SerializableMessage {
     return this;
   }
 
-  public static PrimaryNotFound fromSerializable(Object message){
+  public static PrimaryNotFound fromSerializable(final Object message){
     return (PrimaryNotFound) message;
   }
 }

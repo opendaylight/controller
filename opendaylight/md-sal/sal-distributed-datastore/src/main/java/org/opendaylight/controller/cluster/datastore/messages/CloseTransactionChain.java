@@ -11,11 +11,11 @@ package org.opendaylight.controller.cluster.datastore.messages;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages;
 
 public class CloseTransactionChain implements SerializableMessage {
-    public static final Class SERIALIZABLE_CLASS =
+    public static final Class<ShardTransactionChainMessages.CloseTransactionChain> SERIALIZABLE_CLASS =
         ShardTransactionChainMessages.CloseTransactionChain.class;
     private final String transactionChainId;
 
-    public CloseTransactionChain(String transactionChainId){
+    public CloseTransactionChain(final String transactionChainId){
         this.transactionChainId = transactionChainId;
     }
 
@@ -25,7 +25,7 @@ public class CloseTransactionChain implements SerializableMessage {
             .setTransactionChainId(transactionChainId).build();
     }
 
-    public static CloseTransactionChain fromSerializable(Object message){
+    public static CloseTransactionChain fromSerializable(final Object message){
         ShardTransactionChainMessages.CloseTransactionChain closeTransactionChain
             = (ShardTransactionChainMessages.CloseTransactionChain) message;
 
