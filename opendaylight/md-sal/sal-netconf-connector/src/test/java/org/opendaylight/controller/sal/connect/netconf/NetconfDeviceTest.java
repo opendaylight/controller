@@ -17,7 +17,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
@@ -134,7 +133,7 @@ public class NetconfDeviceTest {
 
         // Make fallback attempt to fail due to empty resolved sources
         final MissingSchemaSourceException schemaResolutionException = new MissingSchemaSourceException("fail first", TEST_SID);
-        doAnswer(new Answer() {
+        doAnswer(new Answer<Object>() {
             @Override
             public Object answer(final InvocationOnMock invocation) throws Throwable {
                 if(((Collection<?>) invocation.getArguments()[0]).size() == 2) {
@@ -158,7 +157,7 @@ public class NetconfDeviceTest {
 
     private SchemaSourceRegistry getSchemaRegistry() {
         final SchemaSourceRegistry mock = mock(SchemaSourceRegistry.class);
-        final SchemaSourceRegistration mockReg = mock(SchemaSourceRegistration.class);
+        final SchemaSourceRegistration<?> mockReg = mock(SchemaSourceRegistration.class);
         doNothing().when(mockReg).close();
         doReturn(mockReg).when(mock).registerSchemaSource(any(org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceProvider.class), any(PotentialSchemaSource.class));
         return mock;
