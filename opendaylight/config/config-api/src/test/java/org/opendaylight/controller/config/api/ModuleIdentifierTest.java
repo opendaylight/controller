@@ -1,11 +1,8 @@
 package org.opendaylight.controller.config.api;
 
-import junit.framework.Assert;
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import org.junit.Test;
 
 public class ModuleIdentifierTest {
     String fact = new String("factory");

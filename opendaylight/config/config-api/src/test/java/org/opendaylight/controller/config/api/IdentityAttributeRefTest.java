@@ -1,16 +1,12 @@
 package org.opendaylight.controller.config.api;
 
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.opendaylight.controller.config.api.annotations.AbstractServiceInterface;
 import org.opendaylight.yangtools.yang.binding.BaseIdentity;
-
-import javax.management.*;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
 
 public class IdentityAttributeRefTest {
 

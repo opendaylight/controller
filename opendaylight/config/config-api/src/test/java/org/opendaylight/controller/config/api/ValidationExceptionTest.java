@@ -1,23 +1,20 @@
 package org.opendaylight.controller.config.api;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
-import static org.junit.Assert.assertNotEquals;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.junit.matchers.JUnitMatchers.containsString;
-
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import com.google.common.collect.Lists;
 import java.util.Map;
-
 import org.junit.Assert;
 import org.junit.Test;
 
 public class ValidationExceptionTest {
 
-    private String instance = "instance";
+    private final String instance = "instance";
     private final ModuleIdentifier mi = new ModuleIdentifier("module", instance);
-    private String instance2 = "instance2";
+    private final String instance2 = "instance2";
     private final ModuleIdentifier mi2 = new ModuleIdentifier("module", instance2);
     private final String message = "ex message";
     private final Exception e = new IllegalStateException(message);

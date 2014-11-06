@@ -1,17 +1,16 @@
 package org.opendaylight.controller.config.api.jmx;
 
+import java.util.ArrayList;
+import java.util.List;
+import javax.management.ObjectName;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.management.ObjectName;
-import java.util.ArrayList;
-import java.util.List;
-
 public class CommitStatusTest {
-    List newInst = new ArrayList<ObjectName>();
-    List reusedInst = new ArrayList<ObjectName>();
-    List recreatedInst = new ArrayList<ObjectName>();
+    List<ObjectName> newInst = new ArrayList<>();
+    List<ObjectName> reusedInst = new ArrayList<>();
+    List<ObjectName> recreatedInst = new ArrayList<>();
 
     @Before
     public void setUp() throws Exception {
@@ -43,9 +42,9 @@ public class CommitStatusTest {
 
     @Test
     public void testNotEqual() throws Exception {
-        List newInst2 = new ArrayList<ObjectName>();
-        List reusedInst2 = new ArrayList<ObjectName>();
-        List recreatedInst2 = new ArrayList<ObjectName>();
+        List<ObjectName> newInst2 = new ArrayList<>();
+        List<ObjectName> reusedInst2 = new ArrayList<>();
+        List<ObjectName> recreatedInst2 = new ArrayList<>();
 
         newInst2.add(new ObjectName("first: key1 = value1"));
         reusedInst2.add(new ObjectName("second: key = val"));
