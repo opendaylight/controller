@@ -248,6 +248,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_9fc79345",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/FollowerLogInformationImplTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-06T22:04:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_fc634d18",
+      "revId": "82cfbe0330aebfdc4731061311047f4cef0d8380",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_7eb6548c",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
         "patchSetId": 2
