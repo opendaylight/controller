@@ -8,6 +8,7 @@
 package org.opendaylight.controller.sal.compatibility.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.CRUDP;
 import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.ETHERNET_ARP;
@@ -199,6 +200,29 @@ public class TestToSalConversionsUtils {
         Node node = new Node(NodeIDType.OPENFLOW, 42L);
         NodeConnector nodeConnector = ToSalConversionsUtils.fromNodeConnectorRef(new Uri("1"), node);
         Assert.assertEquals("OF|1@OF|00:00:00:00:00:00:00:2a", nodeConnector.toString());
+    }
+
+    @Test
+    public void testActionFrom() throws ConstructionException {
+        // Bug 2021: Convert AD-SAL notation into MD-SAL notation before calling NodeConnector
+        Node node = new Node(NodeIDType.OPENFLOW, 42L);
+        List<Action> odActions = new ArrayList<>();
+
+        OutputActionBuilder outputActionBuilder = new OutputActionBuilder();
+        outputActionBuilder.setOutputNodeConnector(new Uri("CONTROLLER"));
+        OutputActionCaseBuilder outputActionCaseBuilder = new OutputActionCaseBuilder();
+        outputActionCaseBuilder.setOutputAction(outputActionBuilder.build());
+        odActions.add(new ActionBuilder().setAction(outputActionCaseBuilder.build()).build());
+
+        List<org.opendaylight.controller.sal.action.Action> targetAction =
+                ToSalConversionsUtils.actionFrom(odActions, node);
+        assertNotNull(targetAction);
+        assertTrue( Output.class.isInstance(targetAction.get(0)) );
+        Output targetActionOutput = (Output) targetAction.get(0);
+        NodeConnector port = targetActionOutput.getPort();
+        assertNotNull(port);
+        assertEquals(port.getType(), NodeConnectorIDType.CONTROLLER);
+        assertEquals(port.getID(), org.opendaylight.controller.sal.core.NodeConnector.SPECIALNODECONNECTORID);
     }
 
     private void checkSalMatch(org.opendaylight.controller.sal.match.Match match, MtchType mt) throws ConstructionException {
