@@ -11,13 +11,12 @@ package org.opendaylight.controller.cluster.datastore.utils;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
-import junit.framework.Assert;
-
 import java.util.List;
+import org.junit.Assert;
 
 public class TestUtils {
 
-    public static void assertFirstSentMessage(ActorSystem actorSystem, ActorRef actorRef, Class clazz){
+    public static void assertFirstSentMessage(final ActorSystem actorSystem, final ActorRef actorRef, final Class<?> clazz){
         ActorContext testContext = new ActorContext(actorSystem, actorSystem.actorOf(
             Props.create(DoNothingActor.class)), new MockClusterWrapper(), new MockConfiguration());
         Object messages = testContext
@@ -27,7 +26,7 @@ public class TestUtils {
 
         Assert.assertTrue(messages instanceof List);
 
-        List<Object> listMessages = (List<Object>) messages;
+        List<?> listMessages = (List<?>) messages;
 
         Assert.assertEquals(1, listMessages.size());
 
