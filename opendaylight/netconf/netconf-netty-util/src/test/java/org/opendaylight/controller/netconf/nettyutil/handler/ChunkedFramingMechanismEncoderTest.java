@@ -11,7 +11,6 @@ package org.opendaylight.controller.netconf.nettyutil.handler;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.doAnswer;
-
 import com.google.common.collect.Lists;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -50,7 +49,7 @@ public class ChunkedFramingMechanismEncoderTest {
     @Test
     public void testEncode() throws Exception {
         final List<ByteBuf> chunks = Lists.newArrayList();
-        doAnswer(new Answer() {
+        doAnswer(new Answer<Object>() {
             @Override
             public Object answer(final InvocationOnMock invocation) throws Throwable {
                 chunks.add((ByteBuf) invocation.getArguments()[0]);
