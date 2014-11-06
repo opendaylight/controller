@@ -8,6 +8,12 @@
 
 package org.opendaylight.controller.netconf.monitoring.osgi;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import java.util.Hashtable;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,18 +26,14 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyCollection;
-import static org.mockito.Mockito.*;
-
 public class NetconfMonitoringServiceTrackerTest {
 
     @Mock
-    private ServiceReference reference;
+    private ServiceReference<NetconfMonitoringService> reference;
     @Mock
     private BundleContext context;
     @Mock
-    private ServiceRegistration serviceRegistration;
+    private ServiceRegistration<?> serviceRegistration;
     @Mock
     private Filter filter;
     @Mock

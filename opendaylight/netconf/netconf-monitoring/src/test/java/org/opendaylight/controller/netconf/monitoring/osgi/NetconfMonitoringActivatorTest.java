@@ -8,6 +8,12 @@
 
 package org.opendaylight.controller.netconf.monitoring.osgi;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,10 +23,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
 
 public class NetconfMonitoringActivatorTest {
 
@@ -34,7 +36,7 @@ public class NetconfMonitoringActivatorTest {
         MockitoAnnotations.initMocks(this);
         doReturn(filter).when(context).createFilter(anyString());
         doNothing().when(context).addServiceListener(any(ServiceListener.class), anyString());
-        ServiceReference[] refs = new ServiceReference[2];
+        ServiceReference<?>[] refs = new ServiceReference[2];
         doReturn(Arrays.asList(refs)).when(context).getServiceReferences(any(Class.class), anyString());
         doReturn(refs).when(context).getServiceReferences(anyString(), anyString());
     }
