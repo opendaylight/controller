@@ -13,12 +13,6 @@ import com.google.common.base.Preconditions;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigObject;
-import org.opendaylight.controller.cluster.datastore.shardstrategy.DefaultShardStrategy;
-import org.opendaylight.controller.cluster.datastore.shardstrategy.ModuleShardStrategy;
-import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,6 +21,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.opendaylight.controller.cluster.datastore.shardstrategy.DefaultShardStrategy;
+import org.opendaylight.controller.cluster.datastore.shardstrategy.ModuleShardStrategy;
+import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ConfigurationImpl implements Configuration {
 
@@ -40,15 +39,15 @@ public class ConfigurationImpl implements Configuration {
     // Look up maps to speed things up
 
     // key = memberName, value = list of shardNames
-    private Map<String, List<String>> memberShardNames = new HashMap<>();
+    private final Map<String, List<String>> memberShardNames = new HashMap<>();
 
     // key = shardName, value = list of replicaNames (replicaNames are the same as memberNames)
-    private Map<String, List<String>> shardReplicaNames = new HashMap<>();
+    private final Map<String, List<String>> shardReplicaNames = new HashMap<>();
 
 
-    public ConfigurationImpl(String moduleShardsConfigPath,
+    public ConfigurationImpl(final String moduleShardsConfigPath,
 
-        String modulesConfigPath){
+        final String modulesConfigPath){
 
         Preconditions.checkNotNull(moduleShardsConfigPath, "moduleShardsConfigPath should not be null");
         Preconditions.checkNotNull(modulesConfigPath, "modulesConfigPath should not be null");
@@ -80,7 +79,7 @@ public class ConfigurationImpl implements Configuration {
         readModules(modulesConfig);
     }
 
-    @Override public List<String> getMemberShardNames(String memberName){
+    @Override public List<String> getMemberShardNames(final String memberName){
 
         Preconditions.checkNotNull(memberName, "memberName should not be null");
 
@@ -88,7 +87,7 @@ public class ConfigurationImpl implements Configuration {
             return memberShardNames.get(memberName);
         }
 
-        List<String> shards = new ArrayList();
+        List<String> shards = new ArrayList<>();
         for(ModuleShard ms : moduleShards){
             for(Shard s : ms.getShards()){
                 for(String m : s.getReplicas()){
@@ -105,7 +104,7 @@ public class ConfigurationImpl implements Configuration {
 
     }
 
-    @Override public Optional<String> getModuleNameFromNameSpace(String nameSpace) {
+    @Override public Optional<String> getModuleNameFromNameSpace(final String nameSpace) {
 
         Preconditions.checkNotNull(nameSpace, "nameSpace should not be null");
 
@@ -125,7 +124,7 @@ public class ConfigurationImpl implements Configuration {
         return map;
     }
 
-    @Override public List<String> getShardNamesFromModuleName(String moduleName) {
+    @Override public List<String> getShardNamesFromModuleName(final String moduleName) {
 
         Preconditions.checkNotNull(moduleName, "moduleName should not be null");
 
@@ -139,10 +138,10 @@ public class ConfigurationImpl implements Configuration {
             }
         }
 
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
-    @Override public List<String> getMembersFromShardName(String shardName) {
+    @Override public List<String> getMembersFromShardName(final String shardName) {
 
         Preconditions.checkNotNull(shardName, "shardName should not be null");
 
@@ -159,8 +158,8 @@ public class ConfigurationImpl implements Configuration {
                 }
             }
         }
-        shardReplicaNames.put(shardName, Collections.EMPTY_LIST);
-        return Collections.EMPTY_LIST;
+        shardReplicaNames.put(shardName, Collections.<String>emptyList());
+        return Collections.emptyList();
     }
 
     @Override public Set<String> getAllShardNames() {
@@ -175,7 +174,7 @@ public class ConfigurationImpl implements Configuration {
 
 
 
-    private void readModules(Config modulesConfig) {
+    private void readModules(final Config modulesConfig) {
         List<? extends ConfigObject> modulesConfigObjectList =
             modulesConfig.getObjectList("modules");
 
@@ -186,7 +185,7 @@ public class ConfigurationImpl implements Configuration {
         }
     }
 
-    private void readModuleShards(Config moduleShardsConfig) {
+    private void readModuleShards(final Config moduleShardsConfig) {
         List<? extends ConfigObject> moduleShardsConfigObjectList =
             moduleShardsConfig.getObjectList("module-shards");
 
@@ -214,7 +213,7 @@ public class ConfigurationImpl implements Configuration {
         private final String moduleName;
         private final List<Shard> shards;
 
-        public ModuleShard(String moduleName, List<Shard> shards) {
+        public ModuleShard(final String moduleName, final List<Shard> shards) {
             this.moduleName = moduleName;
             this.shards = shards;
         }
@@ -232,7 +231,7 @@ public class ConfigurationImpl implements Configuration {
         private final String name;
         private final List<String> replicas;
 
-        Shard(String name, List<String> replicas) {
+        Shard(final String name, final List<String> replicas) {
             this.name = name;
             this.replicas = replicas;
         }
@@ -252,7 +251,7 @@ public class ConfigurationImpl implements Configuration {
         private final String nameSpace;
         private final ShardStrategy shardStrategy;
 
-        Module(String name, String nameSpace, String shardStrategy) {
+        Module(final String name, final String nameSpace, final String shardStrategy) {
             this.name = name;
             this.nameSpace = nameSpace;
             if(ModuleShardStrategy.NAME.equals(shardStrategy)){
@@ -280,11 +279,11 @@ public class ConfigurationImpl implements Configuration {
 
         private final ConfigObject configObject;
 
-        ConfigObjectWrapper(ConfigObject configObject){
+        ConfigObjectWrapper(final ConfigObject configObject){
             this.configObject = configObject;
         }
 
-        public String stringValue(String name){
+        public String stringValue(final String name){
             return configObject.get(name).unwrapped().toString();
         }
     }
