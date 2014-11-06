@@ -123,6 +123,8 @@ public abstract class StatAbstractListenCommit<T extends DataObject, N extends N
             }
             listenerRegistration = null;
         }
+
+        super.close();
     }
 
     protected final <K extends DataObject> Optional<K> readLatestConfiguration(final InstanceIdentifier<K> path) {
