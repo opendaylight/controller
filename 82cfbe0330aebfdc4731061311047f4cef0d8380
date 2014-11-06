@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_def3e071",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/AbstractReplicatedLogImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-06T01:35:52Z",
+      "side": 1,
+      "message": "Can you put @Override on a separate line? Same below.",
+      "revId": "82cfbe0330aebfdc4731061311047f4cef0d8380",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_7ee8947c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/FollowerLogInformationImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-06T01:35:52Z",
+      "side": 1,
+      "message": "Can you put @Override on separate line?",
+      "revId": "82cfbe0330aebfdc4731061311047f4cef0d8380",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_bebcdc6d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/FollowerLogInformationImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-06T01:35:52Z",
+      "side": 1,
+      "message": "You could convert the timeoutDuration to a concrete value instead of incurring creation of a temp Duration instance.",
+      "revId": "82cfbe0330aebfdc4731061311047f4cef0d8380",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_3e020c3f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/base/messages/CaptureSnapshot.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-06T01:35:52Z",
+      "side": 1,
+      "message": "Why is this now Serializable?",
+      "revId": "82cfbe0330aebfdc4731061311047f4cef0d8380",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_5effd034",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/base/messages/InitiateInstallSnapshot.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-06T01:35:52Z",
+      "side": 1,
+      "message": "Does this need to be Serializable?",
+      "revId": "82cfbe0330aebfdc4731061311047f4cef0d8380",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_5e86f0ba",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/FollowerLogInformationImplTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-06T01:35:52Z",
+      "side": 1,
+      "message": "You could use Uninterruptibles#sleep here so you don\u0027t have to catch InterrruptedEx.\n\nCan you shorten the sleep times here so the test doesn\u0027t take 7 seconds? Maybe use duration 500 ms and sleep 100 ms and assert true although you probably want to check the time elapsed before and after the sleep to ensure the sleep didn\u0027t take longer than the duration and yield a false failure (anything can happen on jenkins).",
+      "revId": "82cfbe0330aebfdc4731061311047f4cef0d8380",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_7eb6548c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 423,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-06T01:35:52Z",
+      "side": 1,
+      "message": "This doesn\u0027t really need to be separated onto 2 lines. Same with other lines in this file. Did your IDE do this automatically?",
+      "revId": "82cfbe0330aebfdc4731061311047f4cef0d8380",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
