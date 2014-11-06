@@ -7,18 +7,15 @@
  */
 package org.opendaylight.controller.config.api.jmx;
 
-import static junit.framework.Assert.fail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-
+import static org.junit.Assert.fail;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
-
 import java.util.HashMap;
 import java.util.Map;
 import javax.management.ObjectName;
-import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
@@ -84,7 +81,7 @@ public class ObjectNameUtilTest {
         assertPattern(on, pattern);
     }
 
-    private void assertPattern(ObjectName test, ObjectName pattern) {
+    private void assertPattern(final ObjectName test, final ObjectName pattern) {
         assertTrue(pattern.isPattern());
         assertTrue(pattern.apply(test));
     }
@@ -150,11 +147,11 @@ public class ObjectNameUtilTest {
         }, IllegalArgumentException.class);
     }
 
-    private void assertFailure(Runnable test, Class<? extends Exception> ex) {
+    private void assertFailure(final Runnable test, final Class<? extends Exception> ex) {
         try {
             test.run();
         } catch(Exception e) {
-            Assert.assertTrue("Failed with wrong exception: " + Throwables.getStackTraceAsString(e),
+            assertTrue("Failed with wrong exception: " + Throwables.getStackTraceAsString(e),
                     e.getClass().isAssignableFrom(ex));
             return;
         }
