@@ -88,6 +88,24 @@
       "revId": "c8aee2e084dd45ba472180d1a7fbf4e249f3fafc",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_fc26edb9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionChainProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-06T04:37:03Z",
+      "side": 1,
+      "message": "I\u0027ve added the scenario in another patch. \n\nThe code would certainly be simplified if we just did everything synchronous and blocked the caller. But that isn\u0027t ideal. Async coding is not as easy to write nor follow.",
+      "parentUuid": "ba8cc1f7_1e038810",
+      "revId": "c8aee2e084dd45ba472180d1a7fbf4e249f3fafc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
