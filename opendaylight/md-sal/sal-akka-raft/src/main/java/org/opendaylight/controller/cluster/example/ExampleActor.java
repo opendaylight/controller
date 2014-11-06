@@ -13,6 +13,13 @@ import akka.actor.Props;
 import akka.japi.Creator;
 import com.google.common.base.Optional;
 import com.google.protobuf.ByteString;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.HashMap;
+import java.util.Map;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.example.messages.KeyValue;
 import org.opendaylight.controller.cluster.example.messages.KeyValueSaved;
@@ -23,27 +30,19 @@ import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * A sample actor showing how the RaftActor is to be extended
  */
 public class ExampleActor extends RaftActor {
 
-    private final Map<String, String> state = new HashMap();
+    private final Map<String, String> state = new HashMap<>();
     private final DataPersistenceProvider dataPersistenceProvider;
 
     private long persistIdentifier = 1;
 
 
-    public ExampleActor(String id, Map<String, String> peerAddresses,
-        Optional<ConfigParams> configParams) {
+    public ExampleActor(final String id, final Map<String, String> peerAddresses,
+        final Optional<ConfigParams> configParams) {
         super(id, peerAddresses, configParams);
         this.dataPersistenceProvider = new PersistentDataProvider();
     }
@@ -58,7 +57,7 @@ public class ExampleActor extends RaftActor {
         });
     }
 
-    @Override public void onReceiveCommand(Object message) throws Exception{
+    @Override public void onReceiveCommand(final Object message) throws Exception{
         if(message instanceof KeyValue){
             if(isLeader()) {
                 String persistId = Long.toString(persistIdentifier++);
@@ -85,8 +84,8 @@ public class ExampleActor extends RaftActor {
         }
     }
 
-    @Override protected void applyState(ActorRef clientActor, String identifier,
-        Object data) {
+    @Override protected void applyState(final ActorRef clientActor, final String identifier,
+        final Object data) {
         if(data instanceof KeyValue){
             KeyValue kv = (KeyValue) data;
             state.put(kv.getKey(), kv.getValue());
@@ -106,7 +105,7 @@ public class ExampleActor extends RaftActor {
         getSelf().tell(new CaptureSnapshotReply(bs), null);
     }
 
-    @Override protected void applySnapshot(ByteString snapshot) {
+    @Override protected void applySnapshot(final ByteString snapshot) {
         state.clear();
         try {
             state.putAll((HashMap) toObject(snapshot));
@@ -118,7 +117,7 @@ public class ExampleActor extends RaftActor {
         }
     }
 
-    private ByteString fromObject(Object snapshot) throws Exception {
+    private ByteString fromObject(final Object snapshot) throws Exception {
         ByteArrayOutputStream b = null;
         ObjectOutputStream o = null;
         try {
@@ -138,7 +137,7 @@ public class ExampleActor extends RaftActor {
         }
     }
 
-    private Object toObject(ByteString bs) throws ClassNotFoundException, IOException {
+    private Object toObject(final ByteString bs) throws ClassNotFoundException, IOException {
         Object obj = null;
         ByteArrayInputStream bis = null;
         ObjectInputStream ois = null;
@@ -166,7 +165,7 @@ public class ExampleActor extends RaftActor {
         return dataPersistenceProvider;
     }
 
-    @Override public void onReceiveRecover(Object message)throws Exception {
+    @Override public void onReceiveRecover(final Object message)throws Exception {
         super.onReceiveRecover(message);
     }
 
@@ -175,11 +174,11 @@ public class ExampleActor extends RaftActor {
     }
 
     @Override
-    protected void startLogRecoveryBatch(int maxBatchSize) {
+    protected void startLogRecoveryBatch(final int maxBatchSize) {
     }
 
     @Override
-    protected void appendRecoveredLogEntry(Payload data) {
+    protected void appendRecoveredLogEntry(final Payload data) {
     }
 
     @Override
@@ -191,6 +190,6 @@ public class ExampleActor extends RaftActor {
     }
 
     @Override
-    protected void applyRecoverySnapshot(ByteString snapshot) {
+    protected void applyRecoverySnapshot(final ByteString snapshot) {
     }
 }

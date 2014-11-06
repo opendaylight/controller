@@ -7,21 +7,19 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import junit.framework.Assert;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
-import static org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockReplicatedLogEntry;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
+import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockReplicatedLogEntry;
 /**
 *
 */
@@ -65,7 +63,7 @@ public class AbstractReplicatedLogImplTest {
         // now create a snapshot of 3 entries, with 1 unapplied entry left in the log
         // It removes the entries which have made it to snapshot
         // and updates the snapshot index and term
-        Map state = takeSnapshot(3);
+        Map<Long, String> state = takeSnapshot(3);
 
         // check the values after the snapshot.
         // each index value passed in the test is the logical index (log entry index)
@@ -131,8 +129,8 @@ public class AbstractReplicatedLogImplTest {
     }
 
     // create a snapshot for test
-    public Map takeSnapshot(int numEntries) {
-        Map map = new HashMap(numEntries);
+    public Map<Long, String> takeSnapshot(final int numEntries) {
+        Map<Long, String> map = new HashMap<>(numEntries);
         List<ReplicatedLogEntry> entries = replicatedLogImpl.getEntriesTill(numEntries);
         for (ReplicatedLogEntry entry : entries) {
             map.put(entry.getIndex(), entry.getData().toString());
@@ -149,22 +147,24 @@ public class AbstractReplicatedLogImplTest {
     }
     class MockAbstractReplicatedLogImpl extends AbstractReplicatedLogImpl {
         @Override
-        public void appendAndPersist(ReplicatedLogEntry replicatedLogEntry) {
+        public void appendAndPersist(final ReplicatedLogEntry replicatedLogEntry) {
         }
 
         @Override
-        public void removeFromAndPersist(long index) {
+        public void removeFromAndPersist(final long index) {
         }
 
-        public void setSnapshotIndex(long snapshotIndex) {
+        @Override
+        public void setSnapshotIndex(final long snapshotIndex) {
             this.snapshotIndex = snapshotIndex;
         }
 
-        public void setSnapshotTerm(long snapshotTerm) {
+        @Override
+        public void setSnapshotTerm(final long snapshotTerm) {
             this.snapshotTerm = snapshotTerm;
         }
 
-        public List<ReplicatedLogEntry> getEntriesTill(int index) {
+        public List<ReplicatedLogEntry> getEntriesTill(final int index) {
             return journal.subList(0, index);
         }
     }
