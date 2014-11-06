@@ -16,6 +16,24 @@
       "revId": "3dc5c507aefce10890f2a0c2851b2fd8fd79c37a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_7e441474",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionChainProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-06T02:04:19Z",
+      "side": 0,
+      "message": "Yeah - there was some infra in place. Either it was incomplete or subsequent changes accidentally removed it.",
+      "parentUuid": "ba8cc1f7_9ea47858",
+      "revId": "3dc5c507aefce10890f2a0c2851b2fd8fd79c37a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

@@ -16,6 +16,24 @@
       "revId": "c8aee2e084dd45ba472180d1a7fbf4e249f3fafc",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_be4a9c81",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionChainProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-06T02:04:19Z",
+      "side": 1,
+      "message": "It actually happens in the unit test I added. \n\n- The first TransactionProxy is created and the client calls put. \n\n- The TransactionProxy attempts to create the shard Tx. However it first calls the manager to get the primary shard. This is done async. \n\n- The client calls ready and we cache the ready future here. \n\n- Then the FindPrimaryShard call completes and sendCreateTransaction is called. However the cached ready futures were from the ready on this TransactionProxy. If we tried to wait on it, it would cause a form of deadlock (this happened on the first run of the unit test). Hence the Tx ID check.",
+      "parentUuid": "ba8cc1f7_5ead9030",
+      "revId": "c8aee2e084dd45ba472180d1a7fbf4e249f3fafc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
