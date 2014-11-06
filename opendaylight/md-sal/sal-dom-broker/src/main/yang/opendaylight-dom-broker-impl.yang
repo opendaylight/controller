@@ -31,6 +31,11 @@ module opendaylight-sal-dom-broker-impl {
         base config:module-type;
         config:provided-service sal:dom-async-data-broker;
     }
+
+    identity pingpong-data-broker {
+        base config:module-type;
+        config:provided-service sal:dom-async-data-broker;
+    }
     
     identity schema-service-singleton {
         base config:module-type;
@@ -143,6 +148,22 @@ module opendaylight-sal-dom-broker-impl {
             container data {
                 uses common:data-state;
             } 
+        }
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case pingpong-data-broker {
+            when "/config:modules/config:module/config:type = 'pingpong-data-broker'";
+
+            container backend {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity sal:dom-async-data-broker;
+                    }
+                }
+
+            }
         }
     }
 }
