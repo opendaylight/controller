@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import com.google.common.base.Preconditions;
 import java.io.File;
 import java.util.Arrays;
@@ -14,7 +13,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import javax.ws.rs.core.UriInfo;
-import junit.framework.Assert;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
@@ -98,8 +96,8 @@ public class ApiDocGeneratorTest {
     /**
      * Tries to find operation with name {@code operationName} and with summary {@code summary}
      */
-    private boolean findOperation(List<Operation> operations, String operationName, String type,
-            String... searchedParameters) {
+    private boolean findOperation(final List<Operation> operations, final String operationName, final String type,
+            final String... searchedParameters) {
         Set<Operation> filteredOperations = findOperations(operations, operationName);
         for (Operation operation : filteredOperations) {
             if (operation.getType().equals(type)) {
@@ -120,7 +118,7 @@ public class ApiDocGeneratorTest {
         return filteredOperations;
     }
 
-    private boolean containAllParameters(final List<Parameter> searchedIns, String[] searchedWhats) {
+    private boolean containAllParameters(final List<Parameter> searchedIns, final String[] searchedWhats) {
         for (String searchedWhat : searchedWhats) {
             boolean parameterFound = false;
             for (Parameter searchedIn : searchedIns) {
@@ -150,7 +148,7 @@ public class ApiDocGeneratorTest {
     /**
      * Validates whether doc {@code doc} contains concrete specified models.
      */
-    private void validateSwaggerModules(ApiDeclaration doc) {
+    private void validateSwaggerModules(final ApiDeclaration doc) {
         JSONObject models = doc.getModels();
         assertNotNull(models);
         try {
@@ -205,7 +203,7 @@ public class ApiDocGeneratorTest {
             if (m.getKey().getAbsolutePath().endsWith("toaster.yang")) {
                 ApiDeclaration doc = generator.getSwaggerDocSpec(m.getValue(), "http://localhost:8080/restconf", "",
                         schemaContext);
-                Assert.assertNotNull(doc);
+                assertNotNull(doc);
 
                 // testing bugs.opendaylight.org bug 1290. UnionType model type.
                 String jsonString = doc.getModels().toString();
@@ -223,7 +221,7 @@ public class ApiDocGeneratorTest {
      * @param doc
      * @throws Exception
      */
-    private void validateToaster(ApiDeclaration doc) throws Exception {
+    private void validateToaster(final ApiDeclaration doc) throws Exception {
         Set<String> expectedUrls = new TreeSet<>(Arrays.asList(new String[] { "/config/toaster2:toaster/",
                 "/operational/toaster2:toaster/", "/operations/toaster2:cancel-toast",
                 "/operations/toaster2:make-toast", "/operations/toaster2:restock-toaster",
@@ -291,7 +289,7 @@ public class ApiDocGeneratorTest {
         assertEquals(HTTP_HOST + "/toaster2(2009-11-20)", toaster2.getPath());
     }
 
-    private void validateTosterDocContainsModulePrefixes(ApiDeclaration doc) {
+    private void validateTosterDocContainsModulePrefixes(final ApiDeclaration doc) {
         JSONObject topLevelJson = doc.getModels();
         try {
             JSONObject configToaster = topLevelJson.getJSONObject("(config)toaster");

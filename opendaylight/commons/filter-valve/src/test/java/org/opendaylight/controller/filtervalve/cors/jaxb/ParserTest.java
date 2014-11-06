@@ -8,13 +8,12 @@
 
 package org.opendaylight.controller.filtervalve.cors.jaxb;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.junit.matchers.JUnitMatchers.containsString;
-
 import com.google.common.base.Optional;
 import java.io.File;
 import javax.servlet.FilterConfig;

@@ -7,11 +7,9 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator;
 
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.format;
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import java.io.InputStream;
@@ -20,7 +18,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.junit.Assert;
 import org.junit.Before;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.YangModelSearchUtils;
 import org.opendaylight.yangtools.sal.binding.yang.types.TypeProviderImpl;
@@ -86,20 +83,20 @@ public abstract class AbstractYangTest {
                 "/META-INF/yang/rpc-context.yang");
     }
 
-    public Map<QName, IdentitySchemaNode> mapIdentitiesByQNames(Module module) {
+    public Map<QName, IdentitySchemaNode> mapIdentitiesByQNames(final Module module) {
         Map<QName, IdentitySchemaNode> result = new HashMap<>();
         for (IdentitySchemaNode identitySchemaNode : module.getIdentities()) {
             QName qName = identitySchemaNode.getQName();
             Preconditions.checkArgument(
                     result.containsKey(qName) == false,
-                    format("Two identities of %s contain same " + "qname %s",
-                            module, qName));
+                    "Two identities of %s contain same " + "qname %s",
+                            module, qName);
             result.put(qName, identitySchemaNode);
         }
         return result;
     }
 
-    protected static List<InputStream> getStreams(String... paths) {
+    protected static List<InputStream> getStreams(final String... paths) {
         List<InputStream> result = new ArrayList<>();
         for (String path : paths) {
             InputStream is = AbstractYangTest.class.getResourceAsStream(path);
@@ -109,16 +106,16 @@ public abstract class AbstractYangTest {
         return result;
     }
 
-    protected Map<QName, ServiceInterfaceEntry>  loadThreadsServiceInterfaceEntries(String packageName) {
+    protected Map<QName, ServiceInterfaceEntry>  loadThreadsServiceInterfaceEntries(final String packageName) {
         Map<IdentitySchemaNode, ServiceInterfaceEntry> identitiesToSIs = new HashMap<>();
         return ServiceInterfaceEntry.create(threadsModule, packageName,identitiesToSIs);
     }
 
-    protected Map<String /* identity local name */, ModuleMXBeanEntry> loadThreadsJava(Map<QName, ServiceInterfaceEntry> modulesToSIEs, String packageName) {
+    protected Map<String /* identity local name */, ModuleMXBeanEntry> loadThreadsJava(final Map<QName, ServiceInterfaceEntry> modulesToSIEs, final String packageName) {
         Map<String /* identity local name */, ModuleMXBeanEntry> namesToMBEs = ModuleMXBeanEntry
                 .create(threadsJavaModule, modulesToSIEs, context, new TypeProviderWrapper(new TypeProviderImpl
                         (context)), packageName);
-        Assert.assertNotNull(namesToMBEs);
+        assertNotNull(namesToMBEs);
         Set<String> expectedMXBeanNames = Sets.newHashSet(EVENTBUS_MXB_NAME,
                 ASYNC_EVENTBUS_MXB_NAME, THREADFACTORY_NAMING_MXB_NAME,
                 THREADPOOL_DYNAMIC_MXB_NAME, THREADPOOL_REGISTRY_IMPL_NAME);

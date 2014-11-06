@@ -11,20 +11,17 @@ package org.opendaylight.controller.netconf.confignetconfconnector.osgi;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
 import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
-
+import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.matchers.JUnitMatchers;
 import org.opendaylight.controller.config.api.LookupRegistry;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -72,11 +69,11 @@ public class NetconfOperationServiceImplTest {
             String message = e.getMessage();
             Assert.assertThat(
                     message,
-                    JUnitMatchers
+                    CoreMatchers
                     .containsString("missing from config subsystem but present in yangstore: [(namespace?revision=1970-01-01)qname2]"));
             Assert.assertThat(
                     message,
-                    JUnitMatchers
+                    CoreMatchers
                     .containsString("All modules present in config: [(namespace?revision=1970-01-01)qname1]"));
         }
     }

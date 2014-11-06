@@ -10,9 +10,7 @@ package org.opendaylight.controller.config.yang.netty.timer;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
-
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
@@ -112,7 +110,7 @@ public class HashedWheelTimerModuleTest extends AbstractConfigTest {
         assertStatus(status, 0, 1, 1);
     }
 
-    private ObjectName createInstance(ConfigTransactionJMXClient transaction, String instanceName,
+    private ObjectName createInstance(final ConfigTransactionJMXClient transaction, final String instanceName,
             final Long tickDuration, final Integer ticksPerWheel, final boolean hasThreadfactory)
             throws InstanceAlreadyExistsException {
         ObjectName nameCreated = transaction.createModule(factory.getImplementationName(), instanceName);
@@ -126,7 +124,7 @@ public class HashedWheelTimerModuleTest extends AbstractConfigTest {
         return nameCreated;
     }
 
-    private ObjectName createThreadfactoryInstance(ConfigTransactionJMXClient transaction, String instanceName,
+    private ObjectName createThreadfactoryInstance(final ConfigTransactionJMXClient transaction, final String instanceName,
             final String namePrefix) throws InstanceAlreadyExistsException {
         ObjectName nameCreated = transaction.createModule(threadFactory.getImplementationName(), instanceName);
         NamingThreadFactoryModuleMXBean mxBean = transaction.newMBeanProxy(nameCreated,

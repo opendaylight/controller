@@ -16,6 +16,19 @@
  */
 package org.opendaylight.controller.routing.dijkstra_implementation.internal;
 
+import edu.uci.ics.jung.algorithms.shortestpath.DijkstraShortestPath;
+import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.graph.SparseMultigraph;
+import edu.uci.ics.jung.graph.util.EdgeType;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import org.apache.commons.collections15.Transformer;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.sal.core.Bandwidth;
 import org.opendaylight.controller.sal.core.ConstructionException;
@@ -31,24 +44,8 @@ import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
 import org.opendaylight.controller.topologymanager.ITopologyManagerClusterWideAware;
-
-import edu.uci.ics.jung.algorithms.shortestpath.DijkstraShortestPath;
-import edu.uci.ics.jung.graph.Graph;
-import edu.uci.ics.jung.graph.SparseMultigraph;
-import edu.uci.ics.jung.graph.util.EdgeType;
-
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.commons.collections15.Transformer;
 
 @SuppressWarnings("rawtypes")
 public class DijkstraImplementation implements IRouting, ITopologyManagerClusterWideAware {
@@ -95,7 +92,7 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerCluster
         if (EdgeWeightMap == null) {
             mtTransformer = new Transformer<Edge, Double>() {
                 @Override
-                public Double transform(Edge e) {
+                public Double transform(final Edge e) {
                     if (switchManager == null) {
                         log.error("switchManager is null");
                         return (double) -1;
@@ -147,7 +144,7 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerCluster
         } else {
             mtTransformer = new Transformer<Edge, Number>() {
                 @Override
-                public Number transform(Edge e) {
+                public Number transform(final Edge e) {
                     return EdgeWeightMap.get(e);
                 }
             };
@@ -171,7 +168,7 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerCluster
     }
 
     @Override
-    public synchronized Path getMaxThroughputRoute(Node src, Node dst) {
+    public synchronized Path getMaxThroughputRoute(final Node src, final Node dst) {
         if (mtp == null) {
             log.error("Max Throughput Path Calculation Uninitialized!");
             return null;
@@ -237,7 +234,7 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerCluster
     }
 
     @SuppressWarnings({ "unchecked" })
-    private synchronized boolean updateTopo(Edge edge, Short bw, UpdateType type) {
+    private synchronized boolean updateTopo(final Edge edge, final Short bw, final UpdateType type) {
         Graph<Node, Edge> topo = this.topologyBWAware.get(bw);
         DijkstraShortestPath<Node, Edge> spt = this.sptBWAware.get(bw);
         boolean edgePresentInGraph = false;
@@ -313,7 +310,7 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerCluster
         return edgePresentInGraph;
     }
 
-    private boolean edgeUpdate(Edge e, UpdateType type, Set<Property> props, boolean local) {
+    private boolean edgeUpdate(final Edge e, final UpdateType type, final Set<Property> props, final boolean local) {
         String srcType = null;
         String dstType = null;
 
@@ -356,7 +353,7 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerCluster
     }
 
     @Override
-    public void edgeUpdate(List<TopoEdgeUpdate> topoedgeupdateList) {
+    public void edgeUpdate(final List<TopoEdgeUpdate> topoedgeupdateList) {
         log.trace("Start of a Bulk EdgeUpdate with " + topoedgeupdateList.size() + " elements");
         boolean callListeners = false;
         for (int i = 0; i < topoedgeupdateList.size(); i++) {
@@ -397,7 +394,7 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerCluster
      * dependencies are satisfied
      *
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings("unchecked")
     public void init() {
         log.debug("Routing init() is called");
         this.topologyBWAware = new ConcurrentHashMap<Short, Graph<Node, Edge>>();
@@ -435,15 +432,13 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerCluster
         }
         List<TopoEdgeUpdate> topoedgeupdateList = new ArrayList<TopoEdgeUpdate>();
         log.debug("Creating routing database from the topology");
-        for (Iterator<Map.Entry<Edge, Set<Property>>> i = edges.entrySet()
-                .iterator(); i.hasNext();) {
-            Map.Entry<Edge, Set<Property>> entry = i.next();
-            Edge e = entry.getKey();
-            Set<Property> props = entry.getValue();
-            TopoEdgeUpdate topoedgeupdate = new TopoEdgeUpdate(e, props,
-                    UpdateType.ADDED);
-            topoedgeupdateList.add(topoedgeupdate);
-        }
+        for (Entry<Edge, Set<Property>> entry : edges.entrySet()) {
+         Edge e = entry.getKey();
+         Set<Property> props = entry.getValue();
+         TopoEdgeUpdate topoedgeupdate = new TopoEdgeUpdate(e, props,
+            UpdateType.ADDED);
+         topoedgeupdateList.add(topoedgeupdate);
+      }
         edgeUpdate(topoedgeupdateList);
     }
 
@@ -457,32 +452,32 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerCluster
         log.debug("Routing stop() is called");
     }
 
-    public void setSwitchManager(ISwitchManager switchManager) {
+    public void setSwitchManager(final ISwitchManager switchManager) {
         this.switchManager = switchManager;
     }
 
-    public void unsetSwitchManager(ISwitchManager switchManager) {
+    public void unsetSwitchManager(final ISwitchManager switchManager) {
         if (this.switchManager == switchManager) {
             this.switchManager = null;
         }
     }
 
-    public void setTopologyManager(ITopologyManager tm) {
+    public void setTopologyManager(final ITopologyManager tm) {
         this.topologyManager = tm;
     }
 
-    public void unsetTopologyManager(ITopologyManager tm) {
+    public void unsetTopologyManager(final ITopologyManager tm) {
         if (this.topologyManager == tm) {
             this.topologyManager = null;
         }
     }
 
-    void setClusterContainerService(IClusterContainerServices s) {
+    void setClusterContainerService(final IClusterContainerServices s) {
         log.debug("Cluster Service set");
         this.clusterContainerService = s;
     }
 
-    void unsetClusterContainerService(IClusterContainerServices s) {
+    void unsetClusterContainerService(final IClusterContainerServices s) {
         if (this.clusterContainerService == s) {
             log.debug("Cluster Service removed!");
             this.clusterContainerService = null;
@@ -490,13 +485,13 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerCluster
     }
 
     @Override
-    public void edgeOverUtilized(Edge edge) {
+    public void edgeOverUtilized(final Edge edge) {
         // TODO Auto-generated method stub
 
     }
 
     @Override
-    public void edgeUtilBackToNormal(Edge edge) {
+    public void edgeUtilBackToNormal(final Edge edge) {
         // TODO Auto-generated method stub
 
     }

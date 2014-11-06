@@ -12,8 +12,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-
-import org.junit.matchers.JUnitMatchers;
+import org.hamcrest.CoreMatchers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,16 +23,16 @@ final class TestingExceptionHandler implements Thread.UncaughtExceptionHandler {
     private Throwable t;
 
     @Override
-    public void uncaughtException(Thread t, Throwable e) {
+    public void uncaughtException(final Thread t, final Throwable e) {
         logger.debug("Uncaught exception in thread {}", t, e);
         this.t = e;
     }
 
-    public void assertException(Class<? extends Exception> exType, String exMessageToContain) {
+    public void assertException(final Class<? extends Exception> exType, final String exMessageToContain) {
         assertException(exMessageToContain, exType, exMessageToContain);
     }
 
-    public void assertException(String failMessageSuffix, Class<? extends Exception> exType, String exMessageToContain) {
+    public void assertException(final String failMessageSuffix, final Class<? extends Exception> exType, final String exMessageToContain) {
         if(t == null) {
             fail("Should fail to " + failMessageSuffix);
         }
@@ -46,29 +45,30 @@ final class TestingExceptionHandler implements Thread.UncaughtExceptionHandler {
         assertNull("No exception expected but was " + t, t);
     }
 
-    private void assertException(Throwable t, Class<? extends Exception> exType, String exMessageToContain) {
+    private void assertException(final Throwable t, final Class<? extends Exception> exType, final String exMessageToContain) {
         assertEquals("Expected exception of type " + exType + " but was " + t, exType, t.getClass());
         if(exMessageToContain!=null) {
-            assertThat(t.getMessage(), JUnitMatchers.containsString(exMessageToContain));
+            assertThat(t.getMessage(), CoreMatchers.containsString(exMessageToContain));
         }
     }
 
-    public void assertException(String failMessageSuffix, Class<? extends Exception> exType,
-            String exMessageToContain, Class<? extends Exception> nestedExType, String nestedExMessageToContain,
-            int nestedExDepth) {
+    public void assertException(final String failMessageSuffix, final Class<? extends Exception> exType,
+            final String exMessageToContain, final Class<? extends Exception> nestedExType, final String nestedExMessageToContain,
+            final int nestedExDepth) {
         assertException(failMessageSuffix, exType, exMessageToContain);
         assertNotNull("Expected nested exception in " + t, t.getCause());
         assertException(getNestedException(t, nestedExDepth), nestedExType, nestedExMessageToContain);
     }
 
-    private Throwable getNestedException(Throwable t, int nestedExDepth) {
+    private Throwable getNestedException(Throwable t, final int nestedExDepth) {
 
         int depth = 0;
         while(t.getCause() != null) {
             t = t.getCause();
             depth++;
-            if(nestedExDepth == depth)
+            if(nestedExDepth == depth) {
                 return t;
+            }
         }
         throw new IllegalArgumentException("Unable to get nested exception from " + t + " from depth " + nestedExDepth);
     }

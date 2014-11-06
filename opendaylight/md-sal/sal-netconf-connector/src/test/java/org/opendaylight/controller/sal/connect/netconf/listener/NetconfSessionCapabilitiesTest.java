@@ -2,11 +2,10 @@ package org.opendaylight.controller.sal.connect.netconf.listener;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-
 import com.google.common.collect.Lists;
 import java.util.List;
+import org.hamcrest.CoreMatchers;
 import org.junit.Test;
-import org.junit.matchers.JUnitMatchers;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil;
 import org.opendaylight.yangtools.yang.common.QName;
 
@@ -35,12 +34,12 @@ public class NetconfSessionCapabilitiesTest {
         final NetconfSessionCapabilities merged = sessionCaps1.replaceModuleCaps(sessionCaps2);
         assertCaps(merged, 2, 2 + 1 /*Preserved monitoring*/);
         for (final QName qName : sessionCaps2.getModuleBasedCaps()) {
-            assertThat(merged.getModuleBasedCaps(), JUnitMatchers.hasItem(qName));
+            assertThat(merged.getModuleBasedCaps(), CoreMatchers.hasItem(qName));
         }
-        assertThat(merged.getModuleBasedCaps(), JUnitMatchers.hasItem(NetconfMessageTransformUtil.IETF_NETCONF_MONITORING));
+        assertThat(merged.getModuleBasedCaps(), CoreMatchers.hasItem(NetconfMessageTransformUtil.IETF_NETCONF_MONITORING));
 
-        assertThat(merged.getNonModuleCaps(), JUnitMatchers.hasItem("urn:ietf:params:netconf:base:1.0"));
-        assertThat(merged.getNonModuleCaps(), JUnitMatchers.hasItem("urn:ietf:params:netconf:capability:rollback-on-error:1.0"));
+        assertThat(merged.getNonModuleCaps(), CoreMatchers.hasItem("urn:ietf:params:netconf:base:1.0"));
+        assertThat(merged.getNonModuleCaps(), CoreMatchers.hasItem("urn:ietf:params:netconf:capability:rollback-on-error:1.0"));
     }
 
     @Test

@@ -7,10 +7,18 @@
  */
 package org.opendaylight.controller.config.yang.test.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import com.google.common.collect.Lists;
-
-import junit.framework.Assert;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.ObjectName;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.IdentityAttributeRef;
@@ -23,20 +31,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.test.types.rev131127.TestIdentity2;
 import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
 import org.opendaylight.yangtools.yang.data.impl.codec.IdentityCodec;
-
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.ObjectName;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 
 public class NetconfTestImplModuleTest  extends AbstractConfigTest {
 
@@ -96,7 +90,7 @@ public class NetconfTestImplModuleTest  extends AbstractConfigTest {
         List<ObjectName> testingDeps = proxy.getTestingDeps();
         ObjectName testingDep = proxy.getTestingDep();
 
-        Assert.assertEquals(TESTING_DEP_PREFIX, ObjectNameUtil.getInstanceName(testingDep));
+        assertEquals(TESTING_DEP_PREFIX, ObjectNameUtil.getInstanceName(testingDep));
         assertTestingDeps(testingDeps, 4);
 
         transaction.abortConfig();
@@ -134,17 +128,16 @@ public class NetconfTestImplModuleTest  extends AbstractConfigTest {
         proxy.setTestingDeps(Collections.<ObjectName>emptyList());
     }
 
-    private void assertTestingDeps(List<ObjectName> testingDeps, int i) {
-        Assert.assertEquals(i, testingDeps.size());
+    private void assertTestingDeps(final List<ObjectName> testingDeps, final int i) {
+        assertEquals(i, testingDeps.size());
 
         int c = 1;
         for (ObjectName testingDep : testingDeps) {
-            Assert.assertEquals(TESTING_DEP_PREFIX + Integer.toString(c++), ObjectNameUtil.getInstanceName(testingDep));
+            assertEquals(TESTING_DEP_PREFIX + Integer.toString(c++), ObjectNameUtil.getInstanceName(testingDep));
         }
     }
 
-
-    private ObjectName createInstance(ConfigTransactionJMXClient transaction, String instanceName, int depsCount)
+    private ObjectName createInstance(final ConfigTransactionJMXClient transaction, final String instanceName, final int depsCount)
             throws InstanceAlreadyExistsException {
         ObjectName nameCreated = transaction.createModule(factory.getImplementationName(), instanceName);
         NetconfTestImplModuleMXBean mxBean = transaction.newMXBeanProxy(nameCreated, NetconfTestImplModuleMXBean.class);

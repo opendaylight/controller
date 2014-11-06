@@ -8,19 +8,23 @@
 
 package org.opendaylight.controller.netconf.impl.osgi;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Dictionary;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
-import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
-import org.osgi.framework.*;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Filter;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 
 public class NetconfImplActivatorTest {
 
@@ -29,9 +33,9 @@ public class NetconfImplActivatorTest {
     @Mock
     private Filter filter;
     @Mock
-    private ServiceReference reference;
+    private ServiceReference<?> reference;
     @Mock
-    private ServiceRegistration registration;
+    private ServiceRegistration<?> registration;
 
     @Before
     public void setUp() throws Exception {
@@ -39,7 +43,7 @@ public class NetconfImplActivatorTest {
         doReturn(filter).when(bundle).createFilter(anyString());
         doNothing().when(bundle).addServiceListener(any(ServiceListener.class), anyString());
 
-        ServiceReference[] refs = new ServiceReference[0];
+        ServiceReference<?>[] refs = new ServiceReference[0];
         doReturn(refs).when(bundle).getServiceReferences(anyString(), anyString());
         doReturn(Arrays.asList(refs)).when(bundle).getServiceReferences(any(Class.class), anyString());
         doReturn("").when(bundle).getProperty(anyString());

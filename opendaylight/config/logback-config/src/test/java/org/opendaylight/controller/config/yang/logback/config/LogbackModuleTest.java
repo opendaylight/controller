@@ -7,10 +7,9 @@
  */
 package org.opendaylight.controller.config.yang.logback.config;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.junit.matchers.JUnitMatchers.containsString;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -247,10 +246,10 @@ public class LogbackModuleTest extends AbstractConfigTest {
                 1, "FileAppender").commit();
     }
 
-    private ConfigTransactionJMXClient createBeans(Boolean isAppend, String rollingFileName, String encoderPattern,
-            String maxFileSize, Integer minIndex, Integer maxIndex, String fileNamePattern, String rollingName,
-            String consoleName, String thresholdFilter, String loggerName, String level, String rollingPolicyType,
-            int maxHistory, String fileAppName) throws Exception {
+    private ConfigTransactionJMXClient createBeans(final Boolean isAppend, final String rollingFileName, final String encoderPattern,
+            final String maxFileSize, final Integer minIndex, final Integer maxIndex, final String fileNamePattern, final String rollingName,
+            final String consoleName, final String thresholdFilter, final String loggerName, final String level, final String rollingPolicyType,
+            final int maxHistory, final String fileAppName) throws Exception {
         ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
         ObjectName nameRetrieved = transaction.lookupConfigBean(factory.getImplementationName(), INSTANCE_NAME);
         LogbackModuleMXBean bean = transaction.newMXBeanProxy(nameRetrieved, LogbackModuleMXBean.class);

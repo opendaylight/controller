@@ -8,7 +8,7 @@
 
 package org.opendaylight.controller.sal.dom.broker;
 
-import static junit.framework.Assert.fail;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;

@@ -7,22 +7,19 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator;
 
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-
 import javax.management.openmbean.SimpleType;
-
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;

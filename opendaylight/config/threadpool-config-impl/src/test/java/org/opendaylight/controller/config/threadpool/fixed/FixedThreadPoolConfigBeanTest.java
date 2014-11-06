@@ -7,11 +7,10 @@
  */
 package org.opendaylight.controller.config.threadpool.fixed;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.junit.matchers.JUnitMatchers.containsString;
-
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
@@ -97,7 +96,7 @@ public class FixedThreadPoolConfigBeanTest extends AbstractConfigTest {
         }
     }
 
-    private int countThreadsByPrefix(String prefix) {
+    private int countThreadsByPrefix(final String prefix) {
         ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
         int result = 0;
         List<String> names = new ArrayList<>();
@@ -155,7 +154,7 @@ public class FixedThreadPoolConfigBeanTest extends AbstractConfigTest {
         }
     }
 
-    private ObjectName createFixed(ConfigTransactionJMXClient transaction, String name, int numberOfThreads, String prefix)
+    private ObjectName createFixed(final ConfigTransactionJMXClient transaction, final String name, final int numberOfThreads, final String prefix)
             throws InstanceAlreadyExistsException {
         ObjectName nameCreated = transaction.createModule(factory.getImplementationName(), name);
         FixedThreadPoolModuleMXBean mxBean = transaction.newMXBeanProxy(nameCreated, FixedThreadPoolModuleMXBean.class);

@@ -7,16 +7,18 @@
  */
 package org.opendaylight.controller.sal.binding.test.connect.dom;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNotSame;
-import static junit.framework.Assert.assertTrue;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.math.BigInteger;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.Future;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,11 +47,6 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.MoreExecutors;
 
 public class CrossBrokerRpcTest {
 
@@ -132,7 +129,7 @@ public class CrossBrokerRpcTest {
             }
 
             @Override
-            public ListenableFuture<RpcResult<CompositeNode>> invokeRpc(QName rpc, CompositeNode input) {
+            public ListenableFuture<RpcResult<CompositeNode>> invokeRpc(final QName rpc, final CompositeNode input) {
                 CompositeNode result = testContext.getBindingToDomMappingService().toDataDom(output);
                 return Futures.immediateFuture(RpcResultBuilder.<CompositeNode>success(result).build());
             }
@@ -145,7 +142,7 @@ public class CrossBrokerRpcTest {
         assertEquals(output,baResult.get().getResult());
     }
 
-    private CompositeNode toDomRpcInput(DataObject addFlowA) {
+    private CompositeNode toDomRpcInput(final DataObject addFlowA) {
         return testContext.getBindingToDomMappingService().toDataDom(addFlowA);
     }
 
@@ -154,29 +151,29 @@ public class CrossBrokerRpcTest {
         testContext.close();
     }
 
-    private static InstanceIdentifier<Node> createBANodeIdentifier(NodeId node) {
+    private static InstanceIdentifier<Node> createBANodeIdentifier(final NodeId node) {
         return InstanceIdentifier.builder(Nodes.class).child(Node.class, new NodeKey(node)).toInstance();
     }
 
-    private static org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier createBINodeIdentifier(NodeId node) {
+    private static org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier createBINodeIdentifier(final NodeId node) {
         return org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.builder().node(Nodes.QNAME)
                 .nodeWithKey(Node.QNAME, NODE_ID_QNAME, node.getValue()).toInstance();
     }
 
-    private Future<RpcResult<AddFlowOutput>> addFlowResult(boolean success, long xid) {
+    private Future<RpcResult<AddFlowOutput>> addFlowResult(final boolean success, final long xid) {
         AddFlowOutput output = new AddFlowOutputBuilder() //
                 .setTransactionId(new TransactionId(BigInteger.valueOf(xid))).build();
         RpcResult<AddFlowOutput> result = RpcResultBuilder.<AddFlowOutput>status(success).withResult(output).build();
         return Futures.immediateFuture(result);
     }
 
-    private static AddFlowInputBuilder addFlow(InstanceIdentifier<Node> nodeId) {
+    private static AddFlowInputBuilder addFlow(final InstanceIdentifier<Node> nodeId) {
         AddFlowInputBuilder builder = new AddFlowInputBuilder();
         builder.setNode(new NodeRef(nodeId));
         return builder;
     }
 
-    private CompositeNode toDomRpc(QName rpcName, AddFlowInput addFlowA) {
+    private CompositeNode toDomRpc(final QName rpcName, final AddFlowInput addFlowA) {
         return new CompositeNodeTOImpl(rpcName, null,
                 Collections.<org.opendaylight.yangtools.yang.data.api.Node<?>> singletonList(toDomRpcInput(addFlowA)));
     }

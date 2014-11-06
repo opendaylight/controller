@@ -7,12 +7,11 @@
  */
 package org.opendaylight.controller.config.threadpool.scheduled;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.junit.matchers.JUnitMatchers.containsString;
-
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
@@ -140,7 +139,7 @@ public class ScheduledThreadPoolConfigBeanTest extends AbstractConfigTest {
         }
     }
 
-    private ObjectName createScheduled(ConfigTransactionJMXClient transaction, String instanceName, int maxThreadCount)
+    private ObjectName createScheduled(final ConfigTransactionJMXClient transaction, final String instanceName, final int maxThreadCount)
             throws InstanceAlreadyExistsException {
         ObjectName nameCreated = transaction.createModule(factory.getImplementationName(), instanceName);
         ScheduledThreadPoolModuleMXBean mxBean = transaction.newMBeanProxy(nameCreated,

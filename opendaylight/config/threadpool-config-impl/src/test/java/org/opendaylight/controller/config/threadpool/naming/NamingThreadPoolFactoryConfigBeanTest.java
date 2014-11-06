@@ -7,12 +7,11 @@
  */
 package org.opendaylight.controller.config.threadpool.naming;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.junit.matchers.JUnitMatchers.containsString;
-
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
@@ -130,7 +129,7 @@ public class NamingThreadPoolFactoryConfigBeanTest extends AbstractConfigTest {
         assertStatus(status, 0, 1, 0);
     }
 
-    private ObjectName createNamed(ConfigTransactionJMXClient transaction, String instanceName, String prefixes)
+    private ObjectName createNamed(final ConfigTransactionJMXClient transaction, final String instanceName, final String prefixes)
             throws InstanceAlreadyExistsException {
         ObjectName nameCreated = transaction.createModule(factory.getImplementationName(), instanceName);
         NamingThreadFactoryModuleMXBean mxBean = transaction.newMBeanProxy(nameCreated,

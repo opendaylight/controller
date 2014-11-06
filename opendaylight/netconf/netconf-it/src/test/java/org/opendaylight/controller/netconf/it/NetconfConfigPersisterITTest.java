@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.netconf.it;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -16,7 +16,6 @@ import static org.mockito.Mockito.mock;
 import static org.opendaylight.controller.netconf.util.test.XmlUnitUtil.assertContainsElementWithName;
 import static org.opendaylight.controller.netconf.util.test.XmlUnitUtil.assertElementsCount;
 import static org.opendaylight.controller.netconf.util.xml.XmlUtil.readXmlToDocument;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.io.IOException;

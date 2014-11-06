@@ -103,7 +103,7 @@ public class NetconfClientSessionNegotiatorTest {
         return pipeline;
     }
 
-    private NetconfClientSessionNegotiator createNetconfClientSessionNegotiator(final Promise promise,
+    private NetconfClientSessionNegotiator createNetconfClientSessionNegotiator(final Promise<NetconfClientSession> promise,
                                                                                 final NetconfMessage startExi) {
         ChannelProgressivePromise progressivePromise = mock(ChannelProgressivePromise.class);
         NetconfClientSessionPreferences preferences = new NetconfClientSessionPreferences(helloMessage, startExi);
@@ -122,7 +122,7 @@ public class NetconfClientSessionNegotiatorTest {
         NetconfClientSessionNegotiator negotiator = createNetconfClientSessionNegotiator(promise, null);
 
         negotiator.channelActive(null);
-        Set caps = Sets.newSet("a", "b");
+        Set<String> caps = Sets.newSet("a", "b");
         NetconfHelloMessage helloServerMessage = NetconfHelloMessage.createServerHello(caps, 10);
         negotiator.handleMessage(helloServerMessage);
         verify(promise).setSuccess(anyObject());
@@ -137,7 +137,7 @@ public class NetconfClientSessionNegotiatorTest {
         NetconfClientSessionNegotiator negotiator = createNetconfClientSessionNegotiator(promise, exiMessage);
 
         negotiator.channelActive(null);
-        Set caps = Sets.newSet("exi:1.0");
+        Set<String> caps = Sets.newSet("exi:1.0");
         NetconfHelloMessage helloMessage = NetconfHelloMessage.createServerHello(caps, 10);
 
         doAnswer(new Answer<Object>() {

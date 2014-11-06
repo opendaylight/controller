@@ -7,8 +7,12 @@
  */
 package org.opendaylight.controller.topology.northbound;
 
-
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Bandwidth;
 import org.opendaylight.controller.sal.core.ConstructionException;
@@ -22,14 +26,6 @@ import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.NodeCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import static junit.framework.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 public class TopologyTest {
         protected static final Logger logger = LoggerFactory

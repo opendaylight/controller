@@ -8,6 +8,12 @@
 
 package org.opendaylight.controller.netconf.client;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelPipeline;
@@ -17,10 +23,6 @@ import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.
 import org.opendaylight.protocol.framework.SessionListenerFactory;
 import org.opendaylight.protocol.framework.SessionNegotiator;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
-
 public class SshClientChannelInitializerTest {
     @Test
     public void test() throws Exception {
@@ -29,7 +31,7 @@ public class SshClientChannelInitializerTest {
         NetconfClientSessionNegotiatorFactory negotiatorFactory = mock(NetconfClientSessionNegotiatorFactory.class);
         NetconfClientSessionListener sessionListener = mock(NetconfClientSessionListener.class);
 
-        SessionNegotiator sessionNegotiator = mock(SessionNegotiator.class);
+        SessionNegotiator<?> sessionNegotiator = mock(SessionNegotiator.class);
         doReturn("").when(sessionNegotiator).toString();
         doReturn(sessionNegotiator).when(negotiatorFactory).getSessionNegotiator(any(SessionListenerFactory.class), any(Channel.class), any(Promise.class));
         ChannelPipeline pipeline = mock(ChannelPipeline.class);

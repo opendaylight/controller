@@ -8,11 +8,32 @@
 
 package org.opendaylight.md.controller.topology.manager;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -70,29 +91,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 
 public class FlowCapableTopologyExporterTest {
 
@@ -380,7 +378,6 @@ public class FlowCapableTopologyExporterTest {
         assertEquals("getInventoryNodeRef", new NodeRef(invNodeID), augmentation.getInventoryNodeRef());
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
     public void testOnNodeConnectorUpdated() {
 
@@ -616,7 +613,7 @@ public class FlowCapableTopologyExporterTest {
                 Link.class, new LinkKey(new LinkId(sourceNodeConnKey.getId()))));
     }
 
-    private void verifyMockTx(ReadWriteTransaction mockTx) {
+    private void verifyMockTx(final ReadWriteTransaction mockTx) {
         InOrder inOrder = inOrder(mockTx);
         inOrder.verify(mockTx, atLeast(0)).submit();
         inOrder.verify(mockTx, never()).delete(eq(LogicalDatastoreType.OPERATIONAL),
@@ -624,8 +621,8 @@ public class FlowCapableTopologyExporterTest {
     }
 
     @SuppressWarnings("rawtypes")
-    private void assertDeletedIDs(InstanceIdentifier[] expDeletedIIDs,
-            ArgumentCaptor<InstanceIdentifier> deletedLinkIDs) {
+    private void assertDeletedIDs(final InstanceIdentifier[] expDeletedIIDs,
+            final ArgumentCaptor<InstanceIdentifier> deletedLinkIDs) {
         Set<InstanceIdentifier> actualIIDs = new HashSet<>(deletedLinkIDs.getAllValues());
         for(InstanceIdentifier id: expDeletedIIDs) {
             assertTrue("Missing expected deleted IID " + id, actualIIDs.contains(id));
@@ -644,12 +641,12 @@ public class FlowCapableTopologyExporterTest {
         }.start();
     }
 
-    private void waitForSubmit(CountDownLatch latch) {
+    private void waitForSubmit(final CountDownLatch latch) {
         assertEquals("Transaction submitted", true,
                 Uninterruptibles.awaitUninterruptibly(latch, 5, TimeUnit.SECONDS));
     }
 
-    private void waitForDeletes(int expDeleteCalls, final CountDownLatch latch) {
+    private void waitForDeletes(final int expDeleteCalls, final CountDownLatch latch) {
         boolean done = Uninterruptibles.awaitUninterruptibly(latch, 5, TimeUnit.SECONDS);
         if(!done) {
             fail("Expected " + expDeleteCalls + " delete calls. Actual: " +
@@ -657,12 +654,12 @@ public class FlowCapableTopologyExporterTest {
         }
     }
 
-    private CountDownLatch setupStubbedSubmit(ReadWriteTransaction mockTx) {
+    private CountDownLatch setupStubbedSubmit(final ReadWriteTransaction mockTx) {
         final CountDownLatch latch = new CountDownLatch(1);
         doAnswer(new Answer<CheckedFuture<Void, TransactionCommitFailedException>>() {
             @Override
             public CheckedFuture<Void, TransactionCommitFailedException> answer(
-                                                            InvocationOnMock invocation) {
+                                                            final InvocationOnMock invocation) {
                 latch.countDown();
                 return Futures.immediateCheckedFuture(null);
             }
@@ -672,11 +669,11 @@ public class FlowCapableTopologyExporterTest {
     }
 
     @SuppressWarnings("rawtypes")
-    private void setupStubbedDeletes(ReadWriteTransaction mockTx,
-            ArgumentCaptor<InstanceIdentifier> deletedLinkIDs, final CountDownLatch latch) {
+    private void setupStubbedDeletes(final ReadWriteTransaction mockTx,
+            final ArgumentCaptor<InstanceIdentifier> deletedLinkIDs, final CountDownLatch latch) {
         doAnswer(new Answer<Void>() {
             @Override
-            public Void answer(InvocationOnMock invocation) {
+            public Void answer(final InvocationOnMock invocation) {
                 latch.countDown();
                 return null;
             }
@@ -684,7 +681,7 @@ public class FlowCapableTopologyExporterTest {
     }
 
     private org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey
-                                                                        newInvNodeKey(String id) {
+                                                                        newInvNodeKey(final String id) {
         org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey nodeKey =
                 new org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey(
                         new org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.
@@ -692,39 +689,39 @@ public class FlowCapableTopologyExporterTest {
         return nodeKey;
     }
 
-    private NodeConnectorKey newInvNodeConnKey(String id) {
+    private NodeConnectorKey newInvNodeConnKey(final String id) {
         return new org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey(
                 new org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.
                                                                NodeConnectorId(id));
     }
 
     private KeyedInstanceIdentifier<NodeConnector, NodeConnectorKey> newNodeConnID(
-            org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey nodeKey,
-            org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey ncKey) {
+            final org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey nodeKey,
+            final org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey ncKey) {
         return InstanceIdentifier.create(Nodes.class).child(
                 org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node.class,
                 nodeKey).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.
                         rev130819.node.NodeConnector.class, ncKey);
     }
 
-    private Link newLink(String id, Source source, Destination dest) {
+    private Link newLink(final String id, final Source source, final Destination dest) {
         return new LinkBuilder().setLinkId(new LinkId(id))
                 .setSource(source).setDestination(dest).build();
     }
 
-    private Destination newDestTp(String id) {
+    private Destination newDestTp(final String id) {
         return new DestinationBuilder().setDestTp(new TpId(id)).build();
     }
 
-    private Source newSourceTp(String id) {
+    private Source newSourceTp(final String id) {
         return new SourceBuilder().setSourceTp(new TpId(id)).build();
     }
 
-    private Destination newDestNode(String id) {
+    private Destination newDestNode(final String id) {
         return new DestinationBuilder().setDestNode(new NodeId(id)).build();
     }
 
-    private Source newSourceNode(String id) {
+    private Source newSourceNode(final String id) {
         return new SourceBuilder().setSourceNode(new NodeId(id)).build();
     }
 }

@@ -8,6 +8,9 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.osgi;
 
+import static com.google.common.base.Preconditions.checkState;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 import org.osgi.framework.BundleActivator;
@@ -19,17 +22,12 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-
-import static com.google.common.base.Preconditions.checkState;
-
 public class Activator implements BundleActivator {
 
     private static final Logger logger = LoggerFactory.getLogger(Activator.class);
 
     private BundleContext context;
-    private ServiceRegistration osgiRegistration;
+    private ServiceRegistration<?> osgiRegistration;
     private ConfigRegistryLookupThread configRegistryLookup = null;
 
     @Override
@@ -38,7 +36,7 @@ public class Activator implements BundleActivator {
 
         ServiceTrackerCustomizer<SchemaContextProvider, ConfigRegistryLookupThread> customizer = new ServiceTrackerCustomizer<SchemaContextProvider, ConfigRegistryLookupThread>() {
             @Override
-            public ConfigRegistryLookupThread addingService(ServiceReference<SchemaContextProvider> reference) {
+            public ConfigRegistryLookupThread addingService(final ServiceReference<SchemaContextProvider> reference) {
                 logger.debug("Got addingService(SchemaContextProvider) event, starting ConfigRegistryLookupThread");
                 checkState(configRegistryLookup == null, "More than one onYangStoreAdded received");
 
@@ -51,14 +49,14 @@ public class Activator implements BundleActivator {
             }
 
             @Override
-            public void modifiedService(ServiceReference<SchemaContextProvider> reference, ConfigRegistryLookupThread configRegistryLookup) {
+            public void modifiedService(final ServiceReference<SchemaContextProvider> reference, final ConfigRegistryLookupThread configRegistryLookup) {
                 logger.debug("Got modifiedService(SchemaContextProvider) event");
                 configRegistryLookup.yangStoreService.refresh();
 
             }
 
             @Override
-            public void removedService(ServiceReference<SchemaContextProvider> reference, ConfigRegistryLookupThread configRegistryLookup) {
+            public void removedService(final ServiceReference<SchemaContextProvider> reference, final ConfigRegistryLookupThread configRegistryLookup) {
                 configRegistryLookup.interrupt();
                 if (osgiRegistration != null) {
                     osgiRegistration.unregister();
@@ -73,7 +71,7 @@ public class Activator implements BundleActivator {
     }
 
     @Override
-    public void stop(BundleContext context) {
+    public void stop(final BundleContext context) {
         if (configRegistryLookup != null) {
             configRegistryLookup.interrupt();
         }
@@ -82,7 +80,7 @@ public class Activator implements BundleActivator {
     private class ConfigRegistryLookupThread extends Thread {
         private final YangStoreServiceImpl yangStoreService;
 
-        private ConfigRegistryLookupThread(YangStoreServiceImpl yangStoreService) {
+        private ConfigRegistryLookupThread(final YangStoreServiceImpl yangStoreService) {
             super("config-registry-lookup");
             this.yangStoreService = yangStoreService;
         }

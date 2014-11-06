@@ -7,12 +7,12 @@
  */
 package org.opendaylight.controller.sal.binding.test.connect.dom;
 
-import static junit.framework.Assert.assertNotNull;
-
+import static org.junit.Assert.assertNotNull;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import java.util.concurrent.Future;
-
-import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RoutedRpcRegistration;
+import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.RemoveFlowInput;
@@ -23,9 +23,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.Upda
 import org.opendaylight.yangtools.yang.binding.BaseIdentity;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
-
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
 
 public class MessageCapturingFlowService implements SalFlowService, AutoCloseable {
 
@@ -39,19 +36,19 @@ public class MessageCapturingFlowService implements SalFlowService, AutoCloseabl
     private RoutedRpcRegistration<SalFlowService> registration;
 
     @Override
-    public Future<RpcResult<AddFlowOutput>> addFlow(AddFlowInput arg0) {
+    public Future<RpcResult<AddFlowOutput>> addFlow(final AddFlowInput arg0) {
         receivedAddFlows.put(arg0.getNode().getValue(), arg0);
         return addFlowResult;
     }
 
     @Override
-    public Future<RpcResult<RemoveFlowOutput>> removeFlow(RemoveFlowInput arg0) {
+    public Future<RpcResult<RemoveFlowOutput>> removeFlow(final RemoveFlowInput arg0) {
         receivedRemoveFlows.put(arg0.getNode().getValue(), arg0);
         return removeFlowResult;
     }
 
     @Override
-    public Future<RpcResult<UpdateFlowOutput>> updateFlow(UpdateFlowInput arg0) {
+    public Future<RpcResult<UpdateFlowOutput>> updateFlow(final UpdateFlowInput arg0) {
         receivedUpdateFlows.put(arg0.getNode().getValue(), arg0);
         return updateFlowResult;
     }
@@ -60,7 +57,7 @@ public class MessageCapturingFlowService implements SalFlowService, AutoCloseabl
         return addFlowResult;
     }
 
-    public MessageCapturingFlowService setAddFlowResult(Future<RpcResult<AddFlowOutput>> addFlowResult) {
+    public MessageCapturingFlowService setAddFlowResult(final Future<RpcResult<AddFlowOutput>> addFlowResult) {
         this.addFlowResult = addFlowResult;
         return this;
     }
@@ -69,7 +66,7 @@ public class MessageCapturingFlowService implements SalFlowService, AutoCloseabl
         return removeFlowResult;
     }
 
-    public MessageCapturingFlowService setRemoveFlowResult(Future<RpcResult<RemoveFlowOutput>> removeFlowResult) {
+    public MessageCapturingFlowService setRemoveFlowResult(final Future<RpcResult<RemoveFlowOutput>> removeFlowResult) {
         this.removeFlowResult = removeFlowResult;
         return this;
     }
@@ -78,7 +75,7 @@ public class MessageCapturingFlowService implements SalFlowService, AutoCloseabl
         return updateFlowResult;
     }
 
-    public MessageCapturingFlowService setUpdateFlowResult(Future<RpcResult<UpdateFlowOutput>> updateFlowResult) {
+    public MessageCapturingFlowService setUpdateFlowResult(final Future<RpcResult<UpdateFlowOutput>> updateFlowResult) {
         this.updateFlowResult = updateFlowResult;
         return this;
     }
@@ -95,22 +92,23 @@ public class MessageCapturingFlowService implements SalFlowService, AutoCloseabl
         return receivedUpdateFlows;
     }
 
-    public MessageCapturingFlowService registerTo(RpcProviderRegistry registry) {
+    public MessageCapturingFlowService registerTo(final RpcProviderRegistry registry) {
         registration = registry.addRoutedRpcImplementation(SalFlowService.class, this);
         assertNotNull(registration);
         return this;
     }
 
+    @Override
     public void close() throws Exception {
         registration.close();
     }
 
-    public MessageCapturingFlowService registerPath(Class<? extends BaseIdentity> context, InstanceIdentifier<?> path) {
+    public MessageCapturingFlowService registerPath(final Class<? extends BaseIdentity> context, final InstanceIdentifier<?> path) {
         registration.registerPath(context, path);
         return this;
     }
 
-    public MessageCapturingFlowService unregisterPath(Class<? extends BaseIdentity> context, InstanceIdentifier<?> path) {
+    public MessageCapturingFlowService unregisterPath(final Class<? extends BaseIdentity> context, final InstanceIdentifier<?> path) {
         registration.unregisterPath(context, path);
         return this;
     }
@@ -119,7 +117,7 @@ public class MessageCapturingFlowService implements SalFlowService, AutoCloseabl
         return new MessageCapturingFlowService();
     }
 
-    public static MessageCapturingFlowService create(RpcProviderRegistry registry) {
+    public static MessageCapturingFlowService create(final RpcProviderRegistry registry) {
         MessageCapturingFlowService ret = new MessageCapturingFlowService();
         ret.registerTo(registry);
         return ret;

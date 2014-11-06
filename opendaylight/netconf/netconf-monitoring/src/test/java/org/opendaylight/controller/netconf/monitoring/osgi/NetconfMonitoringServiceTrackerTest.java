@@ -33,7 +33,7 @@ public class NetconfMonitoringServiceTrackerTest {
     @Mock
     private BundleContext context;
     @Mock
-    private ServiceRegistration<?> serviceRegistration;
+    private ServiceRegistration<NetconfMonitoringService> serviceRegistration;
     @Mock
     private Filter filter;
     @Mock

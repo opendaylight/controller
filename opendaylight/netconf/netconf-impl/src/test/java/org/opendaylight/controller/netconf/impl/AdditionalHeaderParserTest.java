@@ -7,8 +7,7 @@
  */
 package org.opendaylight.controller.netconf.impl;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAdditionalHeader;
 

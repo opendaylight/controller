@@ -7,13 +7,11 @@
  */
 package org.opendaylight.controller.config.threadpool.async;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.junit.matchers.JUnitMatchers.containsString;
-
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.ObjectName;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
@@ -96,7 +94,7 @@ public class AsyncEventBusConfigBeanTest extends AbstractConfigTest {
         }
     }
 
-    private ObjectName createAsynced(ConfigTransactionJMXClient transaction, String instanceName, ObjectName threadPool)
+    private ObjectName createAsynced(final ConfigTransactionJMXClient transaction, final String instanceName, final ObjectName threadPool)
             throws InstanceAlreadyExistsException {
         ObjectName nameCreated = transaction.createModule(factory.getImplementationName(), instanceName);
         AsyncEventBusModuleMXBean mxBean = transaction.newMBeanProxy(nameCreated, AsyncEventBusModuleMXBean.class);

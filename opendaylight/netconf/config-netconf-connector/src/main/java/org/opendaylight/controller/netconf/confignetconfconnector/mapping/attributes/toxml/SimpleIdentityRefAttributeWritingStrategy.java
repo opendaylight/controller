@@ -8,16 +8,14 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.toxml;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import java.util.Map;
-
 import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 
 public class SimpleIdentityRefAttributeWritingStrategy extends SimpleAttributeWritingStrategy {
 
@@ -27,21 +25,22 @@ public class SimpleIdentityRefAttributeWritingStrategy extends SimpleAttributeWr
      * @param document
      * @param key
      */
-    public SimpleIdentityRefAttributeWritingStrategy(Document document, String key) {
+    public SimpleIdentityRefAttributeWritingStrategy(final Document document, final String key) {
         super(document, key);
     }
 
-    protected Object preprocess(Object value) {
+    @Override
+    protected Object preprocess(final Object value) {
         Util.checkType(value, Map.class);
-        Preconditions.checkArgument(((Map)value).size() == 1, "Unexpected number of values in %s, expected 1", value);
-        Object stringValue = ((Map) value).values().iterator().next();
+        Preconditions.checkArgument(((Map<?, ?>)value).size() == 1, "Unexpected number of values in %s, expected 1", value);
+        Object stringValue = ((Map<?, ?>) value).values().iterator().next();
         Util.checkType(stringValue, String.class);
 
         return stringValue;
     }
 
     @Override
-    protected Element createElement(Document doc, String key, String value, Optional<String> namespace) {
+    protected Element createElement(final Document doc, final String key, final String value, final Optional<String> namespace) {
         QName qName = QName.create(value);
         String identityValue = qName.getLocalName();
         String identityNamespace = qName.getNamespace().toString();

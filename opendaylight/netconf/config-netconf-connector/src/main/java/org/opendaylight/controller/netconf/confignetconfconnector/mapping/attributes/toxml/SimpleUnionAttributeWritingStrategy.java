@@ -9,11 +9,10 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.toxml;
 
 import com.google.common.base.Preconditions;
-import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
-import org.w3c.dom.Document;
-
 import java.util.List;
 import java.util.Map;
+import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
+import org.w3c.dom.Document;
 
 public class SimpleUnionAttributeWritingStrategy extends SimpleAttributeWritingStrategy {
 
@@ -21,18 +20,19 @@ public class SimpleUnionAttributeWritingStrategy extends SimpleAttributeWritingS
      * @param document
      * @param key
      */
-    public SimpleUnionAttributeWritingStrategy(Document document, String key) {
+    public SimpleUnionAttributeWritingStrategy(final Document document, final String key) {
         super(document, key);
     }
 
-    protected Object preprocess(Object value) {
+    @Override
+    protected Object preprocess(final Object value) {
         Util.checkType(value, Map.class);
-        Preconditions.checkArgument(((Map)value).size() == 1, "Unexpected number of values in %s, expected 1", value);
-        Object listOfStrings = ((Map) value).values().iterator().next();
+        Preconditions.checkArgument(((Map<?, ?>)value).size() == 1, "Unexpected number of values in %s, expected 1", value);
+        Object listOfStrings = ((Map<?, ?>) value).values().iterator().next();
         Util.checkType(listOfStrings, List.class);
 
         StringBuilder b = new StringBuilder();
-        for (Object character: (List)listOfStrings) {
+        for (Object character: (List<?>)listOfStrings) {
             Util.checkType(character, String.class);
             b.append(character);
         }

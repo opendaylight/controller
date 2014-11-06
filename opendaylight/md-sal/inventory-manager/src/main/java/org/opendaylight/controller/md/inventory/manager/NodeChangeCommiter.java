@@ -14,6 +14,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnectorUpdated;
@@ -106,16 +107,16 @@ class NodeChangeCommiter implements OpendaylightInventoryListener {
         LOG.debug("Node updated notification received.");
         manager.enqueue(new InventoryOperation() {
             @Override
-            public void applyOperation(ReadWriteTransaction tx) {
+            public void applyOperation(final ReadWriteTransaction tx) {
                 final NodeRef ref = node.getNodeRef();
                 @SuppressWarnings("unchecked")
                 InstanceIdentifierBuilder<Node> builder = ((InstanceIdentifier<Node>) ref.getValue()).builder();
                 InstanceIdentifierBuilder<FlowCapableNode> augmentation = builder.augmentation(FlowCapableNode.class);
                 final InstanceIdentifier<FlowCapableNode> path = augmentation.build();
-                CheckedFuture readFuture = tx.read(LogicalDatastoreType.OPERATIONAL, path);
+                CheckedFuture<Optional<FlowCapableNode>, ReadFailedException> readFuture = tx.read(LogicalDatastoreType.OPERATIONAL, path);
                 Futures.addCallback(readFuture, new FutureCallback<Optional<? extends DataObject>>() {
                     @Override
-                    public void onSuccess(Optional<? extends DataObject> optional) {
+                    public void onSuccess(final Optional<? extends DataObject> optional) {
                         enqueueWriteNodeDataTx(node, flowNode, path);
                         if (!optional.isPresent()) {
                             enqueuePutTable0Tx(ref);
@@ -123,7 +124,7 @@ class NodeChangeCommiter implements OpendaylightInventoryListener {
                     }
 
                     @Override
-                    public void onFailure(Throwable throwable) {
+                    public void onFailure(final Throwable throwable) {
                         LOG.debug(String.format("Can't retrieve node data for node %s. Writing node data with table0.", node));
                         enqueueWriteNodeDataTx(node, flowNode, path);
                         enqueuePutTable0Tx(ref);
@@ -147,7 +148,7 @@ class NodeChangeCommiter implements OpendaylightInventoryListener {
     private void enqueuePutTable0Tx(final NodeRef ref) {
         manager.enqueue(new InventoryOperation() {
             @Override
-            public void applyOperation(ReadWriteTransaction tx) {
+            public void applyOperation(final ReadWriteTransaction tx) {
                 final TableKey tKey = new TableKey((short) 0);
                 final InstanceIdentifier<Table> tableIdentifier =
                         ((InstanceIdentifier<Node>) ref.getValue()).augmentation(FlowCapableNode.class).child(Table.class, new TableKey(tKey));

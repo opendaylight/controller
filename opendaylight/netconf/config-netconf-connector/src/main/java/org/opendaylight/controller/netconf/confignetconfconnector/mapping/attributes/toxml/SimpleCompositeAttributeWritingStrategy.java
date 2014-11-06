@@ -9,10 +9,9 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.toxml;
 
 import com.google.common.base.Preconditions;
+import java.util.Map;
 import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
 import org.w3c.dom.Document;
-
-import java.util.Map;
 
 public class SimpleCompositeAttributeWritingStrategy extends SimpleAttributeWritingStrategy {
 
@@ -20,14 +19,15 @@ public class SimpleCompositeAttributeWritingStrategy extends SimpleAttributeWrit
      * @param document
      * @param key
      */
-    public SimpleCompositeAttributeWritingStrategy(Document document, String key) {
+    public SimpleCompositeAttributeWritingStrategy(final Document document, final String key) {
         super(document, key);
     }
 
-    protected Object preprocess(Object value) {
+    @Override
+    protected Object preprocess(final Object value) {
         Util.checkType(value, Map.class);
-        Preconditions.checkArgument(((Map)value).size() == 1, "Unexpected number of values in %s, expected 1", value);
-        return ((Map)value).values().iterator().next();
+        Preconditions.checkArgument(((Map<?, ?>)value).size() == 1, "Unexpected number of values in %s, expected 1", value);
+        return ((Map<?, ?>)value).values().iterator().next();
     }
 
 }

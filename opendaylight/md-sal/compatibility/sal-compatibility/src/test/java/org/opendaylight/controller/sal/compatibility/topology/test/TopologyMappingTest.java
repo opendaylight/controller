@@ -7,8 +7,7 @@
  */
 package org.opendaylight.controller.sal.compatibility.topology.test;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.sal.compatibility.topology.TopologyMapping;
 import org.opendaylight.controller.sal.core.ConstructionException;

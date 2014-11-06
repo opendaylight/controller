@@ -15,13 +15,12 @@ import akka.japi.Pair;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestProbe;
 import com.typesafe.config.ConfigFactory;
-import junit.framework.Assert;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 
 public class LatestEntryRoutingLogicTest {

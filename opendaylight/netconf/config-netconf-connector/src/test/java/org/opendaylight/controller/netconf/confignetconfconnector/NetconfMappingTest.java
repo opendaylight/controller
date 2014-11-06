@@ -21,14 +21,12 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.opendaylight.controller.netconf.util.test.XmlUnitUtil.assertContainsElement;
 import static org.opendaylight.controller.netconf.util.test.XmlUnitUtil.assertContainsElementWithText;
 import static org.opendaylight.controller.netconf.util.xml.XmlUtil.readXmlToElement;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,22 +41,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.custommonkey.xmlunit.AbstractNodeTester;
 import org.custommonkey.xmlunit.NodeTest;
 import org.custommonkey.xmlunit.NodeTestException;
 import org.custommonkey.xmlunit.NodeTester;
 import org.custommonkey.xmlunit.XMLAssert;
 import org.custommonkey.xmlunit.XMLUnit;
+import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.matchers.JUnitMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
@@ -239,7 +235,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
     }
 
-    private void assertCorrectRefNamesForDependencies(Document config) throws NodeTestException {
+    private void assertCorrectRefNamesForDependencies(final Document config) throws NodeTestException {
         NodeList modulesList = config.getElementsByTagName("modules");
         assertEquals(1, modulesList.getLength());
 
@@ -249,7 +245,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
             private int userRefNameCount = 0;
 
             @Override
-            public void testText(Text text) throws NodeTestException {
+            public void testText(final Text text) throws NodeTestException {
                 if(text.getData().equals("ref_dep2")) {
                     defaultRefNameCount++;
                 } else if(text.getData().equals("ref_dep_user_two")) {
@@ -258,7 +254,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
             }
 
             @Override
-            public void noMoreNodes(NodeTest forTest) throws NodeTestException {
+            public void noMoreNodes(final NodeTest forTest) throws NodeTestException {
                 assertEquals(0, defaultRefNameCount);
                 assertEquals(2, userRefNameCount);
             }
@@ -266,7 +262,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
         nt.performTest(tester, Node.TEXT_NODE);
     }
 
-    private void assertCorrectServiceNames(Document configCandidate, Set<String> refNames) throws NodeTestException {
+    private void assertCorrectServiceNames(final Document configCandidate, final Set<String> refNames) throws NodeTestException {
         final Set<String> refNames2 = new HashSet<>(refNames);
         NodeList servicesNodes = configCandidate.getElementsByTagName("services");
         assertEquals(1, servicesNodes.getLength());
@@ -275,7 +271,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
         NodeTester tester = new AbstractNodeTester() {
 
             @Override
-            public void testElement(Element element) throws NodeTestException {
+            public void testElement(final Element element) throws NodeTestException {
                 if(element.getNodeName() != null) {
                     if(element.getNodeName().equals("name")) {
                         String elmText = element.getTextContent();
@@ -289,7 +285,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
             }
 
             @Override
-            public void noMoreNodes(NodeTest forTest) throws NodeTestException {
+            public void noMoreNodes(final NodeTest forTest) throws NodeTestException {
                 assertEquals(Collections.<String>emptySet(), refNames2);
                 assertTrue(refNames2.toString(), refNames2.isEmpty());
             }
@@ -361,7 +357,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
         verifyNoMoreInteractions(netconfOperationServiceSnapshot);
     }
 
-    private void checkBigDecimal(Document response) throws NodeTestException, SAXException, IOException {
+    private void checkBigDecimal(final Document response) throws NodeTestException, SAXException, IOException {
         assertContainsElement(response, readXmlToElement("<sleep-factor xmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">2.58</sleep-factor>"));
         // Default
         assertContainsElement(response, readXmlToElement("<sleep-factor xmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">2.00</sleep-factor>"));
@@ -374,7 +370,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
         executeOp(closeOp, "netconfMessages/closeSession.xml");
     }
 
-    private void edit(String resource) throws ParserConfigurationException, SAXException, IOException,
+    private void edit(final String resource) throws ParserConfigurationException, SAXException, IOException,
             NetconfDocumentedException {
         EditConfig editOp = new EditConfig(yangStoreSnapshot, transactionProvider, configRegistryClient,
                 NETCONF_SESSION_ID);
@@ -568,8 +564,8 @@ public class NetconfMappingTest extends AbstractConfigTest {
         assertContainsElement(response, readXmlToElement("<extended-enum xmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">ONE</extended-enum>"));
     }
 
-    private void assertContainsString(String string, String substring) {
-        assertThat(string, JUnitMatchers.containsString(substring));
+    private void assertContainsString(final String string, final String substring) {
+        assertThat(string, CoreMatchers.containsString(substring));
     }
 
     private void checkEnum(final Document response) throws Exception {
@@ -581,12 +577,12 @@ public class NetconfMappingTest extends AbstractConfigTest {
                 response);
     }
 
-    private void checkTestingDeps(Document response) {
+    private void checkTestingDeps(final Document response) {
         int testingDepsSize = response.getElementsByTagName("testing-deps").getLength();
         assertEquals(2, testingDepsSize);
     }
 
-    private String getXpathForNetconfImplSubnode(String instanceName, String subnode) {
+    private String getXpathForNetconfImplSubnode(final String instanceName, final String subnode) {
         return "/urn:ietf:params:xml:ns:netconf:base:1.0:rpc-reply" +
                 "/urn:ietf:params:xml:ns:netconf:base:1.0:data" +
                 "/urn:opendaylight:params:xml:ns:yang:controller:config:modules" +
@@ -595,7 +591,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
                 "/urn:opendaylight:params:xml:ns:yang:controller:test:impl:"+subnode;
     }
 
-    private void checkTypeConfigAttribute(Document response) throws Exception {
+    private void checkTypeConfigAttribute(final Document response) throws Exception {
 
         Map<String,String> namesToTypeValues = ImmutableMap.of("instance-from-code", "configAttributeType",
                 "test2", "default-string");
@@ -689,11 +685,11 @@ public class NetconfMappingTest extends AbstractConfigTest {
         return executeOp(getOp, "netconfMessages/get.xml");
     }
 
-    private int getElementsSize(Document response, String elementName) {
+    private int getElementsSize(final Document response, final String elementName) {
         return response.getElementsByTagName(elementName).getLength();
     }
 
-    private int getElementsSize(Document response, String elementName, String namespace) {
+    private int getElementsSize(final Document response, final String elementName, final String namespace) {
         return response.getElementsByTagNameNS(namespace, elementName).getLength();
     }
 
@@ -725,7 +721,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
         return Lists.newArrayList(yangDependencies);
     }
 
-    private void setModule(final NetconfTestImplModuleMXBean mxBean, final ConfigTransactionJMXClient transaction, String depName)
+    private void setModule(final NetconfTestImplModuleMXBean mxBean, final ConfigTransactionJMXClient transaction, final String depName)
             throws InstanceAlreadyExistsException, InstanceNotFoundException {
         mxBean.setSimpleInt((long) 44);
         mxBean.setBinaryLeaf(new byte[] { 8, 7, 9 });
