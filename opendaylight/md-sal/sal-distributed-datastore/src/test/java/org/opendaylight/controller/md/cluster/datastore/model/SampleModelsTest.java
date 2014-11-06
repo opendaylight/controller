@@ -8,7 +8,7 @@
 
 package org.opendaylight.controller.md.cluster.datastore.model;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
