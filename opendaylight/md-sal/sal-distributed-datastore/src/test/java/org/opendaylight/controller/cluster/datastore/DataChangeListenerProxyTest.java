@@ -3,6 +3,11 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
 import akka.actor.Props;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.messages.DataChanged;
@@ -17,18 +22,12 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 public class DataChangeListenerProxyTest extends AbstractActorTest {
 
   private static class MockDataChangedEvent implements AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> {
-    Map<YangInstanceIdentifier,NormalizedNode<?,?>> createdData = new HashMap();
-    Map<YangInstanceIdentifier,NormalizedNode<?,?>> updatedData = new HashMap();
-    Map<YangInstanceIdentifier,NormalizedNode<?,?>> originalData = new HashMap();
+    Map<YangInstanceIdentifier,NormalizedNode<?,?>> createdData = new HashMap<>();
+    Map<YangInstanceIdentifier,NormalizedNode<?,?>> updatedData = new HashMap<>();
+    Map<YangInstanceIdentifier,NormalizedNode<?,?>> originalData = new HashMap<>();
 
 
 
@@ -88,7 +87,7 @@ public class DataChangeListenerProxyTest extends AbstractActorTest {
 
         Assert.assertTrue(messages instanceof List);
 
-        List<Object> listMessages = (List<Object>) messages;
+        List<?> listMessages = (List<?>) messages;
 
         Assert.assertEquals(1, listMessages.size());
 

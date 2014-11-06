@@ -30,7 +30,7 @@ public class PeopleModel {
 
 
 
-    public static NormalizedNode create(){
+    public static NormalizedNode<?, ?> create(){
 
         // Create a list builder
         CollectionNodeBuilder<MapEntryNode, MapNode> cars =
@@ -62,7 +62,7 @@ public class PeopleModel {
 
     }
 
-    public static NormalizedNode emptyContainer(){
+    public static NormalizedNode<?, ?> emptyContainer(){
         return ImmutableContainerNodeBuilder.create()
             .withNodeIdentifier(
                 new YangInstanceIdentifier.NodeIdentifier(BASE_QNAME))

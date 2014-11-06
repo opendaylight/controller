@@ -1,5 +1,6 @@
 package org.opendaylight.controller.cluster.datastore.shardstrategy;
 
+import static org.junit.Assert.assertEquals;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -9,8 +10,6 @@ import org.opendaylight.controller.cluster.datastore.ConfigurationImpl;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-
-import static junit.framework.Assert.assertEquals;
 
 public class ModuleShardStrategyTest {
     @Rule

@@ -1,17 +1,15 @@
 package org.opendaylight.controller.cluster.datastore;
 
-import com.typesafe.config.ConfigFactory;
-import junit.framework.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import java.io.File;
-import java.util.List;
-import java.util.Set;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import com.typesafe.config.ConfigFactory;
+import java.io.File;
+import java.util.List;
+import java.util.Set;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 public class ConfigurationImplTest {
 

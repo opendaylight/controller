@@ -1,5 +1,16 @@
 package org.opendaylight.controller.cluster.datastore;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.opendaylight.controller.cluster.datastore.messages.CreateTransaction.CURRENT_VERSION;
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
@@ -16,6 +27,16 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -79,29 +100,6 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.opendaylight.controller.cluster.datastore.messages.CreateTransaction.CURRENT_VERSION;
 
 
 public class ShardTest extends AbstractActorTest {
@@ -308,6 +306,7 @@ public class ShardTest extends AbstractActorTest {
         }};
     }
 
+    @SuppressWarnings("serial")
     @Test
     public void testPeerAddressResolved() throws Exception {
         new ShardTestKit(getSystem()) {{
@@ -509,7 +508,7 @@ public class ShardTest extends AbstractActorTest {
         shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
     }
 
-    private CompositeModificationPayload newPayload(Modification... mods) {
+    private CompositeModificationPayload newPayload(final Modification... mods) {
         MutableCompositeModification compMod = new MutableCompositeModification();
         for(Modification mod: mods) {
             compMod.addModification(mod);
@@ -518,15 +517,15 @@ public class ShardTest extends AbstractActorTest {
         return new CompositeModificationPayload(compMod.toSerializable());
     }
 
-    private DOMStoreThreePhaseCommitCohort setupMockWriteTransaction(String cohortName,
-            InMemoryDOMDataStore dataStore, YangInstanceIdentifier path, NormalizedNode data,
-            MutableCompositeModification modification) {
+    private DOMStoreThreePhaseCommitCohort setupMockWriteTransaction(final String cohortName,
+            final InMemoryDOMDataStore dataStore, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data,
+            final MutableCompositeModification modification) {
         return setupMockWriteTransaction(cohortName, dataStore, path, data, modification, null);
     }
 
-    private DOMStoreThreePhaseCommitCohort setupMockWriteTransaction(String cohortName,
-            InMemoryDOMDataStore dataStore, YangInstanceIdentifier path, NormalizedNode data,
-            MutableCompositeModification modification,
+    private DOMStoreThreePhaseCommitCohort setupMockWriteTransaction(final String cohortName,
+            final InMemoryDOMDataStore dataStore, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data,
+            final MutableCompositeModification modification,
             final Function<DOMStoreThreePhaseCommitCohort,ListenableFuture<Void>> preCommit) {
 
         DOMStoreWriteTransaction tx = dataStore.newWriteOnlyTransaction();
@@ -536,14 +535,14 @@ public class ShardTest extends AbstractActorTest {
 
         doAnswer(new Answer<ListenableFuture<Boolean>>() {
             @Override
-            public ListenableFuture<Boolean> answer(InvocationOnMock invocation) {
+            public ListenableFuture<Boolean> answer(final InvocationOnMock invocation) {
                 return realCohort.canCommit();
             }
         }).when(cohort).canCommit();
 
         doAnswer(new Answer<ListenableFuture<Void>>() {
             @Override
-            public ListenableFuture<Void> answer(InvocationOnMock invocation) throws Throwable {
+            public ListenableFuture<Void> answer(final InvocationOnMock invocation) throws Throwable {
                 if(preCommit != null) {
                     return preCommit.apply(realCohort);
                 } else {
@@ -554,14 +553,14 @@ public class ShardTest extends AbstractActorTest {
 
         doAnswer(new Answer<ListenableFuture<Void>>() {
             @Override
-            public ListenableFuture<Void> answer(InvocationOnMock invocation) throws Throwable {
+            public ListenableFuture<Void> answer(final InvocationOnMock invocation) throws Throwable {
                 return realCohort.commit();
             }
         }).when(cohort).commit();
 
         doAnswer(new Answer<ListenableFuture<Void>>() {
             @Override
-            public ListenableFuture<Void> answer(InvocationOnMock invocation) throws Throwable {
+            public ListenableFuture<Void> answer(final InvocationOnMock invocation) throws Throwable {
                 return realCohort.abort();
             }
         }).when(cohort).abort();
@@ -658,12 +657,12 @@ public class ShardTest extends AbstractActorTest {
             class OnFutureComplete extends OnComplete<Object> {
                 private final Class<?> expRespType;
 
-                OnFutureComplete(Class<?> expRespType) {
+                OnFutureComplete(final Class<?> expRespType) {
                     this.expRespType = expRespType;
                 }
 
                 @Override
-                public void onComplete(Throwable error, Object resp) {
+                public void onComplete(final Throwable error, final Object resp) {
                     if(error != null) {
                         caughtEx.set(new AssertionError(getClass().getSimpleName() + " failure", error));
                     } else {
@@ -676,7 +675,7 @@ public class ShardTest extends AbstractActorTest {
                     }
                 }
 
-                void onSuccess(Object resp) throws Exception {
+                void onSuccess(final Object resp) throws Exception {
                 }
             }
 
@@ -686,7 +685,7 @@ public class ShardTest extends AbstractActorTest {
                 }
 
                 @Override
-                public void onComplete(Throwable error, Object resp) {
+                public void onComplete(final Throwable error, final Object resp) {
                     super.onComplete(error, resp);
                     commitLatch.countDown();
                 }
@@ -695,13 +694,13 @@ public class ShardTest extends AbstractActorTest {
             class OnCanCommitFutureComplete extends OnFutureComplete {
                 private final String transactionID;
 
-                OnCanCommitFutureComplete(String transactionID) {
+                OnCanCommitFutureComplete(final String transactionID) {
                     super(CanCommitTransactionReply.SERIALIZABLE_CLASS);
                     this.transactionID = transactionID;
                 }
 
                 @Override
-                void onSuccess(Object resp) throws Exception {
+                void onSuccess(final Object resp) throws Exception {
                     CanCommitTransactionReply canCommitReply =
                             CanCommitTransactionReply.fromSerializable(resp);
                     assertEquals("Can commit", true, canCommitReply.getCanCommit());
@@ -828,7 +827,7 @@ public class ShardTest extends AbstractActorTest {
             final CountDownLatch latch = new CountDownLatch(1);
             canCommitFuture.onComplete(new OnComplete<Object>() {
                 @Override
-                public void onComplete(Throwable t, Object resp) {
+                public void onComplete(final Throwable t, final Object resp) {
                     latch.countDown();
                 }
             }, getSystem().dispatcher());
@@ -948,7 +947,7 @@ public class ShardTest extends AbstractActorTest {
                             new AbortTransaction(transactionID).toSerializable(), timeout);
                     abortFuture.onComplete(new OnComplete<Object>() {
                         @Override
-                        public void onComplete(Throwable e, Object resp) {
+                        public void onComplete(final Throwable e, final Object resp) {
                             abortComplete.countDown();
                         }
                     }, getSystem().dispatcher());
@@ -1195,7 +1194,7 @@ public class ShardTest extends AbstractActorTest {
             final CountDownLatch latch = new CountDownLatch(1);
             canCommitFuture.onComplete(new OnComplete<Object>() {
                 @Override
-                public void onComplete(Throwable t, Object resp) {
+                public void onComplete(final Throwable t, final Object resp) {
                     latch.countDown();
                 }
             }, getSystem().dispatcher());
@@ -1220,7 +1219,8 @@ public class ShardTest extends AbstractActorTest {
         testCreateSnapshot(false, "testCreateSnapshotWithNonPersistentData");
     }
 
-    public void testCreateSnapshot(boolean persistent, final String shardActorName) throws IOException, InterruptedException {
+    @SuppressWarnings("serial")
+    public void testCreateSnapshot(final boolean persistent, final String shardActorName) throws IOException, InterruptedException {
         final DatastoreContext dataStoreContext = DatastoreContext.newBuilder().
                 shardJournalRecoveryLogBatchSize(3).shardSnapshotBatchCount(5000).persistent(persistent).build();
 
@@ -1232,7 +1232,7 @@ public class ShardTest extends AbstractActorTest {
                     return new Shard(shardID, Collections.<ShardIdentifier,String>emptyMap(),
                             dataStoreContext, SCHEMA_CONTEXT) {
                         @Override
-                        protected void commitSnapshot(long sequenceNumber) {
+                        protected void commitSnapshot(final long sequenceNumber) {
                             super.commitSnapshot(sequenceNumber);
                             latch.get().countDown();
                         }
@@ -1275,7 +1275,7 @@ public class ShardTest extends AbstractActorTest {
         commitTransaction(putTransaction);
 
 
-        NormalizedNode expected = readStore(store);
+        NormalizedNode<?, ?> expected = readStore(store);
 
         DOMStoreWriteTransaction writeTransaction = store.newWriteOnlyTransaction();
 
@@ -1284,7 +1284,7 @@ public class ShardTest extends AbstractActorTest {
 
         commitTransaction(writeTransaction);
 
-        NormalizedNode actual = readStore(store);
+        NormalizedNode<?, ?> actual = readStore(store);
 
         assertEquals(expected, actual);
 
@@ -1325,7 +1325,7 @@ public class ShardTest extends AbstractActorTest {
     }
 
 
-    private NormalizedNode readStore(InMemoryDOMDataStore store) throws ReadFailedException {
+    private NormalizedNode<?, ?> readStore(final InMemoryDOMDataStore store) throws ReadFailedException {
         DOMStoreReadTransaction transaction = store.newReadOnlyTransaction();
         CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read =
             transaction.read(YangInstanceIdentifier.builder().build());
@@ -1339,7 +1339,7 @@ public class ShardTest extends AbstractActorTest {
         return normalizedNode;
     }
 
-    private void commitTransaction(DOMStoreWriteTransaction transaction) {
+    private void commitTransaction(final DOMStoreWriteTransaction transaction) {
         DOMStoreThreePhaseCommitCohort commitCohort = transaction.ready();
         ListenableFuture<Void> future =
             commitCohort.preCommit();
@@ -1355,13 +1355,13 @@ public class ShardTest extends AbstractActorTest {
         return new AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>() {
             @Override
             public void onDataChanged(
-                AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
+                final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
 
             }
         };
     }
 
-    static NormalizedNode<?,?> readStore(TestActorRef<Shard> shard, YangInstanceIdentifier id)
+    static NormalizedNode<?,?> readStore(final TestActorRef<Shard> shard, final YangInstanceIdentifier id)
             throws ExecutionException, InterruptedException {
         DOMStoreReadTransaction transaction = shard.underlyingActor().getDataStore().newReadOnlyTransaction();
 
@@ -1376,7 +1376,7 @@ public class ShardTest extends AbstractActorTest {
         return node;
     }
 
-    private void writeToStore(TestActorRef<Shard> shard, YangInstanceIdentifier id, NormalizedNode<?,?> node)
+    private void writeToStore(final TestActorRef<Shard> shard, final YangInstanceIdentifier id, final NormalizedNode<?,?> node)
         throws ExecutionException, InterruptedException {
         DOMStoreWriteTransaction transaction = shard.underlyingActor().getDataStore().newWriteOnlyTransaction();
 
@@ -1387,10 +1387,11 @@ public class ShardTest extends AbstractActorTest {
         commitCohort.commit().get();
     }
 
+    @SuppressWarnings("serial")
     private static final class DelegatingShardCreator implements Creator<Shard> {
         private final Creator<Shard> delegate;
 
-        DelegatingShardCreator(Creator<Shard> delegate) {
+        DelegatingShardCreator(final Creator<Shard> delegate) {
             this.delegate = delegate;
         }
 
