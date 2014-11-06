@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_7f6def31",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-06T23:46:07Z",
+      "side": 1,
+      "message": "unused?",
+      "revId": "6b54e3ec7bc3084299c7748bec4fbd77601bd7e4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_9f6a3319",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 686,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-06T23:46:07Z",
+      "side": 1,
+      "message": "you chose to do this because you didn\u0027t want to synchronize access to transactionContext in the rest of the places it is being used?",
+      "revId": "6b54e3ec7bc3084299c7748bec4fbd77601bd7e4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_1f7f03e2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DistributedDataStoreIntegrationTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 652,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-06T23:46:07Z",
+      "side": 1,
+      "message": "I presume you added this in to test initial data change? :)\n\nAll the other changes in here seem to be just refactoring.",
+      "revId": "6b54e3ec7bc3084299c7748bec4fbd77601bd7e4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_bf8377cb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/utils/MockDataChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-06T23:46:07Z",
+      "side": 1,
+      "message": "Isn\u0027t this assert redundant now?",
+      "revId": "6b54e3ec7bc3084299c7748bec4fbd77601bd7e4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
