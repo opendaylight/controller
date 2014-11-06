@@ -15,7 +15,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-
+import com.google.common.base.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -35,8 +35,6 @@ import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
 
 public class BackwardsCompatibleMountPointManagerTest {
     private static final Logger log = LoggerFactory.getLogger(BackwardsCompatibleMountPointManagerTest.class);
@@ -106,7 +104,7 @@ public class BackwardsCompatibleMountPointManagerTest {
 
     private DOMMountPoint mockMountPoint() {
         final DOMMountPoint mock = mock(DOMMountPoint.class);
-        doAnswer(new Answer() {
+        doAnswer(new Answer<Object>() {
             @Override
             public Object answer(final InvocationOnMock invocation) throws Throwable {
                 return Optional.of(mock(((Class<?>) invocation.getArguments()[0])));

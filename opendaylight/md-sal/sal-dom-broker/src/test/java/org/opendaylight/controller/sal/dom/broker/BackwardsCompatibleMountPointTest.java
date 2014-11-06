@@ -8,15 +8,14 @@
 
 package org.opendaylight.controller.sal.dom.broker;
 
-import static junit.framework.Assert.fail;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.AbstractMap;
@@ -38,6 +37,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Deprecated
 public class BackwardsCompatibleMountPointTest {
     private static final Logger log = LoggerFactory.getLogger(BackwardsCompatibleMountPointManagerTest.class);
 
@@ -147,7 +147,7 @@ public class BackwardsCompatibleMountPointTest {
     }
 
     private NormalizedNode<?, ?> mockNormalizedNode() {
-        final NormalizedNode mock = mock(NormalizedNode.class);
+        final NormalizedNode<?, ?> mock = mock(NormalizedNode.class);
         doReturn("mockNormalizedNode").when(mock).toString();
         return mock;
     }

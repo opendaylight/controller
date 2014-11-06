@@ -8,22 +8,35 @@
 
 package org.opendaylight.controller.netconf.client;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import com.google.common.base.Optional;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.ChannelProgressivePromise;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.util.HashedWheelTimer;
+import io.netty.util.Timer;
 import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.concurrent.Promise;
-import org.apache.mina.handler.demux.ExceptionHandler;
+import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.mockito.internal.util.collections.Sets;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.netconf.api.NetconfClientSessionPreferences;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
-import io.netty.util.Timer;
 import org.opendaylight.controller.netconf.nettyutil.handler.ChunkedFramingMechanismEncoder;
 import org.opendaylight.controller.netconf.nettyutil.handler.NetconfXMLToHelloMessageDecoder;
 import org.opendaylight.controller.netconf.nettyutil.handler.NetconfXMLToMessageDecoder;
@@ -31,14 +44,8 @@ import org.opendaylight.controller.netconf.nettyutil.handler.exi.NetconfStartExi
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessage;
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAdditionalHeader;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.openexi.proc.common.EXIOptions;
 import org.w3c.dom.Document;
-import java.util.Set;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
 
 public class NetconfClientSessionNegotiatorTest {
 
@@ -96,8 +103,8 @@ public class NetconfClientSessionNegotiatorTest {
         return pipeline;
     }
 
-    private NetconfClientSessionNegotiator createNetconfClientSessionNegotiator(Promise promise,
-                                                                                NetconfMessage startExi) {
+    private NetconfClientSessionNegotiator createNetconfClientSessionNegotiator(final Promise promise,
+                                                                                final NetconfMessage startExi) {
         ChannelProgressivePromise progressivePromise = mock(ChannelProgressivePromise.class);
         NetconfClientSessionPreferences preferences = new NetconfClientSessionPreferences(helloMessage, startExi);
         doReturn(progressivePromise).when(promise).setFailure(any(Throwable.class));
@@ -133,9 +140,9 @@ public class NetconfClientSessionNegotiatorTest {
         Set caps = Sets.newSet("exi:1.0");
         NetconfHelloMessage helloMessage = NetconfHelloMessage.createServerHello(caps, 10);
 
-        doAnswer(new Answer() {
+        doAnswer(new Answer<Object>() {
             @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+            public Object answer(final InvocationOnMock invocationOnMock) throws Throwable {
                 channelInboundHandlerAdapter = ((ChannelInboundHandlerAdapter) invocationOnMock.getArguments()[2]);
                 return null;
             }
