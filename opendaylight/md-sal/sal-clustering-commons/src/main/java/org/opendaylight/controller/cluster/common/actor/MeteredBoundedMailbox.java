@@ -55,7 +55,7 @@ public class MeteredBoundedMailbox implements MailboxType, ProducesMessageQueue<
             return; //there's no actor to monitor
         }
         String actorName = owner.get().path().toStringWithoutAddress();
-        String metricName = registry.name(actorName, QUEUE_SIZE);
+        String metricName = MetricRegistry.name(actorName, QUEUE_SIZE);
 
         if (registry.getMetrics().containsKey(metricName))
             return; //already registered
