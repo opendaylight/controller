@@ -17,7 +17,6 @@ import org.junit.Test;
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAdditionalHeader;
 import org.opendaylight.protocol.framework.SessionListenerFactory;
 import org.opendaylight.protocol.framework.SessionNegotiator;
-
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -27,15 +26,15 @@ public class NetconfClientSessionNegotiatorFactoryTest {
     public void testGetSessionNegotiator() throws Exception {
         NetconfClientSessionListener sessionListener = mock(NetconfClientSessionListener.class);
         Timer timer = new HashedWheelTimer();
-        SessionListenerFactory listenerFactory = mock(SessionListenerFactory.class);
+        SessionListenerFactory<NetconfClientSessionListener> listenerFactory = mock(SessionListenerFactory.class);
         doReturn(sessionListener).when(listenerFactory).getSessionListener();
 
         Channel channel = mock(Channel.class);
-        Promise promise = mock(Promise.class);
+        Promise<NetconfClientSession> promise = mock(Promise.class);
         NetconfClientSessionNegotiatorFactory negotiatorFactory = new NetconfClientSessionNegotiatorFactory(timer,
                 Optional.<NetconfHelloMessageAdditionalHeader>absent(), 200L);
 
-        SessionNegotiator sessionNegotiator = negotiatorFactory.getSessionNegotiator(listenerFactory, channel, promise);
+        SessionNegotiator<?> sessionNegotiator = negotiatorFactory.getSessionNegotiator(listenerFactory, channel, promise);
         assertNotNull(sessionNegotiator);
     }
 }
