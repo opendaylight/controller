@@ -23,5 +23,6 @@
     <module>akka</module>
     <module>netconf-connector</module>
     <module>restconf</module>
+    <module>neutron</module>
   </modules>
 </project>
