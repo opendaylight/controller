@@ -237,7 +237,7 @@ public class RaftActorTest extends AbstractActorTest {
             super(actorSystem);
 
             raftActor = this.getSystem().actorOf(MockRaftActor.props(actorName,
-                    Collections.EMPTY_MAP, Optional.<ConfigParams>absent()), actorName);
+                    Collections.<String,String>emptyMap(), Optional.<ConfigParams>absent()), actorName);
 
         }
 
@@ -314,7 +314,7 @@ public class RaftActorTest extends AbstractActorTest {
             config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
 
             ActorRef followerActor = getSystem().actorOf(MockRaftActor.props(persistenceId,
-                    Collections.EMPTY_MAP, Optional.<ConfigParams>of(config)), persistenceId);
+                    Collections.<String,String>emptyMap(), Optional.<ConfigParams>of(config)), persistenceId);
 
             watch(followerActor);
 
@@ -368,7 +368,7 @@ public class RaftActorTest extends AbstractActorTest {
 
             //reinstate the actor
             TestActorRef<MockRaftActor> ref = TestActorRef.create(getSystem(),
-                    MockRaftActor.props(persistenceId, Collections.EMPTY_MAP,
+                    MockRaftActor.props(persistenceId, Collections.<String,String>emptyMap(),
                             Optional.<ConfigParams>of(config)));
 
             ref.underlyingActor().waitForRecoveryComplete();
@@ -401,7 +401,7 @@ public class RaftActorTest extends AbstractActorTest {
                 config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
 
                 TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(), MockRaftActor.props(persistenceId,
-                        Collections.EMPTY_MAP, Optional.<ConfigParams>of(config)), persistenceId);
+                        Collections.<String,String>emptyMap(), Optional.<ConfigParams>of(config)), persistenceId);
 
                 MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 
@@ -470,7 +470,7 @@ public class RaftActorTest extends AbstractActorTest {
                 config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
 
                 TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(), MockRaftActor.props(persistenceId,
-                        Collections.EMPTY_MAP, Optional.<ConfigParams>of(config), new DataPersistenceProviderMonitor()), persistenceId);
+                        Collections.<String,String>emptyMap(), Optional.<ConfigParams>of(config), new DataPersistenceProviderMonitor()), persistenceId);
 
                 MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 
@@ -535,7 +535,7 @@ public class RaftActorTest extends AbstractActorTest {
                 dataPersistenceProviderMonitor.setPersistLatch(persistLatch);
 
                 TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(), MockRaftActor.props(persistenceId,
-                        Collections.EMPTY_MAP, Optional.<ConfigParams>of(config), dataPersistenceProviderMonitor), persistenceId);
+                        Collections.<String,String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProviderMonitor), persistenceId);
 
                 MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 
@@ -562,7 +562,7 @@ public class RaftActorTest extends AbstractActorTest {
                 DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
 
                 TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(), MockRaftActor.props(persistenceId,
-                        Collections.EMPTY_MAP, Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
+                        Collections.<String,String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
 
                 MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 
@@ -591,7 +591,7 @@ public class RaftActorTest extends AbstractActorTest {
                 DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
 
                 TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(), MockRaftActor.props(persistenceId,
-                        Collections.EMPTY_MAP, Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
+                        Collections.<String,String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
 
                 MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 
@@ -620,7 +620,7 @@ public class RaftActorTest extends AbstractActorTest {
                 DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
 
                 TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(), MockRaftActor.props(persistenceId,
-                        Collections.EMPTY_MAP, Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
+                        Collections.<String,String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
 
                 MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 
@@ -647,7 +647,7 @@ public class RaftActorTest extends AbstractActorTest {
                 DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
 
                 TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(),
-                    MockRaftActor.props(persistenceId,Collections.EMPTY_MAP,
+                    MockRaftActor.props(persistenceId,Collections.<String,String>emptyMap(),
                         Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
 
                 MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
@@ -687,7 +687,7 @@ public class RaftActorTest extends AbstractActorTest {
                 DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
 
                 TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(), MockRaftActor.props(persistenceId,
-                        Collections.EMPTY_MAP, Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
+                        Collections.<String,String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
 
                 MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 
@@ -746,7 +746,7 @@ public class RaftActorTest extends AbstractActorTest {
                 DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
 
                 TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(), MockRaftActor.props(persistenceId,
-                        Collections.EMPTY_MAP, Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
+                        Collections.<String,String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
 
                 MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 
@@ -776,7 +776,7 @@ public class RaftActorTest extends AbstractActorTest {
                 DataPersistenceProviderMonitor dataPersistenceProviderMonitor = new DataPersistenceProviderMonitor();
 
                 TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(), MockRaftActor.props(persistenceId,
-                        Collections.EMPTY_MAP, Optional.<ConfigParams>of(config), dataPersistenceProviderMonitor), persistenceId);
+                        Collections.<String,String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProviderMonitor), persistenceId);
 
                 MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 
@@ -831,7 +831,7 @@ public class RaftActorTest extends AbstractActorTest {
                 DataPersistenceProviderMonitor dataPersistenceProviderMonitor = new DataPersistenceProviderMonitor();
 
                 TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(), MockRaftActor.props(persistenceId,
-                        Collections.EMPTY_MAP, Optional.<ConfigParams>of(config), dataPersistenceProviderMonitor), persistenceId);
+                        Collections.<String,String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProviderMonitor), persistenceId);
 
                 MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 

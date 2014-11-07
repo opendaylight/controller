@@ -95,7 +95,7 @@ public class SchemaContextTest extends AbstractYangTest {
             }
         }
         assertEquals("Expected identities not found " + copyOfExpectedNames,
-                Collections.EMPTY_MAP, copyOfExpectedNames);
+                Collections.emptyMap(), copyOfExpectedNames);
     }
 
     @Test
