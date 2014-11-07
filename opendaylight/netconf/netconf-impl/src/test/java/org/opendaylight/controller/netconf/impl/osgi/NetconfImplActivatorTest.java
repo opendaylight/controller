@@ -34,9 +34,9 @@ public class NetconfImplActivatorTest {
     @Mock
     private Filter filter;
     @Mock
-    private ServiceReference reference;
+    private ServiceReference<?> reference;
     @Mock
-    private ServiceRegistration registration;
+    private ServiceRegistration<?> registration;
 
     @Before
     public void setUp() throws Exception {
@@ -44,7 +44,7 @@ public class NetconfImplActivatorTest {
         doReturn(filter).when(bundle).createFilter(anyString());
         doNothing().when(bundle).addServiceListener(any(ServiceListener.class), anyString());
 
-        ServiceReference[] refs = new ServiceReference[0];
+        ServiceReference<?>[] refs = new ServiceReference[0];
         doReturn(refs).when(bundle).getServiceReferences(anyString(), anyString());
         doReturn(Arrays.asList(refs)).when(bundle).getServiceReferences(any(Class.class), anyString());
         doReturn("").when(bundle).getProperty(anyString());
