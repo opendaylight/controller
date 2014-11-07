@@ -10,10 +10,6 @@
   <artifactId>sal-rest-docgen</artifactId>
   <packaging>bundle</packaging>
 
-  <properties>
-    <jaxrs-api.version>3.0.4.Final</jaxrs-api.version>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
@@ -42,7 +38,6 @@
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>jaxrs-api</artifactId>
-      <version>${jaxrs-api.version}</version>
     </dependency>
 
     <dependency>
