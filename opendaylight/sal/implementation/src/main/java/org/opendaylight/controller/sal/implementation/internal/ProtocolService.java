@@ -195,7 +195,7 @@ public final class ProtocolService<T> {
             return false;
         }
 
-        ProtocolService plugin = (ProtocolService)o;
+        ProtocolService<?> plugin = (ProtocolService<?>)o;
         return (service.equals(plugin.service) && priority == plugin.priority);
     }
 
