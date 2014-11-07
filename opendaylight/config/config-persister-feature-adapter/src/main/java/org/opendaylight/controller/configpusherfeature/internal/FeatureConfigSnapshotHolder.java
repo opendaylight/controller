@@ -106,16 +106,15 @@ public class FeatureConfigSnapshotHolder implements ConfigSnapshotHolder {
 
     @Override
     public String toString() {
-       StringBuilder b = new StringBuilder();
-       Path p = Paths.get(fileInfo.getFinalname());
-       b.append(p.getFileName())
-           .append("(")
-           .append(getCauseFeature())
-           .append(",")
-           .append(getFeature())
-           .append(")");
-       return b.toString();
-
+        StringBuilder b = new StringBuilder();
+        Path p = Paths.get(fileInfo.getFinalname());
+        b.append(p.getFileName())
+            .append("(")
+            .append(getCauseFeature())
+            .append(",")
+            .append(getFeature())
+            .append(")");
+        return b.toString();
     }
 
     @Override

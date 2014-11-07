@@ -40,14 +40,14 @@ public class ConfigPushingRunnable implements Runnable {
         while(true) {
             try {
                 if(!interuppted) {
-                        if(toInstall.isEmpty()) {
-                            event = queue.take();
-                        } else {
-                            event = queue.poll(POLL_TIME, TimeUnit.MILLISECONDS);
-                        }
-                        if(event != null && event.getFeature() !=null) {
-                            processFeatureEvent(event,toInstall);
-                        }
+                    if(toInstall.isEmpty()) {
+                        event = queue.take();
+                    } else {
+                        event = queue.poll(POLL_TIME, TimeUnit.MILLISECONDS);
+                    }
+                    if(event != null && event.getFeature() !=null) {
+                        processFeatureEvent(event,toInstall);
+                    }
                 } else if(toInstall.isEmpty()) {
                     LOGGER.error("ConfigPushingRunnable - exiting");
                     return;

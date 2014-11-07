@@ -607,9 +607,8 @@ public class TemplateFactory {
 
                 String varName = BindingGeneratorUtil
                         .parseToValidParamName(attrEntry.getKey());
-                {
-                ModuleField field;
 
+                ModuleField field;
                 if (isIdentity) {
                     String identityBaseClass = getInnerTypeFromIdentity(((TypedAttribute) attributeIfc).getType());
                     IdentityRefModuleField identityField = new IdentityRefModuleField(type, varName,
@@ -641,7 +640,8 @@ public class TemplateFactory {
                             nullableDefaultWrapped, isDependency, dependency, isListOfDependencies, needsDepResolver);
                 }
                 moduleFields.add(field);
-                }
+
+
                 String getterName = "get"
                         + attributeIfc.getUpperCaseCammelCase();
                 MethodDefinition getter = new MethodDefinition(type,

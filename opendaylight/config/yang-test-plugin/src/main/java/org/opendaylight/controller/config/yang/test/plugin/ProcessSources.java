@@ -39,7 +39,7 @@ public class ProcessSources extends AbstractMojo{
         }
         File sourceDirectory = new File(directory.getPath() + Util.replaceDots(".org.opendaylight.controller.config.yang.test.impl"));
         if (!sourceDirectory.exists()) {
-            super.getLog().error("Source directory does not exists " + sourceDirectory.getPath());
+            super.getLog().error("Source directory does not exists {}", sourceDirectory.getPath());
         }
 
         File[] sourceFiles = sourceDirectory.listFiles();
@@ -49,7 +49,7 @@ public class ProcessSources extends AbstractMojo{
                 try {
                     sourceContent = FileUtils.readFileToString(sourceFile);
                 } catch (IOException e) {
-                    getLog().error("Cannot read " + sourceFile.getAbsolutePath(), e);
+                    getLog().error("Cannot read {}", sourceFile.getAbsolutePath(), e);
                     continue;
                 }
                 if (sourceFile.getName().endsWith("Module.java") || sourceFile.getName().endsWith("ModuleFactory.java")) {
@@ -59,7 +59,7 @@ public class ProcessSources extends AbstractMojo{
                         try {
                             stubContent = FileUtils.readFileToString(stubFile);
                         } catch (IOException e) {
-                            getLog().error("Cannot read " + stubFile.getAbsolutePath(), e);
+                            getLog().error("Cannot read {}", stubFile.getAbsolutePath(), e);
                         }
                         if (stubContent != null) {
                             sourceContent = rewriteStub(sourceContent, stubContent);

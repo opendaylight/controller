@@ -100,10 +100,10 @@ public class DependencyResolverManagerTest extends AbstractLockedPlatformMBeanSe
 
         tested.put(moduleIdentifier,
         mockedModule(),
-         moduleFactory,
-         maybeOldInternalInfo,
-         transactionModuleJMXRegistration,
-         isDefaultBean, mock(BundleContext.class));
+        moduleFactory,
+        maybeOldInternalInfo,
+        transactionModuleJMXRegistration,
+        isDefaultBean, mock(BundleContext.class));
     }
 
     private static Module mockedModule() {

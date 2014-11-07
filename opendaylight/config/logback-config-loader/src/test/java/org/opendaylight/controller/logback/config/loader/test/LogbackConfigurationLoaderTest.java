@@ -58,23 +58,22 @@ public class LogbackConfigurationLoaderTest {
 
         // check logs
         String[] expectedLogs = new String[] {
-                "LoggingEvent -> [INFO] org.opendaylight.controller.logback.config.loader.test.LogbackConfigurationLoaderTest: LOGBACK ready -> about to use it",
-                "LoggingEvent -> [TRACE] org.opendaylight.controller.logback.config.loader.test.logwork.Tracer: tracing",
-                "LoggingEvent -> [DEBUG] org.opendaylight.controller.logback.config.loader.test.logwork.Tracer: debugging",
-                "LoggingEvent -> [INFO] org.opendaylight.controller.logback.config.loader.test.logwork.Tracer: infoing",
-                "LoggingEvent -> [WARN] org.opendaylight.controller.logback.config.loader.test.logwork.Tracer: warning",
-                "LoggingEvent -> [ERROR] org.opendaylight.controller.logback.config.loader.test.logwork.Tracer: erroring",
-                "LoggingEvent -> [DEBUG] org.opendaylight.controller.logback.config.loader.test.logwork.Debugger: debugging",
-                "LoggingEvent -> [INFO] org.opendaylight.controller.logback.config.loader.test.logwork.Debugger: infoing",
-                "LoggingEvent -> [WARN] org.opendaylight.controller.logback.config.loader.test.logwork.Debugger: warning",
-                "LoggingEvent -> [ERROR] org.opendaylight.controller.logback.config.loader.test.logwork.Debugger: erroring",
-                "LoggingEvent -> [INFO] org.opendaylight.controller.logback.config.loader.test.logwork.Informer: infoing",
-                "LoggingEvent -> [WARN] org.opendaylight.controller.logback.config.loader.test.logwork.Informer: warning",
-                "LoggingEvent -> [ERROR] org.opendaylight.controller.logback.config.loader.test.logwork.Informer: erroring",
-                "LoggingEvent -> [WARN] org.opendaylight.controller.logback.config.loader.test.logwork.Warner: warning",
-                "LoggingEvent -> [ERROR] org.opendaylight.controller.logback.config.loader.test.logwork.Warner: erroring",
-                "LoggingEvent -> [ERROR] org.opendaylight.controller.logback.config.loader.test.logwork.Errorer: erroring"
-
+            "LoggingEvent -> [INFO] org.opendaylight.controller.logback.config.loader.test.LogbackConfigurationLoaderTest: LOGBACK ready -> about to use it",
+            "LoggingEvent -> [TRACE] org.opendaylight.controller.logback.config.loader.test.logwork.Tracer: tracing",
+            "LoggingEvent -> [DEBUG] org.opendaylight.controller.logback.config.loader.test.logwork.Tracer: debugging",
+            "LoggingEvent -> [INFO] org.opendaylight.controller.logback.config.loader.test.logwork.Tracer: infoing",
+            "LoggingEvent -> [WARN] org.opendaylight.controller.logback.config.loader.test.logwork.Tracer: warning",
+            "LoggingEvent -> [ERROR] org.opendaylight.controller.logback.config.loader.test.logwork.Tracer: erroring",
+            "LoggingEvent -> [DEBUG] org.opendaylight.controller.logback.config.loader.test.logwork.Debugger: debugging",
+            "LoggingEvent -> [INFO] org.opendaylight.controller.logback.config.loader.test.logwork.Debugger: infoing",
+            "LoggingEvent -> [WARN] org.opendaylight.controller.logback.config.loader.test.logwork.Debugger: warning",
+            "LoggingEvent -> [ERROR] org.opendaylight.controller.logback.config.loader.test.logwork.Debugger: erroring",
+            "LoggingEvent -> [INFO] org.opendaylight.controller.logback.config.loader.test.logwork.Informer: infoing",
+            "LoggingEvent -> [WARN] org.opendaylight.controller.logback.config.loader.test.logwork.Informer: warning",
+            "LoggingEvent -> [ERROR] org.opendaylight.controller.logback.config.loader.test.logwork.Informer: erroring",
+            "LoggingEvent -> [WARN] org.opendaylight.controller.logback.config.loader.test.logwork.Warner: warning",
+            "LoggingEvent -> [ERROR] org.opendaylight.controller.logback.config.loader.test.logwork.Warner: erroring",
+            "LoggingEvent -> [ERROR] org.opendaylight.controller.logback.config.loader.test.logwork.Errorer: erroring"
         };
 
         List<String> logSnapshot = new ArrayList<>(TestAppender.getLogRecord());
