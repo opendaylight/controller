@@ -13,7 +13,7 @@ import org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapsh
 
 public class InstallSnapshot extends AbstractRaftRPC {
 
-    public static final Class SERIALIZABLE_CLASS = InstallSnapshotMessages.InstallSnapshot.class;
+    public static final Class<InstallSnapshotMessages.InstallSnapshot> SERIALIZABLE_CLASS = InstallSnapshotMessages.InstallSnapshot.class;
 
     private final String leaderId;
     private final long lastIncludedIndex;

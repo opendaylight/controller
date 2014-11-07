@@ -127,7 +127,7 @@ public class JDBCResultSet implements Serializable, ResultSet,
         return 1;
     }
 
-    public int isObjectFitCriteria(Object element, Class cls) {
+    public int isObjectFitCriteria(Object element, Class<?> cls) {
         Map<XSQLColumn, List<XSQLCriteria>> tblCriteria = criteria.get(cls
                 .getName());
         if (tblCriteria == null) {

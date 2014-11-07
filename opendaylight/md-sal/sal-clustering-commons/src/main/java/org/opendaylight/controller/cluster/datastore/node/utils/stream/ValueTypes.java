@@ -31,7 +31,7 @@ public class ValueTypes {
     public static final byte BIG_INTEGER_TYPE = 10;
     public static final byte BIG_DECIMAL_TYPE = 11;
 
-    private static Map<Class, Byte> types = new HashMap<>();
+    private static Map<Class<?>, Byte> types = new HashMap<>();
 
     static {
         types.put(String.class, Byte.valueOf(STRING_TYPE));

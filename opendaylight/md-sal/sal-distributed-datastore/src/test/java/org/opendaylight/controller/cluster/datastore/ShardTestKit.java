@@ -30,7 +30,7 @@ class ShardTestKit extends JavaTestKit {
         super(actorSystem);
     }
 
-    protected void waitForLogMessage(final Class logLevel, ActorRef subject, String logMessage){
+    protected void waitForLogMessage(final Class<?> logLevel, ActorRef subject, String logMessage){
         // Wait for a specific log message to show up
         final boolean result =
             new JavaTestKit.EventFilter<Boolean>(logLevel

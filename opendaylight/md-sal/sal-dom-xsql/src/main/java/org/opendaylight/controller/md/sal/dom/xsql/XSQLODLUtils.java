@@ -32,7 +32,7 @@ public class XSQLODLUtils {
         types.put(Status.class, Status.class);
     }
 
-    public static boolean isColumnType(Class cls) {
+    public static boolean isColumnType(Class<?> cls) {
         return types.containsKey(cls);
     }
 
@@ -229,7 +229,7 @@ public class XSQLODLUtils {
         return "NULL";
     }
 
-    public static Class getTypeForODLColumn(Object odlNode){
+    public static Class<?> getTypeForODLColumn(Object odlNode){
         Object type = get(odlNode,"type");
         if(type instanceof Uint32 || type instanceof Uint64){
             return long.class;

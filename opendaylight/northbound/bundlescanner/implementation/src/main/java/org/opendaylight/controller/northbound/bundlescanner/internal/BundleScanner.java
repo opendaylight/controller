@@ -294,8 +294,8 @@ import org.slf4j.LoggerFactory;
         if (classes == null || classes.size() == 0) return;
         Map<String,String> names = new HashMap<String,String>();
         StringBuilder conflictsMsg = new StringBuilder();
-        for (Class c : classes) {
-            XmlRootElement root = (XmlRootElement) c.getAnnotation(XmlRootElement.class);
+        for (Class<?> c : classes) {
+            XmlRootElement root = c.getAnnotation(XmlRootElement.class);
             if (root == null) continue;
             String rootName = root.name();
             if ("##default".equals(rootName)) {

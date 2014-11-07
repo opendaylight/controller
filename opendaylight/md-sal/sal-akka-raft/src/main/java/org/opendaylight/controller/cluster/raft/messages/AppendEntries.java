@@ -25,7 +25,7 @@ import java.util.Map;
  */
 public class AppendEntries extends AbstractRaftRPC {
 
-    public static final Class SERIALIZABLE_CLASS = AppendEntriesMessages.AppendEntries.class;
+    public static final Class<AppendEntriesMessages.AppendEntries> SERIALIZABLE_CLASS = AppendEntriesMessages.AppendEntries.class;
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AppendEntries.class);
 

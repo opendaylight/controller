@@ -32,7 +32,7 @@ public enum ValueType {
     BIG_DECIMAL_TYPE,
     BINARY_TYPE;
 
-    private static Map<Class, ValueType> types = new HashMap<>();
+    private static Map<Class<?>, ValueType> types = new HashMap<>();
 
     static {
         types.put(String.class, STRING_TYPE);

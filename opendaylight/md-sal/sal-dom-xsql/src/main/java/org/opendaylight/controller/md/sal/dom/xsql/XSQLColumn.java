@@ -6,7 +6,7 @@ public class XSQLColumn implements Serializable, Comparable<Object> {
     private String name = null;
     private String tableName = null;
     private int charWidth = -1;
-    private Class type = null;
+    private Class<?> type = null;
     private transient Object bluePrintNode = null;
     private String origName = null;
     private String origTableName = null;

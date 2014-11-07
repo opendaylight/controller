@@ -200,7 +200,7 @@ public class RpcRegistryTest {
         Messages.BucketStoreMessages.UpdateRemoteBuckets.class);
   }
 
-  private JavaTestKit createProbeForMessage(ActorSystem node, ActorPath subjectPath, final Class clazz) {
+  private JavaTestKit createProbeForMessage(ActorSystem node, ActorPath subjectPath, final Class<?> clazz) {
     final JavaTestKit probe = new JavaTestKit(node);
 
     ConditionalProbe conditionalProbe =
