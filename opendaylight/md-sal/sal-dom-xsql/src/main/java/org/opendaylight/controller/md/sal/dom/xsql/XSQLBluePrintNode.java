@@ -85,7 +85,7 @@ public class XSQLBluePrintNode implements Serializable {
         this.children.add(ch);
     }
 
-    public boolean isModelChild(Class p) {
+    public boolean isModelChild(Class<?> p) {
         if (this.relations.size() == 0) {
             return false;
         }
@@ -227,7 +227,7 @@ public class XSQLBluePrintNode implements Serializable {
         return "Unknown";
     }
 
-    public Class getInterface() {
+    public Class<?> getInterface() {
         return this.myInterface;
     }
 

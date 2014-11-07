@@ -163,23 +163,23 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
         return cacheLoadedSuccessfuly;
     }
 
-    private static Map<Class, Set<Class>> superClassMap = new HashMap<Class, Set<Class>>();
+    private static Map<Class<?>, Set<Class<?>>> superClassMap = new HashMap<>();
 
-    public static Set<Class> getInheritance(Class myObjectClass,
-            Class returnType) {
+    public static Set<Class<?>> getInheritance(Class<?> myObjectClass,
+            Class<?> returnType) {
 
         if (returnType != null && myObjectClass.equals(returnType)) {
-            return new HashSet<Class>();
+            return new HashSet<>();
         }
-        Set<Class> result = superClassMap.get(myObjectClass);
+        Set<Class<?>> result = superClassMap.get(myObjectClass);
         if (result != null) {
             return result;
         }
-        result = new HashSet<Class>();
+        result = new HashSet<>();
         superClassMap.put(myObjectClass, result);
         if (returnType != null) {
             if (!returnType.equals(myObjectClass)) {
-                Class mySuperClass = myObjectClass.getSuperclass();
+                Class<?> mySuperClass = myObjectClass.getSuperclass();
                 while (mySuperClass != null) {
                     result.add(mySuperClass);
                     mySuperClass = mySuperClass.getSuperclass();
@@ -190,11 +190,11 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
         return result;
     }
 
-    public static Set<Class> collectInterfaces(Class cls) {
-        Set<Class> result = new HashSet<>();
-        Class myInterfaces[] = cls.getInterfaces();
+    public static Set<Class<?>> collectInterfaces(Class<?> cls) {
+        Set<Class<?>> result = new HashSet<>();
+        Class<?> myInterfaces[] = cls.getInterfaces();
         if (myInterfaces != null) {
-            for (Class in : myInterfaces) {
+            for (Class<?> in : myInterfaces) {
                 result.add(in);
                 result.addAll(collectInterfaces(in));
             }
@@ -213,20 +213,20 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
         map.put(blNode.getBluePrintNodeName(), blNode);
     }
 
-    public Class getGenericType(ParameterizedType type) {
+    public Class<?> getGenericType(ParameterizedType type) {
         Type[] typeArguments = type.getActualTypeArguments();
         for (Type typeArgument : typeArguments) {
             if (typeArgument instanceof ParameterizedType) {
                 ParameterizedType pType = (ParameterizedType) typeArgument;
-                return (Class) pType.getRawType();
+                return (Class<?>) pType.getRawType();
             } else if (typeArgument instanceof Class) {
-                return (Class) typeArgument;
+                return (Class<?>) typeArgument;
             }
         }
         return null;
     }
 
-    public Class getMethodReturnTypeFromGeneric(Method m) {
+    public Class<?> getMethodReturnTypeFromGeneric(Method m) {
         Type rType = m.getGenericReturnType();
         if (rType instanceof ParameterizedType) {
             return getGenericType((ParameterizedType) rType);
