@@ -6,6 +6,8 @@ import java.util.Map;
 import org.opendaylight.controller.md.sal.dom.xsql.XSQLBluePrint;
 
 public class JDBCCommand implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     public int type = 0;
     public static final int TYPE_EXECUTE_QUERY = 1;
     public static final int TYPE_QUERY_REPLY = 2;

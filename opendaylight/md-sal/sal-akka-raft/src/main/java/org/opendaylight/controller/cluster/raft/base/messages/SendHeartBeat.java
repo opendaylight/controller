@@ -17,4 +17,5 @@ import java.io.Serializable;
  * Typically the Leader to itself on a schedule
  */
 public class SendHeartBeat implements Serializable {
+    private static final long serialVersionUID = 1L;
 }

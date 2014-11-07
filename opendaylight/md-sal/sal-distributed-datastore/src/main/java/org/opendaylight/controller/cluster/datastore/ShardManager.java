@@ -556,6 +556,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     static class SchemaContextModules implements Serializable {
+        private static final long serialVersionUID = 1L;
         private final Set<String> modules;
 
         SchemaContextModules(Set<String> modules){

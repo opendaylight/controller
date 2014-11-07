@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.raft.messages;
 
 public class RequestVoteReply extends AbstractRaftRPC {
+    private static final long serialVersionUID = 1L;
 
     // true means candidate received vot
     private final boolean voteGranted;

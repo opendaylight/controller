@@ -13,6 +13,7 @@ import akka.actor.ActorRef;
 import java.io.Serializable;
 
 public class Monitor implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final ActorRef actorRef;
 
     public Monitor(ActorRef actorRef){
