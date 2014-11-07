@@ -68,6 +68,8 @@ import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceSnapshot;
 import org.opendaylight.controller.netconf.monitoring.osgi.NetconfMonitoringOperationService;
 import org.opendaylight.controller.netconf.ssh.SshProxyServer;
+import org.opendaylight.controller.netconf.ssh.SshProxyServerConfiguration;
+import org.opendaylight.controller.netconf.ssh.SshProxyServerConfigurationBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceException;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceRepresentation;
@@ -193,15 +195,7 @@ public class NetconfDeviceSimulator implements Closeable {
                 server = dispatcher.createLocalServer(tcpLocalAddress);
                 try {
                     final SshProxyServer sshServer = new SshProxyServer(minaTimerExecutor, nettyThreadgroup, nioExecutor);
-                    sshServer.bind(bindingAddress, tcpLocalAddress,
-                            new PasswordAuthenticator() {
-                                @Override
-                                public boolean authenticate(final String username, final String password, final ServerSession session) {
-                                    // All connections are accepted
-                                    return true;
-                                }
-                            }, keyPairProvider);
-
+                    sshServer.bind(getSshConfiguration(bindingAddress, tcpLocalAddress));
                     sshWrappers.add(sshServer);
                 } catch (final Exception e) {
                     LOG.warn("Cannot start simulated device on {}, skipping", address, e);
@@ -253,6 +247,21 @@ public class NetconfDeviceSimulator implements Closeable {
         }
 
         return openDevices;
+    }
+
+    private SshProxyServerConfiguration getSshConfiguration(final InetSocketAddress bindingAddress, final LocalAddress tcpLocalAddress) throws IOException {
+        return new SshProxyServerConfigurationBuilder()
+                .setBindingAddress(bindingAddress)
+                .setLocalAddress(tcpLocalAddress)
+                .setAuthenticator(new PasswordAuthenticator() {
+                    @Override
+                    public boolean authenticate(final String username, final String password, final ServerSession session) {
+                        return true;
+                    }
+                })
+                .setKeyPairProvider(new PEMGeneratorHostKeyProvider(Files.createTempFile("prefix", "suffix").toAbsolutePath().toString()))
+                .setIdleTimeout(Integer.MAX_VALUE)
+                .createSshProxyServerConfiguration();
     }
 
     private PEMGeneratorHostKeyProvider getPemGeneratorHostKeyProvider() {

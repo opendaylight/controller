@@ -35,6 +35,7 @@ import org.opendaylight.controller.netconf.netty.EchoClientHandler.State;
 import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.LoginPassword;
 import org.opendaylight.controller.netconf.nettyutil.handler.ssh.client.AsyncSshHandler;
 import org.opendaylight.controller.netconf.ssh.SshProxyServer;
+import org.opendaylight.controller.netconf.ssh.SshProxyServerConfigurationBuilder;
 import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,13 +71,13 @@ public class SSHTest {
 
         final InetSocketAddress addr = new InetSocketAddress("127.0.0.1", 10831);
         final SshProxyServer sshProxyServer = new SshProxyServer(minaTimerEx, nettyGroup, nioExec);
-        sshProxyServer.bind(addr, NetconfConfigUtil.getNetconfLocalAddress(),
-                new PasswordAuthenticator() {
+        sshProxyServer.bind(
+                new SshProxyServerConfigurationBuilder().setBindingAddress(addr).setLocalAddress(NetconfConfigUtil.getNetconfLocalAddress()).setAuthenticator(new PasswordAuthenticator() {
                     @Override
                     public boolean authenticate(final String username, final String password, final ServerSession session) {
                         return true;
                     }
-                }, new PEMGeneratorHostKeyProvider(Files.createTempFile("prefix", "suffix").toAbsolutePath().toString()));
+                }).setKeyPairProvider(new PEMGeneratorHostKeyProvider(Files.createTempFile("prefix", "suffix").toAbsolutePath().toString())).setIdleTimeout(Integer.MAX_VALUE).createSshProxyServerConfiguration());
 
         final EchoClientHandler echoClientHandler = connectClient(addr);
 
