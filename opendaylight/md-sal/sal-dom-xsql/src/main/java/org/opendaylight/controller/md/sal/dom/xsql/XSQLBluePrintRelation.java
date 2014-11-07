@@ -99,7 +99,7 @@ public class XSQLBluePrintRelation implements Serializable {
             }
             return result;
         } else if (Map.class.isAssignableFrom(o.getClass())) {
-            Map map = (Map) o;
+            Map<?, ?> map = (Map<?, ?>) o;
             for (Object oo : map.values()) {
                 addToResult(result, execute(oo));
             }
@@ -126,7 +126,7 @@ public class XSQLBluePrintRelation implements Serializable {
                 result.add(oo);
             }
         } else if (Map.class.isAssignableFrom(o.getClass())) {
-            Map map = (Map) o;
+            Map<?, ?> map = (Map<?, ?>) o;
             for (Object oo : map.values()) {
                 result.add(oo);
             }
