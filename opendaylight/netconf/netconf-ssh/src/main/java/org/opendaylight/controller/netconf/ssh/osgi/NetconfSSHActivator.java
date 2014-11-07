@@ -19,10 +19,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.sshd.common.util.ThreadUtils;
 import org.apache.sshd.server.keyprovider.PEMGeneratorHostKeyProvider;
 import org.opendaylight.controller.netconf.ssh.SshProxyServer;
+import org.opendaylight.controller.netconf.ssh.SshProxyServerConfigurationBuilder;
 import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil;
 import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil.InfixProp;
 import org.osgi.framework.BundleActivator;
@@ -36,6 +38,7 @@ public class NetconfSSHActivator implements BundleActivator {
     private static final java.lang.String ALGORITHM = "RSA";
     private static final int KEY_SIZE = 4096;
     public static final int POOL_SIZE = 8;
+    private static final int DEFAULT_IDLE_TIMEOUT = (int) TimeUnit.MINUTES.toMillis(20);
 
     private ScheduledExecutorService minaTimerExecutor;
     private NioEventLoopGroup clientGroup;
@@ -100,7 +103,14 @@ public class NetconfSSHActivator implements BundleActivator {
                 NetconfConfigUtil.getPrivateKeyKey());
 
         final SshProxyServer sshProxyServer = new SshProxyServer(minaTimerExecutor, clientGroup, nioExecutor);
-        sshProxyServer.bind(sshSocketAddress, localAddress, authProviderTracker, new PEMGeneratorHostKeyProvider(path, ALGORITHM, KEY_SIZE));
+        sshProxyServer.bind(
+                new SshProxyServerConfigurationBuilder()
+                        .setBindingAddress(sshSocketAddress)
+                        .setLocalAddress(localAddress)
+                        .setAuthenticator(authProviderTracker)
+                        .setKeyPairProvider(new PEMGeneratorHostKeyProvider(path, ALGORITHM, KEY_SIZE))
+                        .setIdleTimeout(DEFAULT_IDLE_TIMEOUT)
+                        .createSshProxyServerConfiguration());
         return sshProxyServer;
     }
 

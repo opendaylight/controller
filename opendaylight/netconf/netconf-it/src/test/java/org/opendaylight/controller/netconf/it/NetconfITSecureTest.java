@@ -55,6 +55,7 @@ import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguratio
 import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.AuthenticationHandler;
 import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.LoginPassword;
 import org.opendaylight.controller.netconf.ssh.SshProxyServer;
+import org.opendaylight.controller.netconf.ssh.SshProxyServerConfigurationBuilder;
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageUtil;
 import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -88,12 +89,19 @@ public class NetconfITSecureTest extends AbstractNetconfConfigTest {
         clientGroup = new NioEventLoopGroup();
         minaTimerEx = Executors.newScheduledThreadPool(1);
         sshProxyServer = new SshProxyServer(minaTimerEx, clientGroup, nioExec);
-        sshProxyServer.bind(TLS_ADDRESS, NetconfConfigUtil.getNetconfLocalAddress(), new PasswordAuthenticator() {
+        sshProxyServer.bind(
+                new SshProxyServerConfigurationBuilder()
+                        .setBindingAddress(TLS_ADDRESS)
+                        .setLocalAddress(NetconfConfigUtil.getNetconfLocalAddress())
+                        .setAuthenticator(new PasswordAuthenticator() {
             @Override
             public boolean authenticate(final String username, final String password, final ServerSession session) {
                 return true;
             }
-        }, new PEMGeneratorHostKeyProvider(Files.createTempFile("prefix", "suffix").toAbsolutePath().toString()));
+        })
+                        .setKeyPairProvider(new PEMGeneratorHostKeyProvider(Files.createTempFile("prefix", "suffix").toAbsolutePath().toString()))
+                        .setIdleTimeout(Integer.MAX_VALUE)
+                        .createSshProxyServerConfiguration());
     }
 
     @After

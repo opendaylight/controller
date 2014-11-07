@@ -10,16 +10,15 @@ package org.opendaylight.controller.netconf.ssh;
 
 import com.google.common.collect.Lists;
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.local.LocalAddress;
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.nio.channels.AsynchronousChannelGroup;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.apache.sshd.SshServer;
 import org.apache.sshd.common.FactoryManager;
-import org.apache.sshd.common.KeyPairProvider;
 import org.apache.sshd.common.NamedFactory;
 import org.apache.sshd.common.RuntimeSshException;
 import org.apache.sshd.common.io.IoAcceptor;
@@ -32,7 +31,7 @@ import org.apache.sshd.common.io.nio2.Nio2Connector;
 import org.apache.sshd.common.io.nio2.Nio2ServiceFactoryFactory;
 import org.apache.sshd.common.util.CloseableUtils;
 import org.apache.sshd.server.Command;
-import org.apache.sshd.server.PasswordAuthenticator;
+import org.apache.sshd.server.ServerFactoryManager;
 
 /**
  * Proxy SSH server that just delegates decrypted content to a delegate server within same VM.
@@ -52,20 +51,28 @@ public class SshProxyServer implements AutoCloseable {
         this.sshServer = SshServer.setUpDefaultServer();
     }
 
-    public void bind(final InetSocketAddress bindingAddress, final LocalAddress localAddress, final PasswordAuthenticator authenticator, final KeyPairProvider keyPairProvider) throws IOException {
-        sshServer.setHost(bindingAddress.getHostString());
-        sshServer.setPort(bindingAddress.getPort());
+    public void bind(final SshProxyServerConfiguration sshProxyServerConfiguration) throws IOException {
+        sshServer.setHost(sshProxyServerConfiguration.getBindingAddress().getHostString());
+        sshServer.setPort(sshProxyServerConfiguration.getBindingAddress().getPort());
 
-        sshServer.setPasswordAuthenticator(authenticator);
-        sshServer.setKeyPairProvider(keyPairProvider);
+        sshServer.setPasswordAuthenticator(sshProxyServerConfiguration.getAuthenticator());
+        sshServer.setKeyPairProvider(sshProxyServerConfiguration.getKeyPairProvider());
 
         sshServer.setIoServiceFactoryFactory(nioServiceWithPoolFactoryFactory);
         sshServer.setScheduledExecutorService(minaTimerExecutor);
+        sshServer.setProperties(getProperties(sshProxyServerConfiguration));
 
         final RemoteNetconfCommand.NetconfCommandFactory netconfCommandFactory =
-                new RemoteNetconfCommand.NetconfCommandFactory(clientGroup, localAddress);
+                new RemoteNetconfCommand.NetconfCommandFactory(clientGroup, sshProxyServerConfiguration.getLocalAddress());
         sshServer.setSubsystemFactories(Lists.<NamedFactory<Command>>newArrayList(netconfCommandFactory));
         sshServer.start();
+    }
+
+    private static Map<String, String> getProperties(final SshProxyServerConfiguration sshProxyServerConfiguration) {
+        return new HashMap<String, String>()
+        {{
+            put(ServerFactoryManager.IDLE_TIMEOUT, String.valueOf(sshProxyServerConfiguration.getIdleTimeout()));
+        }};
     }
 
     @Override
