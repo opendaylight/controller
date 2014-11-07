@@ -11,7 +11,6 @@ package org.opendaylight.controller.sal.connection.implementation.internal;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
 import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.opendaylight.controller.sal.connection.ConnectionLocality;
 import org.opendaylight.controller.sal.connection.IConnectionListener;
@@ -32,7 +31,7 @@ public class ConnectionService implements IPluginOutConnectionService, IConnecti
     private ConcurrentMap<String, IPluginInConnectionService> pluginService =
             new ConcurrentHashMap<String, IPluginInConnectionService>();
 
-    void setPluginService (Map props, IPluginInConnectionService s) {
+    void setPluginService (Map<?, ?> props, IPluginInConnectionService s) {
         String type = null;
         Object value = props.get(GlobalConstants.PROTOCOLPLUGINTYPE.toString());
         if (value instanceof String) {
@@ -46,7 +45,7 @@ public class ConnectionService implements IPluginOutConnectionService, IConnecti
         }
     }
 
-    void unsetPluginService(Map props, IPluginInConnectionService s) {
+    void unsetPluginService(Map<?, ?> props, IPluginInConnectionService s) {
         String type = null;
 
         Object value = props.get(GlobalConstants.PROTOCOLPLUGINTYPE.toString());

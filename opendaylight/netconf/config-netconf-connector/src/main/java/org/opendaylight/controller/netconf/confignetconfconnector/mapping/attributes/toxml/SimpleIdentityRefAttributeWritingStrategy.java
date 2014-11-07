@@ -33,8 +33,8 @@ public class SimpleIdentityRefAttributeWritingStrategy extends SimpleAttributeWr
 
     protected Object preprocess(Object value) {
         Util.checkType(value, Map.class);
-        Preconditions.checkArgument(((Map)value).size() == 1, "Unexpected number of values in %s, expected 1", value);
-        Object stringValue = ((Map) value).values().iterator().next();
+        Preconditions.checkArgument(((Map<?, ?>)value).size() == 1, "Unexpected number of values in %s, expected 1", value);
+        Object stringValue = ((Map<?, ?>) value).values().iterator().next();
         Util.checkType(stringValue, String.class);
 
         return stringValue;
