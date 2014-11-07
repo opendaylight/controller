@@ -41,7 +41,7 @@ public class Activator implements BundleActivator {
         if (this.log != null) {
             this.listener = new LogListenerImpl(log);
 
-            ServiceReference service = null;
+            ServiceReference<?> service = null;
             service = context.getServiceReference(LogReaderService.class
                     .getName());
             if (service != null) {
@@ -99,7 +99,7 @@ public class Activator implements BundleActivator {
 
     @Override
     public void stop(BundleContext context) {
-        ServiceReference serviceRef = context.getServiceReference(
+        ServiceReference<?> serviceRef = context.getServiceReference(
                 LogReaderService.class.getName());
         if (serviceRef != null) {
             LogReaderService reader = (LogReaderService) context.getService(serviceRef);

@@ -38,7 +38,7 @@ public class LogListenerImplTest {
             }
 
             @Override
-            public ServiceReference getServiceReference() {
+            public ServiceReference<?> getServiceReference() {
                 return null;
             }
 
