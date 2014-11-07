@@ -180,7 +180,7 @@ public class StatisticsManagerIT {
         // Assert if true, if false we are good to go!
         assertFalse(debugit);
 
-        ServiceReference r = bc.getServiceReference(IStatisticsManager.class
+        ServiceReference<?> r = bc.getServiceReference(IStatisticsManager.class
                 .getName());
         if (r != null) {
             this.manager = (IStatisticsManager) bc.getService(r);
