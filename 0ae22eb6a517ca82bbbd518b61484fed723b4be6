@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_bf9ff702",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 494,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-07T01:20:41Z",
+      "side": 1,
+      "message": "Sort of. This ex will be caught by the changes below.  It\u0027s not considered best practice to explicitly throw NPE - checkstyle/PMD complain about it. Reason being that NPE should only be thrown by the JVM when a null reference is accessed.",
+      "parentUuid": "ba8cc1f7_5f74abfc",
+      "revId": "0ae22eb6a517ca82bbbd518b61484fed723b4be6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_1f662352",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-11-07T00:01:25Z",
       "side": 1,
       "message": "Should we be handling a more specific exception ?",
+      "revId": "0ae22eb6a517ca82bbbd518b61484fed723b4be6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_5ff90b4c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 542,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-07T01:20:41Z",
+      "side": 1,
+      "message": "I\u0027m not sure what type of unchecked RuntimeExceptions the in-memory data store can throw. We know IllegalStateException - may also throw IllegalArgException. I was just trying to cover all bases.",
+      "parentUuid": "ba8cc1f7_1f662352",
       "revId": "0ae22eb6a517ca82bbbd518b61484fed723b4be6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_3f93e7fb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DistributedDataStoreIntegrationTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 662,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-07T01:20:41Z",
+      "side": 1,
+      "message": "Yes - that\u0027s stated in the API. Maybe we can handle this in TransactionChainProxy to honor the API. We already have the hook to know that the previous Tx was readied so we should be able to verify this in new*Transaction. I\u0027ll look into this.",
+      "parentUuid": "ba8cc1f7_7f540f54",
+      "revId": "0ae22eb6a517ca82bbbd518b61484fed723b4be6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_df5f5b71",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DistributedDataStoreIntegrationTest.java",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2014-11-07T00:01:25Z",
       "side": 1,
       "message": "ok looks like hasTransactionContext should have been part of this commit.",
+      "revId": "0ae22eb6a517ca82bbbd518b61484fed723b4be6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_ffbc9f6e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DistributedDataStoreIntegrationTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 686,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-07T01:20:41Z",
+      "side": 1,
+      "message": "Yup - made a boo boo.",
+      "parentUuid": "ba8cc1f7_df5f5b71",
       "revId": "0ae22eb6a517ca82bbbd518b61484fed723b4be6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
