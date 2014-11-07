@@ -10,18 +10,17 @@
 
 package org.opendaylight.controller.networkconfig.neutron.northbound;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import javax.ws.rs.core.UriInfo;
 import org.opendaylight.controller.networkconfig.neutron.INeutronObject;
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
 import org.opendaylight.controller.networkconfig.neutron.NeutronSubnet;
 import org.opendaylight.controller.northbound.commons.exception.BadRequestException;
 import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
-
-import javax.ws.rs.core.UriInfo;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
 public class PaginatedRequestFactory {
 
@@ -35,26 +34,33 @@ public class PaginatedRequestFactory {
         }
     }
 
-    public static <T extends INeutronObject> INeutronRequest createRequest(Integer limit, String marker,
+    /*
+     * SuppressWarnings is needed because the compiler does not understand that we
+     * are actually safe here.
+     *
+     * FIXME: the only caller performs a cast back, so this is not actually necessary.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T extends INeutronObject> INeutronRequest<T> createRequest(Integer limit, String marker,
                                                                            Boolean pageReverse,
                                                                            UriInfo uriInfo,
                                                                            List<T> collection,
                                                                            Class<T> clazz) {
-        PaginationResults results = _paginate(limit, marker, pageReverse, uriInfo, collection);
+        PaginationResults<T> results = _paginate(limit, marker, pageReverse, uriInfo, collection);
 
         if (clazz.equals(NeutronNetwork.class)){
-            return new NeutronNetworkRequest(results.collection, results.links);
+            return (INeutronRequest<T>) new NeutronNetworkRequest((List<NeutronNetwork>) results.collection, results.links);
         }
         if (clazz.equals(NeutronSubnet.class)){
-            return new NeutronSubnetRequest(results.collection, results.links);
+            return (INeutronRequest<T>) new NeutronSubnetRequest((List<NeutronSubnet>) results.collection, results.links);
         }
         if (clazz.equals(NeutronPort.class)){
-            return new NeutronPortRequest(results.collection, results.links);
+            return (INeutronRequest<T>) new NeutronPortRequest((List<NeutronPort>) results.collection, results.links);
         }
         return null;
     }
 
-    private static <T extends INeutronObject> PaginationResults _paginate(Integer limit, String marker, Boolean pageReverse, UriInfo uriInfo, List<T> collection) {
+    private static <T extends INeutronObject> PaginationResults<T> _paginate(Integer limit, String marker, Boolean pageReverse, UriInfo uriInfo, List<T> collection) {
         List<NeutronPageLink> links = new ArrayList<>();
         Integer startPos = null;
         String startMarker;
@@ -80,10 +86,12 @@ public class PaginatedRequestFactory {
             class MarkerObject implements INeutronObject {
                 private String id;
 
+                @Override
                 public String getID() {
                     return id;
                 }
 
+                @Override
                 public void setID(String id) {
                     this.id = id;
                 }
@@ -149,6 +157,6 @@ public class PaginatedRequestFactory {
             links.add(previous);
         }
 
-        return new PaginationResults(collection, links);
+        return new PaginationResults<T>(collection, links);
     }
 }
