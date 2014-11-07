@@ -40,6 +40,24 @@ public class PaginatedRequestFactory {
         }
     }
 
+    private static final class MarkerObject implements INeutronObject {
+        private final String id;
+
+        MarkerObject(String id) {
+            this.id = id;
+        }
+
+        @Override
+        public String getID() {
+            return id;
+        }
+
+        @Override
+        public void setID(String id) {
+            throw new UnsupportedOperationException("Marker has constant ID");
+        }
+    }
+
     /*
      * SuppressWarnings is needed because the compiler does not understand that we
      * are actually safe here.
@@ -68,7 +86,7 @@ public class PaginatedRequestFactory {
 
     private static <T extends INeutronObject> PaginationResults<T> _paginate(Integer limit, String marker, Boolean pageReverse, UriInfo uriInfo, List<T> collection) {
         List<NeutronPageLink> links = new ArrayList<>();
-        Integer startPos = null;
+        final int startPos;
         String startMarker;
         String endMarker;
         Boolean firstPage = false;
@@ -76,43 +94,21 @@ public class PaginatedRequestFactory {
 
         Collections.sort(collection, NEUTRON_OBJECT_COMPARATOR);
 
-        if (marker == null) {
-            startPos = 0;
-        }
-
-        else {
-
-            class MarkerObject implements INeutronObject {
-                private String id;
-
-                @Override
-                public String getID() {
-                    return id;
-                }
-
-                @Override
-                public void setID(String id) {
-                    this.id = id;
-                }
+        if (marker != null) {
+            int offset = Collections.binarySearch(collection, new MarkerObject(marker), NEUTRON_OBJECT_COMPARATOR);
+            if (offset < 0) {
+                throw new ResourceNotFoundException("UUID for marker: " + marker + " could not be found");
             }
 
-            INeutronObject markerObject = new MarkerObject();
-
-            markerObject.setID(marker);
-
-            startPos = Collections.binarySearch(collection, markerObject, NEUTRON_OBJECT_COMPARATOR);
-
-            if (!pageReverse){
-                startPos = startPos + 1;
+            if (!pageReverse) {
+                startPos = offset + 1;
             }
             else {
-                startPos = startPos - limit;
+                startPos = offset - limit;
             }
-
         }
-
-        if (startPos == null) {
-            throw new ResourceNotFoundException("UUID for marker:" + marker + " could not be found");
+        else {
+            startPos = 0;
         }
 
         if (startPos == 0){
