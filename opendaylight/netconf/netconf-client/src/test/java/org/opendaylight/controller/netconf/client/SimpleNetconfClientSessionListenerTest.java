@@ -9,7 +9,6 @@
 package org.opendaylight.controller.netconf.client;
 import io.netty.channel.*;
 import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.Promise;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.internal.util.collections.Sets;
