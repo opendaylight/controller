@@ -36,13 +36,6 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
 import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
 import org.opendaylight.controller.networkconfig.neutron.NeutronSubnet;
-import org.opendaylight.controller.northbound.commons.RestMessages;
-import org.opendaylight.controller.northbound.commons.exception.BadRequestException;
-import org.opendaylight.controller.northbound.commons.exception.ResourceConflictException;
-import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
-import org.opendaylight.controller.northbound.commons.exception.InternalServerErrorException;
-import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
-import org.opendaylight.controller.sal.utils.ServiceHelper;
 
 /**
  * Neutron Northbound REST APIs for Subnets.<br>
@@ -224,7 +217,7 @@ public class NeutronSubnetsNorthbound {
             if (singleton.gatewayIP_Pool_overlap()) {
                 throw new ResourceConflictException("IP pool overlaps with gateway");
             }
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronSubnetAware.class, this, null);
+            Object[] instances = NeutronUtil.getInstances(INeutronSubnetAware.class, this);
             if (instances != null) {
                 for (Object instance : instances) {
                     INeutronSubnetAware service = (INeutronSubnetAware) instance;
@@ -245,7 +238,7 @@ public class NeutronSubnetsNorthbound {
             List<NeutronSubnet> bulk = input.getBulk();
             Iterator<NeutronSubnet> i = bulk.iterator();
             HashMap<String, NeutronSubnet> testMap = new HashMap<String, NeutronSubnet>();
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronSubnetAware.class, this, null);
+            Object[] instances = NeutronUtil.getInstances(INeutronSubnetAware.class, this);
             while (i.hasNext()) {
                 NeutronSubnet test = i.next();
 
@@ -349,7 +342,7 @@ public class NeutronSubnetsNorthbound {
             throw new BadRequestException("Attribute edit blocked by Neutron");
         }
 
-        Object[] instances = ServiceHelper.getGlobalInstances(INeutronSubnetAware.class, this, null);
+        Object[] instances = NeutronUtil.getInstances(INeutronSubnetAware.class, this);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronSubnetAware service = (INeutronSubnetAware) instance;
@@ -404,7 +397,7 @@ public class NeutronSubnetsNorthbound {
             return Response.status(409).build();
         }
         NeutronSubnet singleton = subnetInterface.getSubnet(subnetUUID);
-        Object[] instances = ServiceHelper.getGlobalInstances(INeutronSubnetAware.class, this, null);
+        Object[] instances = NeutronUtil.getInstances(INeutronSubnetAware.class, this);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronSubnetAware service = (INeutronSubnetAware) instance;
