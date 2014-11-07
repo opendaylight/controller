@@ -76,7 +76,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
                     MockRaftActorContext actorContext = (MockRaftActorContext) createActorContext();
 
-                    Map<String, String> peerAddresses = new HashMap();
+                    Map<String, String> peerAddresses = new HashMap<>();
 
                     peerAddresses.put(followerActor.path().toString(),
                         followerActor.path().toString());
@@ -121,7 +121,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
                     MockRaftActorContext actorContext =
                         (MockRaftActorContext) createActorContext();
 
-                    Map<String, String> peerAddresses = new HashMap();
+                    Map<String, String> peerAddresses = new HashMap<>();
 
                     peerAddresses.put(followerActor.path().toString(),
                         followerActor.path().toString());
@@ -216,7 +216,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
         new JavaTestKit(getSystem()) {{
             ActorRef followerActor = getSystem().actorOf(Props.create(MessageCollectorActor.class));
 
-            Map<String, String> peerAddresses = new HashMap();
+            Map<String, String> peerAddresses = new HashMap<>();
             peerAddresses.put(followerActor.path().toString(),
                 followerActor.path().toString());
 
@@ -300,7 +300,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
             ActorRef followerActor = getTestActor();
 
-            Map<String, String> peerAddresses = new HashMap();
+            Map<String, String> peerAddresses = new HashMap<>();
             peerAddresses.put(followerActor.path().toString(),
                 followerActor.path().toString());
 
@@ -371,7 +371,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
             ActorRef followerActor = getTestActor();
 
-            Map<String, String> peerAddresses = new HashMap();
+            Map<String, String> peerAddresses = new HashMap<>();
             peerAddresses.put(followerActor.path().toString(),
                 followerActor.path().toString());
 
@@ -434,7 +434,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
             ActorRef followerActor = getTestActor();
 
-            Map<String, String> peerAddresses = new HashMap();
+            Map<String, String> peerAddresses = new HashMap<>();
             peerAddresses.put(followerActor.path().toString(),
                 followerActor.path().toString());
 
@@ -514,7 +514,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
             ActorRef followerActor = getTestActor();
 
-            Map<String, String> peerAddresses = new HashMap();
+            Map<String, String> peerAddresses = new HashMap<>();
             peerAddresses.put(followerActor.path().toString(),
                 followerActor.path().toString());
 
@@ -690,7 +690,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
             ForwardMessageToBehaviorActor.setBehavior(follower);
 
-            Map<String, String> peerAddresses = new HashMap();
+            Map<String, String> peerAddresses = new HashMap<>();
             peerAddresses.put(followerActor.path().toString(),
                 followerActor.path().toString());
 
@@ -760,7 +760,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
             ForwardMessageToBehaviorActor.setBehavior(follower);
 
-            Map<String, String> peerAddresses = new HashMap();
+            Map<String, String> peerAddresses = new HashMap<>();
             peerAddresses.put(followerActor.path().toString(),
                 followerActor.path().toString());
 
@@ -823,7 +823,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
                 MockRaftActorContext leaderActorContext =
                     new MockRaftActorContext("leader", getSystem(), leaderActor);
 
-                Map<String, String> peerAddresses = new HashMap();
+                Map<String, String> peerAddresses = new HashMap<>();
                 peerAddresses.put("follower-1",
                     followerActor.path().toString());
 
@@ -858,7 +858,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
                 leaderActorContext.setReplicatedLog(
                     new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 3, 1).build());
 
-                Map<String, String> peerAddresses = new HashMap();
+                Map<String, String> peerAddresses = new HashMap<>();
                 peerAddresses.put("follower-1",
                     followerActor.path().toString());
 

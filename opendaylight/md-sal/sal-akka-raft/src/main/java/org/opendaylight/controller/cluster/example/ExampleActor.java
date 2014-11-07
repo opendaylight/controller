@@ -118,12 +118,12 @@ public class ExampleActor extends RaftActor {
     @Override protected void applySnapshot(final ByteString snapshot) {
         state.clear();
         try {
-            state.putAll((HashMap) toObject(snapshot));
+            state.putAll((Map<String, String>) toObject(snapshot));
         } catch (Exception e) {
            LOG.error(e, "Exception in applying snapshot");
         }
         if(LOG.isDebugEnabled()) {
-            LOG.debug("Snapshot applied to state : {}", ((HashMap) state).size());
+            LOG.debug("Snapshot applied to state : {}", ((Map<?, ?>) state).size());
         }
     }
 
