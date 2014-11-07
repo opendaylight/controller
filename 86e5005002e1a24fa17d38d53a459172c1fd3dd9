@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_a574c8cf",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-11-07T23:45:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_48f95ac7",
+      "revId": "86e5005002e1a24fa17d38d53a459172c1fd3dd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_68f69ed9",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
         "patchSetId": 10
@@ -64,6 +82,24 @@
       "writtenOn": "2014-11-05T08:43:49Z",
       "side": 1,
       "message": "That type would probably come from a different API, so not necessarily directly from an implementation.\n\nThat API would contain a subinterface, which would override this method and upgrade the return type to ListenableFuture\u003c? extends NotificationDeliveryStatistics\u003e -- which is made possible by this construct.",
+      "parentUuid": "ba8cc1f7_48207a49",
+      "revId": "86e5005002e1a24fa17d38d53a459172c1fd3dd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_a55b6853",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-11-07T23:45:41Z",
+      "side": 1,
+      "message": "Done",
       "parentUuid": "ba8cc1f7_48207a49",
       "revId": "86e5005002e1a24fa17d38d53a459172c1fd3dd9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
