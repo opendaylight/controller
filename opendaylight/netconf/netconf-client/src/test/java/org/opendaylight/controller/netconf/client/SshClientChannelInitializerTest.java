@@ -29,7 +29,7 @@ public class SshClientChannelInitializerTest {
         NetconfClientSessionNegotiatorFactory negotiatorFactory = mock(NetconfClientSessionNegotiatorFactory.class);
         NetconfClientSessionListener sessionListener = mock(NetconfClientSessionListener.class);
 
-        SessionNegotiator sessionNegotiator = mock(SessionNegotiator.class);
+        SessionNegotiator<?> sessionNegotiator = mock(SessionNegotiator.class);
         doReturn("").when(sessionNegotiator).toString();
         doReturn(sessionNegotiator).when(negotiatorFactory).getSessionNegotiator(any(SessionListenerFactory.class), any(Channel.class), any(Promise.class));
         ChannelPipeline pipeline = mock(ChannelPipeline.class);
