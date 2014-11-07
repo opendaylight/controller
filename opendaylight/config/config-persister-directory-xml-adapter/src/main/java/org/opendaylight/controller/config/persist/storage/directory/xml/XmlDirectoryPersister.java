@@ -7,17 +7,9 @@
  */
 package org.opendaylight.controller.config.persist.storage.directory.xml;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import com.google.common.base.Optional;
 import com.google.common.io.Files;
-import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
-import org.opendaylight.controller.config.persist.api.Persister;
-import org.opendaylight.controller.config.persist.storage.file.xml.model.ConfigSnapshot;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -27,11 +19,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
-
-import static com.google.common.base.Preconditions.checkArgument;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
+import org.opendaylight.controller.config.persist.api.Persister;
+import org.opendaylight.controller.config.persist.storage.file.xml.model.ConfigSnapshot;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class XmlDirectoryPersister implements Persister {
-    private static final Logger logger = LoggerFactory.getLogger(XmlDirectoryPersister.class);
+    private static final Logger LOG = LoggerFactory.getLogger(XmlDirectoryPersister.class);
 
     private final File storage;
     private final Optional<FilenameFilter> extensionsFilter;
@@ -39,25 +37,25 @@ public class XmlDirectoryPersister implements Persister {
     /**
      * Creates XmlDirectoryPersister that picks up all files in specified folder
      */
-    public XmlDirectoryPersister(File storage) {
+    public XmlDirectoryPersister(final File storage) {
         this(storage, Optional.<FilenameFilter>absent());
     }
 
     /**
      * Creates XmlDirectoryPersister that picks up files only with specified file extension
      */
-    public XmlDirectoryPersister(File storage, Set<String> fileExtensions) {
+    public XmlDirectoryPersister(final File storage, final Set<String> fileExtensions) {
         this(storage, Optional.of(getFilter(fileExtensions)));
     }
 
-    private XmlDirectoryPersister(File storage, Optional<FilenameFilter> extensionsFilter) {
+    private XmlDirectoryPersister(final File storage, final Optional<FilenameFilter> extensionsFilter) {
         checkArgument(storage.exists() && storage.isDirectory(), "Storage directory does not exist: " + storage);
         this.storage = storage;
         this.extensionsFilter = extensionsFilter;
     }
 
     @Override
-    public void persistConfig(ConfigSnapshotHolder holder) throws IOException {
+    public void persistConfig(final ConfigSnapshotHolder holder) throws IOException {
         throw new UnsupportedOperationException("This adapter is read only. Please set readonly=true on " + getClass());
     }
 
@@ -70,11 +68,11 @@ public class XmlDirectoryPersister implements Persister {
         List<File> sortedFiles = new ArrayList<>(Arrays.asList(filesArray));
         Collections.sort(sortedFiles);
         // combine all found files
-        logger.debug("Reading files in following order: {}", sortedFiles);
+        LOG.debug("Reading files in following order: {}", sortedFiles);
 
         List<ConfigSnapshotHolder> result = new ArrayList<>();
         for (File file : sortedFiles) {
-            logger.trace("Adding file '{}' to combined result", file);
+            LOG.trace("Adding file '{}' to combined result", file);
             Optional<ConfigSnapshotHolder> h = fromXmlSnapshot(file);
             // Ignore non valid snapshot
             if(h.isPresent() == false) {
@@ -86,12 +84,12 @@ public class XmlDirectoryPersister implements Persister {
         return result;
     }
 
-    private Optional<ConfigSnapshotHolder> fromXmlSnapshot(File file) {
+    private Optional<ConfigSnapshotHolder> fromXmlSnapshot(final File file) {
         try {
             return Optional.of(loadLastConfig(file));
         } catch (JAXBException e) {
             // In case of parse error, issue a warning, ignore and continue
-            logger.warn(
+            LOG.warn(
                     "Unable to parse configuration snapshot from {}. Initial config from {} will be IGNORED in this run. " +
                     "Note that subsequent config files may fail due to this problem. " +
                     "Xml markup in this file needs to be fixed, for detailed information see enclosed exception.",
@@ -101,7 +99,7 @@ public class XmlDirectoryPersister implements Persister {
         return Optional.absent();
     }
 
-    public static ConfigSnapshotHolder loadLastConfig(File file) throws JAXBException {
+    public static ConfigSnapshotHolder loadLastConfig(final File file) throws JAXBException {
         JAXBContext jaxbContext = JAXBContext.newInstance(ConfigSnapshot.class);
         Unmarshaller um = jaxbContext.createUnmarshaller();
 
@@ -132,7 +130,7 @@ public class XmlDirectoryPersister implements Persister {
 
         return new FilenameFilter() {
             @Override
-            public boolean accept(File dir, String name) {
+            public boolean accept(final File dir, final String name) {
                 String ext = Files.getFileExtension(name);
                 return fileExtensions.contains(ext);
             }

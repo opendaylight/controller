@@ -318,11 +318,11 @@ public class AbsModuleGeneratedObjectFactory {
                             .append("}\n");
                 } else {
                     result.append(format(
-                    "private %s %sDependency;\n"+
-                    "protected final %s get%sDependency(){\n"+
-                        "return %sDependency;\n"+
-                    "}",
-                    osgi, moduleField.getName(), osgi, moduleField.getAttributeName(), moduleField.getName()));
+                        "private %s %sDependency;\n"+
+                        "protected final %s get%sDependency(){\n"+
+                            "return %sDependency;\n"+
+                        "}",
+                        osgi, moduleField.getName(), osgi, moduleField.getAttributeName(), moduleField.getName()));
                 }
             }
         }

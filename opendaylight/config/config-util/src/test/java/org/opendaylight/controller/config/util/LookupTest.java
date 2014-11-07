@@ -93,8 +93,7 @@ public class LookupTest {
     public void testLookupConfigBeans2() throws Exception {
         Method method = LookupRegistry.class.getMethod("lookupConfigBeans",
                 String.class, String.class);
-        Object[] args = new Object[] { TestingConfigRegistry.moduleName1,
-                TestingConfigRegistry.instName1 };
+        Object[] args = new Object[] { TestingConfigRegistry.moduleName1, TestingConfigRegistry.instName1 };
         test(method, args);
     }
 
@@ -102,8 +101,7 @@ public class LookupTest {
     public void testLookupConfigBean() throws Exception {
         Method method = LookupRegistry.class.getMethod("lookupConfigBean",
                 String.class, String.class);
-        Object[] args = new Object[] { TestingConfigRegistry.moduleName1,
-                TestingConfigRegistry.instName1 };
+        Object[] args = new Object[] { TestingConfigRegistry.moduleName1, TestingConfigRegistry.instName1 };
         test(method, args);
     }
 

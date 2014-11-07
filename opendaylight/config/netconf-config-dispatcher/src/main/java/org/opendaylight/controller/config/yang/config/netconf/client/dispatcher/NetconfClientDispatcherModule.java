@@ -12,8 +12,7 @@ import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
 /**
 *
 */
-public final class NetconfClientDispatcherModule extends org.opendaylight.controller.config.yang.config.netconf.client.dispatcher.AbstractNetconfClientDispatcherModule
- {
+public final class NetconfClientDispatcherModule extends org.opendaylight.controller.config.yang.config.netconf.client.dispatcher.AbstractNetconfClientDispatcherModule {
 
     public NetconfClientDispatcherModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
