@@ -24,14 +24,11 @@ public class UrlMatcherTest {
         final String jspFilter = "jspFilter";
         final String exactMatch = "/somePath";
         final String prefixFilter = "prefixFilter";
-        LinkedHashMap<String, String> patternMap = new LinkedHashMap<String, String>() {
-            {
-                put(exactMatch, exactMatchFilter);
-                put("/*", defaultFilter);
-                put("*.jsp", jspFilter);
-                put("/foo/*", prefixFilter);
-            }
-        };
+        LinkedHashMap<String, String> patternMap = new LinkedHashMap<>();
+        patternMap.put(exactMatch, exactMatchFilter);
+        patternMap.put("/*", defaultFilter);
+        patternMap.put("*.jsp", jspFilter);
+        patternMap.put("/foo/*", prefixFilter);
         urlMatcher = new UrlMatcher<>(patternMap);
         assertMatches("/abc", defaultFilter);
         assertMatches(exactMatch, exactMatchFilter, defaultFilter);
