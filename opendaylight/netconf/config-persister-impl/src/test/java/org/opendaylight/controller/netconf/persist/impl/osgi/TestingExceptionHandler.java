@@ -7,13 +7,13 @@
  */
 package org.opendaylight.controller.netconf.persist.impl.osgi;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-import org.junit.matchers.JUnitMatchers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +49,7 @@ final class TestingExceptionHandler implements Thread.UncaughtExceptionHandler {
     private void assertException(Throwable t, Class<? extends Exception> exType, String exMessageToContain) {
         assertEquals("Expected exception of type " + exType + " but was " + t, exType, t.getClass());
         if(exMessageToContain!=null) {
-            assertThat(t.getMessage(), JUnitMatchers.containsString(exMessageToContain));
+            assertThat(t.getMessage(), containsString(exMessageToContain));
         }
     }
 
