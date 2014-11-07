@@ -140,7 +140,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
 
             case NodeTypes.ANY_XML_NODE :
                 LOG.debug("Read xml node");
-                Node value = (Node) readObject();
+                Node<?> value = (Node<?>) readObject();
                 return Builders.anyXmlBuilder().withValue(value).build();
 
             case NodeTypes.MAP_NODE :
