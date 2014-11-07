@@ -22,7 +22,7 @@ public class TcpClientChannelInitializerTest {
     @Test
     public void testInitializeSessionNegotiator() throws Exception {
         NetconfClientSessionNegotiatorFactory factory = mock(NetconfClientSessionNegotiatorFactory.class);
-        SessionNegotiator sessionNegotiator = mock(SessionNegotiator.class);
+        SessionNegotiator<?> sessionNegotiator = mock(SessionNegotiator.class);
         doReturn("").when(sessionNegotiator).toString();
         doReturn(sessionNegotiator).when(factory).getSessionNegotiator(any(SessionListenerFactory.class), any(Channel.class), any(Promise.class));
         NetconfClientSessionListener listener = mock(NetconfClientSessionListener.class);
