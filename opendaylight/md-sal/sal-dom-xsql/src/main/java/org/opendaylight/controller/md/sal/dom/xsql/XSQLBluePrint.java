@@ -191,7 +191,7 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
     }
 
     public static Set<Class> collectInterfaces(Class cls) {
-        Set<Class> result = new HashSet();
+        Set<Class> result = new HashSet<>();
         Class myInterfaces[] = cls.getInterfaces();
         if (myInterfaces != null) {
             for (Class in : myInterfaces) {
