@@ -81,7 +81,7 @@ public class NormalizedNodeNavigator {
   private void navigateNormalizedNode(int level, String parentPath, NormalizedNode<?,?> normalizedNode){
     if(normalizedNode instanceof DataContainerNode){
 
-      final DataContainerNode<?> dataContainerNode = (DataContainerNode) normalizedNode;
+      final DataContainerNode<?> dataContainerNode = (DataContainerNode<?>) normalizedNode;
 
       navigateDataContainerNode(level + 1, parentPath, dataContainerNode);
     } else {
