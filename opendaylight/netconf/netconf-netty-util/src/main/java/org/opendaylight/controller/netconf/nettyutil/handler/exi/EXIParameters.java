@@ -48,18 +48,18 @@ public final class EXIParameters {
             final String alignmentTextContent = alignmentElement.getTextContent().trim();
 
             switch (alignmentTextContent) {
-                case EXI_PARAMETER_BIT_PACKED:
-                    options.setAlignmentType(AlignmentType.bitPacked);
-                    break;
-                case EXI_PARAMETER_BYTE_ALIGNED:
-                    options.setAlignmentType(AlignmentType.byteAligned);
-                    break;
-                case EXI_PARAMETER_COMPRESSED:
-                    options.setAlignmentType(AlignmentType.compress);
-                    break;
-                case EXI_PARAMETER_PRE_COMPRESSION:
-                    options.setAlignmentType(AlignmentType.preCompress);
-                    break;
+            case EXI_PARAMETER_BIT_PACKED:
+                options.setAlignmentType(AlignmentType.bitPacked);
+                break;
+            case EXI_PARAMETER_BYTE_ALIGNED:
+                options.setAlignmentType(AlignmentType.byteAligned);
+                break;
+            case EXI_PARAMETER_COMPRESSED:
+                options.setAlignmentType(AlignmentType.compress);
+                break;
+            case EXI_PARAMETER_PRE_COMPRESSION:
+                options.setAlignmentType(AlignmentType.preCompress);
+                break;
             }
         }
 
