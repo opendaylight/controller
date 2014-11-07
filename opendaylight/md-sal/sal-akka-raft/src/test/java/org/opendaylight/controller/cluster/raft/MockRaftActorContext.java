@@ -33,7 +33,7 @@ public class MockRaftActorContext implements RaftActorContext {
     private long lastApplied = 0;
     private final ElectionTerm electionTerm;
     private ReplicatedLog replicatedLog;
-    private Map<String, String> peerAddresses = new HashMap();
+    private Map<String, String> peerAddresses = new HashMap<>();
     private ConfigParams configParams;
 
     public MockRaftActorContext(){
