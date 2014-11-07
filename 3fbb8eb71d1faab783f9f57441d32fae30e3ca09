@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_bfd137cf",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/FollowerLogInformationImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-07T00:37:48Z",
+      "side": 1,
+      "message": "do you think toMillis does a conversion? If so maybe we could just cache the long in a field. minor issue perhaps :)",
+      "revId": "3fbb8eb71d1faab783f9f57441d32fae30e3ca09",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_dfd67bc5",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/base/messages/SendInstallSnapshot.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-07T00:37:48Z",
+      "side": 1,
+      "message": "This is a local message right? Doesn\u0027t need to be Serializable.",
+      "revId": "3fbb8eb71d1faab783f9f57441d32fae30e3ca09",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_7fdbafed",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-07T00:37:48Z",
+      "side": 1,
+      "message": "Why is getSnapshot/setSnapshot public?",
+      "revId": "3fbb8eb71d1faab783f9f57441d32fae30e3ca09",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_5fe26ba0",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 383,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-07T00:37:48Z",
+      "side": 1,
+      "message": "Do we send AppendEntries when we just need to send InstallSnapshot? If we do not then we may also need to use InstallSnapshotReply as a way to recognize if the follower is active. Also we may not want to send snapshot chunks to a follower that was not active.",
+      "revId": "3fbb8eb71d1faab783f9f57441d32fae30e3ca09",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_3fe527a8",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 391,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-07T00:37:48Z",
+      "side": 1,
+      "message": "bad formatting",
+      "revId": "3fbb8eb71d1faab783f9f57441d32fae30e3ca09",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
