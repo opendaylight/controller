@@ -118,7 +118,7 @@ public class NetconfMessageTransformUtil {
     static Node<?> toNode(final YangInstanceIdentifier.NodeIdentifierWithPredicates argument, final Node<?> node) {
         final List<Node<?>> list = new ArrayList<>();
         for (final Map.Entry<QName, Object> arg : argument.getKeyValues().entrySet()) {
-            list.add(new SimpleNodeTOImpl(arg.getKey(), null, arg.getValue()));
+            list.add(new SimpleNodeTOImpl<>(arg.getKey(), null, arg.getValue()));
         }
         if (node != null) {
             list.add(node);
