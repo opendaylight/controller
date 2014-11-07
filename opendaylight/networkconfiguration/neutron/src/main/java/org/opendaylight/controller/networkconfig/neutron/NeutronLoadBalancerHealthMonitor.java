@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.networkconfig.neutron;
 
-import org.opendaylight.controller.configuration.ConfigurationObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +43,7 @@ import java.util.List;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 
-public class NeutronLoadBalancerHealthMonitor extends ConfigurationObject implements Serializable {
+public class NeutronLoadBalancerHealthMonitor implements Serializable {
     private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(NeutronLoadBalancer.class);
 

@@ -10,18 +10,17 @@
 
 package org.opendaylight.controller.networkconfig.neutron.northbound;
 
-import org.opendaylight.controller.networkconfig.neutron.INeutronObject;
-import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
-import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
-import org.opendaylight.controller.networkconfig.neutron.NeutronSubnet;
-import org.opendaylight.controller.northbound.commons.exception.BadRequestException;
-import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
-
-import javax.ws.rs.core.UriInfo;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
+import javax.ws.rs.core.UriInfo;
+
+import org.opendaylight.controller.networkconfig.neutron.INeutronObject;
+import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
+import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
+import org.opendaylight.controller.networkconfig.neutron.NeutronSubnet;
 
 public class PaginatedRequestFactory {
 
