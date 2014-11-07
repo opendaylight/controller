@@ -14,4 +14,5 @@ import java.io.Serializable;
  * Message sent to Persist an entry into the transaction journal
  */
 public class PersistEntry implements Serializable {
+    private static final long serialVersionUID = 1L;
 }

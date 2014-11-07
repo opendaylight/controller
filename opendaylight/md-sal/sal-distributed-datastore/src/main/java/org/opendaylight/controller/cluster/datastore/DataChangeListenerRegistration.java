@@ -53,6 +53,7 @@ public class DataChangeListenerRegistration extends AbstractUntypedActor {
 
     private static class DataChangeListenerRegistrationCreator
                                             implements Creator<DataChangeListenerRegistration> {
+        private static final long serialVersionUID = 1L;
         final ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
                                                            NormalizedNode<?, ?>>> registration;
 

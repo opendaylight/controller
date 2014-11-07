@@ -81,6 +81,7 @@ public class MeteredBoundedMailboxTest {
 
         public static Props props(final ReentrantLock lock){
             return Props.create(new Creator<PingPongActor>(){
+                private static final long serialVersionUID = 1L;
                 @Override
                 public PingPongActor create() throws Exception {
                     return new PingPongActor(lock);

@@ -52,6 +52,7 @@ public class ExampleActor extends RaftActor {
     public static Props props(final String id, final Map<String, String> peerAddresses,
         final Optional<ConfigParams> configParams){
         return Props.create(new Creator<ExampleActor>(){
+            private static final long serialVersionUID = 1L;
 
             @Override public ExampleActor create() throws Exception {
                 return new ExampleActor(id, peerAddresses, configParams);

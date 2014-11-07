@@ -14,6 +14,7 @@ import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import java.io.Serializable;
 
 public class Replicate implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final ActorRef clientActor;
     private final String identifier;
     private final ReplicatedLogEntry replicatedLogEntry;

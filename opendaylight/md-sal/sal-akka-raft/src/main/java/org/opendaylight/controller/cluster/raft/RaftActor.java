@@ -739,8 +739,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     static class DeleteEntries implements Serializable {
+        private static final long serialVersionUID = 1L;
         private final int fromIndex;
-
 
         public DeleteEntries(int fromIndex) {
             this.fromIndex = fromIndex;
@@ -792,6 +792,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     static class UpdateElectionTerm implements Serializable {
+        private static final long serialVersionUID = 1L;
         private final long currentTerm;
         private final String votedFor;
 
