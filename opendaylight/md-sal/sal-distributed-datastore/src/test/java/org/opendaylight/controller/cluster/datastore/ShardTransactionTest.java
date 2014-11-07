@@ -347,7 +347,6 @@ public class ShardTransactionTest extends AbstractActorTest {
 
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testOnReceiveCloseTransaction() throws Exception {
         new JavaTestKit(getSystem()) {{
