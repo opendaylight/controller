@@ -32,7 +32,7 @@ public class NetconfOperationServiceFactoryTrackerTest {
     @Mock
     private NetconfOperationServiceFactory factory;
     @Mock
-    private ServiceReference reference;
+    private ServiceReference<NetconfOperationServiceFactory> reference;
 
     private NetconfOperationServiceFactoryTracker tracker;
 
