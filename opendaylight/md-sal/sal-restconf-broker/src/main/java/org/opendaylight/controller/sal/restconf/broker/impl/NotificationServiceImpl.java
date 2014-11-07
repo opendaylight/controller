@@ -39,7 +39,7 @@ public class NotificationServiceImpl implements NotificationService {
         notifications.add(new QName(notificationType.toString()));
         String notificationStreamName = RemoteStreamTools.createNotificationStream(salRemoteService, notifications);
         final Map<String,EventStreamInfo> desiredEventStream = RemoteStreamTools.createEventStream(restconfClientContext, notificationStreamName);
-        RemoteNotificationListener remoteNotificationListener = new RemoteNotificationListener(listener);
+        RemoteNotificationListener<T> remoteNotificationListener = new RemoteNotificationListener<T>(listener);
 
         final ListenerRegistration<?> listenerRegistration = restconfClientContext.getEventStreamContext(desiredEventStream.get(desiredEventStream.get(notificationStreamName)))
                 .registerNotificationListener(remoteNotificationListener);
