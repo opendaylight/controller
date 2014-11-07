@@ -105,7 +105,7 @@ public class NorthboundIT {
         // Assert if true, if false we are good to go!
         assertFalse(debugit);
 
-        ServiceReference r = bc.getServiceReference(IUserManager.class.getName());
+        ServiceReference<?> r = bc.getServiceReference(IUserManager.class.getName());
         if (r != null) {
             this.userManager = (IUserManager) bc.getService(r);
         }
