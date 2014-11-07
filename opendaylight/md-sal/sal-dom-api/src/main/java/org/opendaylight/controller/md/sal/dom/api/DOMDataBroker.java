@@ -14,7 +14,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 /**
- * Data Broker which provides data transaction and data change listener fuctionality
+ * Data Broker which provides data transaction and data change listener functionality
  * using {@link NormalizedNode} data format.
  *
  * This interface is type capture of generic interfaces and returns type captures
