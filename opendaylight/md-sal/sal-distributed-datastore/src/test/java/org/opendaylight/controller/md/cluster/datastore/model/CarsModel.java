@@ -31,7 +31,7 @@ public class CarsModel {
     public static final QName CAR_PRICE_QNAME = QName.create(CAR_QNAME, "price");
 
 
-    public static NormalizedNode create(){
+    public static NormalizedNode<?, ?> create(){
 
         // Create a list builder
         CollectionNodeBuilder<MapEntryNode, MapNode> cars =
@@ -63,7 +63,7 @@ public class CarsModel {
 
     }
 
-    public static NormalizedNode emptyContainer(){
+    public static NormalizedNode<?, ?> emptyContainer(){
         return ImmutableContainerNodeBuilder.create()
             .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(BASE_QNAME))
             .build();

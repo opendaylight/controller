@@ -1,6 +1,6 @@
 package org.opendaylight.controller.cluster.datastore.shardstrategy;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 

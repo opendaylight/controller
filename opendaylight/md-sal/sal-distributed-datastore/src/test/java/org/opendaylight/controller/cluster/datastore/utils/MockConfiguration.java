@@ -9,43 +9,42 @@
 package org.opendaylight.controller.cluster.datastore.utils;
 
 import com.google.common.base.Optional;
-import org.opendaylight.controller.cluster.datastore.Configuration;
-import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.opendaylight.controller.cluster.datastore.Configuration;
+import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
 
 public class MockConfiguration implements Configuration{
-    @Override public List<String> getMemberShardNames(String memberName) {
+    @Override public List<String> getMemberShardNames(final String memberName) {
         return Arrays.asList("default");
     }
 
     @Override public Optional<String> getModuleNameFromNameSpace(
-        String nameSpace) {
+        final String nameSpace) {
         return Optional.absent();
     }
 
     @Override
     public Map<String, ShardStrategy> getModuleNameToShardStrategyMap() {
-        return Collections.EMPTY_MAP;
+        return Collections.emptyMap();
     }
 
     @Override public List<String> getShardNamesFromModuleName(
-        String moduleName) {
-        return Collections.EMPTY_LIST;
+        final String moduleName) {
+        return Collections.emptyList();
     }
 
-    @Override public List<String> getMembersFromShardName(String shardName) {
+    @Override public List<String> getMembersFromShardName(final String shardName) {
         if("default".equals(shardName)) {
             return Arrays.asList("member-1", "member-2");
         } else if("astronauts".equals(shardName)){
             return Arrays.asList("member-2", "member-3");
         }
 
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     @Override public Set<String> getAllShardNames() {
