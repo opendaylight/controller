@@ -66,7 +66,6 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
         Assert.assertEquals(mockListener, proxy.getInstance());
     }
 
-    @SuppressWarnings("unchecked")
     @Test(timeout=10000)
     public void testSuccessfulRegistration() {
         new JavaTestKit(getSystem()) {{
@@ -217,7 +216,6 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
         }};
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testCloseBeforeRegistration() {
         new JavaTestKit(getSystem()) {{

@@ -807,7 +807,6 @@ public class TransactionProxyTest {
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testReady() throws Exception {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
@@ -842,7 +841,6 @@ public class TransactionProxyTest {
         verifyCohortFutures(proxy, getSystem().actorSelection(actorRef.path()));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testReadyForwardCompatibility() throws Exception {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE, 0);
@@ -883,7 +881,6 @@ public class TransactionProxyTest {
                 eq(actorRef.path().toString()));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testReadyWithRecordingOperationFailure() throws Exception {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY);
@@ -920,7 +917,6 @@ public class TransactionProxyTest {
                 MergeDataReply.SERIALIZABLE_CLASS, TestException.class);
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testReadyWithReplyFailure() throws Exception {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY);
@@ -977,7 +973,6 @@ public class TransactionProxyTest {
         verifyCohortFutures(proxy, PrimaryNotFoundException.class);
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testReadyWithInvalidReplyMessageType() throws Exception {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY);
@@ -1016,7 +1011,6 @@ public class TransactionProxyTest {
         assertTrue("Invalid identifier: " + id, id.toString().startsWith(memberName));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testClose() throws Exception{
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
