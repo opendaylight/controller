@@ -59,7 +59,7 @@ public class ValueSerializer {
             return InstanceIdentifierUtils.fromSerializable(
                     node.getInstanceIdentifierValue(), context);
         } else if(node.getIntValueType() == ValueType.BITS_TYPE.ordinal()){
-            return new HashSet(node.getBitsValueList());
+            return new HashSet<>(node.getBitsValueList());
         } else if(node.getIntValueType() == ValueType.BINARY_TYPE.ordinal()){
             return node.getBytesValue().toByteArray();
         }

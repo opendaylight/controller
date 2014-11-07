@@ -1,15 +1,13 @@
 package org.opendaylight.controller.cluster.datastore.node.utils;
 
+import com.google.common.collect.ImmutableSet;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.util.TestModel;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import static junit.framework.TestCase.assertEquals;
 
 public class PathUtilsTest {
@@ -92,8 +90,7 @@ public class PathUtilsTest {
     }
 
     private YangInstanceIdentifier.AugmentationIdentifier augmentationIdentifier(){
-        Set<QName> childNames = new HashSet();
-        childNames.add(QNameFactory.create("(urn:opendaylight:flow:table:statistics?revision=2013-12-15)flow-table-statistics"));
+        Set<QName> childNames = ImmutableSet.of(QNameFactory.create("(urn:opendaylight:flow:table:statistics?revision=2013-12-15)flow-table-statistics"));
 
         return new YangInstanceIdentifier.AugmentationIdentifier(childNames);
     }
