@@ -139,7 +139,7 @@ public class BackwardsCompatibleMountPointTest {
 
     private DataNormalizer mockNormalizer() throws DataNormalizationException {
         final DataNormalizer mock = mock(DataNormalizer.class);
-        doReturn(new AbstractMap.SimpleEntry<YangInstanceIdentifier, NormalizedNode<?, ?>>(id, normalizedNode) {})
+        doReturn(new AbstractMap.SimpleEntry<YangInstanceIdentifier, NormalizedNode<?, ?>>(id, normalizedNode))
                 .when(mock).toNormalized(any(YangInstanceIdentifier.class), any(CompositeNode.class));
         doReturn(compositeNode).when(mock).toLegacy(any(YangInstanceIdentifier.class), any(NormalizedNode.class));
         doReturn(id).when(mock).toLegacy(any(YangInstanceIdentifier.class));
