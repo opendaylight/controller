@@ -27,6 +27,13 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
 import org.opendaylight.controller.cluster.common.actor.MeteringBehavior;
@@ -77,14 +84,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
-
-import javax.annotation.Nonnull;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * A Shard represents a portion of the logical data tree <br/>
@@ -491,8 +490,8 @@ public class Shard extends RaftActor {
             }
         }
 
-        if(this.schemaContext == null){
-            throw new NullPointerException("schemaContext should not be null");
+        if(this.schemaContext == null) {
+            throw new IllegalStateException("SchemaContext is not set");
         }
 
         if (transactionType == TransactionProxy.TransactionType.READ_ONLY.ordinal()) {
@@ -533,9 +532,16 @@ public class Shard extends RaftActor {
     }
 
     private void createTransaction(CreateTransaction createTransaction) {
-        createTransaction(createTransaction.getTransactionType(),
-            createTransaction.getTransactionId(), createTransaction.getTransactionChainId(),
-            createTransaction.getVersion());
+        try {
+            ActorRef transactionActor = createTransaction(createTransaction.getTransactionType(),
+                createTransaction.getTransactionId(), createTransaction.getTransactionChainId(),
+                createTransaction.getVersion());
+
+            getSender().tell(new CreateTransactionReply(Serialization.serializedActorPath(transactionActor),
+                    createTransaction.getTransactionId()).toSerializable(), getSelf());
+        } catch (Exception e) {
+            getSender().tell(new akka.actor.Status.Failure(e), getSelf());
+        }
     }
 
     private ActorRef createTransaction(int transactionType, String remoteTransactionId,
@@ -545,17 +551,13 @@ public class Shard extends RaftActor {
             ShardTransactionIdentifier.builder()
                 .remoteTransactionId(remoteTransactionId)
                 .build();
+
         if(LOG.isDebugEnabled()) {
             LOG.debug("Creating transaction : {} ", transactionId);
         }
+
         ActorRef transactionActor = createTypedTransactionActor(transactionType, transactionId,
                 transactionChainId, clientVersion);
-
-        getSender()
-            .tell(new CreateTransactionReply(
-                    Serialization.serializedActorPath(transactionActor),
-                    remoteTransactionId).toSerializable(),
-                getSelf());
 
         return transactionActor;
     }
