@@ -8,14 +8,12 @@
 
 package org.opendaylight.controller.networkconfig.neutron.implementation;
 
-import org.apache.felix.dm.Component;
-import org.opendaylight.controller.clustering.services.IClusterContainerServices;
-import org.opendaylight.controller.configuration.IConfigurationContainerAware;
-import org.opendaylight.controller.configuration.IConfigurationContainerService;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallPolicyCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallRuleCRUD;
-import org.opendaylight.controller.networkconfig.neutron.INeutronFloatingIPCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerHealthMonitorCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerListenerCRUD;
@@ -27,321 +25,111 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronRouterCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityGroupCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityRuleCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
-import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-
-public class Activator extends ComponentActivatorAbstractBase {
+public class Activator implements BundleActivator {
     protected static final Logger logger = LoggerFactory
     .getLogger(Activator.class);
+    private List<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
 
-    /**
-     * Function called when the activator starts just after some
-     * initializations are done by the
-     * ComponentActivatorAbstractBase.
-     *
-     */
     @Override
-    public void init() {
+    public void start(BundleContext context) throws Exception {
+        NeutronRouterInterface neutronRouterInterface = new NeutronRouterInterface();
+        ServiceRegistration<INeutronRouterCRUD> neutronRouterInterfaceRegistration = context.registerService(INeutronRouterCRUD.class, neutronRouterInterface, null);
+        if(neutronRouterInterfaceRegistration != null) {
+            registrations.add(neutronRouterInterfaceRegistration);
+        }
+        NeutronPortInterface neutronPortInterface = new NeutronPortInterface();
+        ServiceRegistration<INeutronPortCRUD> neutronPortInterfaceRegistration = context.registerService(INeutronPortCRUD.class, neutronPortInterface, null);
+        if(neutronPortInterfaceRegistration != null) {
+            registrations.add(neutronPortInterfaceRegistration);
+        }
+
+        NeutronSubnetInterface neutronSubnetInterface = new NeutronSubnetInterface();
+        ServiceRegistration<INeutronSubnetCRUD> neutronSubnetInterfaceRegistration = context.registerService(INeutronSubnetCRUD.class, neutronSubnetInterface, null);
+        if(neutronSubnetInterfaceRegistration != null) {
+            registrations.add(neutronSubnetInterfaceRegistration);
+        }
+
+        NeutronNetworkInterface neutronNetworkInterface = new NeutronNetworkInterface();
+        ServiceRegistration<INeutronNetworkCRUD> neutronNetworkInterfaceRegistration = context.registerService(INeutronNetworkCRUD.class, neutronNetworkInterface, null);
+        if(neutronNetworkInterfaceRegistration != null) {
+            registrations.add(neutronNetworkInterfaceRegistration);
+        }
+
+        NeutronSecurityGroupInterface neutronSecurityGroupInterface = new NeutronSecurityGroupInterface();
+        ServiceRegistration<INeutronSecurityGroupCRUD> neutronSecurityGroupInterfaceRegistration = context.registerService(INeutronSecurityGroupCRUD.class, neutronSecurityGroupInterface, null);
+        if(neutronSecurityGroupInterfaceRegistration != null) {
+            registrations.add(neutronSecurityGroupInterfaceRegistration);
+        }
+
+        NeutronSecurityRuleInterface neutronSecurityRuleInterface = new NeutronSecurityRuleInterface();
+        ServiceRegistration<INeutronSecurityRuleCRUD> neutronSecurityRuleInterfaceRegistration = context.registerService(INeutronSecurityRuleCRUD.class, neutronSecurityRuleInterface, null);
+        if(neutronSecurityRuleInterfaceRegistration != null) {
+            registrations.add(neutronSecurityRuleInterfaceRegistration);
+        }
+
+        NeutronFirewallInterface neutronFirewallInterface = new NeutronFirewallInterface();
+        ServiceRegistration<INeutronFirewallCRUD> neutronFirewallInterfaceRegistration = context.registerService(INeutronFirewallCRUD.class, neutronFirewallInterface, null);
+        if(neutronFirewallInterfaceRegistration != null) {
+            registrations.add(neutronFirewallInterfaceRegistration);
+        }
+
+        NeutronFirewallPolicyInterface neutronFirewallPolicyInterface = new NeutronFirewallPolicyInterface();
+        ServiceRegistration<INeutronFirewallPolicyCRUD> neutronFirewallPolicyInterfaceRegistration = context.registerService(INeutronFirewallPolicyCRUD.class, neutronFirewallPolicyInterface, null);
+        if(neutronFirewallPolicyInterfaceRegistration != null) {
+            registrations.add(neutronFirewallPolicyInterfaceRegistration);
+        }
+
+        NeutronFirewallRuleInterface neutronFirewallRuleInterface = new NeutronFirewallRuleInterface();
+        ServiceRegistration<INeutronFirewallRuleCRUD> neutronFirewallRuleInterfaceRegistration = context.registerService(INeutronFirewallRuleCRUD.class, neutronFirewallRuleInterface, null);
+        if(neutronFirewallRuleInterfaceRegistration != null) {
+            registrations.add(neutronFirewallRuleInterfaceRegistration);
+        }
+
+        NeutronLoadBalancerInterface neutronLoadBalancerInterface = new NeutronLoadBalancerInterface();
+        ServiceRegistration<INeutronLoadBalancerCRUD> neutronLoadBalancerInterfaceRegistration = context.registerService(INeutronLoadBalancerCRUD.class, neutronLoadBalancerInterface, null);
+        if(neutronFirewallInterfaceRegistration != null) {
+            registrations.add(neutronLoadBalancerInterfaceRegistration);
+        }
+
+        NeutronLoadBalancerPoolInterface neutronLoadBalancerPoolInterface = new NeutronLoadBalancerPoolInterface();
+        ServiceRegistration<INeutronLoadBalancerPoolCRUD> neutronLoadBalancerPoolInterfaceRegistration = context.registerService(INeutronLoadBalancerPoolCRUD.class, neutronLoadBalancerPoolInterface, null);
+        if(neutronLoadBalancerPoolInterfaceRegistration != null) {
+            registrations.add(neutronLoadBalancerPoolInterfaceRegistration);
+        }
+
+        NeutronLoadBalancerListenerInterface neutronLoadBalancerListenerInterface = new NeutronLoadBalancerListenerInterface();
+        ServiceRegistration<INeutronLoadBalancerListenerCRUD> neutronLoadBalancerListenerInterfaceRegistration = context.registerService(INeutronLoadBalancerListenerCRUD.class, neutronLoadBalancerListenerInterface, null);
+        if(neutronLoadBalancerListenerInterfaceRegistration != null) {
+            registrations.add(neutronLoadBalancerListenerInterfaceRegistration);
+        }
+
+        NeutronLoadBalancerHealthMonitorInterface neutronLoadBalancerHealthMonitorInterface = new NeutronLoadBalancerHealthMonitorInterface();
+        ServiceRegistration<INeutronLoadBalancerHealthMonitorCRUD> neutronLoadBalancerHealthMonitorInterfaceRegistration = context.registerService(INeutronLoadBalancerHealthMonitorCRUD.class, neutronLoadBalancerHealthMonitorInterface, null);
+        if(neutronLoadBalancerHealthMonitorInterfaceRegistration != null) {
+            registrations.add(neutronLoadBalancerHealthMonitorInterfaceRegistration);
+        }
+
+        NeutronLoadBalancerPoolMemberInterface neutronLoadBalancerPoolMemberInterface = new NeutronLoadBalancerPoolMemberInterface();
+        ServiceRegistration<INeutronLoadBalancerPoolMemberCRUD> neutronLoadBalancerPoolMemberInterfaceRegistration = context.registerService(INeutronLoadBalancerPoolMemberCRUD.class, neutronLoadBalancerPoolMemberInterface, null);
+        if(neutronLoadBalancerPoolMemberInterfaceRegistration != null) {
+            registrations.add(neutronLoadBalancerPoolMemberInterfaceRegistration);
+        }
 
     }
 
-    /**
-     * Function called when the activator stops just before the
-     * cleanup done by ComponentActivatorAbstractBase
-     *
-     */
     @Override
-    public void destroy() {
+    public void stop(BundleContext context) throws Exception {
+       for(ServiceRegistration registration : registrations) {
+           if(registration != null) {
+               registration.unregister();
+           }
+       }
 
-    }
-
-    /**
-     * Function that is used to communicate to dependency manager the
-     * list of known implementations for services inside a container
-     *
-     *
-     * @return An array containing all the CLASS objects that will be
-     * instantiated in order to get an fully working implementation
-     * Object
-     */
-    @Override
-    public Object[] getImplementations() {
-        Object[] res = { NeutronFloatingIPInterface.class,
-                NeutronRouterInterface.class,
-                NeutronPortInterface.class,
-                NeutronSubnetInterface.class,
-                NeutronNetworkInterface.class,
-                NeutronSecurityGroupInterface.class,
-                NeutronSecurityRuleInterface.class,
-                NeutronFirewallInterface.class,
-                NeutronFirewallPolicyInterface.class,
-                NeutronFirewallRuleInterface.class,
-                NeutronLoadBalancerInterface.class,
-                NeutronLoadBalancerPoolInterface.class,
-                NeutronLoadBalancerListenerInterface.class,
-                NeutronLoadBalancerHealthMonitorInterface.class,
-                NeutronLoadBalancerPoolMemberInterface.class};
-        return res;
-    }
-
-    /**
-     * Function that is called when configuration of the dependencies
-     * is required.
-     *
-     * @param c dependency manager Component object, used for
-     * configuring the dependencies exported and imported
-     * @param imp Implementation class that is being configured,
-     * needed as long as the same routine can configure multiple
-     * implementations
-     * @param containerName The containerName being configured, this allow
-     * also optional per-container different behavior if needed, usually
-     * should not be the case though.
-     */
-    @Override
-    public void configureInstance(Component c, Object imp, String containerName) {
-        if (imp.equals(NeutronFloatingIPInterface.class)) {
-            // export the service
-            c.setInterface(
-                    new String[] { INeutronFloatingIPCRUD.class.getName(),
-                                   IConfigurationContainerAware.class.getName()}, null);
-            Dictionary<String, String> props = new Hashtable<String, String>();
-            props.put("salListenerName", "neutron");
-            c.add(createContainerServiceDependency(containerName)
-                    .setService(IClusterContainerServices.class)
-                    .setCallbacks("setClusterContainerService",
-                    "unsetClusterContainerService").setRequired(true));
-            c.add(createContainerServiceDependency(containerName).setService(
-                    IConfigurationContainerService.class).setCallbacks(
-                    "setConfigurationContainerService",
-                    "unsetConfigurationContainerService").setRequired(true));
-        }
-        if (imp.equals(NeutronRouterInterface.class)) {
-            // export the service
-            c.setInterface(
-                    new String[] { INeutronRouterCRUD.class.getName(),
-                                   IConfigurationContainerAware.class.getName()}, null);
-            Dictionary<String, String> props = new Hashtable<String, String>();
-            props.put("salListenerName", "neutron");
-            c.add(createContainerServiceDependency(containerName)
-                    .setService(IClusterContainerServices.class)
-                    .setCallbacks("setClusterContainerService",
-                    "unsetClusterContainerService").setRequired(true));
-            c.add(createContainerServiceDependency(containerName).setService(
-                    IConfigurationContainerService.class).setCallbacks(
-                    "setConfigurationContainerService",
-                    "unsetConfigurationContainerService").setRequired(true));
-        }
-        if (imp.equals(NeutronPortInterface.class)) {
-            // export the service
-            c.setInterface(
-                    new String[] { INeutronPortCRUD.class.getName(),
-                                   IConfigurationContainerAware.class.getName()}, null);
-            Dictionary<String, String> props = new Hashtable<String, String>();
-            props.put("salListenerName", "neutron");
-            c.add(createContainerServiceDependency(containerName)
-                    .setService(IClusterContainerServices.class)
-                    .setCallbacks("setClusterContainerService",
-                    "unsetClusterContainerService").setRequired(true));
-            c.add(createContainerServiceDependency(containerName).setService(
-                    IConfigurationContainerService.class).setCallbacks(
-                    "setConfigurationContainerService",
-                    "unsetConfigurationContainerService").setRequired(true));
-        }
-        if (imp.equals(NeutronSubnetInterface.class)) {
-            // export the service
-            c.setInterface(
-                    new String[] { INeutronSubnetCRUD.class.getName(),
-                                   IConfigurationContainerAware.class.getName()}, null);
-            Dictionary<String, String> props = new Hashtable<String, String>();
-            props.put("salListenerName", "neutron");
-            c.add(createContainerServiceDependency(containerName)
-                    .setService(IClusterContainerServices.class)
-                    .setCallbacks("setClusterContainerService",
-                    "unsetClusterContainerService").setRequired(true));
-            c.add(createContainerServiceDependency(containerName).setService(
-                    IConfigurationContainerService.class).setCallbacks(
-                    "setConfigurationContainerService",
-                    "unsetConfigurationContainerService").setRequired(true));
-        }
-        if (imp.equals(NeutronNetworkInterface.class)) {
-            // export the service
-            c.setInterface(
-                    new String[] { INeutronNetworkCRUD.class.getName(),
-                                   IConfigurationContainerAware.class.getName()}, null);
-            Dictionary<String, String> props = new Hashtable<String, String>();
-            props.put("salListenerName", "neutron");
-            c.add(createContainerServiceDependency(containerName)
-                    .setService(IClusterContainerServices.class)
-                    .setCallbacks("setClusterContainerService",
-                    "unsetClusterContainerService").setRequired(true));
-            c.add(createContainerServiceDependency(containerName).setService(
-                    IConfigurationContainerService.class).setCallbacks(
-                    "setConfigurationContainerService",
-                    "unsetConfigurationContainerService").setRequired(true));
-        }
-        if (imp.equals(NeutronSecurityGroupInterface.class)) {
-            // export the service
-            c.setInterface(
-                new String[] { INeutronSecurityGroupCRUD.class.getName(),
-                    IConfigurationContainerAware.class.getName()}, null);
-            Dictionary<String, String> props = new Hashtable<String, String>();
-            props.put("salListenerName", "neutron");
-            c.add(createContainerServiceDependency(containerName)
-                .setService(IClusterContainerServices.class)
-                .setCallbacks("setClusterContainerService",
-                    "unsetClusterContainerService").setRequired(true));
-            c.add(createContainerServiceDependency(containerName).setService(
-                IConfigurationContainerService.class).setCallbacks(
-                "setConfigurationContainerService",
-                "unsetConfigurationContainerService").setRequired(true));
-        }
-        if (imp.equals(NeutronSecurityRuleInterface.class)) {
-            // export the service
-            c.setInterface(
-                new String[] { INeutronSecurityRuleCRUD.class.getName(),
-                    IConfigurationContainerAware.class.getName()}, null);
-            Dictionary<String, String> props = new Hashtable<String, String>();
-            props.put("salListenerName", "neutron");
-            c.add(createContainerServiceDependency(containerName)
-                .setService(IClusterContainerServices.class)
-                .setCallbacks("setClusterContainerService",
-                    "unsetClusterContainerService").setRequired(true));
-            c.add(createContainerServiceDependency(containerName).setService(
-                IConfigurationContainerService.class).setCallbacks(
-                "setConfigurationContainerService",
-                "unsetConfigurationContainerService").setRequired(true));
-        }
-        if (imp.equals(NeutronFirewallInterface.class)) {
-            // export the service
-            c.setInterface(
-                    new String[] { INeutronFirewallCRUD.class.getName(),
-                            IConfigurationContainerAware.class.getName()}, null);
-            Dictionary<String, String> props = new Hashtable<String, String>();
-            props.put("salListenerName", "neutron");
-            c.add(createContainerServiceDependency(containerName)
-                    .setService(IClusterContainerServices.class)
-                    .setCallbacks("setClusterContainerService",
-                            "unsetClusterContainerService").setRequired(true));
-            c.add(createContainerServiceDependency(containerName).setService(
-                    IConfigurationContainerService.class).setCallbacks(
-                    "setConfigurationContainerService",
-                    "unsetConfigurationContainerService").setRequired(true));
-        }
-        if (imp.equals(NeutronFirewallPolicyInterface.class)) {
-            // export the service
-            c.setInterface(
-                    new String[] { INeutronFirewallPolicyCRUD.class.getName(),
-                            IConfigurationContainerAware.class.getName()}, null);
-            Dictionary<String, String> props = new Hashtable<String, String>();
-            props.put("salListenerName", "neutron");
-            c.add(createContainerServiceDependency(containerName)
-                    .setService(IClusterContainerServices.class)
-                    .setCallbacks("setClusterContainerService",
-                            "unsetClusterContainerService").setRequired(true));
-            c.add(createContainerServiceDependency(containerName).setService(
-                    IConfigurationContainerService.class).setCallbacks(
-                    "setConfigurationContainerService",
-                    "unsetConfigurationContainerService").setRequired(true));
-        }
-        if (imp.equals(NeutronFirewallRuleInterface.class)) {
-            // export the service
-            c.setInterface(
-                    new String[] { INeutronFirewallRuleCRUD.class.getName(),
-                            IConfigurationContainerAware.class.getName()}, null);
-            Dictionary<String, String> props = new Hashtable<String, String>();
-            props.put("salListenerName", "neutron");
-            c.add(createContainerServiceDependency(containerName)
-                    .setService(IClusterContainerServices.class)
-                    .setCallbacks("setClusterContainerService",
-                            "unsetClusterContainerService").setRequired(true));
-            c.add(createContainerServiceDependency(containerName).setService(
-                    IConfigurationContainerService.class).setCallbacks(
-                    "setConfigurationContainerService",
-                    "unsetConfigurationContainerService").setRequired(true));
-        }
-        if (imp.equals(NeutronLoadBalancerInterface.class)) {
-            // export the service
-            c.setInterface(
-                    new String[] { INeutronLoadBalancerCRUD.class.getName(),
-                            IConfigurationContainerAware.class.getName()}, null);
-            Dictionary<String, String> props = new Hashtable<String, String>();
-            props.put("salListenerName", "neutron");
-            c.add(createContainerServiceDependency(containerName)
-                    .setService(IClusterContainerServices.class)
-                    .setCallbacks("setClusterContainerService",
-                            "unsetClusterContainerService").setRequired(true));
-            c.add(createContainerServiceDependency(containerName).setService(
-                    IConfigurationContainerService.class).setCallbacks(
-                    "setConfigurationContainerService",
-                    "unsetConfigurationContainerService").setRequired(true));
-        }
-        if (imp.equals(NeutronLoadBalancerListenerInterface.class)) {
-            // export the service
-            c.setInterface(
-                    new String[] { INeutronLoadBalancerListenerCRUD.class.getName(),
-                            IConfigurationContainerAware.class.getName()}, null);
-            Dictionary<String, String> props = new Hashtable<String, String>();
-            props.put("salListenerName", "neutron");
-            c.add(createContainerServiceDependency(containerName)
-                    .setService(IClusterContainerServices.class)
-                    .setCallbacks("setClusterContainerService",
-                            "unsetClusterContainerService").setRequired(true));
-            c.add(createContainerServiceDependency(containerName).setService(
-                    IConfigurationContainerService.class).setCallbacks(
-                    "setConfigurationContainerService",
-                    "unsetConfigurationContainerService").setRequired(true));
-        }
-        if (imp.equals(NeutronLoadBalancerPoolInterface.class)) {
-            // export the service
-            c.setInterface(
-                    new String[] { INeutronLoadBalancerPoolCRUD.class.getName(),
-                            IConfigurationContainerAware.class.getName()}, null);
-            Dictionary<String, String> props = new Hashtable<String, String>();
-            props.put("salListenerName", "neutron");
-            c.add(createContainerServiceDependency(containerName)
-                    .setService(IClusterContainerServices.class)
-                    .setCallbacks("setClusterContainerService",
-                            "unsetClusterContainerService").setRequired(true));
-            c.add(createContainerServiceDependency(containerName).setService(
-                    IConfigurationContainerService.class).setCallbacks(
-                    "setConfigurationContainerService",
-                    "unsetConfigurationContainerService").setRequired(true));
-        }
-        if (imp.equals(NeutronLoadBalancerHealthMonitorInterface.class)) {
-            // export the service
-            c.setInterface(
-                    new String[] { INeutronLoadBalancerHealthMonitorCRUD.class.getName(),
-                            IConfigurationContainerAware.class.getName()}, null);
-            Dictionary<String, String> props = new Hashtable<String, String>();
-            props.put("salListenerName", "neutron");
-            c.add(createContainerServiceDependency(containerName)
-                    .setService(IClusterContainerServices.class)
-                    .setCallbacks("setClusterContainerService",
-                            "unsetClusterContainerService").setRequired(true));
-            c.add(createContainerServiceDependency(containerName).setService(
-                    IConfigurationContainerService.class).setCallbacks(
-                    "setConfigurationContainerService",
-                    "unsetConfigurationContainerService").setRequired(true));
-        }
-        if (imp.equals(NeutronLoadBalancerPoolMemberInterface.class)) {
-            // export the service
-            c.setInterface(
-                    new String[] { INeutronLoadBalancerPoolMemberCRUD.class.getName(),
-                            IConfigurationContainerAware.class.getName()}, null);
-            Dictionary<String, String> props = new Hashtable<String, String>();
-            props.put("salListenerName", "neutron");
-            c.add(createContainerServiceDependency(containerName)
-                    .setService(IClusterContainerServices.class)
-                    .setCallbacks("setClusterContainerService",
-                            "unsetClusterContainerService").setRequired(true));
-            c.add(createContainerServiceDependency(containerName).setService(
-                    IConfigurationContainerService.class).setCallbacks(
-                    "setConfigurationContainerService",
-                    "unsetConfigurationContainerService").setRequired(true));
-        }
     }
 }

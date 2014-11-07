@@ -16,11 +16,6 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallRuleCRUD;
 import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
 import org.opendaylight.controller.networkconfig.neutron.NeutronFirewall;
-import org.opendaylight.controller.northbound.commons.RestMessages;
-import org.opendaylight.controller.northbound.commons.exception.BadRequestException;
-import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
-import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
-import org.opendaylight.controller.sal.utils.ServiceHelper;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -190,7 +185,7 @@ public class NeutronFirewallNorthbound {
                 throw new BadRequestException("Firewall UUID already exists");
             }
             firewallInterface.addNeutronFirewall(singleton);
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronFirewallAware.class, this, null);
+            Object[] instances = NeutronUtil.getInstances(INeutronFirewallAware.class, this);
             if (instances != null) {
                 for (Object instance : instances) {
                     INeutronFirewallAware service = (INeutronFirewallAware) instance;
@@ -211,7 +206,7 @@ public class NeutronFirewallNorthbound {
             List<NeutronFirewall> bulk = input.getBulk();
             Iterator<NeutronFirewall> i = bulk.iterator();
             HashMap<String, NeutronFirewall> testMap = new HashMap<String, NeutronFirewall>();
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronFirewallAware.class, this, null);
+            Object[] instances = NeutronUtil.getInstances(INeutronFirewallAware.class, this);
             while (i.hasNext()) {
                 NeutronFirewall test = i.next();
 
@@ -301,7 +296,7 @@ public class NeutronFirewallNorthbound {
             throw new BadRequestException("Attribute edit blocked by Neutron");
         }
 
-        Object[] instances = ServiceHelper.getGlobalInstances(INeutronFirewallAware.class, this, null);
+        Object[] instances = NeutronUtil.getInstances(INeutronFirewallAware.class, this);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronFirewallAware service = (INeutronFirewallAware) instance;
@@ -355,7 +350,7 @@ public class NeutronFirewallNorthbound {
             return Response.status(409).build();
         }
         NeutronFirewall singleton = firewallInterface.getNeutronFirewall(firewallUUID);
-        Object[] instances = ServiceHelper.getGlobalInstances(INeutronFirewallAware.class, this, null);
+        Object[] instances = NeutronUtil.getInstances(INeutronFirewallAware.class, this);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronFirewallAware service = (INeutronFirewallAware) instance;

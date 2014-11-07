@@ -8,8 +8,6 @@
 
 package org.opendaylight.controller.networkconfig.neutron;
 
-import org.opendaylight.controller.configuration.ConfigurationObject;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -42,7 +40,7 @@ import java.util.List;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 
-public class NeutronLoadBalancerListener extends ConfigurationObject implements Serializable {
+public class NeutronLoadBalancerListener implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @XmlElement(name="id")
