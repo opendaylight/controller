@@ -17,12 +17,10 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.opendaylight.controller.configuration.ConfigurationObject;
-
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 
-public class NeutronFloatingIP extends ConfigurationObject implements Serializable {
+public class NeutronFloatingIP implements Serializable {
     private static final long serialVersionUID = 1L;
 
     // See OpenStack Network API v2.0 Reference for description of
