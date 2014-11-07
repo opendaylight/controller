@@ -38,12 +38,6 @@ import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
 import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
 import org.opendaylight.controller.networkconfig.neutron.NeutronSubnet;
 import org.opendaylight.controller.networkconfig.neutron.Neutron_IPs;
-import org.opendaylight.controller.northbound.commons.RestMessages;
-import org.opendaylight.controller.northbound.commons.exception.BadRequestException;
-import org.opendaylight.controller.northbound.commons.exception.ResourceConflictException;
-import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
-import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
-import org.opendaylight.controller.sal.utils.ServiceHelper;
 
 /**
  * Neutron Northbound REST APIs.<br>
@@ -263,7 +257,7 @@ public class NeutronPortsNorthbound {
                 }
             }
 
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronPortAware.class, this, null);
+            Object[] instances = NeutronUtil.getInstances(INeutronPortAware.class, this);
             if (instances != null) {
                 for (Object instance : instances) {
                     INeutronPortAware service = (INeutronPortAware) instance;
@@ -287,7 +281,7 @@ public class NeutronPortsNorthbound {
             List<NeutronPort> bulk = input.getBulk();
             Iterator<NeutronPort> i = bulk.iterator();
             HashMap<String, NeutronPort> testMap = new HashMap<String, NeutronPort>();
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronPortAware.class, this, null);
+            Object[] instances = NeutronUtil.getInstances(INeutronPortAware.class, this);
             while (i.hasNext()) {
                 NeutronPort test = i.next();
 
@@ -433,7 +427,7 @@ public class NeutronPortsNorthbound {
             throw new BadRequestException("attribute change blocked by Neutron");
         }
 
-        Object[] instances = ServiceHelper.getGlobalInstances(INeutronPortAware.class, this, null);
+        Object[] instances = NeutronUtil.getInstances(INeutronPortAware.class, this);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronPortAware service = (INeutronPortAware) instance;
@@ -515,7 +509,7 @@ public class NeutronPortsNorthbound {
             Response.status(403).build();
         }
         NeutronPort singleton = portInterface.getPort(portUUID);
-        Object[] instances = ServiceHelper.getGlobalInstances(INeutronPortAware.class, this, null);
+        Object[] instances = NeutronUtil.getInstances(INeutronPortAware.class, this);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronPortAware service = (INeutronPortAware) instance;

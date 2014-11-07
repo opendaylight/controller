@@ -19,16 +19,12 @@
       <artifactId>commons-net</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>clustering.services</artifactId>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>configuration</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal</artifactId>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
     </dependency>
   </dependencies>
   <build>
@@ -39,15 +35,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Import-Package>org.opendaylight.controller.configuration,
-              org.opendaylight.controller.clustering.services,
-              org.opendaylight.controller.sal.core,
-              org.opendaylight.controller.sal.utils,
-              org.apache.felix.dm,
-              org.apache.commons.net.util,
-              org.osgi.service.component,
-              org.slf4j,
-              javax.xml.bind.annotation</Import-Package>
+            <Import-Package>*</Import-Package>
           </instructions>
           <manifestLocation>${project.basedir}/src/main/resources/META-INF</manifestLocation>
         </configuration>
