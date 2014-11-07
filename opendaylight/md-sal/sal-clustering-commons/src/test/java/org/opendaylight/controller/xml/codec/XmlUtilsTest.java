@@ -92,7 +92,7 @@ public class XmlUtilsTest {
 
     YangInstanceIdentifier instance = (YangInstanceIdentifier) secondNode.getValue();
     Iterable<YangInstanceIdentifier.PathArgument> iterable = instance.getPathArguments();
-    Iterator it = iterable.iterator();
+    Iterator<YangInstanceIdentifier.PathArgument> it = iterable.iterator();
     YangInstanceIdentifier.NodeIdentifier firstPath = (YangInstanceIdentifier.NodeIdentifier) it.next();
     Assert.assertEquals("node", firstPath.getNodeType().getLocalName());
     YangInstanceIdentifier.NodeIdentifierWithPredicates secondPath = (YangInstanceIdentifier.NodeIdentifierWithPredicates)it.next();

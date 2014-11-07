@@ -121,7 +121,7 @@ public class JDBCServer extends Thread {
             while (entry.getValue().next()) {
                 Map rec = entry.getValue().getCurrent();
                 Map newRec = new HashMap();
-                for (Iterator iter = rec.entrySet().iterator(); iter.hasNext();) {
+                for (Iterator<?> iter = rec.entrySet().iterator(); iter.hasNext();) {
                     Map.Entry e = (Map.Entry) iter.next();
                     String key = (String) e.getKey();
                     Object value = e.getValue();
