@@ -216,7 +216,7 @@ public class BundleScannerTest {
         }
 
         @Override
-        public Enumeration findEntries(String path, String filePattern, boolean recurse) {
+        public Enumeration<URL> findEntries(String path, String filePattern, boolean recurse) {
             return Collections.enumeration(classes);
         }
 
