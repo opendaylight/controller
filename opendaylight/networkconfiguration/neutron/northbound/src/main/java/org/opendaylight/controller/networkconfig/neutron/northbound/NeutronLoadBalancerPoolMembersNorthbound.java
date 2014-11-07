@@ -10,18 +10,10 @@
 
 package org.opendaylight.controller.networkconfig.neutron.northbound;
 
-import org.codehaus.enunciate.jaxrs.ResponseCode;
-import org.codehaus.enunciate.jaxrs.StatusCodes;
-import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolCRUD;
-import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolMemberAware;
-import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
-import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancerPool;
-import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancerPoolMember;
-import org.opendaylight.controller.northbound.commons.RestMessages;
-import org.opendaylight.controller.northbound.commons.exception.BadRequestException;
-import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
-import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
-import org.opendaylight.controller.sal.utils.ServiceHelper;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -34,10 +26,13 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import org.codehaus.enunciate.jaxrs.ResponseCode;
+import org.codehaus.enunciate.jaxrs.StatusCodes;
+import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolMemberAware;
+import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
+import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancerPool;
+import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancerPoolMember;
 
 @Path("/pools/{loadBalancerPoolUUID}/members")
 public class NeutronLoadBalancerPoolMembersNorthbound {
@@ -203,7 +198,7 @@ public Response createLoadBalancerPoolMember(
                 throw new BadRequestException("LoadBalancerPoolMember UUID already exists");
         }
 
-        Object[] instances = ServiceHelper.getGlobalInstances(INeutronLoadBalancerPoolMemberAware.class, this, null);
+        Object[] instances = NeutronUtil.getInstances(INeutronLoadBalancerPoolMemberAware.class, this);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronLoadBalancerPoolMemberAware service = (INeutronLoadBalancerPoolMemberAware) instance;
@@ -229,7 +224,7 @@ public Response createLoadBalancerPoolMember(
         List<NeutronLoadBalancerPoolMember> bulk = input.getBulk();
         Iterator<NeutronLoadBalancerPoolMember> i = bulk.iterator();
         HashMap<String, NeutronLoadBalancerPoolMember> testMap = new HashMap<String, NeutronLoadBalancerPoolMember>();
-        Object[] instances = ServiceHelper.getGlobalInstances(INeutronLoadBalancerPoolMemberAware.class, this, null);
+        Object[] instances = NeutronUtil.getInstances(INeutronLoadBalancerPoolMemberAware.class, this);
         while (i.hasNext()) {
             NeutronLoadBalancerPoolMember test = i.next();
             String loadBalancerPoolMemberUUID = test.getPoolMemberID();
@@ -337,7 +332,7 @@ public Response deleteLoadBalancerPoolMember(
     if (singleton == null)
         throw new BadRequestException("LoadBalancerPoolMember UUID does not exist.");
 
-    Object[] instances = ServiceHelper.getGlobalInstances(INeutronLoadBalancerPoolMemberAware.class, this, null);
+    Object[] instances = NeutronUtil.getInstances(INeutronLoadBalancerPoolMemberAware.class, this);
     if (instances != null) {
         for (Object instance : instances) {
             INeutronLoadBalancerPoolMemberAware service = (INeutronLoadBalancerPoolMemberAware) instance;

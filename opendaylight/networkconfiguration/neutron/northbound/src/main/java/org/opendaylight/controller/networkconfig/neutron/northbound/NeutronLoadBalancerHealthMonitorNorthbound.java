@@ -9,20 +9,10 @@
 package org.opendaylight.controller.networkconfig.neutron.northbound;
 
 
-import org.codehaus.enunciate.jaxrs.ResponseCode;
-import org.codehaus.enunciate.jaxrs.StatusCodes;
-import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerHealthMonitorAware;
-import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerHealthMonitorCRUD;
-import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
-import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancer;
-import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancerHealthMonitor;
-import org.opendaylight.controller.northbound.commons.RestMessages;
-import org.opendaylight.controller.northbound.commons.exception.BadRequestException;
-import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
-import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
-import org.opendaylight.controller.sal.utils.ServiceHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -35,10 +25,16 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+
+import org.codehaus.enunciate.jaxrs.ResponseCode;
+import org.codehaus.enunciate.jaxrs.StatusCodes;
+import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerHealthMonitorAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerHealthMonitorCRUD;
+import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
+import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancer;
+import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancerHealthMonitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Neutron Northbound REST APIs for Load Balancer HealthMonitor.<br>
@@ -212,7 +208,7 @@ public class NeutronLoadBalancerHealthMonitorNorthbound {
             }
             loadBalancerHealthMonitorInterface.addNeutronLoadBalancerHealthMonitor(singleton);
 
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronLoadBalancerHealthMonitorAware.class, this, null);
+            Object[] instances = NeutronUtil.getInstances(INeutronLoadBalancerHealthMonitorAware.class, this);
             if (instances != null) {
                 for (Object instance : instances) {
                     INeutronLoadBalancerHealthMonitorAware service = (INeutronLoadBalancerHealthMonitorAware) instance;
@@ -233,7 +229,7 @@ public class NeutronLoadBalancerHealthMonitorNorthbound {
             List<NeutronLoadBalancerHealthMonitor> bulk = input.getBulk();
             Iterator<NeutronLoadBalancerHealthMonitor> i = bulk.iterator();
             HashMap<String, NeutronLoadBalancerHealthMonitor> testMap = new HashMap<String, NeutronLoadBalancerHealthMonitor>();
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronLoadBalancerHealthMonitorAware.class, this, null);
+            Object[] instances = NeutronUtil.getInstances(INeutronLoadBalancerHealthMonitorAware.class, this);
             while (i.hasNext()) {
                 NeutronLoadBalancerHealthMonitor test = i.next();
 
@@ -330,7 +326,7 @@ public class NeutronLoadBalancerHealthMonitorNorthbound {
             throw new BadRequestException("Attribute edit blocked by Neutron");
         }
 
-        Object[] instances = ServiceHelper.getGlobalInstances(INeutronLoadBalancerHealthMonitorAware.class, this, null);
+        Object[] instances = NeutronUtil.getInstances(INeutronLoadBalancerHealthMonitorAware.class, this);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronLoadBalancerHealthMonitorAware service = (INeutronLoadBalancerHealthMonitorAware) instance;
@@ -388,7 +384,7 @@ public class NeutronLoadBalancerHealthMonitorNorthbound {
             return Response.status(409).build();
         }
         NeutronLoadBalancerHealthMonitor singleton = loadBalancerHealthMonitorInterface.getNeutronLoadBalancerHealthMonitor(loadBalancerHealthMonitorID);
-        Object[] instances = ServiceHelper.getGlobalInstances(INeutronLoadBalancerHealthMonitorAware.class, this, null);
+        Object[] instances = NeutronUtil.getInstances(INeutronLoadBalancerHealthMonitorAware.class, this);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronLoadBalancerHealthMonitorAware service = (INeutronLoadBalancerHealthMonitorAware) instance;
