@@ -1,23 +1,18 @@
 package org.opendaylight.controller.config.api;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import com.google.common.collect.Lists;
 import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import com.google.common.collect.Lists;
 import org.hamcrest.CoreMatchers;
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-
-import javax.management.Query;
-
-import static org.junit.Assert.*;
 
 public class JmxAttributeValidationExceptionTest {
 
-    private JmxAttribute jmxAttribute = new JmxAttribute("attr1");
+    private final JmxAttribute jmxAttribute = new JmxAttribute("attr1");
 
     @Test
     public void testJmxAttributeValidationExceptionElement() throws Exception {
@@ -28,7 +23,7 @@ public class JmxAttributeValidationExceptionTest {
 
     @Test
     public void testJmxAttributeValidationExceptionList() throws Exception {
-        List attributeNames = new ArrayList<JmxAttribute>();
+        List<JmxAttribute> attributeNames = new ArrayList<>();
         attributeNames.add(new JmxAttribute("att1"));
         attributeNames.add(new JmxAttribute("att2"));
         attributeNames.add(new JmxAttribute("att3"));
@@ -38,7 +33,7 @@ public class JmxAttributeValidationExceptionTest {
 
     @Test
     public void testJmxAttributeValidationExceptionList2() throws Exception {
-        List attributeNames = new ArrayList<JmxAttribute>();
+        List<JmxAttribute> attributeNames = new ArrayList<>();
         attributeNames.add(new JmxAttribute("att1"));
         attributeNames.add(new JmxAttribute("att2"));
         attributeNames.add(new JmxAttribute("att3"));
@@ -84,7 +79,7 @@ public class JmxAttributeValidationExceptionTest {
         JmxAttributeValidationException.checkCondition(false, "message", jmxAttribute);
     }
 
-    private void assertJmxEx(JmxAttributeValidationException e, String message, JmxAttribute... attrNames) {
+    private void assertJmxEx(final JmxAttributeValidationException e, final String message, final JmxAttribute... attrNames) {
         assertEquals(message, e.getMessage());
         assertEquals(Lists.newArrayList(attrNames), e.getAttributeNames());
     }
