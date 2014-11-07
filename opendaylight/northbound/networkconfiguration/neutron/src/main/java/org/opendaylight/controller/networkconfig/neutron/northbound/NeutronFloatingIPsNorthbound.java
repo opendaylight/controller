@@ -11,6 +11,7 @@ package org.opendaylight.controller.networkconfig.neutron.northbound;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -36,12 +37,6 @@ import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
 import org.opendaylight.controller.networkconfig.neutron.NeutronSubnet;
 import org.opendaylight.controller.networkconfig.neutron.Neutron_IPs;
-import org.opendaylight.controller.northbound.commons.RestMessages;
-import org.opendaylight.controller.northbound.commons.exception.BadRequestException;
-import org.opendaylight.controller.northbound.commons.exception.ResourceConflictException;
-import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
-import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
-import org.opendaylight.controller.sal.utils.ServiceHelper;
 
 /**
  * Neutron Northbound REST APIs.<br>
@@ -245,7 +240,7 @@ public class NeutronFloatingIPsNorthbound {
                     throw new ResourceConflictException("fixed IP is in use.");
                 singleton.setFixedIPAddress(fixedIP);
             }
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronFloatingIPAware.class, this, null);
+            Object[] instances = NeutronUtil.getInstances(INeutronFloatingIPAware.class, this);
             if (instances != null) {
                 for (Object instance : instances) {
                     INeutronFloatingIPAware service = (INeutronFloatingIPAware) instance;
@@ -366,7 +361,7 @@ public class NeutronFloatingIPsNorthbound {
             singleton.setFixedIPAddress(fixedIP);
         }
         NeutronFloatingIP target = floatingIPInterface.getFloatingIP(floatingipUUID);
-        Object[] instances = ServiceHelper.getGlobalInstances(INeutronFloatingIPAware.class, this, null);
+        Object[] instances = NeutronUtil.getInstances(INeutronFloatingIPAware.class, this);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronFloatingIPAware service = (INeutronFloatingIPAware) instance;
@@ -409,7 +404,7 @@ public class NeutronFloatingIPsNorthbound {
             throw new ResourceNotFoundException("Floating IP UUID doesn't exist.");
         // TODO: need to undo port association if it exists
         NeutronFloatingIP singleton = floatingIPInterface.getFloatingIP(floatingipUUID);
-        Object[] instances = ServiceHelper.getGlobalInstances(INeutronFloatingIPAware.class, this, null);
+        Object[] instances = NeutronUtil.getInstances(INeutronFloatingIPAware.class, this);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronFloatingIPAware service = (INeutronFloatingIPAware) instance;
