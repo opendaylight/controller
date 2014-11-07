@@ -26,8 +26,8 @@ public class SimpleCompositeAttributeWritingStrategy extends SimpleAttributeWrit
 
     protected Object preprocess(Object value) {
         Util.checkType(value, Map.class);
-        Preconditions.checkArgument(((Map)value).size() == 1, "Unexpected number of values in %s, expected 1", value);
-        return ((Map)value).values().iterator().next();
+        Preconditions.checkArgument(((Map<?, ?>)value).size() == 1, "Unexpected number of values in %s, expected 1", value);
+        return ((Map<?, ?>)value).values().iterator().next();
     }
 
 }
