@@ -176,7 +176,7 @@ public class RaftActorTest extends AbstractActorTest {
                 Object data = toObject(snapshot);
                 System.out.println("!!!!!applyRecoverySnapshot: "+data);
                 if (data instanceof List) {
-                    state.addAll((List) data);
+                    state.addAll((List<?>) data);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
