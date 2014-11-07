@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_bf44d774",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/consensus/ConsensusStrategy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-07T06:32:10Z",
+      "side": 1,
+      "message": "Perhaps this can be shouldBecomeLeaderOnElectionTimeout to better distinguish from the other method?\n\nOr maybe this could be combined with shouldRequestVote, e.g.:\n\nenum  CandidateAction {\n    SHOULD_BECOME_LEADER,\n    SHOULD_REQUEST_VOTE,\n    DO_NOTHING\n}\n\nCandidateAction onElectionTimeout(Candidate candidate);",
+      "revId": "7a5131dfd215738f81986e1db21fad5bcbc2b478",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_ff31ff0b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/consensus/ConsensusStrategy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-07T06:32:10Z",
+      "side": 1,
+      "message": "shouldBecomeLeaderOnVote?",
+      "revId": "7a5131dfd215738f81986e1db21fad5bcbc2b478",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_df499b8c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/consensus/ConsensusStrategy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-07T06:32:10Z",
+      "side": 1,
+      "message": "What does votedFor represent?",
+      "revId": "7a5131dfd215738f81986e1db21fad5bcbc2b478",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_1f370301",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/consensus/ConsensusStrategy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-07T06:32:10Z",
+      "side": 1,
+      "message": "How about:\n\n  shouldGrantVote(Participant voter, Candidate forCandidate, String  votedFor)",
+      "revId": "7a5131dfd215738f81986e1db21fad5bcbc2b478",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_9f5b1354",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/consensus/Follower.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-07T06:32:10Z",
+      "side": 1,
+      "message": "Should this extend extends Participant?",
+      "revId": "7a5131dfd215738f81986e1db21fad5bcbc2b478",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_7f5e4f47",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/consensus/Leader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-07T06:32:10Z",
+      "side": 1,
+      "message": "Should this extend extends Participant?",
+      "revId": "7a5131dfd215738f81986e1db21fad5bcbc2b478",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
