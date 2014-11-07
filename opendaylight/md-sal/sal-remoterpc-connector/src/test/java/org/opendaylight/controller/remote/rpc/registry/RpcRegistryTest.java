@@ -204,7 +204,7 @@ public class RpcRegistryTest {
     final JavaTestKit probe = new JavaTestKit(node);
 
     ConditionalProbe conditionalProbe =
-        new ConditionalProbe(probe.getRef(), new Predicate() {
+        new ConditionalProbe(probe.getRef(), new Predicate<Object>() {
           @Override
           public boolean apply(@Nullable Object input) {
               if (input != null)
