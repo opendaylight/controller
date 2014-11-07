@@ -9,18 +9,23 @@
 package org.opendaylight.controller.netconf.impl.osgi;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Dictionary;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
-import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Filter;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class NetconfImplActivatorTest {
 

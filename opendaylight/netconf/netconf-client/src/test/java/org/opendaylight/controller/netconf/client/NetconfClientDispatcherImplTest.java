@@ -21,7 +21,6 @@ import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
 import org.opendaylight.controller.netconf.client.NetconfClientSessionListener;
 import org.opendaylight.controller.netconf.client.SimpleNetconfClientSessionListener;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
-import org.opendaylight.controller.netconf.client.conf.NetconfClientConfigurationBuilder;
 import org.opendaylight.controller.netconf.client.conf.NetconfReconnectingClientConfiguration;
 import org.opendaylight.controller.netconf.client.conf.NetconfReconnectingClientConfigurationBuilder;
 import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.AuthenticationHandler;
@@ -32,7 +31,6 @@ import org.opendaylight.protocol.framework.ReconnectStrategyFactory;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Future;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;

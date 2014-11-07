@@ -13,7 +13,6 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelPipeline;
 import io.netty.util.concurrent.Promise;
 import org.junit.Test;
-import org.opendaylight.controller.netconf.nettyutil.AbstractChannelInitializer;
 import org.opendaylight.protocol.framework.SessionListenerFactory;
 import org.opendaylight.protocol.framework.SessionNegotiator;
 
