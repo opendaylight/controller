@@ -18,7 +18,7 @@ public class JDBCCommand implements Serializable {
     public static final int TYPE_METADATA_REPLY = 7;
 
     private JDBCResultSet rs = null;
-    private Map record = null;
+    private Map<String, Object> record = null;
     private int rsID = -1;
     private Exception err = null;
     private XSQLBluePrint bluePrint = null;
@@ -49,7 +49,7 @@ public class JDBCCommand implements Serializable {
         this.rsID = rs.getID();
     }
 
-    public JDBCCommand(Map _record, int _rsID) {
+    public JDBCCommand(Map<String, Object> _record, int _rsID) {
         this.record = _record;
         this.rsID = _rsID;
         this.type = TYPE_QUERY_RECORD;
@@ -68,7 +68,7 @@ public class JDBCCommand implements Serializable {
         return this.rs;
     }
 
-    public Map getRecord() {
+    public Map<String, Object> getRecord() {
         return this.record;
     }
 
