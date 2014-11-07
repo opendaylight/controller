@@ -16,6 +16,24 @@
       "revId": "67201f3e9f287f5fe6ac07cee6560f3e08042994",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_4255b2c4",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/AbstractReadWriteTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-11-07T10:16:53Z",
+      "side": 0,
+      "message": "Not doing merges for each node, will lead to behaviour described in bug report - you have done write with createParents \u003d true\nand it will fail because parent does not exists.\n\nThis is only way to ensure parent exists, even if concurrently running transaction deleted it before you commited your transaction.\n\nAs mentioned sevaral times when we introduced createParents - it is much costly then write - but this is penalty for users, who do not do proper state tracking and do not care if tree exists, well behaving users will not use createParents\u003dtrue for every their write.",
+      "parentUuid": "ba8cc1f7_dc5d29eb",
+      "revId": "67201f3e9f287f5fe6ac07cee6560f3e08042994",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
