@@ -7,16 +7,6 @@
  */
 package org.opendaylight.controller.config.yang.logback.config;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.slf4j.LoggerFactory;
-
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
@@ -26,10 +16,17 @@ import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.rolling.FixedWindowRollingPolicy;
 import ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy;
 import ch.qos.logback.core.rolling.TimeBasedRollingPolicy;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of {@link ContextSetter}. Resets running logback
@@ -40,12 +37,13 @@ public class ContextSetterImpl implements ContextSetter, Closeable {
     private final LogbackStatusListener statusListener;
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ContextSetterImpl.class);
 
-    public ContextSetterImpl(LogbackRuntimeRegistrator rootRuntimeBeanRegistratorWrapper) {
+    public ContextSetterImpl(final LogbackRuntimeRegistrator rootRuntimeBeanRegistratorWrapper) {
         statusListener = new LogbackStatusListener(rootRuntimeBeanRegistratorWrapper);
         statusListener.register();
     }
 
-    public void updateContext(LogbackModule module) {
+    @Override
+    public void updateContext(final LogbackModule module) {
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 
         List<ch.qos.logback.classic.Logger> loggersBefore = context.getLoggerList();
@@ -53,12 +51,12 @@ public class ContextSetterImpl implements ContextSetter, Closeable {
         createLoggers(context, module, Sets.newHashSet(loggersBefore));
     }
 
-    private Map<String, Appender<ILoggingEvent>> createConsoleAppenders(LoggerContext context, LogbackModule module) {
+    private Map<String, Appender<ILoggingEvent>> createConsoleAppenders(final LoggerContext context, final LogbackModule module) {
         Map<String, Appender<ILoggingEvent>> appendersMap = new HashMap<>();
         for (ConsoleAppenderTO appender : module.getConsoleAppenderTO()) {
             Preconditions.checkState(appendersMap.containsKey(appender.getName()) == false,
                     "Duplicate appender name %s", appender.getName());
-            ch.qos.logback.core.ConsoleAppender app = new ch.qos.logback.core.ConsoleAppender();
+            ch.qos.logback.core.ConsoleAppender<ILoggingEvent> app = new ch.qos.logback.core.ConsoleAppender<>();
             app.setContext(context);
             PatternLayoutEncoder encoder = new PatternLayoutEncoder();
             encoder.setContext(context);
@@ -77,8 +75,8 @@ public class ContextSetterImpl implements ContextSetter, Closeable {
         return appendersMap;
     }
 
-    private void createLoggers(LoggerContext context, LogbackModule module,
-            Set<ch.qos.logback.classic.Logger> loggersBefore) {
+    private void createLoggers(final LoggerContext context, final LogbackModule module,
+            final Set<ch.qos.logback.classic.Logger> loggersBefore) {
 
         Map<String, Appender<ILoggingEvent>> appendersMap = getAppenders(module, context);
 
@@ -97,8 +95,8 @@ public class ContextSetterImpl implements ContextSetter, Closeable {
         }
     }
 
-    private void addNewAppenders(Map<String, Appender<ILoggingEvent>> appendersMap, LoggerTO logger,
-            ch.qos.logback.classic.Logger logbackLogger, Optional<Set<Appender<ILoggingEvent>>> appendersBefore) {
+    private void addNewAppenders(final Map<String, Appender<ILoggingEvent>> appendersMap, final LoggerTO logger,
+            final ch.qos.logback.classic.Logger logbackLogger, final Optional<Set<Appender<ILoggingEvent>>> appendersBefore) {
         if (logger.getAppenders() != null) {
             for (String appenderName : logger.getAppenders()) {
                 if (appendersMap.containsKey(appenderName)) {
@@ -112,8 +110,8 @@ public class ContextSetterImpl implements ContextSetter, Closeable {
         }
     }
 
-    private void removeBeforeAppenders(Set<ch.qos.logback.classic.Logger> loggersBefore, LoggerTO logger,
-            ch.qos.logback.classic.Logger logbackLogger, Optional<Set<Appender<ILoggingEvent>>> appendersBefore) {
+    private void removeBeforeAppenders(final Set<ch.qos.logback.classic.Logger> loggersBefore, final LoggerTO logger,
+            final ch.qos.logback.classic.Logger logbackLogger, final Optional<Set<Appender<ILoggingEvent>>> appendersBefore) {
         if (appendersBefore.isPresent()) {
             for (Appender<ILoggingEvent> appenderBefore : appendersBefore.get()) {
                 logbackLogger.detachAppender(appenderBefore);
@@ -125,8 +123,8 @@ public class ContextSetterImpl implements ContextSetter, Closeable {
         }
     }
 
-    private Optional<Set<Appender<ILoggingEvent>>> getAppendersBefore(Set<ch.qos.logback.classic.Logger> loggersBefore,
-            ch.qos.logback.classic.Logger logbackLogger) {
+    private Optional<Set<Appender<ILoggingEvent>>> getAppendersBefore(final Set<ch.qos.logback.classic.Logger> loggersBefore,
+            final ch.qos.logback.classic.Logger logbackLogger) {
         if (loggersBefore.contains(logbackLogger)) {
             Iterator<Appender<ILoggingEvent>> appenderIt = logbackLogger.iteratorForAppenders();
             Set<Appender<ILoggingEvent>> appendersBefore = Sets.newHashSet();
@@ -140,7 +138,7 @@ public class ContextSetterImpl implements ContextSetter, Closeable {
 
     }
 
-    private Map<String, Appender<ILoggingEvent>> getAppenders(LogbackModule module, LoggerContext context) {
+    private Map<String, Appender<ILoggingEvent>> getAppenders(final LogbackModule module, final LoggerContext context) {
         Map<String, Appender<ILoggingEvent>> appendersMap = new HashMap<>();
         addAllAppenders(appendersMap, createRollingAppenders(context, module));
         addAllAppenders(appendersMap, createFileAppenders(context, module));
@@ -149,8 +147,8 @@ public class ContextSetterImpl implements ContextSetter, Closeable {
         return appendersMap;
     }
 
-    private void addAllAppenders(Map<String, Appender<ILoggingEvent>> allAppenders,
-            Map<String, Appender<ILoggingEvent>> appendersToAdd) {
+    private void addAllAppenders(final Map<String, Appender<ILoggingEvent>> allAppenders,
+            final Map<String, Appender<ILoggingEvent>> appendersToAdd) {
         for (String appenderName : appendersToAdd.keySet()) {
             Preconditions.checkState(allAppenders.containsKey(appenderName) == false, "Duplicate appender name %s",
                     appenderName);
@@ -158,12 +156,12 @@ public class ContextSetterImpl implements ContextSetter, Closeable {
         }
     }
 
-    private Map<String, Appender<ILoggingEvent>> createFileAppenders(LoggerContext context, LogbackModule module) {
+    private Map<String, Appender<ILoggingEvent>> createFileAppenders(final LoggerContext context, final LogbackModule module) {
         Map<String, Appender<ILoggingEvent>> appendersMap = new HashMap<>();
         for (FileAppenderTO appender : module.getFileAppenderTO()) {
             Preconditions.checkState(appendersMap.containsKey(appender.getName()) == false,
                     "Duplicate appender name %s", appender.getName());
-            ch.qos.logback.core.FileAppender app = new ch.qos.logback.core.FileAppender<>();
+            ch.qos.logback.core.FileAppender<ILoggingEvent> app = new ch.qos.logback.core.FileAppender<>();
             app.setAppend(appender.getAppend());
             app.setContext(context);
             PatternLayoutEncoder encoder = new PatternLayoutEncoder();
@@ -180,12 +178,12 @@ public class ContextSetterImpl implements ContextSetter, Closeable {
         return appendersMap;
     }
 
-    private Map<String, Appender<ILoggingEvent>> createRollingAppenders(LoggerContext context, LogbackModule module) {
+    private Map<String, Appender<ILoggingEvent>> createRollingAppenders(final LoggerContext context, final LogbackModule module) {
         Map<String, Appender<ILoggingEvent>> appendersMap = new HashMap<>();
         for (RollingFileAppenderTO appender : module.getRollingFileAppenderTO()) {
             Preconditions.checkState(appendersMap.containsKey(appender.getName()) == false,
                     "Duplicate appender name %s", appender.getName());
-            ch.qos.logback.core.rolling.RollingFileAppender app = new ch.qos.logback.core.rolling.RollingFileAppender<>();
+            ch.qos.logback.core.rolling.RollingFileAppender<ILoggingEvent> app = new ch.qos.logback.core.rolling.RollingFileAppender<>();
             app.setAppend(appender.getAppend());
             app.setContext(context);
             PatternLayoutEncoder encoder = new PatternLayoutEncoder();
@@ -204,7 +202,7 @@ public class ContextSetterImpl implements ContextSetter, Closeable {
                 policy.start();
                 app.setRollingPolicy(policy);
             } else if (appender.getRollingPolicyType().equals("TimeBasedRollingPolicy")) {
-                TimeBasedRollingPolicy policy = new TimeBasedRollingPolicy();
+                TimeBasedRollingPolicy<ILoggingEvent> policy = new TimeBasedRollingPolicy<>();
                 policy.setContext(context);
                 policy.setMaxHistory(appender.getMaxHistory());
                 if (appender.getCleanHistoryOnStart() != null) {
@@ -215,7 +213,7 @@ public class ContextSetterImpl implements ContextSetter, Closeable {
                 policy.start();
                 app.setRollingPolicy(policy);
             }
-            SizeBasedTriggeringPolicy triggeringPolicy = new SizeBasedTriggeringPolicy();
+            SizeBasedTriggeringPolicy<ILoggingEvent> triggeringPolicy = new SizeBasedTriggeringPolicy<>();
             triggeringPolicy.setContext(context);
             triggeringPolicy.setMaxFileSize(appender.getMaxFileSize());
             triggeringPolicy.start();
