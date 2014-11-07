@@ -28,7 +28,7 @@ public class ValueSerializer {
             builder.setInstanceIdentifierValue(
                 InstanceIdentifierUtils.toSerializable((YangInstanceIdentifier) value, context));
         } else if(value instanceof Set) {
-            Set set = (Set) value;
+            Set<?> set = (Set<?>) value;
             if (!set.isEmpty()) {
                 for (Object o : set) {
                     if (o instanceof String) {

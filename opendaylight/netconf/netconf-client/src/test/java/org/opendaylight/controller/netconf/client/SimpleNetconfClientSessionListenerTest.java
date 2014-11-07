@@ -25,7 +25,7 @@ public class SimpleNetconfClientSessionListenerTest {
 
     private Channel channel;
     private ChannelFuture channelFuture;
-    Set caps;
+    Set<String> caps;
     private NetconfHelloMessage helloMessage;
     private NetconfMessage message;
     private NetconfClientSessionListener sessionListener;
