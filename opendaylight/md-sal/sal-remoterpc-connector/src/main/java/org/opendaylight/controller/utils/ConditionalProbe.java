@@ -15,10 +15,10 @@ import org.slf4j.LoggerFactory;
 
 public class ConditionalProbe {
     private final ActorRef actorRef;
-    private final Predicate predicate;
+    private final Predicate<Object> predicate;
     Logger log = LoggerFactory.getLogger(ConditionalProbe.class);
 
-    public ConditionalProbe(ActorRef actorRef, Predicate predicate) {
+    public ConditionalProbe(ActorRef actorRef, Predicate<Object> predicate) {
         this.actorRef = actorRef;
         this.predicate = predicate;
     }
