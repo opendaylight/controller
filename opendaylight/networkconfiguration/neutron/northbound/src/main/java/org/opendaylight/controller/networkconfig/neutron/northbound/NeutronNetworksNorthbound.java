@@ -25,23 +25,16 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
 import org.codehaus.enunciate.jaxrs.TypeHint;
-
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
-import org.opendaylight.controller.northbound.commons.RestMessages;
-import org.opendaylight.controller.northbound.commons.exception.BadRequestException;
-import org.opendaylight.controller.northbound.commons.exception.ResourceConflictException;
-import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
-import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
-import org.opendaylight.controller.sal.utils.ServiceHelper;
 
 /**
  * Neutron Northbound REST APIs for Network.<br>
@@ -209,7 +202,7 @@ public class NeutronNetworksNorthbound {
                 throw new BadRequestException("network UUID already exists");
             }
 
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronNetworkAware.class, this, null);
+            Object[] instances = NeutronUtil.getInstances(INeutronNetworkAware.class, this);
             if (instances != null) {
                 for (Object instance : instances) {
                     INeutronNetworkAware service = (INeutronNetworkAware) instance;
@@ -234,7 +227,7 @@ public class NeutronNetworksNorthbound {
             List<NeutronNetwork> bulk = input.getBulk();
             Iterator<NeutronNetwork> i = bulk.iterator();
             HashMap<String, NeutronNetwork> testMap = new HashMap<String, NeutronNetwork>();
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronNetworkAware.class, this, null);
+            Object[] instances = NeutronUtil.getInstances(INeutronNetworkAware.class, this);
             while (i.hasNext()) {
                 NeutronNetwork test = i.next();
 
@@ -317,7 +310,7 @@ public class NeutronNetworksNorthbound {
             throw new BadRequestException("attribute edit blocked by Neutron");
         }
 
-        Object[] instances = ServiceHelper.getGlobalInstances(INeutronNetworkAware.class, this, null);
+        Object[] instances = NeutronUtil.getInstances(INeutronNetworkAware.class, this);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronNetworkAware service = (INeutronNetworkAware) instance;
@@ -371,7 +364,7 @@ public class NeutronNetworksNorthbound {
         }
 
         NeutronNetwork singleton = networkInterface.getNetwork(netUUID);
-        Object[] instances = ServiceHelper.getGlobalInstances(INeutronNetworkAware.class, this, null);
+        Object[] instances = NeutronUtil.getInstances(INeutronNetworkAware.class, this);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronNetworkAware service = (INeutronNetworkAware) instance;

@@ -11,18 +11,10 @@
 package org.opendaylight.controller.networkconfig.neutron.northbound;
 
 
-import org.codehaus.enunciate.jaxrs.ResponseCode;
-import org.codehaus.enunciate.jaxrs.StatusCodes;
-import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolAware;
-import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolCRUD;
-import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
-import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancerPool;
-import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancerPoolMember;
-import org.opendaylight.controller.northbound.commons.RestMessages;
-import org.opendaylight.controller.northbound.commons.exception.BadRequestException;
-import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
-import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
-import org.opendaylight.controller.sal.utils.ServiceHelper;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -36,10 +28,13 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import org.codehaus.enunciate.jaxrs.ResponseCode;
+import org.codehaus.enunciate.jaxrs.StatusCodes;
+import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolCRUD;
+import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
+import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancerPool;
+import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancerPoolMember;
 
 /**
  * Neutron Northbound REST APIs for LoadBalancerPool Policies.<br>
@@ -202,7 +197,7 @@ public class NeutronLoadBalancerPoolNorthbound {
             }
             loadBalancerPoolInterface.addNeutronLoadBalancerPool(singleton);
 
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronLoadBalancerPoolAware.class, this, null);
+            Object[] instances = NeutronUtil.getInstances(INeutronLoadBalancerPoolAware.class, this);
             if (instances != null) {
                 for (Object instance : instances) {
                     INeutronLoadBalancerPoolAware service = (INeutronLoadBalancerPoolAware) instance;
@@ -223,7 +218,7 @@ public class NeutronLoadBalancerPoolNorthbound {
             List<NeutronLoadBalancerPool> bulk = input.getBulk();
             Iterator<NeutronLoadBalancerPool> i = bulk.iterator();
             HashMap<String, NeutronLoadBalancerPool> testMap = new HashMap<String, NeutronLoadBalancerPool>();
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronLoadBalancerPoolAware.class, this, null);
+            Object[] instances = NeutronUtil.getInstances(INeutronLoadBalancerPoolAware.class, this);
             while (i.hasNext()) {
                 NeutronLoadBalancerPool test = i.next();
 
@@ -315,7 +310,7 @@ public class NeutronLoadBalancerPoolNorthbound {
             throw new BadRequestException("Attribute edit blocked by Neutron");
         }
 
-        Object[] instances = ServiceHelper.getGlobalInstances(INeutronLoadBalancerPoolAware.class, this, null);
+        Object[] instances = NeutronUtil.getInstances(INeutronLoadBalancerPoolAware.class, this);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronLoadBalancerPoolAware service = (INeutronLoadBalancerPoolAware) instance;
@@ -370,7 +365,7 @@ public class NeutronLoadBalancerPoolNorthbound {
             return Response.status(409).build();
         }
         NeutronLoadBalancerPool singleton = loadBalancerPoolInterface.getNeutronLoadBalancerPool(loadBalancerPoolUUID);
-        Object[] instances = ServiceHelper.getGlobalInstances(INeutronLoadBalancerPoolAware.class, this, null);
+        Object[] instances = NeutronUtil.getInstances(INeutronLoadBalancerPoolAware.class, this);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronLoadBalancerPoolAware service = (INeutronLoadBalancerPoolAware) instance;

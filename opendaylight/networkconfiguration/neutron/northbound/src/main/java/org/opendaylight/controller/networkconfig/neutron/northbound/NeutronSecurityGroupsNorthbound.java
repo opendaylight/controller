@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -32,11 +33,6 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityGroupAw
 import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityGroupCRUD;
 import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
 import org.opendaylight.controller.networkconfig.neutron.NeutronSecurityGroup;
-import org.opendaylight.controller.northbound.commons.RestMessages;
-import org.opendaylight.controller.northbound.commons.exception.BadRequestException;
-import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
-import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
-import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -180,7 +176,7 @@ public class NeutronSecurityGroupsNorthbound {
                 throw new BadRequestException("Security Group UUID already exists");
             }
 
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronSecurityGroupAware.class, this, null);
+            Object[] instances = NeutronUtil.getInstances(INeutronSecurityGroupAware.class, this);
             if (instances != null) {
                 for (Object instance : instances) {
                     INeutronSecurityGroupAware service = (INeutronSecurityGroupAware) instance;
@@ -202,7 +198,7 @@ public class NeutronSecurityGroupsNorthbound {
             List<NeutronSecurityGroup> bulk = input.getBulk();
             Iterator<NeutronSecurityGroup> i = bulk.iterator();
             HashMap<String, NeutronSecurityGroup> testMap = new HashMap<String, NeutronSecurityGroup>();
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronSecurityGroupAware.class, this, null);
+            Object[] instances = NeutronUtil.getInstances(INeutronSecurityGroupAware.class, this);
             while (i.hasNext()) {
                 NeutronSecurityGroup test = i.next();
 
@@ -280,7 +276,7 @@ public class NeutronSecurityGroupsNorthbound {
             throw new BadRequestException("Attribute edit blocked by Neutron");
         }
 
-        Object[] instances = ServiceHelper.getGlobalInstances(INeutronSecurityGroupAware.class, this, null);
+        Object[] instances =  NeutronUtil.getInstances(INeutronSecurityGroupAware.class, this);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronSecurityGroupAware service = (INeutronSecurityGroupAware) instance;
@@ -335,7 +331,7 @@ public class NeutronSecurityGroupsNorthbound {
             return Response.status(409).build();
         }
         NeutronSecurityGroup singleton = securityGroupInterface.getNeutronSecurityGroup(securityGroupUUID);
-        Object[] instances = ServiceHelper.getGlobalInstances(INeutronSecurityGroupAware.class, this, null);
+        Object[] instances = NeutronUtil.getInstances(INeutronSecurityGroupAware.class, this);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronSecurityGroupAware service = (INeutronSecurityGroupAware) instance;
