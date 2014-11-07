@@ -46,8 +46,8 @@ public class JDBCResultSet implements Serializable, ResultSet,
     private List<XSQLBluePrintNode> tablesInQuery = new ArrayList<XSQLBluePrintNode>();
     private Map<String, XSQLBluePrintNode> tablesInQueryMap = new ConcurrentHashMap<String, XSQLBluePrintNode>();
     private List<XSQLColumn> fieldsInQuery = new ArrayList<XSQLColumn>();
-    private transient LinkedList<Map> records = new LinkedList<Map>();
-    private transient Map currentRecord = null;
+    private transient LinkedList<Map<String, Object>> records = new LinkedList<>();
+    private transient Map<String, Object> currentRecord = null;
     private boolean finished = false;
     private int id = 0;
     private static Integer nextID = new Integer(0);
@@ -108,7 +108,7 @@ public class JDBCResultSet implements Serializable, ResultSet,
         }
     }
 
-    public int isObjectFitCriteria(Map objValues, String tableName) {
+    public int isObjectFitCriteria(Map<String, Object> objValues, String tableName) {
         Map<XSQLColumn, List<XSQLCriteria>> tblCriteria = criteria
                 .get(tableName);
         if (tblCriteria == null) {
@@ -197,10 +197,10 @@ public class JDBCResultSet implements Serializable, ResultSet,
         return this.records.size();
     }
 
-    public void addRecord(Map r) {
+    public void addRecord(Map<String, Object> r) {
         synchronized (this) {
             if (records == null) {
-                records = new LinkedList<Map>();
+                records = new LinkedList<>();
             }
             records.add(r);
             this.notifyAll();
@@ -208,7 +208,7 @@ public class JDBCResultSet implements Serializable, ResultSet,
     }
 
     public void addRecord(ArrayList<?> hierarchy) {
-        Map rec = new HashMap();
+        Map<String, Object> rec = new HashMap<>();
         for (int i = hierarchy.size() - 1; i >= 0; i--) {
             Object element = hierarchy.get(i);
             for (XSQLColumn c : fieldsInQuery) {
@@ -230,7 +230,7 @@ public class JDBCResultSet implements Serializable, ResultSet,
     public boolean next() {
         this.currentRecord = null;
         if (records == null) {
-            records = new LinkedList<Map>();
+            records = new LinkedList<>();
         }
         while (!finished || records.size() > 0) {
             synchronized (this) {
@@ -260,12 +260,12 @@ public class JDBCResultSet implements Serializable, ResultSet,
         return false;
     }
 
-    public Map getCurrent() {
+    public Map<String, Object> getCurrent() {
         return this.currentRecord;
     }
 
     private void createRecord(Object data, XSQLBluePrintNode node) {
-        Map rec = new HashMap();
+        Map<String, Object> rec = new HashMap<>();
         for (XSQLColumn c : this.fieldsInQuery) {
             if (c.getTableName().equals(node.getBluePrintNodeName())) {
                 try {
@@ -285,20 +285,20 @@ public class JDBCResultSet implements Serializable, ResultSet,
     }
 
     public static class Record {
-        public Map data = new HashMap();
+        public Map<String, Object> data = new HashMap<>();
         public Object element = null;
 
-        public Map getRecord() {
+        public Map<String, Object> getRecord() {
             return this.data;
         }
     }
 
-    private Map collectColumnValues(Object node, XSQLBluePrintNode bpn) {
-        Map subChildren = XSQLODLUtils.getChildren(node);
-        Map result = new HashMap();
+    private Map<String, Object> collectColumnValues(Object node, XSQLBluePrintNode bpn) {
+        Map<?, ?> subChildren = XSQLODLUtils.getChildren(node);
+        Map<String, Object> result = new HashMap<>();
         for (Object stc : subChildren.values()) {
             if (stc.getClass().getName().endsWith("ImmutableAugmentationNode")) {
-                Map values = XSQLODLUtils.getChildren(stc);
+                Map<?, ?> values = XSQLODLUtils.getChildren(stc);
                 for (Object key : values.keySet()) {
                     Object val = values.get(key);
                     if (val.getClass().getName().endsWith("ImmutableLeafNode")) {
@@ -323,7 +323,7 @@ public class JDBCResultSet implements Serializable, ResultSet,
     }
 
     private void addToData(Record rec, XSQLBluePrintNode bpn,
-            XSQLBluePrint bluePrint, Map fullRecord) {
+            XSQLBluePrint bluePrint, Map<String, Object> fullRecord) {
         XSQLBluePrintNode eNodes[] = bluePrint
                 .getBluePrintNodeByODLTableName(XSQLODLUtils
                         .getNodeIdentiofier(rec.element));
@@ -432,7 +432,7 @@ public class JDBCResultSet implements Serializable, ResultSet,
                     .getBluePrintNodeName());
             if (this.criteria.containsKey(bluePrintNode.getBluePrintNodeName())
                     || bpn != null) {
-                Map<?, ?> allKeyValues = collectColumnValues(element, bpn);
+                Map<String, Object> allKeyValues = collectColumnValues(element, bpn);
                 if (!(isObjectFitCriteria(allKeyValues,
                         bpn.getBluePrintNodeName()) == 1)) {
                     return EMPTY_RESULT;
@@ -471,7 +471,7 @@ public class JDBCResultSet implements Serializable, ResultSet,
                     }
                     boolean isObjectInCriteria = true;
                     if (bpn != null) {
-                        Map allKeyValues = collectColumnValues(rec.element, bpn);
+                        Map<String, Object> allKeyValues = collectColumnValues(rec.element, bpn);
                         if ((isObjectFitCriteria(allKeyValues,
                                 bpn.getBluePrintNodeName()) == 1)) {
                             addToData(rec, bpn, bluePrint, allKeyValues);
