@@ -87,7 +87,7 @@ public class XSQLBluePrintRelation implements Serializable {
         }
 
         if (Set.class.isAssignableFrom(o.getClass())) {
-            Set lst = (Set) o;
+            Set<?> lst = (Set<?>) o;
             for (Object oo : lst) {
                 addToResult(result, execute(oo));
             }
@@ -116,7 +116,7 @@ public class XSQLBluePrintRelation implements Serializable {
             return;
         }
         if (Set.class.isAssignableFrom(o.getClass())) {
-            Set lst = (Set) o;
+            Set<?> lst = (Set<?>) o;
             for (Object oo : lst) {
                 result.add(oo);
             }

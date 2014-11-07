@@ -204,7 +204,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
         }
     }
 
-    private void writeObjSet(Set set) throws IOException {
+    private void writeObjSet(Set<?> set) throws IOException {
         if(!set.isEmpty()){
             writer.writeInt(set.size());
             for(Object o : set){
@@ -329,7 +329,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
                 writer.writeShort((Short) value);
                 break;
             case ValueTypes.BITS_TYPE:
-                writeObjSet((Set) value);
+                writeObjSet((Set<?>) value);
                 break;
             case ValueTypes.YANG_IDENTIFIER_TYPE:
                 writeYangInstanceIdentifier((YangInstanceIdentifier) value);
