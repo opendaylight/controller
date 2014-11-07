@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.netconf.impl;
 
-import static junit.framework.Assert.assertNotNull;
+import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 import org.opendaylight.controller.netconf.api.NetconfMessage;

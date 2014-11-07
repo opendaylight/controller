@@ -4,7 +4,6 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.testkit.JavaTestKit;
 import com.google.protobuf.ByteString;
-import junit.framework.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
@@ -87,7 +86,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         RaftActorBehavior raftBehavior =
             follower.handleMessage(followerActor, new ElectionTimeout());
 
-        Assert.assertTrue(raftBehavior instanceof Candidate);
+        assertTrue(raftBehavior instanceof Candidate);
     }
 
     @Test

@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.sal.compatibility.topology.test;
 
-import junit.framework.Assert;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.opendaylight.controller.sal.compatibility.topology.TopologyMapping;
@@ -30,7 +30,7 @@ public class TopologyMappingTest {
         NodeId nodeId = new NodeId("openflow:1");
         String observedNodeId = TopologyMapping.toADNodeId(nodeId);
 
-        Assert.assertEquals("1", observedNodeId);
+        assertEquals("1", observedNodeId);
     }
 
     /**
@@ -43,7 +43,7 @@ public class TopologyMappingTest {
         TpId source = new TpId("foo:2");
         NodeConnector observedNodeConnector = TopologyMapping.toADNodeConnector(source, nodeId);
 
-        Assert.assertEquals("OF|2@OF|00:00:00:00:00:00:00:01", observedNodeConnector.toString());
+        assertEquals("OF|2@OF|00:00:00:00:00:00:00:01", observedNodeConnector.toString());
     }
 
     /**
@@ -54,7 +54,7 @@ public class TopologyMappingTest {
         TpId source = new TpId("foo:2");
         String observedNodeConnectorId = TopologyMapping.toADNodeConnectorId(source);
 
-        Assert.assertEquals("2", observedNodeConnectorId);
+        assertEquals("2", observedNodeConnectorId);
     }
 
     /**
@@ -66,7 +66,7 @@ public class TopologyMappingTest {
         NodeId nodeId = new NodeId("openflow:1");
         Node observedNode = TopologyMapping.toADNode(nodeId);
 
-        Assert.assertEquals("OF|00:00:00:00:00:00:00:01", observedNode.toString());
+        assertEquals("OF|00:00:00:00:00:00:00:01", observedNode.toString());
     }
 
     /**
@@ -79,7 +79,7 @@ public class TopologyMappingTest {
         TpId source = new TpId("192.168.0.1");
         NodeConnector observedNodeConnector = TopologyMapping.toADNodeConnector(source, nodeId);
 
-        Assert.assertEquals("MD_SAL_DEPRECATED|192.168.0.1@MD_SAL_DEPRECATED|some_unknown_node", observedNodeConnector.toString());
+        assertEquals("MD_SAL_DEPRECATED|192.168.0.1@MD_SAL_DEPRECATED|some_unknown_node", observedNodeConnector.toString());
     }
 
 }

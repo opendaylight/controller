@@ -22,8 +22,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import junit.framework.Assert;
-
 import org.junit.Test;
 import org.opendaylight.controller.sal.action.Flood;
 import org.opendaylight.controller.sal.action.FloodAll;
@@ -198,7 +196,7 @@ public class TestToSalConversionsUtils {
     public void testFromNodeConnectorRef() throws ConstructionException {
         Node node = new Node(NodeIDType.OPENFLOW, 42L);
         NodeConnector nodeConnector = ToSalConversionsUtils.fromNodeConnectorRef(new Uri("1"), node);
-        Assert.assertEquals("OF|1@OF|00:00:00:00:00:00:00:2a", nodeConnector.toString());
+        assertEquals("OF|1@OF|00:00:00:00:00:00:00:2a", nodeConnector.toString());
     }
 
     private void checkSalMatch(org.opendaylight.controller.sal.match.Match match, MtchType mt) throws ConstructionException {

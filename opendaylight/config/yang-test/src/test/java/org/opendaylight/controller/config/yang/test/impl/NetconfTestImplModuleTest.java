@@ -9,8 +9,6 @@ package org.opendaylight.controller.config.yang.test.impl;
 
 import com.google.common.collect.Lists;
 
-import junit.framework.Assert;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.IdentityAttributeRef;
@@ -96,7 +94,7 @@ public class NetconfTestImplModuleTest  extends AbstractConfigTest {
         List<ObjectName> testingDeps = proxy.getTestingDeps();
         ObjectName testingDep = proxy.getTestingDep();
 
-        Assert.assertEquals(TESTING_DEP_PREFIX, ObjectNameUtil.getInstanceName(testingDep));
+        assertEquals(TESTING_DEP_PREFIX, ObjectNameUtil.getInstanceName(testingDep));
         assertTestingDeps(testingDeps, 4);
 
         transaction.abortConfig();
@@ -135,11 +133,11 @@ public class NetconfTestImplModuleTest  extends AbstractConfigTest {
     }
 
     private void assertTestingDeps(List<ObjectName> testingDeps, int i) {
-        Assert.assertEquals(i, testingDeps.size());
+        assertEquals(i, testingDeps.size());
 
         int c = 1;
         for (ObjectName testingDep : testingDeps) {
-            Assert.assertEquals(TESTING_DEP_PREFIX + Integer.toString(c++), ObjectNameUtil.getInstanceName(testingDep));
+            assertEquals(TESTING_DEP_PREFIX + Integer.toString(c++), ObjectNameUtil.getInstanceName(testingDep));
         }
     }
 
