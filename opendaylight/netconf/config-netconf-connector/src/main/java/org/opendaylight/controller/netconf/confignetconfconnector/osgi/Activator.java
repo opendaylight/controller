@@ -29,7 +29,7 @@ public class Activator implements BundleActivator {
     private static final Logger logger = LoggerFactory.getLogger(Activator.class);
 
     private BundleContext context;
-    private ServiceRegistration osgiRegistration;
+    private ServiceRegistration<?> osgiRegistration;
     private ConfigRegistryLookupThread configRegistryLookup = null;
 
     @Override
