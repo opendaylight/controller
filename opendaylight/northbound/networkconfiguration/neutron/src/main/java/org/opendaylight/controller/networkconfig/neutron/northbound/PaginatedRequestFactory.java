@@ -23,6 +23,12 @@ import org.opendaylight.controller.northbound.commons.exception.BadRequestExcept
 import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
 
 public class PaginatedRequestFactory {
+    private static final Comparator<INeutronObject> NEUTRON_OBJECT_COMPARATOR = new Comparator<INeutronObject>() {
+        @Override
+        public int compare(INeutronObject o1, INeutronObject o2) {
+            return o1.getID().compareTo(o2.getID());
+        }
+    };
 
     public static class PaginationResults<T extends INeutronObject> {
         List<T> collection;
@@ -68,14 +74,7 @@ public class PaginatedRequestFactory {
         Boolean firstPage = false;
         Boolean lastPage = false;
 
-        Comparator<INeutronObject> neutronObjectComparator = new Comparator<INeutronObject>() {
-            @Override
-            public int compare(INeutronObject o1, INeutronObject o2) {
-                return o1.getID().compareTo(o2.getID());
-            }
-        };
-
-        Collections.sort(collection, neutronObjectComparator);
+        Collections.sort(collection, NEUTRON_OBJECT_COMPARATOR);
 
         if (marker == null) {
             startPos = 0;
@@ -101,7 +100,7 @@ public class PaginatedRequestFactory {
 
             markerObject.setID(marker);
 
-            startPos = Collections.binarySearch(collection, markerObject, neutronObjectComparator);
+            startPos = Collections.binarySearch(collection, markerObject, NEUTRON_OBJECT_COMPARATOR);
 
             if (!pageReverse){
                 startPos = startPos + 1;
