@@ -192,6 +192,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_62a79650",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-11-07T16:34:11Z",
+      "side": 1,
+      "message": "The implementation is not done, but throwing an exception is inherently slower than returning an object. I will come up with a name which is good for both offerNotification variants.",
+      "parentUuid": "ba8cc1f7_239c3769",
+      "revId": "86e5005002e1a24fa17d38d53a459172c1fd3dd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_a814a6f5",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationService.java",
         "patchSetId": 10
