@@ -16,7 +16,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 public class NormalizedNodeGetter implements
     NormalizedNodeVisitor {
     private final String path;
-    NormalizedNode output;
+    NormalizedNode<?, ?> output;
 
     public NormalizedNodeGetter(String path){
         Preconditions.checkNotNull(path);
@@ -24,7 +24,7 @@ public class NormalizedNodeGetter implements
     }
 
     @Override
-    public void visitNode(int level, String parentPath, NormalizedNode normalizedNode) {
+    public void visitNode(int level, String parentPath, NormalizedNode<?, ?> normalizedNode) {
         String nodePath = parentPath + "/"+ PathUtils.toString(normalizedNode.getIdentifier());
 
         if(nodePath.toString().equals(path)){
@@ -32,7 +32,7 @@ public class NormalizedNodeGetter implements
         }
     }
 
-    public NormalizedNode getOutput(){
+    public NormalizedNode<?, ?> getOutput(){
         return output;
     }
 }
