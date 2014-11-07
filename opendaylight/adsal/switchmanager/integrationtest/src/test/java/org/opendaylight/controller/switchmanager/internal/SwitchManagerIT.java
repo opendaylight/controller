@@ -155,7 +155,7 @@ public class SwitchManagerIT {
         assertFalse(debugit);
 
         // Now lets create a hosttracker for testing purpose
-        ServiceReference s = bc.getServiceReference(ISwitchManager.class
+        ServiceReference<?> s = bc.getServiceReference(ISwitchManager.class
                 .getName());
         if (s != null) {
             this.switchManager = (ISwitchManager) bc.getService(s);
