@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_45c4dc3f",
+        "filename": "opendaylight/md-sal/sal-persisted-dom/src/main/java/org/opendaylight/persisted/Criteria.java",
+        "patchSetId": 25
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-11-07T21:16:39Z",
+      "side": 1,
+      "message": "Please use an enum for these. The mapping to operator names can then be realized through an EnumMap\u003cOperation, String\u003e. In the for loop below, you\u0027d iterate over entrySet(), comparing entry.getValue() and returning entry.getKey().",
+      "revId": "cce8b77c55ffddbd5b381dab6a870148c88775ff",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_25e3d8da",
+        "filename": "opendaylight/md-sal/sal-persisted-dom/src/main/java/org/opendaylight/persisted/Criteria.java",
+        "patchSetId": 25
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-11-07T21:16:39Z",
+      "side": 1,
+      "message": "please use guava\u0027s LoadingCache instead.",
+      "revId": "cce8b77c55ffddbd5b381dab6a870148c88775ff",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_65c1e02d",
+        "filename": "opendaylight/md-sal/sal-persisted-dom/src/main/java/org/opendaylight/persisted/Criteria.java",
+        "patchSetId": 25
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-11-07T21:16:39Z",
+      "side": 1,
+      "message": "String indexOf(String) is a lot slower than String.indexOf(char)",
+      "revId": "cce8b77c55ffddbd5b381dab6a870148c88775ff",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_05ded411",
+        "filename": "opendaylight/md-sal/sal-persisted-dom/src/main/java/org/opendaylight/persisted/Criteria.java",
+        "patchSetId": 25
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-11-07T21:16:39Z",
+      "side": 1,
+      "message": "String.equals(\"\") -\u003e String.isEmpty(), the latter is faster",
+      "revId": "cce8b77c55ffddbd5b381dab6a870148c88775ff",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_c5e78ce3",
+        "filename": "opendaylight/md-sal/sal-persisted-dom/src/main/java/org/opendaylight/persisted/Criteria.java",
+        "patchSetId": 25
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-11-07T21:16:39Z",
+      "side": 1,
+      "message": "this looks like it should be an operation in the enum members, e.g.\n\nreturn operation.matches(aSide, bSide);\n\nDoing that should be this a lot faster.",
+      "revId": "cce8b77c55ffddbd5b381dab6a870148c88775ff",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
