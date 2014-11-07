@@ -67,7 +67,7 @@ public class NormalizedNodeNavigator {
     String newParentPath = parentPath + "/" + node.getIdentifier().toString();
 
     final Iterable<? extends NormalizedNode<?, ?>> value = node.getValue();
-    for(NormalizedNode normalizedNode : value){
+    for(NormalizedNode<?, ?> normalizedNode : value){
       if(normalizedNode instanceof MixinNode && normalizedNode instanceof NormalizedNodeContainer){
         navigateNormalizedNodeContainerMixin(level + 1, newParentPath, (NormalizedNodeContainer) normalizedNode);
       } else {

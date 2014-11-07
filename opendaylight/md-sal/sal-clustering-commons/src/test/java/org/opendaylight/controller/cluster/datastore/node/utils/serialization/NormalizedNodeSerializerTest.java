@@ -45,7 +45,7 @@ public class NormalizedNodeSerializerTest {
 
         start = System.nanoTime();
 
-        NormalizedNode actualNode =
+        NormalizedNode<?, ?> actualNode =
             NormalizedNodeSerializer.deSerialize(expected);
 
         System.out.println("DeSerialize Time = " + (System.nanoTime() - start)/1000000);

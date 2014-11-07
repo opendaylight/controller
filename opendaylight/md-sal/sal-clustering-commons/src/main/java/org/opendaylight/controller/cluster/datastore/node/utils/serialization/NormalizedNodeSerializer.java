@@ -81,12 +81,12 @@ public class NormalizedNodeSerializer {
      * @param node
      * @return
      */
-    public static NormalizedNodeMessages.Node serialize(NormalizedNode node){
+    public static NormalizedNodeMessages.Node serialize(NormalizedNode<?, ?> node){
         Preconditions.checkNotNull(node, "node should not be null");
         return new Serializer(node).serialize();
     }
 
-    public static Serializer newSerializer(NormalizedNode node) {
+    public static Serializer newSerializer(NormalizedNode<?, ?> node) {
         Preconditions.checkNotNull(node, "node should not be null");
         return new Serializer(node);
     }
@@ -97,7 +97,7 @@ public class NormalizedNodeSerializer {
      * @param node
      * @return
      */
-    public static NormalizedNode deSerialize(NormalizedNodeMessages.Node node) {
+    public static NormalizedNode<?, ?> deSerialize(NormalizedNodeMessages.Node node) {
         Preconditions.checkNotNull(node, "node should not be null");
         return new DeSerializer(null, node).deSerialize();
     }
@@ -131,11 +131,11 @@ public class NormalizedNodeSerializer {
     public static class Serializer extends QNameSerializationContextImpl
                                    implements NormalizedNodeSerializationContext {
 
-        private final NormalizedNode node;
+        private final NormalizedNode<?, ?> node;
 
         private NormalizedNodeMessages.InstanceIdentifier serializedPath;
 
-        private Serializer(NormalizedNode node) {
+        private Serializer(NormalizedNode<?, ?> node) {
             this.node = node;
         }
 
@@ -154,7 +154,7 @@ public class NormalizedNodeSerializer {
         }
 
         private NormalizedNodeMessages.Node.Builder serialize(
-            NormalizedNode node) {
+            NormalizedNode<?, ?> node) {
             NormalizedNodeMessages.Node.Builder builder =
                 NormalizedNodeMessages.Node.newBuilder();
 
@@ -183,13 +183,13 @@ public class NormalizedNodeSerializer {
 
                 for (Object o : iterable) {
                     if (o instanceof NormalizedNode) {
-                        builder.addChild(serialize((NormalizedNode) o));
+                        builder.addChild(serialize((NormalizedNode<?, ?>) o));
                     }
                 }
 
             } else if (value instanceof NormalizedNode) {
 
-                builder.addChild(serialize((NormalizedNode) value));
+                builder.addChild(serialize((NormalizedNode<?, ?>) value));
 
             } else {
 
@@ -208,7 +208,7 @@ public class NormalizedNodeSerializer {
         static {
             deSerializationFunctions.put(CONTAINER_NODE_TYPE,
                 new DeSerializationFunction() {
-                    @Override public NormalizedNode apply(
+                    @Override public NormalizedNode<?, ?> apply(
                         DeSerializer deSerializer,
                         NormalizedNodeMessages.Node node) {
                         DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode>
@@ -226,7 +226,7 @@ public class NormalizedNodeSerializer {
 
             deSerializationFunctions.put(LEAF_NODE_TYPE,
                 new DeSerializationFunction() {
-                    @Override public NormalizedNode apply(
+                    @Override public NormalizedNode<?, ?> apply(
                         DeSerializer deSerializer,
                         NormalizedNodeMessages.Node node) {
                         NormalizedNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, Object, LeafNode<Object>>
@@ -243,7 +243,7 @@ public class NormalizedNodeSerializer {
 
             deSerializationFunctions.put(MAP_NODE_TYPE,
                 new DeSerializationFunction() {
-                    @Override public NormalizedNode apply(
+                    @Override public NormalizedNode<?, ?> apply(
                         DeSerializer deSerializer,
                         NormalizedNodeMessages.Node node) {
                         CollectionNodeBuilder<MapEntryNode, MapNode>
@@ -255,7 +255,7 @@ public class NormalizedNodeSerializer {
 
             deSerializationFunctions.put(MAP_ENTRY_NODE_TYPE,
                 new DeSerializationFunction() {
-                    @Override public NormalizedNode apply(
+                    @Override public NormalizedNode<?, ?> apply(
                         DeSerializer deSerializer,
                         NormalizedNodeMessages.Node node) {
                         DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode>
@@ -270,7 +270,7 @@ public class NormalizedNodeSerializer {
 
             deSerializationFunctions.put(AUGMENTATION_NODE_TYPE,
                 new DeSerializationFunction() {
-                    @Override public NormalizedNode apply(
+                    @Override public NormalizedNode<?, ?> apply(
                         DeSerializer deSerializer,
                         NormalizedNodeMessages.Node node) {
                         DataContainerNodeBuilder<YangInstanceIdentifier.AugmentationIdentifier, AugmentationNode>
@@ -286,7 +286,7 @@ public class NormalizedNodeSerializer {
 
             deSerializationFunctions.put(LEAF_SET_NODE_TYPE,
                 new DeSerializationFunction() {
-                    @Override public NormalizedNode apply(
+                    @Override public NormalizedNode<?, ?> apply(
                         DeSerializer deSerializer,
                         NormalizedNodeMessages.Node node) {
                         ListNodeBuilder<Object, LeafSetEntryNode<Object>>
@@ -298,7 +298,7 @@ public class NormalizedNodeSerializer {
 
             deSerializationFunctions.put(LEAF_SET_ENTRY_NODE_TYPE,
                 new DeSerializationFunction() {
-                    @Override public NormalizedNode apply(
+                    @Override public NormalizedNode<?, ?> apply(
                         DeSerializer deSerializer,
                         NormalizedNodeMessages.Node node) {
                         NormalizedNodeAttrBuilder<YangInstanceIdentifier.NodeWithValue, Object, LeafSetEntryNode<Object>>
@@ -313,7 +313,7 @@ public class NormalizedNodeSerializer {
 
             deSerializationFunctions.put(CHOICE_NODE_TYPE,
                 new DeSerializationFunction() {
-                    @Override public NormalizedNode apply(
+                    @Override public NormalizedNode<?, ?> apply(
                         DeSerializer deSerializer,
                         NormalizedNodeMessages.Node node) {
                         DataContainerNodeBuilder<YangInstanceIdentifier.NodeIdentifier, ChoiceNode>
@@ -330,7 +330,7 @@ public class NormalizedNodeSerializer {
 
             deSerializationFunctions.put(ORDERED_LEAF_SET_NODE_TYPE,
                 new DeSerializationFunction() {
-                    @Override public NormalizedNode apply(
+                    @Override public NormalizedNode<?, ?> apply(
                         DeSerializer deSerializer,
                         NormalizedNodeMessages.Node node) {
                         ListNodeBuilder<Object, LeafSetEntryNode<Object>>
@@ -345,7 +345,7 @@ public class NormalizedNodeSerializer {
 
             deSerializationFunctions.put(ORDERED_MAP_NODE_TYPE,
                 new DeSerializationFunction() {
-                    @Override public NormalizedNode apply(
+                    @Override public NormalizedNode<?, ?> apply(
                         DeSerializer deSerializer,
                         NormalizedNodeMessages.Node node) {
                         CollectionNodeBuilder<MapEntryNode, OrderedMapNode>
@@ -358,7 +358,7 @@ public class NormalizedNodeSerializer {
 
             deSerializationFunctions.put(UNKEYED_LIST_NODE_TYPE,
                 new DeSerializationFunction() {
-                    @Override public NormalizedNode apply(
+                    @Override public NormalizedNode<?, ?> apply(
                         DeSerializer deSerializer,
                         NormalizedNodeMessages.Node node) {
                         CollectionNodeBuilder<UnkeyedListEntryNode, UnkeyedListNode>
@@ -371,7 +371,7 @@ public class NormalizedNodeSerializer {
 
             deSerializationFunctions.put(UNKEYED_LIST_ENTRY_NODE_TYPE,
                 new DeSerializationFunction() {
-                    @Override public NormalizedNode apply(
+                    @Override public NormalizedNode<?, ?> apply(
                         DeSerializer deSerializer,
                         NormalizedNodeMessages.Node node) {
                         DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, UnkeyedListEntryNode>
@@ -389,7 +389,7 @@ public class NormalizedNodeSerializer {
             deSerializationFunctions.put(ANY_XML_NODE_TYPE,
                 new DeSerializationFunction() {
 
-                    @Override public NormalizedNode apply(
+                    @Override public NormalizedNode<?, ?> apply(
                         DeSerializer deSerializer,
                         NormalizedNodeMessages.Node node) {
                         NormalizedNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, Node<?>, AnyXmlNode>
@@ -421,8 +421,8 @@ public class NormalizedNodeSerializer {
             return deserializedPath;
         }
 
-        public NormalizedNode deSerialize() {
-            NormalizedNode deserializedNode = deSerialize(node);
+        public NormalizedNode<?, ?> deSerialize() {
+            NormalizedNode<?, ?> deserializedNode = deSerialize(node);
             if(path != null) {
                 deserializedPath = InstanceIdentifierUtils.fromSerializable(path, this);
             }
@@ -430,7 +430,7 @@ public class NormalizedNodeSerializer {
             return deserializedNode;
         }
 
-        private NormalizedNode deSerialize(NormalizedNodeMessages.Node node){
+        private NormalizedNode<?, ?> deSerialize(NormalizedNodeMessages.Node node){
             Preconditions.checkNotNull(node, "node should not be null");
 
             DeSerializationFunction deSerializationFunction = deSerializationFunctions.get(
@@ -440,7 +440,7 @@ public class NormalizedNodeSerializer {
         }
 
 
-        private NormalizedNode buildCollectionNode(
+        private NormalizedNode<?, ?> buildCollectionNode(
             CollectionNodeBuilder builder,
             NormalizedNodeMessages.Node node) {
 
@@ -454,7 +454,7 @@ public class NormalizedNodeSerializer {
         }
 
 
-        private NormalizedNode buildListNode(
+        private NormalizedNode<?, ?> buildListNode(
             ListNodeBuilder<Object, LeafSetEntryNode<Object>> builder,
             NormalizedNodeMessages.Node node) {
             builder.withNodeIdentifier(toNodeIdentifier(node.getPathArgument()));
@@ -466,7 +466,7 @@ public class NormalizedNodeSerializer {
             return builder.build();
         }
 
-        private NormalizedNode buildDataContainer(DataContainerNodeBuilder builder, NormalizedNodeMessages.Node node){
+        private NormalizedNode<?, ?> buildDataContainer(DataContainerNodeBuilder builder, NormalizedNodeMessages.Node node){
 
             for(NormalizedNodeMessages.Node child : node.getChildList()){
                 builder.withChild((DataContainerChild<?, ?>) deSerialize(child));
@@ -477,7 +477,7 @@ public class NormalizedNodeSerializer {
             return builder.build();
         }
 
-        private NormalizedNode buildNormalizedNode(NormalizedNodeAttrBuilder builder, NormalizedNodeMessages.Node node){
+        private NormalizedNode<?, ?> buildNormalizedNode(NormalizedNodeAttrBuilder builder, NormalizedNodeMessages.Node node){
 
             builder.withValue(ValueSerializer.deSerialize(this, node));
 
@@ -515,7 +515,7 @@ public class NormalizedNodeSerializer {
         }
 
         private static interface DeSerializationFunction {
-            NormalizedNode apply(DeSerializer deserializer, NormalizedNodeMessages.Node node);
+            NormalizedNode<?, ?> apply(DeSerializer deserializer, NormalizedNodeMessages.Node node);
         }
     }
 }

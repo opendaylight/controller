@@ -25,7 +25,7 @@ public class NormalizedNodePrinter implements NormalizedNodeVisitor {
     }
 
     @Override
-    public void visitNode(int level, String parentPath, NormalizedNode normalizedNode) {
+    public void visitNode(int level, String parentPath, NormalizedNode<?, ?> normalizedNode) {
         System.out.println(spaces((level) * 4) + normalizedNode.getClass().toString() + ":" + normalizedNode.getIdentifier());
         if(normalizedNode instanceof LeafNode || normalizedNode instanceof LeafSetEntryNode){
             System.out.println(spaces((level) * 4) + " parentPath = " + parentPath);

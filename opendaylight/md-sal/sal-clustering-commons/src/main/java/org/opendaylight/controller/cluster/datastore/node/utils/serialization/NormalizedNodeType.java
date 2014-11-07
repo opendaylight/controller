@@ -39,7 +39,7 @@ public enum NormalizedNodeType {
     UNKEYED_LIST_ENTRY_NODE_TYPE,
     ANY_XML_NODE_TYPE;
 
-    public static NormalizedNodeType getSerializableNodeType(NormalizedNode node){
+    public static NormalizedNodeType getSerializableNodeType(NormalizedNode<?, ?> node){
         Preconditions.checkNotNull(node, "node should not be null");
 
         if(node instanceof LeafNode){
