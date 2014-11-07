@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_5f74abfc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 494,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-07T00:01:25Z",
+      "side": 1,
+      "message": "unrelated enhancement? :)",
+      "revId": "0ae22eb6a517ca82bbbd518b61484fed723b4be6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_1f662352",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 542,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-07T00:01:25Z",
+      "side": 1,
+      "message": "Should we be handling a more specific exception ?",
+      "revId": "0ae22eb6a517ca82bbbd518b61484fed723b4be6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_7f540f54",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DistributedDataStoreIntegrationTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 662,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-07T00:01:25Z",
+      "side": 1,
+      "message": "Just a clarification. Isn\u0027t just creating a transaction on a chain supposed to throw an exception when the previous transaction not ready? If not then why are we catching Exception in Shard when creating a transaction?",
+      "revId": "0ae22eb6a517ca82bbbd518b61484fed723b4be6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_df5f5b71",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DistributedDataStoreIntegrationTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 686,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-07T00:01:25Z",
+      "side": 1,
+      "message": "ok looks like hasTransactionContext should have been part of this commit.",
+      "revId": "0ae22eb6a517ca82bbbd518b61484fed723b4be6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
