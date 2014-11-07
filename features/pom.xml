@@ -24,5 +24,6 @@
     <module>netconf-connector</module>
     <module>restconf</module>
     <module>extras</module>
+    <module>neutron</module>
   </modules>
 </project>
