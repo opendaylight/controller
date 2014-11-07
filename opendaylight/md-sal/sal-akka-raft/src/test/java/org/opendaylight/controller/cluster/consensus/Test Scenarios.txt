@@ -1,0 +1,240 @@
+Starting Config:
+================
+	- configuredPrimary 				= NodeA
+	- failbackToPrimary 				= <Varies by Test>
+	- NetworkPartitionDetectionEnabled	= TRUE
+	- activeActiveDeployment			= FALSE (Active-Passive Testing)
+	 	                                = TRUE (Active-Active Testing)
+
+	(Running State)
+	- networkPartition 					= networkPartitionDetected && NetworkPartitionDetectionEnabled
+
+
+
+
+Startup Scenarios:
+------------------
+- Note: Starting up in to existing failure(s) is covered by failback scenarios.
+
+	1) Clean State (no existing state = same election term and log indexes)
+
+		a) NodeA electionTimeout & Data/Heatbeat from NodeA
+			i) Before NodeB electionTimeout
+			ii) After NodeB electionTimeout
+
+		b) NodeB electionTimeout & Data/Heatbeat from NodeB
+			i) Before NodeA electionTimeout
+				1) failbackToPrimary == TRUE
+				2) failbackToPrimary == FALSE
+			ii) After NodeA electionTimeout
+				1) failbackToPrimary == TRUE
+				2) failbackToPrimary == FALSE
+
+	2) Dirty State (existing state = see test cases for different scenarios)
+
+		"Repeat 1) with "Dirty" State i.e. NodeA and NodeB state differ. 
+			Variations: (relative to RAFT rules)
+				a) NodeA newer state than NodeB
+				b) NodeA same state as NodeB
+				c) NodeA older state than NodeB
+			
+
+
+Failover Scenarios:
+(Failstop)
+-------------------
+
+	1) NodeA Fail-Stop
+		a) Without FULL Network Partition
+			i) NodeA was Active Primary
+			ii) NodeB is Active Primary
+
+		b) With FULL Network Partition
+			i) networkParition (reported state is Correct)
+			ii) networkParition (reported state is Incorrect)
+
+		c) With NodeB - Both Links Failed
+
+	2) NodeB Fail-Stop
+		"Repeat 1)a) and 1)b) cases above"
+
+		c) With NodeA - Both Links Failed 
+
+
+
+Failover Scenarios:
+(Node's Links Failed)
+-------------------
+
+	1) NodeA - Both Links Failed
+
+		a) Without FULL Network Partition
+			i) NodeA was Active Primary
+			ii) NodeB is Active Primary
+
+		b) With FULL Network Partition
+			i) networkParition (reported state is Correct)
+			ii) networkParition (reported state is Incorrect)
+
+		c) With NodeB - Both Links Failed 
+
+	2) NodeB - Both Links Failed
+		"Repeat 1)a) and 1)b) cases above"
+
+		c) With NodeA - Both Links Failed 
+
+
+
+Failover Scenarios:
+(FULL Network Parition)
+-------------------
+
+	1) FULL Network Partition
+		a) networkParition (reported state is Correct)
+			i) NodeA was Active Primary
+			ii) NodeB was Active Primary
+		b) networkParition (reported state is Incorrect)
+			i) NodeA was Active Primary
+			ii) NodeB was Active Primary
+
+
+
+
+Failback Scenarios:
+(Failed Node FIXED/Restarted)
+-------------------
+- Covers cases where we fix the specified failure, but others are still occuring.
+
+	1) NodeA Fail-Stop (FIXED)
+
+		a) failbackToPrimary == TRUE
+
+			i) Clean State (same election term and log indexes)
+
+				1) Without FULL Network Partition (Failure-Free Case)
+
+				2) With FULL Network Partition
+					a) networkParition (reported state is Correct)
+					b) networkParition (reported state is Incorrect)
+
+				3) With NodeB - Both Links Failed 
+
+			ii) Dirty State (existing state = see test cases for different scenarios)
+				"Repeat 1) with "Dirty" State i.e. NodeA and NodeB state differ. 
+				Variations: (relative to RAFT rules)
+					X) NodeA newer state than NodeB
+					Y) NodeA same state as NodeB
+					Z) NodeA older state than NodeB
+
+		b) failbackToPrimary == FALSE
+			"Repeat 1)a) cases above"
+
+	2) NodeB Fail-Stop (FIXED)
+		"Repeat 1)a) case above (failbackToPrimary == TRUE case ONLY)"
+
+
+
+
+Failback Scenarios:
+(Node's Failed Links Fixed)
+-------------------
+- Covers cases where we fix the specified failure, but others are still occuring.
+
+	1) NodeA - Failed Links (FIXED)
+
+		a) failbackToPrimary == TRUE
+
+			i) Clean State (same election term and log indexes)
+
+				1) Without FULL Network Partition (Failure-Free Case)
+
+				2) With FULL Network Partition
+					a) networkParition (reported state is Correct)
+					b) networkParition (reported state is Incorrect)
+
+				3) With NodeB - Both Links Failed 
+
+			ii) Dirty State (existing state = see test cases for different scenarios)
+
+				"Repeat 1)a) with "Dirty" State i.e. NodeA and NodeB state differ. 
+				Variations: (relative to RAFT rules)
+					X) NodeA newer state than NodeB
+					Y) NodeA same state as NodeB
+					Z) NodeA older state than NodeB
+
+		b) failbackToPrimary == FALSE
+			"Repeat 1)a) cases above"
+
+	2) NodeB - Failed Links (FIXED)
+		"Repeat 1)a) cases above (failbackToPrimary == TRUE case ONLY)"
+
+
+
+
+Failback Scenarios:
+(FULL Network Parition Fixed)
+-------------------
+- Covers cases where we fix the specified failure, but others are still occuring.
+
+	1) FULL Network Partition (FIXED)
+
+		a) failbackToPrimary == TRUE
+
+			i) Clean State (same election term and log indexes)
+
+				1) No Node Link Failures (Failure-Free Case)
+					a) networkParition (reported state is Correct)
+					b) networkParition (reported state is Incorrect)
+
+				2) With NodeA - Both Links Failed 	
+					"Repeat 1)a)i)1) cases above"
+
+				3) With NodeB - Both Links Failed 	
+					"Repeat 1)a)i)1) cases above"
+
+			ii) Dirty State (existing state = see test cases for different scenarios)
+
+				"Repeat 1)a)i) with "Dirty" State i.e. NodeA and NodeB state differ. 
+				Variations: (relative to RAFT rules)
+					X) NodeA newer state than NodeB
+					Y) NodeA same state as NodeB
+					Z) NodeA older state than NodeB
+
+		b) failbackToPrimary == FALSE
+			"Repeat 1)a) cases above"
+
+
+
+
+
+Config Change Scenarios:
+------------------------
+
+	1) Switch configuredPrimary
+
+		a) Without FULL Network Partition (Failure-Free Case)
+			i) From NodeA to NodeB
+				1) NodeA was Active Primary
+				2) NodeB was Active Primary
+
+		b) With FULL Network Partition
+			i) networkPartition (reported state is Correct)
+				"repeat 1)a)i) cases"
+
+			ii) networkPartition (reported state is Incorrect)
+				"repeat 1)a)i) cases"
+
+		c) With NodeA - Both Links Failed
+			"repeat 1)a)i) cases"
+
+		d) With NodeB - Both Links Failed
+			"repeat 1)a)i) cases"
+		
+	2) Switch failbackToPrimary
+		"Repeat 1) cases above"
+
+
+
+
+
+
