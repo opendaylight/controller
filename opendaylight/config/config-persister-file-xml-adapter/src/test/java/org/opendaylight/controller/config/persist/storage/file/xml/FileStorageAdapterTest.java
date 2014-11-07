@@ -8,12 +8,12 @@
 
 package org.opendaylight.controller.config.persist.storage.file.xml;
 
-import static junit.framework.Assert.assertFalse;
+import static org.junit.Assert.assertFalse;
 import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-
+import com.google.common.base.Charsets;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -21,16 +21,11 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
-import junit.framework.Assert;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.test.PropertiesProviderTest;
-
-import com.google.common.base.Charsets;
 
 public class FileStorageAdapterTest {
 
@@ -42,8 +37,9 @@ public class FileStorageAdapterTest {
     @Before
     public void setUp() throws Exception {
         file = Files.createTempFile("testFilePersist", ".txt").toFile();
-        if (!file.exists())
+        if (!file.exists()) {
             return;
+        }
         com.google.common.io.Files.write("", file, Charsets.UTF_8);
         i = 1;
     }
@@ -71,7 +67,7 @@ public class FileStorageAdapterTest {
 
         storage.persistConfig(holder);
 
-        Assert.assertEquals(storage.toString().replace("\\","/"),"XmlFileStorageAdapter [storage="+NON_EXISTENT_DIRECTORY+NON_EXISTENT_FILE+"]");
+        assertEquals(storage.toString().replace("\\","/"),"XmlFileStorageAdapter [storage="+NON_EXISTENT_DIRECTORY+NON_EXISTENT_FILE+"]");
         delete(new File(NON_EXISTENT_DIRECTORY));
     }
     @Test
@@ -109,7 +105,7 @@ public class FileStorageAdapterTest {
         storage.setNumberOfBackups(Integer.MAX_VALUE);
 
         List<ConfigSnapshotHolder> last = storage.loadLastConfigs();
-        Assert.assertEquals(createCaps(), last.get(0).getCapabilities());
+        assertEquals(createCaps(), last.get(0).getCapabilities());
     }
 
     private SortedSet<String> createCaps() {
@@ -188,8 +184,9 @@ public class FileStorageAdapterTest {
     @Test
     public void testNoLastConfig() throws Exception {
         File file = Files.createTempFile("testFilePersist", ".txt").toFile();
-        if (!file.exists())
+        if (!file.exists()) {
             return;
+        }
         XmlFileStorageAdapter storage = new XmlFileStorageAdapter();
         storage.setFileStorage(file);
 
@@ -223,12 +220,14 @@ public class FileStorageAdapterTest {
         return "<config>" + i++ + "</config>";
     }
 
-    private void delete(File f) throws IOException {
+    private void delete(final File f) throws IOException {
         if (f.isDirectory()) {
-            for (File c : f.listFiles())
+            for (File c : f.listFiles()) {
                 delete(c);
+            }
         }
-        if (!f.delete())
+        if (!f.delete()) {
             throw new FileNotFoundException("Failed to delete file: " + f);
+        }
     }
 }

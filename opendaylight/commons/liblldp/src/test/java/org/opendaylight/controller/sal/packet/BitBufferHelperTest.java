@@ -9,8 +9,7 @@
 
 package org.opendaylight.controller.sal.packet;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.liblldp.BitBufferHelper;
 

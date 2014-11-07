@@ -14,7 +14,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import javax.ws.rs.core.UriInfo;
-import junit.framework.Assert;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
@@ -205,7 +204,7 @@ public class ApiDocGeneratorTest {
             if (m.getKey().getAbsolutePath().endsWith("toaster.yang")) {
                 ApiDeclaration doc = generator.getSwaggerDocSpec(m.getValue(), "http://localhost:8080/restconf", "",
                         schemaContext);
-                Assert.assertNotNull(doc);
+                assertNotNull(doc);
 
                 // testing bugs.opendaylight.org bug 1290. UnionType model type.
                 String jsonString = doc.getModels().toString();

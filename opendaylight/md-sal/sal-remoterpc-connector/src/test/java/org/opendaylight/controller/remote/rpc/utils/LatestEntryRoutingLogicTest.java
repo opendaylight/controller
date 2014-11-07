@@ -8,21 +8,19 @@
 
 package org.opendaylight.controller.remote.rpc.utils;
 
-
+import static org.junit.Assert.assertTrue;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.japi.Pair;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestProbe;
 import com.typesafe.config.ConfigFactory;
-import junit.framework.Assert;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
-
 
 public class LatestEntryRoutingLogicTest {
 
@@ -52,6 +50,6 @@ public class LatestEntryRoutingLogicTest {
     pairList.add(new Pair<ActorRef, Long>(actor2, 3000L));
     pairList.add(new Pair<ActorRef, Long>(actor3, 2000L));
     RoutingLogic logic = new LatestEntryRoutingLogic(pairList);
-    Assert.assertTrue(logic.select().equals(actor2));
+    assertTrue(logic.select().equals(actor2));
   }
 }

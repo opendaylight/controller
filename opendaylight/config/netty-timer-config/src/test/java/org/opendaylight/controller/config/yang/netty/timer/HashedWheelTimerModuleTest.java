@@ -7,12 +7,11 @@
  */
 package org.opendaylight.controller.config.yang.netty.timer;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
-
-import junit.framework.Assert;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
@@ -42,9 +41,9 @@ public class HashedWheelTimerModuleTest extends AbstractConfigTest {
         try {
             createInstance(transaction, instanceName, 0L, 10, true);
             transaction.validateConfig();
-            Assert.fail();
+            fail();
         } catch (ValidationException e) {
-            Assert.assertTrue(e.getMessage().contains("TickDuration value must be greater than 0"));
+            assertTrue(e.getMessage().contains("TickDuration value must be greater than 0"));
         }
     }
 
@@ -53,9 +52,9 @@ public class HashedWheelTimerModuleTest extends AbstractConfigTest {
         try {
             createInstance(transaction, instanceName, 500L, 0, true);
             transaction.validateConfig();
-            Assert.fail();
+            fail();
         } catch (ValidationException e) {
-            Assert.assertTrue(e.getMessage().contains("TicksPerWheel value must be greater than 0"));
+            assertTrue(e.getMessage().contains("TicksPerWheel value must be greater than 0"));
         }
     }
 
@@ -112,7 +111,7 @@ public class HashedWheelTimerModuleTest extends AbstractConfigTest {
         assertStatus(status, 0, 1, 1);
     }
 
-    private ObjectName createInstance(ConfigTransactionJMXClient transaction, String instanceName,
+    private ObjectName createInstance(final ConfigTransactionJMXClient transaction, final String instanceName,
             final Long tickDuration, final Integer ticksPerWheel, final boolean hasThreadfactory)
             throws InstanceAlreadyExistsException {
         ObjectName nameCreated = transaction.createModule(factory.getImplementationName(), instanceName);
@@ -126,7 +125,7 @@ public class HashedWheelTimerModuleTest extends AbstractConfigTest {
         return nameCreated;
     }
 
-    private ObjectName createThreadfactoryInstance(ConfigTransactionJMXClient transaction, String instanceName,
+    private ObjectName createThreadfactoryInstance(final ConfigTransactionJMXClient transaction, final String instanceName,
             final String namePrefix) throws InstanceAlreadyExistsException {
         ObjectName nameCreated = transaction.createModule(threadFactory.getImplementationName(), instanceName);
         NamingThreadFactoryModuleMXBean mxBean = transaction.newMBeanProxy(nameCreated,

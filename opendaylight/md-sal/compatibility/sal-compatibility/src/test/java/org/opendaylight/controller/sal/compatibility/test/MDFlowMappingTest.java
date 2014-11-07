@@ -7,8 +7,7 @@
  */
 package org.opendaylight.controller.sal.compatibility.test;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.PushVlan;

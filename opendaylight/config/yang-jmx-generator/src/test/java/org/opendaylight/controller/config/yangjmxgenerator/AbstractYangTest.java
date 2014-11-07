@@ -7,8 +7,7 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator;
 
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.format;
+import static org.junit.Assert.assertNotNull;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -92,8 +91,8 @@ public abstract class AbstractYangTest {
             QName qName = identitySchemaNode.getQName();
             Preconditions.checkArgument(
                     result.containsKey(qName) == false,
-                    format("Two identities of %s contain same " + "qname %s",
-                            module, qName));
+                    "Two identities of %s contain same qname %s",
+                            module, qName);
             result.put(qName, identitySchemaNode);
         }
         return result;
