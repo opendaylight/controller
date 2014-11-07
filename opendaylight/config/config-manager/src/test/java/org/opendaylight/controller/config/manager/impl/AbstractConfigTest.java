@@ -213,7 +213,7 @@ public abstract class AbstractConfigTest extends
 
             Object serviceTypeRaw = args[0];
             Object serviceInstance = args[1];
-            Dictionary<String, ?> props = (Dictionary) args[2];
+            Dictionary<String, ?> props = (Dictionary<String, ?>) args[2];
 
             if (serviceTypeRaw instanceof Class) {
                 Class<?> serviceType = (Class<?>) serviceTypeRaw;
