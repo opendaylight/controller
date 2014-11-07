@@ -71,7 +71,7 @@ public class GossiperTest {
     @Test
     public void testReceiveGossipTick_WhenNoRemoteMemberShouldIgnore(){
 
-        mockGossiper.setClusterMembers(Collections.EMPTY_LIST);
+        mockGossiper.setClusterMembers(Collections.<Address>emptyList());
         doNothing().when(mockGossiper).getLocalStatusAndSendTo(any(Address.class));
         mockGossiper.receiveGossipTick();
         verify(mockGossiper, times(0)).getLocalStatusAndSendTo(any(Address.class));
