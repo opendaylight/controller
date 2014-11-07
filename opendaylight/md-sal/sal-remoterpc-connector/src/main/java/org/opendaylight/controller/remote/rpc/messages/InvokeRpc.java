@@ -15,6 +15,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import java.io.Serializable;
 
 public class InvokeRpc implements Serializable {
+  private static final long serialVersionUID = 1L;
 
   private final QName rpc;
   private final YangInstanceIdentifier identifier;

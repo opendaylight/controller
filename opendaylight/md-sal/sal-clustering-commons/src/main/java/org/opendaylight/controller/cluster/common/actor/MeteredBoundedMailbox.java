@@ -66,6 +66,7 @@ public class MeteredBoundedMailbox implements MailboxType, ProducesMessageQueue<
 
 
     public static class MeteredMessageQueue extends BoundedDequeBasedMailbox.MessageQueue {
+        private static final long serialVersionUID = 1L;
 
         public MeteredMessageQueue(int capacity, FiniteDuration pushTimeOut) {
             super(capacity, pushTimeOut);

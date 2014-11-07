@@ -29,9 +29,12 @@ public class Messages {
 
     public static class BucketStoreMessages{
 
-        public static class GetLocalBucket implements Serializable{}
+        public static class GetLocalBucket implements Serializable {
+            private static final long serialVersionUID = 1L;
+        }
 
         public static class ContainsBucket implements Serializable {
+            private static final long serialVersionUID = 1L;
             final private Bucket bucket;
 
             public ContainsBucket(Bucket bucket){
@@ -46,20 +49,25 @@ public class Messages {
         }
 
         public static class UpdateBucket extends ContainsBucket implements Serializable {
+            private static final long serialVersionUID = 1L;
             public UpdateBucket(Bucket bucket){
                 super(bucket);
             }
         }
 
         public static class GetLocalBucketReply extends ContainsBucket implements Serializable {
+            private static final long serialVersionUID = 1L;
             public GetLocalBucketReply(Bucket bucket){
                 super(bucket);
             }
         }
 
-        public static class GetAllBuckets implements Serializable{}
+        public static class GetAllBuckets implements Serializable {
+            private static final long serialVersionUID = 1L;
+        }
 
         public static class GetBucketsByMembers implements Serializable{
+            private static final long serialVersionUID = 1L;
             private Set<Address> members;
 
             public GetBucketsByMembers(Set<Address> members){
@@ -73,6 +81,7 @@ public class Messages {
         }
 
         public static class ContainsBuckets implements Serializable{
+            private static final long serialVersionUID = 1L;
             private Map<Address, Bucket> buckets;
 
             public ContainsBuckets(Map<Address, Bucket> buckets){
@@ -94,20 +103,25 @@ public class Messages {
         }
 
         public static class GetAllBucketsReply extends ContainsBuckets implements Serializable{
+            private static final long serialVersionUID = 1L;
             public GetAllBucketsReply(Map<Address, Bucket> buckets) {
                 super(buckets);
             }
         }
 
         public static class GetBucketsByMembersReply extends ContainsBuckets implements Serializable{
+            private static final long serialVersionUID = 1L;
             public GetBucketsByMembersReply(Map<Address, Bucket> buckets) {
                 super(buckets);
             }
         }
 
-        public static class GetBucketVersions implements Serializable{}
+        public static class GetBucketVersions implements Serializable {
+            private static final long serialVersionUID = 1L;
+        }
 
         public static class ContainsBucketVersions implements Serializable{
+            private static final long serialVersionUID = 1L;
             Map<Address, Long> versions;
 
             public ContainsBucketVersions(Map<Address, Long> versions) {
@@ -123,12 +137,14 @@ public class Messages {
         }
 
         public static class GetBucketVersionsReply extends ContainsBucketVersions implements Serializable{
+            private static final long serialVersionUID = 1L;
             public GetBucketVersionsReply(Map<Address, Long> versions) {
                 super(versions);
             }
         }
 
         public static class UpdateRemoteBuckets extends ContainsBuckets implements Serializable{
+            private static final long serialVersionUID = 1L;
             public UpdateRemoteBuckets(Map<Address, Bucket> buckets) {
                 super(buckets);
             }
@@ -136,11 +152,16 @@ public class Messages {
     }
 
     public static class GossiperMessages{
-        public static class Tick implements Serializable {}
+        public static class Tick implements Serializable {
+            private static final long serialVersionUID = 1L;
+        }
 
-        public static final class GossipTick extends Tick {}
+        public static final class GossipTick extends Tick {
+            private static final long serialVersionUID = 1L;
+        }
 
         public static final class GossipStatus extends ContainsBucketVersions implements Serializable{
+            private static final long serialVersionUID = 1L;
             private Address from;
 
             public GossipStatus(Address from, Map<Address, Long> versions) {
@@ -154,6 +175,7 @@ public class Messages {
         }
 
         public static final class GossipEnvelope extends ContainsBuckets implements Serializable {
+            private static final long serialVersionUID = 1L;
             private final Address from;
             private final Address to;
 

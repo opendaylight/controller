@@ -20,6 +20,7 @@ import java.io.Serializable;
  *
  */
 public class ApplyLogEntries implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final int toIndex;
 
     public ApplyLogEntries(int toIndex) {

@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RoutingTable implements Copier<RoutingTable>, Serializable {
+    private static final long serialVersionUID = 1L;
 
     private Map<RpcRouter.RouteIdentifier<?, ?, ?>, Long> table = new HashMap<>();
     private ActorRef router;

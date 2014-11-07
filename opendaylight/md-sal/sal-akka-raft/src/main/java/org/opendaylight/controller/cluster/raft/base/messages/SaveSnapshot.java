@@ -15,4 +15,5 @@ import java.io.Serializable;
  * it and use it to save it's state
  */
 public class SaveSnapshot implements Serializable {
+    private static final long serialVersionUID = 1L;
 }

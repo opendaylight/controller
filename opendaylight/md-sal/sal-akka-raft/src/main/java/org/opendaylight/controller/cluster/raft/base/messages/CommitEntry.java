@@ -14,4 +14,5 @@ import java.io.Serializable;
  * Message sent to commit an entry to the log
  */
 public class CommitEntry implements Serializable {
+    private static final long serialVersionUID = 1L;
 }
