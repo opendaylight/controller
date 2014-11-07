@@ -124,6 +124,7 @@ public class StatisticsManagerImpl implements StatisticsManager, Runnable {
 
    @Override
    public void close() throws Exception {
+       LOG.info("StatisticsManager close called");
        finishing = true;
        if (nodeRegistrator != null) {
            nodeRegistrator.close();
