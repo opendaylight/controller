@@ -32,7 +32,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.No
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.InstanceIdentifierBuilder;
 import org.slf4j.Logger;
@@ -112,10 +111,10 @@ class NodeChangeCommiter implements OpendaylightInventoryListener {
                 InstanceIdentifierBuilder<Node> builder = ((InstanceIdentifier<Node>) ref.getValue()).builder();
                 InstanceIdentifierBuilder<FlowCapableNode> augmentation = builder.augmentation(FlowCapableNode.class);
                 final InstanceIdentifier<FlowCapableNode> path = augmentation.build();
-                CheckedFuture readFuture = tx.read(LogicalDatastoreType.OPERATIONAL, path);
-                Futures.addCallback(readFuture, new FutureCallback<Optional<? extends DataObject>>() {
+                CheckedFuture<Optional<FlowCapableNode>, ?> readFuture = tx.read(LogicalDatastoreType.OPERATIONAL, path);
+                Futures.addCallback(readFuture, new FutureCallback<Optional<FlowCapableNode>>() {
                     @Override
-                    public void onSuccess(Optional<? extends DataObject> optional) {
+                    public void onSuccess(Optional<FlowCapableNode> optional) {
                         enqueueWriteNodeDataTx(node, flowNode, path);
                         if (!optional.isPresent()) {
                             enqueuePutTable0Tx(ref);
