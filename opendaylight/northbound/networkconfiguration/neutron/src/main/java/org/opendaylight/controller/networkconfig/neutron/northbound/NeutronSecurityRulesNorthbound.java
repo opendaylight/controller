@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -33,11 +34,6 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityRuleAwa
 import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityRuleCRUD;
 import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
 import org.opendaylight.controller.networkconfig.neutron.NeutronSecurityRule;
-import org.opendaylight.controller.northbound.commons.RestMessages;
-import org.opendaylight.controller.northbound.commons.exception.BadRequestException;
-import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
-import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
-import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -203,7 +199,7 @@ public class NeutronSecurityRulesNorthbound {
             if (securityRuleInterface.neutronSecurityRuleExists(singleton.getSecurityRuleUUID())) {
                 throw new BadRequestException("Security Rule UUID already exists");
             }
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronSecurityRuleAware.class, this, null);
+            Object[] instances = NeutronUtil.getInstances(INeutronSecurityRuleAware.class, this);
             if (instances != null) {
                 for (Object instance : instances) {
                     INeutronSecurityRuleAware service = (INeutronSecurityRuleAware) instance;
@@ -235,7 +231,7 @@ public class NeutronSecurityRulesNorthbound {
             List<NeutronSecurityRule> bulk = input.getBulk();
             Iterator<NeutronSecurityRule> i = bulk.iterator();
             HashMap<String, NeutronSecurityRule> testMap = new HashMap<String, NeutronSecurityRule>();
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronSecurityRuleAware.class, this, null);
+            Object[] instances = NeutronUtil.getInstances(INeutronSecurityRuleAware.class, this);
             while (i.hasNext()) {
                 NeutronSecurityRule test = i.next();
 
@@ -330,7 +326,7 @@ public class NeutronSecurityRulesNorthbound {
             throw new BadRequestException("Attribute edit blocked by Neutron");
         }
 
-        Object[] instances = ServiceHelper.getGlobalInstances(INeutronSecurityRuleAware.class, this, null);
+        Object[] instances = NeutronUtil.getInstances(INeutronSecurityRuleAware.class, this);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronSecurityRuleAware service = (INeutronSecurityRuleAware) instance;
@@ -385,7 +381,7 @@ public class NeutronSecurityRulesNorthbound {
             return Response.status(409).build();
         }
         NeutronSecurityRule singleton = securityRuleInterface.getNeutronSecurityRule(securityRuleUUID);
-        Object[] instances = ServiceHelper.getGlobalInstances(INeutronSecurityRuleAware.class, this, null);
+        Object[] instances = NeutronUtil.getInstances(INeutronSecurityRuleAware.class, this);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronSecurityRuleAware service = (INeutronSecurityRuleAware) instance;

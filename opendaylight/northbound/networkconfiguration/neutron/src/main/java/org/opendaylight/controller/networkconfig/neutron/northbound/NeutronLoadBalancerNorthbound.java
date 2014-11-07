@@ -9,17 +9,10 @@
 package org.opendaylight.controller.networkconfig.neutron.northbound;
 
 
-import org.codehaus.enunciate.jaxrs.ResponseCode;
-import org.codehaus.enunciate.jaxrs.StatusCodes;
-import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerAware;
-import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerCRUD;
-import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
-import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancer;
-import org.opendaylight.controller.northbound.commons.RestMessages;
-import org.opendaylight.controller.northbound.commons.exception.BadRequestException;
-import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
-import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
-import org.opendaylight.controller.sal.utils.ServiceHelper;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -32,10 +25,13 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+
+import org.codehaus.enunciate.jaxrs.ResponseCode;
+import org.codehaus.enunciate.jaxrs.StatusCodes;
+import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerCRUD;
+import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
+import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancer;
 
 /**
  * Neutron Northbound REST APIs for LoadBalancers.<br>
@@ -188,7 +184,7 @@ public class NeutronLoadBalancerNorthbound {
             if (loadBalancerInterface.neutronLoadBalancerExists(singleton.getLoadBalancerID())) {
                 throw new BadRequestException("LoadBalancer UUID already exists");
             }
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronLoadBalancerAware.class, this, null);
+            Object[] instances = NeutronUtil.getInstances(INeutronLoadBalancerAware.class, this);
             if (instances != null) {
                 for (Object instance : instances) {
                     INeutronLoadBalancerAware service = (INeutronLoadBalancerAware) instance;
@@ -209,7 +205,7 @@ public class NeutronLoadBalancerNorthbound {
             List<NeutronLoadBalancer> bulk = input.getBulk();
             Iterator<NeutronLoadBalancer> i = bulk.iterator();
             HashMap<String, NeutronLoadBalancer> testMap = new HashMap<String, NeutronLoadBalancer>();
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronLoadBalancerAware.class, this, null);
+            Object[] instances = NeutronUtil.getInstances(INeutronLoadBalancerAware.class, this);
             while (i.hasNext()) {
                 NeutronLoadBalancer test = i.next();
 
@@ -300,7 +296,7 @@ public class NeutronLoadBalancerNorthbound {
             throw new BadRequestException("Attribute edit blocked by Neutron");
         }
 
-        Object[] instances = ServiceHelper.getGlobalInstances(INeutronLoadBalancerAware.class, this, null);
+        Object[] instances = NeutronUtil.getInstances(INeutronLoadBalancerAware.class, this);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronLoadBalancerAware service = (INeutronLoadBalancerAware) instance;
@@ -357,7 +353,7 @@ public class NeutronLoadBalancerNorthbound {
             return Response.status(409).build();
         }
         NeutronLoadBalancer singleton = loadBalancerInterface.getNeutronLoadBalancer(loadBalancerID);
-        Object[] instances = ServiceHelper.getGlobalInstances(INeutronLoadBalancerAware.class, this, null);
+        Object[] instances = NeutronUtil.getInstances(INeutronLoadBalancerAware.class, this);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronLoadBalancerAware service = (INeutronLoadBalancerAware) instance;
