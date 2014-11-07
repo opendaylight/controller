@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_ff181f86",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/FollowerLogInformationImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-07T08:15:16Z",
+      "side": 1,
+      "message": "I have cached the millis instead in a field",
+      "parentUuid": "ba8cc1f7_bfd137cf",
+      "revId": "3fbb8eb71d1faab783f9f57441d32fae30e3ca09",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_dfd67bc5",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/base/messages/SendInstallSnapshot.java",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2014-11-07T00:37:48Z",
       "side": 1,
       "message": "This is a local message right? Doesn\u0027t need to be Serializable.",
+      "revId": "3fbb8eb71d1faab783f9f57441d32fae30e3ca09",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_5f2cabab",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/base/messages/SendInstallSnapshot.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-07T08:15:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_dfd67bc5",
       "revId": "3fbb8eb71d1faab783f9f57441d32fae30e3ca09",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_3f2f67a3",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-07T08:15:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_7fdbafed",
+      "revId": "3fbb8eb71d1faab783f9f57441d32fae30e3ca09",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_5fe26ba0",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
         "patchSetId": 4
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_7f25efc0",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 383,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-07T08:15:16Z",
+      "side": 1,
+      "message": "No we dont. I have added to mark the follower active in the InstallSnapshotReply.\nAlso included an else condition to send AE even if we have not received a snapshot reply for the last chunk sent.Added a test method in LeaderTest as well",
+      "parentUuid": "ba8cc1f7_5fe26ba0",
+      "revId": "3fbb8eb71d1faab783f9f57441d32fae30e3ca09",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_3fe527a8",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
         "patchSetId": 4
@@ -81,6 +153,24 @@
       "writtenOn": "2014-11-07T00:37:48Z",
       "side": 1,
       "message": "bad formatting",
+      "revId": "3fbb8eb71d1faab783f9f57441d32fae30e3ca09",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_9f2233b8",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 391,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-07T08:15:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_3fe527a8",
       "revId": "3fbb8eb71d1faab783f9f57441d32fae30e3ca09",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
