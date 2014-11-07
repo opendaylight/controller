@@ -23,11 +23,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.opendaylight.controller.netconf.persist.impl.PersisterAggregator.PersisterWithConfiguration;

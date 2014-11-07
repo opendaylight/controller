@@ -24,7 +24,7 @@ import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.matchers.JUnitMatchers;
+import org.hamcrest.CoreMatchers;
 import org.opendaylight.controller.config.api.LookupRegistry;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -72,11 +72,11 @@ public class NetconfOperationServiceImplTest {
             String message = e.getMessage();
             Assert.assertThat(
                     message,
-                    JUnitMatchers
+                    CoreMatchers
                     .containsString("missing from config subsystem but present in yangstore: [(namespace?revision=1970-01-01)qname2]"));
             Assert.assertThat(
                     message,
-                    JUnitMatchers
+                    CoreMatchers
                     .containsString("All modules present in config: [(namespace?revision=1970-01-01)qname1]"));
         }
     }

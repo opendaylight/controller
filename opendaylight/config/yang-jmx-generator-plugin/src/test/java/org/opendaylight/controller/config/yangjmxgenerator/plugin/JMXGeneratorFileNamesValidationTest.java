@@ -7,11 +7,11 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.plugin;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.junit.matchers.JUnitMatchers.containsString;
 
 import org.junit.Test;
 import org.opendaylight.controller.config.yangjmxgenerator.ConfigConstants;

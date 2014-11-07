@@ -20,10 +20,10 @@ import org.opendaylight.controller.config.yang.threadpool.impl.EventBusModuleFac
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.ObjectName;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.junit.matchers.JUnitMatchers.containsString;
 
 public class SyncEventBusConfigBeanTest extends AbstractConfigTest {
 

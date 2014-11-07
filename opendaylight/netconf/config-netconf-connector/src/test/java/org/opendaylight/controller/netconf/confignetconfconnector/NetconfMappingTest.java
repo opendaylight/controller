@@ -55,10 +55,10 @@ import org.custommonkey.xmlunit.NodeTestException;
 import org.custommonkey.xmlunit.NodeTester;
 import org.custommonkey.xmlunit.XMLAssert;
 import org.custommonkey.xmlunit.XMLUnit;
+import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.matchers.JUnitMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
@@ -569,7 +569,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
     }
 
     private void assertContainsString(String string, String substring) {
-        assertThat(string, JUnitMatchers.containsString(substring));
+        assertThat(string, CoreMatchers.containsString(substring));
     }
 
     private void checkEnum(final Document response) throws Exception {
