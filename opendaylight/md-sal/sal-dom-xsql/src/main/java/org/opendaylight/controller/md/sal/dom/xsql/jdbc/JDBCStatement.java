@@ -89,7 +89,7 @@ public class JDBCStatement implements PreparedStatement {
         return true;
     }
 
-    public void addRecord(ArrayList hierarchy) {
+    public void addRecord(ArrayList<?> hierarchy) {
         rs.addRecord(hierarchy);
     }
 

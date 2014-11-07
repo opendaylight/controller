@@ -207,7 +207,7 @@ public class JDBCResultSet implements Serializable, ResultSet,
         }
     }
 
-    public void addRecord(ArrayList hierarchy) {
+    public void addRecord(ArrayList<?> hierarchy) {
         Map rec = new HashMap();
         for (int i = hierarchy.size() - 1; i >= 0; i--) {
             Object element = hierarchy.get(i);
