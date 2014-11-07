@@ -14,6 +14,7 @@ import org.opendaylight.yangtools.yang.common.QName;
 import java.io.Serializable;
 
 public class ExecuteRpc implements Serializable {
+  private static final long serialVersionUID = 1L;
 
   private final String inputCompositeNode;
   private final QName rpc;

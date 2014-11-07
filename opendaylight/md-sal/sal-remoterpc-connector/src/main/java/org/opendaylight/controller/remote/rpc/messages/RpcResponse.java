@@ -7,11 +7,10 @@
  */
 package org.opendaylight.controller.remote.rpc.messages;
 
-
-
 import java.io.Serializable;
 
 public class RpcResponse implements Serializable {
+  private static final long serialVersionUID = 1L;
   private final String resultCompositeNode;
 
   public RpcResponse(final String resultCompositeNode) {

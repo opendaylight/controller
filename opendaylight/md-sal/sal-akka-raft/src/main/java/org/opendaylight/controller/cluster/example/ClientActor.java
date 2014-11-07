@@ -29,6 +29,7 @@ public class ClientActor extends UntypedActor {
 
     public static Props props(final ActorRef target){
         return Props.create(new Creator<ClientActor>(){
+            private static final long serialVersionUID = 1L;
 
             @Override public ClientActor create() throws Exception {
                 return new ClientActor(target);

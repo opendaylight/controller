@@ -24,10 +24,10 @@ import java.util.Map;
  * heartbeat (§5.2).
  */
 public class AppendEntries extends AbstractRaftRPC {
-
     public static final Class<AppendEntriesMessages.AppendEntries> SERIALIZABLE_CLASS = AppendEntriesMessages.AppendEntries.class;
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AppendEntries.class);
+    private static final long serialVersionUID = 1L;
 
     // So that follower can redirect clients
     private final String leaderId;

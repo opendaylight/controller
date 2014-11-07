@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.exceptions;
 
 public class UnknownMessageException extends Exception {
+    private static final long serialVersionUID = 1L;
     private final Object message;
 
     public UnknownMessageException(Object message) {

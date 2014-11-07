@@ -16,6 +16,7 @@ import java.io.Serializable;
  * Internal message, issued by follower to its actor
  */
 public class ApplySnapshot implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final Snapshot snapshot;
 
     public ApplySnapshot(Snapshot snapshot) {

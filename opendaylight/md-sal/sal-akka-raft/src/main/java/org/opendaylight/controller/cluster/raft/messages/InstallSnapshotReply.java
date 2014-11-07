@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.raft.messages;
 
 public class InstallSnapshotReply extends AbstractRaftRPC {
+    private static final long serialVersionUID = 1L;
 
     // The followerId - this will be used to figure out which follower is
     // responding

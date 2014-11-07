@@ -14,6 +14,7 @@ import java.io.Serializable;
 
 public class ReplicatedLogImplEntry implements ReplicatedLogEntry,
     Serializable {
+    private static final long serialVersionUID = 1L;
 
     private final long index;
     private final long term;
