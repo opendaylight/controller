@@ -1,5 +1,9 @@
 package org.opendaylight.controller.config.manager.impl.osgi;
 
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import java.util.Dictionary;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.controller.config.manager.impl.osgi.mapping.RefreshingSCPModuleInfoRegistry;
@@ -10,12 +14,6 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
-import java.util.*;
-
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-
 public class RefreshingSCPModuleInfoRegistryTest {
     @Test
     public void testConstructor() throws Exception {
@@ -24,8 +22,7 @@ public class RefreshingSCPModuleInfoRegistryTest {
         doReturn("string").when(prov).toString();
 
         BundleContext ctxt = mock(BundleContext.class);
-        Dictionary dict = new Hashtable();
-        ServiceRegistration servReg = mock(ServiceRegistration.class);
+        ServiceRegistration<?> servReg = mock(ServiceRegistration.class);
         doReturn(servReg).when(ctxt).registerService(Mockito.any(Class.class), Mockito.any(SchemaContextProvider.class), Mockito.any(Dictionary.class));
         doReturn(servReg).when(ctxt).registerService(Mockito.anyString(), Mockito.any(Object.class), Mockito.any(Dictionary.class));
         RefreshingSCPModuleInfoRegistry scpreg = new RefreshingSCPModuleInfoRegistry(reg, prov, ctxt);

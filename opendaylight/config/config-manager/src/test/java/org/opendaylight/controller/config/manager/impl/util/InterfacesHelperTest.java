@@ -8,7 +8,7 @@
 package org.opendaylight.controller.config.manager.impl.util;
 
 import static org.junit.Assert.assertEquals;
-
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import java.util.Collections;
 import java.util.HashSet;
@@ -92,7 +92,7 @@ public class InterfacesHelperTest {
         input.add(clazz);
         Set<Class<? extends AbstractServiceInterface>> result = InterfacesHelper.getAllAbstractServiceInterfaceClasses(input);
 
-        Set<Class<?>> expected = Sets.newHashSet((Class<?>) TestingScheduledThreadPoolServiceInterface.class,
+        Set<Class<?>> expected = ImmutableSet.of((Class<?>) TestingScheduledThreadPoolServiceInterface.class,
                 TestingThreadPoolServiceInterface.class
                 );
         assertEquals(expected, result);

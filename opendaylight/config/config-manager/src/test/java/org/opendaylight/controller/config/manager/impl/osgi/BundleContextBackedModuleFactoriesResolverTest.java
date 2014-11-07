@@ -1,13 +1,12 @@
 package org.opendaylight.controller.config.manager.impl.osgi;
 
-import static junit.framework.Assert.fail;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.matchers.JUnitMatchers.containsString;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-
 import com.google.common.collect.Lists;
 import java.util.Map;
 import org.junit.Before;
@@ -24,8 +23,8 @@ public class BundleContextBackedModuleFactoriesResolverTest {
     @Mock
     private BundleContext bundleContext;
     private BundleContextBackedModuleFactoriesResolver resolver;
-    private ServiceReference s1;
-    private ServiceReference s2;
+    private ServiceReference<?> s1;
+    private ServiceReference<?> s2;
     private ModuleFactory f1;
     private ModuleFactory f2;
 
@@ -42,15 +41,15 @@ public class BundleContextBackedModuleFactoriesResolverTest {
         resolver = new BundleContextBackedModuleFactoriesResolver(bundleContext);
     }
 
-    private ModuleFactory getMockFactory(String name) {
+    private ModuleFactory getMockFactory(final String name) {
         ModuleFactory mock = mock(ModuleFactory.class);
         doReturn(name).when(mock).toString();
         doReturn(name).when(mock).getImplementationName();
         return mock;
     }
 
-    private ServiceReference getServiceRef() {
-        ServiceReference mock = mock(ServiceReference.class);
+    private ServiceReference<?> getServiceRef() {
+        ServiceReference<?> mock = mock(ServiceReference.class);
         doReturn("serviceRef").when(mock).toString();
         final Bundle bundle = mock(Bundle.class);
         doReturn(bundleContext).when(bundle).getBundleContext();

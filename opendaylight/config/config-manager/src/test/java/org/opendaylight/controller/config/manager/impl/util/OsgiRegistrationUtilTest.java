@@ -4,7 +4,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
@@ -37,7 +36,7 @@ public class OsgiRegistrationUtilTest {
         OsgiRegistrationUtil.wrap(serviceReg).close();
         verify(serviceReg).unregister();
 
-        final BundleTracker tracker = mock(BundleTracker.class);
+        final BundleTracker<?> tracker = mock(BundleTracker.class);
         doNothing().when(tracker).close();
         OsgiRegistrationUtil.wrap(tracker).close();
         verify(tracker).close();
@@ -49,7 +48,7 @@ public class OsgiRegistrationUtilTest {
     }
 
     private ServiceRegistration<?> mockServiceRegistration() {
-        ServiceRegistration mock = mock(ServiceRegistration.class);
+        ServiceRegistration<?> mock = mock(ServiceRegistration.class);
         doNothing().when(mock).unregister();
         return mock;
     }

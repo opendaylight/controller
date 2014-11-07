@@ -1,8 +1,8 @@
 package org.opendaylight.controller.config.manager.impl.osgi;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
@@ -11,10 +11,8 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
-
 import java.util.Dictionary;
 import java.util.Set;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -44,7 +42,7 @@ public class ModuleFactoryBundleTrackerTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        doAnswer(new Answer() {
+        doAnswer(new Answer<Object>() {
             @Override
             public Object answer(final InvocationOnMock invocation) throws Throwable {
                 return getClass().getClassLoader().loadClass((String) invocation.getArguments()[0]);
@@ -141,7 +139,7 @@ public class ModuleFactoryBundleTrackerTest {
     }
 
     static class WrongConstructorTestingFactory extends TestingFactory {
-        WrongConstructorTestingFactory(String randomParam) {
+        WrongConstructorTestingFactory(final String randomParam) {
         }
     }
 

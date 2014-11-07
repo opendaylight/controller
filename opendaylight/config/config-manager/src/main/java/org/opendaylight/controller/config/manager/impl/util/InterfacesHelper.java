@@ -7,17 +7,16 @@
  */
 package org.opendaylight.controller.config.manager.impl.util;
 
-import org.opendaylight.controller.config.api.annotations.AbstractServiceInterface;
-import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation;
-import org.opendaylight.controller.config.spi.Module;
-import org.opendaylight.controller.config.spi.ModuleFactory;
-
-import javax.management.JMX;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import javax.management.JMX;
+import org.opendaylight.controller.config.api.annotations.AbstractServiceInterface;
+import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation;
+import org.opendaylight.controller.config.spi.Module;
+import org.opendaylight.controller.config.spi.ModuleFactory;
 
 public class InterfacesHelper {
 
@@ -40,7 +39,7 @@ public class InterfacesHelper {
 
     }
 
-    private static Set<Class<?>> getAllSuperInterfaces(Set<Class<?>> ifcs) {
+    private static Set<Class<?>> getAllSuperInterfaces(final Set<? extends Class<?>> ifcs) {
         Set<Class<?>> interfaces = new HashSet<>(ifcs); // create copy to modify
         // each interface can extend other interfaces
         Set<Class<?>> result = new HashSet<>();
@@ -61,7 +60,7 @@ public class InterfacesHelper {
      * Get interfaces that this class is derived from that are JMX interfaces.
      */
     public static Set<Class<?>> getMXInterfaces(
-            Class<? extends Module> configBeanClass) {
+            final Class<? extends Module> configBeanClass) {
         Set<Class<?>> allInterfaces = getAllInterfaces(configBeanClass);
         Set<Class<?>> result = new HashSet<>();
         for (Class<?> clazz : allInterfaces) {
@@ -78,7 +77,7 @@ public class InterfacesHelper {
      * annotation.
      */
     public static Set<Class<?>> getServiceInterfaces(
-            Class<? extends Module> configBeanClass) {
+            final Class<? extends Module> configBeanClass) {
         Set<Class<?>> allInterfaces = getAllInterfaces(configBeanClass);
         Set<Class<?>> result = new HashSet<>();
         for (Class<?> clazz : allInterfaces) {
@@ -93,7 +92,7 @@ public class InterfacesHelper {
         return result;
     }
 
-    public static Set<Class<? extends AbstractServiceInterface>> getAllAbstractServiceClasses(Class<? extends Module> configBeanClass) {
+    public static Set<Class<? extends AbstractServiceInterface>> getAllAbstractServiceClasses(final Class<? extends Module> configBeanClass) {
 
         Set<Class<? extends AbstractServiceInterface>> foundGeneratedSIClasses = new HashSet<>();
         for (Class<?> clazz : getAllInterfaces(configBeanClass)) {
@@ -111,7 +110,7 @@ public class InterfacesHelper {
      * {@link org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation#osgiRegistrationType()}
      */
     public static Set<Class<?>> getOsgiRegistrationTypes(
-            Class<? extends Module> configBeanClass) {
+            final Class<? extends Module> configBeanClass) {
         Set<Class<?>> serviceInterfaces = getServiceInterfaces(configBeanClass);
         Set<Class<?>> result = new HashSet<>();
         for (Class<?> clazz : serviceInterfaces) {
@@ -122,7 +121,7 @@ public class InterfacesHelper {
         return result;
     }
 
-    public static Set<String> getQNames(Set<ServiceInterfaceAnnotation> siAnnotations) {
+    public static Set<String> getQNames(final Set<ServiceInterfaceAnnotation> siAnnotations) {
         Set<String> qNames = new HashSet<>();
         for (ServiceInterfaceAnnotation sia: siAnnotations) {
             qNames.add(sia.value());
@@ -130,12 +129,12 @@ public class InterfacesHelper {
         return Collections.unmodifiableSet(qNames);
     }
 
-    public static Set<ServiceInterfaceAnnotation> getServiceInterfaceAnnotations(ModuleFactory factory) {
+    public static Set<ServiceInterfaceAnnotation> getServiceInterfaceAnnotations(final ModuleFactory factory) {
         Set<Class<? extends AbstractServiceInterface>> implementedServiceIntefaces = Collections.unmodifiableSet(factory.getImplementedServiceIntefaces());
         return getServiceInterfaceAnnotations(implementedServiceIntefaces);
     }
 
-    private static Set<ServiceInterfaceAnnotation> getServiceInterfaceAnnotations(Set<Class<? extends AbstractServiceInterface>> implementedServiceIntefaces) {
+    private static Set<ServiceInterfaceAnnotation> getServiceInterfaceAnnotations(final Set<Class<? extends AbstractServiceInterface>> implementedServiceIntefaces) {
         Set<Class<? extends AbstractServiceInterface>> inspected = getAllAbstractServiceInterfaceClasses(implementedServiceIntefaces);
         Set<ServiceInterfaceAnnotation> result = new HashSet<>();
         // SIs can form hierarchies, inspect superclass until it does not extend AbstractSI
@@ -149,9 +148,9 @@ public class InterfacesHelper {
     }
 
     static Set<Class<? extends AbstractServiceInterface>> getAllAbstractServiceInterfaceClasses(
-            Set<Class<? extends AbstractServiceInterface>> directlyImplementedAbstractSIs) {
+            final Set<Class<? extends AbstractServiceInterface>> directlyImplementedAbstractSIs) {
 
-        Set<Class<?>> allInterfaces = getAllSuperInterfaces((Set) directlyImplementedAbstractSIs);
+        Set<Class<?>> allInterfaces = getAllSuperInterfaces(directlyImplementedAbstractSIs);
         Set<Class<? extends AbstractServiceInterface>> result = new HashSet<>();
         for(Class<?> ifc: allInterfaces){
             if (AbstractServiceInterface.class.isAssignableFrom(ifc) &&

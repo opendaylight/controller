@@ -7,38 +7,35 @@
  */
 package org.opendaylight.controller.config.manager.testingservices.scheduledthreadpool.test;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.junit.matchers.JUnitMatchers.containsString;
-
 import javax.annotation.Nullable;
 import javax.management.DynamicMBean;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
-
 import org.junit.Test;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.manager.testingservices.parallelapsp.TestingParallelAPSPConfigMXBean;
 import org.opendaylight.controller.config.manager.testingservices.parallelapsp.TestingParallelAPSPModuleFactory;
 import org.opendaylight.controller.config.manager.testingservices.scheduledthreadpool.TestingScheduledThreadPoolImpl;
-import org.opendaylight.controller.config.manager.testingservices.scheduledthreadpool
-        .TestingScheduledThreadPoolModuleFactory;
+import org.opendaylight.controller.config.manager.testingservices.scheduledthreadpool.TestingScheduledThreadPoolModuleFactory;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 
 public class TwoInterfacesExportTest extends AbstractScheduledTest {
 
-    private void assertExists(String moduleName, String instanceName)
+    private void assertExists(final String moduleName, final String instanceName)
             throws Exception {
         assertExists(null, moduleName, instanceName);
     }
 
-    private void assertExists(@Nullable ConfigTransactionJMXClient transaction,
-            String moduleName, String instanceName)
+    private void assertExists(@Nullable final ConfigTransactionJMXClient transaction,
+            final String moduleName, final String instanceName)
             throws InstanceNotFoundException {
         if (transaction != null) {
             transaction.lookupConfigBean(moduleName, instanceName);
@@ -56,13 +53,13 @@ public class TwoInterfacesExportTest extends AbstractScheduledTest {
         }
     }
 
-    private void assertNotExists(String moduleName, String instanceName) {
+    private void assertNotExists(final String moduleName, final String instanceName) {
         assertNotExists(null, moduleName, instanceName);
     }
 
     private void assertNotExists(
-            @Nullable ConfigTransactionJMXClient transaction,
-            String moduleName, String instanceName) {
+            @Nullable final ConfigTransactionJMXClient transaction,
+            final String moduleName, final String instanceName) {
 
         if (transaction != null) {
             try {
