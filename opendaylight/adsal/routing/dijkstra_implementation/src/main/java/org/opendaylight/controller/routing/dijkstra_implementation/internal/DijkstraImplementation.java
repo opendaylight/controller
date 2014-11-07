@@ -397,7 +397,7 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerCluster
      * dependencies are satisfied
      *
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings("unchecked")
     public void init() {
         log.debug("Routing init() is called");
         this.topologyBWAware = new ConcurrentHashMap<Short, Graph<Node, Edge>>();
