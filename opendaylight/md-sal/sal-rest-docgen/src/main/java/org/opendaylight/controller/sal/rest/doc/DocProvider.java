@@ -70,7 +70,7 @@ public class DocProvider implements BundleActivator, ServiceTrackerCustomizer<Br
     @Override
     public void start(BundleContext context) throws Exception {
         bundleContext = context;
-        brokerServiceTracker = new ServiceTracker(context, Broker.class, this);
+        brokerServiceTracker = new ServiceTracker<>(context, Broker.class, this);
         brokerServiceTracker.open();
     }
 
