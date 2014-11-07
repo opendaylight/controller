@@ -8,7 +8,7 @@
 package org.opendaylight.controller.sal.core.api.data;
 
 import java.util.Set;
-
+import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeValidator;
 import org.opendaylight.controller.sal.common.DataStoreIdentifier;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -28,7 +28,7 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
  * {@link DataProviderService#addValidator(DataStoreIdentifier, DataValidator)}
  * </ul>
  *
- * @deprecated Replaced by {@link org.opendaylight.controller.md.sal.common.api.data.AsyncConfigurationCommitHandler}
+ * @deprecated Replaced by {@link DOMDataTreeValidator}
  *
  **/
 @Deprecated
