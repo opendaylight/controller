@@ -124,7 +124,7 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
         if (path.isWildcarded()) {
             return Optional.absent();
         }
-        return (Optional) getCodec().deserializeFunction(path).apply(Optional.<NormalizedNode<?, ?>> of(data));
+        return (Optional<DataObject>) getCodec().deserializeFunction(path).apply(Optional.<NormalizedNode<?, ?>> of(data));
     }
 
     private class TranslatingDataChangeInvoker implements DOMDataChangeListener {
