@@ -8,13 +8,12 @@
 
 package org.opendaylight.controller.netconf.util.messages;
 
-import com.google.common.base.Charsets;
-import java.util.Arrays;
-import org.junit.Test;
-
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import com.google.common.base.Charsets;
+import org.junit.Test;
 
+@Deprecated
 public class NetconfMessageHeaderTest {
     @Test
     public void testGet() throws Exception {
