@@ -80,20 +80,20 @@ public class XSQLBluePrintRelation implements Serializable {
         }
     }
 
-    public List execute(Object o) {
-        List result = new LinkedList();
+    public List<?> execute(Object o) {
+        List<Object> result = new LinkedList<>();
         if (o == null) {
             return null;
         }
 
         if (Set.class.isAssignableFrom(o.getClass())) {
-            Set lst = (Set) o;
+            Set<?> lst = (Set<?>) o;
             for (Object oo : lst) {
                 addToResult(result, execute(oo));
             }
             return result;
         } else if (List.class.isAssignableFrom(o.getClass())) {
-            List lst = (List) o;
+            List<?> lst = (List<?>) o;
             for (Object oo : lst) {
                 addToResult(result, execute(oo));
             }
@@ -111,17 +111,17 @@ public class XSQLBluePrintRelation implements Serializable {
         return result;
     }
 
-    public static void addToResult(List result, Object o) {
+    private static void addToResult(List<Object> result, Object o) {
         if (o == null) {
             return;
         }
         if (Set.class.isAssignableFrom(o.getClass())) {
-            Set lst = (Set) o;
+            Set<?> lst = (Set<?>) o;
             for (Object oo : lst) {
                 result.add(oo);
             }
         } else if (List.class.isAssignableFrom(o.getClass())) {
-            List lst = (List) o;
+            List<?> lst = (List<?>) o;
             for (Object oo : lst) {
                 result.add(oo);
             }

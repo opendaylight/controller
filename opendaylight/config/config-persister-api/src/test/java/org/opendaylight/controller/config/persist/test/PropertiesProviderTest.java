@@ -12,7 +12,7 @@ import java.util.Map;
 import org.opendaylight.controller.config.persist.api.PropertiesProvider;
 
 public class PropertiesProviderTest implements PropertiesProvider {
-    private final Map<String,String> properties = new HashMap();
+    private final Map<String,String> properties = new HashMap<>();
 
     public void addProperty(String key,String value){
         properties.put(key,value);

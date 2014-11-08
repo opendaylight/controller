@@ -73,8 +73,8 @@ public class NetconfMonitoringServiceImplTest {
     public void testGetSchemas3() throws Exception {
         doReturn("").when(managementSession).toString();
         Capability cap = mock(Capability.class);
-        Set caps = Sets.newHashSet(cap);
-        Set services = Sets.newHashSet(operationService);
+        Set<Capability> caps = Sets.newHashSet(cap);
+        Set<NetconfOperationService> services = Sets.newHashSet(operationService);
         doReturn(snapshot).when(operationProvider).openSnapshot(anyString());
         doReturn(services).when(snapshot).getServices();
         doReturn(caps).when(operationService).getCapabilities();

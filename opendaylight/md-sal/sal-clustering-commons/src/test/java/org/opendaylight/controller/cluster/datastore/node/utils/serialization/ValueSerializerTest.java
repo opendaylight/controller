@@ -355,8 +355,8 @@ public class ValueSerializerTest{
                 nodeBuilder.build());
 
         assertTrue(o instanceof Set);
-        assertTrue(((Set)o).contains("foo"));
-        assertTrue(((Set) o).contains("bar"));
+        assertTrue(((Set<?>)o).contains("foo"));
+        assertTrue(((Set<?>) o).contains("bar"));
 
     }
 

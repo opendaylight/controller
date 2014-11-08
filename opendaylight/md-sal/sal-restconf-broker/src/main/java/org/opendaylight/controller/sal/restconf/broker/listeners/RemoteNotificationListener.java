@@ -8,15 +8,16 @@
 package org.opendaylight.controller.sal.restconf.broker.listeners;
 
 import org.opendaylight.controller.sal.binding.api.NotificationListener;
+import org.opendaylight.yangtools.yang.binding.Notification;
 
-public class RemoteNotificationListener implements org.opendaylight.yangtools.yang.binding.NotificationListener {
+public class RemoteNotificationListener<T extends Notification> implements org.opendaylight.yangtools.yang.binding.NotificationListener {
 
-    org.opendaylight.controller.sal.binding.api.NotificationListener listener;
+    NotificationListener<T> listener;
 
-    public RemoteNotificationListener(NotificationListener listener){
+    public RemoteNotificationListener(NotificationListener<T> listener){
         this.listener = listener;
     }
-    public NotificationListener getListener(){
+    public NotificationListener<T> getListener() {
         return this.listener;
     }
 

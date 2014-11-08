@@ -32,7 +32,7 @@ public class SimpleUnionAttributeWritingStrategy extends SimpleAttributeWritingS
         Util.checkType(listOfStrings, List.class);
 
         StringBuilder b = new StringBuilder();
-        for (Object character: (List)listOfStrings) {
+        for (Object character: (List<?>)listOfStrings) {
             Util.checkType(character, String.class);
             b.append(character);
         }

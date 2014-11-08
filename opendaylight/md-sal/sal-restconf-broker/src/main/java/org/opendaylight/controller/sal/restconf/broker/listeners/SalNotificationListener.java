@@ -11,14 +11,14 @@ import org.opendaylight.controller.sal.binding.api.NotificationListener;
 import org.opendaylight.yangtools.yang.binding.Notification;
 
 
-public class SalNotificationListener implements NotificationListener {
-    private NotificationListener notificationListener;
+public class SalNotificationListener<T extends Notification> implements NotificationListener<T> {
+    private NotificationListener<T> notificationListener;
 
-    public SalNotificationListener( NotificationListener notificationListener){
+    public SalNotificationListener( NotificationListener<T> notificationListener){
         this.notificationListener = notificationListener;
     }
     @Override
     public void onNotification(Notification notification) {
-        this.notificationListener.onNotification(notification);
+        this.notificationListener.onNotification((T)notification);
     }
 }

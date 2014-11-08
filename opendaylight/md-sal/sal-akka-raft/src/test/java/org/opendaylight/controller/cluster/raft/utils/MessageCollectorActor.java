@@ -54,7 +54,7 @@ public class MessageCollectorActor extends UntypedActor {
      * @param clazz
      * @return
      */
-    public static Object getFirstMatching(ActorRef actor, Class clazz) throws Exception {
+    public static Object getFirstMatching(ActorRef actor, Class<?> clazz) throws Exception {
         List<Object> allMessages = getAllMessages(actor);
 
         for(Object message : allMessages){
@@ -66,7 +66,7 @@ public class MessageCollectorActor extends UntypedActor {
         return null;
     }
 
-    public static List<Object> getAllMatching(ActorRef actor, Class clazz) throws Exception {
+    public static List<Object> getAllMatching(ActorRef actor, Class<?> clazz) throws Exception {
         List<Object> allMessages = getAllMessages(actor);
 
         List<Object> output = Lists.newArrayList();

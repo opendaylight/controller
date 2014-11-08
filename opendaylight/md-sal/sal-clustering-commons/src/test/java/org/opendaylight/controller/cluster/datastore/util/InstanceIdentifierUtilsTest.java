@@ -10,6 +10,7 @@
 
 package org.opendaylight.controller.cluster.datastore.util;
 
+import com.google.common.collect.ImmutableSet;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.node.utils.serialization.QNameDeSerializationContext;
@@ -20,7 +21,6 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 
 public class InstanceIdentifierUtilsTest {
@@ -116,8 +116,8 @@ public class InstanceIdentifierUtilsTest {
 
     @Test
     public void testAugmentationIdentifier() {
-        YangInstanceIdentifier.PathArgument p1 = new YangInstanceIdentifier.AugmentationIdentifier(new HashSet(
-                Arrays.asList(TEST_QNAME)));
+        YangInstanceIdentifier.PathArgument p1 = new YangInstanceIdentifier.AugmentationIdentifier(
+            ImmutableSet.of(TEST_QNAME));
 
         List<YangInstanceIdentifier.PathArgument> arguments = new ArrayList<>();
 

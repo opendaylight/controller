@@ -176,7 +176,7 @@ public class RaftActorTest extends AbstractActorTest {
                 Object data = toObject(snapshot);
                 System.out.println("!!!!!applyRecoverySnapshot: "+data);
                 if (data instanceof List) {
-                    state.addAll((List) data);
+                    state.addAll((List<?>) data);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -246,7 +246,7 @@ public class RaftActorTest extends AbstractActorTest {
             return raftActor;
         }
 
-        public boolean waitForLogMessage(final Class logEventClass, String message){
+        public boolean waitForLogMessage(final Class<?> logEventClass, String message){
             // Wait for a specific log message to show up
             return
                 new JavaTestKit.EventFilter<Boolean>(logEventClass
