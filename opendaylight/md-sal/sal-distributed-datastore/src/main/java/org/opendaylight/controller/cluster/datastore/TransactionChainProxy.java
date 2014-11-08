@@ -14,6 +14,7 @@ import com.google.common.base.Preconditions;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChain;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
@@ -22,6 +23,8 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
 
@@ -29,6 +32,9 @@ import scala.concurrent.Promise;
  * TransactionChainProxy acts as a proxy for a DOMStoreTransactionChain created on a remote shard
  */
 public class TransactionChainProxy implements DOMStoreTransactionChain {
+
+    private static final Logger LOG = LoggerFactory.getLogger(TransactionChainProxy.class);
+
     private interface State {
         boolean isReady();
 
@@ -92,10 +98,15 @@ public class TransactionChainProxy implements DOMStoreTransactionChain {
     private final ActorContext actorContext;
     private final String transactionChainId;
     private volatile State state = IDLE_STATE;
+    private static final AtomicInteger counter = new AtomicInteger(0);
 
     public TransactionChainProxy(ActorContext actorContext) {
         this.actorContext = actorContext;
-        transactionChainId = actorContext.getCurrentMemberName() + "-" + System.currentTimeMillis();
+        transactionChainId = actorContext.getCurrentMemberName() + "-transaction-chain-" + counter.incrementAndGet();
+    }
+
+    public String getTransactionChainId() {
+        return transactionChainId;
     }
 
     @Override
@@ -144,6 +155,7 @@ public class TransactionChainProxy implements DOMStoreTransactionChain {
 
         @Override
         protected void onTransactionReady(List<Future<ActorSelection>> readyFutures) {
+            LOG.debug("onTransactionReady {} pending readyFutures size {} chain {}", getIdentifier(), readyFutures.size(), TransactionChainProxy.this.transactionChainId);
             state.setReadyFutures(getIdentifier(), readyFutures);
         }
 

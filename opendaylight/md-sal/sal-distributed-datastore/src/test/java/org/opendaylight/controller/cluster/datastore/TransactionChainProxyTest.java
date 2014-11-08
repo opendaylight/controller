@@ -10,6 +10,11 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,12 +24,6 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransactio
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 public class TransactionChainProxyTest {
     ActorContext actorContext = mock(ActorContext.class);
@@ -67,5 +66,13 @@ public class TransactionChainProxyTest {
         new TransactionChainProxy(context).close();
 
         verify(context, times(1)).broadcast(anyObject());
+    }
+
+    @Test
+    public void testTransactionChainsHaveUniqueId(){
+        TransactionChainProxy one = new TransactionChainProxy(mock(ActorContext.class));
+        TransactionChainProxy two = new TransactionChainProxy(mock(ActorContext.class));
+
+        Assert.assertNotEquals(one.getTransactionChainId(), two.getTransactionChainId());
     }
 }
