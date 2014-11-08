@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_b065e4e2",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/consensus/ConsensusStrategy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-08T08:04:06Z",
+      "side": 1,
+      "message": "Mark, could you clarify where you would hook onDataMerge in. Is this the same as apply state.",
+      "parentUuid": "ba8cc1f7_e5a41059",
+      "revId": "38e24e3714a2c3f5062f5df1cf90bb24f4d29649",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_627476fd",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/consensus/ConsensusStrategy.java",
         "patchSetId": 2
