@@ -220,7 +220,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             phantomReferenceCache.put(cleanup, cleanup);
         }
 
-        LOG.debug("Created txn {} of type {}", identifier, transactionType);
+        LOG.debug("Created txn {} of type {} on chain {}", identifier, transactionType, transactionChainId);
     }
 
     @VisibleForTesting
@@ -423,8 +423,8 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
         for(TransactionFutureCallback txFutureCallback : txFutureCallbackMap.values()) {
 
-            LOG.debug("Tx {} Readying transaction for shard {}", identifier,
-                        txFutureCallback.getShardName());
+            LOG.debug("Tx {} Readying transaction for shard {} chain {}", identifier,
+                        txFutureCallback.getShardName(), transactionChainId);
 
             TransactionContext transactionContext = txFutureCallback.getTransactionContext();
             if(transactionContext != null) {
