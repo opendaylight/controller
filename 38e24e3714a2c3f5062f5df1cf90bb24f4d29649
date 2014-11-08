@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_9041c03b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/consensus/ConsensusStrategy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-08T06:00:55Z",
+      "side": 1,
+      "message": "Mark - so given this interface, do you think you could write the 2-node implementation (maybe sans onDataMerge) based on your ideas for 2-node behavior? Might be a worthwhile exercise to prove out the interface...",
+      "parentUuid": "ba8cc1f7_e5a41059",
+      "revId": "38e24e3714a2c3f5062f5df1cf90bb24f4d29649",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_627476fd",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/consensus/ConsensusStrategy.java",
         "patchSetId": 2
