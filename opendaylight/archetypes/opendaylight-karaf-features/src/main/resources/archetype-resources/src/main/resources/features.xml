@@ -28,7 +28,9 @@
     <feature name='odl-${repoName}-all' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${repoName} :: All'>
         <!--
             Necessary TODO:
-            List all of the user consumable features you define in this feature file here.
+            List all of the features you define in this feature file here. This is meant to be used as index
+            of all available features, not necessarily a feature that a user would ever install directly.
+
             Generally you would *not* list individual bundles here, but only features defined in *this* file.
             It is useful to list them in the same order they occur in the file.
 
@@ -43,8 +45,19 @@
             https://wiki.opendaylight.org/view/Runtime:Karaf_Features_Guidelines
         Particularly:
             a) Prefixing names with 'odl-': https://wiki.opendaylight.org/view/Runtime:Karaf_Features_Guidelines#Feature_Naming
-            b) Descriptions: https://wiki.opendaylight.org/view/Runtime:Karaf_Features_Guidelines#Description
-            c) Avoid start-levels: https://wiki.opendaylight.org/view/Runtime:Karaf_Features_Guidelines#Avoid_start-levels
+            b) For user-facing features, it's often useful to have two additional features with the suffix -rest and -ui
+               * The "base" feature, e.g., odl-${repoName}-<feautre> provides just the base functionality
+               * The "rest" feature, e.g., odl-${repoName}-<feautre>-rest includes the odl-${repoName}-<feautre> feature as well
+                 as odl-restconf and any other features/bundles needed to make REST/RESTCONF work for the base feature
+               * The "ui" feature, e.g., odl-${repoName}-<feautre>-ui includes the odl-${repoName}-<feautre>-rest feature as well
+                 as the odl-dlux-core feature and any other features/bundles needed to make DLUX work for the base feature
+               * Note: Not all features should be user-facing. Only features which end-users of OpenDaylight, e.g., network
+                       opeartors would want to be able to easily install/enable/disable should be considered user-facing.
+                       The goal of user-facing features is to hit the 90/10 point where ~10% of the configuration options cover
+                       ~90% of use cases. Developers and advanced users can dig in and customize the installed features and
+                       bundles to their heart's content.
+            c) Descriptions: https://wiki.opendaylight.org/view/Runtime:Karaf_Features_Guidelines#Description
+            d) Avoid start-levels: https://wiki.opendaylight.org/view/Runtime:Karaf_Features_Guidelines#Avoid_start-levels
 
         It's also nice to list inside a feature, first the features it needs, then the bundles it needs, then the configfiles.
         Examples:
