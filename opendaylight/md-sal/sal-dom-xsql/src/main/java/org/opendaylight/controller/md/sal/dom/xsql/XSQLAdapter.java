@@ -349,7 +349,7 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
         JDBCResultSet rs = new JDBCResultSet(sql);
         try {
             int count = 0;
-            jdbcServer.execute(rs, this);
+            JDBCServer.execute(rs, this);
             boolean isFirst = true;
             int loc = rs.getFields().size() - 1;
             int totalWidth = 0;

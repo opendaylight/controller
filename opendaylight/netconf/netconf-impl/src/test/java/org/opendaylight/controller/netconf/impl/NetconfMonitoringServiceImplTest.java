@@ -12,7 +12,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.netty.channel.Channel;
-import java.util.List;
 import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
@@ -56,7 +55,6 @@ public class NetconfMonitoringServiceImplTest {
     public void testSessions() throws Exception {
         doReturn("sessToStr").when(managementSession).toString();
         service.onSessionUp(managementSession);
-        List list = Lists.newArrayList(managementSession);
     }
 
     @Test(expected = RuntimeException.class)
@@ -80,12 +78,12 @@ public class NetconfMonitoringServiceImplTest {
         doReturn(snapshot).when(operationProvider).openSnapshot(anyString());
         doReturn(services).when(snapshot).getServices();
         doReturn(caps).when(operationService).getCapabilities();
-        Optional opt = mock(Optional.class);
+        Optional<String> opt = mock(Optional.class);
         doReturn(opt).when(cap).getCapabilitySchema();
         doReturn(true).when(opt).isPresent();
         doReturn(opt).when(cap).getModuleNamespace();
         doReturn("namespace").when(opt).get();
-        Optional optRev = Optional.of("rev");
+        Optional<String> optRev = Optional.of("rev");
         doReturn(optRev).when(cap).getRevision();
         doReturn(Optional.of("modName")).when(cap).getModuleName();
         doReturn(Optional.of(Lists.newArrayList("loc"))).when(cap).getLocation();
