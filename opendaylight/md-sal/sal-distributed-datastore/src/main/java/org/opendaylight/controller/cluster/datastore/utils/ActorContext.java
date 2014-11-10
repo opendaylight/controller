@@ -18,6 +18,7 @@ import akka.pattern.AskTimeoutException;
 import akka.util.Timeout;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.Configuration;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
@@ -41,7 +42,10 @@ import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
+
+import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
+
 import static akka.pattern.Patterns.ask;
 
 /**
@@ -370,7 +374,7 @@ public class ActorContext {
         return operationDuration;
     }
 
-    public boolean isLocalPath(String path) {
+    public boolean isPathCoLocated(String path) {
         String selfAddress = clusterWrapper.getSelfAddress();
         if (path == null || selfAddress == null) {
             return false;
@@ -379,21 +383,42 @@ public class ActorContext {
         int atIndex1 = path.indexOf("@");
         int atIndex2 = selfAddress.indexOf("@");
 
-        if (atIndex1 == -1 || atIndex2 == -1) {
+        if (atIndex1 == -1 && atIndex2 == -1) {
+            // local path
+            Iterator<String> iter1 = Splitter.<String>on("/").limit(4).omitEmptyStrings().split(path).iterator();
+            Iterator<String> iter2= Splitter.<String>on("/").limit(4).omitEmptyStrings().split(selfAddress).iterator();
+
+            // the first 3 tokens are considered for a match
+            int count = 3;
+            while (--count > 0 && iter1.hasNext() && iter2.hasNext()) {
+                if (iter1.next().equals(iter2.next())) {
+                    continue;
+                } else {
+                    break;
+                }
+            }
+
+            return count == 0 ;
+
+        } else if (atIndex1 == -1 || atIndex2 == -1) {
             return false;
+
+        } else {
+            //remote paths
+            int slashIndex1 = path.indexOf("/", atIndex1);
+            int slashIndex2 = selfAddress.indexOf("/", atIndex2);
+
+            if (slashIndex1 == -1 || slashIndex2 == -1) {
+                return false;
+            }
+
+            String hostPort1 = path.substring(atIndex1, slashIndex1);
+            String hostPort2 = selfAddress.substring(atIndex2, slashIndex2);
+
+            return hostPort1.equals(hostPort2);
         }
 
-        int slashIndex1 = path.indexOf("/", atIndex1);
-        int slashIndex2 = selfAddress.indexOf("/", atIndex2);
 
-        if (slashIndex1 == -1 || slashIndex2 == -1) {
-            return false;
-        }
-
-        String hostPort1 = path.substring(atIndex1, slashIndex1);
-        String hostPort2 = selfAddress.substring(atIndex2, slashIndex2);
-
-        return hostPort1.equals(hostPort2);
     }
 
     /**

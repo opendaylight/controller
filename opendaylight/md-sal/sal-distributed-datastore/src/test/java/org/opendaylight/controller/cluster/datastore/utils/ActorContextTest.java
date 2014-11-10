@@ -158,32 +158,48 @@ public class ActorContextTest extends AbstractActorTest{
     }
 
     @Test
-    public void testIsLocalPath() {
+    public void testIsPathCoLocated() {
         MockClusterWrapper clusterWrapper = new MockClusterWrapper();
         ActorContext actorContext =
                 new ActorContext(getSystem(), null, clusterWrapper, mock(Configuration.class));
 
         clusterWrapper.setSelfAddress("");
-        assertEquals(false, actorContext.isLocalPath(null));
-        assertEquals(false, actorContext.isLocalPath(""));
+        assertEquals(false, actorContext.isPathCoLocated(null));
+        assertEquals(false, actorContext.isPathCoLocated(""));
 
         clusterWrapper.setSelfAddress(null);
-        assertEquals(false, actorContext.isLocalPath(""));
+        assertEquals(false, actorContext.isPathCoLocated(""));
+
+        // even if the path is in local format, match the primary path (first 3 elements)
+        // and return true
+        clusterWrapper.setSelfAddress("akka://test/user/$b");
+        assertEquals(true, actorContext.isPathCoLocated("akka://test/user/$a"));
+
+        clusterWrapper.setSelfAddress("akka://test/user/token1/$b");
+        assertEquals(true, actorContext.isPathCoLocated("akka://test/user/$a"));
 
         clusterWrapper.setSelfAddress("akka://test/user/$b");
-        assertEquals(false, actorContext.isLocalPath("akka://test/user/$a"));
+        assertEquals(true, actorContext.isPathCoLocated("akka://test/user/token2/token3/$a"));
 
+        //local path but not same
+        clusterWrapper.setSelfAddress("akka://test/user/$b");
+        assertEquals(false, actorContext.isPathCoLocated("akka://test1/user/$a"));
+
+        //ip and port same
         clusterWrapper.setSelfAddress("akka.tcp://system@127.0.0.1:2550/");
-        assertEquals(true, actorContext.isLocalPath("akka.tcp://system@127.0.0.1:2550/"));
+        assertEquals(true, actorContext.isPathCoLocated("akka.tcp://system@127.0.0.1:2550/"));
 
+        // forward-slash missing in address
         clusterWrapper.setSelfAddress("akka.tcp://system@127.0.0.1:2550");
-        assertEquals(false, actorContext.isLocalPath("akka.tcp://system@127.0.0.1:2550/"));
+        assertEquals(false, actorContext.isPathCoLocated("akka.tcp://system@127.0.0.1:2550/"));
 
+        //ips differ
         clusterWrapper.setSelfAddress("akka.tcp://system@128.0.0.1:2550/");
-        assertEquals(false, actorContext.isLocalPath("akka.tcp://system@127.0.0.1:2550/"));
+        assertEquals(false, actorContext.isPathCoLocated("akka.tcp://system@127.0.0.1:2550/"));
 
+        //ports differ
         clusterWrapper.setSelfAddress("akka.tcp://system@127.0.0.1:2551/");
-        assertEquals(false, actorContext.isLocalPath("akka.tcp://system@127.0.0.1:2550/"));
+        assertEquals(false, actorContext.isPathCoLocated("akka.tcp://system@127.0.0.1:2550/"));
     }
 
     @Test
