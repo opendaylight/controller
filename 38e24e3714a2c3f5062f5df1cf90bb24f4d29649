@@ -55,6 +55,42 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_711d1ebd",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/consensus/ConsensusStrategy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 2508
+      },
+      "writtenOn": "2014-11-10T17:16:45Z",
+      "side": 1,
+      "message": "Tom, I agree it would be worthwhile to prove out the interface for 2-Node. I will do that soon.",
+      "parentUuid": "ba8cc1f7_9041c03b",
+      "revId": "38e24e3714a2c3f5062f5df1cf90bb24f4d29649",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_31379601",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/consensus/ConsensusStrategy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 2508
+      },
+      "writtenOn": "2014-11-10T17:16:45Z",
+      "side": 1,
+      "message": "Moiz, I was taking the \"state\" to just be the switching between the Follower/Candidate/Leader RAFT states. Since those states define what happens with the data according to the RAFT consensus algorithm I though we should allow alternative data merge before changing this state. When I think about the implementation actually based on the data merge strategy/config/state, etc. it should probably have  a role in what the next state is.\n\nThere are 2 main data merge cases from 2-Node (below) and how to apply it without affecting RAFT as it is implemented today is my goal:\n1) Bring 1 node\u0027s data over completely and apply it to the other (Lithium 2-Node behavior)\n2) Merge, at some level, each node\u0027s data entry-by-entry (Potential future 2-Node behavior)\n\nIt needs more discussion. Let\u0027s talk through it at our 2-Node call today (Monday 11/10/14 - 1pm (PST)) and I will revise the suggestion based on the group\u0027s input.",
+      "parentUuid": "ba8cc1f7_b065e4e2",
+      "revId": "38e24e3714a2c3f5062f5df1cf90bb24f4d29649",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_627476fd",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/consensus/ConsensusStrategy.java",
         "patchSetId": 2
