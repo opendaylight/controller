@@ -71,6 +71,14 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
     }
 
     @Override
+    public void startOrderedLeafSet(YangInstanceIdentifier.NodeIdentifier name, int childSizeHint) throws IOException, IllegalArgumentException {
+        Preconditions.checkNotNull(name, "Node identifier should not be null");
+        LOG.debug("Starting a new ordered leaf set");
+
+        startNode(name.getNodeType(), NodeTypes.ORDERED_LEAF_SET);
+    }
+
+    @Override
     public void leafSetEntryNode(Object value) throws IOException, IllegalArgumentException {
         LOG.debug("Writing a new leaf set entry node");
 
