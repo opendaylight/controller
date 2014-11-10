@@ -8,14 +8,16 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.controller.sal.connect.netconf.schema.mapping.NetconfMessageTransformer;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.Module;
@@ -251,6 +253,21 @@ public class NetconfToRpcRequestTest {
 
         final org.w3c.dom.Node streamName = subscribeName.getFirstChild();
         assertEquals(streamName.getLocalName(), "stream-name");
+
+    }
+
+    @Test
+    public void testRpcResponse() throws Exception {
+        final NetconfMessage response = new NetconfMessage(XmlUtil.readXmlToDocument(
+                "<rpc-reply xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"m-5\">\n" +
+                "<data xmlns=\"urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring\">" +
+                "module schema" +
+                "</data>\n" +
+                "</rpc-reply>\n"
+        ));
+        final RpcResult<CompositeNode> compositeNodeRpcResult = messageTransformer.toRpcResult(response, SUBSCRIBE_RPC_NAME);
+        final Node<?> dataNode = compositeNodeRpcResult.getResult().getValue().get(0);
+        assertEquals("module schema", dataNode.getValue());
     }
 
 }
