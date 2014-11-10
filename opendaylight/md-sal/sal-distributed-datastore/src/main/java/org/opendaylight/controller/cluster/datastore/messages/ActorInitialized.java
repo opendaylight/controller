@@ -10,4 +10,5 @@ package org.opendaylight.controller.cluster.datastore.messages;
 import java.io.Serializable;
 
 public class ActorInitialized implements Serializable {
+    private static final long serialVersionUID = 1L;
 }

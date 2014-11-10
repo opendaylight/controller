@@ -387,6 +387,7 @@ public class ShardManagerTest extends AbstractActorTest {
             throws Exception {
         final CountDownLatch persistLatch = new CountDownLatch(1);
         final Creator<ShardManager> creator = new Creator<ShardManager>() {
+            private static final long serialVersionUID = 1L;
             @Override
             public ShardManager create() throws Exception {
                 return new ShardManager(shardMrgIDSuffix, new MockClusterWrapper(), new MockConfiguration(), DatastoreContext.newBuilder().build()) {
@@ -466,6 +467,7 @@ public class ShardManagerTest extends AbstractActorTest {
     }
 
     private static class DelegatingShardManagerCreator implements Creator<ShardManager> {
+        private static final long serialVersionUID = 1L;
         private Creator<ShardManager> delegate;
 
         public DelegatingShardManagerCreator(Creator<ShardManager> delegate) {

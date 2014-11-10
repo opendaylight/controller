@@ -85,6 +85,7 @@ public class RaftActorTest extends AbstractActorTest {
         private final RaftActor delegate;
 
         public static final class MockRaftActorCreator implements Creator<MockRaftActor> {
+            private static final long serialVersionUID = 1L;
             private final Map<String, String> peerAddresses;
             private final String id;
             private final Optional<ConfigParams> config;

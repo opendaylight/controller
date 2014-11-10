@@ -198,6 +198,7 @@ public class MockRaftActorContext implements RaftActorContext {
     }
 
     public static class MockPayload extends Payload implements Serializable {
+        private static final long serialVersionUID = 1L;
         private String value = "";
 
         public MockPayload(){
@@ -231,6 +232,7 @@ public class MockRaftActorContext implements RaftActorContext {
     }
 
     public static class MockReplicatedLogEntry implements ReplicatedLogEntry, Serializable {
+        private static final long serialVersionUID = 1L;
 
         private final long term;
         private final long index;

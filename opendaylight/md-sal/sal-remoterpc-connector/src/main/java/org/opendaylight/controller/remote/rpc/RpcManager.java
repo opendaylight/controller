@@ -65,6 +65,7 @@ public class RpcManager extends AbstractUntypedActor {
                             final Broker.ProviderSession brokerSession,
                             final RpcProvisionRegistry rpcProvisionRegistry) {
     return Props.create(new Creator<RpcManager>() {
+      private static final long serialVersionUID = 1L;
       @Override
       public RpcManager create() throws Exception {
         return new RpcManager(schemaContext, brokerSession, rpcProvisionRegistry);

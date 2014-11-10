@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.raft.client.messages;
 import java.io.Serializable;
 
 public class FindLeaderReply implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final String leaderActor;
 
     public FindLeaderReply(String leaderActor) {

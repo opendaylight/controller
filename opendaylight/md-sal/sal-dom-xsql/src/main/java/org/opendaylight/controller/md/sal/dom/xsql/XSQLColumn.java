@@ -3,6 +3,8 @@ package org.opendaylight.controller.md.sal.dom.xsql;
 import java.io.Serializable;
 
 public class XSQLColumn implements Serializable, Comparable<Object> {
+    private static final long serialVersionUID = 4854919735031714751L;
+
     private String name = null;
     private String tableName = null;
     private int charWidth = -1;
