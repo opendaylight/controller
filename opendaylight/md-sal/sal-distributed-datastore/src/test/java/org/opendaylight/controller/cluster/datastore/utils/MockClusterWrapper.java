@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.utils;
 
 import akka.actor.ActorRef;
+import akka.actor.Address;
 import akka.actor.AddressFromURIString;
 import akka.cluster.ClusterEvent;
 import akka.cluster.MemberStatus;
@@ -20,7 +21,7 @@ import java.util.Set;
 
 public class MockClusterWrapper implements ClusterWrapper{
 
-    private String selfAddress = "akka.tcp://test@127.0.0.1:2550/user/member-1-shard-test-config";
+    private Address selfAddress = new Address("akka.tcp", "test", "127.0.0.1", 2550);
 
     @Override
     public void subscribeToMemberEvents(ActorRef actorRef) {
@@ -32,11 +33,11 @@ public class MockClusterWrapper implements ClusterWrapper{
     }
 
     @Override
-    public String getSelfAddress() {
+    public Address getSelfAddress() {
         return selfAddress;
     }
 
-    public void setSelfAddress(String selfAddress) {
+    public void setSelfAddress(Address selfAddress) {
         this.selfAddress = selfAddress;
     }
 

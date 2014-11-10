@@ -9,9 +9,10 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
+import akka.actor.Address;
 
 public interface ClusterWrapper {
     void subscribeToMemberEvents(ActorRef actorRef);
     String getCurrentMemberName();
-    String getSelfAddress();
+    Address getSelfAddress();
 }
