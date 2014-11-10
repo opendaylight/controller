@@ -60,7 +60,7 @@ public class MeteredBoundedMailbox implements MailboxType, ProducesMessageQueue<
         if (registry.getMetrics().containsKey(metricName))
             return; //already registered
 
-        Gauge queueSize = getQueueSizeGuage(monitoredQueue);
+        Gauge<Integer> queueSize = getQueueSizeGuage(monitoredQueue);
         registerQueueSizeMetric(metricName, queueSize);
     }
 
@@ -73,7 +73,7 @@ public class MeteredBoundedMailbox implements MailboxType, ProducesMessageQueue<
         }
     }
 
-    private Gauge getQueueSizeGuage(final MeteredMessageQueue monitoredQueue ){
+    private Gauge<Integer> getQueueSizeGuage(final MeteredMessageQueue monitoredQueue ){
         return new Gauge<Integer>() {
             @Override
             public Integer getValue() {
@@ -82,7 +82,7 @@ public class MeteredBoundedMailbox implements MailboxType, ProducesMessageQueue<
         };
     }
 
-    private void registerQueueSizeMetric(String metricName, Gauge metric){
+    private void registerQueueSizeMetric(String metricName, Gauge<Integer> metric){
         try {
             registry.register(metricName,metric);
         } catch (IllegalArgumentException e) {
