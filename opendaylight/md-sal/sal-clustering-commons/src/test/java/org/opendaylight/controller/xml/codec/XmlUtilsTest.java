@@ -104,7 +104,7 @@ public class XmlUtilsTest {
   @Test
   public void testInputCompositeNodeToXML() {
     CompositeNode input = XmlUtils.inputXmlToCompositeNode(testRpc.getQName(), XML_CONTENT, schema);
-    List<Node<?>> childNodes = new ArrayList();
+    List<Node<?>> childNodes = new ArrayList<>();
     childNodes.add(input);
     QName rpcQName = schema.getOperations().iterator().next().getQName();
     CompositeNode node = new ImmutableCompositeNode(rpcQName, input.getValue(), ModifyAction.REPLACE);
