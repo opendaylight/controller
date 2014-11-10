@@ -81,13 +81,13 @@ public class XmlUtilsTest {
   @Test
   public void testInputXmlToCompositeNode() {
     CompositeNode node = XmlUtils.inputXmlToCompositeNode(testRpc.getQName(), XML_CONTENT, schema);
-    ImmutableList<SimpleNode> input = (ImmutableList)node.getValue().get(0).getValue();
-    SimpleNode firstNode = input.get(0);
+    ImmutableList<SimpleNode<?>> input = (ImmutableList<SimpleNode<?>>)node.getValue().get(0).getValue();
+    SimpleNode<?> firstNode = input.get(0);
 
     Assert.assertEquals("id", firstNode.getNodeType().getLocalName());
     Assert.assertEquals("flowid", firstNode.getValue());
 
-    SimpleNode secondNode = input.get(1);
+    SimpleNode<?> secondNode = input.get(1);
     Assert.assertEquals("flow", secondNode.getNodeType().getLocalName());
 
     YangInstanceIdentifier instance = (YangInstanceIdentifier) secondNode.getValue();
