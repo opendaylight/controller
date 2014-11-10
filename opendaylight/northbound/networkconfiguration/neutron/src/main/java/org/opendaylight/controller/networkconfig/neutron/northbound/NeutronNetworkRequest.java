@@ -9,17 +9,15 @@
 package org.opendaylight.controller.networkconfig.neutron.northbound;
 
 import java.util.List;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-public class NeutronNetworkRequest implements INeutronRequest {
+public class NeutronNetworkRequest implements INeutronRequest<NeutronNetwork> {
     // See OpenStack Network API v2.0 Reference for description of
     // annotated attributes
 
@@ -50,14 +48,17 @@ public class NeutronNetworkRequest implements INeutronRequest {
         singletonNetwork = net;
     }
 
+    @Override
     public NeutronNetwork getSingleton() {
         return singletonNetwork;
     }
 
+    @Override
     public boolean isSingleton() {
         return (singletonNetwork != null);
     }
 
+    @Override
     public List<NeutronNetwork> getBulk() {
         return bulkRequest;
     }
