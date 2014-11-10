@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import akka.actor.Address;
 import akka.cluster.Cluster;
 import akka.cluster.ClusterEvent;
 import com.google.common.base.Preconditions;
@@ -17,7 +18,7 @@ import com.google.common.base.Preconditions;
 public class ClusterWrapperImpl implements ClusterWrapper {
     private final Cluster cluster;
     private final String currentMemberName;
-    private final String selfAddress;
+    private final Address selfAddress;
 
     public ClusterWrapperImpl(ActorSystem actorSystem){
         Preconditions.checkNotNull(actorSystem, "actorSystem should not be null");
@@ -32,7 +33,7 @@ public class ClusterWrapperImpl implements ClusterWrapper {
         );
 
         currentMemberName = (String) cluster.getSelfRoles().toArray()[0];
-        selfAddress = cluster.selfAddress().toString();
+        selfAddress = cluster.selfAddress();
 
     }
 
@@ -48,7 +49,7 @@ public class ClusterWrapperImpl implements ClusterWrapper {
         return currentMemberName;
     }
 
-    public String getSelfAddress() {
+    public Address getSelfAddress() {
         return selfAddress;
     }
 }

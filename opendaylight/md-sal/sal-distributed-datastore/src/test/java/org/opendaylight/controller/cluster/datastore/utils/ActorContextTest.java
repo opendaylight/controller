@@ -3,11 +3,13 @@ package org.opendaylight.controller.cluster.datastore.utils;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
+import akka.actor.Address;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.japi.Creator;
 import akka.testkit.JavaTestKit;
 import com.google.common.base.Optional;
+import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
@@ -18,8 +20,6 @@ import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
-
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -158,32 +158,67 @@ public class ActorContextTest extends AbstractActorTest{
     }
 
     @Test
-    public void testIsLocalPath() {
+    public void testIsPathLocal() {
         MockClusterWrapper clusterWrapper = new MockClusterWrapper();
-        ActorContext actorContext =
-                new ActorContext(getSystem(), null, clusterWrapper, mock(Configuration.class));
+        ActorContext actorContext = null;
 
-        clusterWrapper.setSelfAddress("");
-        assertEquals(false, actorContext.isLocalPath(null));
-        assertEquals(false, actorContext.isLocalPath(""));
+        actorContext = new ActorContext(getSystem(), null, clusterWrapper, mock(Configuration.class));
+        assertEquals(false, actorContext.isPathLocal(null));
+        assertEquals(false, actorContext.isPathLocal(""));
 
         clusterWrapper.setSelfAddress(null);
-        assertEquals(false, actorContext.isLocalPath(""));
+        actorContext = new ActorContext(getSystem(), null, clusterWrapper, mock(Configuration.class));
+        assertEquals(false, actorContext.isPathLocal(""));
 
-        clusterWrapper.setSelfAddress("akka://test/user/$b");
-        assertEquals(false, actorContext.isLocalPath("akka://test/user/$a"));
+        // even if the path is in local format, match the primary path (first 3 elements) and return true
+        clusterWrapper.setSelfAddress(new Address("akka", "test"));
+        actorContext = new ActorContext(getSystem(), null, clusterWrapper, mock(Configuration.class));
+        assertEquals(true, actorContext.isPathLocal("akka://test/user/$a"));
 
-        clusterWrapper.setSelfAddress("akka.tcp://system@127.0.0.1:2550/");
-        assertEquals(true, actorContext.isLocalPath("akka.tcp://system@127.0.0.1:2550/"));
+        clusterWrapper.setSelfAddress(new Address("akka", "test"));
+        actorContext = new ActorContext(getSystem(), null, clusterWrapper, mock(Configuration.class));
+        assertEquals(true, actorContext.isPathLocal("akka://test/user/$a"));
 
-        clusterWrapper.setSelfAddress("akka.tcp://system@127.0.0.1:2550");
-        assertEquals(false, actorContext.isLocalPath("akka.tcp://system@127.0.0.1:2550/"));
+        clusterWrapper.setSelfAddress(new Address("akka", "test"));
+        actorContext = new ActorContext(getSystem(), null, clusterWrapper, mock(Configuration.class));
+        assertEquals(true, actorContext.isPathLocal("akka://test/user/token2/token3/$a"));
 
-        clusterWrapper.setSelfAddress("akka.tcp://system@128.0.0.1:2550/");
-        assertEquals(false, actorContext.isLocalPath("akka.tcp://system@127.0.0.1:2550/"));
+        // self address of remote format,but Tx path local format.
+        clusterWrapper.setSelfAddress(new Address("akka.tcp", "system", "127.0.0.1", 2550));
+        actorContext = new ActorContext(getSystem(), null, clusterWrapper, mock(Configuration.class));
+        assertEquals(true, actorContext.isPathLocal(
+            "akka://system/user/shardmanager/shard/transaction"));
 
-        clusterWrapper.setSelfAddress("akka.tcp://system@127.0.0.1:2551/");
-        assertEquals(false, actorContext.isLocalPath("akka.tcp://system@127.0.0.1:2550/"));
+        // self address of local format,but Tx path remote format.
+        clusterWrapper.setSelfAddress(new Address("akka.tcp", "system"));
+        actorContext = new ActorContext(getSystem(), null, clusterWrapper, mock(Configuration.class));
+        assertEquals(false, actorContext.isPathLocal(
+            "akka://system@127.0.0.1:2550/user/shardmanager/shard/transaction"));
+
+        //local path but not same
+        clusterWrapper.setSelfAddress(new Address("akka", "test"));
+        actorContext = new ActorContext(getSystem(), null, clusterWrapper, mock(Configuration.class));
+        assertEquals(true, actorContext.isPathLocal("akka://test1/user/$a"));
+
+        //ip and port same
+        clusterWrapper.setSelfAddress(new Address("akka.tcp", "system", "127.0.0.1", 2550));
+        actorContext = new ActorContext(getSystem(), null, clusterWrapper, mock(Configuration.class));
+        assertEquals(true, actorContext.isPathLocal("akka.tcp://system@127.0.0.1:2550/"));
+
+        // forward-slash missing in address
+        clusterWrapper.setSelfAddress(new Address("akka.tcp", "system", "127.0.0.1", 2550));
+        actorContext = new ActorContext(getSystem(), null, clusterWrapper, mock(Configuration.class));
+        assertEquals(false, actorContext.isPathLocal("akka.tcp://system@127.0.0.1:2550"));
+
+        //ips differ
+        clusterWrapper.setSelfAddress(new Address("akka.tcp", "system", "127.0.0.1", 2550));
+        actorContext = new ActorContext(getSystem(), null, clusterWrapper, mock(Configuration.class));
+        assertEquals(false, actorContext.isPathLocal("akka.tcp://system@127.1.0.1:2550/"));
+
+        //ports differ
+        clusterWrapper.setSelfAddress(new Address("akka.tcp", "system", "127.0.0.1", 2550));
+        actorContext = new ActorContext(getSystem(), null, clusterWrapper, mock(Configuration.class));
+        assertEquals(false, actorContext.isPathLocal("akka.tcp://system@127.0.0.1:2551/"));
     }
 
     @Test
