@@ -25,5 +25,5 @@ public class NodeTypes {
     public static final byte AUGMENTATION_NODE = 11;
     public static final byte ANY_XML_NODE = 12;
     public static final byte END_NODE = 13;
-
+    public static final byte ORDERED_LEAF_SET = 14;
 }
