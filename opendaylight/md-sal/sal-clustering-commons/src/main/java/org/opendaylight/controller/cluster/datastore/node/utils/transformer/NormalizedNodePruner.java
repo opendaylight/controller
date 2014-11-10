@@ -75,6 +75,14 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
     }
 
     @Override
+    public void startOrderedLeafSet(YangInstanceIdentifier.NodeIdentifier nodeIdentifier, int i) throws IOException, IllegalArgumentException {
+
+        checkNotSealed();
+
+        addBuilder(Builders.orderedLeafSetBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
+    }
+
+    @Override
     public void leafSetEntryNode(Object o) throws IOException, IllegalArgumentException {
 
         checkNotSealed();
