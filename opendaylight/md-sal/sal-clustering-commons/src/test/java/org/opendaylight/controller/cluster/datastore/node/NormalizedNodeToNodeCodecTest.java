@@ -60,7 +60,7 @@ public class NormalizedNodeToNodeCodecTest {
         PathUtils.toString(YangInstanceIdentifier.builder().build()), documentOne);
 
     // Validate the value of id can be retrieved from the normalized node
-    NormalizedNode output = normalizedNodeGetter.getOutput();
+    NormalizedNode<?, ?> output = normalizedNodeGetter.getOutput();
     assertNotNull(output);
 
 
