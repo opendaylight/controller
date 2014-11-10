@@ -103,7 +103,7 @@ public class NetconfClientSessionNegotiatorTest {
         return pipeline;
     }
 
-    private NetconfClientSessionNegotiator createNetconfClientSessionNegotiator(final Promise promise,
+    private NetconfClientSessionNegotiator createNetconfClientSessionNegotiator(final Promise<NetconfClientSession> promise,
                                                                                 final NetconfMessage startExi) {
         ChannelProgressivePromise progressivePromise = mock(ChannelProgressivePromise.class);
         NetconfClientSessionPreferences preferences = new NetconfClientSessionPreferences(helloMessage, startExi);
