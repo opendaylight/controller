@@ -387,6 +387,11 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
         }
 
         @Override
+        public void startOrderedLeafSet(NodeIdentifier name, int childSizeHint) throws IOException, IllegalArgumentException {
+            delegate.startOrderedLeafSet(name, childSizeHint);
+        }
+
+        @Override
         public void leafSetEntryNode(Object value) throws IOException, IllegalArgumentException {
             delegate.leafSetEntryNode(value);
         }
