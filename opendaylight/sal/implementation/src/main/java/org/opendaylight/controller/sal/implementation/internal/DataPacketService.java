@@ -204,23 +204,22 @@ public class DataPacketService implements IPluginOutDataPacketService,
         }
     }
 
-    void setPluginInDataService(Map props, IPluginInDataPacketService s) {
+    void setPluginInDataService(Map<?, ?> props, IPluginInDataPacketService s) {
         ProtocolService.set(this.pluginInDataService, props, s, logger);
     }
 
-    void unsetPluginInDataService(Map props, IPluginInDataPacketService s) {
+    void unsetPluginInDataService(Map<?, ?> props, IPluginInDataPacketService s) {
         ProtocolService.unset(this.pluginInDataService, props, s, logger);
     }
 
-    void setListenDataPacket(Map props, IListenDataPacket s) {
+    void setListenDataPacket(Map<?, ?> props, IListenDataPacket s) {
         if (this.listenDataPacket == null || this.indexDataPacket == null) {
             logger.error("data structure to store data is NULL");
             return;
         }
         logger.trace("Received setListenDataPacket request");
-        for (Object e : props.entrySet()) {
-            Map.Entry entry = (Map.Entry) e;
-            logger.trace("Prop key:({}) value:({})",entry.getKey(), entry.getValue());
+        for (Map.Entry<?, ?> e : props.entrySet()) {
+            logger.trace("Prop key:({}) value:({})",e.getKey(), e.getValue());
         }
 
         String listenerName = null;
@@ -295,15 +294,14 @@ public class DataPacketService implements IPluginOutDataPacketService,
         }
     }
 
-    void unsetListenDataPacket(Map props, IListenDataPacket s) {
+    void unsetListenDataPacket(Map<?, ?> props, IListenDataPacket s) {
         if (this.listenDataPacket == null || this.indexDataPacket == null) {
             logger.error("data structure to store data is NULL");
             return;
         }
         logger.trace("Received UNsetListenDataPacket request");
-        for (Object e : props.entrySet()) {
-            Map.Entry entry = (Map.Entry) e;
-            logger.trace("Prop key:({}) value:({})",entry.getKey(), entry.getValue());
+        for (Map.Entry<?, ?> e : props.entrySet()) {
+            logger.trace("Prop key:({}) value:({})",e.getKey(), e.getValue());
         }
 
         String listenerName = null;

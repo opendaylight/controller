@@ -109,7 +109,7 @@ public class CommonConfig extends AbstractConfig {
         public T mailboxCapacity(int capacity) {
             Preconditions.checkArgument(capacity > 0, "mailbox capacity must be >0");
 
-            Map<String, Object> boundedMailbox = (Map) configHolder.get(TAG_MAILBOX);
+            Map<String, Object> boundedMailbox = (Map<String, Object>) configHolder.get(TAG_MAILBOX);
             boundedMailbox.put(TAG_MAILBOX_CAPACITY, capacity);
             return (T)this;
         }
@@ -118,7 +118,7 @@ public class CommonConfig extends AbstractConfig {
             Duration pushTimeout = Duration.create(timeout);
             Preconditions.checkArgument(pushTimeout.isFinite(), "invalid value for mailbox push timeout");
 
-            Map<String, Object> boundedMailbox = (Map) configHolder.get(TAG_MAILBOX);
+            Map<String, Object> boundedMailbox = (Map<String, Object>) configHolder.get(TAG_MAILBOX);
             boundedMailbox.put(TAG_MAILBOX_PUSH_TIMEOUT, timeout);
             return (T)this;
         }
