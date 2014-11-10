@@ -7,14 +7,6 @@
  */
 package org.opendaylight.controller.sal.connect.netconf.util;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
-
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,9 +25,9 @@ import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorSeverity;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
@@ -47,6 +39,15 @@ import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 
 public class NetconfMessageTransformUtil {
 
@@ -326,6 +327,20 @@ public class NetconfMessageTransformUtil {
         return new NodeContainerProxy(NETCONF_RPC_QNAME, Sets.<DataSchemaNode>newHashSet(editConfigProxy));
     }
 
+
+    public static Optional<RpcDefinition> findSchemaForRpc(final QName rpcName, final SchemaContext schemaContext) {
+        Preconditions.checkNotNull(rpcName);
+        Preconditions.checkNotNull(schemaContext);
+
+        for (final RpcDefinition rpcDefinition : schemaContext.getOperations()) {
+            if(rpcDefinition.getQName().equals(rpcName)) {
+                return Optional.of(rpcDefinition);
+            }
+        }
+
+        return Optional.absent();
+    }
+
     /**
      * Creates artificial schema node for schema defined rpc. This artificial schema looks like:
      * <pre>
@@ -341,18 +356,9 @@ public class NetconfMessageTransformUtil {
      * This makes the translation of schema defined rpc request
      * to xml use schema which is crucial for some types of nodes e.g. identity-ref.
      */
-    public static DataNodeContainer createSchemaForRpc(final QName rpcName, final SchemaContext schemaContext) {
-        Preconditions.checkNotNull(rpcName);
-        Preconditions.checkNotNull(schemaContext);
-
-        for (final RpcDefinition rpcDefinition : schemaContext.getOperations()) {
-            if(rpcDefinition.getQName().equals(rpcName)) {
-                final NodeContainerProxy rpcBodyProxy = new NodeContainerProxy(rpcName, rpcDefinition.getInput().getChildNodes());
-                return new NodeContainerProxy(NETCONF_RPC_QNAME, Sets.<DataSchemaNode>newHashSet(rpcBodyProxy));
-            }
-        }
-
-        throw new IllegalArgumentException("Rpc " + rpcName + " not found in schema context " + schemaContext + ". Unable to invoke Rpc");
+    public static DataNodeContainer createSchemaForRpc(final RpcDefinition rpcDefinition) {
+        final NodeContainerProxy rpcBodyProxy = new NodeContainerProxy(rpcDefinition.getQName(), rpcDefinition.getInput().getChildNodes());
+        return new NodeContainerProxy(NETCONF_RPC_QNAME, Sets.<DataSchemaNode>newHashSet(rpcBodyProxy));
     }
 
     public static CompositeNodeTOImpl wrap(final QName name, final Node<?> node) {
