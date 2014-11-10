@@ -18,6 +18,7 @@ import akka.pattern.AskTimeoutException;
 import akka.util.Timeout;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.Configuration;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
@@ -41,7 +42,9 @@ import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
+
 import java.util.concurrent.TimeUnit;
+
 import static akka.pattern.Patterns.ask;
 
 /**
@@ -370,30 +373,37 @@ public class ActorContext {
         return operationDuration;
     }
 
-    public boolean isLocalPath(String path) {
+    public boolean isPathCoLocated(String path) {
         String selfAddress = clusterWrapper.getSelfAddress();
-        if (path == null || selfAddress == null) {
+        if (Strings.isNullOrEmpty(path) || Strings.isNullOrEmpty(selfAddress)) {
             return false;
         }
 
         int atIndex1 = path.indexOf("@");
         int atIndex2 = selfAddress.indexOf("@");
 
-        if (atIndex1 == -1 || atIndex2 == -1) {
+        if (atIndex1 == -1) {
+            //if the path is not of remote format, then its local and is co-located
+            return true;
+
+        } else if (atIndex1 != -1 && atIndex2 == -1) {
+            // self address is local format and tx actor path is remote format
             return false;
+
+        } else {
+            // self-address and tx actor path, both are of remote path format
+            int slashIndex1 = path.indexOf("/", atIndex1);
+            int slashIndex2 = selfAddress.indexOf("/", atIndex2);
+
+            if (slashIndex1 == -1 || slashIndex2 == -1) {
+                return false;
+            }
+
+            String hostPort1 = path.substring(atIndex1, slashIndex1);
+            String hostPort2 = selfAddress.substring(atIndex2, slashIndex2);
+
+            return hostPort1.equals(hostPort2);
         }
-
-        int slashIndex1 = path.indexOf("/", atIndex1);
-        int slashIndex2 = selfAddress.indexOf("/", atIndex2);
-
-        if (slashIndex1 == -1 || slashIndex2 == -1) {
-            return false;
-        }
-
-        String hostPort1 = path.substring(atIndex1, slashIndex1);
-        String hostPort2 = selfAddress.substring(atIndex2, slashIndex2);
-
-        return hostPort1.equals(hostPort2);
     }
 
     /**
