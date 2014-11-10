@@ -1965,7 +1965,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>${checkstyle.version}</version>
         <configuration>
           <failsOnError>true</failsOnError>
           <configLocation>controller/checkstyle.xml</configLocation>
@@ -2051,7 +2050,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>${surefire.version}</version>
         <configuration>
           <argLine>${testvm.argLine} ${jacoco.agent.ut.arg}</argLine>
           <systemProperties>
