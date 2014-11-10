@@ -23,6 +23,12 @@ import org.opendaylight.controller.northbound.commons.exception.BadRequestExcept
 import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
 
 public class PaginatedRequestFactory {
+    private static final Comparator<INeutronObject> NEUTRON_OBJECT_COMPARATOR = new Comparator<INeutronObject>() {
+        @Override
+        public int compare(INeutronObject o1, INeutronObject o2) {
+            return o1.getID().compareTo(o2.getID());
+        }
+    };
 
     public static class PaginationResults<T extends INeutronObject> {
         List<T> collection;
@@ -31,6 +37,24 @@ public class PaginatedRequestFactory {
         public PaginationResults(List<T> collection, List<NeutronPageLink> links) {
             this.collection = collection;
             this.links = links;
+        }
+    }
+
+    private static final class MarkerObject implements INeutronObject {
+        private final String id;
+
+        MarkerObject(String id) {
+            this.id = id;
+        }
+
+        @Override
+        public String getID() {
+            return id;
+        }
+
+        @Override
+        public void setID(String id) {
+            throw new UnsupportedOperationException("Marker has constant ID");
         }
     }
 
@@ -62,58 +86,29 @@ public class PaginatedRequestFactory {
 
     private static <T extends INeutronObject> PaginationResults<T> _paginate(Integer limit, String marker, Boolean pageReverse, UriInfo uriInfo, List<T> collection) {
         List<NeutronPageLink> links = new ArrayList<>();
-        Integer startPos = null;
+        final int startPos;
         String startMarker;
         String endMarker;
         Boolean firstPage = false;
         Boolean lastPage = false;
 
-        Comparator<INeutronObject> neutronObjectComparator = new Comparator<INeutronObject>() {
-            @Override
-            public int compare(INeutronObject o1, INeutronObject o2) {
-                return o1.getID().compareTo(o2.getID());
-            }
-        };
+        Collections.sort(collection, NEUTRON_OBJECT_COMPARATOR);
 
-        Collections.sort(collection, neutronObjectComparator);
-
-        if (marker == null) {
-            startPos = 0;
-        }
-
-        else {
-
-            class MarkerObject implements INeutronObject {
-                private String id;
-
-                @Override
-                public String getID() {
-                    return id;
-                }
-
-                @Override
-                public void setID(String id) {
-                    this.id = id;
-                }
+        if (marker != null) {
+            int offset = Collections.binarySearch(collection, new MarkerObject(marker), NEUTRON_OBJECT_COMPARATOR);
+            if (offset < 0) {
+                throw new ResourceNotFoundException("UUID for marker: " + marker + " could not be found");
             }
 
-            INeutronObject markerObject = new MarkerObject();
-
-            markerObject.setID(marker);
-
-            startPos = Collections.binarySearch(collection, markerObject, neutronObjectComparator);
-
-            if (!pageReverse){
-                startPos = startPos + 1;
+            if (!pageReverse) {
+                startPos = offset + 1;
             }
             else {
-                startPos = startPos - limit;
+                startPos = offset - limit;
             }
-
         }
-
-        if (startPos == null) {
-            throw new ResourceNotFoundException("UUID for marker:" + marker + " could not be found");
+        else {
+            startPos = 0;
         }
 
         if (startPos == 0){
