@@ -315,6 +315,7 @@
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
     </dependency>
+
     <!-- test to validate features.xml -->
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
