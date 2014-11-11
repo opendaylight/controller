@@ -16,6 +16,24 @@
       "revId": "9105f48179f1488e6acbd830c6fb295c99252368",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_e3608537",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-11T02:31:15Z",
+      "side": 1,
+      "message": "Will do. Along with the consolidated changes wirh moiz\u0027s review comments",
+      "parentUuid": "ba8cc1f7_e37965fd",
+      "revId": "9105f48179f1488e6acbd830c6fb295c99252368",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
