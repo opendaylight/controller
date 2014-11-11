@@ -38,7 +38,6 @@
         -->
         <feature version='${project.version}'>odl-restconf</feature>
         <feature version='${project.version}'>odl-mdsal-apidocs</feature>
-        <feature version='${project.version}'>odl-clustering-test-app</feature>
     </feature>
     <!--
         Necessary TODO: Define your features.  It is useful to list then in order of dependency.  So if A depends on B, list A first.
@@ -123,17 +122,6 @@
         <bundle>mvn:com.sun.jersey/jersey-server/${jersey.version}</bundle>
         <bundle>mvn:com.sun.jersey/jersey-servlet/${jersey.version}</bundle>
         <bundle>wrap:mvn:org.json/json/${org.json.version}</bundle>
-    </feature>
-
-    <feature name='odl-clustering-test-app' version='${project.version}'>
-        <feature version='${project.version}'>odl-mdsal-clustering</feature>
-        <feature version='${project.version}'>odl-restconf</feature>
-        <feature version='${yangtools.version}'>odl-yangtools-models</feature>
-        <bundle>mvn:org.opendaylight.controller.samples/clustering-it-model/${project.version}</bundle>
-        <bundle>mvn:org.opendaylight.controller.samples/clustering-it-provider/${project.version}</bundle>
-        <configfile finalname="${config.configfile.directory}/20-clustering-test-app.xml">mvn:org.opendaylight.controller.samples/clustering-it-config/${project.version}/xml/config</configfile>
-        <configfile finalname="configuration/initial/module-shards.conf" override="true" >mvn:org.opendaylight.controller.samples/clustering-it-config/${project.version}/xml/testmoduleshardconf</configfile>
-        <configfile finalname="configuration/initial/modules.conf" override="true">mvn:org.opendaylight.controller.samples/clustering-it-config/${project.version}/xml/testmoduleconf</configfile>
     </feature>
 
     <feature name='odl-toaster-rest' version='${project.version}'>
