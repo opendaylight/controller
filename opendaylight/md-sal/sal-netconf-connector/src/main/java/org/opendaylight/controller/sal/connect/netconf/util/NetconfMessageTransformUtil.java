@@ -43,7 +43,6 @@ import org.opendaylight.yangtools.yang.data.impl.SimpleNodeTOImpl;
 import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -345,14 +344,9 @@ public class NetconfMessageTransformUtil {
         Preconditions.checkNotNull(rpcName);
         Preconditions.checkNotNull(schemaContext);
 
-        for (final RpcDefinition rpcDefinition : schemaContext.getOperations()) {
-            if(rpcDefinition.getQName().equals(rpcName)) {
-                final NodeContainerProxy rpcBodyProxy = new NodeContainerProxy(rpcName, rpcDefinition.getInput().getChildNodes());
-                return new NodeContainerProxy(NETCONF_RPC_QNAME, Sets.<DataSchemaNode>newHashSet(rpcBodyProxy));
-            }
-        }
+        final NodeContainerProxy rpcBodyProxy = new NodeContainerProxy(rpcName, schemaContext.getChildNodes());
+        return new NodeContainerProxy(NETCONF_RPC_QNAME, Sets.<DataSchemaNode>newHashSet(rpcBodyProxy));
 
-        throw new IllegalArgumentException("Rpc " + rpcName + " not found in schema context " + schemaContext + ". Unable to invoke Rpc");
     }
 
     public static CompositeNodeTOImpl wrap(final QName name, final Node<?> node) {
