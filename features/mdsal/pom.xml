@@ -315,6 +315,14 @@
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>features-jolokia</artifactId>
+      <version>${commons.opendaylight.version}</version>
+      <classifier>features</classifier>
+      <type>xml</type>
+    </dependency>
+
     <!-- test to validate features.xml -->
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
