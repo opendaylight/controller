@@ -122,6 +122,24 @@
       "revId": "9105f48179f1488e6acbd830c6fb295c99252368",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_b9aaacd2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 404,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-11T19:50:02Z",
+      "side": 1,
+      "message": "Or i can just return true, considering that the tx path is local.",
+      "parentUuid": "ba8cc1f7_596840ba",
+      "revId": "9105f48179f1488e6acbd830c6fb295c99252368",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
