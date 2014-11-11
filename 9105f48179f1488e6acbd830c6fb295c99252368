@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_f9a034f6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-11T19:48:05Z",
+      "side": 1,
+      "message": "Ok i will update my import layout. Would it be possible to share your intellij CodeStyle to ensure we have identical style. I have the OpendaylightCodeStyle already, but there it does not have the layout desired.",
+      "parentUuid": "ba8cc1f7_e612d3b3",
+      "revId": "9105f48179f1488e6acbd830c6fb295c99252368",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_e37965fd",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
         "patchSetId": 1
@@ -82,6 +100,24 @@
       "writtenOn": "2014-11-11T18:02:00Z",
       "side": 1,
       "message": "It would be safest to just cover that case anyway.",
+      "parentUuid": "ba8cc1f7_c611cfad",
+      "revId": "9105f48179f1488e6acbd830c6fb295c99252368",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_596840ba",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 404,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-11T19:48:05Z",
+      "side": 1,
+      "message": "If the selfAddreess is of the remote format and the Tx path is of local format, I am not sure how can we do  match?\ne.g \nselfaddress \u003d akka.tcp://system@127.0.0.1:2550/\ntx path:akka://system/user/shardmanager/shard/transaction",
       "parentUuid": "ba8cc1f7_c611cfad",
       "revId": "9105f48179f1488e6acbd830c6fb295c99252368",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
