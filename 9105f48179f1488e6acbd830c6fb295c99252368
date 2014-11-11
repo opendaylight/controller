@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "ba8cc1f7_e612d3b3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-11T14:34:25Z",
+      "side": 1,
+      "message": "Kamal, since it\u0027s getting annoying to see imports being moved around like this. Atleast for the clustering code I want to stick with one format for the import order. I talked with Tom and he and I agreed that we would stick with alphabetic order. Could you ensure that your imports maintain that order?",
+      "revId": "9105f48179f1488e6acbd830c6fb295c99252368",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_e37965fd",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
         "patchSetId": 1
@@ -31,6 +48,23 @@
       "side": 1,
       "message": "Will do. Along with the consolidated changes wirh moiz\u0027s review comments",
       "parentUuid": "ba8cc1f7_e37965fd",
+      "revId": "9105f48179f1488e6acbd830c6fb295c99252368",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_c611cfad",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 404,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-11T14:34:25Z",
+      "side": 1,
+      "message": "Can selfAddress ever not have an \u0027@\u0027 in it? Could you confirm that because if that can never happen then you will still identify a local actor as a remote actor.",
       "revId": "9105f48179f1488e6acbd830c6fb295c99252368",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
