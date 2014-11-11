@@ -29,6 +29,7 @@ import org.opendaylight.yangtools.yang.data.impl.codec.xml.XmlDocumentUtils;
 import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.NotificationDefinition;
+import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -77,17 +78,26 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
                     final DataNodeContainer schemaForGetConfig = NetconfMessageTransformUtil.createSchemaForGetConfig(schemaContext.get());
                     w3cPayload = XmlDocumentUtils.toDocument(rpcPayload, schemaForGetConfig, codecProvider);
                 } else {
-                    final DataNodeContainer schemaForGetConfig = NetconfMessageTransformUtil.createSchemaForRpc(rpc, schemaContext.get());
-                    w3cPayload = XmlDocumentUtils.toDocument(rpcPayload, schemaForGetConfig, codecProvider);
+                    final Optional<RpcDefinition> schemaForRpc = NetconfMessageTransformUtil.findSchemaForRpc(rpc, schemaContext.get());
+                    if(schemaForRpc.isPresent()) {
+                        final DataNodeContainer schemaForGetConfig = NetconfMessageTransformUtil.createSchemaForRpc(schemaForRpc.get());
+                        w3cPayload = XmlDocumentUtils.toDocument(rpcPayload, schemaForGetConfig, codecProvider);
+                    } else {
+                        w3cPayload = toRpcRequestWithoutSchema(rpcPayload, codecProvider);
+                    }
                 }
             } else {
-                w3cPayload = XmlDocumentUtils.toDocument(rpcPayload, codecProvider);
+                w3cPayload = toRpcRequestWithoutSchema(rpcPayload, codecProvider);
             }
         } catch (final UnsupportedDataTypeException e) {
             throw new IllegalArgumentException("Unable to create message", e);
         }
         w3cPayload.getDocumentElement().setAttribute("message-id", counter.getNewMessageId(MESSAGE_ID_PREFIX));
         return new NetconfMessage(w3cPayload);
+    }
+
+    private Document toRpcRequestWithoutSchema(final CompositeNodeTOImpl rpcPayload, final XmlCodecProvider codecProvider) {
+        return XmlDocumentUtils.toDocument(rpcPayload, codecProvider);
     }
 
     @Override
