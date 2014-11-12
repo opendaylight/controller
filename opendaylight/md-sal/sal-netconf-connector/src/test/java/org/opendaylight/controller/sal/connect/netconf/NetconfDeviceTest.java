@@ -218,7 +218,7 @@ public class NetconfDeviceTest {
         device.onRemoteSessionUp(sessionCaps, listener);
 
         verify(schemaContextProviderFactory, timeout(5000).times(2)).createSchemaContext(any(Collection.class));
-        verify(messageTransformer, timeout(5000).times(2)).onGlobalContextUpdated(any(SchemaContext.class));
+        verify(messageTransformer, timeout(5000).times(3)).onGlobalContextUpdated(any(SchemaContext.class));
         verify(facade, timeout(5000).times(2)).onDeviceConnected(any(SchemaContext.class), any(NetconfSessionCapabilities.class), any(RpcImplementation.class));
     }
 
