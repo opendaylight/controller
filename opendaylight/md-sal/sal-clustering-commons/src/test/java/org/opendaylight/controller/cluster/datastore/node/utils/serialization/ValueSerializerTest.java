@@ -1,7 +1,15 @@
 package org.opendaylight.controller.cluster.datastore.node.utils.serialization;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.ByteString;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Set;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -10,12 +18,6 @@ import org.opendaylight.controller.cluster.datastore.util.TestModel;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.Set;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 
 public class ValueSerializerTest{
 
@@ -118,7 +120,8 @@ public class ValueSerializerTest{
             ImmutableSet.of("foo", "bar"));
 
         assertEquals(ValueType.BITS_TYPE.ordinal(), builder1.getType());
-        assertEquals("[foo, bar]", builder1.getValue());
+        assertTrue( "foo not in bits", builder1.getBitsValueList().contains("foo"));
+        assertTrue( "bar not in bits", builder1.getBitsValueList().contains("bar"));
 
     }
 
@@ -218,6 +221,21 @@ public class ValueSerializerTest{
         assertEquals(1, serializedYangInstanceIdentifier.getArgumentsCount());
         Mockito.verify(mockContext).addLocalName(TestModel.TEST_QNAME.getLocalName());
         Mockito.verify(mockContext).addNamespace(TestModel.TEST_QNAME.getNamespace());
+
+        NormalizedNodeMessages.PathArgumentAttribute.Builder argumentBuilder
+                = NormalizedNodeMessages.PathArgumentAttribute.newBuilder();
+
+        mockContext = mock(QNameSerializationContext.class);
+
+        ValueSerializer.serialize(argumentBuilder, mockContext, v1);
+
+        serializedYangInstanceIdentifier =
+                argumentBuilder.getInstanceIdentifierValue();
+
+        assertEquals(1, serializedYangInstanceIdentifier.getArgumentsCount());
+        Mockito.verify(mockContext).addLocalName(TestModel.TEST_QNAME.getLocalName());
+        Mockito.verify(mockContext).addNamespace(TestModel.TEST_QNAME.getNamespace());
+
     }
 
     @Test
@@ -254,6 +272,25 @@ public class ValueSerializerTest{
         assertEquals("1000000000000000000000000.51616", builder1.getValue());
 
     }
+
+    @Test
+    public void testSerializeBinary(){
+        NormalizedNodeMessages.Node.Builder builder = NormalizedNodeMessages.Node.newBuilder();
+        byte[] bytes = new byte[] {1,2,3,4};
+        ValueSerializer.serialize(builder, mock(QNameSerializationContext.class),bytes);
+
+        assertEquals(ValueType.BINARY_TYPE.ordinal(), builder.getIntValueType());
+        assertEquals(ByteString.copyFrom(bytes), builder.getBytesValue());
+
+        NormalizedNodeMessages.PathArgumentAttribute.Builder builder1 = NormalizedNodeMessages.PathArgumentAttribute.newBuilder();
+
+        ValueSerializer.serialize(builder1, mock(QNameSerializationContext.class),bytes);
+
+        assertEquals(ValueType.BINARY_TYPE.ordinal(), builder1.getType());
+        assertEquals(ByteString.copyFrom(bytes), builder1.getBytesValue());
+
+    }
+
 
     @Test
     public void testDeSerializeShort(){
@@ -358,6 +395,20 @@ public class ValueSerializerTest{
         assertTrue(((Set)o).contains("foo"));
         assertTrue(((Set) o).contains("bar"));
 
+        NormalizedNodeMessages.PathArgumentAttribute.Builder argumentBuilder
+                = NormalizedNodeMessages.PathArgumentAttribute.newBuilder();
+
+        argumentBuilder.setType(ValueType.BITS_TYPE.ordinal());
+        argumentBuilder.addAllBitsValue(ImmutableList.of("foo", "bar"));
+
+        o = ValueSerializer
+                .deSerialize(mock(QNameDeSerializationContext.class),
+                        argumentBuilder.build());
+
+        assertTrue(o instanceof Set);
+        assertTrue(((Set<?>)o).contains("foo"));
+        assertTrue(((Set<?>) o).contains("bar"));
+
     }
 
     @Test
@@ -386,6 +437,16 @@ public class ValueSerializerTest{
         assertTrue(o instanceof YangInstanceIdentifier);
         assertEquals(TestModel.TEST_PATH, o);
 
+        NormalizedNodeMessages.PathArgumentAttribute.Builder argumentBuilder =
+                NormalizedNodeMessages.PathArgumentAttribute.newBuilder();
+
+        argumentBuilder.setType(ValueType.YANG_IDENTIFIER_TYPE.ordinal());
+        argumentBuilder.setInstanceIdentifierValue(idBuilder);
+
+        o = ValueSerializer.deSerialize(mockContext, argumentBuilder.build());
+
+        assertTrue(o instanceof YangInstanceIdentifier);
+        assertEquals(TestModel.TEST_PATH, o);
     }
 
     @Test
@@ -431,5 +492,32 @@ public class ValueSerializerTest{
         assertEquals(new BigDecimal("25"), o);
 
     }
+
+
+    @Test
+    public void testDeSerializeBinaryType(){
+        NormalizedNodeMessages.Node.Builder nodeBuilder = NormalizedNodeMessages.Node.newBuilder();
+        nodeBuilder.setIntValueType(ValueType.BINARY_TYPE.ordinal());
+        byte[] bytes = new byte[] {1,2,3,4};
+        nodeBuilder.setBytesValue(ByteString.copyFrom(bytes));
+
+        Object o = ValueSerializer.deSerialize(mock(QNameDeSerializationContext.class),nodeBuilder.build());
+
+        assertTrue("not a byte array", o instanceof byte[]);
+        assertTrue("bytes value does not match" , Arrays.equals(bytes, (byte[]) o));
+
+        NormalizedNodeMessages.PathArgumentAttribute.Builder argumentBuilder =
+                NormalizedNodeMessages.PathArgumentAttribute.newBuilder();
+        argumentBuilder.setType(ValueType.BINARY_TYPE.ordinal());
+        argumentBuilder.setBytesValue(ByteString.copyFrom(bytes));
+
+        o = ValueSerializer.deSerialize(mock(QNameDeSerializationContext.class), argumentBuilder.build());
+
+        assertTrue("not a byte array", o instanceof byte[]);
+        assertTrue("bytes value does not match" ,Arrays.equals(bytes, (byte[]) o));
+
+
+    }
+
 
 }
