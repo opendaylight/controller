@@ -33,6 +33,24 @@
       "revId": "b3996f4a72f52e81266b7795b03306e339cebaa2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_fcd82255",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 407,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-12T18:36:21Z",
+      "side": 1,
+      "message": "So self address is not an actor path right? It\u0027s an Address instance so it always has host/port?",
+      "parentUuid": "ba8cc1f7_1c1aa617",
+      "revId": "b3996f4a72f52e81266b7795b03306e339cebaa2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
