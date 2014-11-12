@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_f917d4a1",
+        "filename": "features/jolokia/src/main/resources/features.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-11-12T02:11:39Z",
+      "side": 1,
+      "message": "Do we need jolokia-all or is it just the way we always defined features?",
+      "revId": "f5785a206d214665da81b515c826ade9f6a6d2bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_d91210b4",
+        "filename": "features/jolokia/src/main/resources/features.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-11-12T02:11:39Z",
+      "side": 1,
+      "message": "We should add description to this feature also.",
+      "revId": "f5785a206d214665da81b515c826ade9f6a6d2bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
