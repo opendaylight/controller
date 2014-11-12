@@ -1,4 +1,4 @@
-/**ab
+/**
  * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
@@ -99,7 +99,8 @@ public class FlowForwarder extends AbstractListeningCommiter<Flow> {
             builder.setFlowRef(new FlowRef(identifier));
             builder.setNode(new NodeRef(nodeIdent.firstIdentifierOf(Node.class)));
             builder.setFlowTable(new FlowTableRef(nodeIdent.child(Table.class, tableKey)));
-            builder.setTransactionUri(new Uri(provider.getNewTransactionId()));
+            builder.setTransactionUri(new Uri(provider.getNewTransactionId())).
+                setStrict(Boolean.TRUE);
             provider.getSalFlowService().removeFlow(builder.build());
         }
     }
@@ -116,8 +117,8 @@ public class FlowForwarder extends AbstractListeningCommiter<Flow> {
             builder.setNode(new NodeRef(nodeIdent.firstIdentifierOf(Node.class)));
             builder.setFlowRef(new FlowRef(identifier));
             builder.setTransactionUri(new Uri(provider.getNewTransactionId()));
-            builder.setUpdatedFlow((new UpdatedFlowBuilder(update)).build());
-            builder.setOriginalFlow((new OriginalFlowBuilder(original)).build());
+            builder.setUpdatedFlow((new UpdatedFlowBuilder(update)).setStrict(Boolean.TRUE).build());
+            builder.setOriginalFlow((new OriginalFlowBuilder(original)).setStrict(Boolean.TRUE).build());
 
             provider.getSalFlowService().updateFlow(builder.build());
         }
