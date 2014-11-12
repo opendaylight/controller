@@ -17,13 +17,17 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.util.TestModel;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
+import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetEntryNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class NormalizedNodeStreamReaderWriterTest {
@@ -31,7 +35,7 @@ public class NormalizedNodeStreamReaderWriterTest {
     @Test
     public void testNormalizedNodeStreamReaderWriter() throws IOException {
 
-        testNormalizedNodeStreamReaderWriter(TestModel.createTestContainer());
+        testNormalizedNodeStreamReaderWriter(createTestContainer());
 
         QName toaster = QName.create("http://netconfcentral.org/ns/toaster","2009-11-20","toaster");
         QName darknessFactor = QName.create("http://netconfcentral.org/ns/toaster","2009-11-20","darknessFactor");
@@ -42,6 +46,25 @@ public class NormalizedNodeStreamReaderWriterTest {
         testNormalizedNodeStreamReaderWriter(Builders.containerBuilder().
                 withNodeIdentifier(new NodeIdentifier(SchemaContext.NAME)).
                 withChild(toasterNode).build());
+    }
+
+    private NormalizedNode<?, ?> createTestContainer() {
+        byte[] bytes1 = {1,2,3};
+        LeafSetEntryNode<Object> entry1 = ImmutableLeafSetEntryNodeBuilder.create().withNodeIdentifier(
+                new YangInstanceIdentifier.NodeWithValue(TestModel.BINARY_LEAF_LIST_QNAME, bytes1)).
+                withValue(bytes1).build();
+
+        byte[] bytes2 = {};
+        LeafSetEntryNode<Object> entry2 = ImmutableLeafSetEntryNodeBuilder.create().withNodeIdentifier(
+                new YangInstanceIdentifier.NodeWithValue(TestModel.BINARY_LEAF_LIST_QNAME, bytes2)).
+                withValue(bytes2).build();
+
+        return TestModel.createBaseTestContainerBuilder().
+                withChild(ImmutableLeafSetNodeBuilder.create().withNodeIdentifier(
+                        new YangInstanceIdentifier.NodeIdentifier(TestModel.BINARY_LEAF_LIST_QNAME)).
+                        withChild(entry1).withChild(entry2).build()).
+                withChild(ImmutableNodes.leafNode(TestModel.SOME_BINARY_DATE_QNAME, new byte[]{1,2,3,4})).
+                        build();
     }
 
     private void testNormalizedNodeStreamReaderWriter(NormalizedNode<?, ?> input) throws IOException {

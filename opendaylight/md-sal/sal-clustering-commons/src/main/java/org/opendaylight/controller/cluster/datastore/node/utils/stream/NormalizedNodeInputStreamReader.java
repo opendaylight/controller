@@ -12,6 +12,18 @@ package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import java.io.DataInput;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.opendaylight.controller.cluster.datastore.node.utils.QNameFactory;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.Node;
@@ -29,18 +41,6 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNo
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeContainerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.io.DataInput;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * NormalizedNodeInputStreamReader reads the byte stream and constructs the normalized node including its children nodes.
@@ -66,6 +66,8 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
 
     private NormalizedNodeAttrBuilder<NodeWithValue, Object,
                                       LeafSetEntryNode<Object>> leafSetEntryBuilder;
+
+    private final StringBuilder reusableStringBuilder = new StringBuilder(50);
 
     public NormalizedNodeInputStreamReader(InputStream stream) throws IOException {
         Preconditions.checkNotNull(stream);
@@ -147,7 +149,6 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
 
             case NodeTypes.ANY_XML_NODE :
                 LOG.debug("Read xml node");
-                Node<?> value = (Node<?>) readObject();
                 return Builders.anyXmlBuilder().withValue((Node<?>) readObject()).build();
 
             case NodeTypes.MAP_NODE :
@@ -196,14 +197,16 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
         String namespace = readCodedString();
         String revision = readCodedString();
 
-        // Not using stringbuilder as compiler optimizes string concatenation of +
         String qName;
         if(!Strings.isNullOrEmpty(revision)) {
-            qName = "(" + namespace + REVISION_ARG + revision + ")" +localName;
+            qName = reusableStringBuilder.append('(').append(namespace).append(REVISION_ARG).
+                        append(revision).append(')').append(localName).toString();
         } else {
-            qName = "(" + namespace + ")" + localName;
+            qName = reusableStringBuilder.append('(').append(namespace).append(')').
+                        append(localName).toString();
         }
 
+        reusableStringBuilder.delete(0, reusableStringBuilder.length());
         return QNameFactory.create(qName);
     }
 
@@ -213,7 +216,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
         if(valueType == NormalizedNodeOutputStreamWriter.IS_CODE_VALUE) {
             return codedStringMap.get(input.readInt());
         } else if(valueType == NormalizedNodeOutputStreamWriter.IS_STRING_VALUE) {
-            String value = input.readUTF();
+            String value = input.readUTF().intern();
             codedStringMap.put(Integer.valueOf(codedStringMap.size()), value);
             return value;
         }
@@ -249,22 +252,22 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
                 return readObjSet();
 
             case ValueTypes.BOOL_TYPE :
-                return input.readBoolean();
+                return Boolean.valueOf(input.readBoolean());
 
             case ValueTypes.BYTE_TYPE :
-                return input.readByte();
+                return Byte.valueOf(input.readByte());
 
             case ValueTypes.INT_TYPE :
-                return input.readInt();
+                return Integer.valueOf(input.readInt());
 
             case ValueTypes.LONG_TYPE :
-                return input.readLong();
+                return Long.valueOf(input.readLong());
 
             case ValueTypes.QNAME_TYPE :
                 return readQName();
 
             case ValueTypes.SHORT_TYPE :
-                return input.readShort();
+                return Short.valueOf(input.readShort());
 
             case ValueTypes.STRING_TYPE :
                 return input.readUTF();
@@ -274,6 +277,11 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
 
             case ValueTypes.BIG_INTEGER_TYPE :
                 return new BigInteger(input.readUTF());
+
+            case ValueTypes.BINARY_TYPE :
+                byte[] bytes = new byte[input.readInt()];
+                input.readFully(bytes);
+                return bytes;
 
             case ValueTypes.YANG_IDENTIFIER_TYPE :
             return readYangInstanceIdentifier();

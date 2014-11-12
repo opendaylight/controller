@@ -74,6 +74,10 @@ module odl-datastore-test {
             type uint8;
         }
 
+        leaf-list binary_leaf_list {
+            type binary;
+        }
+
         leaf pointer {
             type leafref {
                 path "/network-topology/topology/node/termination-point/tp-id";
