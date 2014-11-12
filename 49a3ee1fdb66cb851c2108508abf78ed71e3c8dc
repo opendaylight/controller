@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_795bc454",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-12T08:21:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_79cbc472",
+      "revId": "49a3ee1fdb66cb851c2108508abf78ed71e3c8dc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_b9b94ceb",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2014-11-12T00:50:20Z",
       "side": 1,
       "message": "To make the code more readable can you rename atIndex1 to pathAtIndex?",
+      "revId": "49a3ee1fdb66cb851c2108508abf78ed71e3c8dc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_19587855",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 382,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-12T08:21:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_b9b94ceb",
       "revId": "49a3ee1fdb66cb851c2108508abf78ed71e3c8dc",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_d931b00c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 383,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-12T08:21:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_59ce0085",
+      "revId": "49a3ee1fdb66cb851c2108508abf78ed71e3c8dc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_39ee9ced",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
         "patchSetId": 3
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_f936f402",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-12T08:21:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_39ee9ced",
+      "revId": "49a3ee1fdb66cb851c2108508abf78ed71e3c8dc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_d9ba10e1",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/utils/ActorContextTest.java",
         "patchSetId": 3
@@ -81,6 +153,24 @@
       "writtenOn": "2014-11-12T00:50:20Z",
       "side": 1,
       "message": "Can you add a test for path in local format and self address in remote format?",
+      "revId": "49a3ee1fdb66cb851c2108508abf78ed71e3c8dc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_b9406c57",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/utils/ActorContextTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-12T08:21:38Z",
+      "side": 1,
+      "message": "There is one, just 6-7 lines above , commented as \n//self address of remote format,but Tx path local format.",
+      "parentUuid": "ba8cc1f7_d9ba10e1",
       "revId": "49a3ee1fdb66cb851c2108508abf78ed71e3c8dc",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
