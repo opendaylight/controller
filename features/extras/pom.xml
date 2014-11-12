@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ This program and the accompanying materials are made available under the
+ terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ and is available at http://www.eclipse.org/legal/epl-v10.html
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>commons.opendaylight</artifactId>
+        <version>1.5.0-SNAPSHOT</version>
+        <relativePath>../../opendaylight/commons/opendaylight</relativePath>
+    </parent>
+    <artifactId>features-extras</artifactId>
+    <groupId>org.opendaylight.controller</groupId>
+    <packaging>jar</packaging>
+    <properties>
+        <features.file>features.xml</features.file>
+        <!-- Optional TODO: Move these properties to your parent pom and possibly
+              DependencyManagement section of your parent pom -->
+        <branding.version>1.1.0-SNAPSHOT</branding.version>
+        <karaf.resources.version>1.5.0-SNAPSHOT</karaf.resources.version>
+        <karaf.version>3.0.1</karaf.version>
+        <feature.test.version>0.7.0-SNAPSHOT</feature.test.version>
+        <karaf.empty.version>1.5.0-SNAPSHOT</karaf.empty.version>
+        <surefire.version>2.16</surefire.version>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>org.jolokia</groupId>
+            <artifactId>jolokia-osgi</artifactId>
+            <version>${jolokia.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>features-test</artifactId>
+            <version>${feature.test.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- dependency for opendaylight-karaf-empty for use by testing -->
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>opendaylight-karaf-empty</artifactId>
+            <version>${karaf.empty.version}</version>
+            <type>zip</type>
+        </dependency>
+    </dependencies>
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>filter</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>resources</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-artifacts</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>${project.build.directory}/classes/${features.file}</file>
+                                    <type>xml</type>
+                                    <classifier>features</classifier>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${surefire.version}</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <karaf.distro.groupId>org.opendaylight.controller</karaf.distro.groupId>
+                        <karaf.distro.artifactId>opendaylight-karaf-empty</karaf.distro.artifactId>
+                        <karaf.distro.version>${karaf.empty.version}</karaf.distro.version>
+                    </systemPropertyVariables>
+                    <dependenciesToScan>
+                        <dependency>org.opendaylight.yangtools:features-test</dependency>
+                    </dependenciesToScan>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <scm>
+        <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
+        <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://git.opendaylight.org/gerrit/gitweb?p=controller.git;a=summary</url>
+    </scm>
+</project>
