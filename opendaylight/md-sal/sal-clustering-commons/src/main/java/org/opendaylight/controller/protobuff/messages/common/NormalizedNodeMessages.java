@@ -840,6 +840,78 @@ public final class NormalizedNodeMessages {
      * <code>optional int32 type = 3;</code>
      */
     int getType();
+
+    // optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierValue = 4;
+    /**
+     * <code>optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierValue = 4;</code>
+     *
+     * <pre>
+     * Specific values
+     * </pre>
+     */
+    boolean hasInstanceIdentifierValue();
+    /**
+     * <code>optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierValue = 4;</code>
+     *
+     * <pre>
+     * Specific values
+     * </pre>
+     */
+    org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier getInstanceIdentifierValue();
+    /**
+     * <code>optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierValue = 4;</code>
+     *
+     * <pre>
+     * Specific values
+     * </pre>
+     */
+    org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder getInstanceIdentifierValueOrBuilder();
+
+    // repeated string bitsValue = 5;
+    /**
+     * <code>repeated string bitsValue = 5;</code>
+     *
+     * <pre>
+     * intValueType = Bits
+     * </pre>
+     */
+    java.util.List<java.lang.String>
+    getBitsValueList();
+    /**
+     * <code>repeated string bitsValue = 5;</code>
+     *
+     * <pre>
+     * intValueType = Bits
+     * </pre>
+     */
+    int getBitsValueCount();
+    /**
+     * <code>repeated string bitsValue = 5;</code>
+     *
+     * <pre>
+     * intValueType = Bits
+     * </pre>
+     */
+    java.lang.String getBitsValue(int index);
+    /**
+     * <code>repeated string bitsValue = 5;</code>
+     *
+     * <pre>
+     * intValueType = Bits
+     * </pre>
+     */
+    com.google.protobuf.ByteString
+        getBitsValueBytes(int index);
+
+    // optional bytes bytesValue = 6;
+    /**
+     * <code>optional bytes bytesValue = 6;</code>
+     */
+    boolean hasBytesValue();
+    /**
+     * <code>optional bytes bytesValue = 6;</code>
+     */
+    com.google.protobuf.ByteString getBytesValue();
   }
   /**
    * Protobuf type {@code org.opendaylight.controller.mdsal.PathArgumentAttribute}
@@ -915,6 +987,32 @@ public final class NormalizedNodeMessages {
               type_ = input.readInt32();
               break;
             }
+            case 34: {
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000008) == 0x00000008)) {
+                subBuilder = instanceIdentifierValue_.toBuilder();
+              }
+              instanceIdentifierValue_ = input.readMessage(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(instanceIdentifierValue_);
+                instanceIdentifierValue_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000008;
+              break;
+            }
+            case 42: {
+              if (!((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+                bitsValue_ = new com.google.protobuf.LazyStringArrayList();
+                mutable_bitField0_ |= 0x00000010;
+              }
+              bitsValue_.add(input.readBytes());
+              break;
+            }
+            case 50: {
+              bitField0_ |= 0x00000010;
+              bytesValue_ = input.readBytes();
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -923,6 +1021,9 @@ public final class NormalizedNodeMessages {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
+        if (((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+          bitsValue_ = new com.google.protobuf.UnmodifiableLazyStringList(bitsValue_);
+        }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
@@ -1036,16 +1137,121 @@ public final class NormalizedNodeMessages {
       return type_;
     }
 
+    // optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierValue = 4;
+    public static final int INSTANCEIDENTIFIERVALUE_FIELD_NUMBER = 4;
+    private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier instanceIdentifierValue_;
+    /**
+     * <code>optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierValue = 4;</code>
+     *
+     * <pre>
+     * Specific values
+     * </pre>
+     */
+    public boolean hasInstanceIdentifierValue() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierValue = 4;</code>
+     *
+     * <pre>
+     * Specific values
+     * </pre>
+     */
+    public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier getInstanceIdentifierValue() {
+      return instanceIdentifierValue_;
+    }
+    /**
+     * <code>optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierValue = 4;</code>
+     *
+     * <pre>
+     * Specific values
+     * </pre>
+     */
+    public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder getInstanceIdentifierValueOrBuilder() {
+      return instanceIdentifierValue_;
+    }
+
+    // repeated string bitsValue = 5;
+    public static final int BITSVALUE_FIELD_NUMBER = 5;
+    private com.google.protobuf.LazyStringList bitsValue_;
+    /**
+     * <code>repeated string bitsValue = 5;</code>
+     *
+     * <pre>
+     * intValueType = Bits
+     * </pre>
+     */
+    public java.util.List<java.lang.String>
+        getBitsValueList() {
+      return bitsValue_;
+    }
+    /**
+     * <code>repeated string bitsValue = 5;</code>
+     *
+     * <pre>
+     * intValueType = Bits
+     * </pre>
+     */
+    public int getBitsValueCount() {
+      return bitsValue_.size();
+    }
+    /**
+     * <code>repeated string bitsValue = 5;</code>
+     *
+     * <pre>
+     * intValueType = Bits
+     * </pre>
+     */
+    public java.lang.String getBitsValue(int index) {
+      return bitsValue_.get(index);
+    }
+    /**
+     * <code>repeated string bitsValue = 5;</code>
+     *
+     * <pre>
+     * intValueType = Bits
+     * </pre>
+     */
+    public com.google.protobuf.ByteString
+        getBitsValueBytes(int index) {
+      return bitsValue_.getByteString(index);
+    }
+
+    // optional bytes bytesValue = 6;
+    public static final int BYTESVALUE_FIELD_NUMBER = 6;
+    private com.google.protobuf.ByteString bytesValue_;
+    /**
+     * <code>optional bytes bytesValue = 6;</code>
+     */
+    public boolean hasBytesValue() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
+    }
+    /**
+     * <code>optional bytes bytesValue = 6;</code>
+     */
+    public com.google.protobuf.ByteString getBytesValue() {
+      return bytesValue_;
+    }
+
     private void initFields() {
       name_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.QName.getDefaultInstance();
       value_ = "";
       type_ = 0;
+      instanceIdentifierValue_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.getDefaultInstance();
+      bitsValue_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      bytesValue_ = com.google.protobuf.ByteString.EMPTY;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
 
+      if (hasInstanceIdentifierValue()) {
+        if (!getInstanceIdentifierValue().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -1061,6 +1267,15 @@ public final class NormalizedNodeMessages {
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         output.writeInt32(3, type_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeMessage(4, instanceIdentifierValue_);
+      }
+      for (int i = 0; i < bitsValue_.size(); i++) {
+        output.writeBytes(5, bitsValue_.getByteString(i));
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeBytes(6, bytesValue_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -1082,6 +1297,23 @@ public final class NormalizedNodeMessages {
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(3, type_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, instanceIdentifierValue_);
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < bitsValue_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeBytesSizeNoTag(bitsValue_.getByteString(i));
+        }
+        size += dataSize;
+        size += 1 * getBitsValueList().size();
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(6, bytesValue_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1192,6 +1424,7 @@ public final class NormalizedNodeMessages {
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
           getNameFieldBuilder();
+          getInstanceIdentifierValueFieldBuilder();
         }
       }
       private static Builder create() {
@@ -1210,6 +1443,16 @@ public final class NormalizedNodeMessages {
         bitField0_ = (bitField0_ & ~0x00000002);
         type_ = 0;
         bitField0_ = (bitField0_ & ~0x00000004);
+        if (instanceIdentifierValueBuilder_ == null) {
+          instanceIdentifierValue_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.getDefaultInstance();
+        } else {
+          instanceIdentifierValueBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000008);
+        bitsValue_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000010);
+        bytesValue_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000020);
         return this;
       }
 
@@ -1254,6 +1497,24 @@ public final class NormalizedNodeMessages {
           to_bitField0_ |= 0x00000004;
         }
         result.type_ = type_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        if (instanceIdentifierValueBuilder_ == null) {
+          result.instanceIdentifierValue_ = instanceIdentifierValue_;
+        } else {
+          result.instanceIdentifierValue_ = instanceIdentifierValueBuilder_.build();
+        }
+        if (((bitField0_ & 0x00000010) == 0x00000010)) {
+          bitsValue_ = new com.google.protobuf.UnmodifiableLazyStringList(
+              bitsValue_);
+          bitField0_ = (bitField0_ & ~0x00000010);
+        }
+        result.bitsValue_ = bitsValue_;
+        if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
+          to_bitField0_ |= 0x00000010;
+        }
+        result.bytesValue_ = bytesValue_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -1281,11 +1542,33 @@ public final class NormalizedNodeMessages {
         if (other.hasType()) {
           setType(other.getType());
         }
+        if (other.hasInstanceIdentifierValue()) {
+          mergeInstanceIdentifierValue(other.getInstanceIdentifierValue());
+        }
+        if (!other.bitsValue_.isEmpty()) {
+          if (bitsValue_.isEmpty()) {
+            bitsValue_ = other.bitsValue_;
+            bitField0_ = (bitField0_ & ~0x00000010);
+          } else {
+            ensureBitsValueIsMutable();
+            bitsValue_.addAll(other.bitsValue_);
+          }
+          onChanged();
+        }
+        if (other.hasBytesValue()) {
+          setBytesValue(other.getBytesValue());
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
 
       public final boolean isInitialized() {
+        if (hasInstanceIdentifierValue()) {
+          if (!getInstanceIdentifierValue().isInitialized()) {
+
+            return false;
+          }
+        }
         return true;
       }
 
@@ -1528,6 +1811,324 @@ public final class NormalizedNodeMessages {
       public Builder clearType() {
         bitField0_ = (bitField0_ & ~0x00000004);
         type_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierValue = 4;
+      private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier instanceIdentifierValue_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder> instanceIdentifierValueBuilder_;
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierValue = 4;</code>
+       *
+       * <pre>
+       * Specific values
+       * </pre>
+       */
+      public boolean hasInstanceIdentifierValue() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierValue = 4;</code>
+       *
+       * <pre>
+       * Specific values
+       * </pre>
+       */
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier getInstanceIdentifierValue() {
+        if (instanceIdentifierValueBuilder_ == null) {
+          return instanceIdentifierValue_;
+        } else {
+          return instanceIdentifierValueBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierValue = 4;</code>
+       *
+       * <pre>
+       * Specific values
+       * </pre>
+       */
+      public Builder setInstanceIdentifierValue(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier value) {
+        if (instanceIdentifierValueBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          instanceIdentifierValue_ = value;
+          onChanged();
+        } else {
+          instanceIdentifierValueBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000008;
+        return this;
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierValue = 4;</code>
+       *
+       * <pre>
+       * Specific values
+       * </pre>
+       */
+      public Builder setInstanceIdentifierValue(
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder builderForValue) {
+        if (instanceIdentifierValueBuilder_ == null) {
+          instanceIdentifierValue_ = builderForValue.build();
+          onChanged();
+        } else {
+          instanceIdentifierValueBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000008;
+        return this;
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierValue = 4;</code>
+       *
+       * <pre>
+       * Specific values
+       * </pre>
+       */
+      public Builder mergeInstanceIdentifierValue(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier value) {
+        if (instanceIdentifierValueBuilder_ == null) {
+          if (((bitField0_ & 0x00000008) == 0x00000008) &&
+              instanceIdentifierValue_ != org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.getDefaultInstance()) {
+            instanceIdentifierValue_ =
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.newBuilder(instanceIdentifierValue_).mergeFrom(value).buildPartial();
+          } else {
+            instanceIdentifierValue_ = value;
+          }
+          onChanged();
+        } else {
+          instanceIdentifierValueBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000008;
+        return this;
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierValue = 4;</code>
+       *
+       * <pre>
+       * Specific values
+       * </pre>
+       */
+      public Builder clearInstanceIdentifierValue() {
+        if (instanceIdentifierValueBuilder_ == null) {
+          instanceIdentifierValue_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.getDefaultInstance();
+          onChanged();
+        } else {
+          instanceIdentifierValueBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000008);
+        return this;
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierValue = 4;</code>
+       *
+       * <pre>
+       * Specific values
+       * </pre>
+       */
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder getInstanceIdentifierValueBuilder() {
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return getInstanceIdentifierValueFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierValue = 4;</code>
+       *
+       * <pre>
+       * Specific values
+       * </pre>
+       */
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder getInstanceIdentifierValueOrBuilder() {
+        if (instanceIdentifierValueBuilder_ != null) {
+          return instanceIdentifierValueBuilder_.getMessageOrBuilder();
+        } else {
+          return instanceIdentifierValue_;
+        }
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierValue = 4;</code>
+       *
+       * <pre>
+       * Specific values
+       * </pre>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder>
+          getInstanceIdentifierValueFieldBuilder() {
+        if (instanceIdentifierValueBuilder_ == null) {
+          instanceIdentifierValueBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder>(
+                  instanceIdentifierValue_,
+                  getParentForChildren(),
+                  isClean());
+          instanceIdentifierValue_ = null;
+        }
+        return instanceIdentifierValueBuilder_;
+      }
+
+      // repeated string bitsValue = 5;
+      private com.google.protobuf.LazyStringList bitsValue_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      private void ensureBitsValueIsMutable() {
+        if (!((bitField0_ & 0x00000010) == 0x00000010)) {
+          bitsValue_ = new com.google.protobuf.LazyStringArrayList(bitsValue_);
+          bitField0_ |= 0x00000010;
+         }
+      }
+      /**
+       * <code>repeated string bitsValue = 5;</code>
+       *
+       * <pre>
+       * intValueType = Bits
+       * </pre>
+       */
+      public java.util.List<java.lang.String>
+          getBitsValueList() {
+        return java.util.Collections.unmodifiableList(bitsValue_);
+      }
+      /**
+       * <code>repeated string bitsValue = 5;</code>
+       *
+       * <pre>
+       * intValueType = Bits
+       * </pre>
+       */
+      public int getBitsValueCount() {
+        return bitsValue_.size();
+      }
+      /**
+       * <code>repeated string bitsValue = 5;</code>
+       *
+       * <pre>
+       * intValueType = Bits
+       * </pre>
+       */
+      public java.lang.String getBitsValue(int index) {
+        return bitsValue_.get(index);
+      }
+      /**
+       * <code>repeated string bitsValue = 5;</code>
+       *
+       * <pre>
+       * intValueType = Bits
+       * </pre>
+       */
+      public com.google.protobuf.ByteString
+          getBitsValueBytes(int index) {
+        return bitsValue_.getByteString(index);
+      }
+      /**
+       * <code>repeated string bitsValue = 5;</code>
+       *
+       * <pre>
+       * intValueType = Bits
+       * </pre>
+       */
+      public Builder setBitsValue(
+          int index, java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureBitsValueIsMutable();
+        bitsValue_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string bitsValue = 5;</code>
+       *
+       * <pre>
+       * intValueType = Bits
+       * </pre>
+       */
+      public Builder addBitsValue(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureBitsValueIsMutable();
+        bitsValue_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string bitsValue = 5;</code>
+       *
+       * <pre>
+       * intValueType = Bits
+       * </pre>
+       */
+      public Builder addAllBitsValue(
+          java.lang.Iterable<java.lang.String> values) {
+        ensureBitsValueIsMutable();
+        super.addAll(values, bitsValue_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string bitsValue = 5;</code>
+       *
+       * <pre>
+       * intValueType = Bits
+       * </pre>
+       */
+      public Builder clearBitsValue() {
+        bitsValue_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000010);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string bitsValue = 5;</code>
+       *
+       * <pre>
+       * intValueType = Bits
+       * </pre>
+       */
+      public Builder addBitsValueBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureBitsValueIsMutable();
+        bitsValue_.add(value);
+        onChanged();
+        return this;
+      }
+
+      // optional bytes bytesValue = 6;
+      private com.google.protobuf.ByteString bytesValue_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes bytesValue = 6;</code>
+       */
+      public boolean hasBytesValue() {
+        return ((bitField0_ & 0x00000020) == 0x00000020);
+      }
+      /**
+       * <code>optional bytes bytesValue = 6;</code>
+       */
+      public com.google.protobuf.ByteString getBytesValue() {
+        return bytesValue_;
+      }
+      /**
+       * <code>optional bytes bytesValue = 6;</code>
+       */
+      public Builder setBytesValue(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000020;
+        bytesValue_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes bytesValue = 6;</code>
+       */
+      public Builder clearBytesValue() {
+        bitField0_ = (bitField0_ & ~0x00000020);
+        bytesValue_ = getDefaultInstance().getBytesValue();
         onChanged();
         return this;
       }
@@ -2850,6 +3451,12 @@ public final class NormalizedNodeMessages {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
 
+      for (int i = 0; i < getAttributeCount(); i++) {
+        if (!getAttribute(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
       for (int i = 0; i < getAttributesCount(); i++) {
         if (!getAttributes(i).isInitialized()) {
           memoizedIsInitialized = 0;
@@ -3212,6 +3819,12 @@ public final class NormalizedNodeMessages {
       }
 
       public final boolean isInitialized() {
+        for (int i = 0; i < getAttributeCount(); i++) {
+          if (!getAttribute(i).isInitialized()) {
+
+            return false;
+          }
+        }
         for (int i = 0; i < getAttributesCount(); i++) {
           if (!getAttributes(i).isInitialized()) {
 
@@ -10357,43 +10970,46 @@ public final class NormalizedNodeMessages {
     java.lang.String[] descriptorData = {
       "\n\014Common.proto\022!org.opendaylight.control" +
       "ler.mdsal\"6\n\tAttribute\022\014\n\004name\030\001 \002(\t\022\r\n\005" +
-      "value\030\002 \001(\t\022\014\n\004type\030\003 \001(\t\"l\n\025PathArgumen" +
-      "tAttribute\0226\n\004name\030\001 \001(\0132(.org.opendayli" +
-      "ght.controller.mdsal.QName\022\r\n\005value\030\002 \001(" +
-      "\t\022\014\n\004type\030\003 \001(\005\"N\n\005QName\022\r\n\005value\030\001 \001(\t\022" +
-      "\021\n\tnamespace\030\002 \001(\005\022\020\n\010revision\030\003 \001(\005\022\021\n\t" +
-      "localName\030\004 \001(\005\"\207\002\n\014PathArgument\022\r\n\005valu" +
-      "e\030\001 \001(\t\022\014\n\004type\030\002 \001(\t\022:\n\010nodeType\030\003 \001(\0132" +
-      "(.org.opendaylight.controller.mdsal.QNam",
-      "e\022K\n\tattribute\030\004 \003(\01328.org.opendaylight." +
-      "controller.mdsal.PathArgumentAttribute\022@" +
+      "value\030\002 \001(\t\022\014\n\004type\030\003 \001(\t\"\353\001\n\025PathArgume" +
+      "ntAttribute\0226\n\004name\030\001 \001(\0132(.org.opendayl" +
+      "ight.controller.mdsal.QName\022\r\n\005value\030\002 \001" +
+      "(\t\022\014\n\004type\030\003 \001(\005\022V\n\027instanceIdentifierVa" +
+      "lue\030\004 \001(\01325.org.opendaylight.controller." +
+      "mdsal.InstanceIdentifier\022\021\n\tbitsValue\030\005 " +
+      "\003(\t\022\022\n\nbytesValue\030\006 \001(\014\"N\n\005QName\022\r\n\005valu" +
+      "e\030\001 \001(\t\022\021\n\tnamespace\030\002 \001(\005\022\020\n\010revision\030\003",
+      " \001(\005\022\021\n\tlocalName\030\004 \001(\005\"\207\002\n\014PathArgument" +
+      "\022\r\n\005value\030\001 \001(\t\022\014\n\004type\030\002 \001(\t\022:\n\010nodeTyp" +
+      "e\030\003 \001(\0132(.org.opendaylight.controller.md" +
+      "sal.QName\022K\n\tattribute\030\004 \003(\01328.org.opend" +
+      "aylight.controller.mdsal.PathArgumentAtt" +
+      "ribute\022@\n\nattributes\030\005 \003(\0132,.org.openday" +
+      "light.controller.mdsal.Attribute\022\017\n\007intT" +
+      "ype\030\006 \001(\005\"f\n\022InstanceIdentifier\022B\n\targum" +
+      "ents\030\001 \003(\0132/.org.opendaylight.controller" +
+      ".mdsal.PathArgument\022\014\n\004code\030\002 \003(\t\"\271\003\n\004No",
+      "de\022\014\n\004path\030\001 \001(\t\022\014\n\004type\030\002 \001(\t\022E\n\014pathAr" +
+      "gument\030\003 \001(\0132/.org.opendaylight.controll" +
+      "er.mdsal.PathArgument\022\017\n\007intType\030\004 \001(\005\022@" +
       "\n\nattributes\030\005 \003(\0132,.org.opendaylight.co" +
-      "ntroller.mdsal.Attribute\022\017\n\007intType\030\006 \001(" +
-      "\005\"f\n\022InstanceIdentifier\022B\n\targuments\030\001 \003" +
-      "(\0132/.org.opendaylight.controller.mdsal.P" +
-      "athArgument\022\014\n\004code\030\002 \003(\t\"\271\003\n\004Node\022\014\n\004pa" +
-      "th\030\001 \001(\t\022\014\n\004type\030\002 \001(\t\022E\n\014pathArgument\030\003" +
-      " \001(\0132/.org.opendaylight.controller.mdsal" +
-      ".PathArgument\022\017\n\007intType\030\004 \001(\005\022@\n\nattrib",
-      "utes\030\005 \003(\0132,.org.opendaylight.controller" +
-      ".mdsal.Attribute\0226\n\005child\030\006 \003(\0132\'.org.op" +
-      "endaylight.controller.mdsal.Node\022\r\n\005valu" +
-      "e\030\007 \001(\t\022\021\n\tvalueType\030\010 \001(\t\022\024\n\014intValueTy" +
-      "pe\030\t \001(\005\022V\n\027instanceIdentifierValue\030\n \001(" +
-      "\01325.org.opendaylight.controller.mdsal.In" +
-      "stanceIdentifier\022\021\n\tbitsValue\030\013 \003(\t\022\014\n\004c" +
-      "ode\030\014 \003(\t\022\022\n\nbytesValue\030\r \001(\014\"`\n\tContain" +
-      "er\022\022\n\nparentPath\030\001 \002(\t\022?\n\016normalizedNode" +
-      "\030\002 \001(\0132\'.org.opendaylight.controller.mds",
-      "al.Node\"\246\001\n\014NodeMapEntry\022U\n\026instanceIden" +
-      "tifierPath\030\001 \002(\01325.org.opendaylight.cont" +
-      "roller.mdsal.InstanceIdentifier\022?\n\016norma" +
-      "lizedNode\030\002 \001(\0132\'.org.opendaylight.contr" +
-      "oller.mdsal.Node\"N\n\007NodeMap\022C\n\nmapEntrie" +
-      "s\030\001 \003(\0132/.org.opendaylight.controller.md" +
-      "sal.NodeMapEntryBO\n5org.opendaylight.con" +
-      "troller.protobuff.messages.commonB\026Norma" +
-      "lizedNodeMessages"
+      "ntroller.mdsal.Attribute\0226\n\005child\030\006 \003(\0132" +
+      "\'.org.opendaylight.controller.mdsal.Node" +
+      "\022\r\n\005value\030\007 \001(\t\022\021\n\tvalueType\030\010 \001(\t\022\024\n\014in" +
+      "tValueType\030\t \001(\005\022V\n\027instanceIdentifierVa" +
+      "lue\030\n \001(\01325.org.opendaylight.controller." +
+      "mdsal.InstanceIdentifier\022\021\n\tbitsValue\030\013 ",
+      "\003(\t\022\014\n\004code\030\014 \003(\t\022\022\n\nbytesValue\030\r \001(\014\"`\n" +
+      "\tContainer\022\022\n\nparentPath\030\001 \002(\t\022?\n\016normal" +
+      "izedNode\030\002 \001(\0132\'.org.opendaylight.contro" +
+      "ller.mdsal.Node\"\246\001\n\014NodeMapEntry\022U\n\026inst" +
+      "anceIdentifierPath\030\001 \002(\01325.org.opendayli" +
+      "ght.controller.mdsal.InstanceIdentifier\022" +
+      "?\n\016normalizedNode\030\002 \001(\0132\'.org.opendaylig" +
+      "ht.controller.mdsal.Node\"N\n\007NodeMap\022C\n\nm" +
+      "apEntries\030\001 \003(\0132/.org.opendaylight.contr" +
+      "oller.mdsal.NodeMapEntryBO\n5org.opendayl",
+      "ight.controller.protobuff.messages.commo" +
+      "nB\026NormalizedNodeMessages"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -10411,7 +11027,7 @@ public final class NormalizedNodeMessages {
           internal_static_org_opendaylight_controller_mdsal_PathArgumentAttribute_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_org_opendaylight_controller_mdsal_PathArgumentAttribute_descriptor,
-              new java.lang.String[] { "Name", "Value", "Type", });
+              new java.lang.String[] { "Name", "Value", "Type", "InstanceIdentifierValue", "BitsValue", "BytesValue", });
           internal_static_org_opendaylight_controller_mdsal_QName_descriptor =
             getDescriptor().getMessageTypes().get(2);
           internal_static_org_opendaylight_controller_mdsal_QName_fieldAccessorTable = new

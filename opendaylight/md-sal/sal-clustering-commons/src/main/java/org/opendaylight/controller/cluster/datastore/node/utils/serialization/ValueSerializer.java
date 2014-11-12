@@ -9,15 +9,14 @@
 package org.opendaylight.controller.cluster.datastore.node.utils.serialization;
 
 import com.google.protobuf.ByteString;
-import org.opendaylight.controller.cluster.datastore.node.utils.QNameFactory;
-import org.opendaylight.controller.cluster.datastore.util.InstanceIdentifierUtils;
-import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.Set;
+import org.opendaylight.controller.cluster.datastore.node.utils.QNameFactory;
+import org.opendaylight.controller.cluster.datastore.util.InstanceIdentifierUtils;
+import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public class ValueSerializer {
     public static void serialize(NormalizedNodeMessages.Node.Builder builder,
@@ -50,7 +49,27 @@ public class ValueSerializer {
             QNameSerializationContext context, Object value){
 
         builder.setType(ValueType.getSerializableType(value).ordinal());
-        builder.setValue(value.toString());
+
+        if(value instanceof YangInstanceIdentifier) {
+            builder.setInstanceIdentifierValue(
+                    InstanceIdentifierUtils.toSerializable((YangInstanceIdentifier) value, context));
+        } else if(value instanceof Set) {
+            Set<?> set = (Set<?>) value;
+            if (!set.isEmpty()) {
+                for (Object o : set) {
+                    if (o instanceof String) {
+                        builder.addBitsValue(o.toString());
+                    } else {
+                        throw new IllegalArgumentException("Expected value type to be Bits but was : " +
+                                value.toString());
+                    }
+                }
+            }
+        } else if(value instanceof byte[]){
+            builder.setBytesValue(ByteString.copyFrom((byte[]) value));
+        } else {
+            builder.setValue(value.toString());
+        }
     }
 
     public static Object deSerialize(QNameDeSerializationContext context,
@@ -68,6 +87,15 @@ public class ValueSerializer {
 
     public static Object deSerialize(QNameDeSerializationContext context,
             NormalizedNodeMessages.PathArgumentAttribute attribute) {
+
+        if(attribute.getType() == ValueType.YANG_IDENTIFIER_TYPE.ordinal()){
+            return InstanceIdentifierUtils.fromSerializable(
+                    attribute.getInstanceIdentifierValue(), context);
+        } else if(attribute.getType() == ValueType.BITS_TYPE.ordinal()){
+            return new HashSet<>(attribute.getBitsValueList());
+        } else if(attribute.getType() == ValueType.BINARY_TYPE.ordinal()){
+            return attribute.getBytesValue().toByteArray();
+        }
         return deSerializeBasicTypes(attribute.getType(), attribute.getValue());
     }
 
