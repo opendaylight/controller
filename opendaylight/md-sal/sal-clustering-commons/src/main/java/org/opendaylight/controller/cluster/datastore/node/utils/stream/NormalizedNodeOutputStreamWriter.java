@@ -12,11 +12,6 @@ package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
-import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -24,6 +19,11 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * NormalizedNodeOutputStreamWriter will be used by distributed datastore to send normalized node in
@@ -338,6 +338,11 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
                 break;
             case ValueTypes.BITS_TYPE:
                 writeObjSet((Set<?>) value);
+                break;
+            case ValueTypes.BINARY_TYPE:
+                byte[] bytes = (byte[]) value;
+                output.writeInt(bytes.length);
+                output.write(bytes);
                 break;
             case ValueTypes.YANG_IDENTIFIER_TYPE:
                 writeYangInstanceIdentifier((YangInstanceIdentifier) value);
