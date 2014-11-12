@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_dc88be24",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-12T19:48:06Z",
+      "side": 1,
+      "message": "Yeah i can use the host/port of selfaddress, check if they are present. Will make this change.",
+      "parentUuid": "ba8cc1f7_5c958e3e",
+      "revId": "b3996f4a72f52e81266b7795b03306e339cebaa2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_1c1aa617",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
         "patchSetId": 4
