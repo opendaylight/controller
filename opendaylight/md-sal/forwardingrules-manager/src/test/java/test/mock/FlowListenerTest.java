@@ -124,6 +124,8 @@ public class FlowListenerTest extends FRMTest {
         assertEquals(1, updateFlowCalls.size());
         assertEquals("DOM-1", updateFlowCalls.get(0).getTransactionUri().getValue());
         assertEquals(flowII, updateFlowCalls.get(0).getFlowRef().getValue());
+        assertEquals(Boolean.TRUE, updateFlowCalls.get(0).getOriginalFlow().isStrict());
+        assertEquals(Boolean.TRUE, updateFlowCalls.get(0).getUpdatedFlow().isStrict());
 
         forwardingRulesManager.close();
     }
@@ -204,6 +206,7 @@ public class FlowListenerTest extends FRMTest {
         assertEquals(1, removeFlowCalls.size());
         assertEquals("DOM-1", removeFlowCalls.get(0).getTransactionUri().getValue());
         assertEquals(flowII, removeFlowCalls.get(0).getFlowRef().getValue());
+        assertEquals(Boolean.TRUE, removeFlowCalls.get(0).isStrict());
 
         forwardingRulesManager.close();
     }
