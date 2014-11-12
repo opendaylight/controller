@@ -12,6 +12,18 @@ package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import java.io.DataInput;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.opendaylight.controller.cluster.datastore.node.utils.QNameFactory;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.Node;
@@ -29,18 +41,6 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNo
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeContainerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.io.DataInput;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * NormalizedNodeInputStreamReader reads the byte stream and constructs the normalized node including its children nodes.
@@ -147,7 +147,6 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
 
             case NodeTypes.ANY_XML_NODE :
                 LOG.debug("Read xml node");
-                Node<?> value = (Node<?>) readObject();
                 return Builders.anyXmlBuilder().withValue((Node<?>) readObject()).build();
 
             case NodeTypes.MAP_NODE :
@@ -274,6 +273,11 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
 
             case ValueTypes.BIG_INTEGER_TYPE :
                 return new BigInteger(input.readUTF());
+
+            case ValueTypes.BINARY_TYPE :
+                byte[] bytes = new byte[input.readInt()];
+                input.readFully(bytes);
+                return bytes;
 
             case ValueTypes.YANG_IDENTIFIER_TYPE :
             return readYangInstanceIdentifier();
