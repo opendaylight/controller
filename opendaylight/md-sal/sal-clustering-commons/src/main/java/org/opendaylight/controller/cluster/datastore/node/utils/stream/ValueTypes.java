@@ -9,14 +9,13 @@
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
 import com.google.common.base.Preconditions;
-import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public class ValueTypes {
     public static final byte SHORT_TYPE = 1;
@@ -30,6 +29,7 @@ public class ValueTypes {
     public static final byte STRING_TYPE = 9;
     public static final byte BIG_INTEGER_TYPE = 10;
     public static final byte BIG_DECIMAL_TYPE = 11;
+    public static final byte BINARY_TYPE = 12;
 
     private static Map<Class<?>, Byte> types = new HashMap<>();
 
@@ -45,6 +45,7 @@ public class ValueTypes {
         types.put(Short.class, Byte.valueOf(SHORT_TYPE));
         types.put(BigInteger.class, Byte.valueOf(BIG_INTEGER_TYPE));
         types.put(BigDecimal.class, Byte.valueOf(BIG_DECIMAL_TYPE));
+        types.put(byte[].class, Byte.valueOf(BINARY_TYPE));
     }
 
     public static final byte getSerializableType(Object node){
