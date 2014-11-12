@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_79cbc472",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-12T00:50:20Z",
+      "side": 1,
+      "message": "I think I prefer the previous name of this method, isLocalPath, as that more accurately describes the purpose of this method. To me, \"isPathCoLocated\" begs the question, co-located with what? Not a big deal, just an observation.",
+      "revId": "49a3ee1fdb66cb851c2108508abf78ed71e3c8dc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_b9b94ceb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 382,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-12T00:50:20Z",
+      "side": 1,
+      "message": "To make the code more readable can you rename atIndex1 to pathAtIndex?",
+      "revId": "49a3ee1fdb66cb851c2108508abf78ed71e3c8dc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_59ce0085",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 383,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-12T00:50:20Z",
+      "side": 1,
+      "message": "Since selfAddress should be immutable, we can optimize here by not obtaining its \u0027at\u0027 index each time. Same with host and port below. In the constructor, we can parse self address and store selfAddressIsLocal, selfAddressHost, and selfAddressPort class members.",
+      "revId": "49a3ee1fdb66cb851c2108508abf78ed71e3c8dc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_39ee9ced",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-12T00:50:20Z",
+      "side": 1,
+      "message": "You don\u0027t actually need to check atIndex1 here since we know !\u003d -1 due to the check on line 385.",
+      "revId": "49a3ee1fdb66cb851c2108508abf78ed71e3c8dc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_d9ba10e1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/utils/ActorContextTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-12T00:50:20Z",
+      "side": 1,
+      "message": "Can you add a test for path in local format and self address in remote format?",
+      "revId": "49a3ee1fdb66cb851c2108508abf78ed71e3c8dc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
