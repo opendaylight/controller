@@ -134,6 +134,14 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionCapabilit
         logger.error("{}: Initialization in sal failed, disconnecting from device", id, t);
         listener.close();
         onRemoteSessionDown();
+        resetMessageTransformer();
+    }
+
+    /**
+     * Set the schema context inside transformer to null as is in initial state
+     */
+    private void resetMessageTransformer() {
+        updateMessageTransformer(null);
     }
 
     /**
@@ -162,6 +170,7 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionCapabilit
         for (final SchemaSourceRegistration<? extends SchemaSourceRepresentation> sourceRegistration : sourceRegistrations) {
             sourceRegistration.close();
         }
+        resetMessageTransformer();
     }
 
     @Override
