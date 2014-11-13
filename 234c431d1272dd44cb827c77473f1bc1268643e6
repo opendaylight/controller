@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_3c90caeb",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 416,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-13T02:04:54Z",
+      "side": 1,
+      "message": "This code was copied so votesRequired no longer applies in the comments - need to change to numPeers.",
+      "revId": "234c431d1272dd44cb827c77473f1bc1268643e6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_fcc102e5",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 418,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-13T02:04:54Z",
+      "side": 1,
+      "message": "I would think numPeers shouldn\u0027t be negative but checking \u003e 0 makes it clear in the code that negative isn\u0027t valid. Could also add a PreConditon for non-negative.",
+      "revId": "234c431d1272dd44cb827c77473f1bc1268643e6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_bcbb7a71",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/IsolatedLeader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-13T02:04:54Z",
+      "side": 1,
+      "message": "Since we\u0027re not really overriding this method can we just remove it?",
+      "revId": "234c431d1272dd44cb827c77473f1bc1268643e6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_7cff3235",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/IsolatedLeader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-13T02:04:54Z",
+      "side": 1,
+      "message": "Minor style/cosmetic thing but could you put @Override on a separate line?",
+      "revId": "234c431d1272dd44cb827c77473f1bc1268643e6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_dc63de18",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/IsolatedLeader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-13T02:04:54Z",
+      "side": 1,
+      "message": "What if the new state is Candidate? - I don\u0027t think we would want to switch  to Leader - maybe that can\u0027t happen, at least currently (not sure with proposed 2-node cluster), but wouldn\u0027t hurt to check.  Maybe it\u0027s safest to check if new state \u003d\u003d IsolatedLeader, i.e. the state didn\u0027t change?.",
+      "revId": "234c431d1272dd44cb827c77473f1bc1268643e6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_9c6d5607",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/IsolatedLeader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-13T02:04:54Z",
+      "side": 1,
+      "message": "@Override on a separate line ....",
+      "revId": "234c431d1272dd44cb827c77473f1bc1268643e6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_dc951ee5",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-13T02:04:54Z",
+      "side": 1,
+      "message": "getMajorityVoteCount is called twice here - could just call once.",
+      "revId": "234c431d1272dd44cb827c77473f1bc1268643e6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
