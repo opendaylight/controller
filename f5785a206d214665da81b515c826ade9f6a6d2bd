@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_b2cac19f",
+        "filename": "features/jolokia/src/main/resources/features.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-13T21:31:51Z",
+      "side": 1,
+      "message": "It\u0027s the convention we are following",
+      "parentUuid": "ba8cc1f7_f917d4a1",
+      "revId": "f5785a206d214665da81b515c826ade9f6a6d2bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_d91210b4",
         "filename": "features/jolokia/src/main/resources/features.xml",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2014-11-12T02:11:39Z",
       "side": 1,
       "message": "We should add description to this feature also.",
+      "revId": "f5785a206d214665da81b515c826ade9f6a6d2bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_d2cf45af",
+        "filename": "features/jolokia/src/main/resources/features.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-13T21:31:51Z",
+      "side": 1,
+      "message": "Will do.",
+      "parentUuid": "ba8cc1f7_d91210b4",
       "revId": "f5785a206d214665da81b515c826ade9f6a6d2bd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
