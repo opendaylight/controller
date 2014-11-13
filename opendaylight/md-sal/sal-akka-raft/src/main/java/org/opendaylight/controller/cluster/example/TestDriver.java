@@ -44,6 +44,11 @@ public class TestDriver {
      *  stopLoggingForClient:{nodeName}
      *  printNodes
      *  printState
+     *
+     *  Note: when run on IDE and on debug log level, the debug logs in
+     *  AbstractUptypedActor and AbstractUptypedPersistentActor would need to be commented out.
+     *  Also RaftActor handleCommand(), debug log which prints for every command other than AE/AER
+     *
      * @param args
      * @throws Exception
      */
