@@ -14,6 +14,11 @@ message PathArgumentAttribute{
     optional QName name =1;
     optional string value=2;
     optional int32 type=3;
+    // Specific values
+    optional InstanceIdentifier instanceIdentifierValue = 4; // intValueType = YangInstanceIdentifier
+    repeated string bitsValue = 5; // intValueType = Bits
+    optional bytes bytesValue = 6;
+
 }
 
 
