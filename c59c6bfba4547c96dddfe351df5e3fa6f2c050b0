@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_3290f194",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 394,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-13T21:20:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_177fdfe1",
+      "revId": "c59c6bfba4547c96dddfe351df5e3fa6f2c050b0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_776d0b32",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2014-11-13T14:55:01Z",
       "side": 1,
       "message": "Hopefully the path host/port format will always be of the form \"host:port\" with no spaces as this is how we construct the selfAddressHostPort. Reasonable assumption - should be the case.",
+      "revId": "c59c6bfba4547c96dddfe351df5e3fa6f2c050b0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_528d757a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 407,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-13T21:20:52Z",
+      "side": 1,
+      "message": "I am not sure if the path can be of any other format than host:port. \nIf its not, (for e.g, there is just a host but no port), then  match would fail and that would make it a remote path. \nBut i doubt that it will ever be the case though",
+      "parentUuid": "ba8cc1f7_776d0b32",
       "revId": "c59c6bfba4547c96dddfe351df5e3fa6f2c050b0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
