@@ -63,6 +63,8 @@ public class DistributedConfigDataStoreProviderModule extends
                 .shardTransactionCommitQueueCapacity(
                         props.getShardTransactionCommitQueueCapacity().getValue().intValue())
                 .persistent(props.getPersistent().booleanValue())
+                .shardIsolatedLeaderCheckIntervalInMillis(
+                    props.getShardIsolatedLeaderCheckIntervalInMillis().getValue())
                 .build();
 
         return DistributedDataStoreFactory.createInstance("config", getConfigSchemaServiceDependency(),

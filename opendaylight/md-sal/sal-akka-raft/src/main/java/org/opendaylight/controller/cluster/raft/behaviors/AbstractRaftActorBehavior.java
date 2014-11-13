@@ -390,7 +390,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     }
 
     protected RaftActorBehavior switchBehavior(RaftActorBehavior behavior) {
-        LOG.info("Switching from behavior {} to {}", this.state(), behavior.state());
+        LOG.info("{} :- Switching from behavior {} to {}", context.getId(), this.state(), behavior.state());
         try {
             close();
         } catch (Exception e) {
@@ -398,5 +398,28 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         }
 
         return behavior;
+    }
+
+    protected int getMajorityVoteCount(int numPeers) {
+        // Votes are required from a majority of the peers including self.
+        // The numMajority field therefore stores a calculated value
+        // of the number of votes required for this candidate to win an
+        // election based on it's known peers.
+        // If a peer was added during normal operation and raft replicas
+        // came to know about them then the new peer would also need to be
+        // taken into consideration when calculating this value.
+        // Here are some examples for what the numMajority would be for n
+        // peers
+        // 0 peers = 1 numMajority -: (0 + 1) / 2 + 1 = 1
+        // 2 peers = 2 numMajority -: (2 + 1) / 2 + 1 = 2
+        // 4 peers = 3 numMajority -: (4 + 1) / 2 + 1 = 3
+
+        int numMajority = 0;
+        if (numPeers > 0) {
+            int self = 1;
+            numMajority = (numPeers + self) / 2 + 1;
+        }
+        return numMajority;
+
     }
 }
