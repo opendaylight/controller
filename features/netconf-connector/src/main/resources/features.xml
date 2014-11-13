@@ -108,8 +108,6 @@
         -->
         <feature version='${aaa.version}'>odl-aaa-netconf-plugin</feature>
         <bundle>mvn:org.opendaylight.controller/netconf-ssh/${netconf.version}</bundle>
-        <bundle>mvn:org.bouncycastle/bcpkix-jdk15on/${bouncycastle.version}</bundle>
-        <bundle>mvn:org.bouncycastle/bcprov-jdk15on/${bouncycastle.version}</bundle>
       </feature>
       <feature name='odl-netconf-tcp' version='${netconf.version}' description="OpenDaylight :: Netconf Connector :: TCP">
         <feature version='${netconf.version}'>odl-netconf-impl</feature>
