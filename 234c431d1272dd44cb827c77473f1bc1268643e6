@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_b7f39309",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 416,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-13T21:02:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_3c90caeb",
+      "revId": "234c431d1272dd44cb827c77473f1bc1268643e6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_fcc102e5",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2014-11-13T02:04:54Z",
       "side": 1,
       "message": "I would think numPeers shouldn\u0027t be negative but checking \u003e 0 makes it clear in the code that negative isn\u0027t valid. Could also add a PreConditon for non-negative.",
+      "revId": "234c431d1272dd44cb827c77473f1bc1268643e6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_d7f897e7",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 418,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-13T21:02:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_fcc102e5",
       "revId": "234c431d1272dd44cb827c77473f1bc1268643e6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_77dd0b70",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/IsolatedLeader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-13T21:02:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_bcbb7a71",
+      "revId": "234c431d1272dd44cb827c77473f1bc1268643e6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_7cff3235",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/IsolatedLeader.java",
         "patchSetId": 3
@@ -64,6 +118,24 @@
       "writtenOn": "2014-11-13T02:04:54Z",
       "side": 1,
       "message": "Minor style/cosmetic thing but could you put @Override on a separate line?",
+      "revId": "234c431d1272dd44cb827c77473f1bc1268643e6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_97da0f77",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/IsolatedLeader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-13T21:02:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_7cff3235",
       "revId": "234c431d1272dd44cb827c77473f1bc1268643e6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_57e4873a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/IsolatedLeader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-13T21:02:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_dc63de18",
+      "revId": "234c431d1272dd44cb827c77473f1bc1268643e6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_9c6d5607",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/IsolatedLeader.java",
         "patchSetId": 3
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_17d6ff4f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/IsolatedLeader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-13T21:02:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_9c6d5607",
+      "revId": "234c431d1272dd44cb827c77473f1bc1268643e6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_dc951ee5",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
         "patchSetId": 3
@@ -115,6 +223,24 @@
       "writtenOn": "2014-11-13T02:04:54Z",
       "side": 1,
       "message": "getMajorityVoteCount is called twice here - could just call once.",
+      "revId": "234c431d1272dd44cb827c77473f1bc1268643e6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_b7cab39f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-13T21:02:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_dc951ee5",
       "revId": "234c431d1272dd44cb827c77473f1bc1268643e6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
