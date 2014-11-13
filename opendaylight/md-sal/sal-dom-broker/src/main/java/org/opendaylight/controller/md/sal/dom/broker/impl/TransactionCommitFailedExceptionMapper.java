@@ -18,9 +18,9 @@ import org.opendaylight.yangtools.util.concurrent.ExceptionMapper;
 final class TransactionCommitFailedExceptionMapper
                            extends ExceptionMapper<TransactionCommitFailedException> {
 
-    static final TransactionCommitFailedExceptionMapper PRE_COMMIT_MAPPER = create("canCommit");
+    static final TransactionCommitFailedExceptionMapper PRE_COMMIT_MAPPER = create("preCommit");
 
-    static final TransactionCommitFailedExceptionMapper CAN_COMMIT_ERROR_MAPPER = create("preCommit");
+    static final TransactionCommitFailedExceptionMapper CAN_COMMIT_ERROR_MAPPER = create("canCommit");
 
     static final TransactionCommitFailedExceptionMapper COMMIT_ERROR_MAPPER = create("commit");
 
