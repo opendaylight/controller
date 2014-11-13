@@ -15,6 +15,15 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.protobuf.ByteString;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
 import org.opendaylight.controller.cluster.raft.ClientRequestTrackerImpl;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
@@ -24,6 +33,7 @@ import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.InitiateInstallSnapshot;
+import org.opendaylight.controller.cluster.raft.base.messages.IsolatedLeaderCheck;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapshot;
@@ -34,16 +44,6 @@ import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import scala.concurrent.duration.FiniteDuration;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * The behavior of a RaftActor when it is in the Leader state
@@ -77,10 +77,13 @@ public class Leader extends AbstractRaftActorBehavior {
 
     private Cancellable heartbeatSchedule = null;
     private Cancellable installSnapshotSchedule = null;
+    private Cancellable isolatedLeaderCheckSchedule = null;
 
     private List<ClientRequestTracker> trackerList = new ArrayList<>();
 
     private final int minReplicationCount;
+
+    private final int minIsolatedLeaderPeerCount;
 
     private Optional<ByteString> snapshot;
 
@@ -99,15 +102,21 @@ public class Leader extends AbstractRaftActorBehavior {
             followerToLog.put(followerId, followerLogInformation);
         }
 
+        leaderId = context.getId();
+
         if(LOG.isDebugEnabled()) {
             LOG.debug("Election:Leader has following peers: {}", followers);
         }
 
-        if (followers.size() > 0) {
-            minReplicationCount = (followers.size() + 1) / 2 + 1;
-        } else {
-            minReplicationCount = 0;
-        }
+        minReplicationCount = getMajorityVoteCount(followers.size());
+
+        // the isolated Leader peer count will be 1 less than the majority vote count.
+        // this is because the vote count has the self vote counted in it
+        // for e.g
+        // 0 peers = 1 votesRequired , minIsolatedLeaderPeerCount = 0
+        // 2 peers = 2 votesRequired , minIsolatedLeaderPeerCount = 1
+        // 4 peers = 3 votesRequired, minIsolatedLeaderPeerCount = 2
+        minIsolatedLeaderPeerCount = minReplicationCount > 0 ? (minReplicationCount - 1) : 0;
 
         snapshot = Optional.absent();
 
@@ -117,11 +126,11 @@ public class Leader extends AbstractRaftActorBehavior {
         // prevent election timeouts (§5.2)
         scheduleHeartBeat(new FiniteDuration(0, TimeUnit.SECONDS));
 
-        scheduleInstallSnapshotCheck(
-            new FiniteDuration(context.getConfigParams().getHeartBeatInterval().length() * 1000,
-                context.getConfigParams().getHeartBeatInterval().unit())
-        );
+        scheduleInstallSnapshotCheck(context.getConfigParams().getIsolatedCheckInterval());
 
+        scheduleIsolatedLeaderCheck(
+            new FiniteDuration(context.getConfigParams().getHeartBeatInterval().length() * 10,
+                context.getConfigParams().getHeartBeatInterval().unit()));
     }
 
     private Optional<ByteString> getSnapshot() {
@@ -194,11 +203,9 @@ public class Leader extends AbstractRaftActorBehavior {
             }
 
             if (replicatedCount >= minReplicationCount) {
-                ReplicatedLogEntry replicatedLogEntry =
-                    context.getReplicatedLog().get(N);
-                if (replicatedLogEntry != null
-                    && replicatedLogEntry.getTerm()
-                    == currentTerm()) {
+                ReplicatedLogEntry replicatedLogEntry = context.getReplicatedLog().get(N);
+                if (replicatedLogEntry != null &&
+                    replicatedLogEntry.getTerm() == currentTerm()) {
                     context.setCommitIndex(N);
                 }
             } else {
@@ -230,7 +237,6 @@ public class Leader extends AbstractRaftActorBehavior {
                 return tracker;
             }
         }
-
         return null;
     }
 
@@ -277,8 +283,14 @@ public class Leader extends AbstractRaftActorBehavior {
                 replicate((Replicate) message);
 
             } else if (message instanceof InstallSnapshotReply){
-                handleInstallSnapshotReply(
-                    (InstallSnapshotReply) message);
+                handleInstallSnapshotReply((InstallSnapshotReply) message);
+
+            } else if (message instanceof IsolatedLeaderCheck) {
+                if (isLeaderIsolated()) {
+                    LOG.info("At least {} followers need to be active, Switching {} from Leader to IsolatedLeader",
+                        minIsolatedLeaderPeerCount, leaderId);
+                    return switchBehavior(new IsolatedLeader(context));
+                }
             }
         } finally {
             scheduleHeartBeat(context.getConfigParams().getHeartBeatInterval());
@@ -575,13 +587,26 @@ public class Leader extends AbstractRaftActorBehavior {
         }
     }
 
+    protected boolean isLeaderIsolated() {
+        int minPresent = minIsolatedLeaderPeerCount;
+        for (FollowerLogInformation followerLogInformation : followerToLog.values()) {
+            if (followerLogInformation.isFollowerActive()) {
+                --minPresent;
+                if (minPresent == 0) {
+                    break;
+                }
+            }
+        }
+        return (minPresent != 0);
+    }
+
     private void stopHeartBeat() {
         if (heartbeatSchedule != null && !heartbeatSchedule.isCancelled()) {
             heartbeatSchedule.cancel();
         }
     }
 
-    private void stopInstallSnapshotSchedule() {
+    protected void stopInstallSnapshotSchedule() {
         if (installSnapshotSchedule != null && !installSnapshotSchedule.isCancelled()) {
             installSnapshotSchedule.cancel();
         }
@@ -606,7 +631,7 @@ public class Leader extends AbstractRaftActorBehavior {
             context.getActorSystem().dispatcher(), context.getActor());
     }
 
-    private void scheduleInstallSnapshotCheck(FiniteDuration interval) {
+    protected void scheduleInstallSnapshotCheck(FiniteDuration interval) {
         if(followers.size() == 0){
             // Optimization - do not bother scheduling a heartbeat as there are
             // no followers
@@ -622,12 +647,25 @@ public class Leader extends AbstractRaftActorBehavior {
                 interval,
                 context.getActor(), new InitiateInstallSnapshot(),
                 context.getActorSystem().dispatcher(), context.getActor());
+
     }
 
+    protected void stopIsolatedLeaderCheckSchedule() {
+        if (isolatedLeaderCheckSchedule != null && !isolatedLeaderCheckSchedule.isCancelled()) {
+            isolatedLeaderCheckSchedule.cancel();
+        }
+    }
 
+    protected void scheduleIsolatedLeaderCheck(FiniteDuration isolatedCheckInterval) {
+        isolatedLeaderCheckSchedule = context.getActorSystem().scheduler().schedule(isolatedCheckInterval, isolatedCheckInterval,
+            context.getActor(), new IsolatedLeaderCheck(),
+            context.getActorSystem().dispatcher(), context.getActor());
+    }
 
     @Override public void close() throws Exception {
         stopHeartBeat();
+        stopInstallSnapshotSchedule();
+        stopIsolatedLeaderCheckSchedule();
     }
 
     @Override public String getLeaderId() {

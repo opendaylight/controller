@@ -56,25 +56,7 @@ public class Candidate extends AbstractRaftActorBehavior {
             LOG.debug("Election:Candidate has following peers: {}", peers);
         }
 
-        if(peers.size() > 0) {
-            // Votes are required from a majority of the peers including self.
-            // The votesRequired field therefore stores a calculated value
-            // of the number of votes required for this candidate to win an
-            // election based on it's known peers.
-            // If a peer was added during normal operation and raft replicas
-            // came to know about them then the new peer would also need to be
-            // taken into consideration when calculating this value.
-            // Here are some examples for what the votesRequired would be for n
-            // peers
-            // 0 peers = 1 votesRequired (0 + 1) / 2 + 1 = 1
-            // 2 peers = 2 votesRequired (2 + 1) / 2 + 1 = 2
-            // 4 peers = 3 votesRequired (4 + 1) / 2 + 1 = 3
-            int noOfPeers = peers.size();
-            int self = 1;
-            votesRequired = (noOfPeers + self) / 2 + 1;
-        } else {
-            votesRequired = 0;
-        }
+        votesRequired = getMajorityVoteCount(peers.size());
 
         startNewTerm();
         scheduleElection(electionDuration());

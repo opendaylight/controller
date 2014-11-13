@@ -44,6 +44,8 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     private FiniteDuration heartBeatInterval = HEART_BEAT_INTERVAL;
     private long snapshotBatchCount = SNAPSHOT_BATCH_COUNT;
     private int journalRecoveryLogBatchSize = JOURNAL_RECOVERY_LOG_BATCH_SIZE;
+    private FiniteDuration isolatedLeaderCheckInterval =
+        new FiniteDuration(HEART_BEAT_INTERVAL.length() * 1000, HEART_BEAT_INTERVAL.unit());
 
     public void setHeartBeatInterval(FiniteDuration heartBeatInterval) {
         this.heartBeatInterval = heartBeatInterval;
@@ -55,6 +57,10 @@ public class DefaultConfigParamsImpl implements ConfigParams {
 
     public void setJournalRecoveryLogBatchSize(int journalRecoveryLogBatchSize) {
         this.journalRecoveryLogBatchSize = journalRecoveryLogBatchSize;
+    }
+
+    public void setIsolatedLeaderCheckInterval(FiniteDuration isolatedLeaderCheckInterval) {
+        this.isolatedLeaderCheckInterval = isolatedLeaderCheckInterval;
     }
 
     @Override
@@ -86,5 +92,10 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     @Override
     public int getJournalRecoveryLogBatchSize() {
         return journalRecoveryLogBatchSize;
+    }
+
+    @Override
+    public FiniteDuration getIsolatedCheckInterval() {
+        return isolatedLeaderCheckInterval;
     }
 }
