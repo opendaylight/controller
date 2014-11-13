@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_177fdfe1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 394,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-13T14:55:01Z",
+      "side": 1,
+      "message": "Not trying to be nitpicky but the use of Optional here incurs an object creation when it isn\u0027t null which will likely be the case. This can be avoided by simply using \"selfAddressHostPort \u003d\u003d null\". This code will be exercised a lot so I think we should optimize the fast path.",
+      "revId": "c59c6bfba4547c96dddfe351df5e3fa6f2c050b0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_776d0b32",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 407,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-13T14:55:01Z",
+      "side": 1,
+      "message": "Hopefully the path host/port format will always be of the form \"host:port\" with no spaces as this is how we construct the selfAddressHostPort. Reasonable assumption - should be the case.",
+      "revId": "c59c6bfba4547c96dddfe351df5e3fa6f2c050b0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
