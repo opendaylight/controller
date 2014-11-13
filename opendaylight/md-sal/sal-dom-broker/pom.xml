@@ -11,10 +11,6 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.github.romix</groupId>
-      <artifactId>java-concurrent-hash-trie-map</artifactId>
-    </dependency>
-    <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
     </dependency>
@@ -103,7 +99,6 @@
                             org.opendaylight.yangtools.yang.util,
                             org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.dom.impl.rev131028.*</Private-Package>
             <Import-Package>*</Import-Package>
-            <Embed-Dependency>java-concurrent-hash-trie-map;inline=true</Embed-Dependency>
           </instructions>
         </configuration>
       </plugin>
