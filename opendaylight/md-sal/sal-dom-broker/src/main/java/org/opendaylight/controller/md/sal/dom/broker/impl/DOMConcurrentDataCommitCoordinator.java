@@ -95,7 +95,8 @@ public class DOMConcurrentDataCommitCoordinator implements DOMDataCommitExecutor
             public void onSuccess(Boolean result) {
                 if (result == null || !result) {
                     handleException(clientSubmitFuture, transaction, cohorts, cohortSize,
-                            CAN_COMMIT, new TransactionCommitFailedException(
+                            CAN_COMMIT, TransactionCommitFailedExceptionMapper.CAN_COMMIT_ERROR_MAPPER,
+                            new TransactionCommitFailedException(
                                             "Can Commit failed, no detailed cause available."));
                 } else {
                     if(remaining.decrementAndGet() == 0) {
@@ -107,7 +108,8 @@ public class DOMConcurrentDataCommitCoordinator implements DOMDataCommitExecutor
 
             @Override
             public void onFailure(Throwable t) {
-                handleException(clientSubmitFuture, transaction, cohorts, cohortSize, CAN_COMMIT, t);
+                handleException(clientSubmitFuture, transaction, cohorts, cohortSize, CAN_COMMIT,
+                        TransactionCommitFailedExceptionMapper.CAN_COMMIT_ERROR_MAPPER, t);
             }
         };
 
@@ -134,7 +136,8 @@ public class DOMConcurrentDataCommitCoordinator implements DOMDataCommitExecutor
 
             @Override
             public void onFailure(Throwable t) {
-                handleException(clientSubmitFuture, transaction, cohorts, cohortSize, PRE_COMMIT, t);
+                handleException(clientSubmitFuture, transaction, cohorts, cohortSize, PRE_COMMIT,
+                        TransactionCommitFailedExceptionMapper.PRE_COMMIT_MAPPER, t);
             }
         };
 
@@ -163,7 +166,8 @@ public class DOMConcurrentDataCommitCoordinator implements DOMDataCommitExecutor
 
             @Override
             public void onFailure(Throwable t) {
-                handleException(clientSubmitFuture, transaction, cohorts, cohortSize, COMMIT, t);
+                handleException(clientSubmitFuture, transaction, cohorts, cohortSize, COMMIT,
+                        TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER, t);
             }
         };
 
@@ -176,7 +180,8 @@ public class DOMConcurrentDataCommitCoordinator implements DOMDataCommitExecutor
     private void handleException(final AsyncNotifyingSettableFuture clientSubmitFuture,
             final DOMDataWriteTransaction transaction,
             final Iterable<DOMStoreThreePhaseCommitCohort> cohorts, int cohortSize,
-            final String phase, final Throwable t) {
+            final String phase, final TransactionCommitFailedExceptionMapper exMapper,
+            final Throwable t) {
 
         if(clientSubmitFuture.isDone()) {
             // We must have had failures from multiple cohorts.
@@ -191,8 +196,7 @@ public class DOMConcurrentDataCommitCoordinator implements DOMDataCommitExecutor
             e = new RuntimeException("Unexpected error occurred", t);
         }
 
-        final TransactionCommitFailedException clientException =
-                TransactionCommitFailedExceptionMapper.CAN_COMMIT_ERROR_MAPPER.apply(e);
+        final TransactionCommitFailedException clientException = exMapper.apply(e);
 
         // Transaction failed - tell all cohorts to abort.
 
