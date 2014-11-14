@@ -7,14 +7,13 @@
  */
 package org.opendaylight.controller.netconf.persist.impl;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.persist.api.PropertiesProvider;
 import org.opendaylight.controller.config.persist.api.StorageAdapter;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
 
 public class DummyAdapter implements StorageAdapter, Persister {
 

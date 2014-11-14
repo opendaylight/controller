@@ -7,17 +7,16 @@
  */
 package org.opendaylight.controller.netconf.persist.impl;
 
+import static org.junit.Assert.assertEquals;
+
 import com.google.common.collect.Sets;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Element;
-
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
-
-import static org.junit.Assert.assertEquals;
 
 public class CapabilityStrippingConfigSnapshotHolderTest {
 
