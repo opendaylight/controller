@@ -8,10 +8,9 @@
 
 package org.opendaylight.controller.netconf.util.messages;
 
-import java.nio.ByteBuffer;
-
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
+import java.nio.ByteBuffer;
 
 /**
  * Netconf message header is used only when chunked framing mechanism is
