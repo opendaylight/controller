@@ -72,17 +72,17 @@ public class NetconfITMonitoringTest extends AbstractNetconfConfigTest {
         return TCP_ADDRESS;
     }
 
-    static SessionMonitoringService getNetconfMonitoringListenerService(final Logger logger, final NetconfMonitoringServiceImpl monitor) {
+    static SessionMonitoringService getNetconfMonitoringListenerService(final Logger LOG, final NetconfMonitoringServiceImpl monitor) {
         return new SessionMonitoringService() {
             @Override
             public void onSessionUp(final NetconfManagementSession session) {
-                logger.debug("Management session up {}", session);
+                LOG.debug("Management session up {}", session);
                 monitor.onSessionUp(session);
             }
 
             @Override
             public void onSessionDown(final NetconfManagementSession session) {
-                logger.debug("Management session down {}", session);
+                LOG.debug("Management session down {}", session);
                 monitor.onSessionDown(session);
             }
         };
