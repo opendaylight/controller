@@ -23,7 +23,7 @@ public class ModuleElementDefinition {
 
     private final String instanceName;
     private final EditStrategyType editStrategy;
-    private static final Logger logger = LoggerFactory.getLogger(ModuleElementDefinition.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ModuleElementDefinition.class);
 
     public ModuleElementDefinition(String instanceName, String currentStrategy, EditStrategyType defaultStrategy) {
         this.instanceName = instanceName;
@@ -35,7 +35,7 @@ public class ModuleElementDefinition {
                 _edStrategy = InstanceConfigElementResolved.parseStrategy(currentStrategy, defaultStrategy);
             } catch (OperationNotPermittedException e) {
                 _edStrategy = defaultStrategy;
-                logger.warn("Operation not permitted on current strategy {} while default strategy is {}. Element definition strategy set to default.",
+                LOG.warn("Operation not permitted on current strategy {} while default strategy is {}. Element definition strategy set to default.",
                         currentStrategy,
                         defaultStrategy,
                         e);
@@ -51,10 +51,12 @@ public class ModuleElementDefinition {
 
     public EditConfigStrategy getEditStrategy() {
         switch (editStrategy) {
-            case delete :
-            case remove :
-            case none : return NONE_EDIT_CONFIG_STRATEGY;
-            default : return MISSING_INSTANCE_HANDLING_STRATEGY;
+        case delete :
+        case remove :
+        case none :
+            return NONE_EDIT_CONFIG_STRATEGY;
+        default :
+            return MISSING_INSTANCE_HANDLING_STRATEGY;
         }
     }
 }

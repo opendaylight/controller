@@ -8,11 +8,11 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector;
 
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services.ServiceInstance;
-
-import static org.junit.Assert.assertEquals;
 
 public class ServiceTrackerTest {
 

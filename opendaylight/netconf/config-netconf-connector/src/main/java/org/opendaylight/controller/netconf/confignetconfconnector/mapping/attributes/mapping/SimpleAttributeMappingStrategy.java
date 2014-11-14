@@ -11,11 +11,10 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
-import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
-
-import javax.management.openmbean.SimpleType;
 import java.util.Date;
 import java.util.Map;
+import javax.management.openmbean.SimpleType;
+import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
 
 public class SimpleAttributeMappingStrategy extends AbstractAttributeMappingStrategy<String, SimpleType<?>> {
 

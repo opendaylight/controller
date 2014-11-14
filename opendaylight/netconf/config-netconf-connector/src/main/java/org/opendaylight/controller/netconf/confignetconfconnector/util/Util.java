@@ -8,12 +8,11 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.util;
 
-import com.google.common.base.Preconditions;
+import static org.opendaylight.yangtools.yang.common.SimpleDateFormatUtil.getRevisionFormat;
 
+import com.google.common.base.Preconditions;
 import java.text.ParseException;
 import java.util.Date;
-
-import static org.opendaylight.yangtools.yang.common.SimpleDateFormatUtil.getRevisionFormat;
 
 public final class Util {
 

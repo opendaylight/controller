@@ -28,7 +28,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,12 +42,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.custommonkey.xmlunit.AbstractNodeTester;
 import org.custommonkey.xmlunit.NodeTest;
 import org.custommonkey.xmlunit.NodeTestException;
@@ -121,7 +118,7 @@ import org.xml.sax.SAXException;
 
 
 public class NetconfMappingTest extends AbstractConfigTest {
-    private static final Logger logger = LoggerFactory.getLogger(NetconfMappingTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NetconfMappingTest.class);
 
     private static final String INSTANCE_NAME = "instance-from-code";
     private static final String NETCONF_SESSION_ID = "foo";
@@ -498,7 +495,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
         for (int i = 0; i < TESTS_COUNT; i++) {
             String file = String.format(format, i + 1);
-            logger.info("Reading {}", file);
+            LOG.info("Reading {}", file);
             try {
                 edit(file);
             } catch (NetconfDocumentedException e) {
@@ -702,13 +699,13 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
         final Document request = XmlFileLoader.xmlFileToDocument(filename);
 
-        logger.debug("Executing netconf operation\n{}", XmlUtil.toString(request));
+        LOG.debug("Executing netconf operation\n{}", XmlUtil.toString(request));
         HandlingPriority priority = op.canHandle(request);
 
         Preconditions.checkState(priority != HandlingPriority.CANNOT_HANDLE);
 
         final Document response = op.handle(request, NetconfOperationChainedExecution.EXECUTION_TERMINATION_POINT);
-        logger.debug("Got response\n{}", XmlUtil.toString(response));
+        LOG.debug("Got response\n{}", XmlUtil.toString(response));
         return response;
     }
 

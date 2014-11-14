@@ -9,19 +9,18 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.resolving;
 
 import com.google.common.base.Optional;
+import javax.management.ObjectName;
+import javax.management.openmbean.SimpleType;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.mapping.ObjectNameAttributeMappingStrategy;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
 import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.management.ObjectName;
-import javax.management.openmbean.SimpleType;
-
 public class ObjectNameAttributeResolvingStrategy extends AbstractAttributeResolvingStrategy<ObjectName, SimpleType<?>> {
 
     private final ServiceRegistryWrapper serviceTracker;
-    private static final Logger logger = LoggerFactory.getLogger(ObjectNameAttributeResolvingStrategy.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ObjectNameAttributeResolvingStrategy.class);
 
     ObjectNameAttributeResolvingStrategy(ServiceRegistryWrapper serviceTracker) {
         super(SimpleType.OBJECTNAME);
@@ -40,11 +39,11 @@ public class ObjectNameAttributeResolvingStrategy extends AbstractAttributeResol
         String serviceName = mappedDep.getServiceName();
         String refName = mappedDep.getRefName();
         String namespace = mappedDep.getNamespace();
-        logger.trace("Getting service instance by service name {} : {} and ref name {}", namespace, serviceName, refName);
+        LOG.trace("Getting service instance by service name {} : {} and ref name {}", namespace, serviceName, refName);
 
         ObjectName on = serviceTracker.getByServiceAndRefName(namespace, serviceName, refName);
 
-        logger.debug("Attribute {} : {} parsed to type {}", attrName, value, getOpenType());
+        LOG.debug("Attribute {} : {} parsed to type {}", attrName, value, getOpenType());
         return Optional.of(on);
     }
 

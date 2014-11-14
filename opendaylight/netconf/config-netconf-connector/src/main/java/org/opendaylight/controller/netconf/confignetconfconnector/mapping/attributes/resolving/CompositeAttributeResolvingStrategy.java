@@ -11,23 +11,22 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.util.Map;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
-import java.util.Map;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class CompositeAttributeResolvingStrategy extends
         AbstractAttributeResolvingStrategy<CompositeDataSupport, CompositeType> {
     private final Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> innerTypes;
     private final Map<String, String> yangToJavaAttrMapping;
 
-    private static final Logger logger = LoggerFactory.getLogger(CompositeAttributeResolvingStrategy.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CompositeAttributeResolvingStrategy.class);
 
     CompositeAttributeResolvingStrategy(Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> innerTypes,
             CompositeType openType, Map<String, String> yangToJavaAttrMapping) {
@@ -80,7 +79,7 @@ class CompositeAttributeResolvingStrategy extends
                     + " for attribute " + attrName + " from value " + value, e);
         }
 
-        logger.debug("Attribute {} : {} parsed to type {} as {}", attrName, value, getOpenType(), parsedValue);
+        LOG.debug("Attribute {} : {} parsed to type {} as {}", attrName, value, getOpenType(), parsedValue);
 
         return Optional.of(parsedValue);
     }

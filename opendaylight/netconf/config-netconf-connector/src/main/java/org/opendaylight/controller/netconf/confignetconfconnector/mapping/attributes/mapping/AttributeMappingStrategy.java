@@ -9,7 +9,6 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.mapping;
 
 import com.google.common.base.Optional;
-
 import javax.management.openmbean.OpenType;
 
 public interface AttributeMappingStrategy<T, O extends OpenType<?>> {

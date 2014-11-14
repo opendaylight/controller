@@ -9,7 +9,6 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.toxml;
 
 import java.util.List;
-
 import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
 import org.w3c.dom.Element;
 

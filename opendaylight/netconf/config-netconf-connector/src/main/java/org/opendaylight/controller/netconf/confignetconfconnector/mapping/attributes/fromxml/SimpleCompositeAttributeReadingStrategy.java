@@ -9,7 +9,6 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml;
 
 import com.google.common.collect.Maps;
-
 import java.util.HashMap;
 
 public class SimpleCompositeAttributeReadingStrategy extends SimpleAttributeReadingStrategy {

@@ -10,6 +10,7 @@ package org.opendaylight.controller.netconf.confignetconfconnector.osgi;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
+import java.util.Set;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Commit;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.DiscardChanges;
@@ -20,8 +21,6 @@ import org.opendaylight.controller.netconf.confignetconfconnector.operations.get
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.runtimerpc.RuntimeRpc;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
-
-import java.util.Set;
 
 final class NetconfOperationProvider {
     private final Set<NetconfOperation> operations;

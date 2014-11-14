@@ -9,13 +9,11 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.osgi;
 
 import com.google.common.collect.Maps;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.PackageTranslator;
 import org.opendaylight.controller.config.yangjmxgenerator.ServiceInterfaceEntry;
@@ -29,7 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class YangStoreSnapshotImpl implements YangStoreSnapshot {
-    private static final Logger logger = LoggerFactory.getLogger(YangStoreSnapshotImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(YangStoreSnapshotImpl.class);
 
 
     private final Map<String /* Namespace from yang file */,
@@ -42,7 +40,7 @@ public class YangStoreSnapshotImpl implements YangStoreSnapshot {
 
 
     public YangStoreSnapshotImpl(final SchemaContext resolveSchemaContext) {
-        logger.trace("Resolved modules:{}", resolveSchemaContext.getModules());
+        LOG.trace("Resolved modules:{}", resolveSchemaContext.getModules());
         this.schemaContext = resolveSchemaContext;
         // JMX generator
 

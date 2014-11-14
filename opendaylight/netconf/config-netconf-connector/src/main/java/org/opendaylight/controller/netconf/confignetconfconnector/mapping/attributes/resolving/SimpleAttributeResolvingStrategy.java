@@ -11,22 +11,21 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.ParseException;
+import java.util.Date;
+import java.util.Map;
+import javax.management.openmbean.SimpleType;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.management.openmbean.SimpleType;
-import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.Date;
-import java.util.Map;
-
 final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingStrategy<Object, SimpleType<?>> {
 
-    private static final Logger logger = LoggerFactory.getLogger(SimpleAttributeResolvingStrategy.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SimpleAttributeResolvingStrategy.class);
 
     SimpleAttributeResolvingStrategy(SimpleType<?> simpleType) {
         super(simpleType);
@@ -56,7 +55,7 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
         prefferedPlugin = prefferedPlugin == null ? resolverPlugins.get(DEFAULT_RESOLVERS) : prefferedPlugin;
 
         Object parsedValue = prefferedPlugin.resolveObject(cls, attrName, (String) value);
-        logger.debug("Attribute {} : {} parsed to type {} with value {}", attrName, value, getOpenType(), parsedValue);
+        LOG.debug("Attribute {} : {} parsed to type {} with value {}", attrName, value, getOpenType(), parsedValue);
         return Optional.of(parsedValue);
     }
 
@@ -96,7 +95,7 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
                 method = type.getMethod("valueOf", String.class);
                 return method.invoke(null, value);
             } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                logger.trace("Error parsing object {}",e);
+                LOG.trace("Error parsing object ",e);
                 throw new NetconfDocumentedException("Error parsing object.",
                         NetconfDocumentedException.ErrorType.application,
                         NetconfDocumentedException.ErrorTag.operation_failed,
@@ -143,7 +142,7 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
             try {
                 return Util.readDate(value);
             } catch (ParseException e) {
-                logger.trace("Unable parse value {} due to  {}",value, e);
+                LOG.trace("Unable parse value {} due to ",value, e);
                 throw new NetconfDocumentedException("Unable to parse value "+value+" as date.",
                         NetconfDocumentedException.ErrorType.application,
                         NetconfDocumentedException.ErrorTag.operation_failed,

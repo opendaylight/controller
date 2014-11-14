@@ -41,7 +41,7 @@ public class GetConfig extends AbstractConfigNetconfOperation {
 
     private final TransactionProvider transactionProvider;
 
-    private static final Logger logger = LoggerFactory.getLogger(GetConfig.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GetConfig.class);
 
     public GetConfig(YangStoreSnapshot yangStoreSnapshot, Optional<String> maybeNamespace,
             TransactionProvider transactionProvider, ConfigRegistryClient configRegistryClient,
@@ -61,7 +61,7 @@ public class GetConfig extends AbstractConfigNetconfOperation {
                 XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
         XmlElement sourceNode = sourceElement.getOnlyChildElement();
         String sourceParsed = sourceNode.getName();
-        logger.debug("Setting source datastore to '{}'", sourceParsed);
+        LOG.debug("Setting source datastore to '{}'", sourceParsed);
         Datastore sourceDatastore = Datastore.valueOf(sourceParsed);
 
         // Filter option: ignore for now, TODO only load modules specified by the filter
@@ -86,7 +86,7 @@ public class GetConfig extends AbstractConfigNetconfOperation {
         ServiceRegistryWrapper serviceTracker = new ServiceRegistryWrapper(ta);
         dataElement = configMapping.toXml(instances, this.maybeNamespace, document, dataElement, serviceTracker);
 
-        logger.trace("{} operation successful", GET_CONFIG);
+        LOG.trace("{} operation successful", GET_CONFIG);
 
         return dataElement;
     }

@@ -9,13 +9,10 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.get;
 
 import com.google.common.collect.Maps;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.management.ObjectName;
-
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
@@ -42,7 +39,7 @@ import org.w3c.dom.Element;
 public class Get extends AbstractConfigNetconfOperation {
 
     private final YangStoreSnapshot yangStoreSnapshot;
-    private static final Logger logger = LoggerFactory.getLogger(Get.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Get.class);
 
     public Get(YangStoreSnapshot yangStoreSnapshot, ConfigRegistryClient configRegistryClient,
                String netconfSessionIdForReporting) {
@@ -133,7 +130,7 @@ public class Get extends AbstractConfigNetconfOperation {
 
         final Element element = runtime.toXml(runtimeBeans, configBeans, document);
 
-        logger.trace("{} operation successful", XmlNetconfConstants.GET);
+        LOG.trace("{} operation successful", XmlNetconfConstants.GET);
 
         return element;
     }
