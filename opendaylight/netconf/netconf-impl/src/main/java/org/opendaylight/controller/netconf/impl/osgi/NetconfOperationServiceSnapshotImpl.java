@@ -8,14 +8,13 @@
 
 package org.opendaylight.controller.netconf.impl.osgi;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceSnapshot;
 import org.opendaylight.controller.netconf.util.CloseableUtil;
-
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 public class NetconfOperationServiceSnapshotImpl implements NetconfOperationServiceSnapshot {
 

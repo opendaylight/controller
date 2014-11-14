@@ -13,6 +13,10 @@ import io.netty.channel.Channel;
 import io.netty.channel.local.LocalAddress;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.Promise;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.AbstractMap;
+import java.util.Map;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfServerSessionPreferences;
 import org.opendaylight.controller.netconf.nettyutil.AbstractNetconfSessionNegotiator;
@@ -21,17 +25,12 @@ import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAddi
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.util.AbstractMap;
-import java.util.Map;
-
 public class NetconfServerSessionNegotiator
         extends
         AbstractNetconfSessionNegotiator<NetconfServerSessionPreferences, NetconfServerSession, NetconfServerSessionListener> {
 
-    static final Logger logger = LoggerFactory
-            .getLogger(NetconfServerSessionNegotiator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NetconfServerSessionNegotiator.class);
+    
     private static final String UNKNOWN = "unknown";
 
     protected NetconfServerSessionNegotiator(
@@ -71,7 +70,7 @@ public class NetconfServerSessionNegotiator
 
         }
 
-        logger.debug("Additional header from hello parsed as {} from {}",
+        LOG.debug("Additional header from hello parsed as {} from {}",
                 parsedHeader, additionalHeader);
 
         return new NetconfServerSession(sessionListener, channel,

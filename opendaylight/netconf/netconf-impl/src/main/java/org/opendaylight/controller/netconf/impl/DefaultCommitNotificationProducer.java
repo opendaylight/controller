@@ -8,13 +8,7 @@
 
 package org.opendaylight.controller.netconf.impl;
 
-import org.opendaylight.controller.netconf.api.jmx.CommitJMXNotification;
-import org.opendaylight.controller.netconf.api.jmx.DefaultCommitOperationMXBean;
-import org.opendaylight.controller.netconf.api.jmx.NetconfJMXNotification;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Element;
-
+import java.util.Set;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
@@ -22,12 +16,17 @@ import javax.management.MBeanServer;
 import javax.management.NotCompliantMBeanException;
 import javax.management.NotificationBroadcasterSupport;
 import javax.management.ObjectName;
-import java.util.Set;
+import org.opendaylight.controller.netconf.api.jmx.CommitJMXNotification;
+import org.opendaylight.controller.netconf.api.jmx.DefaultCommitOperationMXBean;
+import org.opendaylight.controller.netconf.api.jmx.NetconfJMXNotification;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Element;
 
 public class DefaultCommitNotificationProducer extends NotificationBroadcasterSupport implements
         DefaultCommitOperationMXBean, AutoCloseable {
 
-    private static final Logger logger = LoggerFactory.getLogger(DefaultCommitNotificationProducer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultCommitNotificationProducer.class);
 
     private final MBeanServer mbeanServer;
 
@@ -35,7 +34,7 @@ public class DefaultCommitNotificationProducer extends NotificationBroadcasterSu
 
     public DefaultCommitNotificationProducer(MBeanServer mBeanServer) {
         this.mbeanServer = mBeanServer;
-        logger.debug("Registering to JMX under {}", on);
+        LOG.debug("Registering to JMX under {}", on);
         registerMBean(this, mbeanServer, on);
     }
 
@@ -49,7 +48,7 @@ public class DefaultCommitNotificationProducer extends NotificationBroadcasterSu
 
     public void sendCommitNotification(String message, Element cfgSnapshot, Set<String> capabilities) {
         CommitJMXNotification notif = NetconfJMXNotification.afterCommit(this, message, cfgSnapshot, capabilities);
-        logger.debug("Notification about commit {} sent", notif);
+        LOG.debug("Notification about commit {} sent", notif);
         sendNotification(notif);
     }
 
@@ -58,7 +57,7 @@ public class DefaultCommitNotificationProducer extends NotificationBroadcasterSu
         try {
             mbeanServer.unregisterMBean(on);
         } catch (InstanceNotFoundException | MBeanRegistrationException e) {
-            logger.warn("Ignoring exception while unregistering {} as {}", this, on, e);
+            LOG.warn("Ignoring exception while unregistering {} as {}", this, on, e);
         }
     }
 }

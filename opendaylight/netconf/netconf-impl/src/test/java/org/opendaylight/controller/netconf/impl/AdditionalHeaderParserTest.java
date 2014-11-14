@@ -8,6 +8,7 @@
 package org.opendaylight.controller.netconf.impl;
 
 import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAdditionalHeader;
 

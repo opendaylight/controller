@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 public class NetconfImplActivator implements BundleActivator {
 
-    private static final Logger logger = LoggerFactory.getLogger(NetconfImplActivator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NetconfImplActivator.class);
 
     private NetconfOperationServiceFactoryTracker factoriesTracker;
     private DefaultCommitNotificationProducer commitNot;
@@ -62,7 +62,7 @@ public class NetconfImplActivator implements BundleActivator {
         NetconfServerDispatcher dispatch = new NetconfServerDispatcher(serverChannelInitializer, eventLoopGroup, eventLoopGroup);
 
         LocalAddress address = NetconfConfigUtil.getNetconfLocalAddress();
-        logger.trace("Starting local netconf server at {}", address);
+        LOG.trace("Starting local netconf server at {}", address);
         dispatch.createLocalServer(address);
 
         context.registerService(NetconfOperationProvider.class, factoriesListener, null);
@@ -84,7 +84,7 @@ public class NetconfImplActivator implements BundleActivator {
 
     @Override
     public void stop(final BundleContext context) {
-        logger.info("Shutting down netconf because YangStoreService service was removed");
+        LOG.info("Shutting down netconf because YangStoreService service was removed");
 
         commitNot.close();
         eventLoopGroup.shutdownGracefully(0, 1, TimeUnit.SECONDS);
