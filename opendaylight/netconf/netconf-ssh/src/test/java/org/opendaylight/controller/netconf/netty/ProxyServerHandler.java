@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ProxyServerHandler extends ChannelInboundHandlerAdapter {
-    private static final Logger logger = LoggerFactory.getLogger(ProxyServerHandler.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(ProxyServerHandler.class);
     private final Bootstrap clientBootstrap;
     private final LocalAddress localAddress;
 
@@ -53,32 +53,32 @@ public class ProxyServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
-        logger.info("channelInactive - closing client connection");
+        LOG.info("channelInactive - closing client connection");
         clientChannel.close();
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, final Object msg) {
-        logger.debug("Writing to client {}", msg);
+        LOG.debug("Writing to client {}", msg);
         clientChannel.write(msg);
     }
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {
-        logger.debug("flushing");
+        LOG.debug("flushing");
         clientChannel.flush();
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         // Close the connection when an exception is raised.
-        logger.warn("Unexpected exception from downstream.", cause);
+        LOG.warn("Unexpected exception from downstream.", cause);
         ctx.close();
     }
 }
 
 class ProxyClientHandler extends ChannelInboundHandlerAdapter {
-    private static final Logger logger = LoggerFactory.getLogger(ProxyClientHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ProxyClientHandler.class);
 
     private final ChannelHandlerContext remoteCtx;
 
@@ -89,33 +89,33 @@ class ProxyClientHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
-        logger.info("client active");
+        LOG.info("client active");
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         ByteBuf bb = (ByteBuf) msg;
-        logger.info(">{}", bb.toString(Charsets.UTF_8));
+        LOG.info(">{}", bb.toString(Charsets.UTF_8));
         remoteCtx.write(msg);
     }
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {
-        logger.debug("Flushing server ctx");
+        LOG.debug("Flushing server ctx");
         remoteCtx.flush();
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         // Close the connection when an exception is raised.
-        logger.warn("Unexpected exception from downstream", cause);
+        LOG.warn("Unexpected exception from downstream", cause);
         ctx.close();
     }
 
     // called both when local or remote connection dies
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
-        logger.debug("channelInactive() called, closing remote client ctx");
+        LOG.debug("channelInactive() called, closing remote client ctx");
         remoteCtx.close();
     }
 }

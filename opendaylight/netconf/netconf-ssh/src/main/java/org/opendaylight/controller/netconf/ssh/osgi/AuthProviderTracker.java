@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 final class AuthProviderTracker implements ServiceTrackerCustomizer<AuthProvider, AuthProvider>, PasswordAuthenticator {
-    private static final Logger logger = LoggerFactory.getLogger(AuthProviderTracker.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AuthProviderTracker.class);
 
     private final BundleContext bundleContext;
 
@@ -37,7 +37,7 @@ final class AuthProviderTracker implements ServiceTrackerCustomizer<AuthProvider
 
     @Override
     public AuthProvider addingService(final ServiceReference<AuthProvider> reference) {
-        logger.trace("Service {} added", reference);
+        LOG.trace("Service {} added", reference);
         final AuthProvider authService = bundleContext.getService(reference);
         final Integer newServicePreference = getPreference(reference);
         if(isBetter(newServicePreference)) {
@@ -66,15 +66,15 @@ final class AuthProviderTracker implements ServiceTrackerCustomizer<AuthProvider
         final AuthProvider authService = bundleContext.getService(reference);
         final Integer newServicePreference = getPreference(reference);
         if(isBetter(newServicePreference)) {
-            logger.trace("Replacing modified service {} in netconf SSH.", reference);
+            LOG.trace("Replacing modified service {} in netconf SSH.", reference);
             this.authProvider = authService;
         }
     }
 
     @Override
     public void removedService(final ServiceReference<AuthProvider> reference, final AuthProvider service) {
-        logger.trace("Removing service {} from netconf SSH. " +
-                "SSH won't authenticate users until AuthProvider service will be started.", reference);
+        LOG.trace("Removing service {} from netconf SSH. ", reference,
+                " SSH won't authenticate users until AuthProvider service will be started.");
         maxPreference = null;
         this.authProvider = null;
     }
