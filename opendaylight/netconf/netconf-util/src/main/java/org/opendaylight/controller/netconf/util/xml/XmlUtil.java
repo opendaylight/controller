@@ -10,14 +10,12 @@ package org.opendaylight.controller.netconf.util.xml;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
@@ -35,7 +33,6 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
-
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -124,7 +121,7 @@ public final class XmlUtil {
     public static Element createTextElementWithNamespacedContent(Document document, String qName, String prefix,
                                                                  String namespace, String contentWithoutPrefix) {
 
-       return createTextElementWithNamespacedContent(document, qName, prefix, namespace, contentWithoutPrefix, Optional.<String>absent());
+        return createTextElementWithNamespacedContent(document, qName, prefix, namespace, contentWithoutPrefix, Optional.<String>absent());
     }
 
     public static Element createTextElementWithNamespacedContent(Document document, String qName, String prefix,

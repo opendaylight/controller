@@ -9,14 +9,12 @@
 package org.opendaylight.controller.netconf.util.messages;
 
 import com.google.common.base.Preconditions;
-
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
-
-import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
@@ -27,20 +25,20 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 
 public final class SendErrorExceptionUtil {
-    private static final Logger logger = LoggerFactory.getLogger(SendErrorExceptionUtil.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SendErrorExceptionUtil.class);
 
     private SendErrorExceptionUtil() {}
 
     public static void sendErrorMessage(final NetconfSession session,
             final NetconfDocumentedException sendErrorException) {
-        logger.trace("Sending error {}", sendErrorException.getMessage(), sendErrorException);
+        LOG.trace("Sending error {}", sendErrorException.getMessage(), sendErrorException);
         final Document errorDocument = createDocument(sendErrorException);
         ChannelFuture f = session.sendMessage(new NetconfMessage(errorDocument));
         f.addListener(new SendErrorVerifyingListener(sendErrorException));
     }
 
     public static void sendErrorMessage(Channel channel, NetconfDocumentedException sendErrorException) {
-        logger.trace("Sending error {}", sendErrorException.getMessage(), sendErrorException);
+        LOG.trace("Sending error {}", sendErrorException.getMessage(), sendErrorException);
         final Document errorDocument = createDocument(sendErrorException);
         ChannelFuture f = channel.writeAndFlush(new NetconfMessage(errorDocument));
         f.addListener(new SendErrorVerifyingListener(sendErrorException));
@@ -49,7 +47,7 @@ public final class SendErrorExceptionUtil {
     public static void sendErrorMessage(NetconfSession session, NetconfDocumentedException sendErrorException,
             NetconfMessage incommingMessage) {
         final Document errorDocument = createDocument(sendErrorException);
-        logger.trace("Sending error {}", XmlUtil.toString(errorDocument));
+        LOG.trace("Sending error {}", XmlUtil.toString(errorDocument));
         tryToCopyAttributes(incommingMessage.getDocument(), errorDocument, sendErrorException);
         ChannelFuture f = session.sendMessage(new NetconfMessage(errorDocument));
         f.addListener(new SendErrorVerifyingListener(sendErrorException));
@@ -76,7 +74,7 @@ public final class SendErrorExceptionUtil {
                 rpcReply.setAttributeNode((Attr) errorDocument.importNode(attr, true));
             }
         } catch (final Exception e) {
-            logger.warn("Unable to copy incomming attributes to {}, returned rpc-error might be invalid for client",
+            LOG.warn("Unable to copy incomming attributes to {}, returned rpc-error might be invalid for client",
                     sendErrorException, e);
         }
     }

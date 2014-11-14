@@ -8,7 +8,6 @@
 package org.opendaylight.controller.netconf.util;
 
 import com.google.common.base.Preconditions;
-
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
@@ -19,7 +18,7 @@ import org.w3c.dom.Document;
 
 public final class NetconfUtil {
 
-    private static final Logger logger = LoggerFactory.getLogger(NetconfUtil.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NetconfUtil.class);
 
     private NetconfUtil() {}
 
@@ -30,7 +29,7 @@ public final class NetconfUtil {
         if (element.getName().equals(XmlNetconfConstants.OK)) {
             return response;
         }
-        logger.warn("Can not load last configuration. Operation failed.");
+        LOG.warn("Can not load last configuration. Operation failed.");
         throw new IllegalStateException("Can not load last configuration. Operation failed: "
                 + XmlUtil.toString(response));
     }
