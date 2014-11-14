@@ -8,24 +8,22 @@
 
 package org.opendaylight.controller.netconf.client;
 
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.util.Timer;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.Promise;
 import java.io.Closeable;
-
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
 import org.opendaylight.controller.netconf.client.conf.NetconfReconnectingClientConfiguration;
 import org.opendaylight.protocol.framework.AbstractDispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.util.Timer;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.Promise;
-
 public class NetconfClientDispatcherImpl extends AbstractDispatcher<NetconfClientSession, NetconfClientSessionListener>
         implements NetconfClientDispatcher, Closeable {
 
-    private static final Logger logger = LoggerFactory.getLogger(NetconfClientDispatcherImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NetconfClientDispatcherImpl.class);
 
     private final Timer timer;
 
@@ -48,14 +46,17 @@ public class NetconfClientDispatcherImpl extends AbstractDispatcher<NetconfClien
     @Override
     public Future<Void> createReconnectingClient(final NetconfReconnectingClientConfiguration clientConfiguration) {
         switch (clientConfiguration.getProtocol()) {
-            case TCP: return createReconnectingTcpClient(clientConfiguration);
-            case SSH: return createReconnectingSshClient(clientConfiguration);
-            default: throw new IllegalArgumentException("Unknown client protocol " + clientConfiguration.getProtocol());
+        case TCP:
+            return createReconnectingTcpClient(clientConfiguration);
+        case SSH:
+            return createReconnectingSshClient(clientConfiguration);
+        default:
+            throw new IllegalArgumentException("Unknown client protocol " + clientConfiguration.getProtocol());
         }
     }
 
     private Future<NetconfClientSession> createTcpClient(final NetconfClientConfiguration currentConfiguration) {
-        logger.debug("Creating TCP client with configuration: {}", currentConfiguration);
+        LOG.debug("Creating TCP client with configuration: {}", currentConfiguration);
         return super.createClient(currentConfiguration.getAddress(), currentConfiguration.getReconnectStrategy(),
                 new PipelineInitializer<NetconfClientSession>() {
 
@@ -72,7 +73,7 @@ public class NetconfClientDispatcherImpl extends AbstractDispatcher<NetconfClien
     }
 
     private Future<Void> createReconnectingTcpClient(final NetconfReconnectingClientConfiguration currentConfiguration) {
-        logger.debug("Creating reconnecting TCP client with configuration: {}", currentConfiguration);
+        LOG.debug("Creating reconnecting TCP client with configuration: {}", currentConfiguration);
         final TcpClientChannelInitializer init = new TcpClientChannelInitializer(getNegotiatorFactory(currentConfiguration),
                 currentConfiguration.getSessionListener());
 
@@ -86,7 +87,7 @@ public class NetconfClientDispatcherImpl extends AbstractDispatcher<NetconfClien
     }
 
     private Future<NetconfClientSession> createSshClient(final NetconfClientConfiguration currentConfiguration) {
-        logger.debug("Creating SSH client with configuration: {}", currentConfiguration);
+        LOG.debug("Creating SSH client with configuration: {}", currentConfiguration);
         return super.createClient(currentConfiguration.getAddress(), currentConfiguration.getReconnectStrategy(),
                 new PipelineInitializer<NetconfClientSession>() {
 
@@ -102,7 +103,7 @@ public class NetconfClientDispatcherImpl extends AbstractDispatcher<NetconfClien
     }
 
     private Future<Void> createReconnectingSshClient(final NetconfReconnectingClientConfiguration currentConfiguration) {
-        logger.debug("Creating reconnecting SSH client with configuration: {}", currentConfiguration);
+        LOG.debug("Creating reconnecting SSH client with configuration: {}", currentConfiguration);
         final SshClientChannelInitializer init = new SshClientChannelInitializer(currentConfiguration.getAuthHandler(),
                 getNegotiatorFactory(currentConfiguration), currentConfiguration.getSessionListener());
 
