@@ -15,8 +15,7 @@
 )
 package org.opendaylight.controller.netconf.monitoring.xml.model;
 
-import org.opendaylight.controller.netconf.monitoring.MonitoringConstants;
-
 import javax.xml.bind.annotation.XmlNs;
 import javax.xml.bind.annotation.XmlNsForm;
 import javax.xml.bind.annotation.XmlSchema;
+import org.opendaylight.controller.netconf.monitoring.MonitoringConstants;

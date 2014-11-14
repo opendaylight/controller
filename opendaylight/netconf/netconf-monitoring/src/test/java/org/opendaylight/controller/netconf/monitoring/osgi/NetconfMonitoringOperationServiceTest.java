@@ -8,13 +8,13 @@
 
 package org.opendaylight.controller.netconf.monitoring.osgi;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+
 import com.google.common.base.Optional;
 import org.junit.Test;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.monitoring.MonitoringConstants;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
 
 public class NetconfMonitoringOperationServiceTest {
     @Test
