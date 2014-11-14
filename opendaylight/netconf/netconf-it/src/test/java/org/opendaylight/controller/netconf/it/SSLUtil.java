@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.netconf.it;
 
+import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyManagementException;
@@ -15,12 +16,9 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
-
-import com.google.common.base.Preconditions;
 
 public final class SSLUtil {
 

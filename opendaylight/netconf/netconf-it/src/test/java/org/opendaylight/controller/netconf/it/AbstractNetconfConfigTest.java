@@ -78,9 +78,11 @@ public abstract class AbstractNetconfConfigTest extends AbstractConfigTest {
     public static final String LOOPBACK_ADDRESS = "127.0.0.1";
     public static final int SERVER_CONNECTION_TIMEOUT_MILLIS = 5000;
 
-    static ModuleFactory[] FACTORIES = { new TestImplModuleFactory(),
-            new DepTestImplModuleFactory(), new NetconfTestImplModuleFactory(),
-            new IdentityTestModuleFactory(), new MultipleDependenciesModuleFactory() };
+    static ModuleFactory[] FACTORIES = {new TestImplModuleFactory(),
+                                        new DepTestImplModuleFactory(),
+                                        new NetconfTestImplModuleFactory(),
+                                        new IdentityTestModuleFactory(),
+                                        new MultipleDependenciesModuleFactory() };
 
     private EventLoopGroup nettyThreadgroup;
     private HashedWheelTimer hashedWheelTimer;
