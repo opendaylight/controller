@@ -29,7 +29,7 @@ import org.xml.sax.SAXException;
 
 @RunWith(value = Parameterized.class)
 public class SubtreeFilterTest {
-    private static final Logger logger = LoggerFactory.getLogger(SubtreeFilterTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SubtreeFilterTest.class);
 
     private final int directoryIndex;
 
@@ -57,7 +57,7 @@ public class SubtreeFilterTest {
         Document preFilterDocument = getDocument("pre-filter.xml");
         Document postFilterDocument = getDocument("post-filter.xml");
         Document actualPostFilterDocument = SubtreeFilter.applySubtreeFilter(requestDocument, preFilterDocument);
-        logger.info("Actual document: {}", XmlUtil.toString(actualPostFilterDocument));
+        LOG.info("Actual document: {}", XmlUtil.toString(actualPostFilterDocument));
         Diff diff = XMLUnit.compareXML(postFilterDocument, actualPostFilterDocument);
         assertTrue(diff.toString(), diff.similar());
 

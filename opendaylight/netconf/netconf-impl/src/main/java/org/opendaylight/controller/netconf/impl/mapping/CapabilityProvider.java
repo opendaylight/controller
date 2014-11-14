@@ -9,7 +9,6 @@
 package org.opendaylight.controller.netconf.impl.mapping;
 
 import com.google.common.base.Optional;
-
 import java.util.Set;
 
 public interface CapabilityProvider {

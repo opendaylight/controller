@@ -11,8 +11,8 @@ import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorSeverity;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorTag;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
-import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.impl.NetconfServerSession;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
 import org.opendaylight.controller.netconf.util.mapping.AbstractSingletonNetconfOperation;
@@ -25,7 +25,7 @@ import org.w3c.dom.Element;
 public class DefaultStartExi extends AbstractSingletonNetconfOperation implements DefaultNetconfOperation {
     public static final String START_EXI = "start-exi";
 
-    private static final Logger logger = LoggerFactory.getLogger(DefaultStartExi.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultStartExi.class);
     private NetconfServerSession netconfSession;
 
     public DefaultStartExi(String netconfSessionIdForReporting) {
@@ -35,7 +35,7 @@ public class DefaultStartExi extends AbstractSingletonNetconfOperation implement
     @Override
     public Document handle(Document message,
                            NetconfOperationChainedExecution subsequentOperation) throws NetconfDocumentedException {
-        logger.debug("Received start-exi message {} ", XmlUtil.toString(message));
+        LOG.debug("Received start-exi message {} ", XmlUtil.toString(message));
 
         try {
             netconfSession.startExiCommunication(new NetconfMessage(message));
@@ -50,7 +50,7 @@ public class DefaultStartExi extends AbstractSingletonNetconfOperation implement
     @Override
     protected Element handleWithNoSubsequentOperations(Document document, XmlElement operationElement) throws NetconfDocumentedException {
         Element getSchemaResult = document.createElementNS( XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0, XmlNetconfConstants.OK);
-        logger.trace("{} operation successful", START_EXI);
+        LOG.trace("{} operation successful", START_EXI);
         return getSchemaResult;
     }
 

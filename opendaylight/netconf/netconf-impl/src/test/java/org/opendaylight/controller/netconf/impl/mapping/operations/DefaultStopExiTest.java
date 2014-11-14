@@ -8,6 +8,14 @@
 
 package org.opendaylight.controller.netconf.impl.mapping.operations;
 
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelPipeline;
@@ -16,9 +24,6 @@ import org.opendaylight.controller.netconf.impl.NetconfServerSession;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
-
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.*;
 
 public class DefaultStopExiTest {
     @Test

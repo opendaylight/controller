@@ -8,6 +8,14 @@
 
 package org.opendaylight.controller.netconf.impl.osgi;
 
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -16,10 +24,6 @@ import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFa
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
-
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
 
 public class NetconfOperationServiceFactoryTrackerTest {
 

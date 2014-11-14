@@ -8,14 +8,15 @@
 
 package org.opendaylight.controller.netconf.impl.mapping.operations;
 
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+
 import org.junit.Test;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 
 public class DefaultCloseSessionTest {
     @Test

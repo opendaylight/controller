@@ -9,12 +9,12 @@
 package org.opendaylight.controller.netconf.impl.mapping.operations;
 
 import com.google.common.base.Preconditions;
-
+import java.io.InputStream;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
-import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
+import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
 import org.opendaylight.controller.netconf.util.mapping.AbstractNetconfOperation;
@@ -25,11 +25,9 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.io.InputStream;
-
 public class DefaultCommit extends AbstractNetconfOperation {
 
-    private static final Logger logger = LoggerFactory.getLogger(DefaultCommit.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultCommit.class);
 
     private static final String NOTIFY_ATTR = "notify";
 
@@ -69,12 +67,12 @@ public class DefaultCommit extends AbstractNetconfOperation {
                 "Subsequent netconf operation expected by %s", this);
 
         if (isCommitWithoutNotification(requestMessage)) {
-            logger.debug("Skipping commit notification");
+            LOG.debug("Skipping commit notification");
         } else {
             // Send commit notification if commit was not issued by persister
             removePersisterAttributes(requestMessage);
             Element cfgSnapshot = getConfigSnapshot(operationRouter);
-            logger.debug("Config snapshot retrieved successfully {}", cfgSnapshot);
+            LOG.debug("Config snapshot retrieved successfully {}", cfgSnapshot);
             notificationProducer.sendCommitNotification("ok", cfgSnapshot, cap.getCapabilities());
         }
 
@@ -101,7 +99,7 @@ public class DefaultCommit extends AbstractNetconfOperation {
             xmlElement = XmlElement.fromDomElementWithExpected(message.getDocumentElement(),
                     XmlNetconfConstants.RPC_KEY, XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
         } catch (NetconfDocumentedException e) {
-            logger.trace("Commit operation is not valid due to  {}",e);
+            LOG.trace("Commit operation is not valid due to ",e);
             return false;
         }
 
@@ -110,7 +108,7 @@ public class DefaultCommit extends AbstractNetconfOperation {
         if (attr == null || attr.equals("")){
             return false;
         } else if (attr.equals(Boolean.toString(false))) {
-            logger.debug("Commit operation received with notify=false attribute {}", message);
+            LOG.debug("Commit operation received with notify=false attribute {}", message);
             return true;
         } else {
             return false;
