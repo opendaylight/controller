@@ -16,6 +16,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
 import com.google.common.base.Optional;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -61,7 +62,6 @@ public class NetconfClientSessionNegotiatorTest {
         pipeline = mockChannelPipeline();
         future = mockChannelFuture();
         channel = mockChannel();
-        System.out.println("setup done");
     }
 
     private ChannelHandler mockChannelHandler() {

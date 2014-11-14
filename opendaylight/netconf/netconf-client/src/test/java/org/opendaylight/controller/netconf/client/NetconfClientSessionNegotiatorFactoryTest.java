@@ -8,6 +8,10 @@
 
 package org.opendaylight.controller.netconf.client;
 
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+
 import com.google.common.base.Optional;
 import io.netty.channel.Channel;
 import io.netty.util.HashedWheelTimer;
@@ -17,9 +21,6 @@ import org.junit.Test;
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAdditionalHeader;
 import org.opendaylight.protocol.framework.SessionListenerFactory;
 import org.opendaylight.protocol.framework.SessionNegotiator;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 
 public class NetconfClientSessionNegotiatorFactoryTest {
     @Test

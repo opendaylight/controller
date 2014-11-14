@@ -8,21 +8,17 @@
 
 package org.opendaylight.controller.netconf.client;
 
+import com.google.common.base.Preconditions;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import io.netty.util.concurrent.Promise;
-
 import java.util.ArrayDeque;
 import java.util.Queue;
-
 import javax.annotation.concurrent.GuardedBy;
-
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Preconditions;
 
 public class SimpleNetconfClientSessionListener implements NetconfClientSessionListener {
     private static final class RequestEntry {
@@ -35,7 +31,7 @@ public class SimpleNetconfClientSessionListener implements NetconfClientSessionL
         }
     }
 
-    private static final Logger logger = LoggerFactory.getLogger(SimpleNetconfClientSessionListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SimpleNetconfClientSessionListener.class);
 
     @GuardedBy("this")
     private final Queue<RequestEntry> requests = new ArrayDeque<>();
@@ -48,12 +44,12 @@ public class SimpleNetconfClientSessionListener implements NetconfClientSessionL
         while (!requests.isEmpty()) {
             final RequestEntry e = requests.peek();
             if (e.promise.setUncancellable()) {
-                logger.debug("Sending message {}", e.request);
+                LOG.debug("Sending message {}", e.request);
                 clientSession.sendMessage(e.request);
                 break;
             }
 
-            logger.debug("Message {} has been cancelled, skipping it", e.request);
+            LOG.debug("Message {} has been cancelled, skipping it", e.request);
             requests.poll();
         }
     }
@@ -61,7 +57,7 @@ public class SimpleNetconfClientSessionListener implements NetconfClientSessionL
     @Override
     public final synchronized void onSessionUp(NetconfClientSession clientSession) {
         this.clientSession = Preconditions.checkNotNull(clientSession);
-        logger.debug("Client session {} went up", clientSession);
+        LOG.debug("Client session {} went up", clientSession);
         dispatchRequest();
     }
 
@@ -76,28 +72,28 @@ public class SimpleNetconfClientSessionListener implements NetconfClientSessionL
 
     @Override
     public final void onSessionDown(NetconfClientSession clientSession, Exception e) {
-        logger.debug("Client Session {} went down unexpectedly", clientSession, e);
+        LOG.debug("Client Session {} went down unexpectedly", clientSession, e);
         tearDown(e);
     }
 
     @Override
     public final void onSessionTerminated(NetconfClientSession clientSession,
             NetconfTerminationReason netconfTerminationReason) {
-        logger.debug("Client Session {} terminated, reason: {}", clientSession,
+        LOG.debug("Client Session {} terminated, reason: {}", clientSession,
                 netconfTerminationReason.getErrorMessage());
         tearDown(new RuntimeException(netconfTerminationReason.getErrorMessage()));
     }
 
     @Override
     public synchronized void onMessage(NetconfClientSession session, NetconfMessage message) {
-        logger.debug("New message arrived: {}", message);
+        LOG.debug("New message arrived: {}", message);
 
         final RequestEntry e = requests.poll();
         if (e != null) {
             e.promise.setSuccess(message);
             dispatchRequest();
         } else {
-            logger.info("Ignoring unsolicited message {}", message);
+            LOG.info("Ignoring unsolicited message {}", message);
         }
     }
 

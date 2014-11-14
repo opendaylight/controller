@@ -8,6 +8,10 @@
 
 package org.opendaylight.controller.netconf.client;
 
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doReturn;
+
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelPromise;
@@ -15,11 +19,10 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.GenericFutureListener;
+import java.net.InetSocketAddress;
+import java.util.concurrent.Future;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
-import org.opendaylight.controller.netconf.client.NetconfClientSessionListener;
-import org.opendaylight.controller.netconf.client.SimpleNetconfClientSessionListener;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
 import org.opendaylight.controller.netconf.client.conf.NetconfReconnectingClientConfiguration;
 import org.opendaylight.controller.netconf.client.conf.NetconfReconnectingClientConfigurationBuilder;
@@ -27,13 +30,6 @@ import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAdditionalHeader;
 import org.opendaylight.protocol.framework.ReconnectStrategy;
 import org.opendaylight.protocol.framework.ReconnectStrategyFactory;
-
-import java.net.InetSocketAddress;
-import java.util.concurrent.Future;
-
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doReturn;
 
 public class NetconfClientDispatcherImplTest {
     @Test
