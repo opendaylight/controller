@@ -11,7 +11,6 @@ package org.opendaylight.controller.netconf.nettyutil.handler;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
-
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageConstants;
 
 public class EOMFramingMechanismEncoder extends MessageToByteEncoder<ByteBuf> {

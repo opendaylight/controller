@@ -7,14 +7,13 @@
  */
 package org.opendaylight.controller.netconf.nettyutil.handler.exi;
 
+import com.google.common.base.Preconditions;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.openexi.proc.common.AlignmentType;
 import org.openexi.proc.common.EXIOptions;
 import org.openexi.proc.common.EXIOptionsException;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-
-import com.google.common.base.Preconditions;
 
 public final class EXIParameters {
     private static final String EXI_PARAMETER_ALIGNMENT = "alignment";

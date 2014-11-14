@@ -26,7 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractNetconfSession<S extends NetconfSession, L extends NetconfSessionListener<S>> extends AbstractProtocolSession<NetconfMessage> implements NetconfSession, NetconfExiSession {
-    private static final Logger logger = LoggerFactory.getLogger(AbstractNetconfSession.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractNetconfSession.class);
     private final L sessionListener;
     private final long sessionId;
     private boolean up = false;
@@ -39,7 +39,7 @@ public abstract class AbstractNetconfSession<S extends NetconfSession, L extends
         this.sessionListener = sessionListener;
         this.channel = channel;
         this.sessionId = sessionId;
-        logger.debug("Session {} created", sessionId);
+        LOG.debug("Session {} created", sessionId);
     }
 
     protected abstract S thisInstance();
@@ -53,7 +53,7 @@ public abstract class AbstractNetconfSession<S extends NetconfSession, L extends
 
     @Override
     protected void handleMessage(final NetconfMessage netconfMessage) {
-        logger.debug("handling incoming message");
+        LOG.debug("handling incoming message");
         sessionListener.onMessage(thisInstance(), netconfMessage);
     }
 
@@ -61,8 +61,8 @@ public abstract class AbstractNetconfSession<S extends NetconfSession, L extends
     public ChannelFuture sendMessage(final NetconfMessage netconfMessage) {
         final ChannelFuture future = channel.writeAndFlush(netconfMessage);
         if (delayedEncoder != null) {
-                replaceMessageEncoder(delayedEncoder);
-                delayedEncoder = null;
+            replaceMessageEncoder(delayedEncoder);
+            delayedEncoder = null;
         }
 
         return future;
@@ -70,7 +70,7 @@ public abstract class AbstractNetconfSession<S extends NetconfSession, L extends
 
     @Override
     protected void endOfInput() {
-        logger.debug("Session {} end of input detected while session was in state {}", toString(), isUp() ? "up"
+        LOG.debug("Session {} end of input detected while session was in state {}", toString(), isUp() ? "up"
                 : "initialized");
         if (isUp()) {
             this.sessionListener.onSessionDown(thisInstance(), new IOException("End of input detected. Close the session."));
@@ -79,7 +79,7 @@ public abstract class AbstractNetconfSession<S extends NetconfSession, L extends
 
     @Override
     protected void sessionUp() {
-        logger.debug("Session {} up", toString());
+        LOG.debug("Session {} up", toString());
         sessionListener.onSessionUp(thisInstance());
         this.up = true;
     }
@@ -114,12 +114,12 @@ public abstract class AbstractNetconfSession<S extends NetconfSession, L extends
         try {
             exiParams = EXIParameters.fromXmlElement(XmlElement.fromDomDocument(startExiMessage.getDocument()));
         } catch (final EXIOptionsException e) {
-            logger.warn("Unable to parse EXI parameters from {} om session {}", XmlUtil.toString(startExiMessage.getDocument()), this, e);
+            LOG.warn("Unable to parse EXI parameters from {} om session {}", XmlUtil.toString(startExiMessage.getDocument()), this, e);
             throw new IllegalArgumentException(e);
         }
         final NetconfEXICodec exiCodec = new NetconfEXICodec(exiParams.getOptions());
         addExiHandlers(exiCodec);
-        logger.debug("Session {} EXI handlers added to pipeline", this);
+        LOG.debug("Session {} EXI handlers added to pipeline", this);
     }
 
     protected abstract void addExiHandlers(NetconfEXICodec exiCodec);

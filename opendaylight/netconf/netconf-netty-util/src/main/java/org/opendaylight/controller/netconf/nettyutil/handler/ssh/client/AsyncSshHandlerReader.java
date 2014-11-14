@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class AsyncSshHandlerReader implements SshFutureListener<IoReadFuture>, AutoCloseable {
 
-    private static final Logger logger = LoggerFactory.getLogger(AsyncSshHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AsyncSshHandlerReader.class);
 
     private static final int BUFFER_SIZE = 8192;
 
@@ -49,9 +49,9 @@ public final class AsyncSshHandlerReader implements SshFutureListener<IoReadFutu
         if(future.getException() != null) {
             if(asyncOut.isClosed() || asyncOut.isClosing()) {
                 // Ssh dropped
-                logger.debug("Ssh session dropped on channel: {}", channelId, future.getException());
+                LOG.debug("Ssh session dropped on channel: {}", channelId, future.getException());
             } else {
-                logger.warn("Exception while reading from SSH remote on channel {}", channelId, future.getException());
+                LOG.warn("Exception while reading from SSH remote on channel {}", channelId, future.getException());
             }
             invokeDisconnect();
             return;
@@ -59,8 +59,8 @@ public final class AsyncSshHandlerReader implements SshFutureListener<IoReadFutu
 
         if (future.getRead() > 0) {
             final ByteBuf msg = Unpooled.wrappedBuffer(buf.array(), 0, future.getRead());
-            if(logger.isTraceEnabled()) {
-                logger.trace("Reading message on channel: {}, message: {}", channelId, AsyncSshHandlerWriter.byteBufToString(msg));
+            if(LOG.isTraceEnabled()) {
+                LOG.trace("Reading message on channel: {}, message: {}", channelId, AsyncSshHandlerWriter.byteBufToString(msg));
             }
             readHandler.onMessageRead(msg);
 

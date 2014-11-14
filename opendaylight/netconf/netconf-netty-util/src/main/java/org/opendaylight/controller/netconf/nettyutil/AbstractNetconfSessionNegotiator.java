@@ -42,9 +42,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
 public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionPreferences, S extends AbstractNetconfSession<S, L>, L extends NetconfSessionListener<S>>
-extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
+    extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
 
-    private static final Logger logger = LoggerFactory.getLogger(AbstractNetconfSessionNegotiator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractNetconfSessionNegotiator.class);
 
     public static final String NAME_OF_EXCEPTION_HANDLER = "lastExceptionHandler";
 
@@ -85,7 +85,7 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
                 @Override
                 public void operationComplete(Future<? super Channel> future) {
                     Preconditions.checkState(future.isSuccess(), "Ssl handshake was not successful");
-                    logger.debug("Ssl handshake complete");
+                    LOG.debug("Ssl handshake complete");
                     start();
                 }
             });
@@ -105,7 +105,7 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
 
     private void start() {
         final NetconfMessage helloMessage = this.sessionPreferences.getHelloMessage();
-        logger.debug("Session negotiation started with hello message {} on channel {}", XmlUtil.toString(helloMessage.getDocument()), channel);
+        LOG.debug("Session negotiation started with hello message {} on channel {}", XmlUtil.toString(helloMessage.getDocument()), channel);
 
         channel.pipeline().addLast(NAME_OF_EXCEPTION_HANDLER, new ExceptionHandlingInboundChannelHandler());
 
@@ -121,7 +121,7 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
                 synchronized (this) {
                     if (state != State.ESTABLISHED) {
 
-                        logger.debug("Connection timeout after {}, session is in state {}", timeout, state);
+                        LOG.debug("Connection timeout after {}, session is in state {}", timeout, state);
 
                         // Do not fail negotiation if promise is done or canceled
                         // It would result in setting result of the promise second time and that throws exception
@@ -133,9 +133,9 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
                                 @Override
                                 public void operationComplete(ChannelFuture future) throws Exception {
                                     if(future.isSuccess()) {
-                                        logger.debug("Channel {} closed: success", future.channel());
+                                        LOG.debug("Channel {} closed: success", future.channel());
                                     } else {
-                                        logger.warn("Channel {} closed: fail", future.channel());
+                                        LOG.warn("Channel {} closed: fail", future.channel());
                                     }
                                 }
                             });
@@ -223,7 +223,7 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
     protected abstract S getSession(L sessionListener, Channel channel, NetconfHelloMessage message) throws NetconfDocumentedException;
 
     private synchronized void changeState(final State newState) {
-        logger.debug("Changing state from : {} to : {} for channel: {}", state, newState, channel);
+        LOG.debug("Changing state from : {} to : {} for channel: {}", state, newState, channel);
         Preconditions.checkState(isStateChangePermitted(state, newState), "Cannot change state from %s to %s for chanel %s", state,
                 newState, channel);
         this.state = newState;
@@ -249,7 +249,7 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
         if (state == State.OPEN_WAIT && newState == State.FAILED) {
             return true;
         }
-        logger.debug("Transition from {} to {} is not allowed", state, newState);
+        LOG.debug("Transition from {} to {} is not allowed", state, newState);
         return false;
     }
 
@@ -259,7 +259,7 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
     private final class ExceptionHandlingInboundChannelHandler extends ChannelInboundHandlerAdapter {
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-            logger.warn("An exception occurred during negotiation with {}", channel.remoteAddress(), cause);
+            LOG.warn("An exception occurred during negotiation with {}", channel.remoteAddress(), cause);
             cancelTimeout();
             negotiationFailed(cause);
             changeState(State.FAILED);
