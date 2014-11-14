@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  */
 public class RemoteNetconfCommand implements AsyncCommand, SessionAware {
 
-    private static final Logger logger = LoggerFactory.getLogger(RemoteNetconfCommand.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RemoteNetconfCommand.class);
 
     private final EventLoopGroup clientEventGroup;
     private final LocalAddress localAddress;
@@ -100,7 +100,7 @@ public class RemoteNetconfCommand implements AsyncCommand, SessionAware {
 
     @Override
     public void start(final Environment env) throws IOException {
-        logger.trace("Establishing internal connection to netconf server for client: {}", getClientAddress());
+        LOG.trace("Establishing internal connection to netconf server for client: {}", getClientAddress());
 
         final Bootstrap clientBootstrap = new Bootstrap();
         clientBootstrap.group(clientEventGroup).channel(LocalChannel.class);
@@ -120,7 +120,7 @@ public class RemoteNetconfCommand implements AsyncCommand, SessionAware {
                 if(future.isSuccess()) {
                     clientChannel = clientChannelFuture.channel();
                 } else {
-                    logger.warn("Unable to establish internal connection to netconf server for client: {}", getClientAddress());
+                    LOG.warn("Unable to establish internal connection to netconf server for client: {}", getClientAddress());
                     Preconditions.checkNotNull(callback, "Exit callback must be set");
                     callback.onExit(1, "Unable to establish internal connection to netconf server for client: "+ getClientAddress());
                 }
@@ -130,7 +130,7 @@ public class RemoteNetconfCommand implements AsyncCommand, SessionAware {
 
     @Override
     public void destroy() {
-        logger.trace("Releasing internal connection to netconf server for client: {} on channel: {}",
+        LOG.trace("Releasing internal connection to netconf server for client: {} on channel: {}",
                 getClientAddress(), clientChannel);
 
         clientChannelFuture.cancel(true);
@@ -140,7 +140,7 @@ public class RemoteNetconfCommand implements AsyncCommand, SessionAware {
                 @Override
                 public void operationComplete(final ChannelFuture future) throws Exception {
                     if (future.isSuccess() == false) {
-                        logger.warn("Unable to release internal connection to netconf server on channel: {}", clientChannel);
+                        LOG.warn("Unable to release internal connection to netconf server on channel: {}", clientChannel);
                     }
                 }
             });
