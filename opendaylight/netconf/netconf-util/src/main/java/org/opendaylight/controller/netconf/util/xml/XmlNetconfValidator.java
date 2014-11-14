@@ -8,18 +8,15 @@
 
 package org.opendaylight.controller.netconf.util.xml;
 
+import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.io.InputStream;
-
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.Validator;
-
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
-
-import com.google.common.base.Preconditions;
 
 public final class XmlNetconfValidator {
 

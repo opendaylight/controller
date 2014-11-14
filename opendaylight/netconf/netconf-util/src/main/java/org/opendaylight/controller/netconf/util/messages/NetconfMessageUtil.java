@@ -23,7 +23,7 @@ import org.w3c.dom.Document;
 
 public final class NetconfMessageUtil {
 
-    private static final Logger logger = LoggerFactory.getLogger(NetconfMessageUtil.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NetconfMessageUtil.class);
 
     private NetconfMessageUtil() {}
 
@@ -70,7 +70,7 @@ public final class NetconfMessageUtil {
                 try {
                     return input.getTextContent().trim();
                 } catch (NetconfDocumentedException e) {
-                    logger.trace("Error fetching inpit text content becauese {}",e);
+                    LOG.trace("Error fetching input text content",e);
                     return null;
                 }
             }
