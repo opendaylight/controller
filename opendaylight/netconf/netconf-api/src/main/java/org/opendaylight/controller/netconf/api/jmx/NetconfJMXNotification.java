@@ -9,10 +9,8 @@
 package org.opendaylight.controller.netconf.api.jmx;
 
 import java.util.Set;
-
 import javax.management.Notification;
 import javax.management.NotificationBroadcasterSupport;
-
 import org.w3c.dom.Element;
 
 public abstract class NetconfJMXNotification extends Notification {
