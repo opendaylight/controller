@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 public class NetconfServerSessionNegotiator extends
         AbstractNetconfSessionNegotiator<NetconfServerSessionPreferences, NetconfServerSession, NetconfServerSessionListener> {
 
-    static final Logger logger = LoggerFactory.getLogger(NetconfServerSessionNegotiator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NetconfServerSessionNegotiator.class);
 
     protected NetconfServerSessionNegotiator(NetconfServerSessionPreferences sessionPreferences,
             Promise<NetconfServerSession> promise, Channel channel, Timer timer, NetconfServerSessionListener sessionListener,
@@ -53,7 +53,7 @@ public class NetconfServerSessionNegotiator extends
                     "tcp", "client");
         }
 
-        logger.debug("Additional header from hello parsed as {} from {}", parsedHeader, additionalHeader);
+        LOG.debug("Additional header from hello parsed as {} from {}", parsedHeader, additionalHeader);
 
         return new NetconfServerSession(sessionListener, channel, getSessionPreferences().getSessionId(), parsedHeader);
     }

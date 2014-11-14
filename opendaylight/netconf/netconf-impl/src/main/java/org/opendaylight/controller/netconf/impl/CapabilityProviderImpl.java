@@ -11,6 +11,12 @@ package org.opendaylight.controller.netconf.impl;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
 import org.opendaylight.controller.netconf.mapping.api.Capability;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
@@ -18,18 +24,11 @@ import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceSn
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
 public class CapabilityProviderImpl implements CapabilityProvider {
     private final NetconfOperationServiceSnapshot netconfOperationServiceSnapshot;
     private final Set<String> capabilityURIs;
 
-    private static final Logger logger = LoggerFactory.getLogger(DefaultCommitNotificationProducer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CapabilityProviderImpl.class);
 
     public CapabilityProviderImpl(NetconfOperationServiceSnapshot netconfOperationServiceSnapshot) {
         this.netconfOperationServiceSnapshot = netconfOperationServiceSnapshot;
@@ -49,7 +48,7 @@ public class CapabilityProviderImpl implements CapabilityProvider {
             for (Capability cap : caps) {
 
                 if(capabilityMap.containsKey(cap.getCapabilityUri())) {
-                    logger.debug("Duplicate capability {} from service {}", cap.getCapabilityUri(), netconfOperationService);
+                    LOG.debug("Duplicate capability {} from service {}", cap.getCapabilityUri(), netconfOperationService);
                 }
 
                 capabilityMap.put(cap.getCapabilityUri(), cap);

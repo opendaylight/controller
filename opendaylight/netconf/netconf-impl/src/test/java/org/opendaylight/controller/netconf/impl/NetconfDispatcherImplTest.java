@@ -12,13 +12,12 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.HashedWheelTimer;
+import java.lang.management.ManagementFactory;
+import java.net.InetSocketAddress;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
-
-import java.lang.management.ManagementFactory;
-import java.net.InetSocketAddress;
 
 public class NetconfDispatcherImplTest {
 
