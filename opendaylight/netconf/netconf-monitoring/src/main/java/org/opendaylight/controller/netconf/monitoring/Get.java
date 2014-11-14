@@ -24,7 +24,7 @@ import org.w3c.dom.Element;
 
 public class Get extends AbstractNetconfOperation {
 
-    private static final Logger logger = LoggerFactory.getLogger(Get.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Get.class);
     private final NetconfMonitoringService netconfMonitor;
 
     public Get(final NetconfMonitoringService netconfMonitor) {
@@ -72,7 +72,7 @@ public class Get extends AbstractNetconfOperation {
             return innerResult;
         } catch (final RuntimeException e) {
             final String errorMessage = "Get operation for netconf-state subtree failed";
-            logger.warn(errorMessage, e);
+            LOG.warn(errorMessage, e);
 
             throw new NetconfDocumentedException(errorMessage, NetconfDocumentedException.ErrorType.application,
                     NetconfDocumentedException.ErrorTag.operation_failed,
