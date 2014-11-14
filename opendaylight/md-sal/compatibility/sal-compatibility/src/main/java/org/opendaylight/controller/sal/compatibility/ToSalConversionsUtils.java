@@ -52,6 +52,7 @@ import org.opendaylight.controller.sal.action.SetVlanPcp;
 import org.opendaylight.controller.sal.action.SwPath;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.match.Match;
@@ -207,10 +208,16 @@ public class ToSalConversionsUtils {
 
                 Uri nodeConnector = ((OutputActionCase) sourceAction).getOutputAction().getOutputNodeConnector();
                 if (nodeConnector != null) {
-                    //for (Uri uri : nodeConnectors) {
-                    Uri fullNodeConnector = new Uri(node.getType()+":"+node.getID()+":"+nodeConnector.getValue());
+                    // TODO: We should really have a bi-directional map from AD-SAL node types to
+                    //       MD-SAL node types, but lets fix that later.
+                    String type = node.getType();
+                    if( type.equals(NodeIDType.OPENFLOW) ){
+                        type = NodeMapping.OPENFLOW_ID_PREFIX;
+                    }else{
+                        type = type + ":";
+                    }
+                    Uri fullNodeConnector = new Uri(type+node.getID()+":"+nodeConnector.getValue());
                         targetAction.add(new Output(fromNodeConnectorRef(fullNodeConnector, node)));
-                    //}
                 }
             } else if (sourceAction instanceof PopMplsActionCase) {
                 // TODO: define maping
