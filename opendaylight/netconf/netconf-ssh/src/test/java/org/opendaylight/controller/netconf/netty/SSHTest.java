@@ -42,7 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SSHTest {
-    public static final Logger logger = LoggerFactory.getLogger(SSHTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SSHTest.class);
     public static final String AHOJ = "ahoj\n";
 
     private static EventLoopGroup nettyGroup;
@@ -89,7 +89,7 @@ public class SSHTest {
             Thread.sleep(500);
         }
         assertTrue(echoClientHandler.isConnected());
-        logger.info("connected, writing to client");
+        LOG.info("connected, writing to client");
         echoClientHandler.write(AHOJ);
 
         // check that server sent back the same string
@@ -102,7 +102,7 @@ public class SSHTest {
             final String read = echoClientHandler.read();
             assertTrue(read + " should end with " + AHOJ, read.endsWith(AHOJ));
         } finally {
-            logger.info("Closing socket");
+            LOG.info("Closing socket");
             sshProxyServer.close();
         }
     }

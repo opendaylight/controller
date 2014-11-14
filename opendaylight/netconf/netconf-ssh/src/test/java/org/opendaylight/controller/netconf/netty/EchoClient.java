@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * the server.
  */
 public class EchoClient extends Thread {
-    private static final Logger logger = LoggerFactory.getLogger(EchoClient.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EchoClient.class);
 
 
     private final ChannelInitializer<LocalChannel> channelInitializer;
@@ -63,11 +63,11 @@ public class EchoClient extends Thread {
             // Wait until the connection is closed.
             f.channel().closeFuture().sync();
         } catch (Exception e) {
-            logger.error("Error in client", e);
+            LOG.error("Error in client", e);
             throw new RuntimeException("Error in client", e);
         } finally {
             // Shut down the event loop to terminate all threads.
-            logger.info("Client is shutting down");
+            LOG.info("Client is shutting down");
             group.shutdownGracefully();
         }
     }
