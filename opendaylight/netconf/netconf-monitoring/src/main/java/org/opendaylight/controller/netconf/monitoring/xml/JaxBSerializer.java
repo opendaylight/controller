@@ -7,14 +7,13 @@
  */
 package org.opendaylight.controller.netconf.monitoring.xml;
 
-import org.opendaylight.controller.netconf.monitoring.xml.model.NetconfState;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.transform.dom.DOMResult;
+import org.opendaylight.controller.netconf.monitoring.xml.model.NetconfState;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 public class JaxBSerializer {
 
@@ -29,7 +28,7 @@ public class JaxBSerializer {
             res = new DOMResult();
             marshaller.marshal(monitoringModel, res);
         } catch (final JAXBException e) {
-           throw new RuntimeException("Unable to serialize netconf state " + monitoringModel, e);
+            throw new RuntimeException("Unable to serialize netconf state " + monitoringModel, e);
         }
         return ((Document)res.getNode()).getDocumentElement();
     }

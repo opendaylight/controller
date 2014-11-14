@@ -7,10 +7,9 @@
  */
 package org.opendaylight.controller.netconf.monitoring.xml.model;
 
+import com.google.common.base.Joiner;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
-
-import com.google.common.base.Joiner;
 import org.opendaylight.controller.netconf.monitoring.MonitoringConstants;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.extension.rev131210.Session1;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.sessions.Session;
