@@ -13,6 +13,8 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collections;
@@ -20,7 +22,6 @@ import java.util.Dictionary;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.config.persist.api.ConfigPusher;
@@ -37,9 +38,6 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 final class MockedBundleContext {
     @Mock

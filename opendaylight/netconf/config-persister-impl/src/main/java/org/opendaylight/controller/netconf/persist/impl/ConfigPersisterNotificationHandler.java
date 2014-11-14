@@ -8,21 +8,20 @@
 
 package org.opendaylight.controller.netconf.persist.impl;
 
-import org.opendaylight.controller.config.persist.api.Persister;
-import org.opendaylight.controller.netconf.api.jmx.CommitJMXNotification;
-import org.opendaylight.controller.netconf.api.jmx.DefaultCommitOperationMXBean;
-import org.opendaylight.controller.netconf.api.jmx.NetconfJMXNotification;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.io.Closeable;
+import java.io.IOException;
 import javax.annotation.concurrent.ThreadSafe;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanServerConnection;
 import javax.management.Notification;
 import javax.management.NotificationListener;
 import javax.management.ObjectName;
-import java.io.Closeable;
-import java.io.IOException;
+import org.opendaylight.controller.config.persist.api.Persister;
+import org.opendaylight.controller.netconf.api.jmx.CommitJMXNotification;
+import org.opendaylight.controller.netconf.api.jmx.DefaultCommitOperationMXBean;
+import org.opendaylight.controller.netconf.api.jmx.NetconfJMXNotification;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Responsible for listening for notifications from netconf (via JMX) containing latest
@@ -32,7 +31,7 @@ import java.io.IOException;
 @ThreadSafe
 public class ConfigPersisterNotificationHandler implements Closeable {
 
-    private static final Logger logger = LoggerFactory.getLogger(ConfigPersisterNotificationHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ConfigPersisterNotificationHandler.class);
     private final MBeanServerConnection mBeanServerConnection;
     private final NotificationListener listener;
 
@@ -48,7 +47,7 @@ public class ConfigPersisterNotificationHandler implements Closeable {
     }
 
     private static void registerAsJMXListener(final MBeanServerConnection mBeanServerConnection, final NotificationListener listener) {
-        logger.trace("Called registerAsJMXListener");
+        LOG.trace("Called registerAsJMXListener");
         try {
             mBeanServerConnection.addNotificationListener(DefaultCommitOperationMXBean.OBJECT_NAME, listener, null, null);
         } catch (InstanceNotFoundException | IOException e) {
@@ -65,13 +64,13 @@ public class ConfigPersisterNotificationHandler implements Closeable {
                 mBeanServerConnection.removeNotificationListener(on, listener);
             }
         } catch (final Exception e) {
-            logger.warn("Unable to unregister {} as listener for {}", listener, on, e);
+            LOG.warn("Unable to unregister {} as listener for {}", listener, on, e);
         }
     }
 }
 
 class ConfigPersisterNotificationListener implements NotificationListener {
-    private static final Logger logger = LoggerFactory.getLogger(ConfigPersisterNotificationListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ConfigPersisterNotificationListener.class);
 
     private final Persister persisterAggregator;
 
@@ -87,14 +86,14 @@ class ConfigPersisterNotificationListener implements NotificationListener {
         // Socket should not be closed at this point
         // Activator unregisters this as JMX listener before close is called
 
-        logger.trace("Received notification {}", notification);
+        LOG.trace("Received notification {}", notification);
         if (notification instanceof CommitJMXNotification) {
             try {
                 handleAfterCommitNotification((CommitJMXNotification) notification);
             } catch (final Exception e) {
                 // log exceptions from notification Handler here since
                 // notificationBroadcastSupport logs only DEBUG level
-                logger.warn("Failed to handle notification {}", notification, e);
+                LOG.warn("Failed to handle notification {}", notification, e);
                 throw e;
             }
         } else {
@@ -106,7 +105,7 @@ class ConfigPersisterNotificationListener implements NotificationListener {
         try {
             persisterAggregator.persistConfig(new CapabilityStrippingConfigSnapshotHolder(notification.getConfigSnapshot(),
                     notification.getCapabilities()));
-            logger.trace("Configuration persisted successfully");
+            LOG.trace("Configuration persisted successfully");
         } catch (final IOException e) {
             throw new RuntimeException("Unable to persist configuration snapshot", e);
         }

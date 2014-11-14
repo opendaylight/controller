@@ -8,10 +8,9 @@
 
 package org.opendaylight.controller.netconf.persist.impl;
 
+import com.google.common.collect.Lists;
 import java.util.Collections;
-
 import javax.management.Notification;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,8 +23,6 @@ import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.netconf.api.jmx.CommitJMXNotification;
 import org.opendaylight.controller.netconf.api.jmx.NetconfJMXNotification;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
-
-import com.google.common.collect.Lists;
 
 public class ConfigPersisterNotificationListenerTest {
 

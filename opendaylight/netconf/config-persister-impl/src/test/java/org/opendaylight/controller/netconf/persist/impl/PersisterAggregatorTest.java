@@ -8,21 +8,6 @@
 
 package org.opendaylight.controller.netconf.persist.impl;
 
-import com.google.common.collect.Lists;
-
-import org.junit.Test;
-import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
-import org.opendaylight.controller.config.persist.api.Persister;
-import org.opendaylight.controller.config.persist.storage.file.xml.XmlFileStorageAdapter;
-import org.opendaylight.controller.netconf.persist.impl.osgi.ConfigPersisterActivator;
-import org.opendaylight.controller.netconf.persist.impl.osgi.PropertiesProviderBaseImpl;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
-
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -31,7 +16,19 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.opendaylight.controller.netconf.persist.impl.PersisterAggregator.PersisterWithConfiguration;
-import static org.opendaylight.controller.netconf.persist.impl.PersisterAggregatorTest.TestingPropertiesProvider.loadFile;
+
+import com.google.common.collect.Lists;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
+import org.junit.Test;
+import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
+import org.opendaylight.controller.config.persist.api.Persister;
+import org.opendaylight.controller.config.persist.storage.file.xml.XmlFileStorageAdapter;
+import org.opendaylight.controller.netconf.persist.impl.osgi.ConfigPersisterActivator;
+import org.opendaylight.controller.netconf.persist.impl.osgi.PropertiesProviderBaseImpl;
 
 public class PersisterAggregatorTest {
 
@@ -72,7 +69,7 @@ public class PersisterAggregatorTest {
 
     @Test
     public void testDummyAdapter() throws Exception {
-        PersisterAggregator persisterAggregator = PersisterAggregator.createFromProperties(loadFile("test1.properties"));
+        PersisterAggregator persisterAggregator = PersisterAggregator.createFromProperties(TestingPropertiesProvider.loadFile("test1.properties"));
         List<PersisterWithConfiguration> persisters = persisterAggregator.getPersisterWithConfigurations();
         assertEquals(1, persisters.size());
         PersisterWithConfiguration persister = persisters.get(0);
@@ -107,7 +104,7 @@ public class PersisterAggregatorTest {
 
     @Test
     public void testLoadFromPropertyFile() throws Exception {
-        PersisterAggregator persisterAggregator = PersisterAggregator.createFromProperties(loadFile("test2.properties"));
+        PersisterAggregator persisterAggregator = PersisterAggregator.createFromProperties(TestingPropertiesProvider.loadFile("test2.properties"));
         List<PersisterWithConfiguration> persisters = persisterAggregator.getPersisterWithConfigurations();
         assertEquals(1, persisters.size());
         PersisterWithConfiguration persister = persisters.get(0);
@@ -118,7 +115,7 @@ public class PersisterAggregatorTest {
     @Test
     public void testFileStorageNumberOfBackups() throws Exception {
         try {
-            PersisterAggregator.createFromProperties(loadFile("test3.properties"));
+            PersisterAggregator.createFromProperties(TestingPropertiesProvider.loadFile("test3.properties"));
             fail();
         } catch (RuntimeException e) {
             assertThat(
