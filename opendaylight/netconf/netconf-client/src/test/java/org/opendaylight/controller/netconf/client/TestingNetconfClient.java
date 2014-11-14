@@ -108,7 +108,7 @@ public class TestingNetconfClient implements Closeable {
         NetconfClientDispatcherImpl netconfClientDispatcher = new NetconfClientDispatcherImpl(nettyGroup, nettyGroup, hashedWheelTimer);
         LoginPassword authHandler = new LoginPassword("admin", "admin");
         TestingNetconfClient client = new TestingNetconfClient("client", netconfClientDispatcher, getClientConfig("127.0.0.1", 1830, true, Optional.of(authHandler)));
-        System.out.println(client.getCapabilities());
+        System.console().writer().println(client.getCapabilities());
     }
 
     private static NetconfClientConfiguration getClientConfig(String host ,int port, boolean ssh, Optional<? extends AuthenticationHandler> maybeAuthHandler) throws UnknownHostException {
