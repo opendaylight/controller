@@ -304,15 +304,15 @@ public class NetconfDeviceSimulator implements Closeable {
 
         final Map<SourceIdentifier, Map.Entry<ASTSchemaSource, YangTextSchemaSource>> asts = Maps.newHashMap();
         for (final SourceIdentifier loadedSource : loadedSources) {
-                try {
-                    final CheckedFuture<ASTSchemaSource, SchemaSourceException> ast = consumer.getSchemaSource(loadedSource, ASTSchemaSource.class);
-                    final CheckedFuture<YangTextSchemaSource, SchemaSourceException> text = consumer.getSchemaSource(loadedSource, YangTextSchemaSource.class);
-                    asts.put(loadedSource, new AbstractMap.SimpleEntry<>(ast.get(), text.get()));
-                } catch (final InterruptedException e) {
-                    throw new RuntimeException(e);
-                } catch (final ExecutionException e) {
-                    throw new RuntimeException("Cannot parse schema context", e);
-                }
+            try {
+                final CheckedFuture<ASTSchemaSource, SchemaSourceException> ast = consumer.getSchemaSource(loadedSource, ASTSchemaSource.class);
+                final CheckedFuture<YangTextSchemaSource, SchemaSourceException> text = consumer.getSchemaSource(loadedSource, YangTextSchemaSource.class);
+                asts.put(loadedSource, new AbstractMap.SimpleEntry<>(ast.get(), text.get()));
+            } catch (final InterruptedException e) {
+                throw new RuntimeException(e);
+            } catch (final ExecutionException e) {
+                throw new RuntimeException("Cannot parse schema context", e);
+            }
         }
         return toModuleBuilders(asts);
     }

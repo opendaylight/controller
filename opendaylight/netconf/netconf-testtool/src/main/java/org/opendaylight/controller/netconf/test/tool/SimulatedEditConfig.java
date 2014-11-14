@@ -45,7 +45,7 @@ class SimulatedEditConfig extends AbstractConfigNetconfOperation {
     }
 
     @Override
-      protected String getOperationName() {
+    protected String getOperationName() {
         return EditConfigXmlParser.EDIT_CONFIG;
     }
 
