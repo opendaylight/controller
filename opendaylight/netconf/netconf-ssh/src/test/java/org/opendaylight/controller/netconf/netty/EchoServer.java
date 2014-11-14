@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * Echoes back any received data from a client.
  */
 public class EchoServer implements Runnable {
-    private static final Logger logger = LoggerFactory.getLogger(EchoServer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EchoServer.class);
 
     public void run() {
         // Configure the server.
@@ -76,7 +76,7 @@ public class EchoServer implements Runnable {
             if (message == null ||  "exit".equalsIgnoreCase(message)) {
                 break;
             }
-            logger.debug("Got '{}'", message);
+            LOG.debug("Got '{}'", message);
             clientHandler.write(message);
         } while (true);
         System.exit(0);

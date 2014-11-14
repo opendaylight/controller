@@ -47,7 +47,7 @@ public class SSHServerTest {
     private static final String PASSWORD = "netconf";
     private static final String HOST = "127.0.0.1";
     private static final int PORT = 1830;
-    private static final Logger logger = LoggerFactory.getLogger(SSHServerTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SSHServerTest.class);
 
     private SshProxyServer server;
 
@@ -64,7 +64,7 @@ public class SSHServerTest {
         doNothing().when(mockedContext).addServiceListener(any(ServiceListener.class), anyString());
         doReturn(new ServiceReference[0]).when(mockedContext).getServiceReferences(anyString(), anyString());
 
-        logger.info("Creating SSH server");
+        LOG.info("Creating SSH server");
 
         final InetSocketAddress addr = InetSocketAddress.createUnresolved(HOST, PORT);
         server = new SshProxyServer(minaTimerEx, clientGroup, nioExec);
@@ -75,7 +75,7 @@ public class SSHServerTest {
                         return true;
                     }
                 }).setKeyPairProvider(new PEMGeneratorHostKeyProvider(Files.createTempFile("prefix", "suffix").toAbsolutePath().toString())).setIdleTimeout(Integer.MAX_VALUE).createSshProxyServerConfiguration());
-        logger.info("SSH server started on " + PORT);
+        LOG.info("SSH server started on {}", PORT);
     }
 
     @Test
