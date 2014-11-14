@@ -12,7 +12,6 @@ import javax.management.openmbean.ArrayType;
 import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
-
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.DependencyAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;

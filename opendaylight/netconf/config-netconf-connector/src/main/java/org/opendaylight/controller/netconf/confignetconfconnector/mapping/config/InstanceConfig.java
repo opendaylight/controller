@@ -11,15 +11,12 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.confi
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import javax.management.ObjectName;
 import javax.management.openmbean.OpenType;
-
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
@@ -44,7 +41,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public final class InstanceConfig {
-    private static final Logger logger = LoggerFactory.getLogger(InstanceConfig.class);
+    private static final Logger LOG = LoggerFactory.getLogger(InstanceConfig.class);
 
     private final Map<String, AttributeIfc> yangToAttrConfig;
     private final String nullableDummyContainerName;
@@ -124,7 +121,7 @@ public final class InstanceConfig {
             try {
                 AttributeResolvingStrategy<?, ? extends OpenType<?>> attributeResolvingStrategy = resolvingStrategies
                         .get(attributeName);
-                logger.trace("Trying to set value {} of attribute {} with {}", value, attributeName, attributeResolvingStrategy);
+                LOG.trace("Trying to set value {} of attribute {} with {}", value, attributeName, attributeResolvingStrategy);
 
                 value.resolveValue(attributeResolvingStrategy, attributeName);
                 value.setJmxName(
@@ -199,8 +196,8 @@ public final class InstanceConfig {
             List<XmlElement> recognisedChildren, List<XmlElement> typeAndName) throws NetconfDocumentedException {
         List<XmlElement> foundConfigNodes = moduleElement.getChildElementsWithinNamespace(name, moduleNamespace);
         if (foundConfigNodes.isEmpty()) {
-            logger.debug("No config nodes {}:{} found in {}", moduleNamespace, name, moduleElement);
-            logger.debug("Trying lookup of config nodes without specified namespace");
+            LOG.debug("No config nodes {}:{} found in {}", moduleNamespace, name, moduleElement);
+            LOG.debug("Trying lookup of config nodes without specified namespace");
             foundConfigNodes = moduleElement.getChildElementsWithinNamespace(name,
                     XmlNetconfConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
             // In case module type or name element is not present in config it
@@ -208,7 +205,7 @@ public final class InstanceConfig {
             // We need to remove config type and name from available module
             // config elements
             foundConfigNodes.removeAll(typeAndName);
-            logger.debug("Found {} config nodes {} without specified namespace in {}", foundConfigNodes.size(), name,
+            LOG.debug("Found {} config nodes {} without specified namespace in {}", foundConfigNodes.size(), name,
                     moduleElement);
         } else {
             List<XmlElement> foundWithoutNamespaceNodes = moduleElement.getChildElementsWithinNamespace(name,

@@ -8,6 +8,11 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.operations;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+
 import org.junit.Test;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
@@ -16,11 +21,6 @@ import org.opendaylight.controller.netconf.confignetconfconnector.transactions.T
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Element;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 
 public class ValidateTest {
 

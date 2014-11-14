@@ -11,7 +11,9 @@ package org.opendaylight.controller.netconf.confignetconfconnector.operations.ru
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
-
+import java.util.Map;
+import javax.management.ObjectName;
+import javax.management.openmbean.OpenType;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
@@ -28,7 +30,6 @@ import org.opendaylight.controller.netconf.confignetconfconnector.mapping.rpc.In
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.rpc.ModuleRpcs;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.rpc.Rpcs;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.AbstractConfigNetconfOperation;
-import org.opendaylight.controller.netconf.confignetconfconnector.operations.Commit;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreSnapshot;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
@@ -39,14 +40,9 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.management.ObjectName;
-import javax.management.openmbean.OpenType;
-
-import java.util.Map;
-
 public class RuntimeRpc extends AbstractConfigNetconfOperation {
 
-    private static final Logger logger = LoggerFactory.getLogger(Commit.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RuntimeRpc.class);
     public static final String CONTEXT_INSTANCE = "context-instance";
 
     private final YangStoreSnapshot yangStoreSnapshot;
@@ -98,7 +94,7 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
         try {
             namespace = xml.getNamespace();
         } catch (MissingNameSpaceException e) {
-            logger.trace("Can't get namespace from xml element due to {}",e);
+            LOG.trace("Can't get namespace from xml element due to ",e);
             throw NetconfDocumentedException.wrap(e);
         }
         final XmlElement contextInstanceElement = xml.getOnlyChildElement(CONTEXT_INSTANCE);
@@ -133,7 +129,7 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
         try {
             netconfOperationNamespace = operationElement.getNamespace();
         } catch (MissingNameSpaceException e) {
-            logger.debug("Cannot retrieve netconf operation namespace from message due to {}", e);
+            LOG.debug("Cannot retrieve netconf operation namespace from message due to ", e);
             return HandlingPriority.CANNOT_HANDLE;
         }
 
@@ -159,7 +155,7 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
                     netconfOperationName);
 
         } catch (IllegalStateException e) {
-            logger.debug("Cannot handle runtime operation {}:{}", netconfOperationNamespace, netconfOperationName, e);
+            LOG.debug("Cannot handle runtime operation {}:{}", netconfOperationNamespace, netconfOperationName, e);
             return HandlingPriority.CANNOT_HANDLE;
         }
 
@@ -182,12 +178,12 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
         // TODO check for namespaces and unknown elements
         final NetconfOperationExecution execution = fromXml(xml);
 
-        logger.debug("Invoking operation {} on {} with arguments {}", execution.operationName, execution.on,
+        LOG.debug("Invoking operation {} on {} with arguments {}", execution.operationName, execution.on,
                 execution.attributes);
         final Object result = executeOperation(getConfigRegistryClient(), execution.on, execution.operationName,
                 execution.attributes);
 
-        logger.trace("Operation {} called successfully on {} with arguments {} with result {}", execution.operationName,
+        LOG.trace("Operation {} called successfully on {} with arguments {} with result {}", execution.operationName,
                 execution.on, execution.attributes, result);
 
         if (execution.isVoid()) {

@@ -12,15 +12,14 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Sets;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import javax.management.ObjectName;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.InstanceConfig;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import javax.management.ObjectName;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 public class InstanceRuntime {
 

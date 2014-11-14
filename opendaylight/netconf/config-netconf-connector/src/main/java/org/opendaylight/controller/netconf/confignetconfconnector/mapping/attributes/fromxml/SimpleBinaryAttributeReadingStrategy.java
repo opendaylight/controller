@@ -10,7 +10,6 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 
 import com.google.common.collect.Lists;
 import com.google.common.io.BaseEncoding;
-
 import java.util.List;
 
 public class SimpleBinaryAttributeReadingStrategy extends SimpleAttributeReadingStrategy {

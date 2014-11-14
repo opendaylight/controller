@@ -8,15 +8,13 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.mapping;
 
-import java.lang.reflect.Array;
-import java.util.List;
-
-import javax.management.openmbean.ArrayType;
-import javax.management.openmbean.OpenType;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import java.lang.reflect.Array;
+import java.util.List;
+import javax.management.openmbean.ArrayType;
+import javax.management.openmbean.OpenType;
 
 public class ArrayAttributeMappingStrategy extends AbstractAttributeMappingStrategy<List<Object>, ArrayType<?>> {
 

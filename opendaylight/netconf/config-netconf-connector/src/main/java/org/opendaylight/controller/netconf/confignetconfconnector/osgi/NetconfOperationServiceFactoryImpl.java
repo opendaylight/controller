@@ -8,13 +8,12 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.osgi;
 
+import java.lang.management.ManagementFactory;
+import javax.management.MBeanServer;
 import org.opendaylight.controller.config.util.ConfigRegistryJMXClient;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.management.MBeanServer;
-import java.lang.management.ManagementFactory;
 
 public class NetconfOperationServiceFactoryImpl implements NetconfOperationServiceFactory {
 
@@ -24,7 +23,7 @@ public class NetconfOperationServiceFactoryImpl implements NetconfOperationServi
     private final YangStoreService yangStoreService;
     private final ConfigRegistryJMXClient jmxClient;
 
-    private static final Logger logger = LoggerFactory.getLogger(NetconfOperationServiceFactoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NetconfOperationServiceFactoryImpl.class);
 
     public NetconfOperationServiceFactoryImpl(YangStoreService yangStoreService) {
         this(yangStoreService, ManagementFactory.getPlatformMBeanServer());
@@ -44,9 +43,9 @@ public class NetconfOperationServiceFactoryImpl implements NetconfOperationServi
             } catch (IllegalStateException e) {
                 ++i;
                 if (i > SILENT_ATTEMPTS) {
-                    logger.info("JMX client not created after {} attempts, still trying", i, e);
+                    LOG.info("JMX client not created after {} attempts, still trying", i, e);
                 } else {
-                    logger.debug("JMX client could not be created, reattempting, try {}", i, e);
+                    LOG.debug("JMX client could not be created, reattempting, try {}", i, e);
                 }
                 try {
                     Thread.sleep(ATTEMPT_TIMEOUT_MS);
@@ -59,9 +58,9 @@ public class NetconfOperationServiceFactoryImpl implements NetconfOperationServi
 
         jmxClient = configRegistryJMXClient;
         if (i > SILENT_ATTEMPTS) {
-            logger.info("Created JMX client after {} attempts", i);
+            LOG.info("Created JMX client after {} attempts", i);
         } else {
-            logger.debug("Created JMX client after {} attempts", i);
+            LOG.debug("Created JMX client after {} attempts", i);
         }
     }
 

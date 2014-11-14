@@ -9,12 +9,11 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.mapping;
 
 import com.google.common.base.Optional;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;
-
+import java.util.Map;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenType;
-import java.util.Map;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;
 
 public class UnionCompositeAttributeMappingStrategy extends
         CompositeAttributeMappingStrategy {

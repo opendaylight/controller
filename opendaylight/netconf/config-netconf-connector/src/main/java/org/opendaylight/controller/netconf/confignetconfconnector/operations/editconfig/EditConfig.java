@@ -13,15 +13,12 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
-
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
@@ -53,7 +50,7 @@ import org.w3c.dom.Element;
 
 public class EditConfig extends AbstractConfigNetconfOperation {
 
-    private static final Logger logger = LoggerFactory.getLogger(EditConfig.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EditConfig.class);
 
     private final YangStoreSnapshot yangStoreSnapshot;
 
@@ -80,7 +77,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
             executeSet(getConfigRegistryClient(), editConfigExecution);
         }
 
-        logger.trace("Operation {} successful", EditConfigXmlParser.EDIT_CONFIG);
+        LOG.trace("Operation {} successful", EditConfigXmlParser.EDIT_CONFIG);
 
         return XmlUtil.createElement(document, XmlNetconfConstants.OK, Optional.<String>absent());
     }
@@ -88,7 +85,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
     private void executeSet(ConfigRegistryClient configRegistryClient,
             EditConfigXmlParser.EditConfigExecution editConfigExecution) throws NetconfDocumentedException {
         set(configRegistryClient, editConfigExecution);
-        logger.debug("Set phase for {} operation successful", EditConfigXmlParser.EDIT_CONFIG);
+        LOG.debug("Set phase for {} operation successful", EditConfigXmlParser.EDIT_CONFIG);
     }
 
     private void executeTests(ConfigRegistryClient configRegistryClient,
@@ -96,13 +93,13 @@ public class EditConfig extends AbstractConfigNetconfOperation {
         try {
             test(configRegistryClient, editConfigExecution, editConfigExecution.getDefaultStrategy());
         } catch (final ValidationException e) {
-            logger.warn("Test phase for {} failed", EditConfigXmlParser.EDIT_CONFIG, e);
+            LOG.warn("Test phase for {} failed", EditConfigXmlParser.EDIT_CONFIG, e);
             final Map<String, String> errorInfo = new HashMap<>();
             errorInfo.put(ErrorTag.operation_failed.name(), e.getMessage());
             throw new NetconfDocumentedException("Test phase: " + e.getMessage(), e, ErrorType.application,
                     ErrorTag.operation_failed, ErrorSeverity.error, errorInfo);
         }
-        logger.debug("Test phase for {} operation successful", EditConfigXmlParser.EDIT_CONFIG);
+        LOG.debug("Test phase for {} operation successful", EditConfigXmlParser.EDIT_CONFIG);
     }
 
     private void test(ConfigRegistryClient configRegistryClient, EditConfigExecution execution,
@@ -158,7 +155,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
                     ObjectName on = refNameToServiceEntry.getValue().getObjectName(ta.getTransactionName());
                     try {
                         ObjectName saved = ta.saveServiceReference(qnameOfService, refNameToServiceEntry.getKey(), on);
-                        logger.debug("Saving service {} with on {} under name {} with service on {}", qnameOfService,
+                        LOG.debug("Saving service {} with on {} under name {} with service on {}", qnameOfService,
                                 on, refNameToServiceEntry.getKey(), saved);
                     } catch (InstanceNotFoundException e) {
                         throw new NetconfDocumentedException(String.format("Unable to save ref name " + refNameToServiceEntry.getKey() + " for instance " + on, e),
@@ -265,7 +262,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
 
     public static Map<String/* Namespace from yang file */,
             Map<String /* Name of module entry from yang file */, ModuleConfig>> transformMbeToModuleConfigs
-            (final ConfigRegistryClient configRegistryClient, Map<String/* Namespace from yang file */,
+    (final ConfigRegistryClient configRegistryClient, Map<String/* Namespace from yang file */,
                     Map<String /* Name of module entry from yang file */, ModuleMXBeanEntry>> mBeanEntries) {
 
         Map<String, Map<String, ModuleConfig>> namespaceToModuleNameToModuleConfig = Maps.newHashMap();

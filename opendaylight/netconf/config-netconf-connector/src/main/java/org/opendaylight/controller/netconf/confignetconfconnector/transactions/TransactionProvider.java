@@ -10,6 +10,11 @@ package org.opendaylight.controller.netconf.confignetconfconnector.transactions;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import javax.management.InstanceNotFoundException;
+import javax.management.ObjectName;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
@@ -20,14 +25,8 @@ import org.opendaylight.controller.netconf.confignetconfconnector.exception.NoTr
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.management.InstanceNotFoundException;
-import javax.management.ObjectName;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
 public class TransactionProvider implements AutoCloseable {
-    private static final Logger logger = LoggerFactory.getLogger(TransactionProvider.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TransactionProvider.class);
 
     private final ConfigRegistryClient configRegistryClient;
 
@@ -49,7 +48,7 @@ public class TransactionProvider implements AutoCloseable {
                     configRegistryClient.getConfigTransactionClient(tx).abortConfig();
                 }
             } catch (Exception e) {
-                logger.debug("Ignoring exception while closing transaction {}", tx, e);
+                LOG.debug("Ignoring exception while closing transaction {}", tx, e);
             }
         }
         allOpenedTransactions.clear();
@@ -63,7 +62,7 @@ public class TransactionProvider implements AutoCloseable {
 
         // Transaction was already closed somehow
         if (!isStillOpenTransaction(transaction)) {
-            logger.warn("Fixing illegal state: transaction {} was closed in {}", transaction,
+            LOG.warn("Fixing illegal state: transaction {} was closed in {}", transaction,
                     netconfSessionIdForReporting);
             transaction = null;
             return Optional.absent();
@@ -114,10 +113,10 @@ public class TransactionProvider implements AutoCloseable {
             return status;
         } catch (ValidationException validationException) {
             // no clean up: user can reconfigure and recover this transaction
-            logger.warn("Transaction {} failed on {}", taON, validationException.toString());
+            LOG.warn("Transaction {} failed on {}", taON, validationException.toString());
             throw validationException;
         } catch (ConflictingVersionException e) {
-            logger.error("Exception while commit of {}, aborting transaction", taON, e);
+            LOG.error("Exception while commit of {}, aborting transaction", taON, e);
             // clean up
             abortTransaction();
             throw e;
@@ -125,7 +124,7 @@ public class TransactionProvider implements AutoCloseable {
     }
 
     public synchronized void abortTransaction() {
-        logger.debug("Aborting current transaction");
+        LOG.debug("Aborting current transaction");
         Optional<ObjectName> taON = getTransaction();
         Preconditions.checkState(taON.isPresent(), NO_TRANSACTION_FOUND_FOR_SESSION + netconfSessionIdForReporting);
 
@@ -136,7 +135,7 @@ public class TransactionProvider implements AutoCloseable {
     }
 
     public synchronized void abortTestTransaction(ObjectName testTx) {
-        logger.debug("Aborting transaction {}", testTx);
+        LOG.debug("Aborting transaction {}", testTx);
         ConfigTransactionClient transactionClient = configRegistryClient.getConfigTransactionClient(testTx);
         allOpenedTransactions.remove(testTx);
         transactionClient.abortConfig();
@@ -172,18 +171,18 @@ public class TransactionProvider implements AutoCloseable {
                 transactionClient.destroyModule(instance);
             } catch (InstanceNotFoundException e) {
                 if (isTest){
-                    logger.debug("Unable to clean configuration in transactiom {}", taON, e);
+                    LOG.debug("Unable to clean configuration in transactiom {}", taON, e);
                 } else {
-                    logger.warn("Unable to clean configuration in transactiom {}", taON, e);
+                    LOG.warn("Unable to clean configuration in transactiom {}", taON, e);
                 }
 
                 throw new IllegalStateException("Unable to clean configuration in transactiom " + taON, e);
             }
         }
-        logger.debug("Transaction {} wiped clean of {} config beans", taON, i);
+        LOG.debug("Transaction {} wiped clean of {} config beans", taON, i);
 
         transactionClient.removeAllServiceReferences();
-        logger.debug("Transaction {} wiped clean of all service references", taON);
+        LOG.debug("Transaction {} wiped clean of all service references", taON);
     }
 
     public void wipeTransaction() {

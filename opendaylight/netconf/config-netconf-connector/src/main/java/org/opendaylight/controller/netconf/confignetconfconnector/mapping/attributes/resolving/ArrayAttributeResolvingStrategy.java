@@ -9,23 +9,22 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.resolving;
 
 import com.google.common.base.Optional;
+import java.lang.reflect.Array;
+import java.util.List;
+import javax.management.openmbean.ArrayType;
+import javax.management.openmbean.CompositeDataSupport;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenType;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.management.openmbean.ArrayType;
-import javax.management.openmbean.CompositeDataSupport;
-import javax.management.openmbean.CompositeType;
-import javax.management.openmbean.OpenType;
-import java.lang.reflect.Array;
-import java.util.List;
-
 final class ArrayAttributeResolvingStrategy extends AbstractAttributeResolvingStrategy<Object, ArrayType<?>> {
 
     private final AttributeResolvingStrategy<?, ? extends OpenType<?>> innerTypeResolvingStrategy;
 
-    private static final Logger logger = LoggerFactory.getLogger(ArrayAttributeResolvingStrategy.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ArrayAttributeResolvingStrategy.class);
 
     public ArrayAttributeResolvingStrategy(AttributeResolvingStrategy<?, ? extends OpenType<?>> innerTypeResolved,
             ArrayType<?> openType) {
@@ -74,7 +73,7 @@ final class ArrayAttributeResolvingStrategy extends AbstractAttributeResolvingSt
             i++;
         }
 
-        logger.debug("Attribute {} : {} parsed to type {} as {}", attrName, value, getOpenType(),
+        LOG.debug("Attribute {} : {} parsed to type {} as {}", attrName, value, getOpenType(),
                 toStringArray(parsedArray));
 
         return Optional.of(parsedArray);

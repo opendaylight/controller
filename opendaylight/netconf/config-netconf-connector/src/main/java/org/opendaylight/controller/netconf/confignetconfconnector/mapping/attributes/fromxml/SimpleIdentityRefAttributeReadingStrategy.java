@@ -8,13 +8,12 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import java.net.URI;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;

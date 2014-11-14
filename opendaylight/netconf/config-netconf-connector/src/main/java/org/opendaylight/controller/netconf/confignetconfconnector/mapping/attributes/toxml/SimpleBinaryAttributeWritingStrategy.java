@@ -10,10 +10,9 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 
 import com.google.common.base.Preconditions;
 import com.google.common.io.BaseEncoding;
+import java.util.List;
 import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
 import org.w3c.dom.Document;
-
-import java.util.List;
 
 public class SimpleBinaryAttributeWritingStrategy extends SimpleAttributeWritingStrategy {
 

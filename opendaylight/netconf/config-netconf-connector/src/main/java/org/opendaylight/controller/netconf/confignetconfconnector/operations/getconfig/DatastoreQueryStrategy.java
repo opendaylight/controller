@@ -9,9 +9,7 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.getconfig;
 
 import java.util.Set;
-
 import javax.management.ObjectName;
-
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 
 public interface DatastoreQueryStrategy {

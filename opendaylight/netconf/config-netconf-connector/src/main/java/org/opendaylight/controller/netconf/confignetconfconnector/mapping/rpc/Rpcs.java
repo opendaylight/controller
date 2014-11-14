@@ -9,9 +9,8 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.rpc;
 
 import com.google.common.base.Preconditions;
-import org.opendaylight.controller.netconf.confignetconfconnector.operations.runtimerpc.RuntimeRpcElementResolved;
-
 import java.util.Map;
+import org.opendaylight.controller.netconf.confignetconfconnector.operations.runtimerpc.RuntimeRpcElementResolved;
 
 public class Rpcs {
     private final Map<String, Map<String, ModuleRpcs>> mappedRpcs;

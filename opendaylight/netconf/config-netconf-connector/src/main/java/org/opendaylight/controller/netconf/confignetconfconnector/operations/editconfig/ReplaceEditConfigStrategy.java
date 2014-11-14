@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 
 public class ReplaceEditConfigStrategy extends AbstractEditConfigStrategy {
 
-    private static final Logger logger = LoggerFactory.getLogger(ReplaceEditConfigStrategy.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ReplaceEditConfigStrategy.class);
 
     @Override
     void handleMissingInstance(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta,
@@ -45,12 +45,12 @@ public class ReplaceEditConfigStrategy extends AbstractEditConfigStrategy {
                 if (!ace.getResolvedValue().isPresent()) {
                     Object value = ace.getResolvedDefaultValue();
                     ta.setAttribute(on, ace.getJmxName(), new Attribute(ace.getJmxName(), value));
-                    logger.debug("Attribute {} set to default value {} for {}", configAttributeEntry.getKey(), value,
+                    LOG.debug("Attribute {} set to default value {} for {}", configAttributeEntry.getKey(), value,
                             on);
                 } else {
                     Object value = ace.getResolvedValue().get();
                     ta.setAttribute(on, ace.getJmxName(), new Attribute(ace.getJmxName(), value));
-                    logger.debug("Attribute {} set to value {} for {}", configAttributeEntry.getKey(), value, on);
+                    LOG.debug("Attribute {} set to value {} for {}", configAttributeEntry.getKey(), value, on);
                 }
 
             } catch (Exception e) {
