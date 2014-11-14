@@ -8,9 +8,8 @@
 
 package org.opendaylight.controller.netconf.api.jmx;
 
-import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-
 import javax.management.ObjectName;
+import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 
 public interface DefaultCommitOperationMXBean {
 
