@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  */
 final class SshProxyClientHandler extends ChannelInboundHandlerAdapter {
 
-    private static final Logger logger = LoggerFactory.getLogger(SshProxyClientHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SshProxyClientHandler.class);
 
     private final IoInputStream in;
     private final IoOutputStream out;
@@ -64,8 +64,8 @@ final class SshProxyClientHandler extends ChannelInboundHandlerAdapter {
         }, new AsyncSshHandlerReader.ReadMsgHandler() {
             @Override
             public void onMessageRead(final ByteBuf msg) {
-                if(logger.isTraceEnabled()) {
-                    logger.trace("Forwarding message for client: {} on channel: {}, message: {}",
+                if(LOG.isTraceEnabled()) {
+                    LOG.trace("Forwarding message for client: {} on channel: {}, message: {}",
                             netconfHelloMessageAdditionalHeader.getAddress(), ctx.channel(), AsyncSshHandlerWriter.byteBufToString(msg));
                 }
                 // Just forward to delegate
@@ -83,12 +83,12 @@ final class SshProxyClientHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(final ChannelHandlerContext ctx, final Object msg) throws Exception {
-       asyncSshHandlerWriter.write(ctx, msg, ctx.newPromise());
+        asyncSshHandlerWriter.write(ctx, msg, ctx.newPromise());
     }
 
     @Override
     public void channelInactive(final ChannelHandlerContext ctx) throws Exception {
-        logger.debug("Internal connection to netconf server was dropped for client: {} on channel: ",
+        LOG.debug("Internal connection to netconf server was dropped for client: {} on channel: ",
                 netconfHelloMessageAdditionalHeader.getAddress(), ctx.channel());
         callback.onExit(1, "Internal connection to netconf server was dropped for client: " +
                 netconfHelloMessageAdditionalHeader.getAddress() + " on channel: " + ctx.channel());
