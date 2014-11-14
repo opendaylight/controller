@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.config.manager.impl.util;
 
+import com.google.common.collect.ImmutableSet;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -18,7 +19,7 @@ import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnota
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 
-public class InterfacesHelper {
+public final class InterfacesHelper {
 
     private InterfacesHelper() {
     }
@@ -126,7 +127,7 @@ public class InterfacesHelper {
         for (ServiceInterfaceAnnotation sia: siAnnotations) {
             qNames.add(sia.value());
         }
-        return Collections.unmodifiableSet(qNames);
+        return ImmutableSet.copyOf(qNames);
     }
 
     public static Set<ServiceInterfaceAnnotation> getServiceInterfaceAnnotations(final ModuleFactory factory) {
