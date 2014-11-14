@@ -219,7 +219,7 @@ public final class Main {
 
         private final File configDir;
         private final List<Integer> openDevices;
-        private final File ncFeatureFile;
+        private final List<File> ncFeatureFiles;
         private final File etcDir;
         private final File loadOrderCfgFile;
 
@@ -227,7 +227,7 @@ public final class Main {
             this.configDir = new File(directory, ETC_OPENDAYLIGHT_KARAF_PATH);
             this.etcDir = new File(directory, ETC_KARAF_PATH);
             this.loadOrderCfgFile = new File(etcDir, ORG_OPS4J_PAX_URL_MVN_CFG);
-            this.ncFeatureFile = getFeatureFile(directory, "features-netconf-connector");
+            this.ncFeatureFiles = getFeatureFile(directory, "features-netconf-connector", "xml");
             this.openDevices = openDevices;
         }
 
@@ -309,37 +309,49 @@ public final class Main {
 
 
         public void updateFeatureFile(final List<File> generated) {
-            // TODO karaf core contains jaxb for feature files, use that for modification
+            // TODO karaf core contains jaxb for feature files, use that for
+            // modification
             try {
-                final Document document = XmlUtil.readXmlToDocument(Files.toString(ncFeatureFile, Charsets.UTF_8));
-                final NodeList childNodes = document.getDocumentElement().getChildNodes();
+                for (final File featureFile : ncFeatureFiles) {
+                    final Document document = XmlUtil.readXmlToDocument(Files
+                            .toString(featureFile, Charsets.UTF_8));
+                    final NodeList childNodes = document.getDocumentElement().getChildNodes();
 
-                for (int i = 0; i < childNodes.getLength(); i++) {
-                    final Node item = childNodes.item(i);
-                    if(item instanceof Element == false) {
-                        continue;
-                    }
-                    if(item.getLocalName().equals("feature") ==false) {
-                        continue;
+                    for (int i = 0; i < childNodes.getLength(); i++) {
+                        final Node item = childNodes.item(i);
+                        if (item instanceof Element == false) {
+                            continue;
+                        }
+                        if (item.getLocalName().equals("feature") == false) {
+                            continue;
+                        }
+
+                        if (NETCONF_CONNECTOR_ALL_FEATURE
+                                .equals(((Element) item).getAttribute("name"))) {
+                            final Element ncAllFeatureDefinition = (Element) item;
+                            // Clean previous generated files
+                            for (final XmlElement configfile : XmlElement
+                                    .fromDomElement(ncAllFeatureDefinition)
+                                    .getChildElements("configfile")) {
+                                ncAllFeatureDefinition.removeChild(configfile.getDomElement());
+                            }
+                            for (final File file : generated) {
+                                final Element configfile = document.createElement("configfile");
+                                configfile.setTextContent("file:"
+                                        + ETC_OPENDAYLIGHT_KARAF_PATH
+                                        + file.getName());
+                                configfile.setAttribute(
+                                        "finalname",
+                                        ETC_OPENDAYLIGHT_KARAF_PATH
+                                                + file.getName());
+                                ncAllFeatureDefinition.appendChild(configfile);
+                            }
+                        }
                     }
 
-                    if(NETCONF_CONNECTOR_ALL_FEATURE.equals(((Element) item).getAttribute("name"))) {
-                        final Element ncAllFeatureDefinition = (Element) item;
-                        // Clean previous generated files
-                        for (final XmlElement configfile : XmlElement.fromDomElement(ncAllFeatureDefinition).getChildElements("configfile")) {
-                            ncAllFeatureDefinition.removeChild(configfile.getDomElement());
-                        }
-                        for (final File file : generated) {
-                            final Element configfile = document.createElement("configfile");
-                            configfile.setTextContent("file:" + ETC_OPENDAYLIGHT_KARAF_PATH + file.getName());
-                            configfile.setAttribute("finalname", ETC_OPENDAYLIGHT_KARAF_PATH + file.getName());
-                            ncAllFeatureDefinition.appendChild(configfile);
-                        }
-                    }
+                    Files.write(XmlUtil.toString(document), featureFile,Charsets.UTF_8);
+                    LOG.info("Feature file {} updated", featureFile);
                 }
-
-                Files.write(XmlUtil.toString(document), ncFeatureFile, Charsets.UTF_8);
-                LOG.info("Feature file {} updated", ncFeatureFile);
             } catch (final IOException e) {
                 throw new RuntimeException("Unable to load features file as a resource");
             } catch (final SAXException e) {
@@ -348,7 +360,7 @@ public final class Main {
         }
 
 
-        private static File getFeatureFile(final File distroFolder, final String featureName) {
+        private static List<File> getFeatureFile(final File distroFolder, final String featureName, final String suffix) {
             checkExistingDir(distroFolder, String.format("Folder %s does not exist", distroFolder));
 
             final File systemDir = checkExistingDir(new File(distroFolder, "system"), String.format("Folder %s does not contain a karaf distro, folder system is missing", distroFolder));
@@ -368,12 +380,13 @@ public final class Main {
                         }
                     });
 
-            return newestVersionDir.listFiles(new FileFilter() {
+            return Lists.newArrayList(newestVersionDir.listFiles(new FileFilter() {
                 @Override
                 public boolean accept(final File pathname) {
-                    return pathname.getName().contains(featureName);
+                    return pathname.getName().contains(featureName)
+                            && Files.getFileExtension(pathname.getName()).equals(suffix);
                 }
-            })[0];
+            }));
         }
 
         private static File checkExistingDir(final File folder, final String msg) {
