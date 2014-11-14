@@ -9,7 +9,6 @@
 package org.opendaylight.controller.netconf.mapping.api;
 
 import com.google.common.base.Optional;
-
 import java.util.List;
 
 /**
