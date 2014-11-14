@@ -11,6 +11,7 @@ package org.opendaylight.controller.netconf.util.messages;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
 import com.google.common.base.Optional;
 import java.util.Set;
 import org.junit.Before;

@@ -8,6 +8,11 @@
 
 package org.opendaylight.controller.netconf.util.mapping;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+
 import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,11 +25,6 @@ import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 
 public class AbstractNetconfOperationTest {
 
