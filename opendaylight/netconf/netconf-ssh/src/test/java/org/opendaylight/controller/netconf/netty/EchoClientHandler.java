@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * the server.
  */
 public class EchoClientHandler extends ChannelInboundHandlerAdapter implements ChannelFutureListener {
-    private static final Logger logger = LoggerFactory.getLogger(EchoClientHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EchoClientHandler.class);
 
     private ChannelHandlerContext ctx;
     private final StringBuilder fromServer = new StringBuilder();
@@ -39,7 +39,7 @@ public class EchoClientHandler extends ChannelInboundHandlerAdapter implements C
     @Override
     public synchronized void channelActive(ChannelHandlerContext ctx) {
         checkState(this.ctx == null);
-        logger.info("channelActive");
+        LOG.info("channelActive");
         this.ctx = ctx;
         state = State.CONNECTED;
     }
@@ -54,14 +54,14 @@ public class EchoClientHandler extends ChannelInboundHandlerAdapter implements C
         ByteBuf bb = (ByteBuf) msg;
         String string = bb.toString(Charsets.UTF_8);
         fromServer.append(string);
-        logger.info(">{}", string);
+        LOG.info(">{}", string);
         bb.release();
     }
 
     @Override
     public synchronized void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         // Close the connection when an exception is raised.
-        logger.warn("Unexpected exception from downstream.", cause);
+        LOG.warn("Unexpected exception from downstream.", cause);
         checkState(this.ctx.equals(ctx));
         ctx.close();
         this.ctx = null;
@@ -84,7 +84,7 @@ public class EchoClientHandler extends ChannelInboundHandlerAdapter implements C
     public synchronized void operationComplete(ChannelFuture future) throws Exception {
         checkState(state == State.CONNECTING);
         if (future.isSuccess()) {
-            logger.trace("Successfully connected, state will be switched in channelActive");
+            LOG.trace("Successfully connected, state will be switched in channelActive");
         } else {
             state = State.FAILED_TO_CONNECT;
         }

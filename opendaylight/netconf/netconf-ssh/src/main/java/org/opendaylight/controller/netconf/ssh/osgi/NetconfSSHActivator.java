@@ -33,7 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class NetconfSSHActivator implements BundleActivator {
-    private static final Logger logger = LoggerFactory.getLogger(NetconfSSHActivator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NetconfSSHActivator.class);
 
     private static final java.lang.String ALGORITHM = "RSA";
     private static final int KEY_SIZE = 4096;
@@ -87,12 +87,12 @@ public class NetconfSSHActivator implements BundleActivator {
         final Optional<InetSocketAddress> maybeSshSocketAddress = NetconfConfigUtil.extractNetconfServerAddress(bundleContext, InfixProp.ssh);
 
         if (maybeSshSocketAddress.isPresent() == false) {
-            logger.trace("SSH bridge not configured");
+            LOG.trace("SSH bridge not configured");
             return null;
         }
 
         final InetSocketAddress sshSocketAddress = maybeSshSocketAddress.get();
-        logger.trace("Starting netconf SSH bridge at {}", sshSocketAddress);
+        LOG.trace("Starting netconf SSH bridge at {}", sshSocketAddress);
 
         final LocalAddress localAddress = NetconfConfigUtil.getNetconfLocalAddress();
 
