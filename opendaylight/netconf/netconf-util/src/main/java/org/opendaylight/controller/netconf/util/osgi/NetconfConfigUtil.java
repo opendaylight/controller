@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class NetconfConfigUtil {
-    private static final Logger logger = LoggerFactory.getLogger(NetconfConfigUtil.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NetconfConfigUtil.class);
 
     private static final String PREFIX_PROP = "netconf.";
 
@@ -48,7 +48,7 @@ public final class NetconfConfigUtil {
         try {
             return Long.parseLong(timeoutString);
         } catch (final NumberFormatException e) {
-            logger.warn("Cannot parse {} property: {}, using defaults", key, timeoutString, e);
+            LOG.warn("Cannot parse {} property: {}, using defaults", key, timeoutString, e);
             return DEFAULT_TIMEOUT_MILLIS;
         }
     }
@@ -89,7 +89,7 @@ public final class NetconfConfigUtil {
             try {
                 return Optional.of(parseAddress(address, port));
             } catch (final RuntimeException e) {
-                logger.warn("Unable to parse {} netconf address from {}:{}, fallback to default",
+                LOG.warn("Unable to parse {} netconf address from {}:{}, fallback to default",
                         infixProp, address, port, e);
             }
         }

@@ -10,6 +10,7 @@ package org.opendaylight.controller.netconf.util.messages;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+
 import com.google.common.base.Charsets;
 import org.junit.Test;
 

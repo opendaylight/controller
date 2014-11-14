@@ -40,7 +40,7 @@ public final class XmlElement {
     public static final String DEFAULT_NAMESPACE_PREFIX = "";
 
     private final Element element;
-    private static final Logger logger = LoggerFactory.getLogger(XmlElement.class);
+    private static final Logger LOG = LoggerFactory.getLogger(XmlElement.class);
 
     private XmlElement(Element element) {
         this.element = element;
@@ -132,7 +132,7 @@ public final class XmlElement {
 
     public void checkNamespace(String expectedNamespace) throws UnexpectedNamespaceException, MissingNameSpaceException {
         if (!getNamespace().equals(expectedNamespace))
-       {
+        {
             throw new UnexpectedNamespaceException(String.format("Unexpected namespace %s should be %s",
                     getNamespace(),
                     expectedNamespace),
@@ -405,7 +405,7 @@ public final class XmlElement {
             try {
                 sb.append(", namespace='").append(getNamespace()).append('\'');
             } catch (MissingNameSpaceException e) {
-                logger.trace("Missing namespace for element.");
+                LOG.trace("Missing namespace for element.");
             }
         }
         sb.append('}');
