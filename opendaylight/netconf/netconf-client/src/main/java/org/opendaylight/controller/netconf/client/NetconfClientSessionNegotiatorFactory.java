@@ -11,11 +11,9 @@ package org.opendaylight.controller.netconf.client;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
-
 import io.netty.channel.Channel;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.Promise;
-
 import org.opendaylight.controller.netconf.api.NetconfClientSessionPreferences;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
@@ -45,7 +43,7 @@ public class NetconfClientSessionNegotiatorFactory implements SessionNegotiatorF
     private final long connectionTimeoutMillis;
     private final Timer timer;
     private final EXIOptions options;
-    private static final Logger logger = LoggerFactory.getLogger(NetconfClientSessionNegotiatorFactory.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NetconfClientSessionNegotiatorFactory.class);
 
     public NetconfClientSessionNegotiatorFactory(Timer timer,
                                                  Optional<NetconfHelloMessageAdditionalHeader> additionalHeader,
@@ -72,7 +70,7 @@ public class NetconfClientSessionNegotiatorFactory implements SessionNegotiatorF
         try {
             helloMessage = NetconfHelloMessage.createClientHello(CLIENT_CAPABILITIES, additionalHeader);
         } catch (NetconfDocumentedException e) {
-            logger.error("Unable to create client hello message with capabilities {} and additional handler {}",CLIENT_CAPABILITIES,additionalHeader);
+            LOG.error("Unable to create client hello message with capabilities {} and additional handler {}",CLIENT_CAPABILITIES,additionalHeader);
             throw new IllegalStateException(e);
         }
 
