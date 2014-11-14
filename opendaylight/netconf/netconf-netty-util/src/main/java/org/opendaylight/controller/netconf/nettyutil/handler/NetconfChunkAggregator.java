@@ -8,19 +8,17 @@
 
 package org.opendaylight.controller.netconf.nettyutil.handler;
 
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.CompositeByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NetconfChunkAggregator extends ByteToMessageDecoder {
-    private final static Logger logger = LoggerFactory.getLogger(NetconfChunkAggregator.class);
+    private final static Logger LOG = LoggerFactory.getLogger(NetconfChunkAggregator.class);
     private static final String GOT_PARAM_WHILE_WAITING_FOR_PARAM = "Got byte {} while waiting for {}";
     private static final String GOT_PARAM_WHILE_WAITING_FOR_PARAM_PARAM = "Got byte {} while waiting for {}-{}";
     public static final int DEFAULT_MAXIMUM_CHUNK_SIZE = 16 * 1024 * 1024;
@@ -44,21 +42,21 @@ public class NetconfChunkAggregator extends ByteToMessageDecoder {
 
     private void checkNewLine(byte b,String errorMessage){
         if (b != '\n') {
-            logger.debug(GOT_PARAM_WHILE_WAITING_FOR_PARAM, b, (byte)'\n');
+            LOG.debug(GOT_PARAM_WHILE_WAITING_FOR_PARAM, b, (byte)'\n');
             throw new IllegalStateException(errorMessage);
         }
     }
 
     private void checkHash(byte b,String errorMessage){
         if (b != '#') {
-            logger.debug(GOT_PARAM_WHILE_WAITING_FOR_PARAM, b, (byte)'#');
+            LOG.debug(GOT_PARAM_WHILE_WAITING_FOR_PARAM, b, (byte)'#');
             throw new IllegalStateException(errorMessage);
         }
     }
 
     private void checkChunkSize(){
         if (chunkSize > maxChunkSize) {
-            logger.debug("Parsed chunk size {}, maximum allowed is {}", chunkSize, maxChunkSize);
+            LOG.debug("Parsed chunk size {}, maximum allowed is {}", chunkSize, maxChunkSize);
             throw new IllegalStateException("Maximum chunk size exceeded");
         }
 
@@ -101,7 +99,7 @@ public class NetconfChunkAggregator extends ByteToMessageDecoder {
                 }
 
                 if (b < '0' || b > '9') {
-                    logger.debug(GOT_PARAM_WHILE_WAITING_FOR_PARAM_PARAM, b, (byte)'0', (byte)'9');
+                    LOG.debug(GOT_PARAM_WHILE_WAITING_FOR_PARAM_PARAM, b, (byte)'0', (byte)'9');
                     throw new IllegalStateException("Invalid chunk size encountered");
                 }
 
@@ -118,7 +116,7 @@ public class NetconfChunkAggregator extends ByteToMessageDecoder {
                  *        comes through.
                  */
                 if (in.readableBytes() < chunkSize) {
-                    logger.debug("Buffer has {} bytes, need {} to complete chunk", in.readableBytes(), chunkSize);
+                    LOG.debug("Buffer has {} bytes, need {} to complete chunk", in.readableBytes(), chunkSize);
                     in.discardReadBytes();
                     return;
                 }
@@ -175,7 +173,7 @@ public class NetconfChunkAggregator extends ByteToMessageDecoder {
         } else if (b == '#') {
             state = State.FOOTER_FOUR;
         } else {
-            logger.debug(GOT_PARAM_WHILE_WAITING_FOR_PARAM_PARAM, b, (byte) '#', (byte) '1', (byte) '9');
+            LOG.debug(GOT_PARAM_WHILE_WAITING_FOR_PARAM_PARAM, b, (byte) '#', (byte) '1', (byte) '9');
             throw new IllegalStateException("Malformed chunk footer encountered (byte 2)");
         }
     }
@@ -193,7 +191,7 @@ public class NetconfChunkAggregator extends ByteToMessageDecoder {
 
     private static int processHeaderLengthFirst(byte b) {
         if (!isHeaderLengthFirst(b)) {
-            logger.debug(GOT_PARAM_WHILE_WAITING_FOR_PARAM_PARAM, b, (byte)'1', (byte)'9');
+            LOG.debug(GOT_PARAM_WHILE_WAITING_FOR_PARAM_PARAM, b, (byte)'1', (byte)'9');
             throw new IllegalStateException("Invalid chunk size encountered (byte 0)");
         }
 

@@ -8,15 +8,13 @@
 
 package org.opendaylight.controller.netconf.nettyutil.handler;
 
+import com.google.common.base.Preconditions;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
-
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageConstants;
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageHeader;
-
-import com.google.common.base.Preconditions;
 
 public class ChunkedFramingMechanismEncoder extends MessageToByteEncoder<ByteBuf> {
     public static final int DEFAULT_CHUNK_SIZE = 8192;
