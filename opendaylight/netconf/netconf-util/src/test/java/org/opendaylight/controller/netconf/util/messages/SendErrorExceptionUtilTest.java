@@ -8,6 +8,12 @@
 
 package org.opendaylight.controller.netconf.util.messages;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.util.concurrent.GenericFutureListener;
@@ -18,9 +24,6 @@ import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.w3c.dom.Document;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
 
 public class SendErrorExceptionUtilTest {
 

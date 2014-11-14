@@ -9,7 +9,6 @@
 package org.opendaylight.controller.netconf.util.messages;
 
 import com.google.common.base.Preconditions;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
