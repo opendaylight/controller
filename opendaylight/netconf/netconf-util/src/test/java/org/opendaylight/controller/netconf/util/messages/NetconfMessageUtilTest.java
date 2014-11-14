@@ -8,14 +8,14 @@
 
 package org.opendaylight.controller.netconf.util.messages;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Collection;
 import org.junit.Test;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.w3c.dom.Document;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 public class NetconfMessageUtilTest {
     @Test

@@ -8,13 +8,11 @@
 
 package org.opendaylight.controller.netconf.util.xml;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
-
 import javax.xml.namespace.NamespaceContext;
-
-import com.google.common.collect.ImmutableMap;
 
 // http://www.ibm.com/developerworks/library/x-nmspccontext/
 public class HardcodedNamespaceResolver implements NamespaceContext {

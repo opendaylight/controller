@@ -9,7 +9,6 @@ package org.opendaylight.controller.netconf.util.exception;
 
 import java.util.Collections;
 import java.util.Map;
-
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 
 public class UnexpectedElementException extends NetconfDocumentedException {
