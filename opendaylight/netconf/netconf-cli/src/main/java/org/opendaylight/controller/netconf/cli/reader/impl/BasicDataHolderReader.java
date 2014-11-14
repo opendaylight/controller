@@ -245,11 +245,11 @@ public abstract class BasicDataHolderReader<T extends DataSchemaNode> extends Ab
 
             return new StringsCompleter(Collections2.transform(((IdentityrefTypeDefinition) getType()).getIdentity()
                     .getDerivedIdentities(), new Function<IdentitySchemaNode, String>() {
-                @Override
-                public String apply(final IdentitySchemaNode input) {
-                    return identityMap.inverse().get(input.getQName());
-                }
-            })).complete(buffer, cursor, candidates);
+                        @Override
+                        public String apply(final IdentitySchemaNode input) {
+                            return identityMap.inverse().get(input.getQName());
+                        }
+                    })).complete(buffer, cursor, candidates);
         }
     }
 }
