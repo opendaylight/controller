@@ -11,7 +11,6 @@ package org.opendaylight.controller.netconf.impl;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
-
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSessionListener;
@@ -31,7 +30,7 @@ import org.w3c.dom.Node;
 
 public class NetconfServerSessionListener implements NetconfSessionListener<NetconfServerSession> {
 
-    static final Logger logger = LoggerFactory.getLogger(NetconfServerSessionListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NetconfServerSessionListener.class);
     private final SessionMonitoringService monitoringService;
     private final NetconfOperationRouter operationRouter;
     private final AutoCloseable onSessionDownCloseable;
@@ -50,7 +49,7 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
 
     @Override
     public void onSessionDown(NetconfServerSession netconfNetconfServerSession, Exception cause) {
-        logger.debug("Session {} down, reason: {}", netconfNetconfServerSession, cause.getMessage());
+        LOG.debug("Session {} down, reason: {}", netconfNetconfServerSession, cause.getMessage());
         onDown(netconfNetconfServerSession);
     }
 
@@ -60,19 +59,19 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
         try {
             operationRouter.close();
         } catch (Exception closingEx) {
-            logger.debug("Ignoring exception while closing operationRouter", closingEx);
+            LOG.debug("Ignoring exception while closing operationRouter", closingEx);
         }
         try {
             onSessionDownCloseable.close();
         } catch(Exception ex){
-            logger.debug("Ignoring exception while closing onSessionDownCloseable", ex);
+            LOG.debug("Ignoring exception while closing onSessionDownCloseable", ex);
         }
     }
 
     @Override
     public void onSessionTerminated(NetconfServerSession netconfNetconfServerSession,
             NetconfTerminationReason netconfTerminationReason) {
-        logger.debug("Session {} terminated, reason: {}", netconfNetconfServerSession,
+        LOG.debug("Session {} terminated, reason: {}", netconfNetconfServerSession,
                 netconfTerminationReason.getErrorMessage());
         onDown(netconfNetconfServerSession);
     }
@@ -86,7 +85,7 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
             // schemas
             final NetconfMessage message = processDocument(netconfMessage,
                     session);
-            logger.debug("Responding with message {}", XmlUtil.toString(message.getDocument()));
+            LOG.debug("Responding with message {}", XmlUtil.toString(message.getDocument()));
             session.sendMessage(message);
 
             if (isCloseSession(netconfMessage)) {
@@ -95,11 +94,11 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
 
         } catch (final RuntimeException e) {
             // TODO: should send generic error or close session?
-            logger.error("Unexpected exception", e);
+            LOG.error("Unexpected exception", e);
             session.onIncommingRpcFail();
             throw new IllegalStateException("Unable to process incoming message " + netconfMessage, e);
         } catch (NetconfDocumentedException e) {
-            logger.trace("Error occurred while processing message",e);
+            LOG.trace("Error occurred while processing message",e);
             session.onOutgoingRpcError();
             session.onIncommingRpcFail();
             SendErrorExceptionUtil.sendErrorMessage(session, e, netconfMessage);
@@ -109,7 +108,7 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
     private void closeNetconfSession(NetconfServerSession session) {
         // destroy NetconfOperationService
         session.close();
-        logger.info("Session {} closed successfully", session.getSessionId());
+        LOG.info("Session {} closed successfully", session.getSessionId());
     }
 
 
@@ -148,7 +147,9 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
     }
 
     private void checkMessageId(Node rootNode) throws NetconfDocumentedException {
-            NamedNodeMap attributes = rootNode.getAttributes();
+
+        NamedNodeMap attributes = rootNode.getAttributes();
+
         if(attributes.getNamedItemNS(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0, XmlNetconfConstants.MESSAGE_ID)!=null) {
             return;
         }
@@ -159,8 +160,9 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
 
         throw new NetconfDocumentedException("Missing attribute" + rootNode.getNodeName(),
                 NetconfDocumentedException.ErrorType.protocol, NetconfDocumentedException.ErrorTag.missing_attribute,
-                NetconfDocumentedException.ErrorSeverity.error, ImmutableMap.of(NetconfDocumentedException.ErrorTag.missing_attribute.toString(),
-                XmlNetconfConstants.MESSAGE_ID));
+                NetconfDocumentedException.ErrorSeverity.error,
+                ImmutableMap.of(NetconfDocumentedException.ErrorTag.missing_attribute.toString(),
+                        XmlNetconfConstants.MESSAGE_ID));
     }
 
     private static boolean isCloseSession(final NetconfMessage incomingDocument) {

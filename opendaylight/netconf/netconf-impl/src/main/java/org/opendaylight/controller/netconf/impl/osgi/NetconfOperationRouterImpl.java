@@ -10,6 +10,12 @@ package org.opendaylight.controller.netconf.impl.osgi;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.NavigableMap;
+import java.util.Set;
+import java.util.TreeMap;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.NetconfServerSession;
@@ -30,16 +36,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.NavigableMap;
-import java.util.Set;
-import java.util.TreeMap;
-
 public class NetconfOperationRouterImpl implements NetconfOperationRouter {
 
-    private static final Logger logger = LoggerFactory.getLogger(NetconfOperationRouterImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NetconfOperationRouterImpl.class);
 
     private final NetconfOperationServiceSnapshot netconfOperationServiceSnapshot;
     private Set<NetconfOperation> allNetconfOperations;
@@ -104,7 +103,7 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
             messageAsString = XmlUtil.toString(message);
             netconfOperationExecution = getNetconfOperationWithHighestPriority(message, session);
         } catch (IllegalArgumentException | IllegalStateException e) {
-            logger.warn("Unable to handle rpc {} on session {}", messageAsString, session, e);
+            LOG.warn("Unable to handle rpc {} on session {}", messageAsString, session, e);
 
             String errorMessage = String.format("Unable to handle rpc %s on session %s", messageAsString, session);
             Map<String, String> errorInfo = Maps.newHashMap();
@@ -137,7 +136,7 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
     }
 
     private NetconfDocumentedException handleUnexpectedEx(String s, Exception e) throws NetconfDocumentedException {
-        logger.error(s, e);
+        LOG.error(s, e);
 
         Map<String, String> info = Maps.newHashMap();
         info.put(NetconfDocumentedException.ErrorSeverity.error.toString(), e.toString());
@@ -150,7 +149,7 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
     private Document executeOperationWithHighestPriority(Document message,
             NetconfOperationExecution netconfOperationExecution, String messageAsString)
             throws NetconfDocumentedException {
-        logger.debug("Forwarding netconf message {} to {}", messageAsString, netconfOperationExecution.netconfOperation);
+        LOG.debug("Forwarding netconf message {} to {}", messageAsString, netconfOperationExecution.netconfOperation);
         return netconfOperationExecution.execute(message);
     }
 

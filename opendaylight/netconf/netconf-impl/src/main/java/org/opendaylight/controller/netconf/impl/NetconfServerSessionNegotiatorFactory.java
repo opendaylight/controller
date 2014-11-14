@@ -12,9 +12,11 @@ import static org.opendaylight.controller.netconf.mapping.api.NetconfOperationPr
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
-
+import com.google.common.collect.Sets;
+import io.netty.channel.Channel;
+import io.netty.util.Timer;
+import io.netty.util.concurrent.Promise;
 import java.util.Set;
-
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfServerSessionPreferences;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
@@ -26,13 +28,6 @@ import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessage;
 import org.opendaylight.protocol.framework.SessionListenerFactory;
 import org.opendaylight.protocol.framework.SessionNegotiator;
 import org.opendaylight.protocol.framework.SessionNegotiatorFactory;
-
-import com.google.common.collect.Sets;
-
-import io.netty.channel.Channel;
-import io.netty.util.Timer;
-import io.netty.util.concurrent.Promise;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +46,7 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
     private final long connectionTimeoutMillis;
     private final DefaultCommitNotificationProducer commitNotificationProducer;
     private final SessionMonitoringService monitoringService;
-    private static final Logger logger = LoggerFactory.getLogger(NetconfServerSessionNegotiatorFactory.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NetconfServerSessionNegotiatorFactory.class);
     private final Set<String> baseCapabilities;
 
     // TODO too many params, refactor
@@ -112,7 +107,7 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
             proposal = new NetconfServerSessionPreferences(
                     createHelloMessage(sessionId, capabilityProvider), sessionId);
         } catch (NetconfDocumentedException e) {
-            logger.error("Unable to create hello mesage for session {} with capability provider {}", sessionId,capabilityProvider);
+            LOG.error("Unable to create hello mesage for session {} with capability provider {}", sessionId,capabilityProvider);
             throw new IllegalStateException(e);
         }
 

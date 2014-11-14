@@ -10,7 +10,7 @@ package org.opendaylight.controller.netconf.impl.mapping.operations;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
-
+import java.util.Map;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
@@ -23,14 +23,12 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.Map;
-
 public final class DefaultGetSchema extends AbstractLastNetconfOperation {
     public static final String GET_SCHEMA = "get-schema";
     public static final String IDENTIFIER = "identifier";
     public static final String VERSION = "version";
 
-    private static final Logger logger = LoggerFactory.getLogger(DefaultGetSchema.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultGetSchema.class);
     private final CapabilityProvider cap;
 
     public DefaultGetSchema(CapabilityProvider cap, String netconfSessionIdForReporting) {
@@ -60,7 +58,7 @@ public final class DefaultGetSchema extends AbstractLastNetconfOperation {
         } catch (IllegalStateException e) {
             Map<String, String> errorInfo = Maps.newHashMap();
             errorInfo.put(entry.identifier, e.getMessage());
-            logger.warn("Rpc error: {}", NetconfDocumentedException.ErrorTag.operation_failed, e);
+            LOG.warn("Rpc error: {}", NetconfDocumentedException.ErrorTag.operation_failed, e);
             throw new NetconfDocumentedException(e.getMessage(), NetconfDocumentedException.ErrorType.application,
                     NetconfDocumentedException.ErrorTag.operation_failed,
                     NetconfDocumentedException.ErrorSeverity.error, errorInfo);
@@ -69,7 +67,7 @@ public final class DefaultGetSchema extends AbstractLastNetconfOperation {
         Element getSchemaResult;
         getSchemaResult = XmlUtil.createTextElement(document, XmlNetconfConstants.DATA_KEY, schema,
                 Optional.of(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_YANG_IETF_NETCONF_MONITORING));
-        logger.trace("{} operation successful", GET_SCHEMA);
+        LOG.trace("{} operation successful", GET_SCHEMA);
 
         return getSchemaResult;
     }
@@ -86,7 +84,7 @@ public final class DefaultGetSchema extends AbstractLastNetconfOperation {
             try {
                 identifierElement = getSchemaElement.getOnlyChildElementWithSameNamespace(IDENTIFIER);
             } catch (MissingNameSpaceException e) {
-                logger.trace("Can't get identifier element as only child element with same namespace due to {}",e);
+                LOG.trace("Can't get identifier element as only child element with same namespace due to ",e);
                 throw NetconfDocumentedException.wrap(e);
             }
             identifier = identifierElement.getTextContent();
