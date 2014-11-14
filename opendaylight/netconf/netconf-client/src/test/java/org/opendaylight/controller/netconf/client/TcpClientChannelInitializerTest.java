@@ -8,6 +8,13 @@
 
 package org.opendaylight.controller.netconf.client;
 
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelPipeline;
@@ -15,8 +22,6 @@ import io.netty.util.concurrent.Promise;
 import org.junit.Test;
 import org.opendaylight.protocol.framework.SessionListenerFactory;
 import org.opendaylight.protocol.framework.SessionNegotiator;
-
-import static org.mockito.Mockito.*;
 
 public class TcpClientChannelInitializerTest {
     @Test

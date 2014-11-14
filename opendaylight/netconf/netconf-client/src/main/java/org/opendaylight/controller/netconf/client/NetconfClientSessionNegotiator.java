@@ -10,7 +10,6 @@ package org.opendaylight.controller.netconf.client;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -18,12 +17,9 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.Promise;
-
 import java.util.Collection;
-
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
-
 import org.opendaylight.controller.netconf.api.NetconfClientSessionPreferences;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
@@ -44,7 +40,7 @@ import org.w3c.dom.NodeList;
 public class NetconfClientSessionNegotiator extends
         AbstractNetconfSessionNegotiator<NetconfClientSessionPreferences, NetconfClientSession, NetconfClientSessionListener>
 {
-    private static final Logger logger = LoggerFactory.getLogger(NetconfClientSessionNegotiator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NetconfClientSessionNegotiator.class);
 
     private static final XPathExpression sessionIdXPath = XMLNetconfUtil
             .compileXPath("/netconf:hello/netconf:session-id");
@@ -68,12 +64,12 @@ public class NetconfClientSessionNegotiator extends
         // If exi should be used, try to initiate exi communication
         // Call negotiationSuccessFul after exi negotiation is finished successfully or not
         if (shouldUseExi(netconfMessage)) {
-            logger.debug("Netconf session {} should use exi.", session);
+            LOG.debug("Netconf session {} should use exi.", session);
             NetconfStartExiMessage startExiMessage = (NetconfStartExiMessage) sessionPreferences.getStartExiMessage();
             tryToInitiateExi(session, startExiMessage);
         } else {
             // Exi is not supported, release session immediately
-            logger.debug("Netconf session {} isn't capable of using exi.", session);
+            LOG.debug("Netconf session {} isn't capable of using exi.", session);
             negotiationSuccessful(session);
         }
     }
@@ -92,10 +88,10 @@ public class NetconfClientSessionNegotiator extends
             @Override
             public void operationComplete(final ChannelFuture f) {
                 if (!f.isSuccess()) {
-                    logger.warn("Failed to send start-exi message {} on session {}", startExiMessage, this, f.cause());
+                    LOG.warn("Failed to send start-exi message {} on session {}", startExiMessage, this, f.cause());
                     channel.pipeline().remove(ExiConfirmationInboundHandler.EXI_CONFIRMED_HANDLER);
                 } else {
-                    logger.trace("Start-exi message {} sent to socket on session {}", startExiMessage, this);
+                    LOG.trace("Start-exi message {} sent to socket on session {}", startExiMessage, this);
                 }
             }
         });
@@ -161,26 +157,28 @@ public class NetconfClientSessionNegotiator extends
 
             // Ok response to start-exi, try to add exi handlers
             if (NetconfMessageUtil.isOKMessage(netconfMessage)) {
-                logger.trace("Positive response on start-exi call received on session {}", session);
+                LOG.trace("Positive response on start-exi call received on session {}", session);
                 try {
                     session.startExiCommunication(startExiMessage);
                 } catch (RuntimeException e) {
                     // Unable to add exi, continue without exi
-                    logger.warn("Unable to start exi communication, Communication will continue without exi on session {}", session, e);
+                    LOG.warn("Unable to start exi communication, Communication will continue without exi on session {}", session, e);
                 }
 
                 // Error response
             } else if(NetconfMessageUtil.isErrorMessage(netconfMessage)) {
-                logger.warn(
+                LOG.warn(
                         "Error response to start-exi message {}, Communication will continue without exi on session {}",
                         XmlUtil.toString(netconfMessage.getDocument()), session);
 
                 // Unexpected response to start-exi, throwing message away, continue without exi
             } else {
-                logger.warn(
-                        "Unexpected response to start-exi message, should be ok, was {}, " +
-                                "Communication will continue without exi and response message will be thrown away on session {}",
-                        XmlUtil.toString(netconfMessage.getDocument()), session);
+                LOG.warn(
+                        "Unexpected response to start-exi message, should be ok, was {}, ",
+                        XmlUtil.toString(netconfMessage.getDocument()));
+                LOG.warn(
+                        "Communication will continue without exi and response message will be thrown away on session {}",
+                        session);
             }
 
             negotiationSuccessful(session);
