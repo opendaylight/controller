@@ -9,18 +9,17 @@ package org.opendaylight.controller.netconf.monitoring.xml.model;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
+import java.util.Collection;
+import javax.annotation.Nullable;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.monitoring.MonitoringConstants;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.Schemas;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.Sessions;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.schemas.Schema;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.sessions.Session;
-
-import javax.annotation.Nullable;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Collection;
 
 @XmlRootElement(name = MonitoringConstants.NETCONF_MONITORING_XML_ROOT_ELEMENT)
 public final class NetconfState {
