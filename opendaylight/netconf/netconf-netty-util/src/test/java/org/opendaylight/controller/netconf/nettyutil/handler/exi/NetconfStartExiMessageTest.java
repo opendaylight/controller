@@ -53,8 +53,8 @@ public class NetconfStartExiMessageTest {
         fullOptions.setPreservePIs(true);
 
         return Arrays.asList(new Object[][]{
-                {noChangeXml, new EXIOptions()},
-                {fullOptionsXml, fullOptions},
+            {noChangeXml, new EXIOptions()},
+            {fullOptionsXml, fullOptions},
         });
     }
 

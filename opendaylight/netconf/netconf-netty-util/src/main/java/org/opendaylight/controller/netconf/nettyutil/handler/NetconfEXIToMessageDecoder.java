@@ -7,28 +7,24 @@
  */
 package org.opendaylight.controller.netconf.nettyutil.handler;
 
+import com.google.common.base.Preconditions;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufInputStream;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.ByteToMessageDecoder;
 import java.io.InputStream;
 import java.util.List;
-
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TransformerHandler;
-
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.openexi.sax.EXIReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
-
-import com.google.common.base.Preconditions;
-
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufInputStream;
-import io.netty.buffer.ByteBufUtil;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.ByteToMessageDecoder;
 
 public final class NetconfEXIToMessageDecoder extends ByteToMessageDecoder {
 
@@ -60,7 +56,7 @@ public final class NetconfEXIToMessageDecoder extends ByteToMessageDecoder {
         final EXIReader r = codec.getReader();
 
         final SAXTransformerFactory transformerFactory
-                = (SAXTransformerFactory) TransformerFactory.newInstance();
+            = (SAXTransformerFactory) TransformerFactory.newInstance();
         final TransformerHandler handler = transformerFactory.newTransformerHandler();
         r.setContentHandler(handler);
 
