@@ -23,26 +23,26 @@ import org.slf4j.LoggerFactory;
 @Sharable
 public class EchoServerHandler extends ChannelInboundHandlerAdapter {
 
-    private static final Logger logger = LoggerFactory.getLogger(EchoServerHandler.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(EchoServerHandler.class);
     private String fromLastNewLine = "";
     private final Splitter splitter = Splitter.onPattern("\r?\n");
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        logger.debug("sleep start");
+        LOG.debug("sleep start");
         Thread.sleep(1000);
-        logger.debug("sleep done");
+        LOG.debug("sleep done");
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         ByteBuf byteBuf = (ByteBuf) msg;
         String message = byteBuf.toString(Charsets.UTF_8);
-        logger.info("writing back '{}'", message);
+        LOG.info("writing back '{}'", message);
         ctx.write(msg);
         fromLastNewLine += message;
         for (String line : splitter.split(fromLastNewLine)) {
             if ("quit".equals(line)) {
-                logger.info("closing server ctx");
+                LOG.info("closing server ctx");
                 ctx.flush();
                 ctx.close();
                 break;
@@ -55,7 +55,7 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-        logger.debug("flushing");
+        LOG.debug("flushing");
         ctx.flush();
     }
 }
