@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 public class NetconfMonitoringServiceTracker extends ServiceTracker<NetconfMonitoringService, NetconfMonitoringService> {
 
-    private static final Logger logger = LoggerFactory.getLogger(NetconfMonitoringServiceTracker.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NetconfMonitoringServiceTracker.class);
 
     private ServiceRegistration<NetconfOperationServiceFactory> reg;
 
@@ -51,7 +51,7 @@ public class NetconfMonitoringServiceTracker extends ServiceTracker<NetconfMonit
             try {
                 reg.unregister();
             } catch (final Exception e) {
-                logger.warn("Ignoring exception while unregistering {}", reg, e);
+                LOG.warn("Ignoring exception while unregistering {}", reg, e);
             }
         }
     }

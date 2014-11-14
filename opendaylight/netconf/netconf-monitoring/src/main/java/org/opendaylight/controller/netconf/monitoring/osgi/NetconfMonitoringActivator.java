@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 public class NetconfMonitoringActivator implements BundleActivator {
 
-    private static final Logger logger = LoggerFactory.getLogger(NetconfMonitoringActivator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NetconfMonitoringActivator.class);
 
     private NetconfMonitoringServiceTracker monitor;
 
@@ -32,7 +32,7 @@ public class NetconfMonitoringActivator implements BundleActivator {
             try {
                 monitor.close();
             } catch (Exception e) {
-                logger.warn("Ignoring exception while closing {}", monitor, e);
+                LOG.warn("Ignoring exception while closing {}", monitor, e);
             }
         }
     }
