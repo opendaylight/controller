@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 
 public final class NetconfServerSession extends AbstractNetconfSession<NetconfServerSession, NetconfServerSessionListener> implements NetconfManagementSession {
 
-    private static final Logger logger = LoggerFactory.getLogger(NetconfServerSession.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NetconfServerSession.class);
 
     private final NetconfHelloMessageAdditionalHeader header;
 
@@ -50,7 +50,7 @@ public final class NetconfServerSession extends AbstractNetconfSession<NetconfSe
             NetconfHelloMessageAdditionalHeader header) {
         super(sessionListener, channel, sessionId);
         this.header = header;
-        logger.debug("Session {} created", toString());
+        LOG.debug("Session {} created", toString());
     }
 
     @Override
@@ -111,9 +111,12 @@ public final class NetconfServerSession extends AbstractNetconfSession<NetconfSe
 
     private Class<? extends Transport> getTransportForString(String transport) {
         switch(transport) {
-        case "ssh" : return NetconfSsh.class;
-        case "tcp" : return NetconfTcp.class;
-        default: throw new IllegalArgumentException("Unknown transport type " + transport);
+        case "ssh" :
+            return NetconfSsh.class;
+        case "tcp" :
+            return NetconfTcp.class;
+        default:
+            throw new IllegalArgumentException("Unknown transport type " + transport);
         }
     }
 
