@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_addd8644",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/consensus/TwoNodeRaftStrategy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-14T14:08:50Z",
+      "side": 1,
+      "message": "What common behavior are we getting from RaftStrategy? Would it be cleaner to abstract the common behavior into a base class so this class doesn\u0027t extend RaftStrategy? Just something to think about - I know this is just an initial draft.",
+      "revId": "0976053fe53ee5820ec64994ab2c6a374df06c63",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_cde24a03",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/consensus/TwoNodeRaftStrategy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-14T14:08:50Z",
+      "side": 1,
+      "message": "Minor thing but the ODL coding style is to include braces even if block has one line.",
+      "revId": "0976053fe53ee5820ec64994ab2c6a374df06c63",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
