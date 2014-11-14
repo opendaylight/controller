@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 
 public class NetconfMonitoringServiceImpl implements NetconfMonitoringService, SessionMonitoringService {
 
-    private static final Logger logger = LoggerFactory.getLogger(NetconfMonitoringServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NetconfMonitoringServiceImpl.class);
 
     private final Set<NetconfManagementSession> sessions = new ConcurrentSet<>();
     private final NetconfOperationProvider netconfOperationProvider;
@@ -49,14 +49,14 @@ public class NetconfMonitoringServiceImpl implements NetconfMonitoringService, S
 
     @Override
     public void onSessionUp(NetconfManagementSession session) {
-        logger.debug("Session {} up", session);
+        LOG.debug("Session {} up", session);
         Preconditions.checkState(!sessions.contains(session), "Session %s was already added", session);
         sessions.add(session);
     }
 
     @Override
     public void onSessionDown(NetconfManagementSession session) {
-        logger.debug("Session {} down", session);
+        LOG.debug("Session {} down", session);
         Preconditions.checkState(sessions.contains(session), "Session %s not present", session);
         sessions.remove(session);
     }

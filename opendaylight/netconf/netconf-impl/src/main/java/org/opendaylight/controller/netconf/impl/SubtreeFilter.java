@@ -28,14 +28,14 @@ import org.xml.sax.SAXException;
  * See <a href="http://tools.ietf.org/html/rfc6241#section-6">rfc6241</a> for details.
  */
 public class SubtreeFilter {
-    private static final Logger logger = LoggerFactory.getLogger(SubtreeFilter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SubtreeFilter.class);
 
     static Document applySubtreeFilter(Document requestDocument, Document rpcReply) throws NetconfDocumentedException {
         // FIXME: rpcReply document must be reread otherwise some nodes do not inherit namespaces. (services/service)
         try {
             rpcReply = XmlUtil.readXmlToDocument(XmlUtil.toString(rpcReply, true));
         } catch (SAXException | IOException e) {
-            logger.error("Cannot transform document", e);
+            LOG.error("Cannot transform document", e);
             throw new NetconfDocumentedException("Cannot transform document");
         }
 
@@ -49,8 +49,8 @@ public class SubtreeFilter {
                     XmlNetconfConstants.FILTER, XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
             if (maybeFilter.isPresent() && (
                     "subtree".equals(maybeFilter.get().getAttribute("type"))||
-                            "subtree".equals(maybeFilter.get().getAttribute("type", XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0))
-            )) {
+                            "subtree".equals(maybeFilter.get().getAttribute("type", XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0)))
+            ) {
 
 
                 // do
@@ -160,7 +160,7 @@ public class SubtreeFilter {
         if (result == null) {
             result = MatchingResult.NO_MATCH;
         }
-        logger.debug("Matching {} to {} resulted in {}", src, filter, result);
+        LOG.debug("Matching {} to {} resulted in {}", src, filter, result);
         return result;
     }
 
