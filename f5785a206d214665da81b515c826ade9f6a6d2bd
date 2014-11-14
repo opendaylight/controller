@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "ba8cc1f7_3220f1f6",
+        "filename": "features/jolokia/src/main/resources/features.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-11-14T01:35:33Z",
+      "side": 1,
+      "message": "Does this have to be in its own repo?? I find the quantity of repos to already be a little too extreme...",
+      "revId": "f5785a206d214665da81b515c826ade9f6a6d2bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_f917d4a1",
         "filename": "features/jolokia/src/main/resources/features.xml",
         "patchSetId": 3
