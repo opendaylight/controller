@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_28dba41c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-15T13:29:24Z",
+      "side": 1,
+      "message": "It usually isn\u0027t safe to call methods overridden in a derived class from the constructor of the base class. It\u0027s calling into the derived instance when it hasn\u0027t been fully constructed yet. In this case, at this point, it\u0027s not a problem as the IsolatedLeader derived class doesn\u0027t do anything but it\u0027s still not best practice and not clean and may lead to issues in the future. \n\nI agree with Moiz\u0027s suggestion to extract an AbstractLeader which has these methods that the derived can classes call. The laser would call them but IsolatedLeader wouldn\u0027t. I think this is s cleaner approach,",
+      "revId": "990ee149c409a449ac08aa7d434d29e36f305e17",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
