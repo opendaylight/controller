@@ -7,6 +7,14 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
+import com.google.common.util.concurrent.AbstractFuture;
+import com.google.common.util.concurrent.AbstractListeningExecutorService;
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -19,14 +27,6 @@ import org.opendaylight.yangtools.util.DurationStatisticsTracker;
 import org.opendaylight.yangtools.util.concurrent.MappingCheckedFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterables;
-import com.google.common.util.concurrent.AbstractFuture;
-import com.google.common.util.concurrent.AbstractListeningExecutorService;
-import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 
 /**
  * Implementation of DOMDataCommitExecutor that coordinates transaction commits concurrently. The 3
@@ -134,7 +134,7 @@ public class DOMConcurrentDataCommitCoordinator implements DOMDataCommitExecutor
 
             @Override
             public void onFailure(Throwable t) {
-                handleException(clientSubmitFuture, transaction, cohorts, cohortSize, CAN_COMMIT, t);
+                handleException(clientSubmitFuture, transaction, cohorts, cohortSize, PRE_COMMIT, t);
             }
         };
 
@@ -163,7 +163,7 @@ public class DOMConcurrentDataCommitCoordinator implements DOMDataCommitExecutor
 
             @Override
             public void onFailure(Throwable t) {
-                handleException(clientSubmitFuture, transaction, cohorts, cohortSize, CAN_COMMIT, t);
+                handleException(clientSubmitFuture, transaction, cohorts, cohortSize, COMMIT, t);
             }
         };
 
