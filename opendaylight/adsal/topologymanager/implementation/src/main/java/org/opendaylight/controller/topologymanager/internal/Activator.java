@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -22,6 +21,7 @@ import org.opendaylight.controller.configuration.IConfigurationContainerService;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.sal.topology.IListenTopoUpdates;
 import org.opendaylight.controller.sal.topology.ITopologyService;
+import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
 import org.opendaylight.controller.topologymanager.ITopologyManagerAware;
@@ -73,6 +73,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             props.put("cachenames", propSet);
 
             c.setInterface(new String[] { IListenTopoUpdates.class.getName(),
+                    IInventoryListener.class.getName(),
                     ITopologyManager.class.getName(),
                     ITopologyManagerShell.class.getName(),
                     IConfigurationContainerAware.class.getName(),
