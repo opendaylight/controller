@@ -59,8 +59,6 @@ public class MockDataChangeListener implements
                     expChangeEventCount, (expChangeEventCount - changeLatch.getCount())));
         }
 
-        assertEquals("Change notifications complete", true, done);
-
         for(int i = 0; i < expPaths.length; i++) {
             assertTrue(String.format("Change %d does not contain %s", (i+1), expPaths[i]),
                     changeList.get(i).getCreatedData().containsKey(expPaths[i]));
