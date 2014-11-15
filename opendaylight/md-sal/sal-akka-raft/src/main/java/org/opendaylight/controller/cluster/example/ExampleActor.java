@@ -20,7 +20,9 @@ import org.opendaylight.controller.cluster.example.messages.PrintRole;
 import org.opendaylight.controller.cluster.example.messages.PrintState;
 import org.opendaylight.controller.cluster.raft.ConfigParams;
 import org.opendaylight.controller.cluster.raft.RaftActor;
+import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
+import org.opendaylight.controller.cluster.raft.behaviors.Leader;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 
 import java.io.ByteArrayInputStream;
@@ -77,7 +79,15 @@ public class ExampleActor extends RaftActor {
 
         } else if (message instanceof PrintRole) {
             if(LOG.isDebugEnabled()) {
-                LOG.debug("{} = {}, Peers={}", getId(), getRaftState(), getPeers());
+                String followers = "";
+                if (getRaftState() == RaftState.Leader) {
+                    followers = ((Leader)this.getCurrentBehavior()).printFollowerStates();
+                    LOG.debug("{} = {}, Peers={}, followers={}", getId(), getRaftState(), getPeers(), followers);
+                } else {
+                    LOG.debug("{} = {}, Peers={}", getId(), getRaftState(), getPeers());
+                }
+
+
             }
 
         } else {

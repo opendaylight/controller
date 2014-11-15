@@ -18,6 +18,7 @@ import akka.persistence.SaveSnapshotFailure;
 import akka.persistence.SaveSnapshotSuccess;
 import akka.persistence.SnapshotOffer;
 import akka.persistence.SnapshotSelectionCriteria;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import com.google.protobuf.ByteString;
@@ -30,6 +31,8 @@ import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
+import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapshot;
+import org.opendaylight.controller.cluster.raft.behaviors.AbstractRaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.behaviors.Follower;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
@@ -372,6 +375,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     public java.util.Set<String> getPeers() {
+
         return context.getPeerAddresses().keySet();
     }
 
@@ -620,7 +624,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         //be greedy and remove entries from in-mem journal which are in the snapshot
         // and update snapshotIndex and snapshotTerm without waiting for the success,
 
-        context.getReplicatedLog().snapshotPreCommit(stateInBytes,
+        context.getReplicatedLog().snapshotPreCommit(
             captureSnapshot.getLastAppliedIndex(),
             captureSnapshot.getLastAppliedTerm());
 
@@ -628,16 +632,19 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             "and term:{}", captureSnapshot.getLastAppliedIndex(),
             captureSnapshot.getLastAppliedTerm());
 
+        if (isLeader() && captureSnapshot.isInstallSnapshotInitiated()) {
+            // this would be call straight to the leader and won't initiate in serialization
+            currentBehavior.handleMessage(getSelf(), new SendInstallSnapshot(stateInBytes));
+        }
+
         captureSnapshot = null;
         hasSnapshotCaptureInitiated = false;
     }
 
-
     private class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
 
         public ReplicatedLogImpl(Snapshot snapshot) {
-            super(ByteString.copyFrom(snapshot.getState()),
-                snapshot.getLastAppliedIndex(), snapshot.getLastAppliedTerm(),
+            super(snapshot.getLastAppliedIndex(), snapshot.getLastAppliedTerm(),
                 snapshot.getUnAppliedEntries());
         }
 
@@ -827,4 +834,12 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
     }
 
+    @VisibleForTesting
+    void setCurrentBehavior(AbstractRaftActorBehavior behavior) {
+        currentBehavior = behavior;
+    }
+
+    protected RaftActorBehavior getCurrentBehavior() {
+        return currentBehavior;
+    }
 }
