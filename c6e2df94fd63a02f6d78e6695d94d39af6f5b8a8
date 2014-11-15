@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_2876443f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/base/messages/IsolatedLeaderCheck.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-15T00:39:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_0d1832d2",
+      "revId": "c6e2df94fd63a02f6d78e6695d94d39af6f5b8a8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_cd11eaad",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/IsolatedLeader.java",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2014-11-14T17:01:52Z",
       "side": 1,
       "message": "I believe you are doing this because in Leader constructor you start the schedule and here you do not want to have the scheduled job. This is potentially confusing. Maybe we should move the Leader code into an AbstractLeader with a constructor parameter boolean to schedule isolation checks",
+      "revId": "c6e2df94fd63a02f6d78e6695d94d39af6f5b8a8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_4873884d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/IsolatedLeader.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-15T00:39:36Z",
+      "side": 1,
+      "message": "I have overrided the scheduleIsolatedLeaderCheck in the IsolatedLeader.\n\nremoved the stop calls.",
+      "parentUuid": "ba8cc1f7_cd11eaad",
       "revId": "c6e2df94fd63a02f6d78e6695d94d39af6f5b8a8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
