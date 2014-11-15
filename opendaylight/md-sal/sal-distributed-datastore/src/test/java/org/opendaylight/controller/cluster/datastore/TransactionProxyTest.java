@@ -358,7 +358,7 @@ public class TransactionProxyTest {
                 executeOperationAsync(eq(actorSystem.actorSelection(actorRef.path())),
                         eqCreateTransaction(memberName, type));
 
-        doReturn(false).when(mockActorContext).isLocalPath(actorRef.path().toString());
+        doReturn(false).when(mockActorContext).isPathLocal(actorRef.path().toString());
 
         return actorRef;
     }
@@ -899,7 +899,7 @@ public class TransactionProxyTest {
         doReturn(readySerializedTxReply(actorRef.path().toString())).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), isA(ReadyTransaction.SERIALIZABLE_CLASS));
 
-        doReturn(false).when(mockActorContext).isLocalPath(actorRef.path().toString());
+        doReturn(false).when(mockActorContext).isPathLocal(actorRef.path().toString());
 
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
                 WRITE_ONLY);
@@ -1069,7 +1069,7 @@ public class TransactionProxyTest {
             executeOperationAsync(eq(actorSystem.actorSelection(shardActorRef.path())),
                 eqCreateTransaction(memberName, READ_ONLY));
 
-        doReturn(true).when(mockActorContext).isLocalPath(actorPath);
+        doReturn(true).when(mockActorContext).isPathLocal(actorPath);
 
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,READ_ONLY);
 
@@ -1124,7 +1124,7 @@ public class TransactionProxyTest {
         executeOperationAsync(eq(actorSystem.actorSelection(shardActorRef.path())),
                 eqCreateTransaction(memberName, WRITE_ONLY));
 
-        doReturn(true).when(mockActorContext).isLocalPath(actorPath);
+        doReturn(true).when(mockActorContext).isPathLocal(actorPath);
 
         NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
