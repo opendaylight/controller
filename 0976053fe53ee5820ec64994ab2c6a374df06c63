@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9a91bd0f_42cf14b1",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/consensus/ConsensusStrategy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 2508
+      },
+      "writtenOn": "2014-11-17T17:49:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a91bd0f_df3e9b29",
+      "range": {
+        "startLine": 21,
+        "startChar": 8,
+        "endLine": 21,
+        "endChar": 39
+      },
+      "revId": "0976053fe53ee5820ec64994ab2c6a374df06c63",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a91bd0f_7f30af56",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/consensus/ConsensusStrategy.java",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2014-11-16T03:26:01Z",
       "side": 1,
       "message": "ParticipantSyncedAction? to be consistent",
+      "range": {
+        "startLine": 35,
+        "startChar": 9,
+        "endLine": 35,
+        "endChar": 26
+      },
+      "revId": "0976053fe53ee5820ec64994ab2c6a374df06c63",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_62d01854",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/consensus/ConsensusStrategy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 2508
+      },
+      "writtenOn": "2014-11-17T17:49:10Z",
+      "side": 1,
+      "message": "Yes, updated in Patchset #2",
+      "parentUuid": "9a91bd0f_7f30af56",
       "range": {
         "startLine": 35,
         "startChar": 9,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "9a91bd0f_c2e32432",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/consensus/ConsensusStrategy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 2508
+      },
+      "writtenOn": "2014-11-17T17:49:10Z",
+      "side": 1,
+      "message": "Yes, for Leader.",
+      "parentUuid": "9a91bd0f_1f35e345",
+      "range": {
+        "startLine": 46,
+        "startChar": 22,
+        "endLine": 46,
+        "endChar": 41
+      },
+      "revId": "0976053fe53ee5820ec64994ab2c6a374df06c63",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a91bd0f_ff3b5f36",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/consensus/RaftStrategy.java",
         "patchSetId": 1
@@ -82,6 +154,30 @@
       "writtenOn": "2014-11-16T03:26:01Z",
       "side": 1,
       "message": "NONE - means stay Leader\n\nThis cannot be the only outcome for RaftStrategy. I know this is not a draft implementation but just wanted to point this out.",
+      "range": {
+        "startLine": 44,
+        "startChar": 34,
+        "endLine": 44,
+        "endChar": 38
+      },
+      "revId": "0976053fe53ee5820ec64994ab2c6a374df06c63",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_42463425",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/consensus/RaftStrategy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 2508
+      },
+      "writtenOn": "2014-11-17T17:49:10Z",
+      "side": 1,
+      "message": "Updated to get out of 2-Leader state.",
+      "parentUuid": "9a91bd0f_ff3b5f36",
       "range": {
         "startLine": 44,
         "startChar": 34,
@@ -111,6 +207,24 @@
     },
     {
       "key": {
+        "uuid": "9a91bd0f_a2bdc004",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/consensus/TwoNodeRaftStrategy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 2508
+      },
+      "writtenOn": "2014-11-17T17:49:10Z",
+      "side": 1,
+      "message": "I was trying to get TwoNodeRaftStrategy to share the RaftStrategy\u0027s defined RAFT rules for who is the latest valid leader as encoded in RaftStrategy#onVoteRequestReceived. \n\nBut I agree that should be extracted especially since RaftStrategy\u0027s implementation of onVoteRequestReceived may consider additional config/state for that strategy than just these rules. Eventually and it could break TwoNodeRaftStrategy.\n\nSee Patchset #2 for proposed change to define a base class. (We could use a Raft utility class instead with a static method to do the same.) Comments/changes welcomed.",
+      "parentUuid": "ba8cc1f7_addd8644",
+      "revId": "0976053fe53ee5820ec64994ab2c6a374df06c63",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_cde24a03",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/consensus/TwoNodeRaftStrategy.java",
         "patchSetId": 1
@@ -122,6 +236,24 @@
       "writtenOn": "2014-11-14T14:08:50Z",
       "side": 1,
       "message": "Minor thing but the ODL coding style is to include braces even if block has one line.",
+      "revId": "0976053fe53ee5820ec64994ab2c6a374df06c63",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_02c10c80",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/consensus/TwoNodeRaftStrategy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 2508
+      },
+      "writtenOn": "2014-11-17T17:49:10Z",
+      "side": 1,
+      "message": "I updated all of TwoNodeRaftStrategy and will conform going forward. Thanks.",
+      "parentUuid": "ba8cc1f7_cde24a03",
       "revId": "0976053fe53ee5820ec64994ab2c6a374df06c63",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
