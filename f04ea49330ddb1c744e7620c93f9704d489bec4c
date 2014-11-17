@@ -16,6 +16,24 @@
       "revId": "f04ea49330ddb1c744e7620c93f9704d489bec4c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_62a1f8a8",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-17T19:18:25Z",
+      "side": 1,
+      "message": "Intellij has it defaulted to be on the same line. I guess Eclipse its the other way around.\n\nI have changed it now to be on the next line.",
+      "parentUuid": "9a91bd0f_42f874e5",
+      "revId": "f04ea49330ddb1c744e7620c93f9704d489bec4c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
