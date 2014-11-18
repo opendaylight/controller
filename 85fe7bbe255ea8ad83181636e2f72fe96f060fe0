@@ -16,6 +16,47 @@
       "revId": "85fe7bbe255ea8ad83181636e2f72fe96f060fe0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_8863fbb0",
+        "filename": "features/mdsal/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 384,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-18T21:55:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_bbff1901",
+      "revId": "85fe7bbe255ea8ad83181636e2f72fe96f060fe0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_2858aff9",
+        "filename": "features/mdsal/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-18T21:55:46Z",
+      "side": 1,
+      "message": "Tony could you please clarify why this needs to be in a downstream project. Is it because the downstream project would have a more complete set of models?",
+      "range": {
+        "startLine": 385,
+        "startChar": 0,
+        "endLine": 385,
+        "endChar": 8
+      },
+      "revId": "85fe7bbe255ea8ad83181636e2f72fe96f060fe0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
