@@ -1,13 +1,12 @@
 package org.opendaylight.controller.netconf.impl;
 
-import io.netty.channel.local.LocalAddress;
-import org.apache.sshd.common.SshdSocketAddress;
-import org.junit.Test;
-
-import java.net.InetSocketAddress;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+
+import io.netty.channel.local.LocalAddress;
+import java.net.InetSocketAddress;
+import org.apache.sshd.common.SshdSocketAddress;
+import org.junit.Test;
 
 public class NetconfServerSessionNegotiatorTest {
 

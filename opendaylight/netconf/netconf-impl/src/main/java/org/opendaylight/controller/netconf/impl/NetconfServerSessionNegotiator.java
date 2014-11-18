@@ -30,7 +30,7 @@ public class NetconfServerSessionNegotiator
         AbstractNetconfSessionNegotiator<NetconfServerSessionPreferences, NetconfServerSession, NetconfServerSessionListener> {
 
     private static final Logger LOG = LoggerFactory.getLogger(NetconfServerSessionNegotiator.class);
-    
+
     private static final String UNKNOWN = "unknown";
 
     protected NetconfServerSessionNegotiator(
