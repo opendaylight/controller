@@ -3,15 +3,17 @@ package org.opendaylight.controller.cluster.example;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import com.google.common.base.Optional;
-import org.opendaylight.controller.cluster.example.messages.PrintRole;
-import org.opendaylight.controller.cluster.example.messages.PrintState;
-import org.opendaylight.controller.cluster.raft.ConfigParams;
-
+import com.google.common.collect.Lists;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.opendaylight.controller.cluster.example.messages.PrintRole;
+import org.opendaylight.controller.cluster.example.messages.PrintState;
+import org.opendaylight.controller.cluster.example.messages.SetNotifiers;
+import org.opendaylight.controller.cluster.raft.ConfigParams;
 
 /**
  * This is a test driver for testing akka-raft implementation
@@ -21,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class TestDriver {
 
-    private static final ActorSystem actorSystem = ActorSystem.create();
+    private static final ActorSystem actorSystem = ActorSystem.create("raft-test");
     private static Map<String, String> allPeers = new HashMap<>();
     private static Map<String, ActorRef> clientActorRefs  = new HashMap<String, ActorRef>();
     private static Map<String, ActorRef> actorRefs = new HashMap<String, ActorRef>();
@@ -116,7 +118,7 @@ public class TestDriver {
     public void createNodes(int num) {
         for (int i=0; i < num; i++)  {
             nameCounter = nameCounter + 1;
-            allPeers.put("example-"+nameCounter, "akka://default/user/example-"+nameCounter);
+            allPeers.put("example-"+nameCounter, "akka://raft-test/user/example-"+nameCounter);
         }
 
         for (String s : allPeers.keySet())  {
@@ -125,6 +127,14 @@ public class TestDriver {
             System.out.println("Created node:"+s);
 
         }
+
+        createClusterRoleChangeListener(Lists.newArrayList(allPeers.keySet()));
+    }
+
+    private void createClusterRoleChangeListener(List<String> memberIds) {
+        System.out.println("memberIds="+memberIds);
+        ActorRef listenerActor = actorSystem.actorOf(ExampleClusterRoleChangeListener.getProps(), "role-change-listener");
+        listenerActor.tell(new SetNotifiers(memberIds), ActorRef.noSender());
     }
 
     // add num clients to all nodes in the system

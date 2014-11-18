@@ -87,6 +87,9 @@ public class Leader extends AbstractRaftActorBehavior {
     public Leader(RaftActorContext context) {
         super(context);
 
+        // leader will set leaderid as its own id, follower will set it from the append-entries
+        leaderId = context.getId();
+
         followers = context.getPeerAddresses().keySet();
 
         for (String followerId : followers) {
@@ -628,10 +631,6 @@ public class Leader extends AbstractRaftActorBehavior {
 
     @Override public void close() throws Exception {
         stopHeartBeat();
-    }
-
-    @Override public String getLeaderId() {
-        return context.getId();
     }
 
     /**
