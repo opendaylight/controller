@@ -103,6 +103,8 @@ public class RaftActorTest extends AbstractActorTest {
             public MockRaftActor create() throws Exception {
                 return new MockRaftActor(id, peerAddresses, config, dataPersistenceProvider);
             }
+
+
         }
 
         private final CountDownLatch recoveryComplete = new CountDownLatch(1);
@@ -199,6 +201,11 @@ public class RaftActorTest extends AbstractActorTest {
         @Override
         protected DataPersistenceProvider persistence() {
             return this.dataPersistenceProvider;
+        }
+
+        @Override
+        protected Optional<ActorRef> createRoleChangeNotifier(String id) {
+            return Optional.absent();
         }
 
         @Override public String persistenceId() {

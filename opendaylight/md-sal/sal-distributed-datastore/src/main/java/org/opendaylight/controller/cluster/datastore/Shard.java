@@ -197,6 +197,13 @@ public class Shard extends RaftActor {
     }
 
     @Override
+    public Optional<ActorRef> createRoleChangeNotifier(String shardId) {
+        ActorRef shardRoleChangeNotifier = this.getContext().actorOf(ShardRoleChangeNotifier.getProps(shardId),
+            shardId + "-notifier");
+        return Optional.<ActorRef>of(shardRoleChangeNotifier);
+    }
+
+    @Override
     public void postStop() {
         super.postStop();
 
