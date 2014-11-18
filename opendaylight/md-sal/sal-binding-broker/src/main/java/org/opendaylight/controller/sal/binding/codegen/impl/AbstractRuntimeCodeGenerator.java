@@ -8,17 +8,11 @@
 package org.opendaylight.controller.sal.binding.codegen.impl;
 
 import com.google.common.base.Supplier;
-
-import java.util.Map;
-import java.util.WeakHashMap;
-
+import com.google.common.collect.Iterables;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtMethod;
 import javassist.NotFoundException;
-
-import javax.annotation.concurrent.GuardedBy;
-
 import org.eclipse.xtext.xbase.lib.Extension;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcRouter;
 import org.opendaylight.controller.sal.binding.codegen.RpcIsNotRoutedException;
@@ -30,6 +24,10 @@ import org.opendaylight.yangtools.yang.binding.NotificationListener;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.opendaylight.yangtools.yang.binding.annotations.RoutingContext;
 import org.opendaylight.yangtools.yang.binding.util.ClassLoaderUtils;
+
+import javax.annotation.concurrent.GuardedBy;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 abstract class AbstractRuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.codegen.RuntimeCodeGenerator, NotificationInvokerFactory {
     @GuardedBy("this")
@@ -173,6 +171,10 @@ abstract class AbstractRuntimeCodeGenerator implements org.opendaylight.controll
                 }
             }
         });
+
+        if (Iterables.isEmpty(metadata.getContexts())) {
+            throw new RpcIsNotRoutedException("Service doesn't have routing context associated.");
+        }
 
         synchronized (utils) {
             final T instance = ClassLoaderUtils.withClassLoader(serviceType.getClassLoader(), routerSupplier(serviceType, metadata));
