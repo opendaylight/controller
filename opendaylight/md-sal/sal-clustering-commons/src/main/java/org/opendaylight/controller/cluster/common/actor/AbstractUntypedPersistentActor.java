@@ -35,11 +35,11 @@ public abstract class AbstractUntypedPersistentActor extends UntypedPersistentAc
     @Override public void onReceiveCommand(Object message) throws Exception {
         final String messageType = message.getClass().getSimpleName();
         if(LOG.isDebugEnabled()) {
-            LOG.debug("Received message {}", messageType);
+//            LOG.debug("Received message {}", messageType);
         }
         handleCommand(message);
         if(LOG.isDebugEnabled()) {
-            LOG.debug("Done handling message {}", messageType);
+//            LOG.debug("Done handling message {}", messageType);
         }
 
     }
@@ -47,11 +47,11 @@ public abstract class AbstractUntypedPersistentActor extends UntypedPersistentAc
     @Override public void onReceiveRecover(Object message) throws Exception {
         final String messageType = message.getClass().getSimpleName();
         if(LOG.isDebugEnabled()) {
-            LOG.debug("Received message {}", messageType);
+//            LOG.debug("Received message {}", messageType);
         }
         handleRecover(message);
         if(LOG.isDebugEnabled()) {
-            LOG.debug("Done handling message {}", messageType);
+//            LOG.debug("Done handling message {}", messageType);
         }
 
     }

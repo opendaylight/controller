@@ -31,11 +31,13 @@ import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
+import org.opendaylight.controller.cluster.raft.base.messages.RaftRoleChanged;
 import org.opendaylight.controller.cluster.raft.behaviors.Follower;
 import org.opendaylight.controller.cluster.raft.behaviors.Leader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
+import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.controller.cluster.raft.utils.MockAkkaJournal;
 import org.opendaylight.controller.cluster.raft.utils.MockSnapshotStore;
 import scala.concurrent.Await;
@@ -83,6 +85,10 @@ public class RaftActorTest extends AbstractActorTest {
 
         private final DataPersistenceProvider dataPersistenceProvider;
         private final RaftActor delegate;
+        private final CountDownLatch recoveryComplete = new CountDownLatch(1);
+        private final List<Object> state;
+        private static ActorRef roleChangeNotifier;
+
 
         public static final class MockRaftActorCreator implements Creator<MockRaftActor> {
             private static final long serialVersionUID = 1L;
@@ -90,24 +96,24 @@ public class RaftActorTest extends AbstractActorTest {
             private final String id;
             private final Optional<ConfigParams> config;
             private final DataPersistenceProvider dataPersistenceProvider;
+            private final ActorRef roleChangeNotifier;
 
             private MockRaftActorCreator(Map<String, String> peerAddresses, String id,
-                    Optional<ConfigParams> config, DataPersistenceProvider dataPersistenceProvider) {
+                Optional<ConfigParams> config, DataPersistenceProvider dataPersistenceProvider,
+                ActorRef roleChangeNotifier) {
                 this.peerAddresses = peerAddresses;
                 this.id = id;
                 this.config = config;
                 this.dataPersistenceProvider = dataPersistenceProvider;
+                this.roleChangeNotifier = roleChangeNotifier;
             }
 
             @Override
             public MockRaftActor create() throws Exception {
+                MockRaftActor.roleChangeNotifier = roleChangeNotifier;
                 return new MockRaftActor(id, peerAddresses, config, dataPersistenceProvider);
             }
         }
-
-        private final CountDownLatch recoveryComplete = new CountDownLatch(1);
-
-        private final List<Object> state;
 
         public MockRaftActor(String id, Map<String, String> peerAddresses, Optional<ConfigParams> config, DataPersistenceProvider dataPersistenceProvider) {
             super(id, peerAddresses, config);
@@ -134,22 +140,23 @@ public class RaftActorTest extends AbstractActorTest {
 
         public static Props props(final String id, final Map<String, String> peerAddresses,
                 Optional<ConfigParams> config){
-            return Props.create(new MockRaftActorCreator(peerAddresses, id, config, null));
+            return Props.create(new MockRaftActorCreator(peerAddresses, id, config, null, null));
         }
 
         public static Props props(final String id, final Map<String, String> peerAddresses,
                                   Optional<ConfigParams> config, DataPersistenceProvider dataPersistenceProvider){
-            return Props.create(new MockRaftActorCreator(peerAddresses, id, config, dataPersistenceProvider));
+            return Props.create(new MockRaftActorCreator(peerAddresses, id, config, dataPersistenceProvider, null));
         }
 
+        public static Props props(final String id, final Map<String, String> peerAddresses,
+            Optional<ConfigParams> config, ActorRef roleChangeNotifier){
+            return Props.create(new MockRaftActorCreator(peerAddresses, id, config, null, roleChangeNotifier));
+        }
 
         @Override protected void applyState(ActorRef clientActor, String identifier, Object data) {
             delegate.applyState(clientActor, identifier, data);
             LOG.info("applyState called");
         }
-
-
-
 
         @Override
         protected void startLogRecoveryBatch(int maxBatchSize) {
@@ -199,6 +206,11 @@ public class RaftActorTest extends AbstractActorTest {
         @Override
         protected DataPersistenceProvider persistence() {
             return this.dataPersistenceProvider;
+        }
+
+        @Override
+        protected Optional<ActorRef> createRoleChangeNotifier(String id) {
+            return Optional.fromNullable(roleChangeNotifier);
         }
 
         @Override public String persistenceId() {
@@ -860,6 +872,40 @@ public class RaftActorTest extends AbstractActorTest {
 
             }
         };
+    }
+
+    @Test
+    public void testRaftRoleChangeNotifier() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            ActorRef notifierActor = getSystem().actorOf(Props.create(MessageCollectorActor.class));
+            DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+            String id = "testRaftRoleChangeNotifier";
+
+            TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(), MockRaftActor.props(id,
+                Collections.<String,String>emptyMap(), Optional.<ConfigParams>of(config), notifierActor), id);
+
+            MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
+            mockRaftActor.setCurrentBehavior(new Follower(mockRaftActor.getRaftActorContext()));
+
+            // sleeping for a minimum of 2 seconds, if it spans more its fine.
+            Uninterruptibles.sleepUninterruptibly(2, TimeUnit.SECONDS);
+
+            List<Object> matches =  MessageCollectorActor.getAllMatching(notifierActor, RaftRoleChanged.class);
+            assertNotNull(matches);
+            assertEquals(2, matches.size());
+
+            // check if the notifier got a role change from Follower to Candidate
+            RaftRoleChanged raftRoleChanged = (RaftRoleChanged) matches.get(0);
+            assertEquals(id, raftRoleChanged.getMemberId());
+            assertEquals(RaftState.Follower, raftRoleChanged.getOldRole());
+            assertEquals(RaftState.Candidate, raftRoleChanged.getNewRole());
+
+            // check if the notifier got a role change from Candidate to Leader
+            raftRoleChanged = (RaftRoleChanged) matches.get(1);
+            assertEquals(id, raftRoleChanged.getMemberId());
+            assertEquals(RaftState.Candidate, raftRoleChanged.getOldRole());
+            assertEquals(RaftState.Leader, raftRoleChanged.getNewRole());
+        }};
     }
 
     private ByteString fromObject(Object snapshot) throws Exception {
