@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a91bd0f_a8191f24",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ConfigParams.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-18T23:52:06Z",
+      "side": 1,
+      "message": "Document this",
+      "range": {
+        "startLine": 66,
+        "startChar": 19,
+        "endLine": 66,
+        "endChar": 43
+      },
+      "revId": "acb3ba4e879824ee5566cef60ad5dfb2df12082c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_08cb6b73",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/IsolatedLeader.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-18T23:52:06Z",
+      "side": 1,
+      "message": "The comment does not seem to be in-sync with the code",
+      "range": {
+        "startLine": 39,
+        "startChar": 35,
+        "endLine": 39,
+        "endChar": 43
+      },
+      "revId": "acb3ba4e879824ee5566cef60ad5dfb2df12082c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
