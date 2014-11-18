@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.netconf.util;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.hamcrest.CoreMatchers.containsString;
 
 import org.junit.Test;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
