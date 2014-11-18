@@ -57,6 +57,24 @@
       "revId": "85fe7bbe255ea8ad83181636e2f72fe96f060fe0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_e8716778",
+        "filename": "features/mdsal/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 989
+      },
+      "writtenOn": "2014-11-18T22:17:25Z",
+      "side": 1,
+      "message": "Sorry Tony for never addressing these comments, I lost track of this commit.  Yeah, could you explain why I should put this in integration?  Of course, it\u0027s easy to make another patch for the integration branch.",
+      "parentUuid": "9a91bd0f_2858aff9",
+      "revId": "85fe7bbe255ea8ad83181636e2f72fe96f060fe0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
