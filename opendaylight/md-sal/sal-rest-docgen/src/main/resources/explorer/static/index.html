@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RestConf Documentation</title>
+    <link href='fonts.css'
+          rel='stylesheet' type='text/css' />   <!--original location: //fonts.googleapis.com/css?family=Droid+Sans:400,700 -->
+    <link href='../css/highlight.default.css' media='screen' rel='stylesheet'
+          type='text/css' />
+    <link href='../css/screen.css' media='screen' rel='stylesheet'
+          type='text/css' />
+    <link rel="stylesheet" type="text/css" href="opendaylight.css">
+    <link rel="stylesheet" type="text/css"
+          href="../css/ui-lightness/jquery-ui-1.10.4.custom.min.css">
+    <script type="text/javascript" src="../lib/shred.bundle.js"></script>
+    <script src='../lib/jquery-1.8.0.min.js' type='text/javascript'></script>
+    <script src='../lib/jquery-ui-1.11.0.min.js' type="text/javascript"></script>
+    <script src='../lib/jquery.slideto.min.js' type='text/javascript'></script>
+    <script src='../lib/jquery.wiggle.min.js' type='text/javascript'></script>
+    <script src='../lib/jquery.ba-bbq.min.js' type='text/javascript'></script>
+    <script src='../lib/handlebars-1.0.0.js' type='text/javascript'></script>
+    <script src='../lib/underscore-min.js' type='text/javascript'></script>
+    <script src='../lib/backbone-min.js' type='text/javascript'></script>
+    <script src='swagger.js' type='text/javascript'></script>
+    <script src='swagger-ui.js' type='text/javascript'></script>
+    <script src='../lib/odl/list_mounts.js' type='text/javascript'></script>
+    <script src='../lib/highlight.7.3.pack.js' type='text/javascript'></script>
+    <script src='../lib/odl/swagger.js' type='text/javascript'></script>
+    <script src='resources.js' type='text/javascript'></script>
+
+    <script type="text/javascript">
+
+        //reloads the swagger UI documentation for the specified mount.
+        var loadMount = function(mountIndex, mountPath) {
+            $("#message").empty();
+            $("#message").append( "<p>Loading...</p>" );
+            loadSwagger("/apidoc/apis/mounts/" + mountIndex,
+                    "swagger-ui-container");
+            $("#message").empty();
+            $("#message").append( "<h2><b>Showing mount points for " + mountPath + "</b></h2>");
+        }
+
+        //clears the swagger UI and adds text prompting use to select a mount point.
+        var selectAMount = function(string) {
+            $("#swagger-ui-container").empty();
+            $("#message").empty();
+            $("#message").append("<p>Select a mount point.</p>");
+        }
+
+        //loads the root swagger documenation (which comes from RestConf)
+        var loadRootSwagger = function() {
+            $("#message").empty();
+            loadSwagger("/apidoc/apis", "swagger-ui-container");
+        }
+
+        //main method to initialize the mount list / swagger docs / tabs on page load
+        $(function() {
+            $("#tabs").tabs();
+
+            loadMountList($("#mountlist"));
+
+            loadRootSwagger();
+        });
+    </script>
+</head>
+
+<body>
+<div>
+    <!-- style="background-color: #FCA000;" -->
+    <div class="swagger-ui-wrap ui-tabs">
+        <table>
+            <tr>
+                <td><img src="../images/logo_small.png" /></td>
+                <td><h1 width="100%">OpenDaylight RestConf API
+                    Documentation</h1></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="navbar-inner">
+    <div class="brand"></div>
+</div>
+
+<!--  defines the div shells which represent the jquery tabs -->
+<div id="tabs" class="swagger-ui-wrap">
+    <ul>
+        <li><a href="#Controller" onclick="loadRootSwagger()">Controller
+            Resources</a></li>
+    </ul>
+
+    <div id="Controller">
+        <div>
+            <h3>Below are the list of APIs supported by the Controller.</h3>
+        </div>
+    </div>
+</div>
+
+<div class="swagger-ui-wrap"><hr/></div>
+
+<!-- messages -->
+<div id="message" class="swagger-ui-wrap"></div>
+
+<!-- the swagger is always loaded in this div -->
+<div id="swagger-ui-container" class="swagger-ui-wrap"></div>
+
+<div id="message-bar" class="swagger-ui-wrap">&nbsp;</div>
+</body>
+
+</html>
