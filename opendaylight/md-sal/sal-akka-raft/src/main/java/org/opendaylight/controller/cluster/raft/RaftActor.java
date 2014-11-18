@@ -22,6 +22,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import com.google.protobuf.ByteString;
+import java.io.Serializable;
+import java.util.Map;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActor;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
@@ -38,11 +40,10 @@ import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
+import org.opendaylight.controller.cluster.raft.notifications.RaftRoleChangeNotifier;
+import org.opendaylight.controller.cluster.raft.notifications.RaftRoleChanged;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
-
-import java.io.Serializable;
-import java.util.Map;
 
 /**
  * RaftActor encapsulates a state machine that needs to be kept synchronized
@@ -113,6 +114,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     private int currentRecoveryBatchCount;
 
+    private ActorSelection raftRoleChangeNotifier;
+
     public RaftActor(String id, Map<String, String> peerAddresses) {
         this(id, peerAddresses, Optional.<ConfigParams>absent());
     }
@@ -125,6 +128,17 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             -1, -1, replicatedLog, peerAddresses,
             (configParams.isPresent() ? configParams.get(): new DefaultConfigParamsImpl()),
             LOG);
+
+        // create a notifier actor for each cluster member
+        createNotifier(id);
+    }
+
+
+    private void createNotifier(String memberId) {
+        ActorRef actorRef = this.getContext().actorOf(RaftRoleChangeNotifier.getProps(memberId), memberId + "-notifier");
+        String path = actorRef.path().toString();
+        raftRoleChangeNotifier = context.actorSelection(path);
+        LOG.info("RaftRoleChangeNotifier created: {}", path);
     }
 
     private void initRecoveryTimer() {
@@ -169,8 +183,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 deleteSnapshots(new SnapshotSelectionCriteria(scala.Long.MaxValue(), scala.Long.MaxValue()));
 
                 onRecoveryComplete();
+
+                RaftActorBehavior oldBehavior = currentBehavior;
                 currentBehavior = new Follower(context);
-                onStateChanged();
+                handleBehaviorChange(oldBehavior, currentBehavior);
             }
         }
     }
@@ -269,8 +285,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             replicatedLog.lastIndex(), replicatedLog.snapshotIndex,
             replicatedLog.snapshotTerm, replicatedLog.size());
 
+        RaftActorBehavior oldBehavior = currentBehavior;
         currentBehavior = new Follower(context);
-        onStateChanged();
+        handleBehaviorChange(oldBehavior, currentBehavior);
     }
 
     @Override public void handleCommand(Object message) {
@@ -366,25 +383,25 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             RaftActorBehavior oldBehavior = currentBehavior;
             currentBehavior = currentBehavior.handleMessage(getSender(), message);
 
-            if(oldBehavior != currentBehavior){
-                onStateChanged();
-            }
-
-            onLeaderChanged(oldBehavior.getLeaderId(), currentBehavior.getLeaderId());
+            handleBehaviorChange(oldBehavior, currentBehavior);
         }
     }
 
-    public java.util.Set<String> getPeers() {
+    private void handleBehaviorChange(RaftActorBehavior oldBehavior, RaftActorBehavior currentBehavior) {
+        if (oldBehavior != currentBehavior){
+            onStateChanged();
+        }
+        if (oldBehavior != null) {
+            // it can happen that the state has not changed but the leader has changed.
+            onLeaderChanged(oldBehavior.getLeaderId(), currentBehavior.getLeaderId());
 
-        return context.getPeerAddresses().keySet();
+            if (raftRoleChangeNotifier != null && oldBehavior.state() != currentBehavior.state()) {
+                //TODO: we might want to check if the notifier is alive, if not then we might need to create a new one and send
+                // we do not want to notify when the behavior/role is set for the first time (i.e follower)
+                raftRoleChangeNotifier.tell(new RaftRoleChanged(getId(), oldBehavior.state(), currentBehavior.state()), getSelf());
+            }
+        }
     }
-
-    protected String getReplicatedLogState() {
-        return "snapshotIndex=" + context.getReplicatedLog().getSnapshotIndex()
-            + ", snapshotTerm=" + context.getReplicatedLog().getSnapshotTerm()
-            + ", im-mem journal size=" + context.getReplicatedLog().size();
-    }
-
 
     /**
      * When a derived RaftActor needs to persist something it must call
@@ -843,4 +860,5 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     protected RaftActorBehavior getCurrentBehavior() {
         return currentBehavior;
     }
+
 }

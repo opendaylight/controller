@@ -82,9 +82,11 @@ public class ExampleActor extends RaftActor {
                 String followers = "";
                 if (getRaftState() == RaftState.Leader || getRaftState() == RaftState.IsolatedLeader) {
                     followers = ((Leader)this.getCurrentBehavior()).printFollowerStates();
-                    LOG.debug("{} = {}, Peers={}, followers={}", getId(), getRaftState(), getPeers(), followers);
+                    LOG.debug("{} = {}, Peers={}, followers={}", getId(), getRaftState(),
+                        getRaftActorContext().getPeerAddresses().keySet(), followers);
                 } else {
-                    LOG.debug("{} = {}, Peers={}", getId(), getRaftState(), getPeers());
+                    LOG.debug("{} = {}, Peers={}", getId(), getRaftState(),
+                        getRaftActorContext().getPeerAddresses().keySet());
                 }
 
 
@@ -93,6 +95,12 @@ public class ExampleActor extends RaftActor {
         } else {
             super.onReceiveCommand(message);
         }
+    }
+
+    protected String getReplicatedLogState() {
+        return "snapshotIndex=" + getRaftActorContext().getReplicatedLog().getSnapshotIndex()
+            + ", snapshotTerm=" + getRaftActorContext().getReplicatedLog().getSnapshotTerm()
+            + ", im-mem journal size=" + getRaftActorContext().getReplicatedLog().size();
     }
 
     @Override protected void applyState(final ActorRef clientActor, final String identifier,
