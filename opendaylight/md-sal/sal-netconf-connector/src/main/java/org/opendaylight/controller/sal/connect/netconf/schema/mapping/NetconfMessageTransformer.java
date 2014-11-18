@@ -8,12 +8,9 @@
 package org.opendaylight.controller.sal.connect.netconf.schema.mapping;
 
 import com.google.common.base.Optional;
-
 import java.util.List;
 import java.util.Set;
-
 import javax.activation.UnsupportedDataTypeException;
-
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.sal.connect.api.MessageTransformer;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil;
@@ -134,6 +131,6 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
 
     @Override
     public synchronized void onGlobalContextUpdated(final SchemaContext schemaContext) {
-        this.schemaContext = Optional.of(schemaContext);
+        this.schemaContext = Optional.fromNullable(schemaContext);
     }
 }
