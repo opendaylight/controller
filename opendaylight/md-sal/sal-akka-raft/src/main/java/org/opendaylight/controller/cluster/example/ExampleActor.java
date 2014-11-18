@@ -18,6 +18,7 @@ import org.opendaylight.controller.cluster.example.messages.KeyValue;
 import org.opendaylight.controller.cluster.example.messages.KeyValueSaved;
 import org.opendaylight.controller.cluster.example.messages.PrintRole;
 import org.opendaylight.controller.cluster.example.messages.PrintState;
+import org.opendaylight.controller.cluster.notifications.RoleChangeNotifier;
 import org.opendaylight.controller.cluster.raft.ConfigParams;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.RaftState;
@@ -42,12 +43,14 @@ public class ExampleActor extends RaftActor {
     private final DataPersistenceProvider dataPersistenceProvider;
 
     private long persistIdentifier = 1;
+    private Optional<ActorRef> roleChangeNotifier;
 
 
     public ExampleActor(String id, Map<String, String> peerAddresses,
         Optional<ConfigParams> configParams) {
         super(id, peerAddresses, configParams);
         this.dataPersistenceProvider = new PersistentDataProvider();
+        roleChangeNotifier = createRoleChangeNotifier(id);
     }
 
     public static Props props(final String id, final Map<String, String> peerAddresses,
@@ -82,9 +85,11 @@ public class ExampleActor extends RaftActor {
                 String followers = "";
                 if (getRaftState() == RaftState.Leader || getRaftState() == RaftState.IsolatedLeader) {
                     followers = ((Leader)this.getCurrentBehavior()).printFollowerStates();
-                    LOG.debug("{} = {}, Peers={}, followers={}", getId(), getRaftState(), getPeers(), followers);
+                    LOG.debug("{} = {}, Peers={}, followers={}", getId(), getRaftState(),
+                        getRaftActorContext().getPeerAddresses().keySet(), followers);
                 } else {
-                    LOG.debug("{} = {}, Peers={}", getId(), getRaftState(), getPeers());
+                    LOG.debug("{} = {}, Peers={}", getId(), getRaftState(),
+                        getRaftActorContext().getPeerAddresses().keySet());
                 }
 
 
@@ -93,6 +98,23 @@ public class ExampleActor extends RaftActor {
         } else {
             super.onReceiveCommand(message);
         }
+    }
+
+    protected String getReplicatedLogState() {
+        return "snapshotIndex=" + getRaftActorContext().getReplicatedLog().getSnapshotIndex()
+            + ", snapshotTerm=" + getRaftActorContext().getReplicatedLog().getSnapshotTerm()
+            + ", im-mem journal size=" + getRaftActorContext().getReplicatedLog().size();
+    }
+
+    public Optional<ActorRef> createRoleChangeNotifier(String actorId) {
+        ActorRef exampleRoleChangeNotifier = this.getContext().actorOf(
+            RoleChangeNotifier.getProps(actorId), actorId + "-notifier");
+        return Optional.<ActorRef>of(exampleRoleChangeNotifier);
+    }
+
+    @Override
+    protected Optional<ActorRef> getRoleChangeNotifier() {
+        return roleChangeNotifier;
     }
 
     @Override protected void applyState(ActorRef clientActor, String identifier,
