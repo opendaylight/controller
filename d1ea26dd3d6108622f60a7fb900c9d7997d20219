@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a91bd0f_c5c48e61",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataValidator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-11-18T13:54:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_a3e7dde3",
+      "revId": "d1ea26dd3d6108622f60a7fb900c9d7997d20219",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_c3b541ce",
         "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataValidator.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-11-11T09:22:05Z",
       "side": 1,
       "message": "HTML compatible address needs escaping...",
+      "revId": "d1ea26dd3d6108622f60a7fb900c9d7997d20219",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_05927657",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataValidator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-11-18T13:54:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_c3b541ce",
       "revId": "d1ea26dd3d6108622f60a7fb900c9d7997d20219",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "9a91bd0f_a5c70a64",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataValidator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-11-18T13:54:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_43c1312d",
+      "revId": "d1ea26dd3d6108622f60a7fb900c9d7997d20219",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_e3dde515",
         "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataValidator.java",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2014-11-11T09:22:05Z",
       "side": 1,
       "message": "prevented, with the DataBroker transaction providing the thrown exception as the cause of failure.",
+      "revId": "d1ea26dd3d6108622f60a7fb900c9d7997d20219",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_05cb5673",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataValidator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-11-18T13:54:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_e3dde515",
       "revId": "d1ea26dd3d6108622f60a7fb900c9d7997d20219",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "9a91bd0f_858d2634",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataValidatorRegistry.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-11-18T13:54:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_46737f4d",
+      "revId": "d1ea26dd3d6108622f60a7fb900c9d7997d20219",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_e68f3322",
         "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/ModifiedDataObject.java",
         "patchSetId": 1
@@ -98,6 +188,24 @@
       "writtenOn": "2014-11-11T09:22:05Z",
       "side": 1,
       "message": "collection :-)",
+      "revId": "d1ea26dd3d6108622f60a7fb900c9d7997d20219",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_a59e2a62",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/ModifiedDataObject.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-11-18T13:54:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_e68f3322",
       "revId": "d1ea26dd3d6108622f60a7fb900c9d7997d20219",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
