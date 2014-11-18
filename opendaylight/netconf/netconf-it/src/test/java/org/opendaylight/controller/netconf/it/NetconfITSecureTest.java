@@ -94,11 +94,12 @@ public class NetconfITSecureTest extends AbstractNetconfConfigTest {
                         .setBindingAddress(TLS_ADDRESS)
                         .setLocalAddress(NetconfConfigUtil.getNetconfLocalAddress())
                         .setAuthenticator(new PasswordAuthenticator() {
-            @Override
-            public boolean authenticate(final String username, final String password, final ServerSession session) {
-                return true;
-            }
-        })
+                            @Override
+                            public boolean authenticate(final String username, final String password, final ServerSession session) {
+                                return true;
+                            }
+                        }
+                    )
                         .setKeyPairProvider(new PEMGeneratorHostKeyProvider(Files.createTempFile("prefix", "suffix").toAbsolutePath().toString()))
                         .setIdleTimeout(Integer.MAX_VALUE)
                         .createSshProxyServerConfiguration());

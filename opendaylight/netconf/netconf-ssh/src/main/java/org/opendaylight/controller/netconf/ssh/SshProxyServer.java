@@ -70,11 +70,13 @@ public class SshProxyServer implements AutoCloseable {
 
     private static Map<String, String> getProperties(final SshProxyServerConfiguration sshProxyServerConfiguration) {
         return new HashMap<String, String>()
-        {{
-            put(ServerFactoryManager.IDLE_TIMEOUT, String.valueOf(sshProxyServerConfiguration.getIdleTimeout()));
-            // TODO make auth timeout configurable on its own
-            put(ServerFactoryManager.AUTH_TIMEOUT, String.valueOf(sshProxyServerConfiguration.getIdleTimeout()));
-        }};
+        {
+            {
+                put(ServerFactoryManager.IDLE_TIMEOUT, String.valueOf(sshProxyServerConfiguration.getIdleTimeout()));
+                // TODO make auth timeout configurable on its own
+                put(ServerFactoryManager.AUTH_TIMEOUT, String.valueOf(sshProxyServerConfiguration.getIdleTimeout()));
+            }
+        };
     }
 
     @Override

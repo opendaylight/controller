@@ -114,7 +114,7 @@
         <artifactId>maven-checkstyle-plugin</artifactId>
         <configuration>
           <failsOnError>false</failsOnError>
-          <failOnViolation>false</failOnViolation>
+          <failOnViolation>true</failOnViolation>
           <configLocation>checkstyle-logging.xml</configLocation>
           <consoleOutput>true</consoleOutput>
           <includeTestSourceDirectory>true</includeTestSourceDirectory>
