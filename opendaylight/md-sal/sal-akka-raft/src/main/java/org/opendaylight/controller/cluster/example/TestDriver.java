@@ -3,15 +3,17 @@ package org.opendaylight.controller.cluster.example;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import com.google.common.base.Optional;
-import org.opendaylight.controller.cluster.example.messages.PrintRole;
-import org.opendaylight.controller.cluster.example.messages.PrintState;
-import org.opendaylight.controller.cluster.raft.ConfigParams;
-
+import com.google.common.collect.Lists;
+import com.typesafe.config.ConfigFactory;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.opendaylight.controller.cluster.example.messages.PrintRole;
+import org.opendaylight.controller.cluster.example.messages.PrintState;
+import org.opendaylight.controller.cluster.raft.ConfigParams;
 
 /**
  * This is a test driver for testing akka-raft implementation
@@ -21,13 +23,16 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class TestDriver {
 
-    private static final ActorSystem actorSystem = ActorSystem.create();
+
     private static Map<String, String> allPeers = new HashMap<>();
     private static Map<String, ActorRef> clientActorRefs  = new HashMap<String, ActorRef>();
     private static Map<String, ActorRef> actorRefs = new HashMap<String, ActorRef>();
     private static LogGenerator logGenerator = new LogGenerator();
     private int nameCounter = 0;
     private static ConfigParams configParams = new ExampleConfigParamsImpl();
+
+    private static ActorSystem actorSystem;
+    private static ActorSystem listenerActorSystem;
 
     /**
      * Create nodes, add clients and start logging.
@@ -53,6 +58,13 @@ public class TestDriver {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
+
+        actorSystem = ActorSystem.create("raft-test", ConfigFactory
+            .load().getConfig("raft-test"));
+
+        listenerActorSystem = ActorSystem.create("raft-test-listener", ConfigFactory
+            .load().getConfig("raft-test-listener"));
+
         TestDriver td = new TestDriver();
 
         System.out.println("Enter command (type bye to exit):");
@@ -113,6 +125,16 @@ public class TestDriver {
         }
     }
 
+    // create the listener using a separate actor system for each example actor
+    private void createClusterRoleChangeListener(List<String> memberIds) {
+        System.out.println("memberIds="+memberIds);
+        for (String memberId : memberIds) {
+            ActorRef listenerActor = listenerActorSystem.actorOf(
+                ExampleRoleChangeListener.getProps(memberId), memberId + "-role-change-listener");
+            System.out.println("Role Change Listener created:" + listenerActor.path().toString());
+        }
+    }
+
     public static ActorRef createExampleActor(String name) {
         return actorSystem.actorOf(ExampleActor.props(name, withoutPeer(name),
             Optional.of(configParams)), name);
@@ -121,7 +143,7 @@ public class TestDriver {
     public void createNodes(int num) {
         for (int i=0; i < num; i++)  {
             nameCounter = nameCounter + 1;
-            allPeers.put("example-"+nameCounter, "akka://default/user/example-"+nameCounter);
+            allPeers.put("example-"+nameCounter, "akka://raft-test/user/example-"+nameCounter);
         }
 
         for (String s : allPeers.keySet())  {
@@ -130,6 +152,8 @@ public class TestDriver {
             System.out.println("Created node:"+s);
 
         }
+
+        createClusterRoleChangeListener(Lists.newArrayList(allPeers.keySet()));
     }
 
     // add num clients to all nodes in the system
