@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a91bd0f_65ffc202",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestCodec.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-11-18T10:53:19Z",
+      "side": 0,
+      "message": "REMARK:\nLeafrefTypeDefinition should be resolved before calling this (deserialization) method. Base type is found therefore this branch should be redundant.",
+      "revId": "687598acd2f6b71397b105e93f6a2d1b21a7c0ef",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a91bd0f_e5dc3277",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/cnsn/to/json/test/CnSnToJsonLeafrefType.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-11-18T10:53:19Z",
+      "side": 1,
+      "message": "44 is awaited as \"44\" which isn\u0027t correct because it should be 44.\nIt is caused with\nJsonMapper.writeValueOfNodeByType()\n- resolveBaseTypeFrom() - if dataSchemaNode is LeafrefSchemaNode then it isn\u0027t correctly resolved and is printed as string - \"44\"",
+      "revId": "38eeb2f89f552cb64ad4d44a9b775ed09c608ac0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_45463e25",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/resources/xml-to-cnsn/leafref/leafref-module",
+        "patchSetId": 9
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-11-18T10:53:19Z",
+      "side": 1,
+      "message": "why was this part added?",
+      "revId": "38eeb2f89f552cb64ad4d44a9b775ed09c608ac0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
