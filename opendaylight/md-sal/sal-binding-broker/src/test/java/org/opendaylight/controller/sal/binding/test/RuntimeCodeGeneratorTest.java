@@ -28,7 +28,7 @@ import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory;
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory.NotificationInvoker;
 import org.opendaylight.controller.sal.binding.test.mock.BarListener;
 import org.opendaylight.controller.sal.binding.test.mock.BarUpdate;
-import org.opendaylight.controller.sal.binding.test.mock.FlowDelete;
+import org.opendaylight.controller.sal.binding.test.mock.FooDelete;
 import org.opendaylight.controller.sal.binding.test.mock.FooListener;
 import org.opendaylight.controller.sal.binding.test.mock.FooService;
 import org.opendaylight.controller.sal.binding.test.mock.FooUpdate;
@@ -258,7 +258,7 @@ public class RuntimeCodeGeneratorTest {
     private static class CompositeListenerImpl extends FooListenerImpl implements BarListener {
 
         List<BarUpdate> receivedBars = new ArrayList<>();
-        List<FlowDelete> receivedDeletes = new ArrayList<>();
+        List<FooDelete> receivedDeletes = new ArrayList<>();
 
         @Override
         public void onBarUpdate(final BarUpdate notification) {
@@ -266,7 +266,7 @@ public class RuntimeCodeGeneratorTest {
         }
 
         @Override
-        public void onFlowDelete(final FlowDelete notification) {
+        public void onFooDelete(final FooDelete notification) {
             receivedDeletes.add(notification);
         }
 
