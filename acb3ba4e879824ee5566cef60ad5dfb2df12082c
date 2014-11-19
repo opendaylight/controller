@@ -25,6 +25,24 @@
     },
     {
       "key": {
+        "uuid": "9a91bd0f_93048c16",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ConfigParams.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-19T06:55:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a91bd0f_a8191f24",
+      "revId": "acb3ba4e879824ee5566cef60ad5dfb2df12082c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a91bd0f_08cb6b73",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/IsolatedLeader.java",
         "patchSetId": 9
@@ -42,6 +60,24 @@
         "endLine": 39,
         "endChar": 43
       },
+      "revId": "acb3ba4e879824ee5566cef60ad5dfb2df12082c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_c802630b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/IsolatedLeader.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-19T06:55:33Z",
+      "side": 1,
+      "message": "Its in sync but was a bit incomplete. Fixed it now",
+      "parentUuid": "9a91bd0f_08cb6b73",
       "revId": "acb3ba4e879824ee5566cef60ad5dfb2df12082c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
