@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a91bd0f_eee64f16",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-19T18:55:03Z",
+      "side": 1,
+      "message": "The comment is accurate but slightly misplaced. It should be in the RaftActor constructor where the call is made. \nSince each cluster member is-a RaftActor, the comment denotes that we are creating a notifier per shard/cluster-member.\n\nWill move it up",
+      "parentUuid": "9a91bd0f_4e0e5b36",
+      "revId": "1bb50c2072eb04aa7a34e73c00eb3a3e3bd4185b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a91bd0f_2e09972c",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "9a91bd0f_aef047ca",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-19T18:55:03Z",
+      "side": 1,
+      "message": "IMO, yes. It would be beneficial to log when the notifier actor gets created, since this might happen only once (when the shard actor gets created). \nIt also helps to see whether the listener got created first, and might help to solve any race condition issues",
+      "parentUuid": "9a91bd0f_2e09972c",
+      "revId": "1bb50c2072eb04aa7a34e73c00eb3a3e3bd4185b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a91bd0f_8e046316",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2014-11-19T16:36:35Z",
       "side": 1,
       "message": "Why was this change made? Is it related to the role change notifications?",
+      "revId": "1bb50c2072eb04aa7a34e73c00eb3a3e3bd4185b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_ceed8bf1",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-19T18:55:03Z",
+      "side": 1,
+      "message": "This is not directly related to role change notifications. But was a small refactoring.\nWe were not setting the leaderId in Leader and were overriding the getLeader() of the AbstractRaftBehavior. \nInstead we can just set the leaderId and remove the overriding.\n\nSince i was consolidating the change in role logic, i made this small change as well.",
+      "parentUuid": "9a91bd0f_8e046316",
       "revId": "1bb50c2072eb04aa7a34e73c00eb3a3e3bd4185b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
