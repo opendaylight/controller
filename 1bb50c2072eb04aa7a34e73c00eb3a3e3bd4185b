@@ -104,6 +104,24 @@
       "revId": "1bb50c2072eb04aa7a34e73c00eb3a3e3bd4185b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_8e8d4334",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-19T19:31:53Z",
+      "side": 1,
+      "message": "In the isolated leader change rebase, this change is gone now.",
+      "parentUuid": "9a91bd0f_ceed8bf1",
+      "revId": "1bb50c2072eb04aa7a34e73c00eb3a3e3bd4185b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
