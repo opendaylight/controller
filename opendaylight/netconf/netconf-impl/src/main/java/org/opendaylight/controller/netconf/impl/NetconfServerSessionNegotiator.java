@@ -10,9 +10,9 @@ package org.opendaylight.controller.netconf.impl;
 
 import com.google.common.base.Optional;
 import io.netty.channel.Channel;
+import io.netty.channel.local.LocalAddress;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.Promise;
-import java.net.InetSocketAddress;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfServerSessionPreferences;
 import org.opendaylight.controller.netconf.nettyutil.AbstractNetconfSessionNegotiator;
@@ -21,19 +21,31 @@ import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAddi
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NetconfServerSessionNegotiator extends
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.AbstractMap;
+import java.util.Map;
+
+public class NetconfServerSessionNegotiator
+        extends
         AbstractNetconfSessionNegotiator<NetconfServerSessionPreferences, NetconfServerSession, NetconfServerSessionListener> {
 
-    static final Logger logger = LoggerFactory.getLogger(NetconfServerSessionNegotiator.class);
+    static final Logger logger = LoggerFactory
+            .getLogger(NetconfServerSessionNegotiator.class);
+    private static final String UNKNOWN = "unknown";
 
-    protected NetconfServerSessionNegotiator(NetconfServerSessionPreferences sessionPreferences,
-            Promise<NetconfServerSession> promise, Channel channel, Timer timer, NetconfServerSessionListener sessionListener,
+    protected NetconfServerSessionNegotiator(
+            NetconfServerSessionPreferences sessionPreferences,
+            Promise<NetconfServerSession> promise, Channel channel,
+            Timer timer, NetconfServerSessionListener sessionListener,
             long connectionTimeoutMillis) {
-        super(sessionPreferences, promise, channel, timer, sessionListener, connectionTimeoutMillis);
+        super(sessionPreferences, promise, channel, timer, sessionListener,
+                connectionTimeoutMillis);
     }
 
     @Override
-    protected void handleMessage(NetconfHelloMessage netconfMessage) throws NetconfDocumentedException {
+    protected void handleMessage(NetconfHelloMessage netconfMessage)
+            throws NetconfDocumentedException {
         NetconfServerSession session = getSessionForHelloMessage(netconfMessage);
         replaceHelloMessageInboundHandler(session);
         // Negotiation successful after all non hello messages were processed
@@ -41,21 +53,56 @@ public class NetconfServerSessionNegotiator extends
     }
 
     @Override
-    protected NetconfServerSession getSession(NetconfServerSessionListener sessionListener, Channel channel, NetconfHelloMessage message) {
-        Optional<NetconfHelloMessageAdditionalHeader> additionalHeader = message.getAdditionalHeader();
+    protected NetconfServerSession getSession(
+            NetconfServerSessionListener sessionListener, Channel channel,
+            NetconfHelloMessage message) {
+        Optional<NetconfHelloMessageAdditionalHeader> additionalHeader = message
+                .getAdditionalHeader();
 
         NetconfHelloMessageAdditionalHeader parsedHeader;
         if (additionalHeader.isPresent()) {
             parsedHeader = additionalHeader.get();
         } else {
-            InetSocketAddress inetSocketAddress = (InetSocketAddress) channel.localAddress();
-            parsedHeader = new NetconfHelloMessageAdditionalHeader("unknown", inetSocketAddress.getHostString(), Integer.toString(inetSocketAddress.getPort()),
-                    "tcp", "client");
+
+            parsedHeader = new NetconfHelloMessageAdditionalHeader(UNKNOWN,
+                    getHostName(channel.localAddress()).getValue(),
+                    getHostName(channel.localAddress()).getKey(), "tcp",
+                    "client");
+
         }
 
-        logger.debug("Additional header from hello parsed as {} from {}", parsedHeader, additionalHeader);
+        logger.debug("Additional header from hello parsed as {} from {}",
+                parsedHeader, additionalHeader);
 
-        return new NetconfServerSession(sessionListener, channel, getSessionPreferences().getSessionId(), parsedHeader);
+        return new NetconfServerSession(sessionListener, channel,
+                getSessionPreferences().getSessionId(), parsedHeader);
+    }
+
+    /**
+     * @param socketAddress
+     *            type of socket address LocalAddress, or
+     *            InetSocketAddress, for others returns unknown
+     * @return Map<port, host > two values - port and host of socket address
+     */
+    protected static Map.Entry<String, String> getHostName(
+            SocketAddress socketAddress) {
+
+        if (socketAddress instanceof InetSocketAddress) {
+
+            InetSocketAddress inetSocketAddress = (InetSocketAddress) socketAddress;
+
+            return new AbstractMap.SimpleImmutableEntry<>(
+                    Integer.toString(inetSocketAddress.getPort()),
+                    inetSocketAddress.getHostString());
+
+        } else if (socketAddress instanceof LocalAddress) {
+
+            return new AbstractMap.SimpleImmutableEntry<>(UNKNOWN,
+                    ((LocalAddress) socketAddress).id());
+
+        }
+        return new AbstractMap.SimpleImmutableEntry<>(UNKNOWN, UNKNOWN);
+
     }
 
 }
