@@ -119,6 +119,7 @@ public class DatastoreContext {
         private Timeout shardLeaderElectionTimeout = new Timeout(30, TimeUnit.SECONDS);
         private boolean persistent = true;
         private ConfigurationReader configurationReader = new FileConfigurationReader();
+        private int shardIsolatedLeaderCheckIntervalInMillis = shardHeartbeatIntervalInMillis * 10;
 
         public Builder shardTransactionIdleTimeout(Duration shardTransactionIdleTimeout) {
             this.shardTransactionIdleTimeout = shardTransactionIdleTimeout;
@@ -180,9 +181,13 @@ public class DatastoreContext {
             return this;
         }
 
-
         public Builder persistent(boolean persistent){
             this.persistent = persistent;
+            return this;
+        }
+
+        public Builder shardIsolatedLeaderCheckIntervalInMillis(int shardIsolatedLeaderCheckIntervalInMillis) {
+            this.shardIsolatedLeaderCheckIntervalInMillis = shardIsolatedLeaderCheckIntervalInMillis;
             return this;
         }
 
@@ -192,6 +197,8 @@ public class DatastoreContext {
                     TimeUnit.MILLISECONDS));
             raftConfig.setJournalRecoveryLogBatchSize(shardJournalRecoveryLogBatchSize);
             raftConfig.setSnapshotBatchCount(shardSnapshotBatchCount);
+            raftConfig.setIsolatedLeaderCheckInterval(
+                new FiniteDuration(shardIsolatedLeaderCheckIntervalInMillis, TimeUnit.MILLISECONDS));
 
             return new DatastoreContext(dataStoreProperties, raftConfig, dataStoreMXBeanType,
                     operationTimeoutInSeconds, shardTransactionIdleTimeout,

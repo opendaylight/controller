@@ -62,4 +62,10 @@ public interface ConfigParams {
      * The number of journal log entries to batch on recovery before applying.
      */
     int getJournalRecoveryLogBatchSize();
+
+    /**
+     * The interval in which the leader needs to check itself if its isolated
+     * @return FiniteDuration
+     */
+    FiniteDuration getIsolatedCheckInterval();
 }
