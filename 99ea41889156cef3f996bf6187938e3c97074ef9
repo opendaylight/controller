@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a91bd0f_7318e884",
+        "filename": "opendaylight/netconf/netconf-client/src/main/java/org/opendaylight/controller/netconf/client/NetconfClientSessionNegotiator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-11-19T15:55:58Z",
+      "side": 1,
+      "message": "This format is wrong for log. Only the first string is the blueprint for the message. ALl the others are arguments.",
+      "revId": "99ea41889156cef3f996bf6187938e3c97074ef9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
