@@ -67,18 +67,18 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
             if(schemaContext.isPresent()) {
                 if (NetconfMessageTransformUtil.isDataEditOperation(rpc)) {
                     final DataNodeContainer schemaForEdit = NetconfMessageTransformUtil.createSchemaForEdit(schemaContext.get());
-                    w3cPayload = XmlDocumentUtils.toDocument(rpcPayload, schemaForEdit, codecProvider);
+                    w3cPayload = XmlDocumentUtils.toDocument(rpcPayload, schemaContext.get(), schemaForEdit, codecProvider);
                 } else if (NetconfMessageTransformUtil.isGetOperation(rpc)) {
                     final DataNodeContainer schemaForGet = NetconfMessageTransformUtil.createSchemaForGet(schemaContext.get());
-                    w3cPayload = XmlDocumentUtils.toDocument(rpcPayload, schemaForGet, codecProvider);
+                    w3cPayload = XmlDocumentUtils.toDocument(rpcPayload, schemaContext.get(), schemaForGet, codecProvider);
                 } else if (NetconfMessageTransformUtil.isGetConfigOperation(rpc)) {
                     final DataNodeContainer schemaForGetConfig = NetconfMessageTransformUtil.createSchemaForGetConfig(schemaContext.get());
-                    w3cPayload = XmlDocumentUtils.toDocument(rpcPayload, schemaForGetConfig, codecProvider);
+                    w3cPayload = XmlDocumentUtils.toDocument(rpcPayload, schemaContext.get(), schemaForGetConfig, codecProvider);
                 } else {
                     final Optional<RpcDefinition> schemaForRpc = NetconfMessageTransformUtil.findSchemaForRpc(rpc, schemaContext.get());
                     if(schemaForRpc.isPresent()) {
                         final DataNodeContainer schemaForGetConfig = NetconfMessageTransformUtil.createSchemaForRpc(schemaForRpc.get());
-                        w3cPayload = XmlDocumentUtils.toDocument(rpcPayload, schemaForGetConfig, codecProvider);
+                        w3cPayload = XmlDocumentUtils.toDocument(rpcPayload, schemaContext.get(), schemaForGetConfig, codecProvider);
                     } else {
                         w3cPayload = toRpcRequestWithoutSchema(rpcPayload, codecProvider);
                     }

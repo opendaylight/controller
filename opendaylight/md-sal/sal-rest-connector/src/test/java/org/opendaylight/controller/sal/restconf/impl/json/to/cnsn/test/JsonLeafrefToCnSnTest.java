@@ -51,9 +51,7 @@ public class JsonLeafrefToCnSnTest extends YangAndXmlAndDataSchemaLoader {
         }
 
         assertNotNull(lf2);
-        assertTrue(lf2.getValue() instanceof String);
-        assertEquals("121", lf2.getValue());
-
+        assertEquals(121, lf2.getValue());
     }
 
 }

@@ -1,9 +1,11 @@
 module leafref-module {
-  namespace "leafref:module";  
+  namespace "leafref:module";
 
   prefix "lfrfmo";
-  revision 2013-11-18 {    
+  revision 2013-11-18 {
   }
+
+  identity base {}
 
     container cont {
         leaf lf1 {
@@ -11,9 +13,49 @@ module leafref-module {
         }
         leaf lf2 {
             type leafref {
-                path "/cont/lf1"; 
+                path "/cont/lf1";
             }
         }
+
+        leaf lf-ident {
+            type identityref {
+                base "lfrfmo:base";
+            }
+        }
+
+        leaf lf-ident-ref {
+            type leafref {
+                path "/cont/lf-ident";
+            }
+        }
+
+        leaf lf-ident-ref-relative {
+            type leafref {
+                path "../lf-ident";
+            }
+        }
+
+        leaf lf-ident-ref-relative-cnd {
+            type leafref {
+                path "/lfrfmo:cont/lfrfmo:lis[lfrfmo:id='abc']/lf-ident-ref";
+            }
+        }
+
+
+        list lis {
+            key "id";
+
+            leaf id {
+                type string;
+            }
+
+            leaf lf-ident-ref {
+                type leafref {
+                    path "/cont/lf-ident";
+                }
+            }
+        }
+
     }
-  
+
 }
