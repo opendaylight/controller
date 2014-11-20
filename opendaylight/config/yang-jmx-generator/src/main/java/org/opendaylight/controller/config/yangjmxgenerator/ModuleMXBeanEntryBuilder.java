@@ -18,7 +18,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,9 +26,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.annotation.Nullable;
-
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AbstractDependencyAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.DependencyAttribute;
@@ -93,7 +90,7 @@ final class ModuleMXBeanEntryBuilder {
         return this;
     }
 
-    private static final Logger LOGGER = LoggerFactory
+    private static final Logger LOG = LoggerFactory
             .getLogger(ModuleMXBeanEntryBuilder.class);
 
     // TODO: the XPath should be parsed by code generator IMO
@@ -108,7 +105,7 @@ final class ModuleMXBeanEntryBuilder {
 
 
     public Map<String, ModuleMXBeanEntry> build() {
-        LOGGER.debug("Generating ModuleMXBeans of {} to package {}",
+        LOG.debug("Generating ModuleMXBeans of {} to package {}",
                 currentModule.getNamespace(), packageName);
 
         String configModulePrefix;
@@ -146,7 +143,7 @@ final class ModuleMXBeanEntryBuilder {
         checkAttributeNamesUniqueness(uniqueGeneratedClassesNames, result);
         checkUnaugumentedIdentities(unaugmentedModuleIdentities);
 
-        LOGGER.debug("Number of ModuleMXBeans to be generated: {}", result.size());
+        LOG.debug("Number of ModuleMXBeans to be generated: {}", result.size());
 
         return result;
     }
@@ -166,7 +163,7 @@ final class ModuleMXBeanEntryBuilder {
 
     private static void checkUnaugumentedIdentities(final Map<String, IdentitySchemaNode> unaugmentedModuleIdentities) {
         if (unaugmentedModuleIdentities.size() > 0) {
-            LOGGER.warn("Augmentation not found for all currentModule identities: {}",
+            LOG.warn("Augmentation not found for all currentModule identities: {}",
                     unaugmentedModuleIdentities.keySet());
         }
     }
@@ -190,7 +187,7 @@ final class ModuleMXBeanEntryBuilder {
                             + identityLocalName);
                 } else {
                     moduleIdentities.put(identityLocalName, id);
-                    LOGGER.debug("Found identity {}", identityLocalName);
+                    LOG.debug("Found identity {}", identityLocalName);
                 }
                 // validation check on unknown schema nodes
                 boolean providedServiceWasSet = false;
@@ -271,12 +268,12 @@ final class ModuleMXBeanEntryBuilder {
         HAS_CHILDREN_AND_QNAME dataNodeContainer = getDataNodeContainer(choiceCaseNode);
 
         if (EXPECTED_CONFIGURATION_AUGMENTATION_SCHEMA_PATH.equals(augmentation.getTargetPath())) {
-            LOGGER.debug("Parsing configuration of {}", moduleLocalNameFromXPath);
+            LOG.debug("Parsing configuration of {}", moduleLocalNameFromXPath);
             yangToAttributes = fillConfiguration(dataNodeContainer, currentModule, typeProviderWrapper, qNamesToSIEs,
                     schemaContext, packageName);
             checkUniqueAttributesWithGeneratedClass(uniqueGeneratedClassesNames, when.getQName(), yangToAttributes);
         } else if (EXPECTED_STATE_AUGMENTATION_SCHEMA_PATH.equals(augmentation.getTargetPath())) {
-            LOGGER.debug("Parsing state of {}", moduleLocalNameFromXPath);
+            LOG.debug("Parsing state of {}", moduleLocalNameFromXPath);
             try {
                 runtimeBeans = fillRuntimeBeans(dataNodeContainer, currentModule, typeProviderWrapper, packageName,
                         moduleLocalNameFromXPath, javaNamePrefix);
@@ -309,9 +306,9 @@ final class ModuleMXBeanEntryBuilder {
                     " both state and configuration");
         } else {
             ModuleMXBeanEntry.ModuleMXBeanEntryInitial initial = new ModuleMXBeanEntry.ModuleMXBeanEntryInitialBuilder()
-            .setIdSchemaNode(moduleIdentity).setPackageName(packageName).setJavaNamePrefix(javaNamePrefix)
-            .setNamespace(currentModule.getNamespace().toString()).setqName(ModuleUtil.getQName(currentModule))
-            .build();
+                .setIdSchemaNode(moduleIdentity).setPackageName(packageName).setJavaNamePrefix(javaNamePrefix)
+                .setNamespace(currentModule.getNamespace().toString()).setqName(ModuleUtil.getQName(currentModule))
+                .build();
 
             // construct ModuleMXBeanEntry
             ModuleMXBeanEntry moduleMXBeanEntry = new ModuleMXBeanEntry(initial, yangToAttributes, providedServices,
