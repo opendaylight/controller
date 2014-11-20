@@ -10,7 +10,6 @@ package org.opendaylight.controller.config.yang.netty.eventexecutor;
 import com.google.common.reflect.AbstractInvocationHandler;
 import com.google.common.reflect.Reflection;
 import io.netty.util.concurrent.EventExecutor;
-
 import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
 
