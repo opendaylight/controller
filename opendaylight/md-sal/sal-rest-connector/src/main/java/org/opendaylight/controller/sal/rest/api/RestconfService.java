@@ -74,7 +74,7 @@ public interface RestconfService {
     @Path("/modules/module/{identifier:.+}")
     @Produces({ Draft02.MediaTypes.API + JSON, Draft02.MediaTypes.API + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public StructuredData getModule(@PathParam("identifier") String identifier, @Context UriInfo uriInfo);
+    public NormalizedNodeContext getModule(@PathParam("identifier") String identifier, @Context UriInfo uriInfo);
 
     @GET
     @Path("/operations")
