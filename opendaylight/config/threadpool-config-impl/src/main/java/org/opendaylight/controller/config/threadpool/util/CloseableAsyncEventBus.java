@@ -11,10 +11,8 @@ package org.opendaylight.controller.config.threadpool.util;
 import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.DeadEvent;
 import com.google.common.eventbus.Subscribe;
-
 import java.io.Closeable;
 import java.io.IOException;
-
 import org.opendaylight.controller.config.threadpool.ThreadPool;
 import org.opendaylight.controller.config.yang.threadpool.impl.AsyncEventBusRuntimeMXBean;
 import org.opendaylight.controller.config.yang.threadpool.impl.AsyncEventBusRuntimeRegistration;
