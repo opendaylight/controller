@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator;
 
-import static org.junit.Assert.assertNotNull;
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
 import com.google.common.base.Preconditions;
@@ -34,8 +34,8 @@ public abstract class AbstractYangTest {
     protected Map<String, Module> namesToModules; // are module names globally
                                                   // unique?
     protected Module configModule, rpcContextModule, threadsModule,
-            threadsJavaModule, bgpListenerJavaModule, ietfInetTypesModule,
-            jmxModule, jmxImplModule, testFilesModule, testFiles1Module;
+    threadsJavaModule, bgpListenerJavaModule, ietfInetTypesModule,
+    jmxModule, jmxImplModule, testFilesModule, testFiles1Module;
 
     public static final String EVENTBUS_MXB_NAME = "eventbus";
     public static final String ASYNC_EVENTBUS_MXB_NAME = "async-eventbus";
@@ -116,7 +116,7 @@ public abstract class AbstractYangTest {
     protected Map<String /* identity local name */, ModuleMXBeanEntry> loadThreadsJava(Map<QName, ServiceInterfaceEntry> modulesToSIEs, String packageName) {
         Map<String /* identity local name */, ModuleMXBeanEntry> namesToMBEs = ModuleMXBeanEntry
                 .create(threadsJavaModule, modulesToSIEs, context, new TypeProviderWrapper(new TypeProviderImpl
-                        (context)), packageName);
+                (context)), packageName);
         Assert.assertNotNull(namesToMBEs);
         Set<String> expectedMXBeanNames = Sets.newHashSet(EVENTBUS_MXB_NAME,
                 ASYNC_EVENTBUS_MXB_NAME, THREADFACTORY_NAMING_MXB_NAME,
