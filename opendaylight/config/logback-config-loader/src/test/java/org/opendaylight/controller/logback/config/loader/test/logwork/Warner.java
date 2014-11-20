@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Warner {
 
-    private static Logger LOG = LoggerFactory.getLogger(Warner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Warner.class);
 
     /**
      * all logging
