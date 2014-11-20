@@ -67,12 +67,14 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
+import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ModifiedNodeDoesNotExistException;
 import org.opendaylight.yangtools.yang.data.composite.node.schema.cnsn.parser.CnSnToNormalizedNodeParserFactory;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeAttrBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.ListNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
@@ -255,17 +257,19 @@ public class RestconfImpl implements RestconfService {
         return new StructuredData(modulesNode, modulesSchemaNode, mountPoint, parsePrettyPrintParameter(uriInfo));
     }
 
-    @Override
-    public StructuredData getModule(final String identifier, final UriInfo uriInfo) {
-        final QName moduleNameAndRevision = this.getModuleNameAndRevision(identifier);
+    public NormalizedNodeContext getModule(final String identifier, final UriInfo uriInfo) {
+        final QName moduleNameAndRevision = getModuleNameAndRevision(identifier);
         Module module = null;
         DOMMountPoint mountPoint = null;
+        final SchemaContext schemaContext;
         if (identifier.contains(ControllerContext.MOUNT)) {
             InstanceIdentifierContext mountPointIdentifier = this.controllerContext.toMountPointIdentifier(identifier);
             mountPoint = mountPointIdentifier.getMountPoint();
             module = this.controllerContext.findModuleByNameAndRevision(mountPoint, moduleNameAndRevision);
+            schemaContext = mountPoint.getSchemaContext();
         } else {
             module = this.controllerContext.findModuleByNameAndRevision(moduleNameAndRevision);
+            schemaContext = controllerContext.getGlobalSchema();
         }
 
         if (module == null) {
@@ -274,11 +278,17 @@ public class RestconfImpl implements RestconfService {
                     ErrorType.PROTOCOL, ErrorTag.UNKNOWN_ELEMENT);
         }
 
-        Module restconfModule = this.getRestconfModule();
+        final Module restconfModule = getRestconfModule();
         final DataSchemaNode moduleSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(restconfModule,
                 Draft02.RestConfModule.MODULE_LIST_SCHEMA_NODE);
-        final CompositeNode moduleNode = this.toModuleCompositeNode(module, moduleSchemaNode);
-        return new StructuredData(moduleNode, moduleSchemaNode, mountPoint, parsePrettyPrintParameter(uriInfo));
+        Preconditions.checkState(moduleSchemaNode instanceof ListSchemaNode);
+
+        final CollectionNodeBuilder<MapEntryNode, MapNode> listModuleBuilder = Builders
+                .mapBuilder((ListSchemaNode) moduleSchemaNode);
+        listModuleBuilder.withChild(toModuleEntryNode(module, moduleSchemaNode));
+
+        return new NormalizedNodeContext(new InstanceIdentifierContext(null, moduleSchemaNode, mountPoint,
+                schemaContext), listModuleBuilder.build());
     }
 
     @Override
