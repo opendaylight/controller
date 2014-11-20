@@ -28,6 +28,7 @@ import com.google.common.collect.Multimaps;
  * @param <P>
  * @param <D>
  */
+@Deprecated
 public abstract class AbstractDataReadRouter<P extends Path<P>, D> implements DataReader<P, D> {
 
     Multimap<P, DataReaderRegistration<P, D>> configReaders = Multimaps.synchronizedSetMultimap(HashMultimap.<P, DataReaderRegistration<P, D>>create());

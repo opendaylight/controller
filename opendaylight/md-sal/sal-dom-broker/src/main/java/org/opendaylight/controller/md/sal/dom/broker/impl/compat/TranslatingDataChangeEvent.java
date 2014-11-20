@@ -7,11 +7,11 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.impl.compat;
 
+import com.google.common.collect.Maps;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationException;
@@ -20,10 +20,8 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-import com.google.common.collect.Maps;
-
-public abstract class TranslatingDataChangeEvent implements
-DataChangeEvent<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> {
+@Deprecated
+public abstract class TranslatingDataChangeEvent implements DataChangeEvent<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> {
 
     private TranslatingDataChangeEvent() {
     }
