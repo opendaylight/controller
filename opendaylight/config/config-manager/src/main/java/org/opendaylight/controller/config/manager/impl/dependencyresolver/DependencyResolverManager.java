@@ -8,7 +8,7 @@
 package org.opendaylight.controller.config.manager.impl.dependencyresolver;
 
 import static com.google.common.base.Preconditions.checkState;
-
+import com.google.common.base.Preconditions;
 import com.google.common.reflect.AbstractInvocationHandler;
 import com.google.common.reflect.Reflection;
 import java.lang.reflect.InvocationTargetException;
@@ -54,10 +54,10 @@ public class DependencyResolverManager implements DependencyResolverFactory, Aut
     private final DeadlockMonitor deadlockMonitor;
     private final MBeanServer mBeanServer;
 
-    public DependencyResolverManager(TransactionIdentifier transactionIdentifier,
-                                     TransactionStatus transactionStatus,
-                                     ServiceReferenceReadableRegistry readableRegistry, CodecRegistry codecRegistry,
-                                     MBeanServer mBeanServer) {
+    public DependencyResolverManager(final TransactionIdentifier transactionIdentifier,
+                                     final TransactionStatus transactionStatus,
+                                     final ServiceReferenceReadableRegistry readableRegistry, final CodecRegistry codecRegistry,
+                                     final MBeanServer mBeanServer) {
         this.transactionIdentifier = transactionIdentifier;
         this.modulesHolder = new ModulesHolder(transactionIdentifier);
         this.transactionStatus = transactionStatus;
@@ -68,11 +68,11 @@ public class DependencyResolverManager implements DependencyResolverFactory, Aut
     }
 
     @Override
-    public DependencyResolver createDependencyResolver(ModuleIdentifier moduleIdentifier) {
+    public DependencyResolver createDependencyResolver(final ModuleIdentifier moduleIdentifier) {
         return getOrCreate(moduleIdentifier);
     }
 
-    public synchronized DependencyResolverImpl getOrCreate(ModuleIdentifier name) {
+    public synchronized DependencyResolverImpl getOrCreate(final ModuleIdentifier name) {
         DependencyResolverImpl dependencyResolver = moduleIdentifiersToDependencyResolverMap.get(name);
         if (dependencyResolver == null) {
             transactionStatus.checkNotCommitted();
@@ -109,7 +109,7 @@ public class DependencyResolverManager implements DependencyResolverFactory, Aut
     }
 
     public ModuleInternalTransactionalInfo destroyModule(
-            ModuleIdentifier moduleIdentifier) {
+            final ModuleIdentifier moduleIdentifier) {
         transactionStatus.checkNotCommitted();
         ModuleInternalTransactionalInfo found = modulesHolder
                 .destroyModule(moduleIdentifier);
@@ -119,52 +119,62 @@ public class DependencyResolverManager implements DependencyResolverFactory, Aut
 
     // protect write access
 
+    private static final class ModuleInvocationHandler extends AbstractInvocationHandler {
+        private final DeadlockMonitor deadlockMonitor;
+        private final ModuleIdentifier moduleIdentifier;
+        private final Module module;
+
+        // optimization: subsequent calls to getInstance MUST return the same value during transaction,
+        // so it is safe to cache the response
+        private Object cachedInstance;
+
+        ModuleInvocationHandler(final DeadlockMonitor deadlockMonitor, final ModuleIdentifier moduleIdentifier, final Module module) {
+            this.deadlockMonitor = Preconditions.checkNotNull(deadlockMonitor);
+            this.moduleIdentifier = Preconditions.checkNotNull(moduleIdentifier);
+            this.module = Preconditions.checkNotNull(module);
+        }
+
+        @Override
+        protected Object handleInvocation(final Object proxy, final Method method, final Object[] args) throws Throwable {
+            boolean isGetInstance = "getInstance".equals(method.getName());
+            if (isGetInstance) {
+                if (cachedInstance != null) {
+                    return cachedInstance;
+                }
+
+                checkState(deadlockMonitor.isAlive(), "Deadlock monitor is not alive");
+                deadlockMonitor.setCurrentlyInstantiatedModule(moduleIdentifier);
+            }
+            try {
+                Object response = method.invoke(module, args);
+                if (isGetInstance) {
+                    cachedInstance = response;
+                }
+                return response;
+            } catch(InvocationTargetException e) {
+                throw e.getCause();
+            } finally {
+                if (isGetInstance) {
+                    deadlockMonitor.setCurrentlyInstantiatedModule(null);
+                }
+            }
+        }
+    }
+
     public void put(
             final ModuleIdentifier moduleIdentifier,
             final Module module,
-            ModuleFactory moduleFactory,
-            ModuleInternalInfo maybeOldInternalInfo,
-            TransactionModuleJMXRegistration transactionModuleJMXRegistration,
-            boolean isDefaultBean, BundleContext bundleContext) {
+            final ModuleFactory moduleFactory,
+            final ModuleInternalInfo maybeOldInternalInfo,
+            final TransactionModuleJMXRegistration transactionModuleJMXRegistration,
+            final boolean isDefaultBean, final BundleContext bundleContext) {
         transactionStatus.checkNotCommitted();
 
         Class<? extends Module> moduleClass = Module.class;
         if (module instanceof RuntimeBeanRegistratorAwareModule) {
             moduleClass = RuntimeBeanRegistratorAwareModule.class;
         }
-        Module proxiedModule = Reflection.newProxy(moduleClass, new AbstractInvocationHandler() {
-            // optimization: subsequent calls to getInstance MUST return the same value during transaction,
-            // so it is safe to cache the response
-            private Object cachedInstance;
-
-            @Override
-            protected Object handleInvocation(Object proxy, Method method, Object[] args) throws Throwable {
-                boolean isGetInstance = "getInstance".equals(method.getName());
-                if (isGetInstance) {
-                    if (cachedInstance != null) {
-                        return cachedInstance;
-                    }
-
-                    checkState(deadlockMonitor.isAlive(), "Deadlock monitor is not alive");
-                    deadlockMonitor.setCurrentlyInstantiatedModule(moduleIdentifier);
-                }
-                try {
-                    Object response = method.invoke(module, args);
-                    if (isGetInstance) {
-                        cachedInstance = response;
-                    }
-                    return response;
-                } catch(InvocationTargetException e) {
-                    throw e.getCause();
-                } finally {
-                    if (isGetInstance) {
-                        deadlockMonitor.setCurrentlyInstantiatedModule(null);
-                    }
-                }
-            }
-        });
-
-
+        Module proxiedModule = Reflection.newProxy(moduleClass, new ModuleInvocationHandler(deadlockMonitor, moduleIdentifier, module));
         ModuleInternalTransactionalInfo moduleInternalTransactionalInfo = new ModuleInternalTransactionalInfo(
                 moduleIdentifier, proxiedModule, moduleFactory,
                 maybeOldInternalInfo, transactionModuleJMXRegistration, isDefaultBean, module, bundleContext);
@@ -177,18 +187,18 @@ public class DependencyResolverManager implements DependencyResolverFactory, Aut
         return modulesHolder.toCommitInfo();
     }
 
-    public Module findModule(ModuleIdentifier moduleIdentifier,
-                             JmxAttribute jmxAttributeForReporting) {
+    public Module findModule(final ModuleIdentifier moduleIdentifier,
+                             final JmxAttribute jmxAttributeForReporting) {
         return modulesHolder.findModule(moduleIdentifier,
                 jmxAttributeForReporting);
     }
 
-    public ModuleInternalTransactionalInfo findModuleInternalTransactionalInfo(ModuleIdentifier moduleIdentifier) {
+    public ModuleInternalTransactionalInfo findModuleInternalTransactionalInfo(final ModuleIdentifier moduleIdentifier) {
         return modulesHolder.findModuleInternalTransactionalInfo(moduleIdentifier);
     }
 
-    public ModuleFactory findModuleFactory(ModuleIdentifier moduleIdentifier,
-                                           JmxAttribute jmxAttributeForReporting) {
+    public ModuleFactory findModuleFactory(final ModuleIdentifier moduleIdentifier,
+                                           final JmxAttribute jmxAttributeForReporting) {
         return modulesHolder.findModuleFactory(moduleIdentifier,
                 jmxAttributeForReporting);
     }
@@ -197,12 +207,12 @@ public class DependencyResolverManager implements DependencyResolverFactory, Aut
         return modulesHolder.getAllModules();
     }
 
-    public void assertNotExists(ModuleIdentifier moduleIdentifier)
+    public void assertNotExists(final ModuleIdentifier moduleIdentifier)
             throws InstanceAlreadyExistsException {
         modulesHolder.assertNotExists(moduleIdentifier);
     }
 
-    public List<ModuleIdentifier> findAllByFactory(ModuleFactory factory) {
+    public List<ModuleIdentifier> findAllByFactory(final ModuleFactory factory) {
         List<ModuleIdentifier> result = new ArrayList<>();
         for (ModuleInternalTransactionalInfo info : modulesHolder.getAllInfos()) {
             if (factory.equals(info.getModuleFactory())) {
@@ -212,6 +222,7 @@ public class DependencyResolverManager implements DependencyResolverFactory, Aut
         return result;
     }
 
+    @Override
     public void close() {
         deadlockMonitor.close();
     }
