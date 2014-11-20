@@ -9,6 +9,7 @@ package org.opendaylight.controller.config.yang.netty.timer;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
