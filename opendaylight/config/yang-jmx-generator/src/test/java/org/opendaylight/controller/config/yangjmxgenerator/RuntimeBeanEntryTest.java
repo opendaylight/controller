@@ -20,9 +20,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-
 import javax.management.openmbean.SimpleType;
-
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;

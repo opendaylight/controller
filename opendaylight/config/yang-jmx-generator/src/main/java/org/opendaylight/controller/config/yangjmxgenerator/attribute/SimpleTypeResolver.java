@@ -9,13 +9,12 @@ package org.opendaylight.controller.config.yangjmxgenerator.attribute;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
-import org.opendaylight.yangtools.sal.binding.model.api.Type;
-
-import javax.management.openmbean.SimpleType;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.Map;
+import javax.management.openmbean.SimpleType;
+import org.opendaylight.yangtools.sal.binding.model.api.Type;
 
 public class SimpleTypeResolver {
 
