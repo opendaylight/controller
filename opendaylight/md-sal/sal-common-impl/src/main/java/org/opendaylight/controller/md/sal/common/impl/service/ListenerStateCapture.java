@@ -9,6 +9,7 @@ import org.opendaylight.yangtools.concepts.Path;
 
 import com.google.common.base.Predicate;
 
+@Deprecated
 public final class ListenerStateCapture<P extends Path<P>, D, DCL extends DataChangeListener<P, D>> {
 
     final P path;

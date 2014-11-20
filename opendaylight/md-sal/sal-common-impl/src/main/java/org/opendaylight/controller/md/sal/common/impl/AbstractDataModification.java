@@ -18,6 +18,7 @@ import org.opendaylight.controller.md.sal.common.api.data.DataModification;
 import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.yangtools.concepts.Path;
 
+@Deprecated
 public abstract class AbstractDataModification<P extends Path<P>, D> implements DataModification<P, D> {
 
     private final Map<P, D> operationalOriginal;

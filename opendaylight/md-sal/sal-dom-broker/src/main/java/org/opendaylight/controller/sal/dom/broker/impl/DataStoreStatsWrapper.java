@@ -15,6 +15,7 @@ import org.opendaylight.yangtools.concepts.Delegator;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
+@Deprecated
 public class DataStoreStatsWrapper implements Delegator<DataStore>, DataStore {
 
     private final DataStore delegate;

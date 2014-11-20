@@ -54,6 +54,11 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
+/**
+ * @deprecated This class provides compatibility between {@link CompositeNode} and {@link NormalizedNode}.
+ *             Users of this class should use {@link NormalizedNode}s directly.
+ */
+@Deprecated
 public abstract class DataNormalizationOperation<T extends PathArgument> implements Identifiable<T> {
 
     private final T identifier;

@@ -47,6 +47,7 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
+@Deprecated
 public class MultipleAugmentationPutsTest extends AbstractDataServiceTest implements DataChangeListener {
 
     private static final QName NODE_ID_QNAME = QName.create(Node.QNAME, "id");

@@ -319,12 +319,12 @@ public class BindingTestContext implements AutoCloseable {
         updateYangSchema(moduleInfos);
     }
 
-    @SuppressWarnings("deprecation")
+    @Deprecated
     public DataProviderService getBindingDataBroker() {
         return baData;
     }
 
-    @SuppressWarnings("deprecation")
+    @Deprecated
     public org.opendaylight.controller.sal.core.api.data.DataProviderService getDomDataBroker() {
         return biDataLegacyBroker;
     }
