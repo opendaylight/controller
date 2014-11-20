@@ -10,6 +10,7 @@ package org.opendaylight.controller.config.yangjmxgenerator;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import com.google.common.base.Preconditions;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -18,7 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.NameConflictException;
@@ -30,11 +30,9 @@ import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-
 public class ModuleMXBeanEntryNameConflictTest extends AbstractYangTest {
 
-    private static final Logger logger = LoggerFactory
+    private static final Logger LOG = LoggerFactory
             .getLogger(ModuleMXBeanEntryNameConflictTest.class);
 
     public static final String PACKAGE_NAME = "pack2";
@@ -54,7 +52,7 @@ public class ModuleMXBeanEntryNameConflictTest extends AbstractYangTest {
             Module testedModule = loadYangs(yangFile, moduleName);
 
             try {
-                logger.debug("Testing {}", yangFile);
+                LOG.debug("Testing {}", yangFile);
                 ModuleMXBeanEntry.create(testedModule,
                         new HashMap<QName, ServiceInterfaceEntry>(), context,
                         new TypeProviderWrapper(new TypeProviderImpl(context)),
