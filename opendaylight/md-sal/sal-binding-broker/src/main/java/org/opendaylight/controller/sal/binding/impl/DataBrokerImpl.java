@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.Maps;
 
+@Deprecated
 public class DataBrokerImpl extends
         AbstractDataBroker<InstanceIdentifier<? extends DataObject>, DataObject, DataChangeListener> //
         implements DataProviderService, AutoCloseable {

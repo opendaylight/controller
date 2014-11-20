@@ -15,6 +15,7 @@ import org.opendaylight.yangtools.util.ListenerRegistry;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
+@Deprecated
 public class DataTransactionImpl extends AbstractDataTransaction<InstanceIdentifier<? extends DataObject>, DataObject>
     implements DataModificationTransaction {
     private final ListenerRegistry<DataTransactionListener> listeners = new ListenerRegistry<DataTransactionListener>();

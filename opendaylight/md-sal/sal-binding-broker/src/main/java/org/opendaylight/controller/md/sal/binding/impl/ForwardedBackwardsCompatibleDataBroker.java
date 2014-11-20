@@ -183,6 +183,7 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
         });
     }
 
+    @Deprecated
     private class ForwardedBackwardsCompatibleTransacion extends
             AbstractReadWriteTransaction implements DataModificationTransaction {
 

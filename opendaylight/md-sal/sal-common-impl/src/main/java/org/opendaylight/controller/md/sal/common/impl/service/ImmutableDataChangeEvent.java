@@ -13,6 +13,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
+@Deprecated
 public final class ImmutableDataChangeEvent<P extends Path<P>, D> implements DataChangeEvent<P,D> {
 
     private final D updatedOperationalSubtree;

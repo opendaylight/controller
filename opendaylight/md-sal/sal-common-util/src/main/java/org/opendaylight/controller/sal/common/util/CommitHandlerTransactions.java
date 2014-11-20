@@ -13,6 +13,10 @@ import org.opendaylight.yangtools.concepts.Path;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 
+/**
+ * @deprecated Utility class for {@link DataCommitTransaction}, will be removed at the same time.
+ */
+@Deprecated
 public class CommitHandlerTransactions {
 
     private static class AllwaysSuccessfulTransaction<P extends Path<P>,D> implements DataCommitTransaction<P, D> {

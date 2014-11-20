@@ -22,6 +22,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 import com.google.common.util.concurrent.MoreExecutors;
 
+@Deprecated
 public class DataBrokerImpl extends AbstractDataBroker<YangInstanceIdentifier, CompositeNode, DataChangeListener> implements
         DataProviderService, AutoCloseable {
 

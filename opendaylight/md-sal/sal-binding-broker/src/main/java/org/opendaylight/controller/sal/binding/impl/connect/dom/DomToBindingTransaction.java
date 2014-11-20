@@ -12,6 +12,7 @@ import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
+@Deprecated
 class DomToBindingTransaction implements
     DataCommitHandler.DataCommitTransaction<YangInstanceIdentifier, CompositeNode> {
 

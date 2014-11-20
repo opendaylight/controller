@@ -32,6 +32,7 @@ import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 
+@Deprecated
 public class YangDataOperations {
 
     public static CompositeNode merge(final DataSchemaNode schema,

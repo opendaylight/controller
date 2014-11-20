@@ -64,6 +64,7 @@ import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
 
+@Deprecated
 public class DataNormalizerTest {
 
     static class NormalizedNodeData {

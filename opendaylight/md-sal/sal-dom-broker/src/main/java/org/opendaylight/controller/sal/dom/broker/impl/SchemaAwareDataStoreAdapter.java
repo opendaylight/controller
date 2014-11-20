@@ -45,10 +45,8 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataStore> implements //
-DataStore, //
-SchemaContextListener, //
-AutoCloseable {
+@Deprecated
+public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataStore> implements DataStore, SchemaContextListener, AutoCloseable {
 
     private final static Logger LOG = LoggerFactory.getLogger(SchemaAwareDataStoreAdapter.class);
 

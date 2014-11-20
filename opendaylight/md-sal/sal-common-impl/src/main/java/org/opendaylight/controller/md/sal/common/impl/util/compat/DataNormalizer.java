@@ -38,6 +38,11 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
+/**
+ * @deprecated This class provides compatibility between {@link CompositeNode} and {@link NormalizedNode}.
+ *             Users of this class should use {@link NormalizedNode}s directly.
+ */
+@Deprecated
 public class DataNormalizer {
 
     private final DataNormalizationOperation<?> operation;
