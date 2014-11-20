@@ -7,19 +7,16 @@
  */
 package org.opendaylight.controller.config.util;
 
+import com.google.common.collect.Sets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
-
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.jmx.ConfigTransactionControllerMXBean;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-
-import com.google.common.collect.Sets;
 
 public class TestingConfigTransactionController implements
         ConfigTransactionControllerMXBean {
