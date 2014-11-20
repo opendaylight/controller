@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 public class ContextSetterImpl implements ContextSetter, Closeable {
 
     private final LogbackStatusListener statusListener;
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ContextSetterImpl.class);
+    private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(ContextSetterImpl.class);
 
     public ContextSetterImpl(final LogbackRuntimeRegistrator rootRuntimeBeanRegistratorWrapper) {
         statusListener = new LogbackStatusListener(rootRuntimeBeanRegistratorWrapper);
@@ -81,11 +81,11 @@ public class ContextSetterImpl implements ContextSetter, Closeable {
         Map<String, Appender<ILoggingEvent>> appendersMap = getAppenders(module, context);
 
         for (LoggerTO logger : module.getLoggerTO()) {
-            LOGGER.trace("Setting configuration for logger {}", logger.getLoggerName());
+            LOG.trace("Setting configuration for logger {}", logger.getLoggerName());
             final ch.qos.logback.classic.Logger logbackLogger = context.getLogger(logger.getLoggerName());
 
             Optional<Set<Appender<ILoggingEvent>>> appendersBefore = getAppendersBefore(loggersBefore, logbackLogger);
-            LOGGER.trace("Logger {}: Appenders registered before: {}", logger.getLoggerName(),
+            LOG.trace("Logger {}: Appenders registered before: {}", logger.getLoggerName(),
                     appendersBefore.isPresent() ? appendersBefore.get() : "NO APPENDERS BEFORE");
 
             logbackLogger.setLevel(Level.toLevel(logger.getLevel()));
@@ -101,7 +101,7 @@ public class ContextSetterImpl implements ContextSetter, Closeable {
             for (String appenderName : logger.getAppenders()) {
                 if (appendersMap.containsKey(appenderName)) {
                     logbackLogger.addAppender(appendersMap.get(appenderName));
-                    LOGGER.trace("Logger {}: Adding new appender: {}", logger.getLoggerName(), appenderName);
+                    LOG.trace("Logger {}: Adding new appender: {}", logger.getLoggerName(), appenderName);
                 } else {
                     throw new IllegalStateException("No appender " + appenderName
                             + " found. This error should have been discovered by validation");
@@ -116,7 +116,7 @@ public class ContextSetterImpl implements ContextSetter, Closeable {
             for (Appender<ILoggingEvent> appenderBefore : appendersBefore.get()) {
                 logbackLogger.detachAppender(appenderBefore);
                 appenderBefore.stop();
-                LOGGER.trace("Logger {}: Removing old appender: {}", logger.getLoggerName(),
+                LOG.trace("Logger {}: Removing old appender: {}", logger.getLoggerName(),
                         appenderBefore.getName());
             }
             loggersBefore.remove(logbackLogger);
