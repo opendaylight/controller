@@ -16,8 +16,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.opendaylight.controller.sal.restconf.impl.test.RestOperationUtils.XML;
-
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import java.io.IOException;
@@ -188,7 +188,7 @@ public class RestPostOperationTest extends JerseyTest {
         assertEquals(400, post(uri, MediaType.APPLICATION_JSON, ""));
     }
 
-    private void mockInvokeRpc(CompositeNode result, boolean sucessful, Collection<RpcError> errors) {
+    private void mockInvokeRpc(final CompositeNode result, final boolean sucessful, final Collection<RpcError> errors) {
 
         DummyRpcResult.Builder<CompositeNode> builder = new DummyRpcResult.Builder<CompositeNode>().result(result)
                 .isSuccessful(sucessful);
@@ -200,7 +200,7 @@ public class RestPostOperationTest extends JerseyTest {
                 Futures.<RpcResult<CompositeNode>> immediateFuture(rpcResult));
     }
 
-    private void mockInvokeRpc(CompositeNode result, boolean sucessful) {
+    private void mockInvokeRpc(final CompositeNode result, final boolean sucessful) {
         mockInvokeRpc(result, sucessful, Collections.<RpcError> emptyList());
     }
 
@@ -229,14 +229,14 @@ public class RestPostOperationTest extends JerseyTest {
         assertEquals(204, post(URI_1, Draft02.MediaTypes.DATA + XML, xmlTestInterface));
         verify(brokerFacade).commitConfigurationDataPost(instanceIdCaptor.capture(), compNodeCaptor.capture());
         String identifier = "[(urn:ietf:params:xml:ns:yang:test-interface?revision=2014-07-01)interfaces]";
-        assertEquals(identifier, instanceIdCaptor.getValue().getPath().toString());
+        assertEquals(identifier, ImmutableList.copyOf(instanceIdCaptor.getValue().getPathArguments()).toString());
 
         String URI_2 = "/config/test-interface:interfaces";
         assertEquals(204, post(URI_2, Draft02.MediaTypes.DATA + XML, xmlBlockData));
         verify(brokerFacade, times(2))
                 .commitConfigurationDataPost(instanceIdCaptor.capture(), compNodeCaptor.capture());
         identifier = "[(urn:ietf:params:xml:ns:yang:test-interface?revision=2014-07-01)interfaces, (urn:ietf:params:xml:ns:yang:test-interface?revision=2014-07-01)block]";
-        assertEquals(identifier, instanceIdCaptor.getValue().getPath().toString());
+        assertEquals(identifier, ImmutableList.copyOf(instanceIdCaptor.getValue().getPathArguments()).toString());
     }
 
     @Test
@@ -264,7 +264,7 @@ public class RestPostOperationTest extends JerseyTest {
         restconfImpl.setControllerContext(controllerContext);
     }
 
-    private int post(String uri, String mediaType, String data) {
+    private int post(final String uri, final String mediaType, final String data) {
         return target(uri).request(mediaType).post(Entity.entity(data, mediaType)).getStatus();
     }
 

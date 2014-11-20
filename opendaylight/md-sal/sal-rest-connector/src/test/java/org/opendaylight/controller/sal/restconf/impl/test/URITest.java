@@ -13,8 +13,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import java.io.FileNotFoundException;
 import java.util.Set;
@@ -124,7 +124,7 @@ public class URITest {
                 .toInstanceIdentifier("simple-nodes:users/yang-ext:mount/test-interface2:class/student/name");
         assertEquals(
                 "[(urn:ietf:params:xml:ns:yang:test-interface2?revision=2014-08-01)class, (urn:ietf:params:xml:ns:yang:test-interface2?revision=2014-08-01)student[{(urn:ietf:params:xml:ns:yang:test-interface2?revision=2014-08-01)name=name}]]",
-                instanceIdentifier.getInstanceIdentifier().getPath().toString());
+                ImmutableList.copyOf(instanceIdentifier.getInstanceIdentifier().getPathArguments()).toString());
     }
 
     @Test
@@ -140,8 +140,7 @@ public class URITest {
         exception.expect(RestconfDocumentedException.class);
 
         controllerContext.setMountService(null);
-        InstanceIdentifierContext instanceIdentifier = controllerContext
-                .toInstanceIdentifier("simple-nodes:users/yang-ext:mount/test-interface2:class/student/name");
+        controllerContext.toInstanceIdentifier("simple-nodes:users/yang-ext:mount/test-interface2:class/student/name");
     }
 
     @Test
@@ -149,8 +148,7 @@ public class URITest {
         initMountService(false);
         exception.expect(RestconfDocumentedException.class);
 
-        InstanceIdentifierContext instanceIdentifier = controllerContext
-                .toInstanceIdentifier("simple-nodes:users/yang-ext:mount/test-interface2:class");
+        controllerContext.toInstanceIdentifier("simple-nodes:users/yang-ext:mount/test-interface2:class");
     }
 
     public void initMountService(final boolean withSchema) {

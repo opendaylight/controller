@@ -19,18 +19,17 @@ import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessag
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_RUNNING_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_TARGET_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.ROLLBACK_ON_ERROR_OPTION;
-
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -48,10 +47,11 @@ import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.ModifyAction;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
@@ -260,17 +260,16 @@ public class NetconfDeviceWriteOnlyTx implements DOMDataWriteTransaction, Future
                                                     final Optional<CompositeNode> lastChildOverride) {
         Preconditions.checkArgument(Iterables.isEmpty(dataPath.getPathArguments()) == false, "Instance identifier with empty path %s", dataPath);
 
-        List<YangInstanceIdentifier.PathArgument> reversedPath = Lists.reverse(dataPath.getPath());
-
         // Create deepest edit element with expected edit operation
-        CompositeNode previous = getDeepestEditElement(reversedPath.get(0), operation, lastChildOverride);
+        CompositeNode previous = getDeepestEditElement(dataPath.getLastPathArgument(), operation, lastChildOverride);
 
+        Iterator<PathArgument> it = dataPath.getReversePathArguments().iterator();
         // Remove already processed deepest child
-        reversedPath = Lists.newArrayList(reversedPath);
-        reversedPath.remove(0);
+        it.next();
 
         // Create edit structure in reversed order
-        for (final YangInstanceIdentifier.PathArgument arg : reversedPath) {
+        while (it.hasNext()) {
+            final YangInstanceIdentifier.PathArgument arg = it.next();
             final CompositeNodeBuilder<ImmutableCompositeNode> builder = ImmutableCompositeNode.builder();
             builder.setQName(arg.getNodeType());
 
