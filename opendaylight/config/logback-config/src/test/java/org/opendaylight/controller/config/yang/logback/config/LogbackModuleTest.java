@@ -148,7 +148,7 @@ public class LogbackModuleTest extends AbstractConfigTest {
         try {
             createBeans(
 
-            true, "target/rollingApp", "", "30MB", 1, 5, "target/%i.log", "rolling", "consoleName", "ALL", "logger1",
+                true, "target/rollingApp", "", "30MB", 1, 5, "target/%i.log", "rolling", "consoleName", "ALL", "logger1",
                     "DEBUG", "FixedWindowRollingPolicy", 0, "FileAppender").commit();
             fail();
         } catch (ValidationException e) {
