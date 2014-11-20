@@ -8,12 +8,12 @@
 package org.opendaylight.controller.sal.restconf.impl.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
 import javax.ws.rs.WebApplicationException;
 import org.junit.BeforeClass;
@@ -22,12 +22,12 @@ import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
-import org.opendaylight.yangtools.yang.data.api.Node;
-import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 
 public class XmlAndJsonToCnSnInstanceIdentifierTest extends YangAndXmlAndDataSchemaLoader {
 
@@ -80,52 +80,51 @@ public class XmlAndJsonToCnSnInstanceIdentifierTest extends YangAndXmlAndDataSch
         verifyLeafListPredicate(cnSn);
     }
 
-    private void verifyLeafListPredicate(CompositeNode cnSn) throws URISyntaxException {
+    private void verifyLeafListPredicate(final CompositeNode cnSn) throws URISyntaxException {
         SimpleNode<?> lf11 = getSnWithInstanceIdentifierWhenLeafList(cnSn);
         Object value = lf11.getValue();
         assertTrue(value instanceof YangInstanceIdentifier);
 
         YangInstanceIdentifier instanceIdentifier = (YangInstanceIdentifier) value;
-        List<PathArgument> pathArguments = instanceIdentifier.getPath();
-        assertEquals(3, pathArguments.size());
+        Iterator<PathArgument> it = instanceIdentifier.getPathArguments().iterator();
         String revisionDate = "2014-01-17";
-        assertEquals(TestUtils.buildQName("cont", "instance:identifier:module", revisionDate), pathArguments.get(0)
-                .getNodeType());
-        assertEquals(TestUtils.buildQName("cont1", "instance:identifier:module", revisionDate), pathArguments.get(1)
-                .getNodeType());
-        assertEquals(TestUtils.buildQName("lflst11", "augment:module:leaf:list", "2014-01-27"), pathArguments.get(2)
-                .getNodeType());
 
-        assertTrue(pathArguments.get(2) instanceof NodeWithValue);
-        assertEquals("lflst11_1", ((NodeWithValue) pathArguments.get(2)).getValue());
+        assertEquals(TestUtils.buildQName("cont", "instance:identifier:module", revisionDate), it.next().getNodeType());
+        assertEquals(TestUtils.buildQName("cont1", "instance:identifier:module", revisionDate), it.next().getNodeType());
+
+        PathArgument arg = it.next();
+        assertFalse(it.hasNext());
+        assertEquals(TestUtils.buildQName("lflst11", "augment:module:leaf:list", "2014-01-27"), arg.getNodeType());
+
+        assertTrue(arg instanceof NodeWithValue);
+        assertEquals("lflst11_1", ((NodeWithValue) arg).getValue());
 
     }
 
-    private void verifyListPredicate(CompositeNode cnSn) throws URISyntaxException {
+    private void verifyListPredicate(final CompositeNode cnSn) throws URISyntaxException {
         SimpleNode<?> lf111 = getSnWithInstanceIdentifierWhenList(cnSn);
         Object value = lf111.getValue();
         assertTrue(value instanceof YangInstanceIdentifier);
 
         YangInstanceIdentifier instanceIdentifier = (YangInstanceIdentifier) value;
-        List<PathArgument> pathArguments = instanceIdentifier.getPath();
-        assertEquals(4, pathArguments.size());
+        Iterator<PathArgument> it = instanceIdentifier.getPathArguments().iterator();
         String revisionDate = "2014-01-17";
-        assertEquals(TestUtils.buildQName("cont", "instance:identifier:module", revisionDate), pathArguments.get(0)
-                .getNodeType());
-        assertEquals(TestUtils.buildQName("cont1", "instance:identifier:module", revisionDate), pathArguments.get(1)
-                .getNodeType());
-        assertEquals(TestUtils.buildQName("lst11", "augment:module", revisionDate), pathArguments.get(2).getNodeType());
-        assertEquals(TestUtils.buildQName("lf112", "augment:augment:module", revisionDate), pathArguments.get(3)
-                .getNodeType());
+        assertEquals(TestUtils.buildQName("cont", "instance:identifier:module", revisionDate), it.next().getNodeType());
+        assertEquals(TestUtils.buildQName("cont1", "instance:identifier:module", revisionDate), it.next().getNodeType());
 
-        assertTrue(pathArguments.get(2) instanceof NodeIdentifierWithPredicates);
-        Map<QName, Object> predicates = ((NodeIdentifierWithPredicates) pathArguments.get(2)).getKeyValues();
+        PathArgument arg = it.next();
+        assertEquals(TestUtils.buildQName("lst11", "augment:module", revisionDate), arg.getNodeType());
+        assertEquals(TestUtils.buildQName("lf112", "augment:augment:module", revisionDate), it.next().getNodeType());
+        assertFalse(it.hasNext());
+
+        assertTrue(arg instanceof NodeIdentifierWithPredicates);
+        Map<QName, Object> predicates = ((NodeIdentifierWithPredicates) arg).getKeyValues();
         assertEquals(2, predicates.size());
         assertEquals("value1", predicates.get(TestUtils.buildQName("keyvalue111", "augment:module", revisionDate)));
         assertEquals("value2", predicates.get(TestUtils.buildQName("keyvalue112", "augment:module", revisionDate)));
     }
 
-    private SimpleNode<?> getSnWithInstanceIdentifierWhenList(CompositeNode cnSn) throws URISyntaxException {
+    private SimpleNode<?> getSnWithInstanceIdentifierWhenList(final CompositeNode cnSn) throws URISyntaxException {
         CompositeNode cont1 = cnSn.getFirstCompositeByName(TestUtils.buildQName("cont1", "instance:identifier:module",
                 "2014-01-17"));
         assertNotNull(cont1);
@@ -138,7 +137,7 @@ public class XmlAndJsonToCnSnInstanceIdentifierTest extends YangAndXmlAndDataSch
         return lf111;
     }
 
-    private SimpleNode<?> getSnWithInstanceIdentifierWhenLeafList(CompositeNode cnSn) throws URISyntaxException {
+    private SimpleNode<?> getSnWithInstanceIdentifierWhenLeafList(final CompositeNode cnSn) throws URISyntaxException {
         CompositeNode cont1 = cnSn.getFirstCompositeByName(TestUtils.buildQName("cont1", "instance:identifier:module",
                 "2014-01-17"));
         assertNotNull(cont1);

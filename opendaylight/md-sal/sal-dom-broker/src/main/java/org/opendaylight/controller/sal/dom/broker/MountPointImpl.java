@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.sal.dom.broker;
 
-import java.util.List;
+import com.google.common.collect.Iterables;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Set;
-
 import org.opendaylight.controller.md.sal.common.api.RegistrationListener;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandlerRegistration;
@@ -37,10 +37,7 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-
-import com.google.common.util.concurrent.ListenableFuture;
 
 @Deprecated
 public class MountPointImpl implements MountProvisionInstance, SchemaContextProvider {
@@ -187,12 +184,11 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
 
     class ReadWrapper implements DataReader<YangInstanceIdentifier, CompositeNode> {
         private YangInstanceIdentifier shortenPath(final YangInstanceIdentifier path) {
-            YangInstanceIdentifier ret = null;
-            if(mountPath.contains(path)) {
-                List<PathArgument> newArgs = path.getPath().subList(mountPath.getPath().size(), path.getPath().size());
-                ret = YangInstanceIdentifier.create(newArgs);
+            if (!mountPath.contains(path)) {
+                return null;
             }
-            return ret;
+
+            return YangInstanceIdentifier.create(Iterables.skip(path.getPathArguments(), Iterables.size(mountPath.getPathArguments())));
         }
 
         @Override
