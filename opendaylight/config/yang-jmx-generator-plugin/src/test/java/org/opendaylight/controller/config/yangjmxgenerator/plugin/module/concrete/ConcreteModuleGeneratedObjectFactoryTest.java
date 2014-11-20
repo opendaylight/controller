@@ -1,6 +1,12 @@
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.module.concrete;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+
 import com.google.common.base.Optional;
+import java.io.File;
+import java.util.Map.Entry;
 import net.sourceforge.pmd.lang.ast.Node;
 import net.sourceforge.pmd.lang.java.ast.ASTClassOrInterfaceDeclaration;
 import net.sourceforge.pmd.lang.java.ast.ASTCompilationUnit;
@@ -10,13 +16,6 @@ import org.opendaylight.controller.config.yangjmxgenerator.plugin.gofactory.Conc
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.java.FullyQualifiedName;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.java.GeneratedObject;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.module.AbstractGeneratedObjectTest;
-
-import java.io.File;
-import java.util.Map.Entry;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 
 public class ConcreteModuleGeneratedObjectFactoryTest extends AbstractGeneratedObjectTest {
 

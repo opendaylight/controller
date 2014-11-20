@@ -1,15 +1,14 @@
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.java;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
-import org.apache.commons.io.FileUtils;
-import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.StringUtil;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Map.Entry;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.apache.commons.io.FileUtils;
+import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.StringUtil;
 
 public class GeneratedObject {
 

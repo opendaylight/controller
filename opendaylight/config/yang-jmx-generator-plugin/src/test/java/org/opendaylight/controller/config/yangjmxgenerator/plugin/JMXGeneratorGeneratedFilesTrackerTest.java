@@ -8,6 +8,7 @@
 package org.opendaylight.controller.config.yangjmxgenerator.plugin;
 
 import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import org.junit.Test;
 

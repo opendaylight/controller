@@ -8,9 +8,8 @@
 
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model;
 
-import org.opendaylight.controller.config.yangjmxgenerator.plugin.JMXGenerator;
-
 import java.util.Date;
+import org.opendaylight.controller.config.yangjmxgenerator.plugin.JMXGenerator;
 
 public class HeaderSerializer {
     private static final String GENERATOR_CLASS = JMXGenerator.class.getCanonicalName();
