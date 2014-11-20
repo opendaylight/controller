@@ -16,6 +16,40 @@
       "revId": "8c984036b86e6b69a2057a118781884ab107f0ae",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_143e22b9",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/consensus/RaftConsensus.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-20T11:18:38Z",
+      "side": 1,
+      "message": "Since this is intended to be a base class for a ConsensusStrategy impl providing common behavior, can we make it an abstract class, implement ConsensusStrategy, and rename to AbstractConsensusStrategy?",
+      "revId": "8c984036b86e6b69a2057a118781884ab107f0ae",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_74744e9c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/consensus/RaftConsensus.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-20T11:18:38Z",
+      "side": 1,
+      "message": "Since this method is intended for derived classes, can we make it protected?",
+      "revId": "8c984036b86e6b69a2057a118781884ab107f0ae",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
