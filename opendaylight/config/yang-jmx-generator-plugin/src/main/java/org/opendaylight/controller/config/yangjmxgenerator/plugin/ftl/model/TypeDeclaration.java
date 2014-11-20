@@ -7,9 +7,8 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model;
 
-import org.opendaylight.controller.config.yangjmxgenerator.plugin.java.TypeName;
-
 import java.util.List;
+import org.opendaylight.controller.config.yangjmxgenerator.plugin.java.TypeName;
 
 public class TypeDeclaration {
     private final String type, name;

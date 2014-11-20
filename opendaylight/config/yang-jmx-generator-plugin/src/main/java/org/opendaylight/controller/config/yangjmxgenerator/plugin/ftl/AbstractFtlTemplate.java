@@ -9,6 +9,8 @@ package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import java.util.Collections;
+import java.util.List;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Annotation;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Constructor;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Field;
@@ -16,9 +18,6 @@ import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Head
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Method;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.TypeDeclaration;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.FullyQualifiedNameHelper;
-
-import java.util.Collections;
-import java.util.List;
 
 public abstract class AbstractFtlTemplate implements FtlTemplate {
     private final String packageName;

@@ -11,6 +11,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
 import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,7 +26,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import org.opendaylight.controller.config.api.runtime.HierarchicalRuntimeBeanRegistration;
 import org.opendaylight.controller.config.api.runtime.RootRuntimeBeanRegistrator;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
@@ -34,9 +35,6 @@ import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Fiel
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.MethodDefinition;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.FullyQualifiedNameHelper;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Lists;
-
 public class RuntimeRegistratorFtlTemplate extends GeneralClassTemplate {
 
     private RuntimeRegistratorFtlTemplate(RuntimeBeanEntry runtimeBeanEntry,
@@ -44,7 +42,7 @@ public class RuntimeRegistratorFtlTemplate extends GeneralClassTemplate {
         // TODO header
         super(null, runtimeBeanEntry.getPackageName(), name, Collections
                 .<String> emptyList(), Arrays.asList(Closeable.class
-                .getCanonicalName()), fields, methods);
+                    .getCanonicalName()), fields, methods);
     }
 
     public static RuntimeBeanEntry findRoot(

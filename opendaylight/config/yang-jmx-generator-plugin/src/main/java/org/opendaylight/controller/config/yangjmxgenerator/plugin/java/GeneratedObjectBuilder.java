@@ -1,9 +1,9 @@
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.java;
 
+import static org.opendaylight.controller.config.yangjmxgenerator.plugin.util.StringUtil.prefixAndJoin;
+
 import com.google.common.base.Optional;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.StringUtil;
-
-import static org.opendaylight.controller.config.yangjmxgenerator.plugin.util.StringUtil.prefixAndJoin;
 
 public class GeneratedObjectBuilder {
     private final JavaFileInput input;
