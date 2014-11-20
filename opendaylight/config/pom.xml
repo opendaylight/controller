@@ -145,7 +145,7 @@
         <artifactId>maven-checkstyle-plugin</artifactId>
         <configuration>
           <failsOnError>false</failsOnError>
-          <failOnViolation>false</failOnViolation>
+          <failOnViolation>true</failOnViolation>
           <configLocation>checkstyle-logging.xml</configLocation>
           <consoleOutput>true</consoleOutput>
           <includeTestSourceDirectory>true</includeTestSourceDirectory>
@@ -154,7 +154,7 @@
           <!-- excluding logback-config, has several checkstyle warnings
                regarding Logger/LoggerFactory, which couldn't be removed due necessity/intention
                to use the particular implementation/library of Logger/LoggerFactory -->
-          <excludes>**\/logback-config\/,**\/target\/,**\/bin\/,**\/target-ide\/,**\/${jmxGeneratorPath}\/,**\/${salGeneratorPath}\/</excludes>
+          <excludes>**\/config\/yang\/logback\/config\/**,**\/target\/,**\/bin\/,**\/target-ide\/,**\/${jmxGeneratorPath}\/,**\/${salGeneratorPath}\/</excludes>
         </configuration>
         <dependencies>
           <dependency>
