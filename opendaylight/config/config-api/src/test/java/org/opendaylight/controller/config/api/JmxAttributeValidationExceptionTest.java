@@ -2,6 +2,7 @@ package org.opendaylight.controller.config.api;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+
 import com.google.common.collect.Lists;
 import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;

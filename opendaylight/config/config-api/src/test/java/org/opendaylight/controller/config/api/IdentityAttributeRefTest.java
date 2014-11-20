@@ -4,6 +4,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.yangtools.yang.binding.BaseIdentity;

@@ -7,16 +7,16 @@
  */
 package org.opendaylight.controller.config.api.jmx;
 
-import javax.annotation.concurrent.Immutable;
-import javax.management.ObjectName;
 import java.beans.ConstructorProperties;
 import java.util.Collections;
 import java.util.List;
+import javax.annotation.concurrent.Immutable;
+import javax.management.ObjectName;
 
 @Immutable
 public class CommitStatus {
     private final List<ObjectName> newInstances, reusedInstances,
-            recreatedInstances;
+    recreatedInstances;
 
     /**
      * @param newInstances       newly created instances

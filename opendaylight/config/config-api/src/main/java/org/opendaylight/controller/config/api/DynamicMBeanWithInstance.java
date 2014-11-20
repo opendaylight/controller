@@ -8,7 +8,6 @@
 package org.opendaylight.controller.config.api;
 
 import javax.management.DynamicMBean;
-
 import org.opendaylight.controller.config.spi.Module;
 
 /**

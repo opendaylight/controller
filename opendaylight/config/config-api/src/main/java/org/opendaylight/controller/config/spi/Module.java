@@ -7,10 +7,9 @@
  */
 package org.opendaylight.controller.config.spi;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
-
-import javax.annotation.concurrent.NotThreadSafe;
 
 
 /**

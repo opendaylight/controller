@@ -7,9 +7,8 @@
  */
 package org.opendaylight.controller.config.api;
 
-import org.opendaylight.yangtools.yang.binding.BaseIdentity;
-
 import java.beans.ConstructorProperties;
+import org.opendaylight.yangtools.yang.binding.BaseIdentity;
 
 public final class IdentityAttributeRef {
 

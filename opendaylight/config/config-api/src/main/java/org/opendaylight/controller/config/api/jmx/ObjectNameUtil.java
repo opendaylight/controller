@@ -7,12 +7,6 @@
  */
 package org.opendaylight.controller.config.api.jmx;
 
-import org.opendaylight.controller.config.api.ModuleIdentifier;
-import org.opendaylight.controller.config.api.jmx.constants.ConfigRegistryConstants;
-
-import javax.annotation.concurrent.ThreadSafe;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,6 +14,11 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import javax.annotation.concurrent.ThreadSafe;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import org.opendaylight.controller.config.api.ModuleIdentifier;
+import org.opendaylight.controller.config.api.jmx.constants.ConfigRegistryConstants;
 
 /**
  * Provides ObjectName creation. Each created ObjectName consists of domain that
