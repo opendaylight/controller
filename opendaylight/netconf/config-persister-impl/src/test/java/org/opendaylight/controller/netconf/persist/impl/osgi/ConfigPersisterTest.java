@@ -7,7 +7,15 @@
  */
 package org.opendaylight.controller.netconf.persist.impl.osgi;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+
 import com.google.common.collect.Sets;
+import java.io.IOException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,17 +33,8 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import java.io.IOException;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-
 public class ConfigPersisterTest {
-    private static final Logger logger = LoggerFactory.getLogger(ConfigPersisterTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ConfigPersisterTest.class);
 
     private MockedBundleContext ctx;
     private ConfigPersisterActivator configPersisterActivator;
@@ -136,7 +135,7 @@ public class ConfigPersisterTest {
         doReturn(getConflictingService()).when(ctx.serviceFactory).createService(anyString());
         Thread.sleep(500);
         // working service:
-        logger.info("Switching to working service **");
+        LOG.info("Switching to working service **");
         doReturn(getWorkingService(getOKDocument())).when(ctx.serviceFactory).createService(anyString());
         Thread.sleep(1000);
         assertCannotRegisterAsJMXListener_pushWasSuccessful();

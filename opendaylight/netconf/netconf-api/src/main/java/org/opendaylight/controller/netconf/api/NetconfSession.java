@@ -8,7 +8,6 @@
 package org.opendaylight.controller.netconf.api;
 
 import io.netty.channel.ChannelFuture;
-
 import org.opendaylight.protocol.framework.ProtocolSession;
 
 public interface NetconfSession extends ProtocolSession<NetconfMessage> {

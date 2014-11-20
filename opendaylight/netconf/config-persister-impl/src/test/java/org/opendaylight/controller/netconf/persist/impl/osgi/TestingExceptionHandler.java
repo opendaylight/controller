@@ -19,13 +19,13 @@ import org.slf4j.LoggerFactory;
 
 final class TestingExceptionHandler implements Thread.UncaughtExceptionHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(ConfigPersisterTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TestingExceptionHandler.class);
 
     private Throwable t;
 
     @Override
     public void uncaughtException(Thread t, Throwable e) {
-        logger.debug("Uncaught exception in thread {}", t, e);
+        LOG.debug("Uncaught exception in thread {}", t, e);
         this.t = e;
     }
 

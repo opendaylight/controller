@@ -8,10 +8,9 @@
 
 package org.opendaylight.controller.netconf.api.jmx;
 
-import org.w3c.dom.Element;
-
-import javax.management.NotificationBroadcasterSupport;
 import java.util.Set;
+import javax.management.NotificationBroadcasterSupport;
+import org.w3c.dom.Element;
 
 public class CommitJMXNotification extends NetconfJMXNotification {
 

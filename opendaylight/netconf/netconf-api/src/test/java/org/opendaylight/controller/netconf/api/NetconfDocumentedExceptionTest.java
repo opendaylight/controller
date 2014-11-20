@@ -11,15 +11,14 @@ package org.opendaylight.controller.netconf.api;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.Collections;
 import java.util.Iterator;
-
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorSeverity;
@@ -28,8 +27,6 @@ import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorT
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-
-import com.google.common.collect.ImmutableMap;
 
 
 /**

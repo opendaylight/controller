@@ -8,13 +8,12 @@
 
 package org.opendaylight.controller.netconf.persist.impl.osgi;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
 import javax.management.MBeanServer;
-
 import org.opendaylight.controller.config.persist.api.ConfigPusher;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
@@ -34,11 +33,9 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.annotations.VisibleForTesting;
-
 public class ConfigPersisterActivator implements BundleActivator {
 
-    private static final Logger logger = LoggerFactory.getLogger(ConfigPersisterActivator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ConfigPersisterActivator.class);
     private static final MBeanServer platformMBeanServer = ManagementFactory.getPlatformMBeanServer();
 
     public static final String MAX_WAIT_FOR_CAPABILITIES_MILLIS_PROPERTY = "maxWaitForCapabilitiesMillis";
@@ -57,7 +54,7 @@ public class ConfigPersisterActivator implements BundleActivator {
 
     @Override
     public void start(final BundleContext context) throws Exception {
-        logger.debug("ConfigPersister starting");
+        LOG.debug("ConfigPersister starting");
         this.context = context;
 
         autoCloseables = new ArrayList<>();
@@ -68,7 +65,7 @@ public class ConfigPersisterActivator implements BundleActivator {
         long maxWaitForCapabilitiesMillis = getMaxWaitForCapabilitiesMillis(propertiesProvider);
         List<ConfigSnapshotHolder> configs = persisterAggregator.loadLastConfigs();
         long conflictingVersionTimeoutMillis = getConflictingVersionTimeoutMillis(propertiesProvider);
-        logger.debug("Following configs will be pushed: {}", configs);
+        LOG.debug("Following configs will be pushed: {}", configs);
 
         InnerCustomizer innerCustomizer = new InnerCustomizer(configs, maxWaitForCapabilitiesMillis,
                 conflictingVersionTimeoutMillis, persisterAggregator);
@@ -117,7 +114,7 @@ public class ConfigPersisterActivator implements BundleActivator {
 
         @Override
         public NetconfOperationProvider addingService(ServiceReference<NetconfOperationProvider> reference) {
-            logger.trace("Got OuterCustomizer.addingService {}", reference);
+            LOG.trace("Got OuterCustomizer.addingService {}", reference);
             // JMX was registered, track config-netconf-connector
             Filter filter;
             try {
@@ -156,15 +153,15 @@ public class ConfigPersisterActivator implements BundleActivator {
 
         @Override
         public NetconfOperationServiceFactory addingService(ServiceReference<NetconfOperationServiceFactory> reference) {
-            logger.trace("Got InnerCustomizer.addingService {}", reference);
+            LOG.trace("Got InnerCustomizer.addingService {}", reference);
             NetconfOperationServiceFactory service = reference.getBundle().getBundleContext().getService(reference);
 
-            logger.debug("Creating new job queue");
+            LOG.debug("Creating new job queue");
 
             final ConfigPusherImpl configPusher = new ConfigPusherImpl(service, maxWaitForCapabilitiesMillis, conflictingVersionTimeoutMillis);
-            logger.debug("Configuration Persister got {}", service);
-            logger.debug("Context was {}", context);
-            logger.debug("Registration was {}", registration);
+            LOG.debug("Configuration Persister got {}", service);
+            LOG.debug("Context was {}", context);
+            LOG.debug("Registration was {}", registration);
 
             final Thread pushingThread = new Thread(new Runnable() {
                 @Override
@@ -177,12 +174,12 @@ public class ConfigPersisterActivator implements BundleActivator {
                             registration = context.registerService(ConfigPusher.class.getName(), configPusher, null);
                             configPusher.process(autoCloseables, platformMBeanServer, persisterAggregator);
                         } else {
-                            logger.warn("Unable to process configs as BundleContext is null");
+                            LOG.warn("Unable to process configs as BundleContext is null");
                         }
                     } catch (InterruptedException e) {
-                        logger.info("ConfigPusher thread stopped",e);
+                        LOG.info("ConfigPusher thread stopped",e);
                     }
-                    logger.info("Configuration Persister initialization completed.");
+                    LOG.info("Configuration Persister initialization completed.");
                 }
             }, "config-pusher");
             synchronized (autoCloseables) {

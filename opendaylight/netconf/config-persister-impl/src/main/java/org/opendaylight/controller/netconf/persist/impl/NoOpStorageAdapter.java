@@ -8,6 +8,9 @@
 
 package org.opendaylight.controller.netconf.persist.impl;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.persist.api.PropertiesProvider;
@@ -15,32 +18,28 @@ import org.opendaylight.controller.config.persist.api.StorageAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-
 public class NoOpStorageAdapter implements StorageAdapter, Persister {
-    private static final Logger logger = LoggerFactory.getLogger(NoOpStorageAdapter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NoOpStorageAdapter.class);
 
     @Override
     public Persister instantiate(PropertiesProvider propertiesProvider) {
-        logger.debug("instantiate called with {}", propertiesProvider);
+        LOG.debug("instantiate called with {}", propertiesProvider);
         return this;
     }
 
     @Override
     public void persistConfig(ConfigSnapshotHolder holder) throws IOException {
-        logger.debug("persistConfig called with {}", holder);
+        LOG.debug("persistConfig called with {}", holder);
     }
 
     @Override
     public List<ConfigSnapshotHolder> loadLastConfigs() throws IOException {
-        logger.debug("loadLastConfig called");
+        LOG.debug("loadLastConfig called");
         return Collections.emptyList();
     }
 
     @Override
     public void close() {
-        logger.debug("close called");
+        LOG.debug("close called");
     }
 }

@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public final class PersisterAggregator implements Persister {
-    private static final Logger logger = LoggerFactory.getLogger(PersisterAggregator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PersisterAggregator.class);
 
     public static class PersisterWithConfiguration {
 
@@ -139,7 +139,7 @@ public final class PersisterAggregator implements Persister {
                 persisterWithConfigurations.add(PersisterAggregator.loadConfiguration(index, propertiesProvider));
             }
         }
-        logger.debug("Initialized persister with following adapters {}", persisterWithConfigurations);
+        LOG.debug("Initialized persister with following adapters {}", persisterWithConfigurations);
         return new PersisterAggregator(persisterWithConfigurations);
     }
 
@@ -147,7 +147,7 @@ public final class PersisterAggregator implements Persister {
     public void persistConfig(ConfigSnapshotHolder holder) throws IOException {
         for (PersisterWithConfiguration persisterWithConfiguration: persisterWithConfigurations){
             if (!persisterWithConfiguration.readOnly){
-                logger.debug("Calling {}.persistConfig", persisterWithConfiguration.getStorage());
+                LOG.debug("Calling {}.persistConfig", persisterWithConfiguration.getStorage());
                 persisterWithConfiguration.getStorage().persistConfig(holder);
             }
         }
@@ -169,12 +169,12 @@ public final class PersisterAggregator implements Persister {
                 throw new RuntimeException("Error while calling loadLastConfig on " +  persisterWithConfiguration, e);
             }
             if (!configs.isEmpty()) {
-                logger.debug("Found non empty configs using {}:{}", persisterWithConfiguration, configs);
+                LOG.debug("Found non empty configs using {}:{}", persisterWithConfiguration, configs);
                 return configs;
             }
         }
         // no storage had an answer
-        logger.debug("No non-empty list of configuration snapshots found");
+        LOG.debug("No non-empty list of configuration snapshots found");
         return Collections.emptyList();
     }
 
@@ -190,7 +190,7 @@ public final class PersisterAggregator implements Persister {
             try{
                 persisterWithConfiguration.storage.close();
             }catch(RuntimeException e) {
-                logger.error("Error while closing {}", persisterWithConfiguration.storage, e);
+                LOG.error("Error while closing {}", persisterWithConfiguration.storage, e);
                 if (lastException == null){
                     lastException = e;
                 } else {
