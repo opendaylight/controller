@@ -15,7 +15,7 @@ import java.util.concurrent.ExecutorService;
  * Users of this interface can publish any YANG-modeled notification which will
  * be delivered to all subscribed listeners.
  * <p>
- * Prefered way of publishing of notifications is done by invoking {@link #publish(Object)}.
+ * Preferred way of publishing of notifications is done by invoking {@link #publish(Object)}.
  *
  * <p>You may consider using {@link #publish(Object, ExecutorService)} if and only if
  * your use-case requires customized  execution policy or run-to-completion
@@ -50,7 +50,7 @@ public interface NotificationPublishService<N> {
      * Publishes a notification and notifies subscribed listeners. All listener
      * notifications are done via the provided executor.
      * <p>
-     * <b>Note:</b> Use only if ineccessary. Consider using
+     * <b>Note:</b> Use only if necessary. Consider using
      * {@link #publish(Object)} for most use-cases.
      *
      * <p>
