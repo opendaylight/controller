@@ -12,7 +12,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
 import com.google.common.collect.Sets;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
@@ -25,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.opendaylight.yangtools.yang.common.QName;
