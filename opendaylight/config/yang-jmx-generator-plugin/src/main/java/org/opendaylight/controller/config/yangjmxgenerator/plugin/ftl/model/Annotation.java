@@ -9,19 +9,18 @@ package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import org.opendaylight.controller.config.api.annotations.Description;
-import org.opendaylight.controller.config.api.annotations.RequireInterface;
-import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation;
-import org.opendaylight.controller.config.yangjmxgenerator.ServiceInterfaceEntry;
-import org.opendaylight.yangtools.yang.binding.annotations.ModuleQName;
-import org.opendaylight.yangtools.yang.common.QName;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.opendaylight.controller.config.api.annotations.Description;
+import org.opendaylight.controller.config.api.annotations.RequireInterface;
+import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation;
+import org.opendaylight.controller.config.yangjmxgenerator.ServiceInterfaceEntry;
+import org.opendaylight.yangtools.yang.binding.annotations.ModuleQName;
+import org.opendaylight.yangtools.yang.common.QName;
 
 public class Annotation {
     final String name;

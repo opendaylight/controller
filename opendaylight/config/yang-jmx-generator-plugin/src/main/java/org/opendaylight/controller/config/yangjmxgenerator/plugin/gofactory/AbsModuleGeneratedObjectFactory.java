@@ -89,7 +89,7 @@ public class AbsModuleGeneratedObjectFactory {
         }
 
         // add logger:
-        b.addToBody(getLogger(abstractFQN));
+        b.addToBody(getLoggerDefinition(abstractFQN));
 
         b.addToBody("//attributes start");
         for(ModuleField moduleField: moduleFields) {
@@ -377,7 +377,7 @@ public class AbsModuleGeneratedObjectFactory {
         return result;
     }
 
-    private static String getLogger(FullyQualifiedName fqn) {
+    private static String getLoggerDefinition(FullyQualifiedName fqn) {
         return format("private static final %s logger = %s.getLogger(%s.class);",
                 Logger.class.getCanonicalName(), LoggerFactory.class.getCanonicalName(), fqn);
     }

@@ -9,6 +9,16 @@ package org.opendaylight.controller.config.yangjmxgenerator.plugin;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.ServiceInterfaceEntry;
@@ -28,20 +38,9 @@ import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.StringUti
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 final class CodeWriter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CodeWriter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CodeWriter.class);
     private static final Optional<String> COPYRIGHT = StringUtil.loadCopyright();
 
     public File writeSie(ServiceInterfaceEntry sie, File outputBaseDir) {
@@ -52,7 +51,7 @@ final class CodeWriter {
         } catch (Exception e) {
             String message = "An error occurred during Service interface generating, sie:"
                     + sie.getTypeName() + ", " + sie.getFullyQualifiedName();
-            LOGGER.error(message, e);
+            LOG.error(message, e);
             throw new RuntimeException(message, e);
         }
     }
@@ -113,7 +112,7 @@ final class CodeWriter {
         } catch (Exception e) {
             String message = "An error occurred during Module generating, mbe:"
                     + mbe.getJavaNamePrefix();
-            LOGGER.error(message, e);
+            LOG.error(message, e);
             throw new RuntimeException(message, e);
         }
     }
