@@ -29,7 +29,7 @@ public class MessageCollectorActor extends UntypedActor {
     @Override public void onReceive(Object message) throws Exception {
         if(message instanceof String){
             if("get-all-messages".equals(message)){
-                getSender().tell(messages, getSelf());
+                getSender().tell(new ArrayList(messages), getSelf());
             }
         } else {
             messages.add(message);

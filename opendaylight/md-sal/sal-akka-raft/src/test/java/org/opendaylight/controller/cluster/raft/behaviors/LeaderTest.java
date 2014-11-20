@@ -6,7 +6,6 @@ import akka.actor.Props;
 import akka.actor.Terminated;
 import akka.testkit.JavaTestKit;
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.Uninterruptibles;
 import com.google.protobuf.ByteString;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -994,10 +993,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
             final Terminated termMsg1 = probe.expectMsgClass(Terminated.class);
             assertEquals(termMsg1.getActor(), followerActor1);
 
-            //sleep enough for all the follower stopwatches to lapse
-            Uninterruptibles.sleepUninterruptibly(leaderActorContext.getConfigParams().
-                getElectionTimeOutInterval().toMillis(), TimeUnit.MILLISECONDS);
-
+            leader.markFollowerInActive("follower-1");
             leader.markFollowerActive("follower-2");
             behavior = leader.handleMessage(leaderActor, new IsolatedLeaderCheck());
             Assert.assertTrue("Behavior not instance of Leader when majority of followers are active",
@@ -1010,10 +1006,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
             final Terminated termMsg2 = probe.expectMsgClass(Terminated.class);
             assertEquals(termMsg2.getActor(), followerActor2);
 
-            //sleep enough for the remaining the follower stopwatches to lapse
-            Uninterruptibles.sleepUninterruptibly(leaderActorContext.getConfigParams().
-                getElectionTimeOutInterval().toMillis(), TimeUnit.MILLISECONDS);
-
+            leader.markFollowerInActive("follower-2");
             behavior = leader.handleMessage(leaderActor, new IsolatedLeaderCheck());
             Assert.assertTrue("Behavior not instance of IsolatedLeader when majority followers are inactive",
                 behavior instanceof IsolatedLeader);

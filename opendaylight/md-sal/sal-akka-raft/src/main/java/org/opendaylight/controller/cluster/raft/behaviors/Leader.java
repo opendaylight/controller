@@ -113,4 +113,9 @@ public class Leader extends AbstractLeader {
     void markFollowerActive(String followerId) {
         followerToLog.get(followerId).markFollowerActive();
     }
+
+    @VisibleForTesting
+    void markFollowerInActive(String followerId) {
+        followerToLog.get(followerId).markFollowerInActive();
+    }
 }

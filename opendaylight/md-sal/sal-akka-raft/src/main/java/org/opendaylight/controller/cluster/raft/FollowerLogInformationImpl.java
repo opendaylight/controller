@@ -80,4 +80,11 @@ public class FollowerLogInformationImpl implements FollowerLogInformation{
         }
         stopwatch.start();
     }
+
+    @Override
+    public void markFollowerInActive() {
+        if (stopwatch.isRunning()) {
+            stopwatch.stop();
+        }
+    }
 }
