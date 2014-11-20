@@ -178,10 +178,10 @@ public class SubtreeFilter {
             return false;
         }
 
-        final String unprefixedFilterContent = filter.getTextContent().substring(prefix.length());
-        final String unprefixedSrcCOntnet = src.getTextContent().substring(prefix.length());
+        final String unprefixedFilterContent = filter.getTextContent().substring(prefixToNamespaceOfFilter.getKey().length() + 1);
+        final String unprefixedSrcContnet = src.getTextContent().substring(prefixToNamespaceOfSrc.getKey().length() + 1);
         // Finally compare unprefixed content
-        return unprefixedFilterContent.equals(unprefixedSrcCOntnet);
+        return unprefixedFilterContent.equals(unprefixedSrcContnet);
     }
 
     enum MatchingResult {
