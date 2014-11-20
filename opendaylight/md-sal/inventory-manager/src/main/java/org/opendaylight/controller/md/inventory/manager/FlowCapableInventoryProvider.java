@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
-class FlowCapableInventoryProvider implements AutoCloseable, Runnable, TransactionChainListener {
+public class FlowCapableInventoryProvider implements AutoCloseable, Runnable, TransactionChainListener {
     private static final Logger LOG = LoggerFactory.getLogger(FlowCapableInventoryProvider.class);
     private static final int QUEUE_DEPTH = 500;
     private static final int MAX_BATCH = 100;
@@ -37,7 +37,7 @@ class FlowCapableInventoryProvider implements AutoCloseable, Runnable, Transacti
     private ListenerRegistration<?> listenerRegistration;
     private Thread thread;
 
-    FlowCapableInventoryProvider(final DataBroker dataBroker, final NotificationProviderService notificationService) {
+    public FlowCapableInventoryProvider(final DataBroker dataBroker, final NotificationProviderService notificationService) {
         this.dataBroker = Preconditions.checkNotNull(dataBroker);
         this.notificationService = Preconditions.checkNotNull(notificationService);
     }
