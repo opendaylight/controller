@@ -8,6 +8,12 @@
 
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.module;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import net.sourceforge.pmd.lang.Parser;
 import net.sourceforge.pmd.lang.ParserOptions;
 import net.sourceforge.pmd.lang.ast.Node;
@@ -17,15 +23,8 @@ import org.opendaylight.controller.config.yangjmxgenerator.plugin.AbstractGenera
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 public class AbstractGeneratedObjectTest extends AbstractGeneratorTest {
-    private static final Logger logger = LoggerFactory.getLogger(AbstractGeneratedObjectTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractGeneratedObjectTest.class);
 
     protected void assertHasMethodNamed(Node c, String method) {
         assertTrue(c.hasDescendantMatchingXPath("//MethodDeclaration[MethodDeclarator[@Image='" +
@@ -35,7 +34,7 @@ public class AbstractGeneratedObjectTest extends AbstractGeneratorTest {
 
     protected Node parse(File dstFile) throws IOException {
         assertNotNull(dstFile);
-        logger.debug(FileUtils.readFileToString(dstFile));
+        LOG.debug(FileUtils.readFileToString(dstFile));
         Parser parser = new Java17Parser(new ParserOptions());
         return parser.parse(dstFile.toString(), new FileReader(dstFile));
     }

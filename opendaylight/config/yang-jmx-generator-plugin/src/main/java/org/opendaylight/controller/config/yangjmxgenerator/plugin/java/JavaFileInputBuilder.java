@@ -8,14 +8,13 @@
 
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.java;
 
-import com.google.common.base.Optional;
-import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Annotation;
+import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Optional;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Annotation;
 
 public class JavaFileInputBuilder {
 

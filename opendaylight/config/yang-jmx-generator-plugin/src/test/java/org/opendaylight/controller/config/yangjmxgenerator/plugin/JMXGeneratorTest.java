@@ -565,7 +565,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
 
     private static class SieASTVisitor extends ASTVisitor {
         protected String packageName, descriptionAnotValue, sieAnnotValue,
-                sieAnnotOsgiRegistrationType, type, extnds, javadoc;
+        sieAnnotOsgiRegistrationType, type, extnds, javadoc;
         protected Map<String, String> methodDescriptions = Maps.newHashMap();
 
         @Override
