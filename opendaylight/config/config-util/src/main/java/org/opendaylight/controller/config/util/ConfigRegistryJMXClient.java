@@ -7,12 +7,10 @@
  */
 package org.opendaylight.controller.config.util;
 
-import org.opendaylight.controller.config.api.ConflictingVersionException;
-import org.opendaylight.controller.config.api.ValidationException;
-import org.opendaylight.controller.config.api.jmx.CommitStatus;
-import org.opendaylight.controller.config.api.jmx.ConfigRegistryMXBean;
-import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.JMException;
@@ -22,10 +20,11 @@ import javax.management.MBeanServer;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import org.opendaylight.controller.config.api.ConflictingVersionException;
+import org.opendaylight.controller.config.api.ValidationException;
+import org.opendaylight.controller.config.api.jmx.CommitStatus;
+import org.opendaylight.controller.config.api.jmx.ConfigRegistryMXBean;
+import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.api.jmx.ServiceReferenceMXBean;
 
 public class ConfigRegistryJMXClient implements ConfigRegistryClient {

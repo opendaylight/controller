@@ -8,7 +8,6 @@
 package org.opendaylight.controller.config.util;
 
 import javax.management.ObjectName;
-
 import org.opendaylight.controller.config.api.jmx.ConfigRegistryMXBean;
 
 public interface ConfigRegistryClient extends ConfigRegistryMXBean {
