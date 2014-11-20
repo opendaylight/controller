@@ -36,7 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FixedThreadPoolConfigBeanTest extends AbstractConfigTest {
-    private static final Logger logger = LoggerFactory.getLogger(FixedThreadPoolConfigBeanTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FixedThreadPoolConfigBeanTest.class);
 
     private FixedThreadPoolModuleFactory factory;
     private final String nameInstance = "fixedInstance";
@@ -107,7 +107,7 @@ public class FixedThreadPoolConfigBeanTest extends AbstractConfigTest {
                 result++;
             }
         }
-        logger.info("Current threads {}", names);
+        LOG.info("Current threads {}", names);
         return result;
     }
 

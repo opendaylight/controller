@@ -8,14 +8,12 @@
 
 package org.opendaylight.controller.config.threadpool.util;
 
+import com.google.common.base.Preconditions;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;
-
 import javax.annotation.concurrent.ThreadSafe;
-
-import com.google.common.base.Preconditions;
 
 /**
  * Implementation of {@link ThreadFactory}.
