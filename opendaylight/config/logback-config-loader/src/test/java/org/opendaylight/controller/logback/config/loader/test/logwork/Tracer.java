@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Tracer {
 
-    private static Logger LOG = LoggerFactory.getLogger(Tracer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Tracer.class);
 
     /**
      * all logging
