@@ -18,6 +18,7 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 
+@Deprecated
 public final class YangDataUtils {
 
     private YangDataUtils() {

@@ -22,71 +22,75 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.osgi.framework.ServiceReference;
 
-public class DataProviderServiceProxy extends AbstractBrokerServiceProxy<DataProviderService> implements
-        DataProviderService {
+@Deprecated
+public class DataProviderServiceProxy extends AbstractBrokerServiceProxy<DataProviderService> implements DataProviderService {
 
-    public DataProviderServiceProxy(ServiceReference<DataProviderService> ref, DataProviderService delegate) {
+    public DataProviderServiceProxy(final ServiceReference<DataProviderService> ref, final DataProviderService delegate) {
         super(ref, delegate);
     }
 
-    public ListenerRegistration<DataChangeListener> registerDataChangeListener(YangInstanceIdentifier path,
-            DataChangeListener listener) {
+    @Override
+    public ListenerRegistration<DataChangeListener> registerDataChangeListener(final YangInstanceIdentifier path,
+            final DataChangeListener listener) {
         return addRegistration(getDelegate().registerDataChangeListener(path, listener));
     }
 
-    public CompositeNode readConfigurationData(YangInstanceIdentifier path) {
+    @Override
+    public CompositeNode readConfigurationData(final YangInstanceIdentifier path) {
         return getDelegate().readConfigurationData(path);
     }
 
-    public CompositeNode readOperationalData(YangInstanceIdentifier path) {
+    @Override
+    public CompositeNode readOperationalData(final YangInstanceIdentifier path) {
         return getDelegate().readOperationalData(path);
     }
 
+    @Override
     public DataModificationTransaction beginTransaction() {
         return getDelegate().beginTransaction();
     }
 
     @Override
-    public void addRefresher(DataStoreIdentifier store, DataRefresher refresher) {
+    public void addRefresher(final DataStoreIdentifier store, final DataRefresher refresher) {
         getDelegate().addRefresher(store, refresher);
     }
 
     @Override
-    public void addValidator(DataStoreIdentifier store, DataValidator validator) {
+    public void addValidator(final DataStoreIdentifier store, final DataValidator validator) {
         getDelegate().addValidator(store, validator);
     }
 
     @Override
     public Registration registerCommitHandler(
-            YangInstanceIdentifier path, DataCommitHandler<YangInstanceIdentifier, CompositeNode> commitHandler) {
+            final YangInstanceIdentifier path, final DataCommitHandler<YangInstanceIdentifier, CompositeNode> commitHandler) {
         return addRegistration(getDelegate().registerCommitHandler(path, commitHandler));
     }
 
     @Override
     public Registration registerConfigurationReader(
-            YangInstanceIdentifier path, DataReader<YangInstanceIdentifier, CompositeNode> reader) {
+            final YangInstanceIdentifier path, final DataReader<YangInstanceIdentifier, CompositeNode> reader) {
         return addRegistration(getDelegate().registerConfigurationReader(path, reader));
     }
 
     @Override
     public Registration registerOperationalReader(
-            YangInstanceIdentifier path, DataReader<YangInstanceIdentifier, CompositeNode> reader) {
+            final YangInstanceIdentifier path, final DataReader<YangInstanceIdentifier, CompositeNode> reader) {
         return addRegistration(getDelegate().registerOperationalReader(path, reader));
     }
 
     @Override
-    public void removeRefresher(DataStoreIdentifier store, DataRefresher refresher) {
+    public void removeRefresher(final DataStoreIdentifier store, final DataRefresher refresher) {
         getDelegate().removeRefresher(store, refresher);
     }
 
     @Override
-    public void removeValidator(DataStoreIdentifier store, DataValidator validator) {
+    public void removeValidator(final DataStoreIdentifier store, final DataValidator validator) {
         getDelegate().removeValidator(store, validator);
     }
 
     @Override
     public ListenerRegistration<RegistrationListener<DataCommitHandlerRegistration<YangInstanceIdentifier, CompositeNode>>> registerCommitHandlerListener(
-            RegistrationListener<DataCommitHandlerRegistration<YangInstanceIdentifier, CompositeNode>> commitHandlerListener) {
+            final RegistrationListener<DataCommitHandlerRegistration<YangInstanceIdentifier, CompositeNode>> commitHandlerListener) {
         return addRegistration(getDelegate().registerCommitHandlerListener(commitHandlerListener));
     }
 }

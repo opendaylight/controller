@@ -34,8 +34,8 @@ import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DataReaderRouter extends
-AbstractDataReadRouter<YangInstanceIdentifier, CompositeNode> {
+@Deprecated
+public class DataReaderRouter extends AbstractDataReadRouter<YangInstanceIdentifier, CompositeNode> {
     private final static Logger LOG = LoggerFactory
             .getLogger(DataReaderRouter.class);
     private final static URI NETCONF_NAMESPACE = URI

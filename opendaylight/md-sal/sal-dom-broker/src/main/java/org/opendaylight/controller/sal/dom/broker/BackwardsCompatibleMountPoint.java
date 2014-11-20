@@ -15,6 +15,11 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.JdkFutureAdapters;
 import com.google.common.util.concurrent.ListenableFuture;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import javax.annotation.Nullable;
 import org.opendaylight.controller.md.sal.common.api.RegistrationListener;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler;
@@ -71,12 +76,7 @@ import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 
-import javax.annotation.Nullable;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-
+@Deprecated
 public class BackwardsCompatibleMountPoint implements MountProvisionInstance, SchemaContextProvider, SchemaService {
 
     private final DataProviderService dataReader;
@@ -405,8 +405,8 @@ public class BackwardsCompatibleMountPoint implements MountProvisionInstance, Sc
                 return Futures.immediateCheckedFuture(normalizedNodeOptional);
             }
 
-            @Override public CheckedFuture<Boolean, ReadFailedException> exists(LogicalDatastoreType store,
-                YangInstanceIdentifier path) {
+            @Override public CheckedFuture<Boolean, ReadFailedException> exists(final LogicalDatastoreType store,
+                final YangInstanceIdentifier path) {
 
                 try {
                     return Futures.immediateCheckedFuture(read(store, path).get().isPresent());
@@ -527,8 +527,8 @@ public class BackwardsCompatibleMountPoint implements MountProvisionInstance, Sc
                 return new BackwardsCompatibleReadTransaction(dataReader, dataNormalizer).read(store, path);
             }
 
-            @Override public CheckedFuture<Boolean, ReadFailedException> exists(LogicalDatastoreType store,
-                YangInstanceIdentifier path) {
+            @Override public CheckedFuture<Boolean, ReadFailedException> exists(final LogicalDatastoreType store,
+                final YangInstanceIdentifier path) {
 
                 try {
                     return Futures.immediateCheckedFuture(read(store, path).get().isPresent());

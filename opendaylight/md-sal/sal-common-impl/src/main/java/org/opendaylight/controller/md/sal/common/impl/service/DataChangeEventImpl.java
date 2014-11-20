@@ -15,6 +15,7 @@ import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
 import org.opendaylight.yangtools.concepts.Immutable;
 import org.opendaylight.yangtools.concepts.Path;
 
+@Deprecated
 public class DataChangeEventImpl<P extends Path<P>, D> implements DataChangeEvent<P, D>, Immutable {
 
     private final DataChange<P, D> dataChange;

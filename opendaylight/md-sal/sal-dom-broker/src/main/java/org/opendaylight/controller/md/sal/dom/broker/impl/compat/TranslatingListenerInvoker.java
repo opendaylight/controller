@@ -21,6 +21,7 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
+@Deprecated
 abstract class TranslatingListenerInvoker implements AutoCloseable, DOMDataChangeListener, Delegator<DataChangeListener> {
 
     private final DataChangeListener delegate;
