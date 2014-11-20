@@ -1,10 +1,10 @@
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.java;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 public class FullyQualifiedName {
 
