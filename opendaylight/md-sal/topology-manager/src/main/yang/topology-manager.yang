@@ -1,0 +1,42 @@
+module topology-manager {
+        yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:topology-manager";
+    prefix "topology-manager";
+    import config { prefix config; revision-date 2013-04-05; }
+    import opendaylight-md-sal-binding { prefix mdsal; revision-date 2013-10-28; }
+
+    description
+        "Topology manager configuration yang model.";
+
+    revision "2014-11-20" {
+        description
+            "Initial revision";
+    }
+
+    identity topology-manager {
+        base config:module-type;
+        config:java-name-prefix FlowCapableTopologyProvider;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case topology-manager {
+            when "/config:modules/config:module/config:type = 'topology-manager'";
+            container data-broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity mdsal:binding-async-data-broker;
+                    }
+                }
+            }
+            container notification-service {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity mdsal:binding-notification-service;
+                    }
+                }
+            }
+        }
+    }
+}
