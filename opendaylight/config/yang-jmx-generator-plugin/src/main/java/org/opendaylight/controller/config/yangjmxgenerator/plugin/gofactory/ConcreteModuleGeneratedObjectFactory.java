@@ -1,7 +1,8 @@
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.gofactory;
 
+import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
 import java.util.LinkedHashMap;
-
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
@@ -10,9 +11,6 @@ import org.opendaylight.controller.config.yangjmxgenerator.plugin.java.Generated
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.java.GeneratedObjectBuilder;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.java.JavaFileInputBuilder;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.java.TypeName;
-
-import com.google.common.base.Joiner;
-import com.google.common.base.Optional;
 
 public class ConcreteModuleGeneratedObjectFactory {
 

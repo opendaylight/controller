@@ -8,14 +8,13 @@
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl;
 
 import com.google.common.base.Optional;
+import java.util.List;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Annotation;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Constructor;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Field;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Header;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Method;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.TypeDeclaration;
-
-import java.util.List;
 
 public interface FtlTemplate {
 
