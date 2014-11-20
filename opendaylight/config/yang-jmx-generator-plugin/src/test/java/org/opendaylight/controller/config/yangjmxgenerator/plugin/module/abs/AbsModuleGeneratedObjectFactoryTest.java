@@ -9,6 +9,10 @@
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.module.abs;
 
 import com.google.common.base.Optional;
+import java.io.File;
+import java.io.IOException;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.junit.Test;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.ServiceInterfaceEntry;
@@ -17,11 +21,6 @@ import org.opendaylight.controller.config.yangjmxgenerator.plugin.java.FullyQual
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.java.GeneratedObject;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.module.AbstractGeneratedObjectTest;
 import org.opendaylight.yangtools.yang.common.QName;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Map;
-import java.util.Map.Entry;
 
 public class AbsModuleGeneratedObjectFactoryTest extends AbstractGeneratedObjectTest {
 
