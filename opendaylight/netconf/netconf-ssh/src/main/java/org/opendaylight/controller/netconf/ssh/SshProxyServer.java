@@ -72,6 +72,8 @@ public class SshProxyServer implements AutoCloseable {
         return new HashMap<String, String>()
         {{
             put(ServerFactoryManager.IDLE_TIMEOUT, String.valueOf(sshProxyServerConfiguration.getIdleTimeout()));
+            // TODO make auth timeout configurable on its own
+            put(ServerFactoryManager.AUTH_TIMEOUT, String.valueOf(sshProxyServerConfiguration.getIdleTimeout()));
         }};
     }
 
