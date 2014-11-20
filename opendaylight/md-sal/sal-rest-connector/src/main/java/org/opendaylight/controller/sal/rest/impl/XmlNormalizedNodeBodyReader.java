@@ -97,8 +97,11 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
         if(schemaNode instanceof ContainerSchemaNode) {
             return DOM_PARSER_FACTORY.getContainerNodeParser().parse(Collections.singletonList(doc.getDocumentElement()), (ContainerSchemaNode) schemaNode);
         } else if(schemaNode instanceof ListSchemaNode) {
-            ListSchemaNode casted = (ListSchemaNode) schemaNode;
-            return DOM_PARSER_FACTORY.getMapEntryNodeParser().parse(elements, casted);
+            ListSchemaNode listSchemaNode = (ListSchemaNode) schemaNode;
+            if (listSchemaNode.getKeyDefinition().isEmpty()) {
+                return DOM_PARSER_FACTORY.getUnkeyedListEntryNodeParser().parse(elements, listSchemaNode);
+            }
+            return DOM_PARSER_FACTORY.getMapEntryNodeParser().parse(elements, listSchemaNode);
         }
         return null;
     }
