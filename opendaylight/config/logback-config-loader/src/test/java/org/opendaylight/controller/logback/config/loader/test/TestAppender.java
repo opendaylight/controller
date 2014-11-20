@@ -7,9 +7,6 @@
  */
 package org.opendaylight.controller.logback.config.loader.test;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.Context;
@@ -17,6 +14,8 @@ import ch.qos.logback.core.LogbackException;
 import ch.qos.logback.core.filter.Filter;
 import ch.qos.logback.core.spi.FilterReply;
 import ch.qos.logback.core.status.Status;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * dummy appender for collecting log messages
