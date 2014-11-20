@@ -140,9 +140,13 @@
                     <name>binding-async-data-broker</name>
                     <binding-forwarded-data-broker xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">
                         <dom-async-broker>
-                            <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:dom-broker-osgi-registry</type>
-                            <name>dom-broker</name>
+                            <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:dom-async-data-broker</type>
+                            <name>inmemory-data-broker</name>
                         </dom-async-broker>
+                        <schema-service>
+                            <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:schema-service</type>
+                            <name>yang-schema-service</name>
+                        </schema-service>
                         <binding-mapping-service>
                             <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">binding:binding-dom-mapping-service</type>
                             <name>runtime-mapping-singleton</name>
