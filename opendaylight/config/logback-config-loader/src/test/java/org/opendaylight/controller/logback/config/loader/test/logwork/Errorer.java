@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Errorer {
 
-    private static Logger LOG = LoggerFactory.getLogger(Errorer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Errorer.class);
 
     /**
      * all logging

@@ -9,7 +9,6 @@ package org.opendaylight.controller.logback.config.loader;
 
 import java.io.File;
 import java.util.List;
-
 import org.opendaylight.controller.logback.config.loader.impl.LogbackConfigUtil;
 import org.opendaylight.controller.logback.config.loader.impl.LogbackConfigurationLoader;
 import org.osgi.framework.BundleActivator;
@@ -27,7 +26,7 @@ public class Activator implements BundleActivator {
      * logback configurations
      */
     private static final String LOGBACK_CONFIG_D = "logback.config.d";
-    private static Logger LOG = LoggerFactory.getLogger(Activator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
 
     @Override
     public void start(BundleContext context) {
