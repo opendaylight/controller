@@ -7,14 +7,13 @@
  */
 package org.opendaylight.controller.config.yang.test.plugin;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.regex.Pattern;
 
 /**
  * Add implementation code from stub.txt
@@ -39,7 +38,7 @@ public class ProcessSources extends AbstractMojo{
         }
         File sourceDirectory = new File(directory.getPath() + Util.replaceDots(".org.opendaylight.controller.config.yang.test.impl"));
         if (!sourceDirectory.exists()) {
-            super.getLog().error("Source directory does not exists " + sourceDirectory.getPath());
+            super.getLog().error(String.format("Source directory does not exists %s", sourceDirectory.getPath()));
         }
 
         File[] sourceFiles = sourceDirectory.listFiles();
@@ -49,7 +48,7 @@ public class ProcessSources extends AbstractMojo{
                 try {
                     sourceContent = FileUtils.readFileToString(sourceFile);
                 } catch (IOException e) {
-                    getLog().error("Cannot read " + sourceFile.getAbsolutePath(), e);
+                    getLog().error(String.format("Cannot read %s", sourceFile.getAbsolutePath()), e);
                     continue;
                 }
                 if (sourceFile.getName().endsWith("Module.java") || sourceFile.getName().endsWith("ModuleFactory.java")) {
@@ -59,7 +58,7 @@ public class ProcessSources extends AbstractMojo{
                         try {
                             stubContent = FileUtils.readFileToString(stubFile);
                         } catch (IOException e) {
-                            getLog().error("Cannot read " + stubFile.getAbsolutePath(), e);
+                            getLog().error(String.format("Cannot read %s", stubFile.getAbsolutePath()), e);
                         }
                         if (stubContent != null) {
                             sourceContent = rewriteStub(sourceContent, stubContent);
@@ -73,7 +72,7 @@ public class ProcessSources extends AbstractMojo{
                 try {
                     FileUtils.write(sourceFile, sourceContent);
                 } catch (IOException e) {
-                    getLog().error("Cannot write " + sourceFile.getAbsolutePath(), e);
+                    getLog().error(String.format("Cannot write %s", sourceFile.getAbsolutePath()), e);
                 }
             }
 
