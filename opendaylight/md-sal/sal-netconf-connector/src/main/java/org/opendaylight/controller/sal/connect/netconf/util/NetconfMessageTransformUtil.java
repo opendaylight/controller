@@ -7,15 +7,21 @@
  */
 package org.opendaylight.controller.sal.connect.netconf.util;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import javax.annotation.Nullable;
-
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageUtil;
@@ -40,15 +46,6 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
-
 public class NetconfMessageTransformUtil {
 
     public static final String MESSAGE_ID_ATTR = "message-id";
@@ -62,34 +59,34 @@ public class NetconfMessageTransformUtil {
     public static final QName IETF_NETCONF_MONITORING_SCHEMA_VERSION = QName.create(IETF_NETCONF_MONITORING, "version");
     public static final QName IETF_NETCONF_MONITORING_SCHEMA_NAMESPACE = QName.create(IETF_NETCONF_MONITORING, "namespace");
 
-    public static URI NETCONF_URI = URI.create("urn:ietf:params:xml:ns:netconf:base:1.0");
-    public static QName NETCONF_QNAME = QName.create(NETCONF_URI, null, "netconf");
-    public static QName NETCONF_DATA_QNAME = QName.create(NETCONF_QNAME, "data");
-    public static QName NETCONF_RPC_REPLY_QNAME = QName.create(NETCONF_QNAME, "rpc-reply");
-    public static QName NETCONF_ERROR_OPTION_QNAME = QName.create(NETCONF_QNAME, "error-option");
-    public static QName NETCONF_RUNNING_QNAME = QName.create(NETCONF_QNAME, "running");
-    static List<Node<?>> RUNNING = Collections.<Node<?>> singletonList(new SimpleNodeTOImpl<>(NETCONF_RUNNING_QNAME, null, null));
-    public static QName NETCONF_SOURCE_QNAME = QName.create(NETCONF_QNAME, "source");
-    public static CompositeNode CONFIG_SOURCE_RUNNING = new CompositeNodeTOImpl(NETCONF_SOURCE_QNAME, null, RUNNING);
-    public static QName NETCONF_CANDIDATE_QNAME = QName.create(NETCONF_QNAME, "candidate");
-    public static QName NETCONF_TARGET_QNAME = QName.create(NETCONF_QNAME, "target");
-    public static QName NETCONF_CONFIG_QNAME = QName.create(NETCONF_QNAME, "config");
-    public static QName NETCONF_COMMIT_QNAME = QName.create(NETCONF_QNAME, "commit");
-    public static QName NETCONF_OPERATION_QNAME = QName.create(NETCONF_QNAME, "operation");
-    public static QName NETCONF_DEFAULT_OPERATION_QNAME = QName.create(NETCONF_OPERATION_QNAME, "default-operation");
-    public static QName NETCONF_EDIT_CONFIG_QNAME = QName.create(NETCONF_QNAME, "edit-config");
-    public static QName NETCONF_GET_CONFIG_QNAME = QName.create(NETCONF_QNAME, "get-config");
-    public static QName NETCONF_DISCARD_CHANGES_QNAME = QName.create(NETCONF_QNAME, "discard-changes");
-    public static QName NETCONF_TYPE_QNAME = QName.create(NETCONF_QNAME, "type");
-    public static QName NETCONF_FILTER_QNAME = QName.create(NETCONF_QNAME, "filter");
-    public static QName NETCONF_GET_QNAME = QName.create(NETCONF_QNAME, "get");
-    public static QName NETCONF_RPC_QNAME = QName.create(NETCONF_QNAME, "rpc");
+    public static final URI NETCONF_URI = URI.create("urn:ietf:params:xml:ns:netconf:base:1.0");
+    public static final QName NETCONF_QNAME = QName.create(NETCONF_URI, null, "netconf");
+    public static final QName NETCONF_DATA_QNAME = QName.create(NETCONF_QNAME, "data");
+    public static final QName NETCONF_RPC_REPLY_QNAME = QName.create(NETCONF_QNAME, "rpc-reply");
+    public static final QName NETCONF_ERROR_OPTION_QNAME = QName.create(NETCONF_QNAME, "error-option");
+    public static final QName NETCONF_RUNNING_QNAME = QName.create(NETCONF_QNAME, "running");
+    static final List<Node<?>> RUNNING = Collections.<Node<?>> singletonList(new SimpleNodeTOImpl<>(NETCONF_RUNNING_QNAME, null, null));
+    public static final QName NETCONF_SOURCE_QNAME = QName.create(NETCONF_QNAME, "source");
+    public static final CompositeNode CONFIG_SOURCE_RUNNING = new CompositeNodeTOImpl(NETCONF_SOURCE_QNAME, null, RUNNING);
+    public static final QName NETCONF_CANDIDATE_QNAME = QName.create(NETCONF_QNAME, "candidate");
+    public static final QName NETCONF_TARGET_QNAME = QName.create(NETCONF_QNAME, "target");
+    public static final QName NETCONF_CONFIG_QNAME = QName.create(NETCONF_QNAME, "config");
+    public static final QName NETCONF_COMMIT_QNAME = QName.create(NETCONF_QNAME, "commit");
+    public static final QName NETCONF_OPERATION_QNAME = QName.create(NETCONF_QNAME, "operation");
+    public static final QName NETCONF_DEFAULT_OPERATION_QNAME = QName.create(NETCONF_OPERATION_QNAME, "default-operation");
+    public static final QName NETCONF_EDIT_CONFIG_QNAME = QName.create(NETCONF_QNAME, "edit-config");
+    public static final QName NETCONF_GET_CONFIG_QNAME = QName.create(NETCONF_QNAME, "get-config");
+    public static final QName NETCONF_DISCARD_CHANGES_QNAME = QName.create(NETCONF_QNAME, "discard-changes");
+    public static final QName NETCONF_TYPE_QNAME = QName.create(NETCONF_QNAME, "type");
+    public static final QName NETCONF_FILTER_QNAME = QName.create(NETCONF_QNAME, "filter");
+    public static final QName NETCONF_GET_QNAME = QName.create(NETCONF_QNAME, "get");
+    public static final QName NETCONF_RPC_QNAME = QName.create(NETCONF_QNAME, "rpc");
 
-    public static URI NETCONF_ROLLBACK_ON_ERROR_URI = URI
+    public static final URI NETCONF_ROLLBACK_ON_ERROR_URI = URI
             .create("urn:ietf:params:netconf:capability:rollback-on-error:1.0");
-    public static String ROLLBACK_ON_ERROR_OPTION = "rollback-on-error";
+    public static final String ROLLBACK_ON_ERROR_OPTION = "rollback-on-error";
 
-    public static URI NETCONF_CANDIDATE_URI = URI
+    public static final URI NETCONF_CANDIDATE_URI = URI
             .create("urn:ietf:params:netconf:capability:candidate:1.0");
 
     // Discard changes message
