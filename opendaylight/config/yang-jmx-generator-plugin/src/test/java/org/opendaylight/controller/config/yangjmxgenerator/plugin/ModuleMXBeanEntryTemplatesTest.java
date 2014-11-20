@@ -7,7 +7,14 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.plugin;
 
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+
 import com.google.common.collect.Maps;
+import java.util.Collections;
+import java.util.Map;
 import org.junit.Test;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
@@ -15,14 +22,6 @@ import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribu
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.AbstractFactoryTemplate;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.TemplateFactory;
 import org.opendaylight.yangtools.sal.binding.model.api.Type;
-
-import java.util.Collections;
-import java.util.Map;
-
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 
 public class ModuleMXBeanEntryTemplatesTest {
 

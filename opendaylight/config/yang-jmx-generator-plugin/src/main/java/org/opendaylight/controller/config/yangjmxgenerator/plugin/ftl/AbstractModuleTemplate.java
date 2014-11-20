@@ -7,14 +7,13 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl;
 
+import java.util.Collections;
+import java.util.List;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Constructor;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Field;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Header;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.MethodDefinition;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.ModuleField;
-
-import java.util.Collections;
-import java.util.List;
 
 public class AbstractModuleTemplate extends GeneralClassTemplate {
 

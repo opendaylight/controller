@@ -10,6 +10,14 @@ package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import javax.management.openmbean.SimpleType;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.IdentityAttributeRef;
 import org.opendaylight.controller.config.api.RuntimeBeanRegistratorAwareModule;
@@ -43,15 +51,6 @@ import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.FullyQual
 import org.opendaylight.yangtools.binding.generator.util.BindingGeneratorUtil;
 import org.opendaylight.yangtools.sal.binding.model.api.ParameterizedType;
 import org.opendaylight.yangtools.sal.binding.model.api.Type;
-
-import javax.management.openmbean.SimpleType;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 public class TemplateFactory {
 

@@ -1,7 +1,6 @@
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.java;
 
 import com.google.common.base.Optional;
-
 import java.util.List;
 
 public interface JavaFileInput {
