@@ -65,11 +65,16 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.InstanceIdentifierBuilder;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
+import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ModifiedNodeDoesNotExistException;
 import org.opendaylight.yangtools.yang.data.composite.node.schema.cnsn.parser.CnSnToNormalizedNodeParserFactory;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
+import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeAttrBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.ListNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
@@ -1618,5 +1623,49 @@ public class RestconfImpl implements RestconfService {
     public BigInteger getOperationalReceived() {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    private MapEntryNode toModuleEntryNode(final Module module, final DataSchemaNode moduleSchemaNode) {
+        Preconditions.checkArgument(moduleSchemaNode instanceof ListSchemaNode,
+                "moduleSchemaNode has to be of type ListSchemaNode");
+        final ListSchemaNode listModuleSchemaNode = (ListSchemaNode) moduleSchemaNode;
+        final DataContainerNodeAttrBuilder<NodeIdentifierWithPredicates, MapEntryNode> moduleNodeValues = Builders
+                .mapEntryBuilder(listModuleSchemaNode);
+
+        List<DataSchemaNode> instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
+                ((DataNodeContainer) listModuleSchemaNode), "name");
+        final DataSchemaNode nameSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
+        Preconditions.checkState(nameSchemaNode instanceof LeafSchemaNode);
+        moduleNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) nameSchemaNode).withValue(module.getName())
+                .build());
+
+        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
+                ((DataNodeContainer) listModuleSchemaNode), "revision");
+        final DataSchemaNode revisionSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
+        Preconditions.checkState(revisionSchemaNode instanceof LeafSchemaNode);
+        final String revision = REVISION_FORMAT.format(module.getRevision());
+        moduleNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) revisionSchemaNode).withValue(revision)
+                .build());
+
+        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
+                ((DataNodeContainer) listModuleSchemaNode), "namespace");
+        final DataSchemaNode namespaceSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
+        Preconditions.checkState(namespaceSchemaNode instanceof LeafSchemaNode);
+        moduleNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) namespaceSchemaNode)
+                .withValue(module.getNamespace().toString()).build());
+
+        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
+                ((DataNodeContainer) listModuleSchemaNode), "feature");
+        final DataSchemaNode featureSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
+        Preconditions.checkState(featureSchemaNode instanceof LeafListSchemaNode);
+        ListNodeBuilder<Object, LeafSetEntryNode<Object>> featuresBuilder = Builders
+                .leafSetBuilder((LeafListSchemaNode) featureSchemaNode);
+        for (final FeatureDefinition feature : module.getFeatures()) {
+            featuresBuilder.withChild(Builders.leafSetEntryBuilder(((LeafListSchemaNode) featureSchemaNode))
+                    .withValue(feature.getQName().getLocalName()).build());
+        }
+
+        moduleNodeValues.withChild(featuresBuilder.build());
+        return moduleNodeValues.build();
     }
 }
