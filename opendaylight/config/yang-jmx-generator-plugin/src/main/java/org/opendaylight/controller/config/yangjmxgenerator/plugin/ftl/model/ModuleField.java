@@ -8,11 +8,10 @@
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model;
 
 
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.Dependency;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.Dependency;
 
 public class ModuleField extends Field {
 
