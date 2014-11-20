@@ -63,13 +63,22 @@ import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.InstanceIdentifierBuilder;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
+import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
+import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
+import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ModifiedNodeDoesNotExistException;
 import org.opendaylight.yangtools.yang.data.composite.node.schema.cnsn.parser.CnSnToNormalizedNodeParserFactory;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
+import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeAttrBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.ListNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
@@ -181,24 +190,45 @@ public class RestconfImpl implements RestconfService {
     }
 
     @Override
-    public StructuredData getModules(final UriInfo uriInfo) {
-        final Module restconfModule = this.getRestconfModule();
+    public NormalizedNodeContext getModules(final UriInfo uriInfo) {
+        return getModules(controllerContext.getAllModules(), controllerContext.getGlobalSchema(), null);
+    }
 
-        final List<Node<?>> modulesAsData = new ArrayList<Node<?>>();
-        final DataSchemaNode moduleSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(restconfModule,
-                Draft02.RestConfModule.MODULE_LIST_SCHEMA_NODE);
-
-        Set<Module> allModules = this.controllerContext.getAllModules();
-        for (final Module module : allModules) {
-            CompositeNode moduleCompositeNode = this.toModuleCompositeNode(module, moduleSchemaNode);
-            modulesAsData.add(moduleCompositeNode);
+    @Override
+    public NormalizedNodeContext getModules(final String identifier, final UriInfo uriInfo) {
+        if (!identifier.contains(ControllerContext.MOUNT)) {
+            throw new RestconfDocumentedException(
+                    "URI has bad format. If modules behind mount point should be showed, URI has to end with "
+                            + ControllerContext.MOUNT, ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
         }
 
+        InstanceIdentifierContext mountPointIdentifier = controllerContext.toMountPointIdentifier(identifier);
+        final DOMMountPoint mountPoint = mountPointIdentifier.getMountPoint();
+
+        return getModules(controllerContext.getAllModules(mountPoint), mountPoint.getSchemaContext(), mountPoint);
+    }
+
+    private NormalizedNodeContext getModules(final Set<Module> modules, final SchemaContext schemaContext,
+            final DOMMountPoint mountPoint) {
+        final Module restconfModule = this.getRestconfModule();
         final DataSchemaNode modulesSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(restconfModule,
                 Draft02.RestConfModule.MODULES_CONTAINER_SCHEMA_NODE);
-        QName qName = modulesSchemaNode.getQName();
-        final CompositeNode modulesNode = NodeFactory.createImmutableCompositeNode(qName, null, modulesAsData);
-        return new StructuredData(modulesNode, modulesSchemaNode, null, parsePrettyPrintParameter(uriInfo));
+        Preconditions.checkState(modulesSchemaNode instanceof ContainerSchemaNode);
+        final DataSchemaNode moduleSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(restconfModule,
+                Draft02.RestConfModule.MODULE_LIST_SCHEMA_NODE);
+        Preconditions.checkState(moduleSchemaNode instanceof ListSchemaNode);
+
+        final DataContainerNodeAttrBuilder<NodeIdentifier, ContainerNode> containerModulesBuilder = Builders
+                .containerBuilder((ContainerSchemaNode) modulesSchemaNode);
+        CollectionNodeBuilder<MapEntryNode, MapNode> listModuleBuilder = Builders
+                .mapBuilder((ListSchemaNode) moduleSchemaNode);
+        for (final Module module : modules) {
+            listModuleBuilder.withChild(toModuleEntryNode(module, moduleSchemaNode));
+        }
+
+        containerModulesBuilder.withChild(listModuleBuilder.build());
+        return new NormalizedNodeContext(new InstanceIdentifierContext(null, modulesSchemaNode, mountPoint,
+                schemaContext), containerModulesBuilder.build());
     }
 
     @Override
@@ -218,36 +248,6 @@ public class RestconfImpl implements RestconfService {
         QName qName = streamsSchemaNode.getQName();
         final CompositeNode streamsNode = NodeFactory.createImmutableCompositeNode(qName, null, streamsAsData);
         return new StructuredData(streamsNode, streamsSchemaNode, null, parsePrettyPrintParameter(uriInfo));
-    }
-
-    @Override
-    public StructuredData getModules(final String identifier, final UriInfo uriInfo) {
-        Set<Module> modules = null;
-        DOMMountPoint mountPoint = null;
-        if (identifier.contains(ControllerContext.MOUNT)) {
-            InstanceIdentifierContext mountPointIdentifier = this.controllerContext.toMountPointIdentifier(identifier);
-            mountPoint = mountPointIdentifier.getMountPoint();
-            modules = this.controllerContext.getAllModules(mountPoint);
-        } else {
-            throw new RestconfDocumentedException(
-                    "URI has bad format. If modules behind mount point should be showed, URI has to end with "
-                            + ControllerContext.MOUNT, ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
-        }
-
-        final List<Node<?>> modulesAsData = new ArrayList<Node<?>>();
-        Module restconfModule = this.getRestconfModule();
-        final DataSchemaNode moduleSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(restconfModule,
-                Draft02.RestConfModule.MODULE_LIST_SCHEMA_NODE);
-
-        for (final Module module : modules) {
-            modulesAsData.add(this.toModuleCompositeNode(module, moduleSchemaNode));
-        }
-
-        final DataSchemaNode modulesSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(restconfModule,
-                Draft02.RestConfModule.MODULES_CONTAINER_SCHEMA_NODE);
-        QName qName = modulesSchemaNode.getQName();
-        final CompositeNode modulesNode = NodeFactory.createImmutableCompositeNode(qName, null, modulesAsData);
-        return new StructuredData(modulesNode, modulesSchemaNode, mountPoint, parsePrettyPrintParameter(uriInfo));
     }
 
     @Override
@@ -438,6 +438,50 @@ public class RestconfImpl implements RestconfService {
         }
 
         return NodeFactory.createImmutableCompositeNode(moduleSchemaNode.getQName(), null, moduleNodeValues);
+    }
+
+    private MapEntryNode toModuleEntryNode(final Module module, final DataSchemaNode moduleSchemaNode) {
+        Preconditions.checkArgument(moduleSchemaNode instanceof ListSchemaNode,
+                "moduleSchemaNode has to be of type ListSchemaNode");
+        final ListSchemaNode listModuleSchemaNode = (ListSchemaNode) moduleSchemaNode;
+        final DataContainerNodeAttrBuilder<NodeIdentifierWithPredicates, MapEntryNode> moduleNodeValues = Builders
+                .mapEntryBuilder(listModuleSchemaNode);
+
+        List<DataSchemaNode> instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
+                ((DataNodeContainer) listModuleSchemaNode), "name");
+        final DataSchemaNode nameSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
+        Preconditions.checkState(nameSchemaNode instanceof LeafSchemaNode);
+        moduleNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) nameSchemaNode).withValue(module.getName())
+                .build());
+
+        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
+                ((DataNodeContainer) listModuleSchemaNode), "revision");
+        final DataSchemaNode revisionSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
+        Preconditions.checkState(revisionSchemaNode instanceof LeafSchemaNode);
+        final String revision = REVISION_FORMAT.format(module.getRevision());
+        moduleNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) revisionSchemaNode).withValue(revision)
+                .build());
+
+        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
+                ((DataNodeContainer) listModuleSchemaNode), "namespace");
+        final DataSchemaNode namespaceSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
+        Preconditions.checkState(namespaceSchemaNode instanceof LeafSchemaNode);
+        moduleNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) namespaceSchemaNode)
+                .withValue(module.getNamespace().toString()).build());
+
+        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
+                ((DataNodeContainer) listModuleSchemaNode), "feature");
+        final DataSchemaNode featureSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
+        Preconditions.checkState(featureSchemaNode instanceof LeafListSchemaNode);
+        ListNodeBuilder<Object, LeafSetEntryNode<Object>> featuresBuilder = Builders
+                .leafSetBuilder((LeafListSchemaNode) featureSchemaNode);
+        for (final FeatureDefinition feature : module.getFeatures()) {
+            featuresBuilder.withChild(Builders.leafSetEntryBuilder(((LeafListSchemaNode) featureSchemaNode))
+                    .withValue(feature.getQName().getLocalName()).build());
+        }
+
+        moduleNodeValues.withChild(featuresBuilder.build());
+        return moduleNodeValues.build();
     }
 
     @Override

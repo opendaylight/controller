@@ -62,13 +62,13 @@ public interface RestconfService {
     @Path("/modules")
     @Produces({ Draft02.MediaTypes.API + JSON, Draft02.MediaTypes.API + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public StructuredData getModules(@Context UriInfo uriInfo);
+    public NormalizedNodeContext getModules(@Context UriInfo uriInfo);
 
     @GET
     @Path("/modules/{identifier:.+}")
     @Produces({ Draft02.MediaTypes.API + JSON, Draft02.MediaTypes.API + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public StructuredData getModules(@PathParam("identifier") String identifier, @Context UriInfo uriInfo);
+    public NormalizedNodeContext getModules(@PathParam("identifier") String identifier, @Context UriInfo uriInfo);
 
     @GET
     @Path("/modules/module/{identifier:.+}")
