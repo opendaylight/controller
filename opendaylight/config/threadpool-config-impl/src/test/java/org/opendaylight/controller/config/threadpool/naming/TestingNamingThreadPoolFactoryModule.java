@@ -14,7 +14,6 @@ import static org.mockito.Mockito.mock;
 
 import java.io.Closeable;
 import java.io.IOException;
-
 import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.spi.Module;
