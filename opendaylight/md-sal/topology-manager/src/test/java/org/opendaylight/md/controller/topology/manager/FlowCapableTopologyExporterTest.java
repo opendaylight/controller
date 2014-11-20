@@ -380,7 +380,6 @@ public class FlowCapableTopologyExporterTest {
         assertEquals("getInventoryNodeRef", new NodeRef(invNodeID), augmentation.getInventoryNodeRef());
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
     public void testOnNodeConnectorUpdated() {
 
