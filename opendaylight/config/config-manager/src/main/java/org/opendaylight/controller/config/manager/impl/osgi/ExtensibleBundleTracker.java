@@ -92,7 +92,7 @@ public final class ExtensibleBundleTracker<T> extends BundleTracker<Future<T>> {
                     LOG.trace("AddingBundle for {} and event {} finished successfully",bundle,event);
                     return primaryTrackerRetVal;
                 } catch (Exception e) {
-                    LOG.error("Failed to add bundle {}",e);
+                    LOG.error("Failed to add bundle ",e);
                     throw e;
                 }
             }

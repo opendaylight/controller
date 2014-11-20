@@ -10,28 +10,23 @@ package org.opendaylight.controller.config.manager.testingservices.scheduledthre
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import java.util.Collections;
 import java.util.List;
-
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
-
 import org.junit.Test;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-import org.opendaylight.controller.config.manager.testingservices.scheduledthreadpool
-        .TestingScheduledThreadPoolConfigBeanMXBean;
-import org.opendaylight.controller.config.manager.testingservices.scheduledthreadpool
-        .TestingScheduledThreadPoolModuleFactory;
+import org.opendaylight.controller.config.manager.testingservices.scheduledthreadpool.TestingScheduledThreadPoolConfigBeanMXBean;
+import org.opendaylight.controller.config.manager.testingservices.scheduledthreadpool.TestingScheduledThreadPoolModuleFactory;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 /**
  * TestingScheduledThreadPool exports 2 interfaces: <br>

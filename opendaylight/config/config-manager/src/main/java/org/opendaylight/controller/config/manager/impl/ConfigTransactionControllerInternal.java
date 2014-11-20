@@ -7,14 +7,13 @@
  */
 package org.opendaylight.controller.config.manager.impl;
 
+import java.util.Collection;
+import java.util.List;
+import javax.management.ObjectName;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.BundleContext;
-
-import javax.management.ObjectName;
-import java.util.Collection;
-import java.util.List;
 
 /**
  * Defines contract between {@link ConfigTransactionControllerImpl} (producer)

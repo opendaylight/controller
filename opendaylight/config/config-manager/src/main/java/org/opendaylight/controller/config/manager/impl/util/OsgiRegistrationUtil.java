@@ -9,6 +9,7 @@
 package org.opendaylight.controller.config.manager.impl.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -20,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class OsgiRegistrationUtil {
-    private static final Logger LOGGER = LoggerFactory.getLogger(OsgiRegistrationUtil.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OsgiRegistrationUtil.class);
 
     private OsgiRegistrationUtil() {
     }
@@ -82,7 +83,7 @@ public class OsgiRegistrationUtil {
                     try {
                         ac.close();
                     } catch (Exception e) {
-                        LOGGER.warn("Exception while closing {}", ac, e);
+                        LOG.warn("Exception while closing {}", ac, e);
                         if (firstException == null) {
                             firstException = e;
                         } else {

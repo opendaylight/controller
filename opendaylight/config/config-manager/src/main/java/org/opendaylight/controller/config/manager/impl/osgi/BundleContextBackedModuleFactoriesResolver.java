@@ -7,6 +7,10 @@
  */
 package org.opendaylight.controller.config.manager.impl.osgi;
 
+import java.util.AbstractMap;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.ModuleFactoriesResolver;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.BundleContext;
@@ -15,17 +19,12 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.AbstractMap;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Retrieves list of currently registered Module Factories using bundlecontext.
  */
 public class BundleContextBackedModuleFactoriesResolver implements
         ModuleFactoriesResolver {
-    private static final Logger LOGGER = LoggerFactory
+    private static final Logger LOG = LoggerFactory
             .getLogger(BundleContextBackedModuleFactoriesResolver.class);
     private final BundleContext bundleContext;
 
@@ -62,14 +61,14 @@ public class BundleContextBackedModuleFactoriesResolver implements
             if (serviceReference.getBundle() == null || serviceReference.getBundle().getBundleContext() == null) {
                 throw new NullPointerException("Bundle context of " + factory + " ModuleFactory not found.");
             }
-            LOGGER.debug("Reading factory {} {}", moduleName, factory);
+            LOG.debug("Reading factory {} {}", moduleName, factory);
 
             Map.Entry<ModuleFactory, BundleContext> conflicting = result.get(moduleName);
             if (conflicting != null) {
                 String error = String
                         .format("Module name is not unique. Found two conflicting factories with same name '%s': '%s' '%s'",
                                 moduleName, conflicting.getKey(), factory);
-                LOGGER.error(error);
+                LOG.error(error);
                 throw new IllegalArgumentException(error);
             } else {
                 result.put(moduleName, new AbstractMap.SimpleImmutableEntry<>(factory,

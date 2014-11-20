@@ -7,21 +7,14 @@
  */
 package org.opendaylight.controller.config.manager.impl;
 
-import com.google.common.collect.ImmutableMap;
-import org.junit.Before;
-import org.junit.Test;
-import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-import org.opendaylight.controller.config.manager.impl.AbstractConfigTest.RecordingBundleContextServiceRegistrationHandler.RegistrationHolder;
-import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
-import org.opendaylight.controller.config.api.jmx.ServiceReferenceMXBean;
-import org.opendaylight.controller.config.manager.testingservices.parallelapsp.TestingParallelAPSPModuleFactory;
-import org.opendaylight.controller.config.manager.testingservices.parallelapsp.test.AbstractParallelAPSPTest;
-import org.opendaylight.controller.config.manager.testingservices.scheduledthreadpool.TestingScheduledThreadPoolModuleFactory;
-import org.opendaylight.controller.config.manager.testingservices.seviceinterface.TestingThreadPoolServiceInterface;
-import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingFixedThreadPoolModuleFactory;
-import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingThreadPoolIfc;
-import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.opendaylight.controller.config.api.jmx.ObjectNameUtil.withoutTransactionName;
 
+import com.google.common.collect.ImmutableMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.management.Attribute;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
@@ -29,13 +22,19 @@ import javax.management.JMX;
 import javax.management.MBeanException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.opendaylight.controller.config.api.jmx.ObjectNameUtil.withoutTransactionName;
+import org.junit.Before;
+import org.junit.Test;
+import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
+import org.opendaylight.controller.config.api.jmx.ServiceReferenceMXBean;
+import org.opendaylight.controller.config.manager.impl.AbstractConfigTest.RecordingBundleContextServiceRegistrationHandler.RegistrationHolder;
+import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
+import org.opendaylight.controller.config.manager.testingservices.parallelapsp.TestingParallelAPSPModuleFactory;
+import org.opendaylight.controller.config.manager.testingservices.parallelapsp.test.AbstractParallelAPSPTest;
+import org.opendaylight.controller.config.manager.testingservices.scheduledthreadpool.TestingScheduledThreadPoolModuleFactory;
+import org.opendaylight.controller.config.manager.testingservices.seviceinterface.TestingThreadPoolServiceInterface;
+import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingFixedThreadPoolModuleFactory;
+import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingThreadPoolIfc;
+import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 
 public class ServiceReferenceRegistryImplTest extends AbstractParallelAPSPTest {
 

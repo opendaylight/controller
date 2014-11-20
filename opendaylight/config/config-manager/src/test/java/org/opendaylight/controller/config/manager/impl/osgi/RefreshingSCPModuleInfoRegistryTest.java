@@ -3,6 +3,7 @@ package org.opendaylight.controller.config.manager.impl.osgi;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+
 import java.util.Dictionary;
 import org.junit.Test;
 import org.mockito.Mockito;

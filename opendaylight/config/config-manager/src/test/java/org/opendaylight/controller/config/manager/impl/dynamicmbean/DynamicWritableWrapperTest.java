@@ -7,6 +7,16 @@
  */
 package org.opendaylight.controller.config.manager.impl.dynamicmbean;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+import java.util.concurrent.atomic.AtomicBoolean;
+import javax.management.Attribute;
+import javax.management.AttributeList;
+import javax.management.DynamicMBean;
+import javax.management.JMX;
+import javax.management.MBeanServerFactory;
+import javax.management.ObjectName;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
@@ -17,17 +27,6 @@ import org.opendaylight.controller.config.manager.testingservices.parallelapsp.T
 import org.opendaylight.controller.config.manager.testingservices.parallelapsp.TestingParallelAPSPModuleFactory;
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingFixedThreadPoolConfigMXBean;
 import org.opendaylight.controller.config.spi.Module;
-
-import javax.management.Attribute;
-import javax.management.AttributeList;
-import javax.management.DynamicMBean;
-import javax.management.JMX;
-import javax.management.MBeanServerFactory;
-import javax.management.ObjectName;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 public class DynamicWritableWrapperTest extends AbstractDynamicWrapperTest {
     private final int newThreadCount = 10;

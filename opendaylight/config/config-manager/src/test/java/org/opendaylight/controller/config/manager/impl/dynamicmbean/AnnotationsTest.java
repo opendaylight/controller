@@ -13,6 +13,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.common.base.Throwables;
+import com.google.common.collect.Sets;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,17 +22,12 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
-
 import javax.management.ObjectName;
-
 import org.junit.Test;
 import org.opendaylight.controller.config.api.annotations.AbstractServiceInterface;
 import org.opendaylight.controller.config.api.annotations.Description;
 import org.opendaylight.controller.config.api.annotations.RequireInterface;
 import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation;
-
-import com.google.common.base.Throwables;
-import com.google.common.collect.Sets;
 
 public class AnnotationsTest {
 

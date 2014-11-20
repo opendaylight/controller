@@ -99,11 +99,11 @@ public class DependencyResolverManagerTest extends AbstractLockedPlatformMBeanSe
         boolean isDefaultBean = false;
 
         tested.put(moduleIdentifier,
-        mockedModule(),
-        moduleFactory,
-        maybeOldInternalInfo,
-        transactionModuleJMXRegistration,
-        isDefaultBean, mock(BundleContext.class));
+            mockedModule(),
+            moduleFactory,
+            maybeOldInternalInfo,
+            transactionModuleJMXRegistration,
+            isDefaultBean, mock(BundleContext.class));
     }
 
     private static Module mockedModule() {

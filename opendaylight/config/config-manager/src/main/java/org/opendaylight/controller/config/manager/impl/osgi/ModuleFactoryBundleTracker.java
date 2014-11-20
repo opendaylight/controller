@@ -13,7 +13,6 @@ import com.google.common.annotations.VisibleForTesting;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
-
 import org.apache.commons.io.IOUtils;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.Bundle;
@@ -35,7 +34,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Object> {
     private final BlankTransactionServiceTracker blankTransactionServiceTracker;
-    private static final Logger LOGGER = LoggerFactory.getLogger(ModuleFactoryBundleTracker.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ModuleFactoryBundleTracker.class);
 
     public ModuleFactoryBundleTracker(BlankTransactionServiceTracker blankTransactionServiceTracker) {
         this.blankTransactionServiceTracker = blankTransactionServiceTracker;
@@ -44,7 +43,7 @@ public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Objec
     @Override
     public Object addingBundle(Bundle bundle, BundleEvent event) {
         URL resource = bundle.getEntry("META-INF/services/" + ModuleFactory.class.getName());
-        LOGGER.trace("Got addingBundle event of bundle {}, resource {}, event {}",
+        LOG.trace("Got addingBundle event of bundle {}, resource {}, event {}",
                 bundle, resource, event);
         if (resource != null) {
             try (InputStream inputStream = resource.openStream()) {
@@ -53,7 +52,7 @@ public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Objec
                     registerFactory(factoryClassName, bundle);
                 }
             } catch (Exception e) {
-                LOGGER.error("Error while reading {}", resource, e);
+                LOG.error("Error while reading {}", resource, e);
                 throw new RuntimeException(e);
             }
         }
@@ -79,7 +78,7 @@ public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Objec
             Class<?> clazz = bundle.loadClass(factoryClassName);
             if (ModuleFactory.class.isAssignableFrom(clazz)) {
                 try {
-                    LOGGER.debug("Registering {} in bundle {}",
+                    LOG.debug("Registering {} in bundle {}",
                             clazz.getName(), bundle);
                     return bundle.getBundleContext().registerService(
                             ModuleFactory.class.getName(), clazz.newInstance(),
@@ -111,7 +110,7 @@ public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Objec
     }
 
     public static String logMessage(String slfMessage, Object... params) {
-        LOGGER.info(slfMessage, params);
+        LOG.info(slfMessage, params);
         String formatMessage = slfMessage.replaceAll("\\{\\}", "%s");
         return format(formatMessage, params);
     }

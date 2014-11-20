@@ -8,11 +8,9 @@
 package org.opendaylight.controller.config.manager.impl.jmx;
 
 import java.io.Closeable;
-
 import javax.annotation.concurrent.ThreadSafe;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.ObjectName;
-
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.manager.impl.jmx.InternalJMXRegistrator.InternalJMXRegistration;
 

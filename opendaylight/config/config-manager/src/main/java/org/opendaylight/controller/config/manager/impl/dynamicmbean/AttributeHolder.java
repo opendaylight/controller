@@ -7,17 +7,16 @@
  */
 package org.opendaylight.controller.config.manager.impl.dynamicmbean;
 
-import org.opendaylight.controller.config.api.annotations.Description;
-import org.opendaylight.controller.config.api.annotations.RequireInterface;
-
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.Immutable;
-import javax.management.MBeanAttributeInfo;
-import javax.management.ObjectName;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
+import javax.management.MBeanAttributeInfo;
+import javax.management.ObjectName;
+import org.opendaylight.controller.config.api.annotations.Description;
+import org.opendaylight.controller.config.api.annotations.RequireInterface;
 
 @Immutable
 class AttributeHolder {

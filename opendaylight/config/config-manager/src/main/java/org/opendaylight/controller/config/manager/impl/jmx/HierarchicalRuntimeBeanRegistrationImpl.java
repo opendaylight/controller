@@ -9,10 +9,8 @@ package org.opendaylight.controller.config.manager.impl.jmx;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.ObjectName;
-
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.api.runtime.HierarchicalRuntimeBeanRegistration;

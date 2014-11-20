@@ -7,6 +7,12 @@
  */
 package org.opendaylight.controller.config.manager;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyZeroInteractions;
+
+import java.lang.management.ManagementFactory;
 import org.junit.Test;
 import org.opendaylight.controller.config.manager.impl.AbstractLockedPlatformMBeanServerTest;
 import org.opendaylight.controller.config.manager.impl.ConfigRegistryImpl;
@@ -18,16 +24,9 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.management.ManagementFactory;
-
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyZeroInteractions;
-
 public class ConfigRegistryImplTest extends
         AbstractLockedPlatformMBeanServerTest {
-    private static final Logger logger = LoggerFactory
+    private static final Logger LOG = LoggerFactory
             .getLogger(ConfigRegistryImplTest.class);
 
     @Test
@@ -56,7 +55,7 @@ public class ConfigRegistryImplTest extends
                 configRegistry.close();
             } catch (Exception e) {
                 // ignore
-                logger.warn("Ignoring exception", e);
+                LOG.warn("Ignoring exception", e);
             }
         }
     }

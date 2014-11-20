@@ -7,16 +7,15 @@
  */
 package org.opendaylight.controller.config.manager.impl;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+
+import javax.management.InstanceAlreadyExistsException;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
-
-import javax.management.InstanceAlreadyExistsException;
-
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
 
 public class ConfigTransactionManagerImplTest extends
         AbstractConfigTest {

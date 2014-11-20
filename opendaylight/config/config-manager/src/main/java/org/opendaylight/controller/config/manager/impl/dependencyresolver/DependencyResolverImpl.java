@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
  */
 final class DependencyResolverImpl implements DependencyResolver,
         Comparable<DependencyResolverImpl> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DependencyResolverImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DependencyResolverImpl.class);
 
     private final ModulesHolder modulesHolder;
     private final ModuleIdentifier name;
@@ -104,7 +104,7 @@ final class DependencyResolverImpl implements DependencyResolver,
                 format("ObjectName should not contain "
                                 + "transaction name. %s set to %s. ", jmxAttribute,
                         dependentReadOnlyON
-                ), jmxAttribute
+            ), jmxAttribute
         );
 
         ObjectName newDependentReadOnlyON = translateServiceRefIfPossible(dependentReadOnlyON);
@@ -200,7 +200,7 @@ final class DependencyResolverImpl implements DependencyResolver,
         if (expectedBaseClass.isAssignableFrom(deserialized)) {
             return (Class<T>) deserialized;
         } else {
-            LOGGER.error("Cannot resolve class of identity {} : deserialized class {} is not a subclass of {}.",
+            LOG.error("Cannot resolve class of identity {} : deserialized class {} is not a subclass of {}.",
                     identityRef, deserialized, expectedBaseClass);
             throw new IllegalArgumentException("Deserialized identity " + deserialized + " cannot be cast to " + expectedBaseClass);
         }

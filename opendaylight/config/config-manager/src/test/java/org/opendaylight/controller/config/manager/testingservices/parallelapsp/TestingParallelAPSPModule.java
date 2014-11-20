@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 @NotThreadSafe
 public class TestingParallelAPSPModule implements Module,
         TestingParallelAPSPConfigMXBean {
-    private static final Logger logger = LoggerFactory
+    private static final Logger LOG = LoggerFactory
             .getLogger(TestingParallelAPSPModule.class);
 
     private final DependencyResolver dependencyResolver;
@@ -125,13 +125,13 @@ public class TestingParallelAPSPModule implements Module,
                 // changing thread pool is not supported
                 boolean reuse = threadPoolInstance == oldInstance.getThreadPool();
                 if (reuse) {
-                    logger.debug("Reusing old instance");
+                    LOG.debug("Reusing old instance");
                     instance = oldInstance;
                     instance.setSomeParam(someParam);
                 }
             }
             if (instance == null) {
-                logger.debug("Creating new instance");
+                LOG.debug("Creating new instance");
                 if (oldCloseable != null) {
                     try {
                         oldCloseable.close();
