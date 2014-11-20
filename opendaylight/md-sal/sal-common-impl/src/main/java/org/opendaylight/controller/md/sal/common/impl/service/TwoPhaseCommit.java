@@ -33,6 +33,7 @@ import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
+@Deprecated
 public class TwoPhaseCommit<P extends Path<P>, D extends Object, DCL extends DataChangeListener<P, D>> implements
         Callable<RpcResult<TransactionStatus>> {
     private final static Logger log = LoggerFactory.getLogger(TwoPhaseCommit.class);

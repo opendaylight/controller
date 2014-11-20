@@ -8,7 +8,9 @@
 package org.opendaylight.controller.md.sal.dom.broker.impl.compat;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -18,7 +20,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.impl.service.AbstractDataTransaction;
@@ -39,12 +40,8 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.ListenableFuture;
-
-public abstract class BackwardsCompatibleTransaction<T extends DOMDataReadTransaction> implements
-DataModificationTransaction, Delegator<T> {
+@Deprecated
+public abstract class BackwardsCompatibleTransaction<T extends DOMDataReadTransaction> implements DataModificationTransaction, Delegator<T> {
 
     private static final Logger LOG = LoggerFactory.getLogger(BackwardsCompatibleTransaction.class);
 
