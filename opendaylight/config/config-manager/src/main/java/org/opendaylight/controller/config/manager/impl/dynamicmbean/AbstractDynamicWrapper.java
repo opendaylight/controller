@@ -49,8 +49,6 @@ import org.opendaylight.controller.config.spi.Module;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static java.lang.String.format;
-
 /**
  * Contains common code for readable/rw dynamic mbean wrappers. Routes all
  * requests (getAttribute, setAttribute, invoke) into the actual instance, but
@@ -76,7 +74,7 @@ abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrapper {
         public void handleNotification(final Notification n, final Object handback) {
             if (n instanceof MBeanServerNotification
                     && n.getType()
-                    .equals(MBeanServerNotification.UNREGISTRATION_NOTIFICATION)) {
+                        .equals(MBeanServerNotification.UNREGISTRATION_NOTIFICATION)) {
                 if (((MBeanServerNotification) n).getMBeanName().equals(
                         thisWrapperObjectName)) {
                     try {
