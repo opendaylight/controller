@@ -10,18 +10,16 @@ package org.opendaylight.controller.config.yangjmxgenerator.unknownextension;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.common.collect.Lists;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
-
 import org.junit.Test;
 import org.opendaylight.controller.config.yangjmxgenerator.ConfigConstants;
 import org.opendaylight.controller.config.yangjmxgenerator.ServiceInterfaceEntryTest;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.YangModelSearchUtils;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
-
-import com.google.common.collect.Lists;
 
 public class UnknownExtensionTest extends ServiceInterfaceEntryTest {
 
