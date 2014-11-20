@@ -7,13 +7,11 @@
  */
 package org.opendaylight.md.controller.topology.manager;
 
+import com.google.common.base.Preconditions;
 import java.util.concurrent.ExecutionException;
-
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.sal.binding.api.AbstractBindingAwareProvider;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
@@ -23,25 +21,28 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
-import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FlowCapableTopologyProvider extends AbstractBindingAwareProvider implements AutoCloseable {
+public class FlowCapableTopologyProvider implements AutoCloseable {
     private final static Logger LOG = LoggerFactory.getLogger(FlowCapableTopologyProvider.class);
     private ListenerRegistration<NotificationListener> listenerRegistration;
     private Thread thread;
 
-    /**
-     * Gets called on start of a bundle.
-     *
-     * @param session
-     */
-    @Override
-    public synchronized void onSessionInitiated(final ProviderContext session) {
-        final DataBroker dataBroker = session.getSALService(DataBroker.class);
-        final NotificationProviderService notificationService = session.getSALService(NotificationProviderService.class);
+    private DataBroker dataBroker;
+    private NotificationProviderService notificationService;
 
+    public FlowCapableTopologyProvider(DataBroker dataBroker, NotificationProviderService notificationService) {
+        Preconditions.checkNotNull(dataBroker, "Data broker can't be null.");
+        Preconditions.checkNotNull(notificationService, "Notification provider service can't be null.");
+        this.dataBroker = dataBroker;
+        this.notificationService = notificationService;
+    }
+
+    /**
+     * Initializes topology provider.
+     */
+    public synchronized void intialize() {
         final String name = "flow:1";
         final TopologyKey key = new TopologyKey(new TopologyId(name));
         final InstanceIdentifier<Topology> path = InstanceIdentifier
@@ -84,17 +85,4 @@ public class FlowCapableTopologyProvider extends AbstractBindingAwareProvider im
         }
     }
 
-    /**
-     * Gets called during stop bundle
-     *
-     * @param context The execution context of the bundle being stopped.
-     */
-    @Override
-    public void stopImpl(final BundleContext context) {
-        try {
-            this.close();
-        } catch (InterruptedException e) {
-            LOG.error("Failed to stop provider", e);
-        }
-    }
 }
