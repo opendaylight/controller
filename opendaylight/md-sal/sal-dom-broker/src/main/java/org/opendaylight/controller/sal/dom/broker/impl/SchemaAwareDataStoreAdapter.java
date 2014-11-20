@@ -8,12 +8,10 @@
 package org.opendaylight.controller.sal.dom.broker.impl;
 
 import static com.google.common.base.Preconditions.checkState;
-
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -21,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Future;
-
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.DataModification;
 import org.opendaylight.controller.md.sal.common.api.data.DataReader;
@@ -33,9 +30,9 @@ import org.opendaylight.controller.sal.dom.broker.util.YangSchemaUtils;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
@@ -226,7 +223,7 @@ AutoCloseable {
         public int compare(final Entry<YangInstanceIdentifier, CompositeNode> o1, final Entry<YangInstanceIdentifier, CompositeNode> o2) {
             YangInstanceIdentifier o1Key = o1.getKey();
             YangInstanceIdentifier o2Key = o2.getKey();
-            return Integer.compare(o1Key.getPath().size(), o2Key.getPath().size());
+            return Integer.compare(Iterables.size(o1Key.getPathArguments()), Iterables.size(o2Key.getPathArguments()));
         }
     };
 
@@ -246,7 +243,7 @@ AutoCloseable {
                     childNodes.addAll(original.getValue());
                     qname = original.getNodeType();
                 } else {
-                    qname = path.getPath().get(path.getPath().size() - 1).getNodeType();
+                    qname = path.getLastPathArgument().getNodeType();
                 }
 
                 FluentIterable<YangInstanceIdentifier> directChildren = FluentIterable.from(getStoredConfigurationPaths())
@@ -254,7 +251,7 @@ AutoCloseable {
                             @Override
                             public boolean apply(final YangInstanceIdentifier input) {
                                 if (path.contains(input)) {
-                                    int nesting = input.getPath().size() - path.getPath().size();
+                                    int nesting = Iterables.size(input.getPathArguments()) - Iterables.size(path.getPathArguments());
                                     if (nesting == 1) {
                                         return true;
                                     }
@@ -289,7 +286,7 @@ AutoCloseable {
                     childNodes.addAll(original.getValue());
                     qname = original.getNodeType();
                 } else {
-                    qname = path.getPath().get(path.getPath().size() - 1).getNodeType();
+                    qname = path.getLastPathArgument().getNodeType();
                 }
 
                 FluentIterable<YangInstanceIdentifier> directChildren = FluentIterable.from(getStoredOperationalPaths())
@@ -297,7 +294,7 @@ AutoCloseable {
                             @Override
                             public boolean apply(final YangInstanceIdentifier input) {
                                 if (path.contains(input)) {
-                                    int nesting = input.getPath().size() - path.getPath().size();
+                                    int nesting = Iterables.size(input.getPathArguments()) - Iterables.size(path.getPathArguments());
                                     if (nesting == 1) {
                                         return true;
                                     }
