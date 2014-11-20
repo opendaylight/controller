@@ -19,7 +19,6 @@ package org.opendaylight.controller.config.yang.threadpool.impl.flexible;
 
 import com.google.common.base.Optional;
 import java.util.concurrent.TimeUnit;
-
 import org.opendaylight.controller.config.api.JmxAttributeValidationException;
 import org.opendaylight.controller.config.threadpool.util.FlexibleThreadPoolWrapper;
 
