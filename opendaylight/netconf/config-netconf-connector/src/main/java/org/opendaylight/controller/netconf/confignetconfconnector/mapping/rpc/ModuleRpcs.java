@@ -10,10 +10,9 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.rpc;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import java.util.Map;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry.Rpc;
-
-import java.util.Map;
 
 public final class ModuleRpcs {
 

@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 public class MergeEditConfigStrategy extends AbstractEditConfigStrategy {
 
-    private static final Logger logger = LoggerFactory.getLogger(MergeEditConfigStrategy.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MergeEditConfigStrategy.class);
 
     public MergeEditConfigStrategy() {
 
@@ -52,7 +52,7 @@ public class MergeEditConfigStrategy extends AbstractEditConfigStrategy {
                 AttributeConfigElement ace = configAttributeEntry.getValue();
 
                 if (!ace.getResolvedValue().isPresent()) {
-                    logger.debug("Skipping attribute {} for {}", configAttributeEntry.getKey(), on);
+                    LOG.debug("Skipping attribute {} for {}", configAttributeEntry.getKey(), on);
                     continue;
                 }
 
@@ -63,9 +63,9 @@ public class MergeEditConfigStrategy extends AbstractEditConfigStrategy {
                 // Merge value with currentValue
                 toBeMergedIn = merge(oldValue, toBeMergedIn);
                 ta.setAttribute(on, ace.getJmxName(), new Attribute(ace.getJmxName(), toBeMergedIn));
-                logger.debug("Attribute {} set to {} for {}", configAttributeEntry.getKey(), toBeMergedIn, on);
+                LOG.debug("Attribute {} set to {} for {}", configAttributeEntry.getKey(), toBeMergedIn, on);
             } catch (Exception e) {
-                logger.error("Error while merging objectnames of {}", on, e);
+                LOG.error("Error while merging objectnames of {}", on, e);
                 throw new NetconfConfigHandlingException(String.format("Unable to set attributes for %s, Error with attribute %s : %s ",
                         on,
                         configAttributeEntry.getKey(),

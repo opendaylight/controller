@@ -8,12 +8,11 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig;
 
+import java.util.Map;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
 import org.opendaylight.controller.netconf.confignetconfconnector.exception.NetconfConfigHandlingException;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
-
-import java.util.Map;
 
 public interface EditConfigStrategy {
 

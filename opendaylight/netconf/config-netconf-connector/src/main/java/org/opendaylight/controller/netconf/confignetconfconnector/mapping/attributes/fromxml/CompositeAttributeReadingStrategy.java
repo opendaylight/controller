@@ -11,13 +11,11 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.netconf.util.xml.XmlElement;
 
 public class CompositeAttributeReadingStrategy extends AbstractAttributeReadingStrategy {
 

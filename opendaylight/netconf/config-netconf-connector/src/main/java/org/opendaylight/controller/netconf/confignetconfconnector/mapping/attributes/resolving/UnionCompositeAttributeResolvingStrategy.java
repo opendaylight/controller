@@ -10,11 +10,10 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;
-
+import java.util.Map;
 import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenType;
-import java.util.Map;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;
 
 final class UnionCompositeAttributeResolvingStrategy extends CompositeAttributeResolvingStrategy {
 

@@ -8,6 +8,9 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig;
 
+import java.util.Map;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.ObjectName;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.exception.NetconfConfigHandlingException;
@@ -16,20 +19,16 @@ import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.ObjectName;
-import java.util.Map;
-
 public class MissingInstanceHandlingStrategy extends AbstractEditConfigStrategy {
 
-    private static final Logger logger = LoggerFactory.getLogger(MissingInstanceHandlingStrategy.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MissingInstanceHandlingStrategy.class);
 
     @Override
     void handleMissingInstance(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta,
             String module, String instance, ServiceRegistryWrapper services) throws NetconfConfigHandlingException {
         try {
             ObjectName on = ta.createModule(module, instance);
-            logger.trace("New instance for {} {} created under name {}", module, instance, on);
+            LOG.trace("New instance for {} {} created under name {}", module, instance, on);
         } catch (InstanceAlreadyExistsException e1) {
             throw new NetconfConfigHandlingException(String.format("Unable to create instance for %s : %s.", module, instance),
                     NetconfDocumentedException.ErrorType.application,

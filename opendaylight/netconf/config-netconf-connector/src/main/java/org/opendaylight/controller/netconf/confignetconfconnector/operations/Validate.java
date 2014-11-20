@@ -9,7 +9,8 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.operations;
 
 import com.google.common.base.Optional;
-
+import java.util.HashMap;
+import java.util.Map;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
@@ -25,14 +26,11 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class Validate extends AbstractConfigNetconfOperation {
 
     public static final String VALIDATE = "validate";
 
-    private static final Logger logger = LoggerFactory.getLogger(Validate.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Validate.class);
 
     private final TransactionProvider transactionProvider;
 
@@ -71,10 +69,10 @@ public class Validate extends AbstractConfigNetconfOperation {
         try {
             transactionProvider.validateTransaction();
         } catch (ValidationException e) {
-            logger.warn("Validation failed", e);
+            LOG.warn("Validation failed", e);
             throw NetconfDocumentedException.wrap(e);
         } catch (IllegalStateException e) {
-            logger.warn("Validation failed", e);
+            LOG.warn("Validation failed", e);
             final Map<String, String> errorInfo = new HashMap<>();
             errorInfo
                     .put(ErrorTag.operation_failed.name(),
@@ -84,7 +82,7 @@ public class Validate extends AbstractConfigNetconfOperation {
 
         }
 
-        logger.trace("Datastore {} validated successfully", Datastore.candidate);
+        LOG.trace("Datastore {} validated successfully", Datastore.candidate);
 
         return XmlUtil.createElement(document, XmlNetconfConstants.OK, Optional.<String>absent());
     }

@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.operations;
 
+import com.google.common.base.Optional;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
@@ -22,11 +23,9 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.google.common.base.Optional;
-
 public class Commit extends AbstractConfigNetconfOperation {
 
-    private static final Logger logger = LoggerFactory.getLogger(Commit.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Commit.class);
 
     private final TransactionProvider transactionProvider;
 
@@ -53,11 +52,11 @@ public class Commit extends AbstractConfigNetconfOperation {
         CommitStatus status;
         try {
             status = this.transactionProvider.commitTransaction();
-            logger.trace("Datastore {} committed successfully: {}", Datastore.candidate, status);
+            LOG.trace("Datastore {} committed successfully: {}", Datastore.candidate, status);
         } catch (ConflictingVersionException | ValidationException e) {
             throw NetconfDocumentedException.wrap(e);
         }
-        logger.trace("Datastore {} committed successfully: {}", Datastore.candidate, status);
+        LOG.trace("Datastore {} committed successfully: {}", Datastore.candidate, status);
 
         return XmlUtil.createElement(document, XmlNetconfConstants.OK, Optional.<String>absent());
     }

@@ -33,7 +33,7 @@ public class ConsoleIOTestImpl extends ConsoleIOImpl {
     public String read() throws IOException {
         final String prompt = buildPrompt();
         output.append(prompt);
-        System.out.print(prompt);
+        System.console().writer().print(prompt);
 
         String value = inputValues.get(prompt).pollFirst();
         if (value == null) {
@@ -43,7 +43,7 @@ public class ConsoleIOTestImpl extends ConsoleIOImpl {
         value = value != null ? value : "****NO VALUE****";
 
         output.append(value + "\n");
-        System.out.print(value + "\n");
+        System.console().writer().println(value + "\n");
         return value;
     }
 
@@ -69,14 +69,14 @@ public class ConsoleIOTestImpl extends ConsoleIOImpl {
     public void write(final CharSequence data) throws IOException {
         output.append(data);
         lastMessage = (String) data;
-        System.out.print(data);
+        System.console().writer().print(data);
     }
 
     @Override
     public void writeLn(final CharSequence data) throws IOException {
         write(data);
         output.append("\n");
-        System.out.print("\n");
+        System.console().writer().print("\n");
     }
 
     public String getConsoleOutput() {

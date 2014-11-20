@@ -14,14 +14,12 @@ import static org.mockito.Mockito.mock;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
 import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.hamcrest.CoreMatchers;

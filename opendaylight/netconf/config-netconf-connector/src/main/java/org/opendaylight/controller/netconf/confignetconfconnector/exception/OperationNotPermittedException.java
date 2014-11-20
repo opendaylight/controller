@@ -9,7 +9,6 @@ package org.opendaylight.controller.netconf.confignetconfconnector.exception;
 
 import java.util.Collections;
 import java.util.Map;
-
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 
 public class OperationNotPermittedException extends NetconfDocumentedException {

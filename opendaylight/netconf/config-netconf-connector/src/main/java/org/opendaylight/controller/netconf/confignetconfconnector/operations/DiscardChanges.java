@@ -6,10 +6,11 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-    package org.opendaylight.controller.netconf.confignetconfconnector.operations;
+package org.opendaylight.controller.netconf.confignetconfconnector.operations;
 
 import com.google.common.base.Optional;
-
+import java.util.HashMap;
+import java.util.Map;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorSeverity;
@@ -24,15 +25,12 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.HashMap;
-import java.util.Map;
-
 
 public class DiscardChanges extends AbstractConfigNetconfOperation {
 
     public static final String DISCARD = "discard-changes";
 
-    private static final Logger logger = LoggerFactory.getLogger(DiscardChanges.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DiscardChanges.class);
 
     private final TransactionProvider transactionProvider;
 
@@ -58,7 +56,7 @@ public class DiscardChanges extends AbstractConfigNetconfOperation {
         try {
             this.transactionProvider.abortTransaction();
         } catch (final IllegalStateException e) {
-            logger.warn("Abort failed: ", e);
+            LOG.warn("Abort failed: ", e);
             final Map<String, String> errorInfo = new HashMap<>();
             errorInfo
                     .put(ErrorTag.operation_failed.name(),
@@ -66,7 +64,7 @@ public class DiscardChanges extends AbstractConfigNetconfOperation {
             throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.application, ErrorTag.operation_failed,
                     ErrorSeverity.error, errorInfo);
         }
-        logger.trace("Changes discarded successfully from datastore {}", Datastore.candidate);
+        LOG.trace("Changes discarded successfully from datastore {}", Datastore.candidate);
 
 
         return XmlUtil.createElement(document, XmlNetconfConstants.OK, Optional.<String>absent());

@@ -61,7 +61,6 @@ public class NetconfCliTest {
         return parser.parseFiles(testFiles);
     }
 
-    // @Ignore
     @Test
     public void cliTest() throws ReadingException, IOException, WriteException, URISyntaxException {
 
@@ -112,12 +111,11 @@ public class NetconfCliTest {
         final List<Node<?>> redData = new GenericReader(console, new CommandArgHandlerRegistry(console,
                 new SchemaContextRegistry(schemaContext)), schemaContext).read(cont1);
         assertNotNull(redData);
-       assertEquals(1, redData.size());
+        assertEquals(1, redData.size());
 
         assertTrue(redData.get(0) instanceof CompositeNode);
         final CompositeNode redTopLevelNode = (CompositeNode) redData.get(0);
 
-        System.out.println("============================");
         new NormalizedNodeWriter(console, new OutFormatter()).write(cont1, redData);
 
     }

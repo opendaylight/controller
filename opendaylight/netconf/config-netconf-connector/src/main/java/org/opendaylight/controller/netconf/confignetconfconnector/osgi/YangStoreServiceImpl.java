@@ -10,7 +10,6 @@ package org.opendaylight.controller.netconf.confignetconfconnector.osgi;
 
 import java.lang.ref.SoftReference;
 import java.util.concurrent.atomic.AtomicReference;
-
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

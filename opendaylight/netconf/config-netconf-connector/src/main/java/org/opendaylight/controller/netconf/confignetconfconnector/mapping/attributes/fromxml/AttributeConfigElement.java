@@ -9,10 +9,9 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml;
 
 import com.google.common.base.Optional;
+import javax.management.openmbean.OpenType;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.resolving.AttributeResolvingStrategy;
-
-import javax.management.openmbean.OpenType;
 
 /**
  * Parsed xml element containing configuration for one attribute of an instance

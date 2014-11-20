@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 
 public class DeleteEditConfigStrategy extends AbstractEditConfigStrategy {
 
-    private static final Logger logger = LoggerFactory.getLogger(DeleteEditConfigStrategy.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DeleteEditConfigStrategy.class);
 
 
     @Override
@@ -37,7 +37,7 @@ public class DeleteEditConfigStrategy extends AbstractEditConfigStrategy {
     void executeStrategy(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta, ObjectName on, ServiceRegistryWrapper services) throws NetconfConfigHandlingException {
         try {
             ta.destroyModule(on);
-            logger.debug("ServiceInstance {} deleted successfully", on);
+            LOG.debug("ServiceInstance {} deleted successfully", on);
         } catch (InstanceNotFoundException e) {
             throw new NetconfConfigHandlingException(
                     String.format("Unable to delete %s because of exception %s" + on, e.getMessage()),

@@ -11,13 +11,12 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
-import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
-
+import java.util.Map;
+import java.util.Set;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenType;
-import java.util.Map;
-import java.util.Set;
+import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
 
 public class CompositeAttributeMappingStrategy extends
         AbstractAttributeMappingStrategy<Map<String, Object>, CompositeType> {

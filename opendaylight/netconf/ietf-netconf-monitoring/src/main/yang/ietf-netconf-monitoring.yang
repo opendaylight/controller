@@ -88,7 +88,7 @@ module ietf-netconf-monitoring {
         "NETCONF over Secure Shell (SSH).";
       reference
         "RFC 4742: Using the NETCONF Configuration Protocol
-        	  over Secure SHell (SSH)";
+              over Secure SHell (SSH)";
 
     }
 
@@ -99,7 +99,7 @@ module ietf-netconf-monitoring {
        Blocks Extensible Exchange Protocol (BEEP).";
       reference
         "RFC 4743: Using NETCONF over the Simple Object
-        	  Access Protocol (SOAP)";
+              Access Protocol (SOAP)";
 
     }
 
@@ -110,7 +110,7 @@ module ietf-netconf-monitoring {
       over Hypertext Transfer Protocol Secure (HTTPS).";
       reference
         "RFC 4743: Using NETCONF over the Simple Object
-        	  Access Protocol (SOAP)";
+              Access Protocol (SOAP)";
 
     }
 
@@ -120,7 +120,7 @@ module ietf-netconf-monitoring {
         "NETCONF over Blocks Extensible Exchange Protocol (BEEP).";
       reference
         "RFC 4744: Using the NETCONF Protocol over the
-        	  Blocks Extensible Exchange Protocol (BEEP)";
+              Blocks Extensible Exchange Protocol (BEEP)";
 
     }
 
@@ -154,7 +154,7 @@ module ietf-netconf-monitoring {
         "The YANG data modeling language for NETCONF.";
       reference
         "RFC 6020:  YANG - A Data Modeling Language for the
-        	   Network Configuration Protocol (NETCONF)";
+               Network Configuration Protocol (NETCONF)";
 
     }
 
@@ -163,7 +163,7 @@ module ietf-netconf-monitoring {
       description "The YIN syntax for YANG.";
       reference
         "RFC 6020:  YANG - A Data Modeling Language for the
-        	   Network Configuration Protocol (NETCONF)";
+               Network Configuration Protocol (NETCONF)";
 
     }
 
@@ -305,7 +305,7 @@ module ietf-netconf-monitoring {
                   "List of partial locks.";
                 reference
                   "RFC 5717: Partial Lock Remote Procedure Call (RPC) for
-                  	  NETCONF";
+                      NETCONF";
 
                 leaf lock-id {
                   type uint32;

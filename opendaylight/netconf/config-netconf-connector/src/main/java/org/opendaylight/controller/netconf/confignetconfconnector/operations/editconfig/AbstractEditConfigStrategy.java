@@ -8,6 +8,9 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig;
 
+import java.util.Map;
+import javax.management.InstanceNotFoundException;
+import javax.management.ObjectName;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
 import org.opendaylight.controller.netconf.confignetconfconnector.exception.NetconfConfigHandlingException;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
@@ -15,13 +18,9 @@ import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.management.InstanceNotFoundException;
-import javax.management.ObjectName;
-import java.util.Map;
-
 public abstract class AbstractEditConfigStrategy implements EditConfigStrategy {
 
-    private static final Logger logger = LoggerFactory.getLogger(AbstractEditConfigStrategy.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractEditConfigStrategy.class);
 
     @Override
     public void executeConfiguration(String module, String instance, Map<String, AttributeConfigElement> configuration,
@@ -29,7 +28,7 @@ public abstract class AbstractEditConfigStrategy implements EditConfigStrategy {
 
         try {
             ObjectName on = ta.lookupConfigBean(module, instance);
-            logger.debug("ServiceInstance for {} {} located successfully under {}", module, instance, on);
+            LOG.debug("ServiceInstance for {} {} located successfully under {}", module, instance, on);
             executeStrategy(configuration, ta, on, services);
         } catch (InstanceNotFoundException e) {
             handleMissingInstance(configuration, ta, module, instance, services);

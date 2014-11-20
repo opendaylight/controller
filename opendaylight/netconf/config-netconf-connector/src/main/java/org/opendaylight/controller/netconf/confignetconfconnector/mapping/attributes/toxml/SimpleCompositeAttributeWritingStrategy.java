@@ -9,10 +9,9 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.toxml;
 
 import com.google.common.base.Preconditions;
+import java.util.Map;
 import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
 import org.w3c.dom.Document;
-
-import java.util.Map;
 
 public class SimpleCompositeAttributeWritingStrategy extends SimpleAttributeWritingStrategy {
 

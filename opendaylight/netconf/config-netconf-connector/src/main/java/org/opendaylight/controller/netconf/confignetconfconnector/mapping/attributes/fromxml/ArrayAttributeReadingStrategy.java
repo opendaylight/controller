@@ -9,10 +9,9 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml;
 
 import com.google.common.collect.Lists;
+import java.util.List;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
-
-import java.util.List;
 
 public class ArrayAttributeReadingStrategy extends AbstractAttributeReadingStrategy {
 
