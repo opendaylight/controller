@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.config.threadpool.util;
 
+import com.google.common.base.Optional;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
@@ -19,10 +20,7 @@ import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
 import org.opendaylight.controller.config.threadpool.ThreadPool;
-
-import com.google.common.base.Optional;
 
 /**
  * Implementation of {@link ThreadPool} using flexible number of threads wraps
