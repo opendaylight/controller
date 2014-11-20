@@ -18,10 +18,8 @@
 package org.opendaylight.controller.config.yang.netty.threadgroup;
 
 import io.netty.channel.nio.NioEventLoopGroup;
-
-import org.opendaylight.controller.config.api.JmxAttributeValidationException;
-
 import java.util.concurrent.TimeUnit;
+import org.opendaylight.controller.config.api.JmxAttributeValidationException;
 
 /**
 *
