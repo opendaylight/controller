@@ -7,6 +7,10 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
+import static org.opendaylight.controller.config.yangjmxgenerator.ConfigConstants.SERVICE_TYPE_Q_NAME;
+
 import com.google.common.base.Optional;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,9 +25,6 @@ import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
-import static org.opendaylight.controller.config.yangjmxgenerator.ConfigConstants.SERVICE_TYPE_Q_NAME;
 
 /**
  * Represents identity derived from {@link ConfigConstants#SERVICE_TYPE_Q_NAME}.
@@ -46,7 +47,7 @@ import static org.opendaylight.controller.config.yangjmxgenerator.ConfigConstant
  * </p>
  */
 public class ServiceInterfaceEntry extends AbstractEntry {
-    private static final Logger LOGGER = LoggerFactory
+    private static final Logger LOG = LoggerFactory
             .getLogger(ServiceInterfaceEntry.class);
 
     private static final String CLASS_NAME_SUFFIX = "ServiceInterface";
@@ -121,7 +122,7 @@ public class ServiceInterfaceEntry extends AbstractEntry {
      */
     public static Map<QName, ServiceInterfaceEntry> create(Module currentModule,
             String packageName,Map<IdentitySchemaNode, ServiceInterfaceEntry> definedSEItracker) {
-        LOGGER.debug("Generating ServiceInterfaces from {} to package {}",
+        LOG.debug("Generating ServiceInterfaces from {} to package {}",
                 currentModule.getNamespace(), packageName);
 
         Map<IdentitySchemaNode, ServiceInterfaceEntry> identitiesToSIs = new HashMap<>();
@@ -130,7 +131,7 @@ public class ServiceInterfaceEntry extends AbstractEntry {
         int lastSize = notVisited.size() + 1;
         while (!notVisited.isEmpty()) {
             if (notVisited.size() == lastSize) {
-                LOGGER.debug(
+                LOG.debug(
                         "Following identities will be ignored while generating ServiceInterfaces, as they are not derived from {} : {}",
                         SERVICE_TYPE_Q_NAME, notVisited);
                 break;
@@ -175,7 +176,7 @@ public class ServiceInterfaceEntry extends AbstractEntry {
         for (ServiceInterfaceEntry sie : identitiesToSIs.values()) {
             resultMap.put(sie.getQName(), sie);
         }
-        LOGGER.debug("Number of ServiceInterfaces to be generated: {}",
+        LOG.debug("Number of ServiceInterfaces to be generated: {}",
                 resultMap.size());
         return resultMap;
     }

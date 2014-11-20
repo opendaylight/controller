@@ -8,6 +8,13 @@
 package org.opendaylight.controller.config.yangjmxgenerator.attribute;
 
 import com.google.common.base.Preconditions;
+import java.util.Arrays;
+import java.util.List;
+import javax.management.openmbean.ArrayType;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
 import org.opendaylight.controller.config.api.IdentityAttributeRef;
 import org.opendaylight.controller.config.yangjmxgenerator.TypeProviderWrapper;
 import org.opendaylight.yangtools.sal.binding.model.api.Type;
@@ -16,14 +23,6 @@ import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.UnionTypeDefinition;
-
-import javax.management.openmbean.ArrayType;
-import javax.management.openmbean.CompositeType;
-import javax.management.openmbean.OpenDataException;
-import javax.management.openmbean.OpenType;
-import javax.management.openmbean.SimpleType;
-import java.util.Arrays;
-import java.util.List;
 
 public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
 
@@ -233,7 +232,7 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
         return simpleType;
     }
 
-     private OpenType<?> getCompositeType(Type baseType, TypeDefinition<?> baseTypeDefinition) {
+    private OpenType<?> getCompositeType(Type baseType, TypeDefinition<?> baseTypeDefinition) {
 
         SimpleType<?> innerItemType = SimpleTypeResolver.getSimpleType(baseType);
         String innerItemName = typeProviderWrapper.getJMXParamForBaseType(baseTypeDefinition);
