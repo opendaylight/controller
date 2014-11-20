@@ -179,7 +179,7 @@ public class NormalizedNodeSerializer {
                 ValueSerializer.serialize(builder, this, value);
 
             } else if (value instanceof Iterable) {
-                Iterable iterable = (Iterable) value;
+                Iterable<?> iterable = (Iterable<?>) value;
 
                 for (Object o : iterable) {
                     if (o instanceof NormalizedNode) {
