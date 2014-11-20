@@ -12,16 +12,15 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
+import com.google.common.collect.Sets;
 import java.lang.management.ManagementFactory;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-
 import javax.management.Attribute;
 import javax.management.MBeanException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -30,8 +29,6 @@ import org.junit.Test;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.ValidationException.ExceptionMessageWithStackTrace;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-
-import com.google.common.collect.Sets;
 
 public class ConfigTransactionClientsTest {
     private final MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
@@ -156,7 +153,7 @@ public class ConfigTransactionClientsTest {
     @Ignore
     public void testAssertVersion() {
         jmxTransactionClient.assertVersion((int)jmxTransactionClient.getParentVersion(),
-        (int)jmxTransactionClient.getVersion());
+            (int)jmxTransactionClient.getVersion());
     }
 
     @Test(expected = NullPointerException.class)
