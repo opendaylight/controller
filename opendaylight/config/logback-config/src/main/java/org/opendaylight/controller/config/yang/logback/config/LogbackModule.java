@@ -16,12 +16,10 @@
  */
 package org.opendaylight.controller.config.yang.logback.config;
 
+import com.google.common.collect.Sets;
 import java.util.Set;
-
 import org.opendaylight.controller.config.api.JmxAttribute;
 import org.opendaylight.controller.config.api.JmxAttributeValidationException;
-
-import com.google.common.collect.Sets;
 
 /**
 *
