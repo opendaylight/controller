@@ -159,7 +159,7 @@ public class TopologyManagerIT {
 
         Set<Property> properties = new HashSet<Property>();
 
-        ServiceReference r = bc.getServiceReference(IPluginInTopologyService.class
+        ServiceReference<?> r = bc.getServiceReference(IPluginInTopologyService.class
                 .getName());
         TopologyServices topologyServices = null;
         if (r != null) {
