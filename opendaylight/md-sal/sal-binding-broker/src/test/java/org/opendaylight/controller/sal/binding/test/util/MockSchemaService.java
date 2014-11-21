@@ -8,14 +8,13 @@
 package org.opendaylight.controller.sal.binding.test.util;
 
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
-import org.opendaylight.controller.sal.dom.broker.impl.SchemaContextProvider;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.util.ListenerRegistry;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
+import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 
-@SuppressWarnings("deprecation")
 public final class MockSchemaService implements SchemaService, SchemaContextProvider {
 
     private SchemaContext schemaContext;
