@@ -10,7 +10,6 @@ package org.opendaylight.controller.sal.binding.test.connect.dom;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -97,12 +96,8 @@ public class DOMRpcServiceTestBugfix560 {
 
         assertNotNull(moduleStream);
         final List<InputStream> rpcModels = Collections.singletonList(moduleStream);
-        @SuppressWarnings("deprecation")
-        final
-        Set<Module> modules = parser.parseYangModelsFromStreams(rpcModels);
-        @SuppressWarnings("deprecation")
-        final
-        SchemaContext mountSchemaContext = parser.resolveSchemaContext(modules);
+        final Set<Module> modules = parser.parseYangModelsFromStreams(rpcModels);
+        final SchemaContext mountSchemaContext = parser.resolveSchemaContext(modules);
         schemaContext = mountSchemaContext;
     }
 
@@ -121,7 +116,6 @@ public class DOMRpcServiceTestBugfix560 {
                 .child(TopLevelList.class, new TopLevelListKey(mount)).toInstance();
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void test() throws ExecutionException, InterruptedException {
         // FIXME: This is made to only make sure instance identifier codec
