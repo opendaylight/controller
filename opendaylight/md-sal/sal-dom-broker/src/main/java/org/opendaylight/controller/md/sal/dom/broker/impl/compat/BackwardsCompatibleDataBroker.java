@@ -8,7 +8,6 @@
 package org.opendaylight.controller.md.sal.dom.broker.impl.compat;
 
 import javax.annotation.concurrent.ThreadSafe;
-
 import org.opendaylight.controller.md.sal.common.api.RegistrationListener;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandlerRegistration;
@@ -29,6 +28,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 
+@Deprecated
 @ThreadSafe
 public class BackwardsCompatibleDataBroker implements DataProviderService {
 

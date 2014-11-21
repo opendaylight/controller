@@ -13,6 +13,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 
+@Deprecated
 class BindingToDomTransaction implements
     DataCommitHandler.DataCommitTransaction<InstanceIdentifier<? extends DataObject>, DataObject> {
 

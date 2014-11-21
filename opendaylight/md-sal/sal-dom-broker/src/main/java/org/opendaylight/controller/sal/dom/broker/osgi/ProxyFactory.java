@@ -32,6 +32,7 @@ public class ProxyFactory {
         return ((T) _createProxyImpl);
     }
 
+    @Deprecated
     private static Object _createProxyImpl(final ServiceReference<?> ref,
             final DataBrokerService service) {
 
@@ -39,6 +40,7 @@ public class ProxyFactory {
                 ((ServiceReference<DataBrokerService>) ref), service);
     }
 
+    @Deprecated
     private static Object _createProxyImpl(final ServiceReference<?> ref,
             final DataProviderService service) {
 
@@ -60,6 +62,7 @@ public class ProxyFactory {
                 ((ServiceReference<NotificationService>) ref), service);
     }
 
+    @Deprecated
     private static Object _createProxyImpl(final ServiceReference<?> ref,
             final MountProvisionService service) {
 

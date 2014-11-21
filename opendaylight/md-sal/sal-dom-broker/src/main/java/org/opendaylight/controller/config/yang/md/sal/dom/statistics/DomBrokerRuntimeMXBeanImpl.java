@@ -12,6 +12,7 @@ import org.opendaylight.controller.config.yang.md.sal.dom.impl.DomBrokerImplRunt
 import org.opendaylight.controller.config.yang.md.sal.dom.impl.Transactions;
 import org.opendaylight.controller.sal.dom.broker.DataBrokerImpl;
 
+@Deprecated
 public class DomBrokerRuntimeMXBeanImpl implements
         DomBrokerImplRuntimeMXBean {
 

@@ -15,6 +15,7 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.osgi.framework.ServiceReference;
 
+@Deprecated
 public class DataBrokerServiceProxy extends AbstractBrokerServiceProxy<DataBrokerService> implements DataBrokerService {
 
     public DataBrokerServiceProxy(ServiceReference<DataBrokerService> ref, DataBrokerService delegate) {
@@ -37,6 +38,4 @@ public class DataBrokerServiceProxy extends AbstractBrokerServiceProxy<DataBroke
     public DataModificationTransaction beginTransaction() {
         return getDelegate().beginTransaction();
     }
-
-
 }

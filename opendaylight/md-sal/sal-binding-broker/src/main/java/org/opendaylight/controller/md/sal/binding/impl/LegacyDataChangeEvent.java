@@ -17,6 +17,7 @@ import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
+@Deprecated
 public abstract class LegacyDataChangeEvent implements
         DataChangeEvent<InstanceIdentifier<? extends DataObject>, DataObject> {
 

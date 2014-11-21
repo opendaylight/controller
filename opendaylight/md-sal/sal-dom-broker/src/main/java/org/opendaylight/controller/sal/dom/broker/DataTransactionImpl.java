@@ -15,6 +15,7 @@ import org.opendaylight.yangtools.util.ListenerRegistry;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
+@Deprecated
 public class DataTransactionImpl extends AbstractDataTransaction<YangInstanceIdentifier, CompositeNode>
     implements DataModificationTransaction {
     private final ListenerRegistry<DataTransactionListener> listeners = new ListenerRegistry<DataTransactionListener>();

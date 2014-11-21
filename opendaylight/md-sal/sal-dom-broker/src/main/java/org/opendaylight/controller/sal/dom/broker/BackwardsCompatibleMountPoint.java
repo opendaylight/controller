@@ -75,6 +75,7 @@ import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 
+@Deprecated
 public class BackwardsCompatibleMountPoint implements MountProvisionInstance, SchemaContextProvider, SchemaService {
 
     private final DataProviderService dataReader;
