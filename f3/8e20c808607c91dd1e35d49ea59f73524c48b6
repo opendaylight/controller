@@ -1,0 +1,8 @@
+Verified+1: jenkins-controller <jenkins-controller@opendaylight.org>
+Code-Review+1: Robert Varga <rovarga@cisco.com>
+Code-Review+2: Ed Warnicke <eaw@cisco.com>
+Submitted-by: Ed Warnicke <eaw@cisco.com>
+Submitted-at: Fri, 21 Nov 2014 15:42:40 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/13018
+Project: controller
+Branch: refs/heads/master
