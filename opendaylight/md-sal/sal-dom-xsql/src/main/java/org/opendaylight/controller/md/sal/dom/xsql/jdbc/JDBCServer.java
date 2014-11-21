@@ -5,12 +5,10 @@ import java.net.Socket;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.opendaylight.controller.md.sal.dom.xsql.XSQLAdapter;
 import org.opendaylight.controller.md.sal.dom.xsql.XSQLBluePrint;
 import org.opendaylight.controller.md.sal.dom.xsql.XSQLBluePrintNode;
@@ -91,8 +89,8 @@ public class JDBCServer extends Thread {
                 }
                 rs.getFields().addAll(entry.getValue().getFields());
                 while (entry.getValue().next()) {
-                    Map rec = entry.getValue().getCurrent();
-                    Map newRec = new HashMap();
+                    Map<String, Object> rec = entry.getValue().getCurrent();
+                    Map<String, Object> newRec = new HashMap<>();
                     newRec.putAll(rec);
                     rs.addRecord(newRec);
                 }
@@ -119,13 +117,11 @@ public class JDBCServer extends Thread {
         rs.getFields().addAll(columnOrder);
         for (Map.Entry<String, JDBCResultSet> entry : rs.getSubQueries().entrySet()) {
             while (entry.getValue().next()) {
-                Map rec = entry.getValue().getCurrent();
-                Map newRec = new HashMap();
-                for (Iterator<?> iter = rec.entrySet().iterator(); iter.hasNext();) {
-                    Map.Entry e = (Map.Entry) iter.next();
-                    String key = (String) e.getKey();
+                Map<String, Object> rec = entry.getValue().getCurrent();
+                Map<String, Object> newRec = new HashMap<>();
+                for (Map.Entry<String, Object> e : rec.entrySet()) {
                     Object value = e.getValue();
-                    String logicalKey = origNameToName.get(key);
+                    String logicalKey = origNameToName.get(e.getKey());
                     if (value != null && logicalKey != null) {
                         newRec.put(logicalKey, value);
                     }
