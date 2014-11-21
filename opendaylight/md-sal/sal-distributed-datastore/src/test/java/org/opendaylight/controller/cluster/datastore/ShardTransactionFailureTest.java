@@ -14,7 +14,6 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.pattern.AskTimeoutException;
 import akka.testkit.TestActorRef;
-import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
@@ -42,12 +41,8 @@ import scala.concurrent.duration.Duration;
  * @author Basheeruddin Ahmed <syedbahm@cisco.com>
  */
 public class ShardTransactionFailureTest extends AbstractActorTest {
-    private static ListeningExecutorService storeExecutor =
-        MoreExecutors.listeningDecorator(MoreExecutors.sameThreadExecutor());
-
     private static final InMemoryDOMDataStore store =
-        new InMemoryDOMDataStore("OPER", storeExecutor,
-            MoreExecutors.sameThreadExecutor());
+        new InMemoryDOMDataStore("OPER", MoreExecutors.sameThreadExecutor());
 
     private static final SchemaContext testSchemaContext =
         TestModel.createTestContext();

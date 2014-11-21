@@ -26,18 +26,17 @@ public abstract class AbstractModificationTest {
 
   @Before
   public void setUp(){
-    store = new InMemoryDOMDataStore("test", MoreExecutors.sameThreadExecutor(),
-            MoreExecutors.sameThreadExecutor());
+    store = new InMemoryDOMDataStore("test", MoreExecutors.sameThreadExecutor());
     store.onGlobalContextUpdated(TestModel.createTestContext());
   }
 
-  protected void commitTransaction(DOMStoreWriteTransaction transaction){
+  protected void commitTransaction(final DOMStoreWriteTransaction transaction){
     DOMStoreThreePhaseCommitCohort cohort = transaction.ready();
     cohort.preCommit();
     cohort.commit();
   }
 
-  protected Optional<NormalizedNode<?,?>> readData(YangInstanceIdentifier path) throws Exception{
+  protected Optional<NormalizedNode<?,?>> readData(final YangInstanceIdentifier path) throws Exception{
     DOMStoreReadTransaction transaction = store.newReadOnlyTransaction();
     ListenableFuture<Optional<NormalizedNode<?, ?>>> future = transaction.read(path);
     return future.get();
