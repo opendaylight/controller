@@ -2,6 +2,69 @@
   "comments": [
     {
       "key": {
+        "uuid": "9a91bd0f_2822eab9",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-21T02:18:22Z",
+      "side": 1,
+      "message": "Why does this need to be an ActorSelection? This could just as well be an ActorRef I think.",
+      "range": {
+        "startLine": 117,
+        "startChar": 12,
+        "endLine": 117,
+        "endChar": 26
+      },
+      "revId": "5d9dcf5c77602896a84523383c70d55829317405",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_0825a6c1",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-21T02:18:22Z",
+      "side": 1,
+      "message": "The name memberId could be potentially confusing. How about peerId or raftPeerId?",
+      "range": {
+        "startLine": 137,
+        "startChar": 39,
+        "endLine": 137,
+        "endChar": 47
+      },
+      "revId": "5d9dcf5c77602896a84523383c70d55829317405",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_c82edea5",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-21T02:18:22Z",
+      "side": 1,
+      "message": "Just store the actorRef instead of converting it to an ActorSelection.",
+      "revId": "5d9dcf5c77602896a84523383c70d55829317405",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a91bd0f_0b13605d",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 2
@@ -13,6 +76,29 @@
       "writtenOn": "2014-11-21T01:48:50Z",
       "side": 1,
       "message": "The RaftRoleChangeNotifier already logs to info when it starts so this appears redundant.",
+      "revId": "5d9dcf5c77602896a84523383c70d55829317405",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_68179252",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/notifications/RaftRoleChangeNotifier.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-21T02:18:22Z",
+      "side": 1,
+      "message": "A Set of ActorRefs should be ok.",
+      "range": {
+        "startLine": 22,
+        "startChar": 24,
+        "endLine": 22,
+        "endChar": 43
+      },
       "revId": "5d9dcf5c77602896a84523383c70d55829317405",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -36,6 +122,29 @@
     },
     {
       "key": {
+        "uuid": "9a91bd0f_e82ba292",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/notifications/RaftRoleChangeNotifier.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-21T02:18:22Z",
+      "side": 1,
+      "message": "Do not use the word shard here. akka-raft can be used for other stuff...",
+      "range": {
+        "startLine": 41,
+        "startChar": 66,
+        "endLine": 41,
+        "endChar": 71
+      },
+      "revId": "5d9dcf5c77602896a84523383c70d55829317405",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a91bd0f_ab2b5481",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/notifications/RaftRoleChangeNotifier.java",
         "patchSetId": 2
@@ -53,6 +162,29 @@
     },
     {
       "key": {
+        "uuid": "9a91bd0f_080cc641",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/notifications/RaftRoleChangeNotifier.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-21T02:18:22Z",
+      "side": 1,
+      "message": "Do not convert sender path to string. Just add sender to registeredListeners.",
+      "range": {
+        "startLine": 49,
+        "startChar": 45,
+        "endLine": 49,
+        "endChar": 48
+      },
+      "revId": "5d9dcf5c77602896a84523383c70d55829317405",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a91bd0f_2b3e64b9",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/notifications/RaftRoleChangeNotifier.java",
         "patchSetId": 2
@@ -64,6 +196,29 @@
       "writtenOn": "2014-11-21T01:48:50Z",
       "side": 1,
       "message": "I think you could watch for listener actor Terminated message.",
+      "revId": "5d9dcf5c77602896a84523383c70d55829317405",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_cb1c986d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/notifications/RaftRoleChangeNotifier.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-21T02:18:22Z",
+      "side": 1,
+      "message": "If the listener is dead then this may throw an exception. If you use a stale actorRef then the tell will go to dead letters. I think it is safer to use the ActorRef.",
+      "range": {
+        "startLine": 75,
+        "startChar": 29,
+        "endLine": 75,
+        "endChar": 43
+      },
       "revId": "5d9dcf5c77602896a84523383c70d55829317405",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
