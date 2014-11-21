@@ -2,6 +2,7 @@ package org.opendaylight.controller.config.api;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+
 import org.junit.Test;
 
 public class ModuleIdentifierTest {

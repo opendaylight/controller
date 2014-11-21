@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.config.api;
 
+import java.util.Set;
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
-import java.util.Set;
 
 public interface LookupRegistry {
 
