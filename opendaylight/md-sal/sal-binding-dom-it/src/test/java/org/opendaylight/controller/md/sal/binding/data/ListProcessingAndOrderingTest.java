@@ -11,12 +11,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -45,15 +46,10 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.OrderedMapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.UnkeyedListNode;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
-import com.google.common.util.concurrent.ListenableFuture;
-
 /*
  * FIXME: THis test should be moved to sal-binding-broker and rewriten
  * to use new DataBroker API
  */
-@SuppressWarnings("deprecation")
 public class ListProcessingAndOrderingTest extends AbstractDataServiceTest {
 
     private static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier DOM_UNORDERED_LIST_PATH = org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier

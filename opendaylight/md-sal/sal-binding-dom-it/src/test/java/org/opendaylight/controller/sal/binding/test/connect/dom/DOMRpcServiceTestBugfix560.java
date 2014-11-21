@@ -10,14 +10,16 @@ package org.opendaylight.controller.sal.binding.test.connect.dom;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
+import com.google.common.collect.ImmutableSet;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,11 +46,6 @@ import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.parser.api.YangContextParser;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.MoreExecutors;
 
 /**
  * Test case for reported bug 560
@@ -97,9 +94,7 @@ public class DOMRpcServiceTestBugfix560 {
 
         assertNotNull(moduleStream);
         List<InputStream> rpcModels = Collections.singletonList(moduleStream);
-        @SuppressWarnings("deprecation")
         Set<Module> modules = parser.parseYangModelsFromStreams(rpcModels);
-        @SuppressWarnings("deprecation")
         SchemaContext mountSchemaContext = parser.resolveSchemaContext(modules);
         schemaContext = mountSchemaContext;
     }
@@ -118,7 +113,6 @@ public class DOMRpcServiceTestBugfix560 {
                 .child(Node.class, new NodeKey(mountNode)).toInstance();
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void test() throws ExecutionException, InterruptedException {
         // FIXME: This is made to only make sure instance identifier codec

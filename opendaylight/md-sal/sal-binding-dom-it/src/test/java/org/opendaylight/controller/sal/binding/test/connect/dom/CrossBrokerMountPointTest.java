@@ -9,11 +9,10 @@ package org.opendaylight.controller.sal.binding.test.connect.dom;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
-
+import com.google.common.util.concurrent.MoreExecutors;
 import java.math.BigInteger;
 import java.util.Collections;
 import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.data.DataReader;
@@ -38,9 +37,6 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 
-import com.google.common.util.concurrent.MoreExecutors;
-
-@SuppressWarnings("deprecation")
 public class CrossBrokerMountPointTest {
 
     private static final QName NODE_ID_QNAME = QName.create(Node.QNAME, "id");
