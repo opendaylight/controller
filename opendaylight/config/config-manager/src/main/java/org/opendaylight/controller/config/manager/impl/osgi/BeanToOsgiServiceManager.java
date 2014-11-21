@@ -49,7 +49,7 @@ public class BeanToOsgiServiceManager {
 
 
     public static class OsgiRegistration implements AutoCloseable {
-        private static final Logger LOGGER = LoggerFactory.getLogger(OsgiRegistration.class);
+        private static final Logger LOG = LoggerFactory.getLogger(OsgiRegistration.class);
 
         @GuardedBy("this")
         private AutoCloseable instance;
@@ -89,7 +89,7 @@ public class BeanToOsgiServiceManager {
                 try {
                     serviceRegistration.unregister();
                 } catch(IllegalStateException e) {
-                    LOGGER.trace("Cannot unregister {}", serviceRegistration, e);
+                    LOG.trace("Cannot unregister {}", serviceRegistration, e);
                 }
             }
             serviceRegistrations.clear();
@@ -101,7 +101,7 @@ public class BeanToOsgiServiceManager {
             notEquals |= newAnnotationMapping.equals(serviceNamesToAnnotations) == false;
             if (notEquals) {
                 // FIXME: changing from old state to new state can be improved by computing the diff
-                LOGGER.debug("Detected change in service registrations for {}: old: {}, new: {}", moduleIdentifier,
+                LOG.debug("Detected change in service registrations for {}: old: {}, new: {}", moduleIdentifier,
                         serviceNamesToAnnotations, newAnnotationMapping);
                 close();
                 this.instance = newInstance;

@@ -12,6 +12,11 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import java.io.File;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.SortedSet;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.persist.api.PropertiesProvider;
@@ -21,17 +26,11 @@ import org.opendaylight.controller.config.persist.storage.file.xml.model.ConfigS
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.SortedSet;
-
 /**
  * StorageAdapter that stores configuration in an xml file.
  */
 public class XmlFileStorageAdapter implements StorageAdapter, Persister {
-    private static final Logger LOGGER = LoggerFactory.getLogger(XmlFileStorageAdapter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(XmlFileStorageAdapter.class);
 
     public static final String FILE_STORAGE_PROP = "fileStorage";
     public static final String NUMBER_OF_BACKUPS = "numberOfBackups";
@@ -42,15 +41,15 @@ public class XmlFileStorageAdapter implements StorageAdapter, Persister {
     @Override
     public Persister instantiate(PropertiesProvider propertiesProvider) {
         File storage = extractStorageFileFromProperties(propertiesProvider);
-        LOGGER.debug("Using file {}", storage.getAbsolutePath());
+        LOG.debug("Using file {}", storage.getAbsolutePath());
         // Create file if it does not exist
         File parentFile = storage.getAbsoluteFile().getParentFile();
         if (parentFile.exists() == false) {
-            LOGGER.debug("Creating parent folders {}", parentFile);
+            LOG.debug("Creating parent folders {}", parentFile);
             parentFile.mkdirs();
         }
         if (storage.exists() == false) {
-            LOGGER.debug("Storage file does not exist, creating empty file");
+            LOG.debug("Storage file does not exist, creating empty file");
             try {
                 boolean result = storage.createNewFile();
                 if (result == false)
@@ -87,7 +86,7 @@ public class XmlFileStorageAdapter implements StorageAdapter, Persister {
         } else {
             numberOfStoredBackups = Integer.MAX_VALUE;
         }
-        LOGGER.trace("Property {} set to {}", NUMBER_OF_BACKUPS, numberOfStoredBackups);
+        LOG.trace("Property {} set to {}", NUMBER_OF_BACKUPS, numberOfStoredBackups);
         return result;
     }
 

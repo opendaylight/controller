@@ -8,10 +8,8 @@
 package org.opendaylight.controller.config.manager.impl.util;
 
 import java.util.Set;
-
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
-
 import org.opendaylight.controller.config.api.LookupRegistry;
 
 public class LookupBeansUtil {

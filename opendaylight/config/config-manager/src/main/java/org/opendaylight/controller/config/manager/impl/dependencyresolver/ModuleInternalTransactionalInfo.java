@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.config.manager.impl.dependencyresolver;
 
+import javax.annotation.Nullable;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.manager.impl.ModuleInternalInfo;
 import org.opendaylight.controller.config.manager.impl.dynamicmbean.DynamicReadableWrapper;
@@ -14,8 +15,6 @@ import org.opendaylight.controller.config.manager.impl.jmx.TransactionModuleJMXR
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.yangtools.concepts.Identifiable;
-
-import javax.annotation.Nullable;
 import org.osgi.framework.BundleContext;
 
 public class ModuleInternalTransactionalInfo implements Identifiable<ModuleIdentifier> {

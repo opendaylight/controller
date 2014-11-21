@@ -14,9 +14,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Map;
-
 import javax.management.ObjectName;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -139,7 +137,7 @@ public class DependentWiringTest extends AbstractParallelAPSPTest {
     public void testUsingServiceReferences() throws Exception {
         ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
         ObjectName threadPoolON = createFixed1(transaction, 10);
-                transaction.lookupConfigBean(getThreadPoolImplementationName(), fixed1);
+        transaction.lookupConfigBean(getThreadPoolImplementationName(), fixed1);
         String refName = "ref";
         ObjectName serviceReferenceON = transaction.saveServiceReference(TestingThreadPoolServiceInterface.QNAME, refName,
                 threadPoolON);

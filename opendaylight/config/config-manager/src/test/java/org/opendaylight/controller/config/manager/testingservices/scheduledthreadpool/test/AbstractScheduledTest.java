@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.config.manager.testingservices.scheduledthreadpool.test;
 
+import static org.junit.Assert.assertEquals;
+
 import org.junit.After;
 import org.junit.Before;
 import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
@@ -15,8 +17,6 @@ import org.opendaylight.controller.config.manager.testingservices.parallelapsp.T
 import org.opendaylight.controller.config.manager.testingservices.scheduledthreadpool.TestingScheduledThreadPoolImpl;
 import org.opendaylight.controller.config.manager.testingservices.scheduledthreadpool.TestingScheduledThreadPoolModuleFactory;
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingFixedThreadPoolModuleFactory;
-
-import static org.junit.Assert.assertEquals;
 
 public abstract class AbstractScheduledTest extends AbstractConfigTest {
     protected static final String scheduled1 = "scheduled1";

@@ -7,15 +7,14 @@
  */
 package org.opendaylight.controller.config.manager.impl.util;
 
-import org.opendaylight.controller.config.spi.ModuleFactory;
-import org.opendaylight.yangtools.yang.binding.annotations.ModuleQName;
-import org.opendaylight.yangtools.yang.common.QName;
-import org.osgi.framework.BundleContext;
-
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import org.opendaylight.controller.config.spi.ModuleFactory;
+import org.opendaylight.yangtools.yang.binding.annotations.ModuleQName;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.osgi.framework.BundleContext;
 
 public class ModuleQNameUtil {
 

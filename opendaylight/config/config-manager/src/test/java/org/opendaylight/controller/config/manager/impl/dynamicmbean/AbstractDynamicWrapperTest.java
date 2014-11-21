@@ -7,6 +7,9 @@
  */
 package org.opendaylight.controller.config.manager.impl.dynamicmbean;
 
+import static org.junit.Assert.assertEquals;
+
+import java.lang.management.ManagementFactory;
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.DynamicMBean;
@@ -15,8 +18,6 @@ import javax.management.MBeanInfo;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 import javax.management.ObjectName;
-import java.lang.management.ManagementFactory;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,8 +29,6 @@ import org.opendaylight.controller.config.manager.testingservices.threadpool.Tes
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingFixedThreadPoolModule;
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingFixedThreadPoolModuleFactory;
 import org.opendaylight.controller.config.spi.Module;
-
-import static org.junit.Assert.assertEquals;
 
 public abstract class AbstractDynamicWrapperTest extends
         AbstractLockedPlatformMBeanServerTest {
@@ -84,7 +83,7 @@ public abstract class AbstractDynamicWrapperTest extends
                 proxy.getAttribute(TRIGGER_NEW_INSTANCE_CREATION));
 
         AttributeList attributes = proxy.getAttributes(new String[] {
-                THREAD_COUNT, TRIGGER_NEW_INSTANCE_CREATION });
+            THREAD_COUNT, TRIGGER_NEW_INSTANCE_CREATION });
         assertEquals(2, attributes.size());
         Attribute threadCountAttr = (Attribute) attributes.get(0);
         assertEquals(THREAD_COUNT, threadCountAttr.getName());

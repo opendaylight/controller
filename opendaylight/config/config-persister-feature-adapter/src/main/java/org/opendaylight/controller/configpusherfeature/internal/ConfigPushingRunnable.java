@@ -7,11 +7,11 @@
  */
 package org.opendaylight.controller.configpusherfeature.internal;
 
+import com.google.common.collect.LinkedHashMultimap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.features.FeatureEvent.EventType;
@@ -20,10 +20,8 @@ import org.opendaylight.controller.config.persist.api.ConfigPusher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.LinkedHashMultimap;
-
 public class ConfigPushingRunnable implements Runnable {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigPushingRunnable.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ConfigPushingRunnable.class);
     private static final int POLL_TIME = 1;
     private BlockingQueue<FeatureEvent> queue;
     private FeatureConfigPusher configPusher;
@@ -49,14 +47,14 @@ public class ConfigPushingRunnable implements Runnable {
                         processFeatureEvent(event,toInstall);
                     }
                 } else if(toInstall.isEmpty()) {
-                    LOGGER.error("ConfigPushingRunnable - exiting");
+                    LOG.error("ConfigPushingRunnable - exiting");
                     return;
                 }
             } catch (InterruptedException e) {
-                LOGGER.error("ConfigPushingRunnable - interupted");
+                LOG.error("ConfigPushingRunnable - interupted");
                 interuppted = true;
             } catch (Exception e) {
-                LOGGER.error("Exception while processing features {}", e);
+                LOG.error("Exception while processing features ", e);
             }
         }
     }
@@ -73,7 +71,7 @@ public class ConfigPushingRunnable implements Runnable {
 
     protected void logPushResult(LinkedHashMultimap<Feature,FeatureConfigSnapshotHolder> results) {
         for(Feature f:results.keySet()) {
-            LOGGER.info("Pushed configs for feature {} {}",f,results.get(f));
+            LOG.info("Pushed configs for feature {} {}",f,results.get(f));
         }
     }
 }

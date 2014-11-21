@@ -1,17 +1,16 @@
 package org.opendaylight.controller.config.manager.impl;
 
+import java.util.Deque;
+import java.util.LinkedList;
+import java.util.concurrent.TimeUnit;
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.GuardedBy;
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.concurrent.TimeUnit;
-
 public class DeadlockMonitor implements AutoCloseable {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DeadlockMonitorRunnable.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DeadlockMonitor.class);
 
     private static final long WARN_AFTER_MILLIS = 5000;
 
@@ -43,7 +42,7 @@ public class DeadlockMonitor implements AutoCloseable {
             moduleIdentifierWithNanosStack.push(current);
             top = current;
         }
-        LOGGER.trace("setCurrentlyInstantiatedModule {}, top {}", currentlyInstantiatedModule, top);
+        LOG.trace("setCurrentlyInstantiatedModule {}, top {}", currentlyInstantiatedModule, top);
     }
 
     public boolean isAlive() {
@@ -78,7 +77,7 @@ public class DeadlockMonitor implements AutoCloseable {
                     // is the getInstance() running longer than WARN_AFTER_MILLIS ?
                     long runningTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - copy.nanoTime);
                     if (runningTime > WARN_AFTER_MILLIS) {
-                        LOGGER.warn("{} did not finish after {} ms", copy.moduleIdentifier, runningTime);
+                        LOG.warn("{} did not finish after {} ms", copy.moduleIdentifier, runningTime);
                     }
                 }
                 try {
@@ -87,7 +86,7 @@ public class DeadlockMonitor implements AutoCloseable {
                     interrupt();
                 }
             }
-            LOGGER.trace("Exiting {}", this);
+            LOG.trace("Exiting {}", this);
         }
 
         @Override

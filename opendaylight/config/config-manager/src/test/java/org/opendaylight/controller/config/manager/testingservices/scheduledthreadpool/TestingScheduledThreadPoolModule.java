@@ -12,9 +12,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.io.Closeable;
-
 import javax.annotation.Nullable;
-
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.RuntimeBeanRegistratorAwareModule;
 import org.opendaylight.controller.config.api.runtime.RootRuntimeBeanRegistrator;

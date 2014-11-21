@@ -8,7 +8,6 @@
 package org.opendaylight.controller.config.manager.impl.osgi.mapping;
 
 import javassist.ClassPool;
-
 import org.opendaylight.controller.config.manager.impl.util.OsgiRegistrationUtil;
 import org.opendaylight.yangtools.sal.binding.generator.api.ClassLoadingStrategy;
 import org.opendaylight.yangtools.sal.binding.generator.impl.RuntimeGeneratedMappingServiceImpl;

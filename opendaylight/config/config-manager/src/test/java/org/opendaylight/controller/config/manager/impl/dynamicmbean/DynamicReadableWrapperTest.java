@@ -8,7 +8,6 @@
 package org.opendaylight.controller.config.manager.impl.dynamicmbean;
 
 import java.lang.management.ManagementFactory;
-
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.spi.Module;
 

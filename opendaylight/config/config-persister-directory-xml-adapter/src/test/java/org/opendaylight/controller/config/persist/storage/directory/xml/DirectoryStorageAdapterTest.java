@@ -12,6 +12,7 @@ import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
 import com.google.common.base.Optional;
 import java.io.File;
 import java.io.IOException;

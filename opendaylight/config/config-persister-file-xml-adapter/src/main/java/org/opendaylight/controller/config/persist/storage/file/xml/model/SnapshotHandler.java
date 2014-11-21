@@ -7,13 +7,13 @@
  */
 package org.opendaylight.controller.config.persist.storage.file.xml.model;
 
+import java.io.StringReader;
+import java.io.StringWriter;
 import javax.xml.bind.ValidationEventHandler;
 import javax.xml.bind.annotation.DomHandler;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-import java.io.StringReader;
-import java.io.StringWriter;
 
 class SnapshotHandler implements DomHandler<String, StreamResult> {
 

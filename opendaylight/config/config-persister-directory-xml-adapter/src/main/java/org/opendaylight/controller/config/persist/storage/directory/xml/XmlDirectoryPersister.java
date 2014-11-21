@@ -8,6 +8,7 @@
 package org.opendaylight.controller.config.persist.storage.directory.xml;
 
 import static com.google.common.base.Preconditions.checkArgument;
+
 import com.google.common.base.Optional;
 import com.google.common.io.Files;
 import java.io.File;
@@ -90,10 +91,12 @@ public class XmlDirectoryPersister implements Persister {
         } catch (JAXBException e) {
             // In case of parse error, issue a warning, ignore and continue
             LOG.warn(
-                    "Unable to parse configuration snapshot from {}. Initial config from {} will be IGNORED in this run. " +
-                    "Note that subsequent config files may fail due to this problem. " +
+                    "Unable to parse configuration snapshot from {}. Initial config from {} will be IGNORED in this run. ",
+                    file, file);
+            LOG.warn(
+                    "Note that subsequent config files may fail due to this problem. ",
                     "Xml markup in this file needs to be fixed, for detailed information see enclosed exception.",
-                    file, file, e);
+                    e);
         }
 
         return Optional.absent();

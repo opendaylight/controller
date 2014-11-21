@@ -7,12 +7,11 @@
  */
 package org.opendaylight.controller.configpusherfeature.internal;
 
+import com.google.common.base.Preconditions;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-
 import javax.xml.bind.JAXBException;
-
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Conditional;
 import org.apache.karaf.features.ConfigFileInfo;
@@ -21,8 +20,6 @@ import org.apache.karaf.features.Feature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-
 /*
  * Wrap a Feature for the purposes of extracting the FeatureConfigSnapshotHolders from
  * its underlying ConfigFileInfo's
@@ -30,7 +27,7 @@ import com.google.common.base.Preconditions;
  * Delegates the the contained feature and provides additional methods.
  */
 public class AbstractFeatureWrapper implements Feature {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFeatureWrapper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractFeatureWrapper.class);
     protected Feature feature = null;
 
     protected AbstractFeatureWrapper() {
@@ -55,7 +52,7 @@ public class AbstractFeatureWrapper implements Feature {
             try {
                 snapShotHolders.add(new FeatureConfigSnapshotHolder(c,this));
             } catch (JAXBException e) {
-                LOGGER.debug("{} is not a config subsystem config file",c.getFinalname());
+                LOG.debug("{} is not a config subsystem config file",c.getFinalname());
             }
         }
         return snapShotHolders;

@@ -9,7 +9,6 @@ package org.opendaylight.controller.config.manager.impl.jmx;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanServer;
-
 import org.opendaylight.controller.config.api.jmx.ConfigRegistryMXBean;
 import org.opendaylight.controller.config.manager.impl.ConfigRegistryImplMXBean;
 

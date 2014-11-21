@@ -7,14 +7,7 @@
  */
 package org.opendaylight.controller.config.manager.impl.dynamicmbean;
 
-import org.opendaylight.controller.config.api.ModuleIdentifier;
-import org.opendaylight.controller.config.api.ValidationException;
-import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-import org.opendaylight.controller.config.manager.impl.TransactionIdentifier;
-import org.opendaylight.controller.config.spi.Module;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.lang.reflect.Method;
 import javax.annotation.concurrent.ThreadSafe;
 import javax.management.Attribute;
 import javax.management.AttributeList;
@@ -26,7 +19,13 @@ import javax.management.MBeanOperationInfo;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
-import java.lang.reflect.Method;
+import org.opendaylight.controller.config.api.ModuleIdentifier;
+import org.opendaylight.controller.config.api.ValidationException;
+import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
+import org.opendaylight.controller.config.manager.impl.TransactionIdentifier;
+import org.opendaylight.controller.config.spi.Module;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Wraps {@link org.opendaylight.controller.config.spi.Module} instance in a
@@ -47,7 +46,7 @@ import java.lang.reflect.Method;
  */
 @ThreadSafe
 public class DynamicWritableWrapper extends AbstractDynamicWrapper {
-    private static final Logger LOGGER = LoggerFactory
+    private static final Logger LOG = LoggerFactory
             .getLogger(DynamicWritableWrapper.class);
 
     private final ReadOnlyAtomicBoolean configBeanModificationDisabled;
@@ -140,7 +139,7 @@ public class DynamicWritableWrapper extends AbstractDynamicWrapper {
                 setAttribute(attribute);
                 result.add(attribute);
             } catch (Exception e) {
-                LOGGER.warn("Setting attribute {} failed on {}", attribute.getName(), moduleIdentifier, e);
+                LOG.warn("Setting attribute {} failed on {}", attribute.getName(), moduleIdentifier, e);
                 throw new IllegalArgumentException(
                         "Setting attribute failed - " + attribute.getName()
                                 + " on " + moduleIdentifier, e);

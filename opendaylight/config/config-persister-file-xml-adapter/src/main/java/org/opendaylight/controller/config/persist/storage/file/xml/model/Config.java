@@ -12,8 +12,9 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
-import org.apache.commons.lang3.StringUtils;
-
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -21,9 +22,7 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 
 @XmlRootElement(name = "persisted-snapshots")
 public final class Config {

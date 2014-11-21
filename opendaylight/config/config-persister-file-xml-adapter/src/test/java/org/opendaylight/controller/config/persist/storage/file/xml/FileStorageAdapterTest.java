@@ -8,11 +8,12 @@
 
 package org.opendaylight.controller.config.persist.storage.file.xml;
 
-import static org.junit.Assert.assertFalse;
 import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+
 import com.google.common.base.Charsets;
 import java.io.File;
 import java.io.FileNotFoundException;

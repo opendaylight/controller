@@ -14,7 +14,6 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-
 import org.apache.commons.io.IOUtils;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.sal.binding.generator.api.ModuleInfoRegistry;
@@ -31,7 +30,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class ModuleInfoBundleTracker implements BundleTrackerCustomizer<Collection<ObjectRegistration<YangModuleInfo>>> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ModuleInfoBundleTracker.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ModuleInfoBundleTracker.class);
 
     public static final String MODULE_INFO_PROVIDER_PATH_PREFIX = "META-INF/services/";
 
@@ -45,7 +44,7 @@ public final class ModuleInfoBundleTracker implements BundleTrackerCustomizer<Co
     @Override
     public Collection<ObjectRegistration<YangModuleInfo>> addingBundle(Bundle bundle, BundleEvent event) {
         URL resource = bundle.getEntry(MODULE_INFO_PROVIDER_PATH_PREFIX + YangModelBindingProvider.class.getName());
-        LOGGER.debug("Got addingBundle({}) with YangModelBindingProvider resource {}", bundle, resource);
+        LOG.debug("Got addingBundle({}) with YangModelBindingProvider resource {}", bundle, resource);
         if(resource==null) {
             return null;
         }
@@ -54,16 +53,16 @@ public final class ModuleInfoBundleTracker implements BundleTrackerCustomizer<Co
         try (InputStream inputStream = resource.openStream()) {
             List<String> lines = IOUtils.readLines(inputStream);
             for (String moduleInfoName : lines) {
-                LOGGER.trace("Retrieve ModuleInfo({}, {})", moduleInfoName, bundle);
+                LOG.trace("Retrieve ModuleInfo({}, {})", moduleInfoName, bundle);
                 YangModuleInfo moduleInfo = retrieveModuleInfo(moduleInfoName, bundle);
                 registrations.add(moduleInfoRegistry.registerModuleInfo(moduleInfo));
             }
 
         } catch (Exception e) {
-            LOGGER.error("Error while reading {}", resource, e);
+            LOG.error("Error while reading {}", resource, e);
             throw new RuntimeException(e);
         }
-        LOGGER.trace("Got following registrations {}", registrations);
+        LOG.trace("Got following registrations {}", registrations);
         return registrations;
     }
 
@@ -111,7 +110,7 @@ public final class ModuleInfoBundleTracker implements BundleTrackerCustomizer<Co
         } catch (NoClassDefFoundError e) {
 
 
-            LOGGER.error("Error while executing getModuleInfo on {}", instance, e);
+            LOG.error("Error while executing getModuleInfo on {}", instance, e);
             throw e;
         }
     }
@@ -126,7 +125,7 @@ public final class ModuleInfoBundleTracker implements BundleTrackerCustomizer<Co
     }
 
     public static String logMessage(String slfMessage, Object... params) {
-        LOGGER.info(slfMessage, params);
+        LOG.info(slfMessage, params);
         String formatMessage = slfMessage.replaceAll("\\{\\}", "%s");
         return format(formatMessage, params);
     }

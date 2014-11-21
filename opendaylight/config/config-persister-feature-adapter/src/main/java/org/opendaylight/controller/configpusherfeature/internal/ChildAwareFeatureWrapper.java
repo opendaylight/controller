@@ -7,11 +7,10 @@
  */
 package org.opendaylight.controller.configpusherfeature.internal;
 
+import com.google.common.base.Preconditions;
 import java.util.LinkedHashSet;
 import java.util.List;
-
 import javax.xml.bind.JAXBException;
-
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.Dependency;
@@ -21,8 +20,6 @@ import org.osgi.framework.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-
 /*
  * Wrap a Feature for the purposes of extracting the FeatureConfigSnapshotHolders from
  * its underlying ConfigFileInfo's and those of its children recursively
@@ -30,7 +27,7 @@ import com.google.common.base.Preconditions;
  * Delegates the the contained feature and provides additional methods.
  */
 public class ChildAwareFeatureWrapper extends AbstractFeatureWrapper implements Feature {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ChildAwareFeatureWrapper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ChildAwareFeatureWrapper.class);
     private FeaturesService featuresService= null;
 
     protected ChildAwareFeatureWrapper(Feature f) {
@@ -79,7 +76,7 @@ public class ChildAwareFeatureWrapper extends AbstractFeatureWrapper implements 
                     f = new FeatureConfigSnapshotHolder(h,this);
                     snapShotHolders.add(f);
                 } catch (JAXBException e) {
-                    LOGGER.debug("{} is not a config subsystem config file",h.getFileInfo().getFinalname());
+                    LOG.debug("{} is not a config subsystem config file",h.getFileInfo().getFinalname());
                 }
             }
         }
@@ -97,8 +94,8 @@ public class ChildAwareFeatureWrapper extends AbstractFeatureWrapper implements 
                 Version v = VersionTable.getVersion(f.getVersion());
                 if (range.contains(v) &&
                     (fi == null || VersionTable.getVersion(fi.getVersion()).compareTo(v) < 0)) {
-                        fi = f;
-                        break;
+                    fi = f;
+                    break;
                 }
             }
         }

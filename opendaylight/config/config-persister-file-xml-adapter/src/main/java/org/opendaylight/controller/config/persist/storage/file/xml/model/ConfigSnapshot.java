@@ -7,15 +7,14 @@
  */
 package org.opendaylight.controller.config.persist.storage.file.xml.model;
 
+import java.util.SortedSet;
 import java.util.TreeSet;
-import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
-
 import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import java.util.SortedSet;
+import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 
 @XmlRootElement(name = ConfigSnapshot.SNAPSHOT_ROOT_ELEMENT_NAME)
 public class ConfigSnapshot {

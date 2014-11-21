@@ -8,7 +8,6 @@
 package org.opendaylight.controller.config.manager.impl;
 
 import javax.annotation.Nullable;
-
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.manager.impl.dependencyresolver.DestroyedModule;
 import org.opendaylight.controller.config.manager.impl.dynamicmbean.DynamicReadableWrapper;

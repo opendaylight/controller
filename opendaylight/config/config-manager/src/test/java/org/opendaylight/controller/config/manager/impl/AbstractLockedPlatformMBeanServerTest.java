@@ -9,9 +9,7 @@ package org.opendaylight.controller.config.manager.impl;
 
 import java.lang.management.ManagementFactory;
 import java.util.concurrent.locks.ReentrantLock;
-
 import javax.management.MBeanServer;
-
 import org.junit.After;
 import org.junit.Before;
 

@@ -10,10 +10,8 @@ package org.opendaylight.controller.config.manager.testingservices.threadpool;
 import static com.google.common.base.Preconditions.checkState;
 
 import java.io.Closeable;
-
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
-
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.manager.testingservices.seviceinterface.ModifiableThreadPoolServiceInterface;
 import org.opendaylight.controller.config.spi.Module;

@@ -8,6 +8,7 @@
 package org.opendaylight.controller.config.manager.impl.dynamicmbean;
 
 import static java.lang.String.format;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -47,6 +48,8 @@ import org.opendaylight.controller.config.manager.impl.util.InterfacesHelper;
 import org.opendaylight.controller.config.spi.Module;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static java.lang.String.format;
 
 /**
  * Contains common code for readable/rw dynamic mbean wrappers. Routes all
@@ -227,7 +230,7 @@ abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrapper {
                 }
                 AttributeHolder attributeHolder = new AttributeHolder(
                         attribName, module, attributeMap.get(attribName)
-                        .getType(), writable, ifc, description);
+                            .getType(), writable, ifc, description);
                 attributeHolderMap.put(attribName, attributeHolder);
             }
         }

@@ -8,14 +8,13 @@
 
 package org.opendaylight.controller.config.manager.impl.osgi.mapping;
 
+import java.util.Hashtable;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.sal.binding.generator.api.ModuleInfoRegistry;
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-
-import java.util.Hashtable;
 
 /**
  * Update SchemaContext service in Service Registry each time new YangModuleInfo is added or removed.

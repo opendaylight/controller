@@ -9,7 +9,6 @@ package org.opendaylight.controller.configpusherfeature.internal;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-
 import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.features.FeaturesListener;
 import org.apache.karaf.features.FeaturesService;
@@ -19,7 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ConfigFeaturesListener implements  FeaturesListener,  AutoCloseable {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigFeaturesListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ConfigFeaturesListener.class);
     private static final int QUEUE_SIZE = 1000;
     private BlockingQueue<FeatureEvent> queue = new LinkedBlockingQueue<FeatureEvent>(QUEUE_SIZE);
     Thread pushingThread = null;
@@ -36,7 +35,7 @@ public class ConfigFeaturesListener implements  FeaturesListener,  AutoCloseable
 
     @Override
     public void repositoryEvent(RepositoryEvent event) {
-        LOGGER.debug("Repository: " + event.getType() + " " + event.getRepository());
+        LOG.debug("Repository: {} {}", event.getType(), event.getRepository());
     }
 
     @Override

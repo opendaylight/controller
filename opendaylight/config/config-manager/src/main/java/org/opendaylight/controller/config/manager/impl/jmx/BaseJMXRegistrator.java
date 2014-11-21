@@ -7,12 +7,11 @@
  */
 package org.opendaylight.controller.config.manager.impl.jmx;
 
-import org.opendaylight.controller.config.api.ModuleIdentifier;
-
+import java.util.Set;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.QueryExp;
-import java.util.Set;
+import org.opendaylight.controller.config.api.ModuleIdentifier;
 
 public class BaseJMXRegistrator implements AutoCloseable, NestableJMXRegistrator {
 

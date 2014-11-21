@@ -7,7 +7,26 @@
  */
 package org.opendaylight.controller.config.manager.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+
 import com.google.common.base.Preconditions;
+import java.lang.management.ManagementFactory;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.Dictionary;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+import javax.management.RuntimeMBeanException;
 import org.junit.After;
 import org.junit.Before;
 import org.mockito.Matchers;
@@ -28,26 +47,6 @@ import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-import javax.management.RuntimeMBeanException;
-import java.lang.management.ManagementFactory;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.Dictionary;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
 
 /**
  * Each test that relies on
@@ -199,7 +198,7 @@ public abstract class AbstractConfigTest extends
 
     public static interface BundleContextServiceRegistrationHandler {
 
-       void handleServiceRegistration(Class<?> clazz, Object serviceInstance, Dictionary<String, ?> props);
+        void handleServiceRegistration(Class<?> clazz, Object serviceInstance, Dictionary<String, ?> props);
 
     }
 
@@ -260,19 +259,20 @@ public abstract class AbstractConfigTest extends
 
         Object proxy = Proxy.newProxyInstance(innerObject.getClass().getClassLoader(),
                 innerObject.getClass().getInterfaces(), new InvocationHandler() {
-            @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                try {
-                    return method.invoke(innerObject, args);
-                } catch (InvocationTargetException e) {
-                    try {
-                        throw e.getTargetException();
-                    } catch (RuntimeMBeanException e2) {
-                        throw e2.getTargetException();
+                        @Override
+                        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                            try {
+                                return method.invoke(innerObject, args);
+                            } catch (InvocationTargetException e) {
+                                try {
+                                    throw e.getTargetException();
+                                } catch (RuntimeMBeanException e2) {
+                                    throw e2.getTargetException();
+                                }
+                            }
+                        }
                     }
-                }
-            }
-        });
+        );
         return (T) proxy;
     }
 

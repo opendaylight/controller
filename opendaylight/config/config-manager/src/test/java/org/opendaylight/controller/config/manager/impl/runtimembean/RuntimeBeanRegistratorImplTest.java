@@ -11,15 +11,13 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-
 import java.lang.management.ManagementFactory;
 import java.util.Map;
-
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

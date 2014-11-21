@@ -8,6 +8,7 @@
 package org.opendaylight.controller.config.manager.impl.util;
 
 import static org.junit.Assert.assertEquals;
+
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import java.util.Collections;
@@ -94,7 +95,7 @@ public class InterfacesHelperTest {
 
         Set<Class<?>> expected = ImmutableSet.of((Class<?>) TestingScheduledThreadPoolServiceInterface.class,
                 TestingThreadPoolServiceInterface.class
-                );
+        );
         assertEquals(expected, result);
     }
 

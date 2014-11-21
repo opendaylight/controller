@@ -7,16 +7,6 @@
  */
 package org.opendaylight.controller.config.manager.impl.dependencyresolver;
 
-import org.opendaylight.controller.config.api.JmxAttribute;
-import org.opendaylight.controller.config.api.JmxAttributeValidationException;
-import org.opendaylight.controller.config.api.ModuleIdentifier;
-import org.opendaylight.controller.config.manager.impl.CommitInfo;
-import org.opendaylight.controller.config.manager.impl.TransactionIdentifier;
-import org.opendaylight.controller.config.spi.Module;
-import org.opendaylight.controller.config.spi.ModuleFactory;
-
-import javax.annotation.concurrent.GuardedBy;
-import javax.management.InstanceAlreadyExistsException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,6 +15,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.annotation.concurrent.GuardedBy;
+import javax.management.InstanceAlreadyExistsException;
+import org.opendaylight.controller.config.api.JmxAttribute;
+import org.opendaylight.controller.config.api.JmxAttributeValidationException;
+import org.opendaylight.controller.config.api.ModuleIdentifier;
+import org.opendaylight.controller.config.manager.impl.CommitInfo;
+import org.opendaylight.controller.config.manager.impl.TransactionIdentifier;
+import org.opendaylight.controller.config.spi.Module;
+import org.opendaylight.controller.config.spi.ModuleFactory;
 
 /**
  * Represents modules to be committed.

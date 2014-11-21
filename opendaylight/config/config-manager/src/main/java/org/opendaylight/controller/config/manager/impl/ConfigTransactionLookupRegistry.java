@@ -7,6 +7,13 @@
  */
 package org.opendaylight.controller.config.manager.impl;
 
+import java.io.Closeable;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.ObjectName;
 import org.opendaylight.controller.config.api.LookupRegistry;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.manager.impl.jmx.TransactionJMXRegistrator;
@@ -15,14 +22,6 @@ import org.opendaylight.controller.config.manager.impl.util.LookupBeansUtil;
 import org.opendaylight.controller.config.manager.impl.util.ModuleQNameUtil;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.BundleContext;
-
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.ObjectName;
-import java.io.Closeable;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 /**
  * Responsible for creating TransactionJMXRegistrator, registering transaction and all its beans,

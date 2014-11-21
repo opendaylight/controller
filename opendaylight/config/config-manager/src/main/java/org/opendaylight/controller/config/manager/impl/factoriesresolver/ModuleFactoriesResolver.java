@@ -7,10 +7,9 @@
  */
 package org.opendaylight.controller.config.manager.impl.factoriesresolver;
 
+import java.util.Map;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.BundleContext;
-
-import java.util.Map;
 
 /**
  * {@link org.opendaylight.controller.config.manager.impl.ConfigTransactionControllerImpl}

@@ -7,9 +7,12 @@
  */
 package org.opendaylight.controller.config.manager.impl.jmx;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.io.Closeable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import javax.annotation.concurrent.GuardedBy;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
@@ -19,15 +22,11 @@ import javax.management.MBeanServer;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import javax.management.QueryExp;
-import java.io.Closeable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class InternalJMXRegistrator implements Closeable {
-    private static final Logger LOGGER = LoggerFactory
+    private static final Logger LOG = LoggerFactory
             .getLogger(InternalJMXRegistrator.class);
     private final MBeanServer configMBeanServer;
 
@@ -100,7 +99,7 @@ public class InternalJMXRegistrator implements Closeable {
             try {
                 configMBeanServer.unregisterMBean(on);
             } catch (Exception e) {
-                LOGGER.warn("Ignoring error while unregistering {}", on, e);
+                LOG.warn("Ignoring error while unregistering {}", on, e);
             }
         }
         registeredObjectNames.clear();

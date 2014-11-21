@@ -10,9 +10,7 @@ package org.opendaylight.controller.config.manager.impl;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
 import javax.annotation.concurrent.Immutable;
-
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.manager.impl.dependencyresolver.DestroyedModule;
 import org.opendaylight.controller.config.manager.impl.dependencyresolver.ModuleInternalTransactionalInfo;

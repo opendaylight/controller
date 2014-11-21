@@ -8,6 +8,24 @@
 package org.opendaylight.controller.config.manager.impl;
 
 import com.google.common.collect.Maps;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import javax.annotation.concurrent.GuardedBy;
+import javax.annotation.concurrent.NotThreadSafe;
+import javax.annotation.concurrent.ThreadSafe;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanServer;
+import javax.management.MBeanServerFactory;
+import javax.management.ObjectName;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.RuntimeBeanRegistratorAwareModule;
@@ -35,32 +53,13 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.concurrent.GuardedBy;
-import javax.annotation.concurrent.NotThreadSafe;
-import javax.annotation.concurrent.ThreadSafe;
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
-import javax.management.ObjectName;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 /**
  * Singleton that is responsible for creating and committing Config
  * Transactions. It is registered in Platform MBean Server.
  */
 @ThreadSafe
 public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBean {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigRegistryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ConfigRegistryImpl.class);
 
     private final ModuleFactoriesResolver resolver;
     private final MBeanServer configMBeanServer;
@@ -166,7 +165,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         for (ModuleInternalInfo moduleInternalInfo : currentConfig.getEntries()) {
             String name = moduleInternalInfo.getModuleFactory().getImplementationName();
             if (allCurrentFactories.containsKey(name) == false) {
-                LOGGER.trace("Factory {} not found in SR, using reference from previous commit", name);
+                LOG.trace("Factory {} not found in SR, using reference from previous commit", name);
                 allCurrentFactories.put(name,
                         Maps.immutableEntry(moduleInternalInfo.getModuleFactory(), moduleInternalInfo.getBundleContext()));
             }
@@ -202,7 +201,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
             throws ConflictingVersionException, ValidationException {
         final String transactionName = ObjectNameUtil
                 .getTransactionName(transactionControllerON);
-        LOGGER.trace("About to commit {}. Current parentVersion: {}, versionCounter {}", transactionName, version, versionCounter);
+        LOG.trace("About to commit {}. Current parentVersion: {}, versionCounter {}", transactionName, version, versionCounter);
 
         // find ConfigTransactionController
         Map<String, Entry<ConfigTransactionControllerInternal, ConfigTransactionLookupRegistry>> transactions = transactionsHolder.getCurrentTransactions();
@@ -230,7 +229,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         } catch (Error | RuntimeException t) { // some libs throw Errors: e.g.
             // javax.xml.ws.spi.FactoryFinder$ConfigurationError
             isHealthy = false;
-            LOGGER.error("Configuration Transaction failed on 2PC, server is unhealthy", t);
+            LOG.error("Configuration Transaction failed on 2PC, server is unhealthy", t);
             if (t instanceof RuntimeException) {
                 throw (RuntimeException) t;
             } else {
@@ -292,7 +291,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
 
         int orderingIdx = 0;
         for (ModuleIdentifier moduleIdentifier : orderedModuleIdentifiers) {
-            LOGGER.trace("Registering {}", moduleIdentifier);
+            LOG.trace("Registering {}", moduleIdentifier);
             ModuleInternalTransactionalInfo entry = commitInfo.getCommitted()
                     .get(moduleIdentifier);
             if (entry == null) {
@@ -427,7 +426,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
                 configTransactionControllerEntry.getValue().close();
                 configTransactionController.abortConfig();
             } catch (RuntimeException e) {
-                LOGGER.warn("Ignoring exception while aborting {}",
+                LOG.warn("Ignoring exception while aborting {}",
                         configTransactionController, e);
             }
         }
