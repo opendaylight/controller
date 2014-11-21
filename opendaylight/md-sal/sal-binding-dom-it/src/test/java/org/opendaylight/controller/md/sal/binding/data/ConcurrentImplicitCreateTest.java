@@ -9,10 +9,8 @@ package org.opendaylight.controller.md.sal.binding.data;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
@@ -28,14 +26,13 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
  * FIXME: THis test should be moved to sal-binding-broker and rewriten
  * to use new DataBroker API
  */
-@SuppressWarnings("deprecation")
 public class ConcurrentImplicitCreateTest extends AbstractDataServiceTest {
 
     private static final TopLevelListKey FOO_KEY = new TopLevelListKey("foo");
     private static final TopLevelListKey BAR_KEY = new TopLevelListKey("bar");
-    private static InstanceIdentifier<Top> TOP_PATH = InstanceIdentifier.builder(Top.class).build();
-    private static InstanceIdentifier<TopLevelList> FOO_PATH = TOP_PATH.child(TopLevelList.class, FOO_KEY);
-    private static InstanceIdentifier<TopLevelList> BAR_PATH = TOP_PATH.child(TopLevelList.class, BAR_KEY);
+    private static final InstanceIdentifier<Top> TOP_PATH = InstanceIdentifier.builder(Top.class).build();
+    private static final InstanceIdentifier<TopLevelList> FOO_PATH = TOP_PATH.child(TopLevelList.class, FOO_KEY);
+    private static final InstanceIdentifier<TopLevelList> BAR_PATH = TOP_PATH.child(TopLevelList.class, BAR_KEY);
 
     @Test
     public void testConcurrentCreate() throws InterruptedException, ExecutionException {

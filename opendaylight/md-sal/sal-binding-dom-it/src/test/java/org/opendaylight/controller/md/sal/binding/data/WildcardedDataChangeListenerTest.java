@@ -10,12 +10,11 @@ package org.opendaylight.controller.md.sal.binding.data;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-
+import com.google.common.util.concurrent.SettableFuture;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
 import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
@@ -35,12 +34,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-import com.google.common.util.concurrent.SettableFuture;
-
 /**
  * FIXME: THis test should be moved to compat test-suite
  */
-@SuppressWarnings("deprecation")
 public class WildcardedDataChangeListenerTest extends AbstractDataServiceTest {
 
     private static final TopLevelListKey TOP_LEVEL_LIST_0_KEY = new TopLevelListKey("test:0");
