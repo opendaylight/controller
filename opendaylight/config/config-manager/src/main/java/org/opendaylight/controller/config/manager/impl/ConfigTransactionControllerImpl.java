@@ -10,6 +10,7 @@ package org.opendaylight.controller.config.manager.impl;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
+import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -383,23 +384,25 @@ class ConfigTransactionControllerImpl implements
 
         LOG.trace("Committing transaction {}", getTransactionIdentifier());
 
-        // call getInstance()
-        for (Entry<ModuleIdentifier, Module> entry : dependencyResolverManager
-                .getAllModules().entrySet()) {
-            Module module = entry.getValue();
-            ModuleIdentifier name = entry.getKey();
+        Map<ModuleIdentifier, Module> allModules = dependencyResolverManager.getAllModules();
+
+        // call getInstance() on all Modules from top to bottom (from dependees to their dependencies)
+        List<ModuleIdentifier> sortedModuleIdentifiers = Lists.reverse(dependencyResolverManager.getSortedModuleIdentifiers());
+        for (ModuleIdentifier moduleIdentifier : sortedModuleIdentifiers) {
+            Module module = allModules.get(moduleIdentifier);
+
             try {
                 LOG.debug("About to commit {} in transaction {}",
-                        name, getTransactionIdentifier());
+                        moduleIdentifier, getTransactionIdentifier());
                 AutoCloseable instance = module.getInstance();
-                checkNotNull(instance, "Instance is null:{} in transaction {}", name, getTransactionIdentifier());
+                checkNotNull(instance, "Instance is null:{} in transaction {}", moduleIdentifier, getTransactionIdentifier());
             } catch (Exception e) {
-                LOG.error("Commit failed on {} in transaction {}", name,
+                LOG.error("Commit failed on {} in transaction {}", moduleIdentifier,
                         getTransactionIdentifier(), e);
                 internalAbort();
                 throw new IllegalStateException(
                         format("Error - getInstance() failed for %s in transaction %s",
-                                name, getTransactionIdentifier()), e);
+                                moduleIdentifier, getTransactionIdentifier()), e);
             }
         }
 
@@ -408,7 +411,7 @@ class ConfigTransactionControllerImpl implements
         LOG.trace("Committed configuration {}", getTransactionIdentifier());
         transactionStatus.setCommitted();
 
-        return dependencyResolverManager.getSortedModuleIdentifiers();
+        return sortedModuleIdentifiers;
     }
 
     @Override

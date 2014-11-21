@@ -12,6 +12,7 @@ import static java.lang.String.format;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+
 import javax.annotation.concurrent.GuardedBy;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
@@ -20,6 +21,7 @@ import javax.management.MBeanException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
+
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.IdentityAttributeRef;
 import org.opendaylight.controller.config.api.JmxAttribute;
@@ -37,6 +39,8 @@ import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
 import org.opendaylight.yangtools.yang.data.impl.codec.IdentityCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Preconditions;
 
 /**
  * Protect {@link org.opendaylight.controller.config.spi.Module#getInstance()}
@@ -151,28 +155,17 @@ final class DependencyResolverImpl implements DependencyResolver,
     @Override
     public <T> T resolveInstance(Class<T> expectedType, ObjectName dependentReadOnlyON,
                                  JmxAttribute jmxAttribute) {
-        if (expectedType == null || dependentReadOnlyON == null || jmxAttribute == null) {
-            throw new IllegalArgumentException(format(
-                    "Null parameters not allowed, got %s %s %s", expectedType,
-                    dependentReadOnlyON, jmxAttribute));
-        }
-        ObjectName translatedDependentReadOnlyON = translateServiceRefIfPossible(dependentReadOnlyON);
-        transactionStatus.checkCommitStarted();
-        transactionStatus.checkNotCommitted();
+        Module module = resolveModuleInstance(dependentReadOnlyON, jmxAttribute);
 
-        ModuleIdentifier dependentModuleIdentifier = ObjectNameUtil.fromON(
-                translatedDependentReadOnlyON, ObjectNameUtil.TYPE_MODULE);
-        Module module = modulesHolder.findModule(dependentModuleIdentifier,
-                jmxAttribute);
         synchronized (this) {
-            dependencies.add(dependentModuleIdentifier);
+            dependencies.add(module.getIdentifier());
         }
         AutoCloseable instance = module.getInstance();
         if (instance == null) {
             String message = format(
                     "Error while %s resolving instance %s. getInstance() returned null. "
                             + "Expected type %s , attribute %s", name,
-                    dependentModuleIdentifier, expectedType, jmxAttribute
+                    module.getIdentifier(), expectedType, jmxAttribute
             );
             throw new JmxAttributeValidationException(message, jmxAttribute);
         }
@@ -186,6 +179,35 @@ final class DependencyResolverImpl implements DependencyResolver,
             );
             throw new JmxAttributeValidationException(message, e, jmxAttribute);
         }
+    }
+
+    private Module resolveModuleInstance(ObjectName dependentReadOnlyON,
+                                 JmxAttribute jmxAttribute) {
+        Preconditions.checkArgument(dependentReadOnlyON != null ,"dependentReadOnlyON");
+        Preconditions.checkArgument(jmxAttribute != null, "jmxAttribute");
+        ObjectName translatedDependentReadOnlyON = translateServiceRefIfPossible(dependentReadOnlyON);
+        transactionStatus.checkCommitStarted();
+        transactionStatus.checkNotCommitted();
+
+        ModuleIdentifier dependentModuleIdentifier = ObjectNameUtil.fromON(
+                translatedDependentReadOnlyON, ObjectNameUtil.TYPE_MODULE);
+
+        return Preconditions.checkNotNull(modulesHolder.findModule(dependentModuleIdentifier, jmxAttribute));
+    }
+
+    public boolean canReuseDependency(ObjectName objectName, JmxAttribute jmxAttribute) {
+        Preconditions.checkNotNull(objectName);
+        Preconditions.checkNotNull(jmxAttribute);
+
+        Module currentModule = resolveModuleInstance(objectName, jmxAttribute);
+        ModuleIdentifier identifier = currentModule.getIdentifier();
+        ModuleInternalTransactionalInfo moduleInternalTransactionalInfo = modulesHolder.findModuleInternalTransactionalInfo(identifier);
+
+        if(moduleInternalTransactionalInfo.hasOldModule()) {
+            Module oldModule = moduleInternalTransactionalInfo.getOldInternalInfo().getReadableModule().getModule();
+            return currentModule.canReuseInstance(oldModule);
+        }
+        return false;
     }
 
     @Override
@@ -217,7 +239,7 @@ final class DependencyResolverImpl implements DependencyResolver,
 
     @Override
     public int compareTo(DependencyResolverImpl o) {
-        transactionStatus.checkCommitted();
+        transactionStatus.isSecondPhaseCommitStarted();
         return Integer.compare(getMaxDependencyDepth(),
                 o.getMaxDependencyDepth());
     }
@@ -232,7 +254,11 @@ final class DependencyResolverImpl implements DependencyResolver,
     }
 
     void countMaxDependencyDepth(DependencyResolverManager manager) {
-        transactionStatus.checkCommitted();
+        // We can calculate the dependency after second phase commit was started
+        // Second phase commit starts after validation and validation adds the dependencies into the dependency resolver, which are necessary for the calculation
+        // FIXME generated code for abstract module declares validate method as non-final
+        // Overriding the validate would cause recreate every time instead of reuse + also possibly wrong close order if there is another module depending
+        transactionStatus.isSecondPhaseCommitStarted();
         if (maxDependencyDepth == null) {
             maxDependencyDepth = getMaxDepth(this, manager,
                     new LinkedHashSet<ModuleIdentifier>());

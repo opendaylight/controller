@@ -49,4 +49,32 @@ public class MultipleDependenciesModuleTest extends AbstractConfigTest {
         assertNull(getTransactionName(d1WithoutTxName));
         transaction.commit();
     }
+
+    @Test
+    public void testCloseOrdering() throws Exception {
+        // Tests whether close is called in correct order on the module instances on following graph
+        // R1
+        // | \
+        // M1 M2
+        // |
+        // L1
+        ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
+        ObjectName r1 = transaction.createModule(factory.getImplementationName(), "root1");
+        ObjectName m1 = transaction.createModule(factory.getImplementationName(), "middle1");
+        ObjectName m2 = transaction.createModule(factory.getImplementationName(), "middle2");
+        ObjectName l1 = transaction.createModule(factory.getImplementationName(), "leaf1");
+
+        MultipleDependenciesModuleMXBean r1Proxy = transaction.newMXBeanProxy(r1, MultipleDependenciesModuleMXBean.class);
+        MultipleDependenciesModuleMXBean i1Proxy = transaction.newMXBeanProxy(m1, MultipleDependenciesModuleMXBean.class);
+        r1Proxy.setSingle(m1);
+        i1Proxy.setSingle(l1);
+        r1Proxy.setTestingDeps(asList(m2));
+        transaction.commit();
+
+        configRegistryClient.createTransaction().commit();
+        transaction = configRegistryClient.createTransaction();
+        MultipleDependenciesModuleMXBean l1Proxy = transaction.newMXBeanProxy(l1, MultipleDependenciesModuleMXBean.class);
+        l1Proxy.setSimple(true);
+        transaction.commit();
+    }
 }
