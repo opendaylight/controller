@@ -10,9 +10,8 @@ package org.opendaylight.controller.sal.binding.test.bugfix;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
+import com.google.common.util.concurrent.SettableFuture;
 import java.util.concurrent.TimeUnit;
-
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
 import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
@@ -29,9 +28,6 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-import com.google.common.util.concurrent.SettableFuture;
-
-@SuppressWarnings("deprecation")
 public class WriteParentListenAugmentTest extends AbstractDataServiceTest {
 
     private static final String NODE_ID = "node:1";

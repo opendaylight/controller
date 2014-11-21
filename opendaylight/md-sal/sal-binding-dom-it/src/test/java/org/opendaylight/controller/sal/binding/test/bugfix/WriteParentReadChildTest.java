@@ -11,7 +11,7 @@ package org.opendaylight.controller.sal.binding.test.bugfix;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-
+import com.google.common.collect.ImmutableList;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
@@ -38,9 +38,6 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
-import com.google.common.collect.ImmutableList;
-
-@SuppressWarnings("deprecation")
 public class WriteParentReadChildTest extends AbstractDataServiceTest {
 
     private static final String FLOW_ID = "1234";

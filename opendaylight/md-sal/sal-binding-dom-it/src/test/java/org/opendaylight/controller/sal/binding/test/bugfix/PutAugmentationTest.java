@@ -11,11 +11,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-
+import com.google.common.util.concurrent.SettableFuture;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
 import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
@@ -42,9 +41,6 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
-import com.google.common.util.concurrent.SettableFuture;
-
-@SuppressWarnings("deprecation")
 public class PutAugmentationTest extends AbstractDataServiceTest implements DataChangeListener {
 
     private static final QName NODE_ID_QNAME = QName.create(Node.QNAME, "id");

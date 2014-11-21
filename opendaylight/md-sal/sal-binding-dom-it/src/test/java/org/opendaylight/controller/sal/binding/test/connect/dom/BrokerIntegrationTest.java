@@ -10,9 +10,7 @@ package org.opendaylight.controller.sal.binding.test.connect.dom;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-
 import java.util.concurrent.Future;
-
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
@@ -27,8 +25,6 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
-// FIXME: Migrate to use new Data Broker APIs
-@SuppressWarnings("deprecation")
 public class BrokerIntegrationTest extends AbstractDataServiceTest {
 
     @Test

@@ -10,13 +10,13 @@ package org.opendaylight.controller.sal.binding.test.connect.dom;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-
+import com.google.common.collect.ImmutableMap;
+import com.google.common.util.concurrent.SettableFuture;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
@@ -59,11 +59,6 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.SettableFuture;
-
-// FIXME: Migrate to use new Data Broker APIs
-@SuppressWarnings("deprecation")
 public class ChangeOriginatedInDomBrokerTest extends AbstractDataServiceTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(ChangeOriginatedInDomBrokerTest.class);
