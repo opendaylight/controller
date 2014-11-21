@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a91bd0f_0b13605d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-21T01:48:50Z",
+      "side": 1,
+      "message": "The RaftRoleChangeNotifier already logs to info when it starts so this appears redundant.",
+      "revId": "5d9dcf5c77602896a84523383c70d55829317405",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_6b0eac36",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/notifications/RaftRoleChangeNotifier.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-21T01:48:50Z",
+      "side": 1,
+      "message": "Minor thing but it really shouldn\u0027t say \"shard\" since this code is supposed to be generic.",
+      "revId": "5d9dcf5c77602896a84523383c70d55829317405",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_ab2b5481",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/notifications/RaftRoleChangeNotifier.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-21T01:48:50Z",
+      "side": 1,
+      "message": "What is the reason for storing the actor path string instead of storing the ActorRef returned from getSender?",
+      "revId": "5d9dcf5c77602896a84523383c70d55829317405",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_2b3e64b9",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/notifications/RaftRoleChangeNotifier.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-21T01:48:50Z",
+      "side": 1,
+      "message": "I think you could watch for listener actor Terminated message.",
+      "revId": "5d9dcf5c77602896a84523383c70d55829317405",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_eb195c7a",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/notifications/RegisterRoleChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-21T01:48:50Z",
+      "side": 1,
+      "message": "Can you add class javadocs here?",
+      "revId": "5d9dcf5c77602896a84523383c70d55829317405",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_8b2690b9",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/notifications/RegisterRoleChangeListenerReply.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-21T01:48:50Z",
+      "side": 1,
+      "message": "What is senderId for?",
+      "revId": "5d9dcf5c77602896a84523383c70d55829317405",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
