@@ -14,7 +14,6 @@ import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.binding.test.util.BindingBrokerTestFactory;
 import org.opendaylight.controller.sal.binding.test.util.BindingTestContext;
 
-@SuppressWarnings("deprecation")
 public abstract class AbstractDataServiceTest {
 
     protected DataProviderService baDataService;
