@@ -21,6 +21,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.LeafSetNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.UnkeyedListEntryNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
@@ -37,8 +38,10 @@ import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntry;
@@ -103,7 +106,10 @@ public class TestModel {
   private static final String TWO_ONE_NAME = "one";
   private static final String TWO_TWO_NAME = "two";
   private static final String DESC = "Hello there";
-
+  private static final Long LONG_ID = 1L;
+  private static final Boolean ENABLED = false;
+  private static final Short SHORT_ID = 1;
+  private static final Byte BYTE_ID = 1;
   // Family specific constants
   public static final QName FAMILY_QNAME =
       QName
@@ -141,6 +147,7 @@ public class TestModel {
 
   private static final String FIRST_GRAND_CHILD_NAME = "first grand child";
   private static final String SECOND_GRAND_CHILD_NAME = "second grand child";
+
 
   // first child
   private static final YangInstanceIdentifier CHILDREN_1_PATH =
@@ -364,30 +371,45 @@ public class TestModel {
                       QName.create(TEST_QNAME, "my-bits"))).withValue(
               ImmutableSet.of("foo", "bar"));
 
+      // Create unkey list entry
+      UnkeyedListEntryNode binaryDataKey =
+          Builders.unkeyedListEntryBuilder().withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME)).
+              withChild(ImmutableNodes.leafNode(SOME_BINARY_DATE_QNAME, DESC)).build();
+
+      Map<QName, Object> keyValues = new HashMap<>();
+      keyValues.put(CHILDREN_QNAME, FIRST_CHILD_NAME);
+
 
       // Create the document
       return ImmutableContainerNodeBuilder
               .create()
               .withNodeIdentifier(
-                      new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME))
+                  new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME))
               .withChild(myBits.build())
               .withChild(ImmutableNodes.leafNode(DESC_QNAME, DESC))
-              .withChild(ImmutableNodes.leafNode(POINTER_QNAME, "pointer"))
+              .withChild(ImmutableNodes.leafNode(POINTER_QNAME, ENABLED))
+              .withChild(ImmutableNodes.leafNode(POINTER_QNAME, SHORT_ID))
+              .withChild(ImmutableNodes.leafNode(POINTER_QNAME, BYTE_ID))
               .withChild(
-                      ImmutableNodes.leafNode(SOME_REF_QNAME, YangInstanceIdentifier
-                              .builder().build()))
+                  ImmutableNodes.leafNode(SOME_REF_QNAME, GRAND_CHILD_1_PATH))
               .withChild(ImmutableNodes.leafNode(MYIDENTITY_QNAME, DESC_QNAME))
-
+               .withChild(Builders.unkeyedListBuilder().withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(OUTER_LIST_QNAME))
+                   .withChild(binaryDataKey).build())
+               .withChild(Builders.orderedMapBuilder()
+                   .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME)).withChild(mapEntry).build())
+               .withChild(Builders.choiceBuilder().withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME))
+                   .withChild(ImmutableNodes.leafNode(DESC_QNAME, LONG_ID)).build())
                       // .withChild(augmentationNode)
               .withChild(shoes)
               .withChild(numbers)
               .withChild(switchFeatures)
               .withChild(
-                      mapNodeBuilder(AUGMENTED_LIST_QNAME).withChild(mapEntry).build())
+                  mapNodeBuilder(AUGMENTED_LIST_QNAME).withChild(mapEntry).build())
               .withChild(
-                      mapNodeBuilder(OUTER_LIST_QNAME)
-                              .withChild(mapEntry(OUTER_LIST_QNAME, ID_QNAME, ONE_ID))
-                              .withChild(BAR_NODE).build());
+                  mapNodeBuilder(OUTER_LIST_QNAME)
+                      .withChild(mapEntry(OUTER_LIST_QNAME, ID_QNAME, ONE_ID))
+                      .withChild(BAR_NODE).build()
+              );
   }
 
   public static ContainerNode createTestContainer() {
