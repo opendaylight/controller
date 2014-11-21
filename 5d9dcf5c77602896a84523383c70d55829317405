@@ -25,6 +25,24 @@
     },
     {
       "key": {
+        "uuid": "9a91bd0f_3e7c6072",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-21T20:01:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a91bd0f_2822eab9",
+      "revId": "5d9dcf5c77602896a84523383c70d55829317405",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a91bd0f_0825a6c1",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 2
@@ -48,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "9a91bd0f_7ee98819",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-21T20:01:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a91bd0f_0825a6c1",
+      "revId": "5d9dcf5c77602896a84523383c70d55829317405",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a91bd0f_c82edea5",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 2
@@ -59,6 +95,24 @@
       "writtenOn": "2014-11-21T02:18:22Z",
       "side": 1,
       "message": "Just store the actorRef instead of converting it to an ActorSelection.",
+      "revId": "5d9dcf5c77602896a84523383c70d55829317405",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_9eeecc21",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-21T20:01:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a91bd0f_c82edea5",
       "revId": "5d9dcf5c77602896a84523383c70d55829317405",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -82,6 +136,24 @@
     },
     {
       "key": {
+        "uuid": "9a91bd0f_5ef844e5",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-21T20:01:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a91bd0f_0b13605d",
+      "revId": "5d9dcf5c77602896a84523383c70d55829317405",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a91bd0f_68179252",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/notifications/RaftRoleChangeNotifier.java",
         "patchSetId": 2
@@ -99,6 +171,24 @@
         "endLine": 22,
         "endChar": 43
       },
+      "revId": "5d9dcf5c77602896a84523383c70d55829317405",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_deb53432",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/notifications/RaftRoleChangeNotifier.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-21T20:01:05Z",
+      "side": 1,
+      "message": "Changed to map, as stated below",
+      "parentUuid": "9a91bd0f_68179252",
       "revId": "5d9dcf5c77602896a84523383c70d55829317405",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -145,6 +235,42 @@
     },
     {
       "key": {
+        "uuid": "9a91bd0f_beb8702b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/notifications/RaftRoleChangeNotifier.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-21T20:01:05Z",
+      "side": 1,
+      "message": "I have moved this Notifier to the distributed datastore.\n\nNow Notifier gets created by Shard and is injected to RaftActor",
+      "parentUuid": "9a91bd0f_e82ba292",
+      "revId": "5d9dcf5c77602896a84523383c70d55829317405",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_1eacfcec",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/notifications/RaftRoleChangeNotifier.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-21T20:01:05Z",
+      "side": 1,
+      "message": "I have moved this Notifier to the distributed datastore. \n\nNow Notifier gets created by Shard and is injected to RaftActor",
+      "parentUuid": "9a91bd0f_6b0eac36",
+      "revId": "5d9dcf5c77602896a84523383c70d55829317405",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a91bd0f_ab2b5481",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/notifications/RaftRoleChangeNotifier.java",
         "patchSetId": 2
@@ -179,6 +305,42 @@
         "endLine": 49,
         "endChar": 48
       },
+      "revId": "5d9dcf5c77602896a84523383c70d55829317405",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_feaef8e6",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/notifications/RaftRoleChangeNotifier.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-21T20:01:05Z",
+      "side": 1,
+      "message": "I have taken care of this now by having a map\u003cactorpath, actorref\u003e.\n\nhttp://doc.akka.io/japi/akka/2.3.7/akka/actor/ActorRef.html suggests using ActorPath to equate ActorRefs",
+      "parentUuid": "9a91bd0f_080cc641",
+      "revId": "5d9dcf5c77602896a84523383c70d55829317405",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_5eaa84d5",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/notifications/RaftRoleChangeNotifier.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-21T20:01:05Z",
+      "side": 1,
+      "message": "I was using it to take care of reincarnation of a listener. The path would be same, so we wont be having duplicate listners in the notifier.\n\nI have taken care of this now by having a map\u003cactorpath, actorref\u003e.\n\nhttp://doc.akka.io/japi/akka/2.3.7/akka/actor/ActorRef.html suggests using ActorPath to equate ActorRefs",
+      "parentUuid": "9a91bd0f_ab2b5481",
       "revId": "5d9dcf5c77602896a84523383c70d55829317405",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -225,6 +387,42 @@
     },
     {
       "key": {
+        "uuid": "9a91bd0f_de5e9412",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/notifications/RaftRoleChangeNotifier.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-21T20:01:05Z",
+      "side": 1,
+      "message": "The listener might be created in another actorsystem. more over, i think, the notifier need not care if the listener is alive or not.",
+      "parentUuid": "9a91bd0f_2b3e64b9",
+      "revId": "5d9dcf5c77602896a84523383c70d55829317405",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_9ea00cf6",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/notifications/RaftRoleChangeNotifier.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-21T20:01:05Z",
+      "side": 1,
+      "message": "as per api, actorselection(path) does not resolve. So it would not raise an exception. \nIn any case i have used an actorref now.",
+      "parentUuid": "9a91bd0f_cb1c986d",
+      "revId": "5d9dcf5c77602896a84523383c70d55829317405",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a91bd0f_eb195c7a",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/notifications/RegisterRoleChangeListener.java",
         "patchSetId": 2
@@ -242,6 +440,24 @@
     },
     {
       "key": {
+        "uuid": "9a91bd0f_fedcb876",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/notifications/RegisterRoleChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-21T20:01:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a91bd0f_eb195c7a",
+      "revId": "5d9dcf5c77602896a84523383c70d55829317405",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a91bd0f_8b2690b9",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/notifications/RegisterRoleChangeListenerReply.java",
         "patchSetId": 2
@@ -253,6 +469,24 @@
       "writtenOn": "2014-11-21T01:48:50Z",
       "side": 1,
       "message": "What is senderId for?",
+      "revId": "5d9dcf5c77602896a84523383c70d55829317405",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_1edabc78",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/notifications/RegisterRoleChangeListenerReply.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-21T20:01:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a91bd0f_8b2690b9",
       "revId": "5d9dcf5c77602896a84523383c70d55829317405",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
