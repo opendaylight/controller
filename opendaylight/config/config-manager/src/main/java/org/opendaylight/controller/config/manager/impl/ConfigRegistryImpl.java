@@ -196,7 +196,6 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
      * {@inheritDoc}
      */
     @Override
-    @SuppressWarnings("PMD.AvoidCatchingThrowable")
     public synchronized CommitStatus commitConfig(ObjectName transactionControllerON)
             throws ConflictingVersionException, ValidationException {
         final String transactionName = ObjectNameUtil
