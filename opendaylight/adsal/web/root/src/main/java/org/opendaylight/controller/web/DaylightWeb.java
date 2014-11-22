@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2014 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -9,6 +9,7 @@
 package org.opendaylight.controller.web;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -18,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.io.IOUtils;
 import org.opendaylight.controller.configuration.IConfigurationContainerService;
 import org.opendaylight.controller.configuration.IConfigurationService;
 import org.opendaylight.controller.containermanager.IContainerAuthorization;
@@ -65,11 +67,17 @@ public class DaylightWeb {
     @ResponseBody
     public String getVersion(HttpServletRequest request, @PathVariable("property") String property) {
         Properties prop = new Properties();
+        FileInputStream propertiesFile = null;
         try {
-            prop.load(new FileInputStream("version.properties"));
+            propertiesFile = new FileInputStream("version.properties");
+            prop.load(propertiesFile);
             return prop.getProperty(property+".version");
-        } catch (Exception e) {
+        } catch (IOException e) {
+            // TODO: We should be logging the exception here
+            //       "Failed to open version.properties."
             return null;
+        } finally {
+            IOUtils.closeQuietly(propertiesFile);
         }
     }
     @RequestMapping(value = "web.json")
