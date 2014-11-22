@@ -25,6 +25,10 @@
       <artifactId>junit</artifactId>
     </dependency>
     <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>clustering.services</artifactId>
     </dependency>
@@ -90,6 +94,7 @@
               javax.servlet.resources,
               javax.xml.parsers,
               javax.xml.transform,
+              org.apache.commons.io,
               org.apache.commons.logging,
               org.apache.taglibs.standard.functions,
               org.apache.taglibs.standard.resources,
