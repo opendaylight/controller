@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "9a91bd0f_6b6e9fcb",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/example/messages/RegisterListener.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-22T01:43:08Z",
+      "side": 1,
+      "message": "What is this class for and where is it used?",
+      "revId": "9bb5fd7f4f2768f135fe38bba8cc3defbbdb3244",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_ab74a79c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-22T01:43:08Z",
+      "side": 1,
+      "message": "It\u0027s not safe to call an overridable protected method from the base class constructor. Either have it passed in to the constructor or add a protected setter that the derived class calls.",
+      "revId": "9bb5fd7f4f2768f135fe38bba8cc3defbbdb3244",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a91bd0f_8b5c4327",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/AbstractUntypedActor.java",
         "patchSetId": 3
@@ -42,6 +76,40 @@
         "endLine": 38,
         "endChar": 41
       },
+      "revId": "9bb5fd7f4f2768f135fe38bba8cc3defbbdb3244",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_0b48335a",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/notifications/ShardRoleChangeNotification.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-22T01:43:08Z",
+      "side": 1,
+      "message": "The prefix Shard is datastore-specific and should not be in commons clustering.",
+      "revId": "9bb5fd7f4f2768f135fe38bba8cc3defbbdb3244",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_cb79eb94",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardRoleChangeNotifier.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-22T01:43:08Z",
+      "side": 1,
+      "message": "This class doesn\u0027t look shard-specific  - can\u0027t it be part of the raft bundle (sans Shard prefix)?",
       "revId": "9bb5fd7f4f2768f135fe38bba8cc3defbbdb3244",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
