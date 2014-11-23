@@ -77,8 +77,9 @@ public class TransactionProvider implements AutoCloseable {
     public synchronized ObjectName getOrCreateTransaction() {
         Optional<ObjectName> ta = getTransaction();
 
-        if (ta.isPresent())
+        if (ta.isPresent()) {
             return ta.get();
+        }
         transaction = configRegistryClient.beginConfig();
         allOpenedTransactions.add(transaction);
         return transaction;
