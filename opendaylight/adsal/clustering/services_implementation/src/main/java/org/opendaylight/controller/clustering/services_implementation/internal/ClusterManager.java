@@ -457,7 +457,9 @@ public class ClusterManager implements IClusterServices {
             return null;
         }
         for (String cacheName : manager.getCacheNames()) {
-            if (!manager.isRunning(cacheName)) continue;
+            if (!manager.isRunning(cacheName)) {
+                continue;
+            }
             if (cacheName.startsWith("{" + containerName + "}_")) {
                 String[] res = cacheName.split("[{}]");
                 if (res.length >= 4 && res[1].equals(containerName)

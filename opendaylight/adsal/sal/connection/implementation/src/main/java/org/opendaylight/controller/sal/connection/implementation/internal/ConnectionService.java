@@ -103,7 +103,9 @@ public class ConnectionService implements IPluginOutConnectionService, IConnecti
 
     @Override
     public ConnectionLocality getLocalityStatus(Node node) {
-        if (this.connectionListener == null) return ConnectionLocality.NOT_CONNECTED;
+        if (this.connectionListener == null) {
+            return ConnectionLocality.NOT_CONNECTED;
+        }
         return connectionListener.getLocalityStatus(node);
     }
 
@@ -133,7 +135,9 @@ public class ConnectionService implements IPluginOutConnectionService, IConnecti
     @Override
     public Status disconnect(Node node) {
         IPluginInConnectionService s = pluginService.get(node.getType());
-        if (s != null) return s.disconnect(node);
+        if (s != null) {
+            return s.disconnect(node);
+        }
         return new Status(StatusCode.NOTFOUND);
     }
 
