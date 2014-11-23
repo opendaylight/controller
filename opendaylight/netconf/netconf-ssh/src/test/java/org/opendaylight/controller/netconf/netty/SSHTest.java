@@ -19,6 +19,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.HashedWheelTimer;
+import java.io.File;
 import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.util.concurrent.ExecutorService;
@@ -67,6 +68,8 @@ public class SSHTest {
 
     @Test
     public void test() throws Exception {
+        File sshKeyPair = Files.createTempFile("sshKeyPair", ".pem").toFile();
+        sshKeyPair.deleteOnExit();
         new Thread(new EchoServer(), "EchoServer").start();
 
         final InetSocketAddress addr = new InetSocketAddress("127.0.0.1", 10831);
@@ -77,7 +80,7 @@ public class SSHTest {
                     public boolean authenticate(final String username, final String password, final ServerSession session) {
                         return true;
                     }
-                }).setKeyPairProvider(new PEMGeneratorHostKeyProvider(Files.createTempFile("prefix", "suffix").toAbsolutePath().toString())).setIdleTimeout(Integer.MAX_VALUE).createSshProxyServerConfiguration());
+                }).setKeyPairProvider(new PEMGeneratorHostKeyProvider(sshKeyPair.toPath().toAbsolutePath().toString())).setIdleTimeout(Integer.MAX_VALUE).createSshProxyServerConfiguration());
 
         final EchoClientHandler echoClientHandler = connectClient(addr);
 

@@ -38,6 +38,7 @@ public class FileStorageAdapterTest {
     @Before
     public void setUp() throws Exception {
         file = Files.createTempFile("testFilePersist", ".txt").toFile();
+        file.deleteOnExit();
         if (!file.exists()) {
             return;
         }
@@ -185,6 +186,7 @@ public class FileStorageAdapterTest {
     @Test
     public void testNoLastConfig() throws Exception {
         File file = Files.createTempFile("testFilePersist", ".txt").toFile();
+        file.deleteOnExit();
         if (!file.exists()) {
             return;
         }

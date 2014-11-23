@@ -25,6 +25,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.local.LocalAddress;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
+import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.file.Files;
@@ -77,6 +78,7 @@ public class NetconfITSecureTest extends AbstractNetconfConfigTest {
     public static final String USERNAME = "user";
     public static final String PASSWORD = "pwd";
 
+    private File sshKeyPair;
     private SshProxyServer sshProxyServer;
 
     private ExecutorService nioExec;
@@ -85,6 +87,8 @@ public class NetconfITSecureTest extends AbstractNetconfConfigTest {
 
     @Before
     public void setUp() throws Exception {
+        sshKeyPair = Files.createTempFile("sshKeyPair", ".pem").toFile();
+        sshKeyPair.deleteOnExit();
         nioExec = Executors.newFixedThreadPool(1);
         clientGroup = new NioEventLoopGroup();
         minaTimerEx = Executors.newScheduledThreadPool(1);
@@ -99,7 +103,7 @@ public class NetconfITSecureTest extends AbstractNetconfConfigTest {
                 return true;
             }
         })
-                        .setKeyPairProvider(new PEMGeneratorHostKeyProvider(Files.createTempFile("prefix", "suffix").toAbsolutePath().toString()))
+                        .setKeyPairProvider(new PEMGeneratorHostKeyProvider(sshKeyPair.toPath().toAbsolutePath().toString()))
                         .setIdleTimeout(Integer.MAX_VALUE)
                         .createSshProxyServerConfiguration());
     }

@@ -15,6 +15,7 @@ import static org.mockito.Mockito.doReturn;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import java.net.InetSocketAddress;
+import java.io.File;
 import java.nio.file.Files;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -49,6 +50,7 @@ public class SSHServerTest {
     private static final int PORT = 1830;
     private static final Logger logger = LoggerFactory.getLogger(SSHServerTest.class);
 
+    private File sshKeyPair;
     private SshProxyServer server;
 
     @Mock
@@ -59,6 +61,9 @@ public class SSHServerTest {
 
     @Before
     public void setUp() throws Exception {
+        sshKeyPair = Files.createTempFile("sshKeyPair", ".pem").toFile();
+        sshKeyPair.deleteOnExit();
+
         MockitoAnnotations.initMocks(this);
         doReturn(null).when(mockedContext).createFilter(anyString());
         doNothing().when(mockedContext).addServiceListener(any(ServiceListener.class), anyString());
@@ -74,7 +79,7 @@ public class SSHServerTest {
                     public boolean authenticate(final String username, final String password, final ServerSession session) {
                         return true;
                     }
-                }).setKeyPairProvider(new PEMGeneratorHostKeyProvider(Files.createTempFile("prefix", "suffix").toAbsolutePath().toString())).setIdleTimeout(Integer.MAX_VALUE).createSshProxyServerConfiguration());
+                }).setKeyPairProvider(new PEMGeneratorHostKeyProvider(sshKeyPair.toPath().toAbsolutePath().toString())).setIdleTimeout(Integer.MAX_VALUE).createSshProxyServerConfiguration());
         logger.info("SSH server started on " + PORT);
     }
 
