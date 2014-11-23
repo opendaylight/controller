@@ -240,12 +240,15 @@ public class XSQLBluePrintNode implements Serializable {
         XSQLBluePrintNode other = (XSQLBluePrintNode) obj;
         if (odlNode != null) {
             return getBluePrintNodeName().equals(other.getBluePrintNodeName());
-        } else if (this.odlTableName == null && other.odlTableName != null)
+        } else if (this.odlTableName == null && other.odlTableName != null) {
             return false;
-        if (this.odlTableName != null && other.odlTableName == null)
+        }
+        if (this.odlTableName != null && other.odlTableName == null) {
             return false;
-        else
+        }
+        else {
             return this.odlTableName.equals(other.odlTableName);
+        }
     }
 
     @Override

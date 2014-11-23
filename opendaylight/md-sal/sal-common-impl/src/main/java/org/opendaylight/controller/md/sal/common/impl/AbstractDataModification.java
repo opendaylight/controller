@@ -104,8 +104,9 @@ public abstract class AbstractDataModification<P extends Path<P>, D> implements 
     }
 
     private final void checkMutable() {
-        if (!NEW.equals(this.getStatus()))
+        if (!NEW.equals(this.getStatus())) {
             throw new IllegalStateException("Transaction was already submitted");
+        }
     }
 
     @Override
