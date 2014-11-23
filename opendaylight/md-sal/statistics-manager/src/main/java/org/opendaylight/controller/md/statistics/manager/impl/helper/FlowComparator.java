@@ -94,8 +94,12 @@ public final class FlowComparator {
         if (statsFlow == storedFlow) {
             return true;
         }
-        if (storedFlow == null && statsFlow != null) return false;
-        if (statsFlow == null && storedFlow != null) return false;
+        if (storedFlow == null && statsFlow != null) {
+            return false;
+        }
+        if (statsFlow == null && storedFlow != null) {
+            return false;
+        }
         if (storedFlow.getEthernetMatch() == null) {
             if (statsFlow.getEthernetMatch() != null) {
                 return false;
