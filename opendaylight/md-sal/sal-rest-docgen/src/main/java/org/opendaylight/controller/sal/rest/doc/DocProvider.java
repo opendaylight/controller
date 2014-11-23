@@ -76,11 +76,13 @@ public class DocProvider implements BundleActivator, ServiceTrackerCustomizer<Br
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        if (brokerServiceTracker != null)
+        if (brokerServiceTracker != null) {
             brokerServiceTracker.close();
+        }
 
-        if (session != null)
+        if (session != null) {
             session.close();
+        }
 
         synchronized (toClose) {
             for (AutoCloseable close : toClose) {
@@ -98,8 +100,9 @@ public class DocProvider implements BundleActivator, ServiceTrackerCustomizer<Br
 
     @Override
     public void modifiedService(ServiceReference<Broker> reference, Broker service) {
-        if (session != null)
+        if (session != null) {
             session.close();
+        }
 
         Broker broker = bundleContext.getService(reference);
         session = broker.registerProvider(this, bundleContext);

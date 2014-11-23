@@ -52,8 +52,9 @@ public class XmlFileStorageAdapter implements StorageAdapter, Persister {
             LOG.debug("Storage file does not exist, creating empty file");
             try {
                 boolean result = storage.createNewFile();
-                if (result == false)
+                if (result == false) {
                     throw new RuntimeException("Unable to create storage file " + storage);
+                }
             } catch (IOException e) {
                 throw new RuntimeException("Unable to create storage file " + storage, e);
             }
