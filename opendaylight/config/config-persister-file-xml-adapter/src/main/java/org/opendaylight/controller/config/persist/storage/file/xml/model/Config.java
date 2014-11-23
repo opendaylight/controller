@@ -65,8 +65,9 @@ public final class Config {
     }
 
     public static Config fromXml(File from) {
-        if(isEmpty(from))
+        if(isEmpty(from)) {
             return new Config();
+        }
 
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(Config.class);

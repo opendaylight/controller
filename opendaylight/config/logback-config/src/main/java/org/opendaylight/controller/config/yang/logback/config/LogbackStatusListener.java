@@ -108,8 +108,9 @@ public class LogbackStatusListener implements StatusListener, LogbackRuntimeMXBe
 
     @Override
     public void close() throws IOException {
-        if (reg != null)
+        if (reg != null) {
             reg.close();
+        }
         unregisterFromLogback();
     }
 

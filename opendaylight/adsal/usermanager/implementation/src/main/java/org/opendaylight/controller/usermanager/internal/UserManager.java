@@ -278,7 +278,9 @@ public class UserManager implements IUserManager, IObjectReader,
     private String checkPasswordRecovery() {
         final String fileDescription = "Default Network Administrator password recovery file";
         File recoveryFile = new File(UserManager.RECOVERY_FILE);
-        if (!recoveryFile.exists()) return null;
+        if (!recoveryFile.exists()) {
+            return null;
+        }
         // read the recovery file
         String pwd = null;
         try {

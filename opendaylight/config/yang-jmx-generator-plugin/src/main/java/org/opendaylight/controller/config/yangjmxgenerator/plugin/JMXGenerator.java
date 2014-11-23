@@ -254,9 +254,10 @@ public class JMXGenerator implements CodeGenerator {
     public void setMavenProject(MavenProject project) {
         this.projectBaseDir = project.getBasedir();
 
-        if (LOGGER != null)
+        if (LOGGER != null) {
             LOGGER.debug(getClass().getCanonicalName(), " project base dir: ",
                     projectBaseDir);
+        }
     }
 
     @VisibleForTesting
