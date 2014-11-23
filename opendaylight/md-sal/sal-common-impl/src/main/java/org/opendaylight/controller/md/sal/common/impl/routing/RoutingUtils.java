@@ -80,16 +80,19 @@ public class RoutingUtils {
             }
             RouteChangeImpl<?, ?> other = (RouteChangeImpl<?, ?>) obj;
             if (announcement == null) {
-                if (other.announcement != null)
+                if (other.announcement != null) {
                     return false;
-            } else if (!announcement.equals(other.announcement))
+                }
+            } else if (!announcement.equals(other.announcement)) {
                 return false;
+            }
             if (removal == null) {
                 if (other.removal != null) {
                     return false;
                 }
-            } else if (!removal.equals(other.removal))
+            } else if (!removal.equals(other.removal)) {
                 return false;
+            }
             return true;
         }
     }

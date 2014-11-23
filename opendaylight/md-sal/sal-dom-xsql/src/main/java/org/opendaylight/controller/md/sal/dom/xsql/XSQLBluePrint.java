@@ -114,8 +114,9 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
             String odlTableName) {
         Map<String, XSQLBluePrintNode> map = this.odlNameToBluePrint
                 .get(odlTableName);
-        if (map == null)
+        if (map == null) {
             return null;
+        }
         return map.values().toArray(new XSQLBluePrintNode[map.size()]);
     }
 

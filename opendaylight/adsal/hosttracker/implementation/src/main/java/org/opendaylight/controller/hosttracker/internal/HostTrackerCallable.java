@@ -44,8 +44,9 @@ public class HostTrackerCallable implements Callable<HostNodeConnector> {
     @Override
     public HostNodeConnector call() throws Exception {
         HostNodeConnector h = hostTracker.hostFind(trackedHost);
-        if (h != null)
+        if (h != null) {
             return h;
+        }
         hostTracker.setCallableOnPendingARP(trackedHost, this);
         Thread.sleep(2000); // wait 2sec to see if the host responds
         return hostTracker.hostQuery(trackedHost);
