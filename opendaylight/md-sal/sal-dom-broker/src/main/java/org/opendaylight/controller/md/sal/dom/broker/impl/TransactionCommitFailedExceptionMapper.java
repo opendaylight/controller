@@ -15,14 +15,14 @@ import org.opendaylight.yangtools.util.concurrent.ExceptionMapper;
  *
  * @see ExceptionMapper
  */
-final class TransactionCommitFailedExceptionMapper
+public final class TransactionCommitFailedExceptionMapper
                            extends ExceptionMapper<TransactionCommitFailedException> {
 
-    static final TransactionCommitFailedExceptionMapper PRE_COMMIT_MAPPER = create("preCommit");
+    public static final TransactionCommitFailedExceptionMapper PRE_COMMIT_MAPPER = create("preCommit");
 
-    static final TransactionCommitFailedExceptionMapper CAN_COMMIT_ERROR_MAPPER = create("canCommit");
+    public static final TransactionCommitFailedExceptionMapper CAN_COMMIT_ERROR_MAPPER = create("canCommit");
 
-    static final TransactionCommitFailedExceptionMapper COMMIT_ERROR_MAPPER = create("commit");
+    public static final TransactionCommitFailedExceptionMapper COMMIT_ERROR_MAPPER = create("commit");
 
     private TransactionCommitFailedExceptionMapper(final String opName) {
         super( opName, TransactionCommitFailedException.class );
@@ -33,7 +33,7 @@ final class TransactionCommitFailedExceptionMapper
     }
 
     @Override
-    protected TransactionCommitFailedException newWithCause( String message, Throwable cause ) {
+    protected TransactionCommitFailedException newWithCause( final String message, final Throwable cause ) {
         return new TransactionCommitFailedException( message, cause );
     }
 }
