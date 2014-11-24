@@ -87,7 +87,10 @@
                             <!--sal.broker.impl is exported for sal-netconf-connector to use SchemaAwareRpcRegistry.-->
                             <!-- TODO Remove sal.broker.impl from export when SchemaAwareRpcRegistry is not used in connector anymore -->
                             org.opendaylight.controller.sal.dom.broker.impl,
-                            org.opendaylight.controller.sal.dom.broker.impl.*,
+			    org.opendaylight.controller.sal.dom.broker.impl.*,
+
+			    <!-- Temporary until we move abstract classes out into SPI -->
+			    org.opendaylight.controller.md.sal.dom.broker.impl,
             </Export-Package>
             <Private-Package>org.opendaylight.controller.sal.dom.broker,
                             org.opendaylight.controller.sal.dom.broker.osgi,
