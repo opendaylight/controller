@@ -10,10 +10,18 @@ package org.opendaylight.controller.md.sal.dom.broker.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.SettableFuture;
+import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.SynchronousQueue;
@@ -27,15 +35,12 @@ import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
+import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
+import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
-import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
-import com.google.common.util.concurrent.Uninterruptibles;
 
 /**
  * Unit tests for DOMConcurrentDataCommitCoordinator.
@@ -49,12 +54,16 @@ public class DOMConcurrentDataCommitCoordinatorTest {
     private final DOMStoreThreePhaseCommitCohort mockCohort2 = mock(DOMStoreThreePhaseCommitCohort.class);
     private final ThreadPoolExecutor futureExecutor =
             new ThreadPoolExecutor(0, 1, 5, TimeUnit.SECONDS, new SynchronousQueue<Runnable>());
-    private final DOMConcurrentDataCommitCoordinator coordinator =
-            new DOMConcurrentDataCommitCoordinator(futureExecutor);
+    private ConcurrentDOMDataBroker coordinator;
 
     @Before
     public void setup() {
         doReturn("tx").when(transaction).getIdentifier();
+
+        DOMStore store = new InMemoryDOMDataStore("OPER",
+            MoreExecutors.sameThreadExecutor());
+
+        coordinator = new ConcurrentDOMDataBroker(ImmutableMap.of(LogicalDatastoreType.OPERATIONAL, store), futureExecutor);
     }
 
     @After
@@ -76,7 +85,7 @@ public class DOMConcurrentDataCommitCoordinatorTest {
         final CountDownLatch asyncCanCommitContinue = new CountDownLatch(1);
         Answer<ListenableFuture<Boolean>> asyncCanCommit = new Answer<ListenableFuture<Boolean>>() {
             @Override
-            public ListenableFuture<Boolean> answer(InvocationOnMock invocation) {
+            public ListenableFuture<Boolean> answer(final InvocationOnMock invocation) {
                 final SettableFuture<Boolean> future = SettableFuture.create();
                 if(doAsync) {
                     new Thread() {
@@ -110,12 +119,12 @@ public class DOMConcurrentDataCommitCoordinatorTest {
         final AtomicReference<Throwable> caughtEx = new AtomicReference<>();
         Futures.addCallback(future, new FutureCallback<Void>() {
             @Override
-            public void onSuccess(Void result) {
+            public void onSuccess(final Void result) {
                 doneLatch.countDown();
             }
 
             @Override
-            public void onFailure(Throwable t) {
+            public void onFailure(final Throwable t) {
                 caughtEx.set(t);
                 doneLatch.countDown();
             }
@@ -158,8 +167,8 @@ public class DOMConcurrentDataCommitCoordinatorTest {
         assertFailure(future, null, mockCohort1, mockCohort2, mockCohort3);
     }
 
-    private void assertFailure(CheckedFuture<Void, TransactionCommitFailedException> future,
-            Exception expCause, DOMStoreThreePhaseCommitCohort... mockCohorts)
+    private void assertFailure(final CheckedFuture<Void, TransactionCommitFailedException> future,
+            final Exception expCause, final DOMStoreThreePhaseCommitCohort... mockCohorts)
                     throws Exception {
         try {
             future.checkedGet(5, TimeUnit.SECONDS);
