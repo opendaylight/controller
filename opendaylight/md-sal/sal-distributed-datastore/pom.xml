@@ -67,16 +67,6 @@
       <artifactId>sal-binding-config</artifactId>
     </dependency>
 
-      <dependency>
-          <groupId>org.opendaylight.yangtools</groupId>
-          <artifactId>yang-data-api</artifactId>
-      </dependency>
-
-      <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>yang-data-impl</artifactId>
-      </dependency>
-
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-inmemory-datastore</artifactId>
@@ -90,6 +80,11 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-common-util</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-broker-impl</artifactId>
     </dependency>
 
     <dependency>
@@ -115,6 +110,11 @@
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-data-api</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-data-impl</artifactId>
     </dependency>
 
     <dependency>
