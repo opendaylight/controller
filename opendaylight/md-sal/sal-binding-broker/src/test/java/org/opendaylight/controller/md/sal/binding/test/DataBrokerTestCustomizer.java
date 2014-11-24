@@ -16,7 +16,7 @@ import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCo
 import org.opendaylight.controller.md.sal.binding.impl.ForwardedBindingDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
-import org.opendaylight.controller.md.sal.dom.broker.impl.DOMDataBrokerImpl;
+import org.opendaylight.controller.md.sal.dom.broker.impl.SerializedDOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.sal.binding.test.util.MockSchemaService;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
@@ -68,7 +68,7 @@ public class DataBrokerTestCustomizer {
     }
 
     public DOMDataBroker createDOMDataBroker() {
-        return new DOMDataBrokerImpl(getDatastores(), getCommitCoordinatorExecutor());
+        return new SerializedDOMDataBroker(getDatastores(), getCommitCoordinatorExecutor());
     }
 
     public ListeningExecutorService getCommitCoordinatorExecutor() {

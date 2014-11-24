@@ -15,10 +15,9 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitDeadlockException;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 import org.opendaylight.controller.md.sal.common.util.jmx.ThreadExecutorStatsMXBeanImpl;
-import org.opendaylight.controller.md.sal.dom.broker.impl.DOMConcurrentDataCommitCoordinator;
-import org.opendaylight.controller.md.sal.dom.broker.impl.DOMDataBrokerImpl;
-import org.opendaylight.controller.md.sal.dom.broker.impl.DOMDataCommitCoordinatorImpl;
-import org.opendaylight.controller.md.sal.dom.broker.impl.DOMDataCommitExecutor;
+import org.opendaylight.controller.md.sal.dom.broker.impl.ConcurrentDOMDataBroker;
+import org.opendaylight.controller.md.sal.dom.broker.impl.AbstractDOMDataBroker;
+import org.opendaylight.controller.md.sal.dom.broker.impl.SerializedDOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.broker.impl.jmx.CommitStatsMXBeanImpl;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreFactory;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
@@ -85,14 +84,13 @@ public final class DomInmemoryDataBrokerModule extends
 
         final List<AbstractMXBean> mBeans = Lists.newArrayList();
 
-        DOMDataCommitExecutor commitCoordinator;
-        DurationStatisticsTracker commitStatsTracker = null;
+        final DurationStatisticsTracker commitStatsTracker;
+        final AbstractDOMDataBroker broker;
 
-        if(getAllowConcurrentCommits()) {
-            DOMConcurrentDataCommitCoordinator coordinator =
-                    new DOMConcurrentDataCommitCoordinator(listenableFutureExecutor);
-            commitStatsTracker = coordinator.getCommitStatsTracker();
-            commitCoordinator = coordinator;
+        if (getAllowConcurrentCommits()) {
+            final ConcurrentDOMDataBroker cdb = new ConcurrentDOMDataBroker(datastores, listenableFutureExecutor);
+            commitStatsTracker = cdb.getCommitStatsTracker();
+            broker = cdb;
         } else {
             /*
              * We use a single-threaded executor for commits with a bounded queue capacity. If the
@@ -105,13 +103,12 @@ public final class DomInmemoryDataBrokerModule extends
             ExecutorService commitExecutor = SpecialExecutors.newBoundedSingleThreadExecutor(
                     getMaxDataBrokerCommitQueueSize(), "WriteTxCommit");
 
-            DOMDataCommitCoordinatorImpl coordinator = new DOMDataCommitCoordinatorImpl(
+            SerializedDOMDataBroker sdb = new SerializedDOMDataBroker(datastores,
                     new DeadlockDetectingListeningExecutorService(commitExecutor,
                             TransactionCommitDeadlockException.DEADLOCK_EXCEPTION_SUPPLIER,
                             listenableFutureExecutor));
-
-            commitStatsTracker = coordinator.getCommitStatsTracker();
-            commitCoordinator = coordinator;
+            commitStatsTracker = sdb.getCommitStatsTracker();
+            broker = sdb;
 
             final AbstractMXBean commitExecutorStatsMXBean =
                     ThreadExecutorStatsMXBeanImpl.create(commitExecutor, "CommitExecutorStats",
@@ -120,8 +117,6 @@ public final class DomInmemoryDataBrokerModule extends
                 mBeans.add(commitExecutorStatsMXBean);
             }
         }
-
-        DOMDataBrokerImpl newDataBroker = new DOMDataBrokerImpl(datastores, commitCoordinator);
 
         if(commitStatsTracker != null) {
             final CommitStatsMXBeanImpl commitStatsMXBean = new CommitStatsMXBeanImpl(
@@ -137,7 +132,7 @@ public final class DomInmemoryDataBrokerModule extends
             mBeans.add(commitFutureStatsMXBean);
         }
 
-        newDataBroker.setCloseable(new AutoCloseable() {
+        broker.setCloseable(new AutoCloseable() {
             @Override
             public void close() {
                 for(AbstractMXBean mBean: mBeans) {
@@ -146,6 +141,6 @@ public final class DomInmemoryDataBrokerModule extends
             }
         });
 
-        return newDataBroker;
+        return broker;
     }
 }
