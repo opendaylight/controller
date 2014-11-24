@@ -16,12 +16,15 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
+import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.util.DurationStatisticsTracker;
 import org.opendaylight.yangtools.util.concurrent.MappingCheckedFuture;
@@ -35,13 +38,11 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
-public class DOMConcurrentDataCommitCoordinator implements DOMDataCommitExecutor {
-
+public class ConcurrentDOMDataBroker extends AbstractDOMDataBroker {
+    private static final Logger LOG = LoggerFactory.getLogger(ConcurrentDOMDataBroker.class);
     private static final String CAN_COMMIT = "CAN_COMMIT";
     private static final String PRE_COMMIT = "PRE_COMMIT";
     private static final String COMMIT = "COMMIT";
-
-    private static final Logger LOG = LoggerFactory.getLogger(DOMConcurrentDataCommitCoordinator.class);
 
     private final DurationStatisticsTracker commitStatsTracker = DurationStatisticsTracker.createConcurrent();
 
@@ -56,7 +57,8 @@ public class DOMConcurrentDataCommitCoordinator implements DOMDataCommitExecutor
      */
     private final ExecutorService internalFutureCallbackExecutor = new SimpleSameThreadExecutor();
 
-    public DOMConcurrentDataCommitCoordinator(ExecutorService listenableFutureExecutor) {
+    public ConcurrentDOMDataBroker(final Map<LogicalDatastoreType, DOMStore> datastores, ExecutorService listenableFutureExecutor) {
+        super(datastores);
         this.clientFutureCallbackExecutor = Preconditions.checkNotNull(listenableFutureExecutor);
     }
 

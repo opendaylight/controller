@@ -45,7 +45,7 @@ final class DOMDataBrokerTransactionChainImpl extends AbstractDOMForwardedTransa
             AtomicReferenceFieldUpdater.newUpdater(DOMDataBrokerTransactionChainImpl.class, State.class, "state");
     private static final Logger LOG = LoggerFactory.getLogger(DOMDataBrokerTransactionChainImpl.class);
     private final AtomicLong txNum = new AtomicLong();
-    private final DOMDataCommitExecutor coordinator;
+    private final AbstractDOMDataBroker broker;
     private final TransactionChainListener listener;
     private final long chainId;
 
@@ -69,10 +69,10 @@ final class DOMDataBrokerTransactionChainImpl extends AbstractDOMForwardedTransa
      */
     public DOMDataBrokerTransactionChainImpl(final long chainId,
             final Map<LogicalDatastoreType, DOMStoreTransactionChain> chains,
-            final DOMDataCommitExecutor coordinator, final TransactionChainListener listener) {
+            final AbstractDOMDataBroker broker, final TransactionChainListener listener) {
         super(chains);
         this.chainId = chainId;
-        this.coordinator = Preconditions.checkNotNull(coordinator);
+        this.broker = Preconditions.checkNotNull(broker);
         this.listener = Preconditions.checkNotNull(listener);
     }
 
@@ -91,7 +91,7 @@ final class DOMDataBrokerTransactionChainImpl extends AbstractDOMForwardedTransa
         checkNotFailed();
         checkNotClosed();
 
-        final CheckedFuture<Void, TransactionCommitFailedException> ret = coordinator.submit(transaction, cohorts);
+        final CheckedFuture<Void, TransactionCommitFailedException> ret = broker.submit(transaction, cohorts);
 
         COUNTER_UPDATER.incrementAndGet(this);
         Futures.addCallback(ret, new FutureCallback<Void>() {

@@ -15,7 +15,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.dom.broker.impl.DOMDataBrokerImpl;
+import org.opendaylight.controller.md.sal.dom.broker.impl.SerializedDOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -47,7 +47,7 @@ public class InMemoryBrokerWriteTransactionBenchmark extends AbstractInMemoryBro
             LogicalDatastoreType.OPERATIONAL, (DOMStore)operStore,
             LogicalDatastoreType.CONFIGURATION, configStore);
 
-        domBroker = new DOMDataBrokerImpl(datastores, executor);
+        domBroker = new SerializedDOMDataBroker(datastores, executor);
         schemaContext = BenchmarkModel.createTestContext();
         configStore.onGlobalContextUpdated(schemaContext);
         operStore.onGlobalContextUpdated(schemaContext);

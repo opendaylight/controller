@@ -37,7 +37,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 public class DOMTransactionChainTest {
 
     private SchemaContext schemaContext;
-    private DOMDataBrokerImpl domBroker;
+    private AbstractDOMDataBroker domBroker;
 
     @Before
     public void setupStore() {
@@ -54,7 +54,7 @@ public class DOMTransactionChainTest {
                 .build();
 
         ListeningExecutorService executor = MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
-        domBroker = new DOMDataBrokerImpl(stores, executor);
+        domBroker = new SerializedDOMDataBroker(stores, executor);
     }
 
     @Test

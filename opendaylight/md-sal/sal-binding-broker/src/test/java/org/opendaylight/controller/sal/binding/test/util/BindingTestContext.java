@@ -25,7 +25,7 @@ import org.opendaylight.controller.md.sal.binding.impl.ForwardedBackwardsCompati
 import org.opendaylight.controller.md.sal.binding.impl.ForwardedBindingDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
-import org.opendaylight.controller.md.sal.dom.broker.impl.DOMDataBrokerImpl;
+import org.opendaylight.controller.md.sal.dom.broker.impl.SerializedDOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.broker.impl.compat.BackwardsCompatibleDataBroker;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
@@ -144,7 +144,7 @@ public class BindingTestContext implements AutoCloseable {
                 .put(LogicalDatastoreType.CONFIGURATION, configStore)
                 .build();
 
-        newDOMDataBroker = new DOMDataBrokerImpl(newDatastores, executor);
+        newDOMDataBroker = new SerializedDOMDataBroker(newDatastores, executor);
 
         biCompatibleBroker = new BackwardsCompatibleDataBroker(newDOMDataBroker,mockSchemaService);
 

@@ -11,9 +11,12 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
+import java.util.Map;
 import java.util.concurrent.RejectedExecutionException;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
+import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.util.DurationStatisticsTracker;
 import org.opendaylight.yangtools.util.concurrent.MappingCheckedFuture;
@@ -21,22 +24,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
  * Implementation of blocking three phase commit coordinator, which which
  * supports coordination on multiple {@link DOMStoreThreePhaseCommitCohort}.
  *
- * This implementation does not support cancelation of commit,
+ * This implementation does not support cancellation of commit,
  *
  * In order to advance to next phase of three phase commit all subtasks of
  * previous step must be finish.
  *
  * This executor does not have an upper bound on subtask timeout.
- *
- *
  */
-public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
-
-    private static final Logger LOG = LoggerFactory.getLogger(DOMDataCommitCoordinatorImpl.class);
+public class SerializedDOMDataBroker extends AbstractDOMDataBroker {
+    private static final Logger LOG = LoggerFactory.getLogger(SerializedDOMDataBroker.class);
     private final DurationStatisticsTracker commitStatsTracker = DurationStatisticsTracker.createConcurrent();
     private final ListeningExecutorService executor;
 
@@ -47,7 +46,8 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
      *
      * @param executor
      */
-    public DOMDataCommitCoordinatorImpl(final ListeningExecutorService executor) {
+    public SerializedDOMDataBroker(final Map<LogicalDatastoreType, DOMStore> datastores, final ListeningExecutorService executor) {
+        super(datastores);
         this.executor = Preconditions.checkNotNull(executor, "executor must not be null.");
     }
 
@@ -56,7 +56,7 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
     }
 
     @Override
-    public CheckedFuture<Void,TransactionCommitFailedException> submit(final DOMDataWriteTransaction transaction,
+    protected CheckedFuture<Void,TransactionCommitFailedException> submit(final DOMDataWriteTransaction transaction,
             final Iterable<DOMStoreThreePhaseCommitCohort> cohorts) {
         Preconditions.checkArgument(transaction != null, "Transaction must not be null.");
         Preconditions.checkArgument(cohorts != null, "Cohorts must not be null.");
