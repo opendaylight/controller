@@ -1,20 +1,20 @@
 module opendaylight-sal-dom-broker-impl {
-	yang-version 1;
+    yang-version 1;
     namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl";
     prefix "binding-impl";
 
-	import config { prefix config; revision-date 2013-04-05; }
- 	import opendaylight-md-sal-dom {prefix sal;}
- 	import opendaylight-md-sal-common {prefix common;}
- 	import opendaylight-config-dom-datastore {prefix config-dom-store-spi;}
- 	import opendaylight-operational-dom-datastore {prefix operational-dom-store-spi;}
+    import config { prefix config; revision-date 2013-04-05; }
+    import opendaylight-md-sal-dom {prefix sal;}
+    import opendaylight-md-sal-common {prefix common;}
+    import opendaylight-config-dom-datastore {prefix config-dom-store-spi;}
+    import opendaylight-operational-dom-datastore {prefix operational-dom-store-spi;}
 
     description
         "Service definition for Binding Aware MD-SAL.
         Note: The dom-inmemory-data-broker utilizes configurable config-dom-datastore
         and operation-dom-datastore. If configuration is not done for this stores
         then it defaults to InMemoryDOMDataStore";
- 
+
     revision "2013-10-28" {
         description
             "Initial revision";
@@ -24,14 +24,14 @@ module opendaylight-sal-dom-broker-impl {
         base config:module-type;
         config:provided-service sal:dom-broker-osgi-registry;
         config:java-name-prefix DomBrokerImpl;
-    }    
-    
-    
+    }
+
+
     identity dom-inmemory-data-broker {
         base config:module-type;
         config:provided-service sal:dom-async-data-broker;
     }
-    
+
     identity schema-service-singleton {
         base config:module-type;
         config:provided-service sal:schema-service;
@@ -69,80 +69,74 @@ module opendaylight-sal-dom-broker-impl {
             }
         }
     }
-    
+
+    grouping dom-broker-config {
+        container schema-service {
+            uses config:service-ref {
+                refine type {
+                    mandatory false;
+                    config:required-identity sal:schema-service;
+                }
+            }
+        }
+
+        container config-data-store {
+             uses config:service-ref {
+                 refine type {
+                     mandatory false;
+                     config:required-identity config-dom-store-spi:config-dom-datastore;
+                 }
+             }
+        }
+
+        container operational-data-store {
+              uses config:service-ref {
+                   refine type {
+                       mandatory false;
+                       config:required-identity operational-dom-store-spi:operational-dom-datastore;
+                   }
+               }
+        }
+
+        leaf max-data-broker-future-callback-queue-size {
+            default 1000;
+            type uint16;
+            description "The maximum queue size for the data broker's commit future callback executor.";
+        }
+
+        leaf max-data-broker-future-callback-pool-size {
+            default 20;
+            type uint16;
+            description "The maximum thread pool size for the data broker's commit future callback executor.";
+        }
+
+        leaf max-data-broker-commit-queue-size {
+            default 5000;
+            type uint16;
+            description "The maximum queue size for the data broker's commit executor.";
+        }
+    }
+
     augment "/config:modules/config:module/config:configuration" {
         case dom-inmemory-data-broker {
             when "/config:modules/config:module/config:type = 'dom-inmemory-data-broker'";
 
-
-            container schema-service {
-                uses config:service-ref {
-                    refine type {
-                        mandatory false;
-                        config:required-identity sal:schema-service;
-                    }
-                }
-
-            }
-
-            container config-data-store{
-                 uses config:service-ref {
-                     refine type {
-                         mandatory false;
-                         config:required-identity  config-dom-store-spi:config-dom-datastore;
-                     }
-                 }
-            }
-
-            container operational-data-store{
-                  uses config:service-ref {
-                       refine type {
-                           mandatory false;
-                           config:required-identity operational-dom-store-spi:operational-dom-datastore;
-                       }
-                   }
-            }
-
-            leaf max-data-broker-future-callback-queue-size {
-                default 1000;
-                type uint16;
-                description "The maximum queue size for the data broker's commit future callback executor.";
-            }
-
-            leaf max-data-broker-future-callback-pool-size {
-                default 20;
-                type uint16;
-                description "The maximum thread pool size for the data broker's commit future callback executor.";
-            }
-
-            leaf max-data-broker-commit-queue-size {
-                default 5000;
-                type uint16;
-                description "The maximum queue size for the data broker's commit executor.";
-            }
-
-            leaf allow-concurrent-commits {
-                default false;
-                type boolean;
-                description "Specifies whether or not to allow 3-phrase commits to run concurrently.
-                    Use with caution. If set to true, the data store implementations must be prepared
-                    to handle concurrent commits. The default is false";
-            }
+            uses dom-broker-config;
         }
     }
-    
+
     augment "/config:modules/config:module/config:state" {
         case schema-service-singleton {
             when "/config:modules/config:module/config:type = 'schema-service-singleton'";
         }
     }
-    
+
     augment "/config:modules/config:module/config:state" {
         case dom-broker-impl {
             when "/config:modules/config:module/config:type = 'dom-broker-impl'";
             container data {
                 uses common:data-state;
-            } 
+            }
         }
     }
 }
