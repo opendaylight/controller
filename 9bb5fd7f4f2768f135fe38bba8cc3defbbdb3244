@@ -221,6 +221,24 @@
       "revId": "9bb5fd7f4f2768f135fe38bba8cc3defbbdb3244",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_6641f60a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardRoleChangeNotifier.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-24T15:35:57Z",
+      "side": 1,
+      "message": "I guess my view is that this class and and the other one seem generic and not specific  to shard role changes. So if another component derived from RaftActor needed this behavior they could reuse these classes instead of writing their own and duplicating code. But maybe I\u0027m wrong....",
+      "parentUuid": "9a91bd0f_0bd8331c",
+      "revId": "9bb5fd7f4f2768f135fe38bba8cc3defbbdb3244",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
