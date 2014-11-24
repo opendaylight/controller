@@ -56,8 +56,6 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
     private final DOMTransactionChain delegate;
 
     @GuardedBy("this")
-    private PingPongTransaction inflightTransaction;
-    @GuardedBy("this")
     private boolean failed;
 
     /**
@@ -79,6 +77,10 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
             AtomicReferenceFieldUpdater.newUpdater(PingPongTransactionChain.class, PingPongTransaction.class, "lockedTx");
     private volatile PingPongTransaction lockedTx;
 
+    private static final AtomicReferenceFieldUpdater<PingPongTransactionChain, PingPongTransaction> INFLIGHT_UPDATER =
+            AtomicReferenceFieldUpdater.newUpdater(PingPongTransactionChain.class, PingPongTransaction.class, "inflightTx");
+    private volatile PingPongTransaction inflightTx;
+
     PingPongTransactionChain(final DOMDataBroker broker, final TransactionChainListener listener) {
         this.delegate = broker.createTransactionChain(new TransactionChainListener() {
             @Override
@@ -86,11 +88,11 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
                 LOG.debug("Delegate chain {} reported failure in {}", chain, transaction, cause);
 
                 final DOMDataReadWriteTransaction frontend;
-                if (inflightTransaction == null) {
+                if (inflightTx == null) {
                     LOG.warn("Transaction chain {} failed with no pending transactions", chain);
                     frontend = null;
                 } else {
-                    frontend = inflightTransaction.getFrontendTransaction();
+                    frontend = inflightTx.getFrontendTransaction();
                 }
 
                 listener.onTransactionChainFailed(PingPongTransactionChain.this, frontend , cause);
@@ -174,10 +176,11 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
         }
 
         LOG.debug("Submitting transaction {}", tx);
-        final CheckedFuture<Void, ?> f = tx.getTransaction().submit();
-        inflightTransaction = tx;
+        if (!INFLIGHT_UPDATER.compareAndSet(this, null, tx)) {
+            LOG.warn("Submitting transaction {} while {} is still running", tx, inflightTx);
+        }
 
-        Futures.addCallback(f, new FutureCallback<Void>() {
+        Futures.addCallback(tx.getTransaction().submit(), new FutureCallback<Void>() {
             @Override
             public void onSuccess(final Void result) {
                 transactionSuccessful(tx, result);
@@ -193,10 +196,10 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
     private void transactionSuccessful(final PingPongTransaction tx, final Void result) {
         LOG.debug("Transaction {} completed successfully", tx);
 
-        synchronized (this) {
-            Preconditions.checkState(inflightTransaction == tx, "Successful transaction %s while %s was submitted", tx, inflightTransaction);
+        final boolean success = INFLIGHT_UPDATER.compareAndSet(this, tx, null);
+        Preconditions.checkState(success, "Successful transaction %s while %s was submitted", tx, inflightTx);
 
-            inflightTransaction = null;
+        synchronized (this) {
             processIfReady();
         }
 
@@ -207,10 +210,8 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
     private void transactionFailed(final PingPongTransaction tx, final Throwable t) {
         LOG.debug("Transaction {} failed", tx, t);
 
-        synchronized (this) {
-            Preconditions.checkState(inflightTransaction == tx, "Failed transaction %s while %s was submitted", tx, inflightTransaction);
-            inflightTransaction = null;
-        }
+        final boolean success = INFLIGHT_UPDATER.compareAndSet(this, tx, null);
+        Preconditions.checkState(success, "Failed transaction %s while %s was submitted", tx, inflightTx);
 
         tx.onFailure(t);
     }
@@ -221,8 +222,8 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
 
         LOG.debug("Transaction {} unlocked", tx);
 
-        synchronized (this) {
-            if (inflightTransaction == null) {
+        if (inflightTx == null) {
+            synchronized (this) {
                 processTransaction(tx);
             }
         }
