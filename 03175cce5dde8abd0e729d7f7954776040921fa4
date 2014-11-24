@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a91bd0f_e65426cc",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/notifications/ShardRoleChangeNotification.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-24T15:44:22Z",
+      "side": 1,
+      "message": "Re: my previous comments, this message class seems generic and and not shard-specific and could be reused by other RaftActor impls, especially since it\u0027s in \"clsuer.notifications\". So my suggestion is to drop the Shard prefix.",
+      "revId": "03175cce5dde8abd0e729d7f7954776040921fa4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_06526add",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardRoleChangeNotifier.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-24T15:44:22Z",
+      "side": 1,
+      "message": "Similar to ShardRoleChangeNotification, it seems this class is generic and not shard-specific. My suggestion is to drop the Shard prefix and move to \"cluster.notifications\".",
+      "revId": "03175cce5dde8abd0e729d7f7954776040921fa4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
