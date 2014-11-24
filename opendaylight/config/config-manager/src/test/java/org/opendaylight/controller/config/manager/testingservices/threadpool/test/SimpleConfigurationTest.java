@@ -212,7 +212,7 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
         ObjectName fixed1name = firstCommit();
 
         // 2, check that configuration was copied to platform
-        DynamicMBean dynamicMBean = configRegistryClient.newMBeanProxy(
+        DynamicMBean dynamicMBean = configRegistryClient.newMXBeanProxy(
                 ObjectNameUtil.withoutTransactionName(fixed1name),
                 DynamicMBean.class);
         dynamicMBean.getMBeanInfo();

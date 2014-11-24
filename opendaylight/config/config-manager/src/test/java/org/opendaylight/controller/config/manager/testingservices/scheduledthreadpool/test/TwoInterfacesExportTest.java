@@ -41,14 +41,14 @@ public class TwoInterfacesExportTest extends AbstractScheduledTest {
         if (transaction != null) {
             transaction.lookupConfigBean(moduleName, instanceName);
             // make a dummy call
-            configRegistryClient.newMBeanProxy(
+            configRegistryClient.newMXBeanProxy(
                     ObjectNameUtil.createTransactionModuleON(
                             transaction.getTransactionName(), moduleName,
                             instanceName), DynamicMBean.class).getMBeanInfo();
         } else {
             configRegistryClient.lookupConfigBean(moduleName, instanceName);
             // make a dummy call
-            configRegistryClient.newMBeanProxy(
+            configRegistryClient.newMXBeanProxy(
                     ObjectNameUtil.createReadOnlyModuleON(moduleName,
                             instanceName), DynamicMBean.class).getMBeanInfo();
         }
@@ -173,7 +173,7 @@ public class TwoInterfacesExportTest extends AbstractScheduledTest {
 
         ObjectName apspName = transaction.createModule(
                 TestingParallelAPSPModuleFactory.NAME, "apsp1");
-        TestingParallelAPSPConfigMXBean apspProxy = transaction.newMBeanProxy(
+        TestingParallelAPSPConfigMXBean apspProxy = transaction.newMXBeanProxy(
                 apspName, TestingParallelAPSPConfigMXBean.class);
         apspProxy.setThreadPool(scheduledName);
         apspProxy.setSomeParam("someParam");
@@ -190,7 +190,7 @@ public class TwoInterfacesExportTest extends AbstractScheduledTest {
 
         ObjectName apspName = transaction.createModule(
                 TestingParallelAPSPModuleFactory.NAME, "apsp1");
-        TestingParallelAPSPConfigMXBean apspProxy = transaction.newMBeanProxy(
+        TestingParallelAPSPConfigMXBean apspProxy = transaction.newMXBeanProxy(
                 apspName, TestingParallelAPSPConfigMXBean.class);
         apspProxy.setThreadPool(ObjectNameUtil.createReadOnlyModuleON(
                 TestingScheduledThreadPoolModuleFactory.NAME, scheduled1));
