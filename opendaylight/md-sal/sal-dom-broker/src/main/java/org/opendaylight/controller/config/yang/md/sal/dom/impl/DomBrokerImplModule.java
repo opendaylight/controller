@@ -84,6 +84,7 @@ public final class DomBrokerImplModule extends org.opendaylight.controller.confi
         return new BrokerImpl(router, services);
     }
 
+    @Deprecated
     private DataProviderService createLegacyDataService(final DataStore legacyStore, final SchemaService schemaService) {
         YangInstanceIdentifier rootPath = YangInstanceIdentifier.builder().toInstance();
         DataBrokerImpl dataService = new DataBrokerImpl();
