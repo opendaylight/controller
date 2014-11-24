@@ -51,8 +51,8 @@ import org.slf4j.LoggerFactory;
 class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
         AbstractDOMForwardedCompositeTransaction<LogicalDatastoreType, T> implements DOMDataWriteTransaction {
     @SuppressWarnings("rawtypes")
-    private static final AtomicReferenceFieldUpdater<DOMForwardedWriteTransaction, DOMDataCommitImplementation> IMPL_UPDATER =
-            AtomicReferenceFieldUpdater.newUpdater(DOMForwardedWriteTransaction.class, DOMDataCommitImplementation.class, "commitImpl");
+    private static final AtomicReferenceFieldUpdater<DOMForwardedWriteTransaction, AbstractDOMForwardedTransactionFactory> IMPL_UPDATER =
+            AtomicReferenceFieldUpdater.newUpdater(DOMForwardedWriteTransaction.class, AbstractDOMForwardedTransactionFactory.class, "commitImpl");
     @SuppressWarnings("rawtypes")
     private static final AtomicReferenceFieldUpdater<DOMForwardedWriteTransaction, Future> FUTURE_UPDATER =
             AtomicReferenceFieldUpdater.newUpdater(DOMForwardedWriteTransaction.class, Future.class, "commitFuture");
@@ -64,7 +64,7 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
      * the transaction is running -- which we flip atomically using
      * {@link #IMPL_UPDATER}.
      */
-    private volatile DOMDataCommitImplementation commitImpl;
+    private volatile AbstractDOMForwardedTransactionFactory<?> commitImpl;
 
     /**
      * Future task of transaction commit. It starts off as null, but is
@@ -79,7 +79,7 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
     private volatile Future<?> commitFuture;
 
     protected DOMForwardedWriteTransaction(final Object identifier,
-            final Map<LogicalDatastoreType, T> backingTxs, final DOMDataCommitImplementation commitImpl) {
+            final Map<LogicalDatastoreType, T> backingTxs, final AbstractDOMForwardedTransactionFactory<?> commitImpl) {
         super(identifier, backingTxs);
         this.commitImpl = Preconditions.checkNotNull(commitImpl, "commitImpl must not be null.");
     }
@@ -104,7 +104,7 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
 
     @Override
     public boolean cancel() {
-        final DOMDataCommitImplementation impl = IMPL_UPDATER.getAndSet(this, null);
+        final AbstractDOMForwardedTransactionFactory<?> impl = IMPL_UPDATER.getAndSet(this, null);
         if (impl != null) {
             LOG.trace("Transaction {} cancelled before submit", getIdentifier());
             FUTURE_UPDATER.lazySet(this, CANCELLED_FUTURE);
@@ -121,6 +121,7 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
         return future.cancel(false);
     }
 
+    @Deprecated
     @Override
     public ListenableFuture<RpcResult<TransactionStatus>> commit() {
         return AbstractDataTransaction.convertToLegacyCommitFuture(submit());
@@ -128,7 +129,7 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
 
     @Override
     public CheckedFuture<Void, TransactionCommitFailedException> submit() {
-        final DOMDataCommitImplementation impl = IMPL_UPDATER.getAndSet(this, null);
+        final AbstractDOMForwardedTransactionFactory<?> impl = IMPL_UPDATER.getAndSet(this, null);
         checkRunning(impl);
 
         final Collection<T> txns = getSubtransactions();
@@ -144,7 +145,7 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
         return ret;
     }
 
-    private void checkRunning(final DOMDataCommitImplementation impl) {
+    private void checkRunning(final AbstractDOMForwardedTransactionFactory<?> impl) {
         Preconditions.checkState(impl != null, "Transaction %s is no longer running", getIdentifier());
     }
 }

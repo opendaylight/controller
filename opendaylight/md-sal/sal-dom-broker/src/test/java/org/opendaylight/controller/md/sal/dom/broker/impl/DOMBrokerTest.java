@@ -48,7 +48,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 public class DOMBrokerTest {
 
     private SchemaContext schemaContext;
-    private DOMDataBrokerImpl domBroker;
+    private AbstractDOMDataBroker domBroker;
     private ListeningExecutorService executor;
     private ExecutorService futureExecutor;
     private CommitExecutorService commitExecutor;
@@ -74,7 +74,7 @@ public class DOMBrokerTest {
         futureExecutor = SpecialExecutors.newBlockingBoundedCachedThreadPool(1, 5, "FCB");
         executor = new DeadlockDetectingListeningExecutorService(commitExecutor,
                 TransactionCommitDeadlockException.DEADLOCK_EXCEPTION_SUPPLIER, futureExecutor);
-        domBroker = new DOMDataBrokerImpl(stores, executor);
+        domBroker = new SerializedDOMDataBroker(stores, executor);
     }
 
     @After

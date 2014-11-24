@@ -37,7 +37,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 final class DOMForwardedReadWriteTransaction extends DOMForwardedWriteTransaction<DOMStoreReadWriteTransaction> implements DOMDataReadWriteTransaction {
     protected DOMForwardedReadWriteTransaction(final Object identifier,
             final Map<LogicalDatastoreType, DOMStoreReadWriteTransaction> backingTxs,
-            final DOMDataCommitImplementation commitImpl) {
+            final AbstractDOMForwardedTransactionFactory<?> commitImpl) {
         super(identifier, backingTxs, commitImpl);
     }
 
