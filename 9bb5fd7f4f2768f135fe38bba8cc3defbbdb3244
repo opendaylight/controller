@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a91bd0f_2bcad74f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/example/messages/RegisterListener.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-24T00:40:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a91bd0f_6b6e9fcb",
+      "revId": "9bb5fd7f4f2768f135fe38bba8cc3defbbdb3244",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a91bd0f_ab74a79c",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2014-11-22T01:43:08Z",
       "side": 1,
       "message": "It\u0027s not safe to call an overridable protected method from the base class constructor. Either have it passed in to the constructor or add a protected setter that the derived class calls.",
+      "revId": "9bb5fd7f4f2768f135fe38bba8cc3defbbdb3244",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_4bc71b46",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-24T00:40:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a91bd0f_ab74a79c",
       "revId": "9bb5fd7f4f2768f135fe38bba8cc3defbbdb3244",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -59,6 +95,24 @@
     },
     {
       "key": {
+        "uuid": "9a91bd0f_ebc38f36",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/AbstractUntypedActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-24T00:40:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a91bd0f_8b5c4327",
+      "revId": "9bb5fd7f4f2768f135fe38bba8cc3defbbdb3244",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a91bd0f_2b417739",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/AbstractUntypedPersistentActor.java",
         "patchSetId": 3
@@ -82,6 +136,24 @@
     },
     {
       "key": {
+        "uuid": "9a91bd0f_0bc1132e",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/AbstractUntypedPersistentActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-24T00:40:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a91bd0f_2b417739",
+      "revId": "9bb5fd7f4f2768f135fe38bba8cc3defbbdb3244",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a91bd0f_0b48335a",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/notifications/ShardRoleChangeNotification.java",
         "patchSetId": 3
@@ -99,6 +171,24 @@
     },
     {
       "key": {
+        "uuid": "9a91bd0f_8bec43c9",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/notifications/ShardRoleChangeNotification.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-24T00:40:07Z",
+      "side": 1,
+      "message": "I see that the commons-clustering already  has datastore related components (ShardManagerMessages etc) and hence i had put the Shard Notification in the clustering-commons.\nI believe that when the sal-clustering-commons was created, it was meant to be a place to have dependent modules to share common stuff. Not sure it was meant to be datastore agnostic\n\nMy intention was to avoid a direct dependency of the listeners on the distributed-datastore and only to clustering-commons.\nI can move the Shard notification under datastore, but wanted to keep all notification related classes together.\n\nIt can happen that tomorrow another module would come with its Notification (like Shard does now ) and place that in sal clustering commons for the listeners to consume.",
+      "parentUuid": "9a91bd0f_0b48335a",
+      "revId": "9bb5fd7f4f2768f135fe38bba8cc3defbbdb3244",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a91bd0f_cb79eb94",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardRoleChangeNotifier.java",
         "patchSetId": 3
@@ -110,6 +200,24 @@
       "writtenOn": "2014-11-22T01:43:08Z",
       "side": 1,
       "message": "This class doesn\u0027t look shard-specific  - can\u0027t it be part of the raft bundle (sans Shard prefix)?",
+      "revId": "9bb5fd7f4f2768f135fe38bba8cc3defbbdb3244",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_0bd8331c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardRoleChangeNotifier.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-24T00:40:07Z",
+      "side": 1,
+      "message": "Moiz and I had discussion on this offline a couple of days back. Initially (in patch1) the notifier was built from the RaftActor and RaftActor would notify the created notifier and a ClusterRoleChangeNotification was invoked.\n\nThe design change was that to avoid the leakage of the concensus algo implementation (in our case Raft) in the notification logic. From the Listener perspective,  its only interested with the Shard role changes and has nothing to do with Raft\n\nHence as per the new design, each derived module of the RaftActor can create its own notifier and its own notification and RaftActor will just notify the injected notifier of the role change.\n\nLet me know your views.",
+      "parentUuid": "9a91bd0f_cb79eb94",
       "revId": "9bb5fd7f4f2768f135fe38bba8cc3defbbdb3244",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
