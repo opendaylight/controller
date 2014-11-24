@@ -8,16 +8,19 @@
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.CheckedFuture;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionFactory;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 
@@ -37,7 +40,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
  * @param <T>
  *            Type of {@link DOMStoreTransactionFactory} factory.
  */
-abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreTransactionFactory> implements DOMDataCommitImplementation, AutoCloseable {
+abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreTransactionFactory> implements AutoCloseable {
     @SuppressWarnings("rawtypes")
     private static final AtomicIntegerFieldUpdater<AbstractDOMForwardedTransactionFactory> UPDATER =
             AtomicIntegerFieldUpdater.newUpdater(AbstractDOMForwardedTransactionFactory.class, "closed");
@@ -55,6 +58,26 @@ abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreTransact
      * @return new Unique transaction identifier.
      */
     protected abstract Object newTransactionIdentifier();
+
+    /**
+     * User-supplied implementation of {@link DOMDataWriteTransaction#submit()}
+     * for transaction.
+     *
+     * Callback invoked when {@link DOMDataWriteTransaction#submit()} is invoked
+     * on transaction created by this factory.
+     *
+     * @param transaction
+     *            Transaction on which {@link DOMDataWriteTransaction#commit()}
+     *            was invoked.
+     * @param cohorts
+     *            Iteratable of cohorts for subtransactions associated with
+     *            the transaction being committed.
+     * @return a CheckedFuture. if commit coordination on cohorts finished successfully,
+     *         nothing is returned from the Future, On failure,
+     *         the Future fails with a {@link TransactionCommitFailedException}.
+     */
+    protected abstract CheckedFuture<Void,TransactionCommitFailedException> submit(final DOMDataWriteTransaction transaction,
+            final Iterable<DOMStoreThreePhaseCommitCohort> cohorts);
 
     /**
      * Creates a new composite read-only transaction

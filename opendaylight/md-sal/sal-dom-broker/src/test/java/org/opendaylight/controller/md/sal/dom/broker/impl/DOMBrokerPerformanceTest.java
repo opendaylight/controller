@@ -44,7 +44,7 @@ public class DOMBrokerPerformanceTest {
     }
 
     private SchemaContext schemaContext;
-    private DOMDataBrokerImpl domBroker;
+    private AbstractDOMDataBroker domBroker;
 
     private static <V> V measure(final String name, final Callable<V> callable) throws Exception {
         // TODO Auto-generated method stub
@@ -72,7 +72,7 @@ public class DOMBrokerPerformanceTest {
                 .put(OPERATIONAL, operStore) //
                 .build();
         ListeningExecutorService executor = MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
-        domBroker = new DOMDataBrokerImpl(stores, executor);
+        domBroker = new SerializedDOMDataBroker(stores, executor);
     }
 
     @Test
