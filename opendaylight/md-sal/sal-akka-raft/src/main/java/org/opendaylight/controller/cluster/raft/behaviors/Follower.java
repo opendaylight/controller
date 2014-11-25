@@ -9,7 +9,9 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.ByteString;
+import java.util.ArrayList;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
@@ -23,8 +25,6 @@ import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 
-import java.util.ArrayList;
-
 /**
  * The behavior of a RaftActor in the Follower state
  * <p/>
@@ -36,6 +36,7 @@ import java.util.ArrayList;
  * </ul>
  */
 public class Follower extends AbstractRaftActorBehavior {
+
     private ByteString snapshotChunksCollected = ByteString.EMPTY;
 
     public Follower(RaftActorContext context) {
@@ -281,6 +282,16 @@ public class Follower extends AbstractRaftActorBehavior {
         }
 
         try {
+            // The chunk index is greater than 1 yet the snapshotChunksCollected is empty. This means
+            // we just received a chunk from possibly an older InstallSnapshot. Send a failure response
+            // and let the Leader know that the current chunk index is -1 so that it can reset the chunk index
+            // on it's end
+            if(installSnapshot.getChunkIndex() > AbstractLeader.FIRST_CHUNK_INDEX &&
+                    snapshotChunksCollected == ByteString.EMPTY){
+                sender.tell(new InstallSnapshotReply(currentTerm(), context.getId(),
+                        -1, false), actor());
+                return;
+            }
             if (installSnapshot.getChunkIndex() == installSnapshot.getTotalChunks()) {
                 // this is the last chunk, create a snapshot object and apply
 
@@ -298,6 +309,9 @@ public class Follower extends AbstractRaftActorBehavior {
                     installSnapshot.getLastIncludedTerm());
 
                 actor().tell(new ApplySnapshot(snapshot), actor());
+
+                // Reset the snapshot back to empty
+                snapshotChunksCollected = ByteString.EMPTY;
 
             } else {
                 // we have more to go
@@ -323,5 +337,10 @@ public class Follower extends AbstractRaftActorBehavior {
 
     @Override public void close() throws Exception {
         stopElection();
+    }
+
+    @VisibleForTesting
+    ByteString getSnapshotChunksCollected(){
+        return snapshotChunksCollected;
     }
 }

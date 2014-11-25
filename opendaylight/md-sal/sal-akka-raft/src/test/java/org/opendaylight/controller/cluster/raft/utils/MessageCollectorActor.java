@@ -13,14 +13,13 @@ import akka.actor.UntypedActor;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 
 public class MessageCollectorActor extends UntypedActor {
@@ -34,6 +33,10 @@ public class MessageCollectorActor extends UntypedActor {
         } else {
             messages.add(message);
         }
+    }
+
+    public List<Object> getAllMessages(){
+        return messages;
     }
 
     public static List<Object> getAllMessages(ActorRef actor) throws Exception {
