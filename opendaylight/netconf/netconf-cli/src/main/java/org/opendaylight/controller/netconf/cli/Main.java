@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.netconf.cli;
 
+import static com.google.common.base.Throwables.getStackTraceAsString;
+
 import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -105,7 +107,7 @@ public class Main {
     }
 
     private static void handleException(final Exception e, final String message) {
-        // FIXME syserr the exception and stacktrace
+        System.console().writer().println(String.format("Error %s cause %s", message, getStackTraceAsString(e.fillInStackTrace())));
     }
 
     private static void writeStatus(final ConsoleIO io, final String blueprint, final Object... args) {
