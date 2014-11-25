@@ -8,6 +8,7 @@ module config-test-impl {
     import ietf-inet-types { prefix inet; revision-date 2010-09-24;}
     import rpc-context { prefix rpcx; revision-date 2013-06-17; }
     import test-types { prefix tt; revision-date 2013-11-27; }
+    import test-groups { prefix tg; revision-date 2014-12-08; }
 
     description
         "Testing IMPL";
@@ -347,12 +348,33 @@ module config-test-impl {
         }
     }
 
+    grouping netconf-impl-rpc {
+       rpcx:rpc-context-instance netconf-impl-rpc-ctx;
+    }
+
+    identity netconf-impl-rpc-ctx;
+
+    rpc netconf-impl-rpc-from-grouping {
+        input {
+            uses rpcx:rpc-context-ref {
+                refine context-instance {
+                    rpcx:rpc-context-instance "netconf-impl-rpc-ctx";
+                }
+            }
+        }
+    }
+
     augment "/config:modules/config:module/config:state" {
         case impl-netconf {
             when "/config:modules/config:module/config:type = 'impl-netconf'";
             container impl-netconf {
                 // rpc
                 rpcx:rpc-context-instance "test-rpc";
+
+                // add some stats + rpc from groupings outside this module
+                uses tt:common-operational;
+                uses tg:common-operational-rpc;
+                uses netconf-impl-rpc;
 
                 // root runtime bean
                 leaf created-sessions {
