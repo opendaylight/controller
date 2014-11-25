@@ -187,6 +187,7 @@ public abstract class AbstractNetconfConfigTest extends AbstractConfigTest {
                 "/META-INF/yang/config-test.yang",
                 "/META-INF/yang/config-test-impl.yang",
                 "/META-INF/yang/test-types.yang",
+                "/META-INF/yang/test-groups.yang",
                 "/META-INF/yang/ietf-inet-types.yang");
 
         final Collection<InputStream> yangDependencies = new ArrayList<>();

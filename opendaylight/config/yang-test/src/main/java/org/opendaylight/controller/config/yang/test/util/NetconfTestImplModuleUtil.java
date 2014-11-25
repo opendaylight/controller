@@ -11,6 +11,7 @@
 package org.opendaylight.controller.config.yang.test.util;
 
 import com.google.common.collect.Lists;
+import java.math.BigInteger;
 import java.util.List;
 import org.opendaylight.controller.config.yang.test.impl.Asdf;
 import org.opendaylight.controller.config.yang.test.impl.Deep2;
@@ -44,8 +45,33 @@ public class NetconfTestImplModuleUtil {
             }
 
             @Override
+            public BigInteger getCommonStat() {
+                return new BigInteger("54");
+            }
+
+            @Override
             public String noArg(final String arg1) {
                 return arg1.toUpperCase();
+            }
+
+            @Override
+            public Long commonRpcTwo() {
+                return 1L;
+            }
+
+            @Override
+            public String commonRpcThree() {
+                return "true";
+            }
+
+            @Override
+            public Boolean commonRpc() {
+                return true;
+            }
+
+            @Override
+            public void netconfImplRpcFromGrouping() {
+                // rpc from grouping within same yang module
             }
 
         });

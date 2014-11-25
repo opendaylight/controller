@@ -11,8 +11,14 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -20,6 +26,7 @@ import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -36,15 +43,16 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaNode;
 import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.UsesNode;
+import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil;
 
 /**
  * Holds information about runtime bean to be generated. There are two kinds of
@@ -56,6 +64,21 @@ import org.opendaylight.yangtools.yang.model.api.UsesNode;
  * lined via children so that a tree with all beans can be created.
  */
 public class RuntimeBeanEntry {
+
+    private static final Function<SchemaNode, QName> QNAME_FROM_NODE = new Function<SchemaNode, QName>() {
+        @Override
+        public QName apply(final SchemaNode input) {
+            return input.getQName();
+        }
+    };
+
+    private static final Function<UnknownSchemaNode, String> UNKNOWN_NODE_TO_STRING = new Function<UnknownSchemaNode, String>() {
+        @Override
+        public String apply(final UnknownSchemaNode input) {
+            return input.getQName().getLocalName() + input.getNodeParameter();
+        }
+    };
+
     private final String packageName;
     private final String yangName, javaNamePrefix;
     private final boolean isRoot;
@@ -112,13 +135,12 @@ public class RuntimeBeanEntry {
     public static Map<String, RuntimeBeanEntry> extractClassNameToRuntimeBeanMap(
             final String packageName, final DataNodeContainer container,
             final String moduleYangName, final TypeProviderWrapper typeProviderWrapper,
-            final String javaNamePrefix, final Module currentModule) {
+            final String javaNamePrefix, final Module currentModule, final SchemaContext schemaContext) {
 
-        Map<QName, Set<RpcDefinition>> identitiesToRpcs = getIdentitiesToRpcs(currentModule);
 
         AttributesRpcsAndRuntimeBeans attributesRpcsAndRuntimeBeans = extractSubtree(
                 packageName, container, typeProviderWrapper, currentModule,
-                identitiesToRpcs);
+                schemaContext);
         Map<String, RuntimeBeanEntry> result = new HashMap<>();
 
         List<AttributeIfc> attributes;
@@ -150,52 +172,41 @@ public class RuntimeBeanEntry {
         return result;
     }
 
-    private static Map<QName/* of identity */, Set<RpcDefinition>> getIdentitiesToRpcs(
-            final Module currentModule) {
-        // currently only looks for local identities (found in currentModule)
-        Map<QName, Set<RpcDefinition>> result = new HashMap<>();
-        for (IdentitySchemaNode identity : currentModule.getIdentities()) {
-            // add all
-            result.put(identity.getQName(), new HashSet<RpcDefinition>());
-        }
+    private static Multimap<QName/* of identity */, RpcDefinition> getIdentitiesToRpcs(
+            final SchemaContext schemaCtx) {
+        Multimap<QName, RpcDefinition> result = HashMultimap.create();
+        for (Module currentModule : schemaCtx.getModules()) {
 
-        for (RpcDefinition rpc : currentModule.getRpcs()) {
-            ContainerSchemaNode input = rpc.getInput();
-            if (input != null) {
-                for (UsesNode uses : input.getUses()) {
+            // Find all identities in current module for later identity->rpc mapping
+            Set<QName> allIdentitiesInModule = Sets.newHashSet(Collections2.transform(currentModule.getIdentities(), QNAME_FROM_NODE));
 
-                    if (uses.getGroupingPath().getPath().size() != 1) {
-                        continue;
-                    }
+            for (RpcDefinition rpc : currentModule.getRpcs()) {
+                ContainerSchemaNode input = rpc.getInput();
+                if (input != null) {
+                    for (UsesNode uses : input.getUses()) {
 
-                    // check grouping path
-                    QName qname = uses.getGroupingPath().getPath().get(0);
-                    if (false == qname
-                            .equals(ConfigConstants.RPC_CONTEXT_REF_GROUPING_QNAME)) {
-                        continue;
-                    }
+                        // Check if the rpc is config rpc by looking for input argument rpc-context-ref
+                        Iterator<QName> pathFromRoot = uses.getGroupingPath().getPathFromRoot().iterator();
+                        if (!pathFromRoot.hasNext() ||
+                                !pathFromRoot.next().equals(ConfigConstants.RPC_CONTEXT_REF_GROUPING_QNAME)) {
+                            continue;
+                        }
 
-                    for (SchemaNode refinedNode : uses.getRefines().values()) {
-
-                        for (UnknownSchemaNode unknownSchemaNode : refinedNode
-                                .getUnknownSchemaNodes()) {
-                            if (ConfigConstants.RPC_CONTEXT_INSTANCE_EXTENSION_QNAME
-                                    .equals(unknownSchemaNode.getNodeType())) {
-                                String localIdentityName = unknownSchemaNode
-                                        .getNodeParameter();
-                                QName identityQName = QName.create(
-                                        currentModule.getNamespace(),
-                                        currentModule.getRevision(),
-                                        localIdentityName);
-                                Set<RpcDefinition> rpcDefinitions = result
-                                        .get(identityQName);
-                                if (rpcDefinitions == null) {
-                                    throw new IllegalArgumentException(
-                                            "Identity referenced by rpc not found. Identity:"
-                                                    + localIdentityName + " , rpc "
-                                                    + rpc);
+                        for (SchemaNode refinedNode : uses.getRefines().values()) {
+                            for (UnknownSchemaNode unknownSchemaNode : refinedNode
+                                    .getUnknownSchemaNodes()) {
+                                if (ConfigConstants.RPC_CONTEXT_INSTANCE_EXTENSION_QNAME
+                                        .equals(unknownSchemaNode.getNodeType())) {
+                                    String localIdentityName = unknownSchemaNode
+                                            .getNodeParameter();
+                                    QName identityQName = QName.create(
+                                            currentModule.getNamespace(),
+                                            currentModule.getRevision(),
+                                            localIdentityName);
+                                    Preconditions.checkArgument(allIdentitiesInModule.contains(identityQName),
+                                            "Identity referenced by rpc not found. Identity: %s, rpc: %s", localIdentityName, rpc);
+                                    result.put(identityQName, rpc);
                                 }
-                                rpcDefinitions.add(rpc);
                             }
                         }
                     }
@@ -212,7 +223,9 @@ public class RuntimeBeanEntry {
     private static AttributesRpcsAndRuntimeBeans extractSubtree(
             final String packageName, final DataNodeContainer subtree,
             final TypeProviderWrapper typeProviderWrapper, final Module currentModule,
-            final Map<QName, Set<RpcDefinition>> identitiesToRpcs) {
+            final SchemaContext ctx) {
+
+        Multimap<QName, RpcDefinition> identitiesToRpcs = getIdentitiesToRpcs(ctx);
 
         List<AttributeIfc> attributes = Lists.newArrayList();
         List<RuntimeBeanEntry> runtimeBeanEntries = new ArrayList<>();
@@ -234,7 +247,7 @@ public class RuntimeBeanEntry {
                     ListSchemaNode listSchemaNode = (ListSchemaNode) child;
                     RuntimeBeanEntry hierarchicalChild = createHierarchical(
                             packageName, listSchemaNode, typeProviderWrapper,
-                            currentModule, identitiesToRpcs);
+                            currentModule, ctx);
                     runtimeBeanEntries.add(hierarchicalChild);
                 } else /* ordinary list attribute */{
                     ListAttribute listAttribute = ListAttribute.create(
@@ -258,18 +271,11 @@ public class RuntimeBeanEntry {
             if (ConfigConstants.RPC_CONTEXT_INSTANCE_EXTENSION_QNAME
                     .equals(unknownSchemaNode.getNodeType())) {
                 String localIdentityName = unknownSchemaNode.getNodeParameter();
-                QName identityQName = QName.create(currentModule.getNamespace(),
-                        currentModule.getRevision(), localIdentityName);
-                Set<RpcDefinition> rpcDefinitions = identitiesToRpcs
-                        .get(identityQName);
-                if (rpcDefinitions == null) {
-                    throw new IllegalArgumentException("Cannot find identity "
-                            + localIdentityName + " to be used as "
-                            + "context reference when resolving "
-                            + unknownSchemaNode);
-                }
+                QName identityQName = unknownSchemaNode.isAddedByUses() ?
+                        findQNameFromGrouping(subtree, ctx, unknownSchemaNode, localIdentityName) :
+                        QName.create(currentModule.getNamespace(), currentModule.getRevision(), localIdentityName);
                 // convert RpcDefinition to Rpc
-                for (RpcDefinition rpcDefinition : rpcDefinitions) {
+                for (RpcDefinition rpcDefinition : identitiesToRpcs.get(identityQName)) {
                     String name = TypeProviderWrapper
                             .findJavaParameter(rpcDefinition);
                     AttributeIfc returnType;
@@ -308,6 +314,22 @@ public class RuntimeBeanEntry {
         }
         return new AttributesRpcsAndRuntimeBeans(runtimeBeanEntries,
                 attributes, rpcs);
+    }
+
+    /**
+     * Find "proper" qname of unknown node in case it comes from a grouping
+     */
+    private static QName findQNameFromGrouping(final DataNodeContainer subtree, final SchemaContext ctx, final UnknownSchemaNode unknownSchemaNode, final String localIdentityName) {
+        QName identityQName = null;
+        for (UsesNode usesNode : subtree.getUses()) {
+            SchemaNode dataChildByName = SchemaContextUtil.findDataSchemaNode(ctx, usesNode.getGroupingPath());
+            Module m = SchemaContextUtil.findParentModule(ctx, dataChildByName);
+            List<UnknownSchemaNode> unknownSchemaNodes = dataChildByName.getUnknownSchemaNodes();
+            if(Collections2.transform(unknownSchemaNodes, UNKNOWN_NODE_TO_STRING).contains(UNKNOWN_NODE_TO_STRING.apply(unknownSchemaNode))) {
+                identityQName = QName.create(dataChildByName.getQName(), localIdentityName);
+            }
+        }
+        return identityQName;
     }
 
     private static AttributeIfc getReturnTypeAttribute(final DataSchemaNode child, final TypeProviderWrapper typeProviderWrapper,
@@ -353,13 +375,13 @@ public class RuntimeBeanEntry {
     private static RuntimeBeanEntry createHierarchical(final String packageName,
             final ListSchemaNode listSchemaNode,
             final TypeProviderWrapper typeProviderWrapper, final Module currentModule,
-            final Map<QName, Set<RpcDefinition>> identitiesToRpcs) {
+            final SchemaContext ctx) {
 
         // supported are numeric types, strings, enums
         // get all attributes
         AttributesRpcsAndRuntimeBeans attributesRpcsAndRuntimeBeans = extractSubtree(
                 packageName, listSchemaNode, typeProviderWrapper,
-                currentModule, identitiesToRpcs);
+                currentModule, ctx);
 
         Optional<String> keyYangName;
         if (listSchemaNode.getKeyDefinition().isEmpty()) {
