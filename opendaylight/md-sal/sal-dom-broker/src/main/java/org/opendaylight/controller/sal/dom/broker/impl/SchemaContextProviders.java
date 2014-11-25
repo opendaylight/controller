@@ -10,10 +10,11 @@ package org.opendaylight.controller.sal.dom.broker.impl;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.yangtools.concepts.Delegator;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 
 public class SchemaContextProviders {
 
-    public static final SchemaContextProvider fromSchemaService(SchemaService schemaService) {
+    public static final SchemaContextProvider fromSchemaService(final SchemaService schemaService) {
         if (schemaService instanceof SchemaContextProvider) {
             return (SchemaContextProvider) schemaService;
         }
@@ -24,7 +25,7 @@ public class SchemaContextProviders {
 
         private final SchemaService service;
 
-        public SchemaServiceAdapter(SchemaService service) {
+        public SchemaServiceAdapter(final SchemaService service) {
             super();
             this.service = service;
         }
