@@ -105,7 +105,7 @@ public class Main {
     }
 
     private static void handleException(final Exception e, final String message) {
-        // FIXME syserr the exception and stacktrace
+        System.console().writer().println(String.format("Error {} cause {}", message, e.toString()));
     }
 
     private static void writeStatus(final ConsoleIO io, final String blueprint, final Object... args) {
