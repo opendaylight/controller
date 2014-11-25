@@ -377,7 +377,7 @@ final class ModuleMXBeanEntryBuilder {
             final String javaNamePrefix) {
 
         return RuntimeBeanEntry.extractClassNameToRuntimeBeanMap(packageName, dataNodeContainer, moduleLocalNameFromXPath,
-                typeProviderWrapper, javaNamePrefix, currentModule).values();
+                typeProviderWrapper, javaNamePrefix, currentModule, schemaContext).values();
 
     }
 

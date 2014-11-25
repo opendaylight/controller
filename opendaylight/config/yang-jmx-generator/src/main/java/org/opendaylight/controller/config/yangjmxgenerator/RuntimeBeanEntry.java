@@ -12,8 +12,10 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
+import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -38,12 +40,14 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.GroupingDefinition;
 import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaNode;
 import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.UsesNode;
@@ -114,9 +118,9 @@ public class RuntimeBeanEntry {
     public static Map<String, RuntimeBeanEntry> extractClassNameToRuntimeBeanMap(
             final String packageName, final DataNodeContainer container,
             final String moduleYangName, final TypeProviderWrapper typeProviderWrapper,
-            final String javaNamePrefix, final Module currentModule) {
+            final String javaNamePrefix, final Module currentModule, final SchemaContext schemaContext) {
 
-        Map<QName, Set<RpcDefinition>> identitiesToRpcs = getIdentitiesToRpcs(currentModule);
+        Map<QName, Set<RpcDefinition>> identitiesToRpcs = getIdentitiesToRpcs(schemaContext);
 
         AttributesRpcsAndRuntimeBeans attributesRpcsAndRuntimeBeans = extractSubtree(
                 packageName, container, typeProviderWrapper, currentModule,
@@ -153,51 +157,53 @@ public class RuntimeBeanEntry {
     }
 
     private static Map<QName/* of identity */, Set<RpcDefinition>> getIdentitiesToRpcs(
-            final Module currentModule) {
-        // currently only looks for local identities (found in currentModule)
+            final SchemaContext schemaCtx) {
         Map<QName, Set<RpcDefinition>> result = new HashMap<>();
-        for (IdentitySchemaNode identity : currentModule.getIdentities()) {
-            // add all
-            result.put(identity.getQName(), new HashSet<RpcDefinition>());
-        }
+        for (Module currentModule : schemaCtx.getModules()) {
 
-        for (RpcDefinition rpc : currentModule.getRpcs()) {
-            ContainerSchemaNode input = rpc.getInput();
-            if (input != null) {
-                for (UsesNode uses : input.getUses()) {
+            for (IdentitySchemaNode identity : currentModule.getIdentities()) {
+                // add all
+                result.put(identity.getQName(), new HashSet<RpcDefinition>());
+            }
 
-                    if (uses.getGroupingPath().getPath().size() != 1) {
-                        continue;
-                    }
+            for (RpcDefinition rpc : currentModule.getRpcs()) {
+                ContainerSchemaNode input = rpc.getInput();
+                if (input != null) {
+                    for (UsesNode uses : input.getUses()) {
 
-                    // check grouping path
-                    QName qname = uses.getGroupingPath().getPath().get(0);
-                    if (false == qname
-                            .equals(ConfigConstants.RPC_CONTEXT_REF_GROUPING_QNAME)) {
-                        continue;
-                    }
+                        if (uses.getGroupingPath().getPath().size() != 1) {
+                            continue;
+                        }
 
-                    for (SchemaNode refinedNode : uses.getRefines().values()) {
+                        // check grouping path
+                        QName qname = uses.getGroupingPath().getPath().get(0);
+                        if (false == qname
+                                .equals(ConfigConstants.RPC_CONTEXT_REF_GROUPING_QNAME)) {
+                            continue;
+                        }
 
-                        for (UnknownSchemaNode unknownSchemaNode : refinedNode
-                                .getUnknownSchemaNodes()) {
-                            if (ConfigConstants.RPC_CONTEXT_INSTANCE_EXTENSION_QNAME
-                                    .equals(unknownSchemaNode.getNodeType())) {
-                                String localIdentityName = unknownSchemaNode
-                                        .getNodeParameter();
-                                QName identityQName = QName.create(
-                                        currentModule.getNamespace(),
-                                        currentModule.getRevision(),
-                                        localIdentityName);
-                                Set<RpcDefinition> rpcDefinitions = result
-                                        .get(identityQName);
-                                if (rpcDefinitions == null) {
-                                    throw new IllegalArgumentException(
-                                            "Identity referenced by rpc not found. Identity:"
-                                                    + localIdentityName + " , rpc "
-                                                    + rpc);
+                        for (SchemaNode refinedNode : uses.getRefines().values()) {
+
+                            for (UnknownSchemaNode unknownSchemaNode : refinedNode
+                                    .getUnknownSchemaNodes()) {
+                                if (ConfigConstants.RPC_CONTEXT_INSTANCE_EXTENSION_QNAME
+                                        .equals(unknownSchemaNode.getNodeType())) {
+                                    String localIdentityName = unknownSchemaNode
+                                            .getNodeParameter();
+                                    QName identityQName = QName.create(
+                                            currentModule.getNamespace(),
+                                            currentModule.getRevision(),
+                                            localIdentityName);
+                                    Set<RpcDefinition> rpcDefinitions = result
+                                            .get(identityQName);
+                                    if (rpcDefinitions == null) {
+                                        throw new IllegalArgumentException(
+                                                "Identity referenced by rpc not found. Identity:"
+                                                        + localIdentityName + " , rpc "
+                                                        + rpc);
+                                    }
+                                    rpcDefinitions.add(rpc);
                                 }
-                                rpcDefinitions.add(rpc);
                             }
                         }
                     }
@@ -262,13 +268,18 @@ public class RuntimeBeanEntry {
                 String localIdentityName = unknownSchemaNode.getNodeParameter();
                 QName identityQName = QName.create(currentModule.getNamespace(),
                         currentModule.getRevision(), localIdentityName);
-                Set<RpcDefinition> rpcDefinitions = identitiesToRpcs
-                        .get(identityQName);
+                Set<RpcDefinition> rpcDefinitions = identitiesToRpcs.get(identityQName);
                 if (rpcDefinitions == null) {
-                    throw new IllegalArgumentException("Cannot find identity "
-                            + localIdentityName + " to be used as "
-                            + "context reference when resolving "
-                            + unknownSchemaNode);
+                    rpcDefinitions = Sets.newHashSet();
+                    for (GroupingDefinition groupingDefinition : subtree.getGroupings()) {
+                        DataSchemaNode dataChildByName1 = groupingDefinition.getDataChildByName(localIdentityName);
+                        if(dataChildByName1 != null && dataChildByName1 instanceof RpcDefinition) {
+                            rpcDefinitions.add((RpcDefinition) dataChildByName1);
+                        }
+                    }
+
+                    Preconditions.checkState(rpcDefinitions.isEmpty(), "Cannot find identity: %s to be used as context reference while resolving: %s",
+                            localIdentityName, unknownSchemaNode);
                 }
                 // convert RpcDefinition to Rpc
                 for (RpcDefinition rpcDefinition : rpcDefinitions) {
