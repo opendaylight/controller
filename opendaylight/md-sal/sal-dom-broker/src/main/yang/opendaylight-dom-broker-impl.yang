@@ -4,10 +4,12 @@ module opendaylight-sal-dom-broker-impl {
     prefix "binding-impl";
 
     import config { prefix config; revision-date 2013-04-05; }
+    import ietf-yang-types { prefix yang; }
     import opendaylight-md-sal-dom {prefix sal;}
     import opendaylight-md-sal-common {prefix common;}
     import opendaylight-config-dom-datastore {prefix config-dom-store-spi;}
     import opendaylight-operational-dom-datastore {prefix operational-dom-store-spi;}
+    import rpc-context { prefix rpcx; revision-date 2013-06-17; }
 
     description
         "Service definition for Binding Aware MD-SAL.
@@ -117,11 +119,87 @@ module opendaylight-sal-dom-broker-impl {
         }
     }
 
+    // FIXME: move this to java-types
+    typedef time-unit {
+        description "java.util.concurrent.TimeUnit";
+
+        type enumeration {
+	    enum nanoseconds;
+	    enum microseconds;
+	    enum milliseconds;
+	    enum seconds;
+	    enum minutes;
+	    enum hours;
+	    enum days;
+	}
+    }
+
+    grouping commit-duration {
+        leaf duration {
+            type uint64;
+        }
+
+        leaf units {
+            type time-unit;
+        }
+    }
+
+    grouping peak-commit-duration {
+        uses commit-duration;
+
+        leaf timestamp {
+            type yang:date-and-time;
+        }
+    }
+
+    grouping dom-broker-operational {
+        leaf total-commits {
+            type uint64;
+        }
+
+        container average-commit {
+            uses commit-duration;
+        }
+
+        container longest-commit {
+            uses peak-commit-duration;
+        }
+
+        container shortest-commit {
+            uses peak-commit-duration;
+        }
+
+        rpcx:rpc-context-instance dom-broker-rpc-ctx;
+    }
+
+    identity dom-broker-rpc-ctx;
+
+    rpc reset-statistics {
+        description
+          "JMX call to clear the toasts-made counter.";
+
+        input {
+            uses rpcx:rpc-context-ref {
+                refine context-instance {
+                    rpcx:rpc-context-instance dom-broker-rpc-ctx;
+                }
+            }
+        }
+    }
+
     augment "/config:modules/config:module/config:configuration" {
         case dom-inmemory-data-broker {
             when "/config:modules/config:module/config:type = 'dom-inmemory-data-broker'";
 
             uses dom-broker-config;
+        }
+    }
+
+    augment "/config:modules/config:module/config:state" {
+        case dom-inmemory-data-broker {
+            when "/config:modules/config:module/config:type = 'dom-inmemory-data-broker'";
+
+            uses dom-broker-operational;
         }
     }
 
