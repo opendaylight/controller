@@ -1,10 +1,21 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.testkit.JavaTestKit;
 import com.google.protobuf.ByteString;
 import junit.framework.Assert;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
@@ -20,19 +31,6 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 public class FollowerTest extends AbstractRaftActorBehaviorTest {
 
@@ -453,18 +451,20 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             int offset = 0;
             int snapshotLength = bsSnapshot.size();
             int i = 1;
+            int chunkIndex = 1;
 
             do {
                 chunkData = getNextChunk(bsSnapshot, offset);
                 final InstallSnapshot installSnapshot =
                     new InstallSnapshot(1, "leader-1", i, 1,
-                        chunkData, i, 3);
+                        chunkData, chunkIndex, 3);
                 follower.handleMessage(leaderActor, installSnapshot);
                 offset = offset + 50;
                 i++;
+                chunkIndex++;
             } while ((offset+50) < snapshotLength);
 
-            final InstallSnapshot installSnapshot3 = new InstallSnapshot(1, "leader-1", 3, 1, chunkData, 3, 3);
+            final InstallSnapshot installSnapshot3 = new InstallSnapshot(1, "leader-1", 3, 1, chunkData, chunkIndex, 3);
             follower.handleMessage(leaderActor, installSnapshot3);
 
             String[] matches = new ReceiveWhile<String>(String.class, duration("2 seconds")) {
@@ -491,6 +491,9 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
                 }
             }.get();
 
+            // Verify that after a snapshot is successfully applied the collected snapshot chunks is reset to empty
+            assertEquals(ByteString.EMPTY, follower.getSnapshotChunksCollected());
+
             String applySnapshotMatch = "";
             for (String reply: matches) {
                 if (reply.startsWith("applySnapshot")) {
@@ -516,6 +519,52 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             assertEquals(3, installSnapshotReplyReceivedCount);
 
         }};
+    }
+
+    @Test
+    public void testHandleOutOfSequenceInstallSnapshot() throws Exception {
+        JavaTestKit javaTestKit = new JavaTestKit(getSystem()) {
+            {
+
+                ActorRef leaderActor = getSystem().actorOf(Props.create(
+                        MessageCollectorActor.class));
+
+                MockRaftActorContext context = (MockRaftActorContext)
+                        createActorContext(getRef());
+
+                Follower follower = (Follower) createBehavior(context);
+
+                HashMap<String, String> followerSnapshot = new HashMap<>();
+                followerSnapshot.put("1", "A");
+                followerSnapshot.put("2", "B");
+                followerSnapshot.put("3", "C");
+
+                ByteString bsSnapshot = toByteString(followerSnapshot);
+
+                final InstallSnapshot installSnapshot = new InstallSnapshot(1, "leader-1", 3, 1, getNextChunk(bsSnapshot, 10), 3, 3);
+                follower.handleMessage(leaderActor, installSnapshot);
+
+                Object messages = executeLocalOperation(leaderActor, "get-all-messages");
+
+                assertNotNull(messages);
+                assertTrue(messages instanceof List);
+                List<Object> listMessages = (List<Object>) messages;
+
+                int installSnapshotReplyReceivedCount = 0;
+                for (Object message: listMessages) {
+                    if (message instanceof InstallSnapshotReply) {
+                        ++installSnapshotReplyReceivedCount;
+                    }
+                }
+
+                assertEquals(1, installSnapshotReplyReceivedCount);
+                InstallSnapshotReply reply = (InstallSnapshotReply) listMessages.get(0);
+                assertEquals(false, reply.isSuccess());
+                assertEquals(-1, reply.getChunkIndex());
+                assertEquals(ByteString.EMPTY, follower.getSnapshotChunksCollected());
+
+
+            }};
     }
 
     public Object executeLocalOperation(ActorRef actor, Object message) throws Exception {

@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.cluster.raft.messages;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.ByteString;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages;
 
@@ -21,9 +22,10 @@ public class InstallSnapshot extends AbstractRaftRPC {
     private final ByteString data;
     private final int chunkIndex;
     private final int totalChunks;
+    private final Optional<Integer> lastChunkHashCode;
 
     public InstallSnapshot(long term, String leaderId, long lastIncludedIndex,
-        long lastIncludedTerm, ByteString data, int chunkIndex, int totalChunks) {
+        long lastIncludedTerm, ByteString data, int chunkIndex, int totalChunks, Optional<Integer> lastChunkHashCode) {
         super(term);
         this.leaderId = leaderId;
         this.lastIncludedIndex = lastIncludedIndex;
@@ -31,7 +33,14 @@ public class InstallSnapshot extends AbstractRaftRPC {
         this.data = data;
         this.chunkIndex = chunkIndex;
         this.totalChunks = totalChunks;
+        this.lastChunkHashCode = lastChunkHashCode;
     }
+
+    public InstallSnapshot(long term, String leaderId, long lastIncludedIndex,
+                           long lastIncludedTerm, ByteString data, int chunkIndex, int totalChunks) {
+        this(term, leaderId, lastIncludedIndex, lastIncludedTerm, data, chunkIndex, totalChunks, Optional.<Integer>absent());
+    }
+
 
     public String getLeaderId() {
         return leaderId;
@@ -57,25 +66,38 @@ public class InstallSnapshot extends AbstractRaftRPC {
         return totalChunks;
     }
 
-    public <T extends Object> Object toSerializable(){
-        return InstallSnapshotMessages.InstallSnapshot.newBuilder()
-            .setLeaderId(this.getLeaderId())
-            .setChunkIndex(this.getChunkIndex())
-            .setData(this.getData())
-            .setLastIncludedIndex(this.getLastIncludedIndex())
-            .setLastIncludedTerm(this.getLastIncludedTerm())
-            .setTotalChunks(this.getTotalChunks()).build();
+    public Optional<Integer> getLastChunkHashCode() {
+        return lastChunkHashCode;
+    }
 
+    public <T extends Object> Object toSerializable(){
+        InstallSnapshotMessages.InstallSnapshot.Builder builder = InstallSnapshotMessages.InstallSnapshot.newBuilder()
+                .setLeaderId(this.getLeaderId())
+                .setChunkIndex(this.getChunkIndex())
+                .setData(this.getData())
+                .setLastIncludedIndex(this.getLastIncludedIndex())
+                .setLastIncludedTerm(this.getLastIncludedTerm())
+                .setTotalChunks(this.getTotalChunks());
+
+        if(lastChunkHashCode.isPresent()){
+            builder.setLastChunkHashCode(lastChunkHashCode.get());
+        }
+        return builder.build();
     }
 
     public static InstallSnapshot fromSerializable (Object o) {
         InstallSnapshotMessages.InstallSnapshot from =
             (InstallSnapshotMessages.InstallSnapshot) o;
 
+        Optional<Integer> lastChunkHashCode = Optional.absent();
+        if(from.hasLastChunkHashCode()){
+            lastChunkHashCode = Optional.of(from.getLastChunkHashCode());
+        }
+
         InstallSnapshot installSnapshot = new InstallSnapshot(from.getTerm(),
             from.getLeaderId(), from.getLastIncludedIndex(),
             from.getLastIncludedTerm(), from.getData(),
-            from.getChunkIndex(), from.getTotalChunks());
+            from.getChunkIndex(), from.getTotalChunks(), lastChunkHashCode);
 
         return installSnapshot;
     }

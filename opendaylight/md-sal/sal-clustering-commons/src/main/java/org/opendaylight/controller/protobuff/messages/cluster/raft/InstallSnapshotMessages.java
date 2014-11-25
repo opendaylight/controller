@@ -85,6 +85,16 @@ public final class InstallSnapshotMessages {
      * <code>optional int32 totalChunks = 7;</code>
      */
     int getTotalChunks();
+
+    // optional int32 lastChunkHashCode = 8;
+    /**
+     * <code>optional int32 lastChunkHashCode = 8;</code>
+     */
+    boolean hasLastChunkHashCode();
+    /**
+     * <code>optional int32 lastChunkHashCode = 8;</code>
+     */
+    int getLastChunkHashCode();
   }
   /**
    * Protobuf type {@code org.opendaylight.controller.cluster.raft.InstallSnapshot}
@@ -170,6 +180,11 @@ public final class InstallSnapshotMessages {
             case 56: {
               bitField0_ |= 0x00000040;
               totalChunks_ = input.readInt32();
+              break;
+            }
+            case 64: {
+              bitField0_ |= 0x00000080;
+              lastChunkHashCode_ = input.readInt32();
               break;
             }
           }
@@ -351,6 +366,22 @@ public final class InstallSnapshotMessages {
       return totalChunks_;
     }
 
+    // optional int32 lastChunkHashCode = 8;
+    public static final int LASTCHUNKHASHCODE_FIELD_NUMBER = 8;
+    private int lastChunkHashCode_;
+    /**
+     * <code>optional int32 lastChunkHashCode = 8;</code>
+     */
+    public boolean hasLastChunkHashCode() {
+      return ((bitField0_ & 0x00000080) == 0x00000080);
+    }
+    /**
+     * <code>optional int32 lastChunkHashCode = 8;</code>
+     */
+    public int getLastChunkHashCode() {
+      return lastChunkHashCode_;
+    }
+
     private void initFields() {
       term_ = 0L;
       leaderId_ = "";
@@ -359,6 +390,7 @@ public final class InstallSnapshotMessages {
       data_ = com.google.protobuf.ByteString.EMPTY;
       chunkIndex_ = 0;
       totalChunks_ = 0;
+      lastChunkHashCode_ = 0;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -392,6 +424,9 @@ public final class InstallSnapshotMessages {
       }
       if (((bitField0_ & 0x00000040) == 0x00000040)) {
         output.writeInt32(7, totalChunks_);
+      }
+      if (((bitField0_ & 0x00000080) == 0x00000080)) {
+        output.writeInt32(8, lastChunkHashCode_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -429,6 +464,10 @@ public final class InstallSnapshotMessages {
       if (((bitField0_ & 0x00000040) == 0x00000040)) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(7, totalChunks_);
+      }
+      if (((bitField0_ & 0x00000080) == 0x00000080)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(8, lastChunkHashCode_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -560,6 +599,8 @@ public final class InstallSnapshotMessages {
         bitField0_ = (bitField0_ & ~0x00000020);
         totalChunks_ = 0;
         bitField0_ = (bitField0_ & ~0x00000040);
+        lastChunkHashCode_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000080);
         return this;
       }
 
@@ -616,6 +657,10 @@ public final class InstallSnapshotMessages {
           to_bitField0_ |= 0x00000040;
         }
         result.totalChunks_ = totalChunks_;
+        if (((from_bitField0_ & 0x00000080) == 0x00000080)) {
+          to_bitField0_ |= 0x00000080;
+        }
+        result.lastChunkHashCode_ = lastChunkHashCode_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -654,6 +699,9 @@ public final class InstallSnapshotMessages {
         }
         if (other.hasTotalChunks()) {
           setTotalChunks(other.getTotalChunks());
+        }
+        if (other.hasLastChunkHashCode()) {
+          setLastChunkHashCode(other.getLastChunkHashCode());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -957,6 +1005,39 @@ public final class InstallSnapshotMessages {
         return this;
       }
 
+      // optional int32 lastChunkHashCode = 8;
+      private int lastChunkHashCode_ ;
+      /**
+       * <code>optional int32 lastChunkHashCode = 8;</code>
+       */
+      public boolean hasLastChunkHashCode() {
+        return ((bitField0_ & 0x00000080) == 0x00000080);
+      }
+      /**
+       * <code>optional int32 lastChunkHashCode = 8;</code>
+       */
+      public int getLastChunkHashCode() {
+        return lastChunkHashCode_;
+      }
+      /**
+       * <code>optional int32 lastChunkHashCode = 8;</code>
+       */
+      public Builder setLastChunkHashCode(int value) {
+        bitField0_ |= 0x00000080;
+        lastChunkHashCode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 lastChunkHashCode = 8;</code>
+       */
+      public Builder clearLastChunkHashCode() {
+        bitField0_ = (bitField0_ & ~0x00000080);
+        lastChunkHashCode_ = 0;
+        onChanged();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:org.opendaylight.controller.cluster.raft.InstallSnapshot)
     }
 
@@ -983,13 +1064,14 @@ public final class InstallSnapshotMessages {
   static {
     java.lang.String[] descriptorData = {
       "\n\025InstallSnapshot.proto\022(org.opendayligh" +
-      "t.controller.cluster.raft\"\235\001\n\017InstallSna" +
+      "t.controller.cluster.raft\"\270\001\n\017InstallSna" +
       "pshot\022\014\n\004term\030\001 \001(\003\022\020\n\010leaderId\030\002 \001(\t\022\031\n" +
       "\021lastIncludedIndex\030\003 \001(\003\022\030\n\020lastIncluded" +
       "Term\030\004 \001(\003\022\014\n\004data\030\005 \001(\014\022\022\n\nchunkIndex\030\006" +
-      " \001(\005\022\023\n\013totalChunks\030\007 \001(\005BX\n;org.openday" +
-      "light.controller.protobuff.messages.clus" +
-      "ter.raftB\027InstallSnapshotMessagesH\001"
+      " \001(\005\022\023\n\013totalChunks\030\007 \001(\005\022\031\n\021lastChunkHa" +
+      "shCode\030\010 \001(\005BX\n;org.opendaylight.control" +
+      "ler.protobuff.messages.cluster.raftB\027Ins" +
+      "tallSnapshotMessagesH\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -1001,7 +1083,7 @@ public final class InstallSnapshotMessages {
           internal_static_org_opendaylight_controller_cluster_raft_InstallSnapshot_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_org_opendaylight_controller_cluster_raft_InstallSnapshot_descriptor,
-              new java.lang.String[] { "Term", "LeaderId", "LastIncludedIndex", "LastIncludedTerm", "Data", "ChunkIndex", "TotalChunks", });
+              new java.lang.String[] { "Term", "LeaderId", "LastIncludedIndex", "LastIncludedTerm", "Data", "ChunkIndex", "TotalChunks", "LastChunkHashCode", });
           return null;
         }
       };
