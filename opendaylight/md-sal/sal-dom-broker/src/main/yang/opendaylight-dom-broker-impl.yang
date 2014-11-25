@@ -1,13 +1,15 @@
 module opendaylight-sal-dom-broker-impl {
     yang-version 1;
     namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl";
-    prefix "binding-impl";
+    prefix "broker";
 
     import config { prefix config; revision-date 2013-04-05; }
+    import ietf-yang-types { prefix yang; }
     import opendaylight-md-sal-dom {prefix sal;}
     import opendaylight-md-sal-common {prefix common;}
     import opendaylight-config-dom-datastore {prefix config-dom-store-spi;}
     import opendaylight-operational-dom-datastore {prefix operational-dom-store-spi;}
+    import rpc-context { prefix rpcx; revision-date 2013-06-17; }
 
     description
         "Service definition for Binding Aware MD-SAL.
@@ -117,11 +119,65 @@ module opendaylight-sal-dom-broker-impl {
         }
     }
 
+    grouping dom-broker-operational {
+        leaf total-commits {
+            type uint64;
+        }
+
+        leaf average-commit {
+            type uint64;
+            units ns;
+        }
+
+        leaf longest-commit-duration {
+            type uint64;
+            units ns;
+        }
+
+        leaf longest-commit-timestamp {
+            type yang:date-and-time;
+        }
+
+        leaf shortest-commit-duration {
+            type uint64;
+            units ns;
+        }
+
+        leaf shortest-commit-timestamp {
+            type yang:date-and-time;
+        }
+
+        rpcx:rpc-context-instance dom-broker-rpc-ctx;
+    }
+
+    identity dom-broker-rpc-ctx;
+
+    rpc reset-statistics {
+        description
+          "JMX call to clear the toasts-made counter.";
+
+        input {
+            uses rpcx:rpc-context-ref {
+                refine context-instance {
+                    rpcx:rpc-context-instance dom-broker-rpc-ctx;
+                }
+            }
+        }
+    }
+
     augment "/config:modules/config:module/config:configuration" {
         case dom-inmemory-data-broker {
             when "/config:modules/config:module/config:type = 'dom-inmemory-data-broker'";
 
             uses dom-broker-config;
+        }
+    }
+
+    augment "/config:modules/config:module/config:state" {
+        case dom-inmemory-data-broker {
+            when "/config:modules/config:module/config:type = 'dom-inmemory-data-broker'";
+
+            uses dom-broker-operational;
         }
     }
 
