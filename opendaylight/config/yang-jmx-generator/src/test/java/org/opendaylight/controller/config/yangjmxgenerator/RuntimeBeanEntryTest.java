@@ -54,7 +54,7 @@ public class RuntimeBeanEntryTest extends AbstractYangTest {
                 .getUnknownSchemaNodes();
         Map<String, RuntimeBeanEntry> runtimeBeans = RuntimeBeanEntry
                 .extractClassNameToRuntimeBeanMap(PACKAGE_NAME, caseNode, "test-name", new TypeProviderWrapper(new
-                        TypeProviderImpl(context)), "test", jmxImplModule);
+                        TypeProviderImpl(context)), "test", jmxImplModule, context);
         assertEquals(1, runtimeBeans.size());
         RuntimeBeanEntry runtimeMXBean = runtimeBeans.get("testRuntimeMXBean");
         assertTrue(runtimeMXBean.isRoot());
