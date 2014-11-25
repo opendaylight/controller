@@ -8,6 +8,7 @@ module odl-concurrent-data-broker-cfg {
     import opendaylight-operational-dom-datastore {prefix operational-dom-store-spi;}
     import opendaylight-md-sal-dom {prefix sal; }
     import opendaylight-sal-dom-broker-impl { prefix broker; }
+    import rpc-context { prefix rpcx; revision-date 2013-06-17; }
 
     description
         "Service definition for concurrent dom broker.";
@@ -27,6 +28,14 @@ module odl-concurrent-data-broker-cfg {
             when "/config:modules/config:module/config:type = 'dom-concurrent-data-broker'";
 
             uses broker:dom-broker-config;
+        }
+    }
+
+    augment "/config:modules/config:module/config:state" {
+        case dom-concurrent-data-broker {
+            when "/config:modules/config:module/config:type = 'dom-concurrent-data-broker'";
+
+            uses broker:dom-broker-operational;
         }
     }
 }

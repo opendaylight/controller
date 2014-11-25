@@ -56,6 +56,11 @@
     </dependency>
 
     <dependency>
+        <groupId>org.opendaylight.yangtools.model</groupId>
+        <artifactId>ietf-yang-types</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
