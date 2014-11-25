@@ -12,4 +12,5 @@ message InstallSnapshot {
     optional bytes data = 5;
     optional int32 chunkIndex = 6;
     optional int32 totalChunks = 7;
+    optional int32 lastChunkHashCode = 8;
 }
