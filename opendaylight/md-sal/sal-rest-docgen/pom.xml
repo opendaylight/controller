@@ -73,6 +73,11 @@
     </dependency>
 
     <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-maven-plugin-spi</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
     </dependency>
@@ -107,8 +112,12 @@
 
           <instructions>
             <Bundle-Name>MD SAL Rest Api Doc Generator</Bundle-Name>
-            <Import-Package>*,
-              com.sun.jersey.spi.container.servlet, org.eclipse.jetty.servlets</Import-Package>
+            <Import-Package>!org.apache.maven.plugin.logging,
+              !org.apache.maven.project,
+              !org.opendaylight.yangtools.yang2sources.spi,
+              *,
+              com.sun.jersey.spi.container.servlet, org.eclipse.jetty.servlets
+            </Import-Package>
             <Bundle-Activator>org.opendaylight.controller.sal.rest.doc.DocProvider</Bundle-Activator>
             <Web-ContextPath>/apidoc</Web-ContextPath>
           </instructions>
