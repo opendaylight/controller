@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_d8a6b553",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/DefaultConfigParamsImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-26T18:59:48Z",
+      "side": 1,
+      "message": "It does not necessarily have to be 12 (because this is the RaftConfig) but probably should be initialized to something. I\u0027ll fix it.",
+      "parentUuid": "7a96c907_b84de9c6",
+      "revId": "ca86ae00038f2e65ec89659aa09c2ceccafd7cc4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_78ee818d",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-11-26T18:48:11Z",
       "side": 1,
       "message": "Shouldn\u0027t this be \u0027/\u0027 and not \u0027*\u0027?",
+      "revId": "ca86ae00038f2e65ec89659aa09c2ceccafd7cc4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_b8a96926",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 710,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-26T18:59:48Z",
+      "side": 1,
+      "message": "totalMemory \u003d 1000\npercentage \u003d 12\nthreshold \u003d 1000 * 12 / 100 \u003d 1200\n\nThis is the right formula.",
+      "parentUuid": "7a96c907_78ee818d",
       "revId": "ca86ae00038f2e65ec89659aa09c2ceccafd7cc4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
