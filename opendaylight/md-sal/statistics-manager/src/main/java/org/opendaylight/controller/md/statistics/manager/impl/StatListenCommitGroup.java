@@ -29,6 +29,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupDescStats;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupDescStatsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupFeatures;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupFeaturesBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupStatistics;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.OpendaylightGroupStatisticsListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.group.desc.GroupDescBuilder;
@@ -145,8 +146,9 @@ public class StatListenCommitGroup extends StatAbstractListenCommit<Group, Opend
             public void applyOperation(final ReadWriteTransaction tx) {
                 notifyToCollectNextStatistics(nodeIdent);
                 final GroupFeatures stats = new GroupFeaturesBuilder(notification).build();
-                final InstanceIdentifier<GroupFeatures> groupFeatureIdent = nodeIdent
-                        .augmentation(NodeGroupFeatures.class).child(GroupFeatures.class);
+                final NodeGroupFeaturesBuilder ngfBuilder = new NodeGroupFeaturesBuilder().setGroupFeatures(stats);
+                final InstanceIdentifier<NodeGroupFeatures> groupFeatureIdent = nodeIdent
+                        .augmentation(NodeGroupFeatures.class);
                 Optional<Node> node = Optional.absent();
                 try {
                     node = tx.read(LogicalDatastoreType.OPERATIONAL, nodeIdent).checkedGet();
@@ -155,7 +157,7 @@ public class StatListenCommitGroup extends StatAbstractListenCommit<Group, Opend
                     LOG.debug("Read Operational/DS for Node fail! {}", nodeIdent, e);
                 }
                 if (node.isPresent()) {
-                    tx.put(LogicalDatastoreType.OPERATIONAL, groupFeatureIdent, stats);
+                    tx.put(LogicalDatastoreType.OPERATIONAL, groupFeatureIdent, ngfBuilder.build());
                 }
             }
         });

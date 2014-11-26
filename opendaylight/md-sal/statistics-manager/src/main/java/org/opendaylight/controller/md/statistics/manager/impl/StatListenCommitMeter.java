@@ -36,6 +36,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.NodeMeterConfigStats;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.NodeMeterConfigStatsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.NodeMeterFeatures;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.NodeMeterFeaturesBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.NodeMeterStatistics;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.OpendaylightMeterStatisticsListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.nodes.node.MeterFeatures;
@@ -132,17 +133,18 @@ public class StatListenCommitMeter extends StatAbstractListenCommit<Meter, Opend
         if ( ! txContainer.isPresent()) {
             return;
         }
-        final MeterFeatures stats = new MeterFeaturesBuilder(notification).build();
         final InstanceIdentifier<Node> nodeIdent = InstanceIdentifier
                 .create(Nodes.class).child(Node.class, new NodeKey(nodeId));
-        final InstanceIdentifier<MeterFeatures> meterFeatureIdent = nodeIdent
-                .augmentation(NodeMeterFeatures.class).child(MeterFeatures.class);
 
         manager.enqueue(new StatDataStoreOperation() {
             @Override
             public void applyOperation(final ReadWriteTransaction tx) {
                 /* Notification for continue collecting statistics */
                 notifyToCollectNextStatistics(nodeIdent);
+                final MeterFeatures stats = new MeterFeaturesBuilder(notification).build();
+                final NodeMeterFeaturesBuilder nodeMeterFeaturesBuilder = new NodeMeterFeaturesBuilder().setMeterFeatures(stats);
+                final InstanceIdentifier<NodeMeterFeatures> nodeMeterFeatureIdent = nodeIdent
+                        .augmentation(NodeMeterFeatures.class);
                 Optional<Node> node = Optional.absent();
                 try {
                     node = tx.read(LogicalDatastoreType.OPERATIONAL, nodeIdent).checkedGet();
@@ -151,7 +153,7 @@ public class StatListenCommitMeter extends StatAbstractListenCommit<Meter, Opend
                     LOG.debug("Read Operational/DS for Node fail! {}", nodeIdent, e);
                 }
                 if (node.isPresent()) {
-                    tx.put(LogicalDatastoreType.OPERATIONAL, meterFeatureIdent, stats);
+                    tx.put(LogicalDatastoreType.OPERATIONAL, nodeMeterFeatureIdent, nodeMeterFeaturesBuilder.build());
                 }
             }
         });

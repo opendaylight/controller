@@ -23,6 +23,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.Fl
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionAware;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.Queue;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.QueueBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.QueueKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
@@ -137,12 +138,16 @@ public class StatListenCommitQueue extends StatAbstractListenCommit<Queue, Opend
             final FlowCapableNodeConnectorQueueStatisticsDataBuilder statBuild =
                     new FlowCapableNodeConnectorQueueStatisticsDataBuilder();
             statBuild.setFlowCapableNodeConnectorQueueStatistics(statChild);
+
             final QueueKey qKey = new QueueKey(queueEntry.getQueueId());
-            final InstanceIdentifier<FlowCapableNodeConnectorQueueStatisticsData> queueStatIdent = nodeIdent
+            QueueBuilder queueBuilder = new QueueBuilder().setKey(qKey);
+            queueBuilder.addAugmentation(FlowCapableNodeConnectorQueueStatisticsData.class, statBuild.build());
+            
+            final InstanceIdentifier<Queue> queueStatIdent = nodeIdent
                     .child(NodeConnector.class, new NodeConnectorKey(queueEntry.getNodeConnectorId()))
                     .augmentation(FlowCapableNodeConnector.class)
-                    .child(Queue.class, qKey).augmentation(FlowCapableNodeConnectorQueueStatisticsData.class);
-            trans.put(LogicalDatastoreType.OPERATIONAL, queueStatIdent, statBuild.build());
+                    .child(Queue.class, qKey);
+            trans.put(LogicalDatastoreType.OPERATIONAL, queueStatIdent, queueBuilder.build());
         }
     }
 }
