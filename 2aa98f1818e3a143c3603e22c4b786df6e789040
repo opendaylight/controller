@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_78dd2114",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/utils/MessageCollectorActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-26T18:31:27Z",
+      "side": 1,
+      "message": "I don\u0027t see this method being used. Also exposing messages unsynchronized from this class isn\u0027t safe.",
+      "revId": "2aa98f1818e3a143c3603e22c4b786df6e789040",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
