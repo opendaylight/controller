@@ -7,9 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import scala.concurrent.duration.FiniteDuration;
-
 import java.util.concurrent.TimeUnit;
+import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Default implementation of the ConfigParams
@@ -46,6 +45,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     private int journalRecoveryLogBatchSize = JOURNAL_RECOVERY_LOG_BATCH_SIZE;
     private FiniteDuration isolatedLeaderCheckInterval =
         new FiniteDuration(HEART_BEAT_INTERVAL.length() * 1000, HEART_BEAT_INTERVAL.unit());
+    private int snapshotDataThresholdPercentage;
 
     public void setHeartBeatInterval(FiniteDuration heartBeatInterval) {
         this.heartBeatInterval = heartBeatInterval;
@@ -53,6 +53,10 @@ public class DefaultConfigParamsImpl implements ConfigParams {
 
     public void setSnapshotBatchCount(long snapshotBatchCount) {
         this.snapshotBatchCount = snapshotBatchCount;
+    }
+
+    public void setSnapshotDataThresholdPercentage(int snapshotDataThresholdPercentage){
+        this.snapshotDataThresholdPercentage = snapshotDataThresholdPercentage;
     }
 
     public void setJournalRecoveryLogBatchSize(int journalRecoveryLogBatchSize) {
@@ -67,6 +71,12 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     public long getSnapshotBatchCount() {
         return snapshotBatchCount;
     }
+
+    @Override
+    public int getSnapshotDataThresholdPercentage() {
+        return snapshotDataThresholdPercentage;
+    }
+
 
     @Override
     public FiniteDuration getHeartBeatInterval() {
