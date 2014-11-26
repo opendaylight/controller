@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_3357ba04",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/test/java/org/opendaylight/controller/remote/rpc/registry/RpcRegistryTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-26T19:26:46Z",
+      "side": 1,
+      "message": "Most of the changes were to correct indentation. The actual changes are in createProbeForMessage below.",
+      "revId": "98a367ef29fe31fcb4bd226dfc52b8519567f62c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_93524e12",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/test/java/org/opendaylight/controller/remote/rpc/registry/RpcRegistryTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 211,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-26T19:26:46Z",
+      "side": 1,
+      "message": "This is the actual changes below:",
+      "revId": "98a367ef29fe31fcb4bd226dfc52b8519567f62c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
