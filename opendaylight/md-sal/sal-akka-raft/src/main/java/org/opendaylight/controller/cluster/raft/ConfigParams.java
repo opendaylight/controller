@@ -29,6 +29,14 @@ public interface ConfigParams {
     long getSnapshotBatchCount();
 
     /**
+     * The percentage of total memory in the in-memory Raft log before a snapshot
+     * is to be taken
+     *
+     * @return int
+     */
+    int getSnapshotDataThresholdPercentage();
+
+    /**
      * The interval at which a heart beat message will be sent to the remote
      * RaftActor
      *

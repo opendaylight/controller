@@ -9,13 +9,12 @@
 package org.opendaylight.controller.cluster.example.messages;
 
 import com.google.protobuf.GeneratedMessage;
-import org.opendaylight.controller.protobuff.messages.cluster.example.KeyValueMessages;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
-import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
-
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
+import org.opendaylight.controller.protobuff.messages.cluster.example.KeyValueMessages;
+import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
 
 public class KeyValue extends Payload implements Serializable {
     private String key;
@@ -68,6 +67,11 @@ public class KeyValue extends Payload implements Serializable {
         this.setKey(key);
         this.setValue(value);
         return this;
+    }
+
+    @Override
+    public int size() {
+        return this.value.length() + this.key.length();
     }
 
 }

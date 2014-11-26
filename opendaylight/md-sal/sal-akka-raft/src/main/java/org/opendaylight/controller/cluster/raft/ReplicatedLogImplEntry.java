@@ -8,9 +8,8 @@
 
 package org.opendaylight.controller.cluster.raft;
 
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
-
 import java.io.Serializable;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 
 public class ReplicatedLogImplEntry implements ReplicatedLogEntry,
     Serializable {
@@ -36,6 +35,11 @@ public class ReplicatedLogImplEntry implements ReplicatedLogEntry,
 
     @Override public long getIndex() {
         return index;
+    }
+
+    @Override
+    public int size() {
+        return getData().size();
     }
 
     @Override public String toString() {

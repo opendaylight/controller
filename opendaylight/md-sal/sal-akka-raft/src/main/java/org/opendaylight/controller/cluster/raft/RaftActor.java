@@ -667,6 +667,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 @Override public void apply(DeleteEntries param)
                     throws Exception {
                     //FIXME : Doing nothing for now
+                    dataSize = 0;
+                    for(ReplicatedLogEntry entry : journal){
+                        dataSize += entry.size();
+                    }
                 }
             });
         }
@@ -674,6 +678,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         @Override public void appendAndPersist(
             final ReplicatedLogEntry replicatedLogEntry) {
             appendAndPersist(null, null, replicatedLogEntry);
+        }
+
+        @Override
+        public int dataSize() {
+            return dataSize;
         }
 
         public void appendAndPersist(final ActorRef clientActor,
@@ -696,9 +705,15 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 new Procedure<ReplicatedLogEntry>() {
                     @Override
                     public void apply(ReplicatedLogEntry evt) throws Exception {
+                        dataSize += replicatedLogEntry.size();
+
+                        long dataThreshold = Runtime.getRuntime().totalMemory() *
+                                getRaftActorContext().getConfigParams().getSnapshotDataThresholdPercentage() / 100;
+
                         // when a snaphsot is being taken, captureSnapshot != null
                         if (hasSnapshotCaptureInitiated == false &&
-                            journal.size() % context.getConfigParams().getSnapshotBatchCount() == 0) {
+                                ( journal.size() % context.getConfigParams().getSnapshotBatchCount() == 0 ||
+                                        dataSize > dataThreshold)) {
 
                             LOG.info("Initiating Snapshot Capture..");
                             long lastAppliedIndex = -1;

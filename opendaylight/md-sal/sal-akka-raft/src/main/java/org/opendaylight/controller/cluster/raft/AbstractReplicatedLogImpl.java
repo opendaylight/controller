@@ -26,6 +26,7 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     protected ArrayList<ReplicatedLogEntry> snapshottedJournal;
     protected long previousSnapshotIndex = -1;
     protected long previousSnapshotTerm = -1;
+    protected int dataSize = 0;
 
     public AbstractReplicatedLogImpl(long snapshotIndex,
         long snapshotTerm, List<ReplicatedLogEntry> unAppliedEntries) {
@@ -198,6 +199,7 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
         snapshottedJournal = null;
         previousSnapshotIndex = -1;
         previousSnapshotTerm = -1;
+        dataSize = 0;
     }
 
     @Override

@@ -12,12 +12,11 @@ import com.google.common.base.Preconditions;
 import com.google.protobuf.GeneratedMessage;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.UnknownFieldSet;
-import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
-import org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages;
-
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
+import org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages;
 
 public class CompositeModificationPayload extends Payload implements
     Serializable {
@@ -71,5 +70,9 @@ public class CompositeModificationPayload extends Payload implements
 
     public Object getModification(){
         return this.modification;
+    }
+
+    public int size(){
+        return this.modification.getSerializedSize();
     }
 }

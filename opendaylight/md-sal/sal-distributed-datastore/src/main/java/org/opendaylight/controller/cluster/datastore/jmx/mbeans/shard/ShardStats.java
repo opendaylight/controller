@@ -66,6 +66,8 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     private QueuedNotificationManagerMXBeanImpl notificationManagerStatsBean;
 
+    private volatile long dataSize = 0;
+
     private final SimpleDateFormat sdf =
         new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
@@ -224,6 +226,15 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     public void setLastCommittedTransactionTime(long lastCommittedTransactionTime) {
         this.lastCommittedTransactionTime = lastCommittedTransactionTime;
+    }
+
+    public void setDataSize(long dataSize){
+        this.dataSize = dataSize;
+    }
+
+    @Override
+    public long getDataSize(){
+        return dataSize;
     }
 
     @Override
