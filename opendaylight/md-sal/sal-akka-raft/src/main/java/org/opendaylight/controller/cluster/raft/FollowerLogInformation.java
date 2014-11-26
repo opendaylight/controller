@@ -72,5 +72,10 @@ public interface FollowerLogInformation {
      */
     public void markFollowerActive();
 
+    /**
+     * This will stop the timeout clock
+     */
+    public void markFollowerInActive();
+
 
 }
