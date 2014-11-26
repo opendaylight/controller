@@ -34,6 +34,24 @@
       "revId": "2aa98f1818e3a143c3603e22c4b786df6e789040",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_d38c5682",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/utils/MessageCollectorActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-26T19:35:13Z",
+      "side": 1,
+      "message": "It had to be placed in src not commons.",
+      "parentUuid": "7a96c907_38e8f97b",
+      "revId": "2aa98f1818e3a143c3603e22c4b786df6e789040",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
