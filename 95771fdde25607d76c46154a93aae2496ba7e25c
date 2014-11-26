@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_d34a16ac",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-26T20:41:52Z",
+      "side": 1,
+      "message": "Ideally i think the all of install snapshot code should reside in Leader, as an isolated leader should not install a snapshot. Or should it?",
+      "revId": "95771fdde25607d76c46154a93aae2496ba7e25c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_b34d0ac7",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-26T20:41:52Z",
+      "side": 1,
+      "message": "Do we need to check for snapshotChunksCollected\u003dempty. Cant we keep a log of the last chunkIndex received and do a match with the incoming chunk index.\n\nThis could possibly take care of scenario as follows:\n If a follower is recieving snapshot chunks from a leader, and the leader dies. \nA new election happens , in which the follower does not participate. \nSo the snapshotChunksCollected may not be empty and it would never reset, even if the new leader tries to start a install snapshot.",
+      "revId": "95771fdde25607d76c46154a93aae2496ba7e25c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_13ff1e36",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 643,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-26T20:41:52Z",
+      "side": 1,
+      "message": "Didnt understand the reason for this large snapshot for testing.\n\nIs this because the snapshot chunk size is 2MB by default?\n\nIn that case cant we overide the snapshot chunksize as done in other test methods \nactorContext.setConfigParams(new DefaultConfigParamsImpl() {\n            @Override\n            public int getSnapshotChunkSize() {\n                return 50;\n            }\n        });",
+      "revId": "95771fdde25607d76c46154a93aae2496ba7e25c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
