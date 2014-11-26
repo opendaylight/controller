@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_253c4d2f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-26T22:17:47Z",
+      "side": 1,
+      "message": "An Isolated leader does not stop replicating when isolated - thus it should be capable of installing a snapshot.",
+      "parentUuid": "7a96c907_d34a16ac",
+      "revId": "95771fdde25607d76c46154a93aae2496ba7e25c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_b34d0ac7",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_0554b152",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-26T22:17:47Z",
+      "side": 1,
+      "message": "I think this goes into a different condition. What should we do when we receive a chunk that we have already received? We may need to track other things like which was the leader installing the snapshot etc for a more holistic solution",
+      "parentUuid": "7a96c907_b34d0ac7",
+      "revId": "95771fdde25607d76c46154a93aae2496ba7e25c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_13ff1e36",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
         "patchSetId": 3
@@ -47,6 +83,24 @@
       "writtenOn": "2014-11-26T20:41:52Z",
       "side": 1,
       "message": "Didnt understand the reason for this large snapshot for testing.\n\nIs this because the snapshot chunk size is 2MB by default?\n\nIn that case cant we overide the snapshot chunksize as done in other test methods \nactorContext.setConfigParams(new DefaultConfigParamsImpl() {\n            @Override\n            public int getSnapshotChunkSize() {\n                return 50;\n            }\n        });",
+      "revId": "95771fdde25607d76c46154a93aae2496ba7e25c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_2551ad62",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 643,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-26T22:17:47Z",
+      "side": 1,
+      "message": "Yes I should probably do that :)",
+      "parentUuid": "7a96c907_13ff1e36",
       "revId": "95771fdde25607d76c46154a93aae2496ba7e25c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
