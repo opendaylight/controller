@@ -123,6 +123,24 @@
       "revId": "ca86ae00038f2e65ec89659aa09c2ceccafd7cc4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_e58f45cb",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 710,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-11-26T22:59:52Z",
+      "side": 1,
+      "message": "totalMemory is the amount currently reserved but not necessarily in use yet. To get amount of used memory, it\u0027s totalMemory - freeMemory. I think that\u0027s what we want?",
+      "parentUuid": "7a96c907_7304627e",
+      "revId": "ca86ae00038f2e65ec89659aa09c2ceccafd7cc4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
