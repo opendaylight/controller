@@ -171,4 +171,9 @@ public interface ReplicatedLog {
      * Restores the replicated log to a state in the event of a save snapshot failure
      */
     public void snapshotRollback();
+
+    /**
+     * Size of the data in the log (in bytes)
+     */
+    public int dataSize();
 }

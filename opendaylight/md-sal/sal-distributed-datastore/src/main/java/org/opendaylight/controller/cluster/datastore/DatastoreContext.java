@@ -8,16 +8,15 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
+import akka.util.Timeout;
+import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationReader;
 import org.opendaylight.controller.cluster.datastore.config.FileConfigurationReader;
 import org.opendaylight.controller.cluster.raft.ConfigParams;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
-import akka.util.Timeout;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * Contains contextual data for a data store.
@@ -120,6 +119,7 @@ public class DatastoreContext {
         private boolean persistent = true;
         private ConfigurationReader configurationReader = new FileConfigurationReader();
         private int shardIsolatedLeaderCheckIntervalInMillis = shardHeartbeatIntervalInMillis * 10;
+        private int shardSnapshotDataThresholdPercentage = 12;
 
         public Builder shardTransactionIdleTimeout(Duration shardTransactionIdleTimeout) {
             this.shardTransactionIdleTimeout = shardTransactionIdleTimeout;
@@ -156,6 +156,12 @@ public class DatastoreContext {
             return this;
         }
 
+        public Builder shardSnapshotDataThresholdPercentage(int shardSnapshotDataThresholdPercentage) {
+            this.shardSnapshotDataThresholdPercentage = shardSnapshotDataThresholdPercentage;
+            return this;
+        }
+
+
         public Builder shardHeartbeatIntervalInMillis(int shardHeartbeatIntervalInMillis) {
             this.shardHeartbeatIntervalInMillis = shardHeartbeatIntervalInMillis;
             return this;
@@ -191,12 +197,14 @@ public class DatastoreContext {
             return this;
         }
 
+
         public DatastoreContext build() {
             DefaultConfigParamsImpl raftConfig = new DefaultConfigParamsImpl();
             raftConfig.setHeartBeatInterval(new FiniteDuration(shardHeartbeatIntervalInMillis,
                     TimeUnit.MILLISECONDS));
             raftConfig.setJournalRecoveryLogBatchSize(shardJournalRecoveryLogBatchSize);
             raftConfig.setSnapshotBatchCount(shardSnapshotBatchCount);
+            raftConfig.setSnapshotDataThresholdPercentage(shardSnapshotDataThresholdPercentage);
             raftConfig.setIsolatedLeaderCheckInterval(
                 new FiniteDuration(shardIsolatedLeaderCheckIntervalInMillis, TimeUnit.MILLISECONDS));
 

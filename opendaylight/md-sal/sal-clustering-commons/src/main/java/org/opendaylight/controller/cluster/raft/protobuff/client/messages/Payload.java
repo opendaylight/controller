@@ -10,9 +10,8 @@ package org.opendaylight.controller.cluster.raft.protobuff.client.messages;
 
 
 import com.google.protobuf.GeneratedMessage;
-import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
-
 import java.util.Map;
+import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
 
 /**
  * An instance of a Payload class is meant to be used as the Payload for
@@ -80,6 +79,8 @@ public abstract class Payload {
      */
     public abstract Payload decode(
         AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Payload payload);
+
+    public abstract int size();
 
 
 
