@@ -80,7 +80,7 @@ public class ExampleActor extends RaftActor {
         } else if (message instanceof PrintRole) {
             if(LOG.isDebugEnabled()) {
                 String followers = "";
-                if (getRaftState() == RaftState.Leader) {
+                if (getRaftState() == RaftState.Leader || getRaftState() == RaftState.IsolatedLeader) {
                     followers = ((Leader)this.getCurrentBehavior()).printFollowerStates();
                     LOG.debug("{} = {}, Peers={}, followers={}", getId(), getRaftState(), getPeers(), followers);
                 } else {
