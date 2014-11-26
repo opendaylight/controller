@@ -69,6 +69,24 @@
       "revId": "ca86ae00038f2e65ec89659aa09c2ceccafd7cc4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_73b6a2de",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 710,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-11-26T20:09:35Z",
+      "side": 1,
+      "message": "threshold should be equal to 120. Sorry about the confusion :)",
+      "parentUuid": "7a96c907_b8a96926",
+      "revId": "ca86ae00038f2e65ec89659aa09c2ceccafd7cc4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
