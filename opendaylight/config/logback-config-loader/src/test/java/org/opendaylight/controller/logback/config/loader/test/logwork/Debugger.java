@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Debugger {
 
-    private static Logger LOG = LoggerFactory.getLogger(Debugger.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Debugger.class);
 
     /**
      * all logging

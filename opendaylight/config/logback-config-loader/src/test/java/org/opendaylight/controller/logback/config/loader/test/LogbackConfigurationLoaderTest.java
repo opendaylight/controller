@@ -10,7 +10,6 @@ package org.opendaylight.controller.logback.config.loader.test;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,7 +32,7 @@ public class LogbackConfigurationLoaderTest {
 
     /** logback config root */
     private static final String LOGBACK_D = "/logback.d";
-    private static Logger LOG = LoggerFactory
+    private static final Logger LOG = LoggerFactory
             .getLogger(LogbackConfigurationLoaderTest.class);
 
     /**
