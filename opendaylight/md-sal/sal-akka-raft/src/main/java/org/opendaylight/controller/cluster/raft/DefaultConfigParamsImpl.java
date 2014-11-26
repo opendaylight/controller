@@ -7,9 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import scala.concurrent.duration.FiniteDuration;
-
 import java.util.concurrent.TimeUnit;
+import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Default implementation of the ConfigParams
@@ -47,12 +46,20 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     private FiniteDuration isolatedLeaderCheckInterval =
         new FiniteDuration(HEART_BEAT_INTERVAL.length() * 1000, HEART_BEAT_INTERVAL.unit());
 
+    // 12 is just an arbitrary percentage. This is the amount of the total memory that a raft actor's
+    // in-memory journal can use before it needs to snapshot
+    private int snapshotDataThresholdPercentage = 12;
+
     public void setHeartBeatInterval(FiniteDuration heartBeatInterval) {
         this.heartBeatInterval = heartBeatInterval;
     }
 
     public void setSnapshotBatchCount(long snapshotBatchCount) {
         this.snapshotBatchCount = snapshotBatchCount;
+    }
+
+    public void setSnapshotDataThresholdPercentage(int snapshotDataThresholdPercentage){
+        this.snapshotDataThresholdPercentage = snapshotDataThresholdPercentage;
     }
 
     public void setJournalRecoveryLogBatchSize(int journalRecoveryLogBatchSize) {
@@ -67,6 +74,12 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     public long getSnapshotBatchCount() {
         return snapshotBatchCount;
     }
+
+    @Override
+    public int getSnapshotDataThresholdPercentage() {
+        return snapshotDataThresholdPercentage;
+    }
+
 
     @Override
     public FiniteDuration getHeartBeatInterval() {

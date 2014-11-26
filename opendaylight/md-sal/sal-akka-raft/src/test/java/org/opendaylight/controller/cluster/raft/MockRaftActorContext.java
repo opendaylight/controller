@@ -16,13 +16,12 @@ import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import com.google.common.base.Preconditions;
 import com.google.protobuf.GeneratedMessage;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
-import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
-import org.opendaylight.controller.protobuff.messages.cluster.raft.test.MockPayloadMessages;
-
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
+import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
+import org.opendaylight.controller.protobuff.messages.cluster.raft.test.MockPayloadMessages;
 
 public class MockRaftActorContext implements RaftActorContext {
 
@@ -192,6 +191,11 @@ public class MockRaftActorContext implements RaftActorContext {
             append(replicatedLogEntry);
         }
 
+        @Override
+        public int dataSize() {
+            return -1;
+        }
+
         @Override public void removeFromAndPersist(long index) {
             removeFrom(index);
         }
@@ -220,6 +224,11 @@ public class MockRaftActorContext implements RaftActorContext {
             String value = payloadProtoBuff.getExtension(MockPayloadMessages.value);
             this.value = value;
             return this;
+        }
+
+        @Override
+        public int size() {
+            return value.length();
         }
 
         @Override public String getClientPayloadClassName() {
@@ -255,6 +264,11 @@ public class MockRaftActorContext implements RaftActorContext {
 
         @Override public long getIndex() {
             return index;
+        }
+
+        @Override
+        public int size() {
+            return getData().size();
         }
     }
 

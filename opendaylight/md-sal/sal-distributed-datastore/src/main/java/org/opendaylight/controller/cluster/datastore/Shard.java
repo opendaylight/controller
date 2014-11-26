@@ -771,6 +771,7 @@ public class Shard extends RaftActor {
 
         shardMBean.setCommitIndex(getCommitIndex());
         shardMBean.setLastApplied(getLastApplied());
+        shardMBean.setDataSize(getRaftActorContext().getReplicatedLog().dataSize());
     }
 
     @Override

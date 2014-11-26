@@ -54,6 +54,12 @@ module distributed-datastore-provider {
         }
     }
 
+    typedef percentage {
+        type uint8 {
+            range "0..100";
+        }
+    }
+
     grouping data-store-properties {
         leaf max-shard-data-change-executor-queue-size {
             default 1000;
@@ -88,8 +94,15 @@ module distributed-datastore-provider {
          leaf shard-snapshot-batch-count {
             default 20000;
             type non-zero-uint32-type;
-            description "The minimum number of entries to be present in the in-memory journal log before a snapshot to be taken.";
+            description "The minimum number of entries to be present in the in-memory journal log before a snapshot is to be taken.";
          }
+
+         leaf shard-snapshot-data-threshold-percentage {
+            default 12;
+            type percentage;
+            description "The percentage of Runtime.totalMemory() used by the in-memory journal log before a snapshot is to be taken";
+         }
+
 
          leaf shard-hearbeat-interval-in-millis {
             default 500;

@@ -34,4 +34,13 @@ public interface ReplicatedLogEntry {
      * @return
      */
     long getIndex();
+
+    /**
+     * The size of the entry in bytes.
+     *
+     * An approximate number may be good enough.
+     *
+     * @return
+     */
+    int size();
 }

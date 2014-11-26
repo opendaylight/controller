@@ -164,6 +164,11 @@ public class AbstractReplicatedLogImplTest {
             this.snapshotTerm = snapshotTerm;
         }
 
+        @Override
+        public int dataSize() {
+            return -1;
+        }
+
         public List<ReplicatedLogEntry> getEntriesTill(final int index) {
             return journal.subList(0, index);
         }
