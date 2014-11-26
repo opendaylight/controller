@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_d37d36b3",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/notifications/ShardRoleChangeNotification.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-26T20:50:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a91bd0f_e65426cc",
+      "revId": "03175cce5dde8abd0e729d7f7954776040921fa4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a91bd0f_06526add",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardRoleChangeNotifier.java",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2014-11-24T15:44:22Z",
       "side": 1,
       "message": "Similar to ShardRoleChangeNotification, it seems this class is generic and not shard-specific. My suggestion is to drop the Shard prefix and move to \"cluster.notifications\".",
+      "revId": "03175cce5dde8abd0e729d7f7954776040921fa4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_734a2285",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardRoleChangeNotifier.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-11-26T20:50:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a91bd0f_06526add",
       "revId": "03175cce5dde8abd0e729d7f7954776040921fa4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
