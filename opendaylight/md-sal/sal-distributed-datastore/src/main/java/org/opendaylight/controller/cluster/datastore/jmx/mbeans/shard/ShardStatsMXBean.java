@@ -51,4 +51,6 @@ public interface ShardStatsMXBean {
    int getMaxNotificationMgrListenerQueueSize();
 
    void resetTransactionCounters();
+
+   long getDataSize();
 }

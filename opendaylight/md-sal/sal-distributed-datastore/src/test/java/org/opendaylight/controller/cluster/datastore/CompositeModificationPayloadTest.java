@@ -1,5 +1,11 @@
 package org.opendaylight.controller.cluster.datastore;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
@@ -12,13 +18,6 @@ import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payloa
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class CompositeModificationPayloadTest {
 
@@ -59,6 +58,11 @@ public class CompositeModificationPayloadTest {
 
             @Override public long getIndex() {
                 return 1;
+            }
+
+            @Override
+            public int size() {
+                return getData().size();
             }
         });
 
