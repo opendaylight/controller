@@ -212,7 +212,7 @@ public class NeutronLoadBalancerPoolNorthbound {
                     }
                 }
             }
-            loadBalancerPoolInterface.addNeutronLoadBalancerPool(singleton);
+//            loadBalancerPoolInterface.addNeutronLoadBalancerPool(singleton);
             if (instances != null) {
                 for (Object instance : instances) {
                     INeutronLoadBalancerPoolAware service = (INeutronLoadBalancerPoolAware) instance;
