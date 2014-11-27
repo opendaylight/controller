@@ -185,6 +185,10 @@ public class NetconfDeviceSimulator implements Closeable {
         final PEMGeneratorHostKeyProvider keyPairProvider = getPemGeneratorHostKeyProvider();
 
         for (int i = 0; i < params.deviceCount; i++) {
+            if (currentPort > 65535) {
+                LOG.warn("Port cannot be greater than 65535, stopping further attempts.");
+                break;
+            }
             final InetSocketAddress address = getAddress(currentPort);
 
             final ChannelFuture server;
@@ -242,6 +246,8 @@ public class NetconfDeviceSimulator implements Closeable {
 
         if(openDevices.size() == params.deviceCount) {
             LOG.info("All simulated devices started successfully from port {} to {}", params.startingPort, currentPort - 1);
+        } else if (openDevices.size() == 0) {
+            LOG.warn("No simulated devices started.");
         } else {
             LOG.warn("Not all simulated devices started successfully. Started devices ar on ports {}", openDevices);
         }

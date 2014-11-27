@@ -147,7 +147,7 @@ public final class Main {
 
         void validate() {
             checkArgument(deviceCount > 0, "Device count has to be > 0");
-            checkArgument(startingPort > 1024, "Starting port has to be > 1024");
+            checkArgument(startingPort > 1023, "Starting port has to be > 1023");
 
             if(schemasDir != null) {
                 checkArgument(schemasDir.exists(), "Schemas dir has to exist");
@@ -167,6 +167,10 @@ public final class Main {
         final NetconfDeviceSimulator netconfDeviceSimulator = new NetconfDeviceSimulator();
         try {
             final List<Integer> openDevices = netconfDeviceSimulator.start(params);
+            if (openDevices.size() == 0) {
+                LOG.error("Failed to start any simulated devices, exiting...");
+                System.exit(1);
+            }
             if(params.distroFolder != null) {
                 final ConfigGenerator configGenerator = new ConfigGenerator(params.distroFolder, openDevices);
                 final List<File> generated = configGenerator.generate(params.ssh, params.generateConfigBatchSize, params.generateConfigsTimeout, params.generateConfigsAddress);
