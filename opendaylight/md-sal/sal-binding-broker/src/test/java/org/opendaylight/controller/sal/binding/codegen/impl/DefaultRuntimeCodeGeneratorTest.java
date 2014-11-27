@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.sal.binding.test;
+package org.opendaylight.controller.sal.binding.codegen.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -13,17 +13,14 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import javassist.ClassPool;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcRouter;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcRoutingTable;
-import org.opendaylight.controller.sal.binding.codegen.impl.RuntimeCodeGenerator;
+import org.opendaylight.controller.sal.binding.codegen.RuntimeCodeGenerator;
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory;
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory.NotificationInvoker;
 import org.opendaylight.controller.sal.binding.test.mock.BarListener;
@@ -41,14 +38,14 @@ import org.opendaylight.yangtools.yang.binding.DataContainer;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-public class RuntimeCodeGeneratorTest {
+public class DefaultRuntimeCodeGeneratorTest {
 
     private RuntimeCodeGenerator codeGenerator;
     private NotificationInvokerFactory invokerFactory;
 
     @Before
     public void initialize() {
-        this.codeGenerator = new RuntimeCodeGenerator(ClassPool.getDefault());
+        this.codeGenerator = new DefaultRuntimeCodeGenerator(ClassPool.getDefault());
         this.invokerFactory = codeGenerator.getInvokerFactory();
     }
 
