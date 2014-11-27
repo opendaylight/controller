@@ -86,6 +86,7 @@
 
     <!-- Clustering -->
     <module>sal-remoterpc-connector</module>
+    <module>operational-status-service-api</module>
   </modules>
 
   <build>

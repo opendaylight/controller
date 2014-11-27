@@ -1,0 +1,41 @@
+module operational-status {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:operational-status";
+    prefix "operational-status";
+
+    description
+        "Service interface for switching module's operational status.";
+
+    revision "2014-11-27" {
+        description
+            "Initial revision";
+    }
+
+    typedef oper-status {
+        type enumeration {
+            enum STANDBY {
+                description "go to stand by mode";
+            }
+            enum RUN {
+                description "go to fully operational mode";
+            }
+        }
+    }
+    rpc change-operational-status {
+        input {
+            leaf operational-status {
+                type oper-status;
+                description "Change operational status of LLDP speaker.";
+            }
+         }
+    }
+    rpc get-operational-status {
+        output {
+            leaf operational-status {
+                type oper-status;
+                description "Change operational status of LLDP speaker.";
+            }
+         }
+    }
+
+}
