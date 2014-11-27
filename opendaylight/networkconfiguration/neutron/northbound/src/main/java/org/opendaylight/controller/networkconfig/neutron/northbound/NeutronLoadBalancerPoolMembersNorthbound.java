@@ -197,11 +197,13 @@ public Response createLoadBalancerPoolMember(
         /*
          *  Verify that the LoadBalancerPoolMember doesn't already exist.
          */
-        List<NeutronLoadBalancerPoolMember> members = singletonPool.getLoadBalancerPoolMembers();
-        for (NeutronLoadBalancerPoolMember member: members) {
-            if (member.getPoolMemberID().equals(loadBalancerPoolMemberUUID))
-                throw new BadRequestException("LoadBalancerPoolMember UUID already exists");
-        }
+        if (singletonPool.getLoadBalancerPoolMembers()!=null) {
+            List<NeutronLoadBalancerPoolMember> members = singletonPool.getLoadBalancerPoolMembers();
+            for (NeutronLoadBalancerPoolMember member: members) {
+                if (member.getPoolMemberID().equals(loadBalancerPoolMemberUUID))
+                    throw new BadRequestException("LoadBalancerPoolMember UUID already exists");
+            }
+            }
 
         Object[] instances = ServiceHelper.getGlobalInstances(INeutronLoadBalancerPoolMemberAware.class, this, null);
         if (instances != null) {
