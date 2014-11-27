@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_48cad0a2",
+        "filename": "opendaylight/md-sal/statistics-manager/src/main/java/org/opendaylight/controller/md/statistics/manager/impl/StatListenCommitGroup.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2014-11-27T09:38:23Z",
+      "side": 1,
+      "message": "We should remove this condition, because after this patch statistics manager won\u0027t send group feature request periodically. Group feature request will be sent only once by openflowplugin when switch will connect to the controller. If we won\u0027t remove this condition, response for those request won\u0027t be entertained by statistics manager and we won\u0027t see group features in the operational data store.",
+      "range": {
+        "startLine": 150,
+        "startChar": 1,
+        "endLine": 153,
+        "endChar": 9
+      },
+      "revId": "9bb2cb2a94e9d6872530754f1f7bd0754ba0e1bf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_a8d59444",
+        "filename": "opendaylight/md-sal/statistics-manager/src/main/java/org/opendaylight/controller/md/statistics/manager/impl/StatListenCommitMeter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2014-11-27T09:38:23Z",
+      "side": 1,
+      "message": "We should remove this condition, because after this patch statistics manager won\u0027t send meter feature request periodically. Meter feature request will be sent only once by openflowplugin when switch will connect to the controller. If we won\u0027t remove this condition, response for those request won\u0027t be entertained by statistics manager and we won\u0027t see meter features in the operational data store.",
+      "range": {
+        "startLine": 150,
+        "startChar": 0,
+        "endLine": 153,
+        "endChar": 9
+      },
+      "revId": "9bb2cb2a94e9d6872530754f1f7bd0754ba0e1bf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
