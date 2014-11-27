@@ -1,6 +1,7 @@
 package org.opendaylight.controller.config.yang.md.sal.statistics_manager;
 
 import org.opendaylight.controller.md.statistics.manager.StatisticsManager;
+import org.opendaylight.controller.md.statistics.manager.impl.SMOperationalStatusService;
 import org.opendaylight.controller.md.statistics.manager.impl.StatisticsManagerConfig;
 import org.opendaylight.controller.md.statistics.manager.impl.StatisticsManagerImpl;
 import org.slf4j.Logger;
@@ -33,6 +34,9 @@ public class StatisticsManagerModule extends org.opendaylight.controller.config.
         StatisticsManagerConfig config = createConfig();
         statisticsManagerProvider = new StatisticsManagerImpl(getDataBrokerDependency(), config);
         statisticsManagerProvider.start(getNotificationServiceDependency(), getRpcRegistryDependency());
+        SMOperationalStatusService smOperationalStatusService = new SMOperationalStatusService(statisticsManagerProvider);
+        getRpcRegistryDependency().addRpcImplementation(SMOperationalStatusService.class, smOperationalStatusService);
+
         LOG.info("StatisticsManager started successfully.");
         return new AutoCloseable() {
             @Override

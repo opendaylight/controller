@@ -25,6 +25,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.groups.Group;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.OpendaylightMeterStatisticsListener;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.operational.status.rev141127.OperStatus;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.OpendaylightPortStatisticsListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.OpendaylightQueueStatisticsListener;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -187,6 +188,20 @@ public interface StatisticsManager extends AutoCloseable, TransactionChainListen
     StatNotifyCommiter<OpendaylightPortStatisticsListener> getPortNotifyCommit();
 
     StatisticsManagerConfig getConfiguration();
+    /**
+     * Method provides current operational status of statistics manager.
+     *
+     * @return {@link org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.operational.status.rev141127.OperStatus}
+     */
+    public OperStatus getOperationalStatus();
+
+    /**
+     * Method sets operational status for statistics manager.
+     *
+     * @param operationalStatus
+     */
+    public void setOperationalStatus(OperStatus operationalStatus);
+
 
 }
 
