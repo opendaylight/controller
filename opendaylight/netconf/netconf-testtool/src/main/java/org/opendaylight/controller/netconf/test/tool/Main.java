@@ -147,7 +147,7 @@ public final class Main {
 
         void validate() {
             checkArgument(deviceCount > 0, "Device count has to be > 0");
-            checkArgument(startingPort > 1024, "Starting port has to be > 1024");
+            checkArgument(startingPort > 1023, "Starting port has to be > 1023");
 
             if(schemasDir != null) {
                 checkArgument(schemasDir.exists(), "Schemas dir has to exist");
