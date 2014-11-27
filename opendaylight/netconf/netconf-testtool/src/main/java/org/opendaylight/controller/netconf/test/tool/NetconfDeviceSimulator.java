@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
+import java.net.BindException;
 import java.net.Inet4Address;
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -197,14 +198,17 @@ public class NetconfDeviceSimulator implements Closeable {
                     final SshProxyServer sshServer = new SshProxyServer(minaTimerExecutor, nettyThreadgroup, nioExecutor);
                     sshServer.bind(getSshConfiguration(bindingAddress, tcpLocalAddress));
                     sshWrappers.add(sshServer);
-                } catch (final Exception e) {
-                    LOG.warn("Cannot start simulated device on {}, skipping", address, e);
+                } catch (final BindException e) {
+                    LOG.warn("Cannot start simulated device on {}, port already in use. Skipping.", address);
                     // Close local server and continue
                     server.cancel(true);
                     if(server.isDone()) {
                         server.channel().close();
                     }
                     continue;
+                } catch (final IOException e) {
+                    LOG.warn("Cannot start simulated device on {} due to IOException.", address, e);
+                    break;
                 } finally {
                     currentPort++;
                 }
