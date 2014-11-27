@@ -207,7 +207,6 @@
     <usermanager.version>0.5.0-SNAPSHOT</usermanager.version>
     <nsf.version>0.5.0-SNAPSHOT</nsf.version>
     <web.version>0.5.0-SNAPSHOT</web.version>
-    <xtend.dstdir>src/main/xtend-gen</xtend.dstdir>
     <yang-ext.version>2013.09.07.7-SNAPSHOT</yang-ext.version>
     <yang-jmx-generator.version>1.1.0-SNAPSHOT</yang-jmx-generator.version>
     <yangtools.version>0.7.0-SNAPSHOT</yangtools.version>
@@ -751,11 +750,6 @@
       </dependency>
 
       <!-- md-sal -->
-      <dependency>
-        <groupId>org.eclipse.xtend</groupId>
-        <artifactId>org.eclipse.xtend.lib</artifactId>
-        <version>${xtend.version}</version>
-      </dependency>
       <dependency>
         <groupId>org.glassfish.jersey.test-framework.providers</groupId>
         <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
@@ -1637,12 +1631,6 @@
           <configuration>
             <filesets>
               <fileset>
-                <directory>${xtend.dstdir}</directory>
-                <includes>
-                  <include>**</include>
-                </includes>
-              </fileset>
-              <fileset>
                 <directory>${jmxGeneratorPath}</directory>
                 <includes>
                   <include>**</include>
@@ -1755,7 +1743,6 @@
                   <source>src/main/yang</source>
                   <source>${jmxGeneratorPath}</source>
                   <source>${salGeneratorPath}</source>
-                  <source>${xtend.dstdir}</source>
                 </sources>
               </configuration>
             </execution>
@@ -1898,21 +1885,6 @@
           </configuration>
         </plugin>
         <plugin>
-          <groupId>org.eclipse.xtend</groupId>
-          <artifactId>xtend-maven-plugin</artifactId>
-          <version>${xtend.version}</version>
-          <executions>
-            <execution>
-              <goals>
-                <goal>compile</goal>
-              </goals>
-              <configuration>
-                <outputDirectory>${xtend.dstdir}</outputDirectory>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
-        <plugin>
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
           <version>${jacoco.version}</version>
@@ -1972,7 +1944,7 @@
           <includeTestSourceDirectory>true</includeTestSourceDirectory>
           <sourceDirectory>${project.basedir}</sourceDirectory>
           <includes>**\/*.java,**\/*.xml,**\/*.ini,**\/*.sh,**\/*.bat</includes>
-          <excludes>**\/target\/,**\/bin\/,**\/target-ide\/,**\/${jmxGeneratorPath}\/,**\/${salGeneratorPath}\/,**\/xtend-gen\/,**\/protobuff\/</excludes>
+          <excludes>**\/target\/,**\/bin\/,**\/target-ide\/,**\/${jmxGeneratorPath}\/,**\/${salGeneratorPath}\/,**\/protobuff\/</excludes>
         </configuration>
         <dependencies>
           <dependency>
