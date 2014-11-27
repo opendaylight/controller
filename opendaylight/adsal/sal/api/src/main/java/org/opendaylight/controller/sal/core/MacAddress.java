@@ -63,7 +63,7 @@ public class MacAddress extends Property implements Cloneable {
      */
     public MacAddress(String nodeMacAddress) {
         super(name);
-        this.address = nodeMacAddress;
+        this.address = nodeMacAddress.toUpperCase();
     }
 
     /**
