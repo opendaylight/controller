@@ -8,10 +8,11 @@
 
 package org.opendaylight.controller.md.statistics.manager;
 
+import com.google.common.base.Optional;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
-
+import org.opendaylight.controller.md.statistics.manager.impl.TaskRunManager;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionAware;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
@@ -20,12 +21,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.table.types.rev131026.Table
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
-import com.google.common.base.Optional;
-
 /**
  * statistics-manager
  * org.opendaylight.controller.md.statistics.manager
- *
+ * <p/>
  * StatRpcMsgManager
  * It represent access point for Device statistics RPC services which are
  * filtered for needed methods only and they are wrapped in simply way.
@@ -34,12 +33,13 @@ import com.google.common.base.Optional;
  * stack to listener when listener catch the last Multipart msg.
  *
  * @author <a href="mailto:vdemcak@cisco.com">Vaclav Demcak</a>
- *
- * Created: Aug 29, 2014
+ *         <p/>
+ *         Created: Aug 29, 2014
  */
-public interface StatRpcMsgManager extends Runnable, AutoCloseable {
+public interface StatRpcMsgManager extends TaskRunManager, Runnable, AutoCloseable {
 
-    interface RpcJobsQueue extends Callable<Void> {}
+    interface RpcJobsQueue extends Callable<Void> {
+    }
 
     /**
      * Transaction container is definition for Multipart transaction
@@ -186,6 +186,7 @@ public interface StatRpcMsgManager extends Runnable, AutoCloseable {
      * @param NodeRef nodeRef
      */
     void getAllQueueStat(NodeRef nodeRef);
+
 
 }
 

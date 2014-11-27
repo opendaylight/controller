@@ -8,13 +8,20 @@
 
 package org.opendaylight.controller.md.statistics.manager.impl;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.JdkFutureAdapters;
+import com.google.common.util.concurrent.SettableFuture;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-
 import org.opendaylight.controller.md.statistics.manager.StatRpcMsgManager;
 import org.opendaylight.controller.md.statistics.manager.StatisticsManager;
 import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
@@ -49,24 +56,15 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.JdkFutureAdapters;
-import com.google.common.util.concurrent.SettableFuture;
-
 
 /**
  * statistics-manager
  * org.opendaylight.controller.md.statistics.manager.impl
- *
+ * <p/>
  * StatRpcMsgManagerImpl
  * Class register and provide all RPC Statistics Device Services and implement pre-defined
  * wrapped methods for prepare easy access to RPC Statistics Device Services like getAllStatisticsFor...
- *
+ * <p/>
  * In next Class implement process for joining multipart messages.
  * Class internally use two WeakHashMap and GuavaCache for holding values for joining multipart msg.
  * One Weak map is used for holding all Multipart Messages and second is used for possible input
@@ -74,7 +72,6 @@ import com.google.common.util.concurrent.SettableFuture;
  * TableId, GroupId, MeterId or for flow Match, Priority, FlowCookie, TableId and FlowId ...
  *
  * @author avishnoi@in.ibm.com <a href="mailto:vdemcak@cisco.com">Vaclav Demcak</a>
- *
  */
 public class StatRpcMsgManagerImpl implements StatRpcMsgManager {
 
@@ -93,11 +90,12 @@ public class StatRpcMsgManagerImpl implements StatRpcMsgManager {
     private final OpendaylightQueueStatisticsService queueStatsService;
 
     private BlockingQueue<RpcJobsQueue> statsRpcJobQueue;
+    private boolean sleep = false;
 
     private volatile boolean finishing = false;
 
-    public StatRpcMsgManagerImpl (final StatisticsManager manager,
-            final RpcConsumerRegistry rpcRegistry, final long minReqNetMonitInt) {
+    public StatRpcMsgManagerImpl(final StatisticsManager manager,
+                                 final RpcConsumerRegistry rpcRegistry, final long minReqNetMonitInt) {
         Preconditions.checkArgument(manager != null, "StatisticManager can not be null!");
         Preconditions.checkArgument(rpcRegistry != null, "RpcConsumerRegistry can not be null !");
         groupStatsService = Preconditions.checkNotNull(
@@ -133,30 +131,39 @@ public class StatRpcMsgManagerImpl implements StatRpcMsgManager {
     @Override
     public void run() {
          /* Neverending cyle - wait for finishing */
-        while ( ! finishing) {
+        while (!finishing) {
+            while (sleep) {
+                synchronized (this) {
+                    try {
+                        wait();
+                    } catch (InterruptedException e) {
+                        LOG.debug("Can't sleep {}", e.getMessage());
+                    }
+                }
+            }
             try {
                 statsRpcJobQueue.take().call();
-            }
-            catch (final Exception e) {
+            } catch (final Exception e) {
                 LOG.warn("Stat Element RPC executor fail!", e);
             }
+
         }
         // Drain all rpcCall, making sure any blocked threads are unblocked
-        while ( ! statsRpcJobQueue.isEmpty()) {
+        while (!statsRpcJobQueue.isEmpty()) {
             statsRpcJobQueue.poll();
         }
     }
 
     private void addGetAllStatJob(final RpcJobsQueue getAllStatJob) {
         final boolean success = statsRpcJobQueue.offer(getAllStatJob);
-        if ( ! success) {
+        if (!success) {
             LOG.warn("Put RPC request getAllStat fail! Queue is full.");
         }
     }
 
     private void addStatJob(final RpcJobsQueue getStatJob) {
         final boolean success = statsRpcJobQueue.offer(getStatJob);
-        if ( ! success) {
+        if (!success) {
             LOG.debug("Put RPC request for getStat fail! Queue is full.");
         }
     }
@@ -168,26 +175,26 @@ public class StatRpcMsgManagerImpl implements StatRpcMsgManager {
         Futures.addCallback(JdkFutureAdapters.listenInPoolThread(future),
                 new FutureCallback<RpcResult<? extends TransactionAware>>() {
 
-            @Override
-            public void onSuccess(final RpcResult<? extends TransactionAware> result) {
-                final TransactionId id = result.getResult().getTransactionId();
-                if (id == null) {
-                    LOG.warn("No protocol support");
-                } else {
-                    final NodeKey nodeKey = nodeRef.getValue().firstKeyOf(Node.class, NodeKey.class);
-                    final String cacheKey = buildCacheKey(id, nodeKey.getId());
-                    final TransactionCacheContainer<? super TransactionAware> container =
-                            new TransactionCacheContainerImpl<>(id, inputObj, nodeKey.getId());
-                    txCache.put(cacheKey, container);
-                }
-            }
+                    @Override
+                    public void onSuccess(final RpcResult<? extends TransactionAware> result) {
+                        final TransactionId id = result.getResult().getTransactionId();
+                        if (id == null) {
+                            LOG.warn("No protocol support");
+                        } else {
+                            final NodeKey nodeKey = nodeRef.getValue().firstKeyOf(Node.class, NodeKey.class);
+                            final String cacheKey = buildCacheKey(id, nodeKey.getId());
+                            final TransactionCacheContainer<? super TransactionAware> container =
+                                    new TransactionCacheContainerImpl<>(id, inputObj, nodeKey.getId());
+                            txCache.put(cacheKey, container);
+                        }
+                    }
 
-            @Override
-            public void onFailure(final Throwable t) {
-                LOG.warn("Response Registration for Statistics RPC call fail!", t);
-            }
+                    @Override
+                    public void onFailure(final Throwable t) {
+                        LOG.warn("Response Registration for Statistics RPC call fail!", t);
+                    }
 
-        });
+                });
     }
 
     private String buildCacheKey(final TransactionId id, final NodeId nodeId) {
@@ -208,7 +215,7 @@ public class StatRpcMsgManagerImpl implements StatRpcMsgManager {
             @Override
             public Void call() throws Exception {
                 final Optional<TransactionCacheContainer<?>> resultContainer =
-                        Optional.<TransactionCacheContainer<?>> fromNullable(txCache.getIfPresent(key));
+                        Optional.<TransactionCacheContainer<?>>fromNullable(txCache.getIfPresent(key));
                 if (resultContainer.isPresent()) {
                     txCache.invalidate(key);
                 }
@@ -233,7 +240,7 @@ public class StatRpcMsgManagerImpl implements StatRpcMsgManager {
             @Override
             public Void call() throws Exception {
                 final Optional<TransactionCacheContainer<?>> result =
-                        Optional.<TransactionCacheContainer<?>> fromNullable(txCache.getIfPresent(key));
+                        Optional.<TransactionCacheContainer<?>>fromNullable(txCache.getIfPresent(key));
                 checkStatId.set(Boolean.valueOf(result.isPresent()));
                 return null;
             }
@@ -396,6 +403,21 @@ public class StatRpcMsgManagerImpl implements StatRpcMsgManager {
     }
 
     @Override
+    public void sleep() {
+        sleep = true;
+    }
+
+    @Override
+    public void wakeUp() {
+        if (sleep) {
+            synchronized (this) {
+                sleep = false;
+                notify();
+            }
+        }
+    }
+
+    @Override
     public void getAllMeterConfigStat(final NodeRef nodeRef) {
         Preconditions.checkArgument(nodeRef != null, "NodeRef can not be null!");
         final RpcJobsQueue qetAllMeterConfStat = new RpcJobsQueue() {
@@ -473,7 +495,7 @@ public class StatRpcMsgManagerImpl implements StatRpcMsgManager {
         private final List<T> notifications;
         private final Optional<? extends DataObject> confInput;
 
-        public <D extends DataObject> TransactionCacheContainerImpl (final TransactionId id, final D input, final NodeId nodeId) {
+        public <D extends DataObject> TransactionCacheContainerImpl(final TransactionId id, final D input, final NodeId nodeId) {
             this.id = Preconditions.checkNotNull(id, "TransactionId can not be null!");
             notifications = new CopyOnWriteArrayList<T>();
             confInput = Optional.fromNullable(input);

@@ -9,11 +9,11 @@
 package org.opendaylight.controller.md.statistics.manager;
 
 import java.util.List;
-
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.statistics.manager.StatPermCollector.StatCapabTypes;
 import org.opendaylight.controller.md.statistics.manager.impl.StatisticsManagerConfig;
+import org.opendaylight.controller.md.statistics.manager.impl.TaskRunManager;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.Meter;
@@ -32,7 +32,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 /**
  * statistics-manager
  * org.opendaylight.controller.md.statistics.manager
- *
+ * <p/>
  * StatisticsManager
  * It represent a central point for whole module. Implementation
  * StatisticsManager registers all Operation/DS {@link StatNotifyCommiter} and
@@ -41,10 +41,10 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
  * In next, StatisticsManager provides all DS contact Transaction services.
  *
  * @author <a href="mailto:vdemcak@cisco.com">Vaclav Demcak</a>
- *
- * Created: Aug 27, 2014
+ *         <p/>
+ *         Created: Aug 27, 2014
  */
-public interface StatisticsManager extends AutoCloseable, TransactionChainListener {
+public interface StatisticsManager extends TaskRunManager, AutoCloseable, TransactionChainListener {
 
     /**
      * StatDataStoreOperation
@@ -57,6 +57,7 @@ public interface StatisticsManager extends AutoCloseable, TransactionChainListen
         /**
          * Apply all read / write (put|merge) operation
          * for DataStore
+         *
          * @param {@link ReadWriteTransaction} tx
          */
         void applyOperation(ReadWriteTransaction tx);
@@ -66,12 +67,12 @@ public interface StatisticsManager extends AutoCloseable, TransactionChainListen
     /**
      * Method starts whole StatisticManager functionality
      *
-     * @param {@link NotificationProviderService} notifService
-     * @param {@link RpcConsumerRegistry} rpcRegistry
+     * @param {@link            NotificationProviderService} notifService
+     * @param {@link            RpcConsumerRegistry} rpcRegistry
      * @param minReqNetMonitInt
      */
     void start(final NotificationProviderService notifService,
-            final RpcConsumerRegistry rpcRegistry);
+               final RpcConsumerRegistry rpcRegistry);
 
     /**
      * Method provides read/write DataStore functionality cross applyOperation
@@ -88,47 +89,47 @@ public interface StatisticsManager extends AutoCloseable, TransactionChainListen
      *
      * @param nodeIdent
      */
-     boolean isProvidedFlowNodeActive(InstanceIdentifier<Node> nodeIdent);
+    boolean isProvidedFlowNodeActive(InstanceIdentifier<Node> nodeIdent);
 
-     /**
-      * Method wraps {@link StatPermCollector}.collectNextStatistics to provide
-      * parallel statCollection process for Set of Nodes. So it has to
-      * identify correct Node Set by NodeIdentifier.
-      *
-      * @param nodeIdent
-      */
-     void collectNextStatistics(InstanceIdentifier<Node> nodeIdent);
+    /**
+     * Method wraps {@link StatPermCollector}.collectNextStatistics to provide
+     * parallel statCollection process for Set of Nodes. So it has to
+     * identify correct Node Set by NodeIdentifier.
+     *
+     * @param nodeIdent
+     */
+    void collectNextStatistics(InstanceIdentifier<Node> nodeIdent);
 
-     /**
-      * Method wraps {@link StatPermCollector}.connectedNodeRegistration to provide
-      * parallel statCollection process for Set of Nodes. So it has to
-      * connect node to new or not full Node statCollector Set.
-      *
-      * @param nodeIdent
-      * @param statTypes
-      * @param nrOfSwitchTables
-      */
-     void connectedNodeRegistration(InstanceIdentifier<Node> nodeIdent,
-             List<StatCapabTypes> statTypes, Short nrOfSwitchTables);
+    /**
+     * Method wraps {@link StatPermCollector}.connectedNodeRegistration to provide
+     * parallel statCollection process for Set of Nodes. So it has to
+     * connect node to new or not full Node statCollector Set.
+     *
+     * @param nodeIdent
+     * @param statTypes
+     * @param nrOfSwitchTables
+     */
+    void connectedNodeRegistration(InstanceIdentifier<Node> nodeIdent,
+                                   List<StatCapabTypes> statTypes, Short nrOfSwitchTables);
 
-     /**
-      * Method wraps {@link StatPermCollector}.disconnectedNodeUnregistration to provide
-      * parallel statCollection process for Set of Nodes. So it has to identify
-      * correct collector for disconnect node.
-      *
-      * @param nodeIdent
-      */
-     void disconnectedNodeUnregistration(InstanceIdentifier<Node> nodeIdent);
+    /**
+     * Method wraps {@link StatPermCollector}.disconnectedNodeUnregistration to provide
+     * parallel statCollection process for Set of Nodes. So it has to identify
+     * correct collector for disconnect node.
+     *
+     * @param nodeIdent
+     */
+    void disconnectedNodeUnregistration(InstanceIdentifier<Node> nodeIdent);
 
-     /**
-      * Method wraps {@link StatPermCollector}.registerAdditionalNodeFeature to provide
-      * possibility to register additional Node Feature {@link StatCapabTypes} for
-      * statistics collecting.
-      *
-      * @param nodeIdent
-      * @param statCapab
-      */
-     void registerAdditionalNodeFeature(InstanceIdentifier<Node> nodeIdent, StatCapabTypes statCapab);
+    /**
+     * Method wraps {@link StatPermCollector}.registerAdditionalNodeFeature to provide
+     * possibility to register additional Node Feature {@link StatCapabTypes} for
+     * statistics collecting.
+     *
+     * @param nodeIdent
+     * @param statCapab
+     */
+    void registerAdditionalNodeFeature(InstanceIdentifier<Node> nodeIdent, StatCapabTypes statCapab);
 
     /**
      * Method provides access to Device RPC methods by wrapped
@@ -143,6 +144,7 @@ public interface StatisticsManager extends AutoCloseable, TransactionChainListen
     /**
      * Define Method : {@link org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode}
      * Operational/DS data change listener -> impl. target -> register FlowCapableNode to Statistic Collecting process
+     *
      * @return {@link StatNodeRegistration}
      */
     StatNodeRegistration getNodeRegistrator();
@@ -150,6 +152,7 @@ public interface StatisticsManager extends AutoCloseable, TransactionChainListen
     /**
      * Define Method : Flow Config/DS data change listener -> impl. target ->
      * -> make pair between Config/DS FlowId and Device Flow response Hash
+     *
      * @return
      */
     StatListeningCommiter<Flow, OpendaylightFlowStatisticsListener> getFlowListenComit();
@@ -157,6 +160,7 @@ public interface StatisticsManager extends AutoCloseable, TransactionChainListen
     /**
      * Define Method : Meter Config/DS data change listener and Operation/DS notify commit
      * functionality
+     *
      * @return
      */
     StatListeningCommiter<Meter, OpendaylightMeterStatisticsListener> getMeterListenCommit();
@@ -164,29 +168,34 @@ public interface StatisticsManager extends AutoCloseable, TransactionChainListen
     /**
      * Define Method : Group Config/DS data change listener and Operation/DS notify commit
      * functionality
+     *
      * @return
      */
     StatListeningCommiter<Group, OpendaylightGroupStatisticsListener> getGroupListenCommit();
 
     /**
      * Define Method : Queue Config/DS change listener and Operation/DS notify commit functionality
+     *
      * @return
      */
     StatListeningCommiter<Queue, OpendaylightQueueStatisticsListener> getQueueNotifyCommit();
 
     /**
      * Define Method : Table Operation/DS notify commit functionality
+     *
      * @return
      */
     StatNotifyCommiter<OpendaylightFlowTableStatisticsListener> getTableNotifCommit();
 
     /**
      * Define Method : Port Operation/DS notify commit functionality
+     *
      * @return
      */
     StatNotifyCommiter<OpendaylightPortStatisticsListener> getPortNotifyCommit();
 
     StatisticsManagerConfig getConfiguration();
+
 
 }
 

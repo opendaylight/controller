@@ -6,6 +6,7 @@ module statistics-manager {
 
     import config { prefix config; revision-date 2013-04-05; }
     import opendaylight-md-sal-binding { prefix mdsal; revision-date 2013-10-28; }
+    import rpc-context { prefix rpcx; revision-date 2013-06-17; }
 
     description
         "This module contains the base YANG definitions for
@@ -20,7 +21,16 @@ module statistics-manager {
             base config:module-type;
             config:java-name-prefix StatisticsManager;
     }
-
+    typedef oper-status {
+        type enumeration {
+            enum STANDBY {
+                description "go to stand by mode";
+            }
+            enum RUN {
+                description "go to fully operational mode";
+            }
+        }
+    }
     augment "/config:modules/config:module/config:configuration" {
         case statistics-manager {
             when "/config:modules/config:module/config:type = 'statistics-manager'";
@@ -61,6 +71,22 @@ module statistics-manager {
                 }
             }
         }
+    }
+    rpc change-operational-status {
+        input {
+            leaf operational-status {
+                type oper-status;
+                description "Change operational status of statistics manager.";
+            }
+         }
+    }
+    rpc get-operational-status {
+        output {
+            leaf operational-status {
+                type oper-status;
+                description "Change operational status of statistics manager.";
+            }
+         }
     }
 
 }
