@@ -18,7 +18,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,18 +27,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import org.junit.Test;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
-import org.opendaylight.yangtools.yang.data.api.Node;
-import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.api.schema.AnyXmlNode;
 import org.opendaylight.yangtools.yang.data.api.schema.AugmentationNode;
 import org.opendaylight.yangtools.yang.data.api.schema.ChoiceNode;
@@ -146,6 +144,16 @@ public class DataNormalizerTest {
 
         verifyNormalizedInstanceIdentifier(normalizedPath, TEST_QNAME, OUTER_LIST_QNAME, new Object[] {
                 OUTER_LIST_QNAME, ID_QNAME, OUTER_LIST_ID }, OUTER_CHOICE_QNAME, TWO_QNAME);
+
+
+        //following part tests case when target node is nested in more then one choices
+        final QName innerChoiceQName = QName.create(TEST_QNAME, "inner-choice");
+        final QName choiceInChoiceQName = QName.create(TEST_QNAME, "choice-in-choice");
+        final YangInstanceIdentifier legacyII = YangInstanceIdentifier.builder(OUTER_LIST_PATH_LEGACY)
+                .node(choiceInChoiceQName).build();
+        final YangInstanceIdentifier normalizedChoiceInChoice = normalizer.toNormalized(legacyII);
+        verifyNormalizedInstanceIdentifier(normalizedChoiceInChoice, TEST_QNAME, OUTER_LIST_QNAME, new Object[] {
+                OUTER_LIST_QNAME, ID_QNAME, OUTER_LIST_ID }, OUTER_CHOICE_QNAME, innerChoiceQName, choiceInChoiceQName);
     }
 
     private void verifyNormalizedInstanceIdentifier(final YangInstanceIdentifier actual, final Object... expPath) {
