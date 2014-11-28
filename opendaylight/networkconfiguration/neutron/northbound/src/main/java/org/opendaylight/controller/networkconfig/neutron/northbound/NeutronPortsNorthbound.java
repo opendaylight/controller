@@ -219,7 +219,7 @@ public class NeutronPortsNorthbound {
                 throw new BadRequestException("network UUID musy be specified");
             }
             if (portInterface.portExists(singleton.getID())) {
-                throw new BadRequestException("port UUID already exists");
+                throw new ResourceConflictException("port UUID already exists");
             }
             if (!networkInterface.networkExists(singleton.getNetworkUUID())) {
                 throw new ResourceNotFoundException("network UUID does not exist.");
@@ -297,10 +297,10 @@ public class NeutronPortsNorthbound {
                  * can't already contain a new port with the same UUID
                  */
                 if (portInterface.portExists(test.getID())) {
-                    throw new BadRequestException("port UUID already exists");
+                    throw new ResourceConflictException("port UUID already exists");
                 }
                 if (testMap.containsKey(test.getID())) {
-                    throw new BadRequestException("port UUID already exists");
+                    throw new ResourceConflictException("port UUID already exists");
                 }
                 for (NeutronPort check : testMap.values()) {
                     if (test.getMacAddress().equalsIgnoreCase(check.getMacAddress())) {
