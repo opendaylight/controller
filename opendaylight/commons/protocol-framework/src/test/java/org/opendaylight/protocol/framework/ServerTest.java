@@ -251,7 +251,7 @@ public class ServerTest {
     }
 
     @Test
-    public void testNegotiationFailedNoReconnect() throws Exception {
+    public void testNegotiationFailedReconnect() throws Exception {
         final Promise<Boolean> p = new DefaultPromise<>(GlobalEventExecutor.INSTANCE);
 
         this.dispatcher = getServerDispatcher(p);
@@ -292,8 +292,8 @@ public class ServerTest {
                 });
 
 
-        // Only one strategy should be created for initial connect, no more = no reconnects
-        verify(reconnectStrategyFactory, times(1)).createReconnectStrategy();
+        // Reconnect strategy should be consulted at least twice, for initial connect and reconnect attempts after drop
+        verify(reconnectStrategyFactory, timeout((int) TimeUnit.MINUTES.toMillis(3)).atLeast(2)).createReconnectStrategy();
     }
 
     private SimpleDispatcher getClientDispatcher() {

@@ -80,7 +80,7 @@ final class ReconnectPromise<S extends ProtocolSession<?>, L extends SessionList
 
     /**
      * Channel handler that responds to channelInactive event and reconnects the session.
-     * Only if the initial connection was successfully established and promise was not canceled.
+     * Only if the promise was not canceled.
      */
     private static final class ClosedChannelHandler extends ChannelInboundHandlerAdapter {
         private final ReconnectPromise<?, ?> promise;
