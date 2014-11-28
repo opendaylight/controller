@@ -81,59 +81,39 @@ public class XSQLBluePrintRelation implements Serializable {
     }
 
     public List<?> execute(Object o) {
-        List<Object> result = new LinkedList<>();
         if (o == null) {
             return null;
         }
 
-        if (Set.class.isAssignableFrom(o.getClass())) {
-            Set<?> lst = (Set<?>) o;
-            for (Object oo : lst) {
+        List<Object> result = new LinkedList<>();
+        if (o instanceof Set) {
+            for (Object oo : (Set<?>) o) {
                 addToResult(result, execute(oo));
             }
-            return result;
-        } else if (List.class.isAssignableFrom(o.getClass())) {
-            List<?> lst = (List<?>) o;
-            for (Object oo : lst) {
+        } else if (o instanceof List) {
+            for (Object oo : (List<?>) o) {
                 addToResult(result, execute(oo));
             }
-            return result;
-        } else if (Map.class.isAssignableFrom(o.getClass())) {
-            Map<?, ?> map = (Map<?, ?>) o;
-            for (Object oo : map.values()) {
+        } else if (o instanceof Map) {
+            for (Object oo : ((Map<?, ?>) o).values()) {
                 addToResult(result, execute(oo));
             }
-            return result;
+        } else {
+            addToResult(result, XSQLCriteria.getValue(o, this.property));
         }
-
-        addToResult(result, XSQLCriteria.getValue(o, this.property));
-
         return result;
     }
 
     private static void addToResult(List<Object> result, Object o) {
-        if (o == null) {
-            return;
-        }
-        if (Set.class.isAssignableFrom(o.getClass())) {
-            Set<?> lst = (Set<?>) o;
-            for (Object oo : lst) {
-                result.add(oo);
-            }
-        } else if (List.class.isAssignableFrom(o.getClass())) {
-            List<?> lst = (List<?>) o;
-            for (Object oo : lst) {
-                result.add(oo);
-            }
-        } else if (Map.class.isAssignableFrom(o.getClass())) {
-            Map<?, ?> map = (Map<?, ?>) o;
-            for (Object oo : map.values()) {
-                result.add(oo);
-            }
-        } else {
+        if (o instanceof Set) {
+            result.addAll((Set<?>)o);
+        } else if (o instanceof List) {
+            result.addAll((List<?>)o);
+        } else if (o instanceof Map) {
+            result.addAll(((Map<?, ?>)o).values());
+        } else if (o != null) {
             result.add(o);
         }
     }
-
 }
 
