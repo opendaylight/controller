@@ -22,12 +22,21 @@ import org.opendaylight.controller.netconf.cli.io.ConsoleIO;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfigurationBuilder;
 import org.opendaylight.controller.sal.connect.netconf.NetconfDevice;
+import org.opendaylight.controller.sal.connect.netconf.NetconfDevice.SchemaResourcesDTO;
+import org.opendaylight.controller.sal.connect.netconf.NetconfStateSchemas.NetconfStateSchemasResolverImpl;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfDeviceCommunicator;
+import org.opendaylight.controller.sal.connect.netconf.schema.mapping.NetconfMessageTransformer;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
+import org.opendaylight.yangtools.yang.model.repo.api.SchemaContextFactory;
+import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceFilter;
+import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
+import org.opendaylight.yangtools.yang.model.repo.util.FilesystemSchemaSourceCache;
 import org.opendaylight.yangtools.yang.model.util.repo.AbstractCachingSchemaSourceProvider;
 import org.opendaylight.yangtools.yang.model.util.repo.FilesystemSchemaCachingProvider;
 import org.opendaylight.yangtools.yang.model.util.repo.SchemaSourceProvider;
 import org.opendaylight.yangtools.yang.model.util.repo.SchemaSourceProviders;
+import org.opendaylight.yangtools.yang.parser.repo.SharedSchemaRepository;
+import org.opendaylight.yangtools.yang.parser.util.TextToASTTransformer;
 
 /**
  * Manages connect/disconnect to 1 remote device
@@ -41,6 +50,8 @@ public class NetconfDeviceConnectionManager implements Closeable {
     private final ExecutorService executor;
     private final NioEventLoopGroup nettyThreadGroup;
     private final NetconfClientDispatcherImpl netconfClientDispatcher;
+
+    private static final String CACHE = "cache/schema";
 
     // Connection
     private NetconfDeviceConnectionHandler handler;
@@ -70,7 +81,15 @@ public class NetconfDeviceConnectionManager implements Closeable {
 
         handler = new NetconfDeviceConnectionHandler(commandDispatcher, schemaContextRegistry,
                 console, name);
-        device = NetconfDevice.createNetconfDevice(deviceId, getGlobalNetconfSchemaProvider(), executor, handler);
+
+        final SharedSchemaRepository repository = new SharedSchemaRepository("repo");
+        final SchemaContextFactory schemaContextFactory = repository.createSchemaContextFactory(SchemaSourceFilter.ALWAYS_ACCEPT);
+        final FilesystemSchemaSourceCache<YangTextSchemaSource> cache = new FilesystemSchemaSourceCache<>(repository, YangTextSchemaSource.class, new File(CACHE));
+        repository.registerSchemaSourceListener(cache);
+        repository.registerSchemaSourceListener(TextToASTTransformer.create(repository, repository));
+
+        device = new NetconfDevice(new SchemaResourcesDTO(repository, schemaContextFactory, new NetconfStateSchemasResolverImpl()),
+                deviceId, handler, executor, new NetconfMessageTransformer());
         listener = new NetconfDeviceCommunicator(deviceId, device);
         configBuilder.withSessionListener(listener);
         listener.initializeRemoteConnection(netconfClientDispatcher, configBuilder.build());
