@@ -136,7 +136,6 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
         logger.trace("SSH subsystem channel opened successfully on channel: {}", ctx.channel());
 
         connectPromise.setSuccess();
-        connectPromise = null;
 
         sshReadAsyncListener = new AsyncSshHanderReader(this, ctx, channel.getAsyncOut());
         // if readAsyncListener receives immediate close, it will close this handler and closing this handler sets channel variable to null
@@ -148,9 +147,12 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
 
     private synchronized void handleSshSetupFailure(final ChannelHandlerContext ctx, final Throwable e) {
         logger.warn("Unable to setup SSH connection on channel: {}", ctx.channel(), e);
-        connectPromise.setFailure(e);
-        connectPromise = null;
-        throw new IllegalStateException("Unable to setup SSH connection on channel: " + ctx.channel(), e);
+        disconnect(ctx, ctx.newPromise());
+
+        // If the promise is not yet done, we have failed with initial connect and set connectPromise to failure
+        if(!connectPromise.isDone()) {
+            connectPromise.setFailure(e);
+        }
     }
 
     @Override
@@ -171,6 +173,15 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
 
     @Override
     public synchronized void disconnect(final ChannelHandlerContext ctx, final ChannelPromise promise) {
+        // Super disconnect is necessary in this case since we are using NioSocketChannel and it needs to cleanup its resources
+        // e.g. Socket that it tries to open in its constructor (https://bugs.opendaylight.org/show_bug.cgi?id=2430)
+        // TODO better solution would be to implement custom ChannelFactory + Channel that will use mina SSH lib internally: port this to custom channel implementation
+        try {
+            super.disconnect(ctx, ctx.newPromise());
+        } catch (final Exception e) {
+            logger.warn("Unable to cleanup all resources for channel: {}. Ignoring.", ctx.channel(), e);
+        }
+
         if(sshReadAsyncListener != null) {
             sshReadAsyncListener.close();
         }
@@ -191,11 +202,15 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
             });
         }
 
-        channel = null;
-        promise.setSuccess();
+        // If we have already succeeded and the session was dropped after, we need to fire inactive to notify reconnect logic
+        if(connectPromise.isSuccess()) {
+            ctx.fireChannelInactive();
+        }
 
+        channel = null;
+
+        promise.setSuccess();
         logger.debug("SSH session closed on channel: {}", ctx.channel());
-        ctx.fireChannelInactive();
     }
 
 }

@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.netconf.nettyutil.handler.ssh.client;
 
-import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyObject;
@@ -18,14 +17,24 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
+import io.netty.channel.DefaultChannelPromise;
 import java.io.IOException;
 import java.net.SocketAddress;
-
 import org.apache.sshd.ClientChannel;
 import org.apache.sshd.ClientSession;
 import org.apache.sshd.SshClient;
@@ -51,17 +60,6 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.AuthenticationHandler;
-
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
-
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
 
 public class AsyncSshHandlerTest {
 
@@ -146,6 +144,7 @@ public class AsyncSshHandlerTest {
         doReturn(ctx).when(ctx).fireChannelActive();
         doReturn(ctx).when(ctx).fireChannelInactive();
         doReturn(ctx).when(ctx).fireChannelRead(anyObject());
+        doReturn(mock(ChannelFuture.class)).when(ctx).disconnect(any(ChannelPromise.class));
         doReturn(getMockedPromise()).when(ctx).newPromise();
     }
 
@@ -182,7 +181,6 @@ public class AsyncSshHandlerTest {
         verify(subsystemChannel).setStreaming(ClientChannel.Streaming.Async);
 
         verify(promise).setSuccess();
-        verifyNoMoreInteractions(promise);
         verify(ctx).fireChannelActive();
     }
 
@@ -534,14 +532,8 @@ public class AsyncSshHandlerTest {
 
         verify(subsystemChannel).setStreaming(ClientChannel.Streaming.Async);
 
-        try {
-            sshChannelOpenListener.operationComplete(getFailedOpenFuture());
-            fail("Exception expected");
-        } catch (final Exception e) {
-            verify(promise).setFailure(any(Throwable.class));
-            verifyNoMoreInteractions(promise);
-            // TODO should ctx.channelInactive be called if we throw exception ?
-        }
+        sshChannelOpenListener.operationComplete(getFailedOpenFuture());
+        verify(promise).setFailure(any(Throwable.class));
     }
 
     @Test
@@ -556,14 +548,8 @@ public class AsyncSshHandlerTest {
 
         final AuthFuture authFuture = getFailedAuthFuture();
 
-        try {
-            sshAuthListener.operationComplete(authFuture);
-            fail("Exception expected");
-        } catch (final Exception e) {
-            verify(promise).setFailure(any(Throwable.class));
-            verifyNoMoreInteractions(promise);
-            // TODO should ctx.channelInactive be called ?
-        }
+        sshAuthListener.operationComplete(authFuture);
+        verify(promise).setFailure(any(Throwable.class));
     }
 
     private AuthFuture getFailedAuthFuture() {
@@ -585,14 +571,8 @@ public class AsyncSshHandlerTest {
         asyncSshHandler.connect(ctx, remoteAddress, localAddress, promise);
 
         final ConnectFuture connectFuture = getFailedConnectFuture();
-        try {
-            sshConnectListener.operationComplete(connectFuture);
-            fail("Exception expected");
-        } catch (final Exception e) {
-            verify(promise).setFailure(any(Throwable.class));
-            verifyNoMoreInteractions(promise);
-            // TODO should ctx.channelInactive be called ?
-        }
+        sshConnectListener.operationComplete(connectFuture);
+        verify(promise).setFailure(any(Throwable.class));
     }
 
     private ConnectFuture getFailedConnectFuture() {
@@ -603,10 +583,7 @@ public class AsyncSshHandlerTest {
     }
 
     private ChannelPromise getMockedPromise() {
-        final ChannelPromise promise = mock(ChannelPromise.class);
-        doReturn(promise).when(promise).setSuccess();
-        doReturn(promise).when(promise).setFailure(any(Throwable.class));
-        return promise;
+        return spy(new DefaultChannelPromise(channel));
     }
 
     private static abstract class SuccessFutureListener<T extends SshFuture<T>> implements FutureCallback<SshFutureListener<T>> {
