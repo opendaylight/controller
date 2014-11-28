@@ -11,6 +11,8 @@ import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import java.util.ArrayList;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -449,15 +451,20 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
         private final ImmutableMap<QName, DataNormalizationOperation<?>> byQName;
         private final ImmutableMap<PathArgument, DataNormalizationOperation<?>> byArg;
+        private final List<ChoiceNodeNormalization> choiceChildren;
 
-        protected ChoiceNodeNormalization(final ChoiceSchemaNode schema) {
-            super(new NodeIdentifier(schema.getQName()),schema);
+        protected ChoiceNodeNormalization(final org.opendaylight.yangtools.yang.model.api.ChoiceSchemaNode schema) {
+            super(new NodeIdentifier(schema.getQName()), schema);
             ImmutableMap.Builder<QName, DataNormalizationOperation<?>> byQNameBuilder = ImmutableMap.builder();
             ImmutableMap.Builder<PathArgument, DataNormalizationOperation<?>> byArgBuilder = ImmutableMap.builder();
+            choiceChildren = new ArrayList<>();
 
             for (ChoiceCaseNode caze : schema.getCases()) {
                 for (DataSchemaNode cazeChild : caze.getChildNodes()) {
                     DataNormalizationOperation<?> childOp = fromDataSchemaNode(cazeChild);
+                    if (childOp instanceof ChoiceNodeNormalization) {
+                        choiceChildren.add((ChoiceNodeNormalization) childOp);
+                    }
                     byArgBuilder.put(childOp.getIdentifier(), childOp);
                     for (QName qname : childOp.getQNameIdentifiers()) {
                         byQNameBuilder.put(qname, childOp);
@@ -470,12 +477,27 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
         @Override
         public DataNormalizationOperation<?> getChild(final PathArgument child) {
-            return byArg.get(child);
+            final DataNormalizationOperation<?> dataNormalizationOperation = byArg.get(child);
+            return dataNormalizationOperation == null ? searchForNormalizationOperationInChoices(child.getNodeType())
+                    : dataNormalizationOperation;
         }
 
         @Override
         public DataNormalizationOperation<?> getChild(final QName child) {
-            return byQName.get(child);
+            final DataNormalizationOperation<?> dataNormalizationOperation = byQName.get(child);
+            return dataNormalizationOperation == null ? searchForNormalizationOperationInChoices(child)
+                    : dataNormalizationOperation;
+        }
+
+        private DataNormalizationOperation<?> searchForNormalizationOperationInChoices(final QName qName) {
+            for (ChoiceNodeNormalization choiceNodeNormalization : choiceChildren) {
+                DataNormalizationOperation<?> child = choiceNodeNormalization.getChild(qName);
+                if (child != null) {
+                    return choiceNodeNormalization;
+                }
+            }
+            return null;
+
         }
 
         @Override
