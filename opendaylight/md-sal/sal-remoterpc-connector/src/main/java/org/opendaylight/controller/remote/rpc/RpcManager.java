@@ -123,6 +123,7 @@ public class RpcManager extends AbstractUntypedActor {
 
   private void updateSchemaContext(UpdateSchemaContext message) {
     this.schemaContext = message.getSchemaContext();
+    rpcBroker.tell(message, ActorRef.noSender());
   }
 
   @Override

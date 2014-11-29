@@ -13,14 +13,17 @@ import akka.actor.Props;
 import akka.dispatch.OnComplete;
 import akka.japi.Creator;
 import akka.japi.Pair;
+
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.JdkFutureAdapters;
 import com.google.common.util.concurrent.ListenableFuture;
+
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.remote.rpc.messages.ExecuteRpc;
 import org.opendaylight.controller.remote.rpc.messages.InvokeRpc;
 import org.opendaylight.controller.remote.rpc.messages.RpcResponse;
+import org.opendaylight.controller.remote.rpc.messages.UpdateSchemaContext;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
 import org.opendaylight.controller.remote.rpc.utils.LatestEntryRoutingLogic;
 import org.opendaylight.controller.remote.rpc.utils.RoutingLogic;
@@ -53,7 +56,7 @@ public class RpcBroker extends AbstractUntypedActor {
     private static final Logger LOG = LoggerFactory.getLogger(RpcBroker.class);
     private final Broker.ProviderSession brokerSession;
     private final ActorRef rpcRegistry;
-    private final SchemaContext schemaContext;
+    private SchemaContext schemaContext;
     private final RemoteRpcProviderConfig config;
 
     private RpcBroker(Broker.ProviderSession brokerSession, ActorRef rpcRegistry,
@@ -75,7 +78,13 @@ public class RpcBroker extends AbstractUntypedActor {
             invokeRemoteRpc((InvokeRpc) message);
         } else if(message instanceof ExecuteRpc) {
             executeRpc((ExecuteRpc) message);
+        } else if(message instanceof UpdateSchemaContext) {
+            updateSchemaContext((UpdateSchemaContext) message);
         }
+    }
+
+    private void updateSchemaContext(UpdateSchemaContext message) {
+        this.schemaContext = message.getSchemaContext();
     }
 
     private void invokeRemoteRpc(final InvokeRpc msg) {
