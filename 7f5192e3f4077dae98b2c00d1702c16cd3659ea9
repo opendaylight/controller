@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_1b264917",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcBroker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 2246
+      },
+      "writtenOn": "2014-11-29T20:16:14Z",
+      "side": 1,
+      "message": "you may want to move this line down by one to put all final variables together.",
+      "revId": "7f5192e3f4077dae98b2c00d1702c16cd3659ea9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
