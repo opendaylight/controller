@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_6641f00a",
+        "filename": "opendaylight/networkconfiguration/neutron/northbound/src/main/java/org/opendaylight/controller/networkconfig/neutron/northbound/NeutronPortsNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 2850
+      },
+      "writtenOn": "2014-11-30T19:29:55Z",
+      "side": 1,
+      "message": "Could you please correct this nit too?",
+      "range": {
+        "startLine": 219,
+        "startChar": 60,
+        "endLine": 219,
+        "endChar": 64
+      },
+      "revId": "a65d58f0c62293430a59407ad4613922a21f3159",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_86467c22",
+        "filename": "opendaylight/networkconfiguration/neutron/northbound/src/main/java/org/opendaylight/controller/networkconfig/neutron/northbound/NeutronSubnetsNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 2850
+      },
+      "writtenOn": "2014-11-30T19:29:55Z",
+      "side": 1,
+      "message": "Could you please correct this nit too?",
+      "range": {
+        "startLine": 219,
+        "startChar": 47,
+        "endLine": 219,
+        "endChar": 54
+      },
+      "revId": "a65d58f0c62293430a59407ad4613922a21f3159",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
