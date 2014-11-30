@@ -200,8 +200,6 @@ public class NeutronLoadBalancerPoolNorthbound {
             if (loadBalancerPoolInterface.neutronLoadBalancerPoolExists(singleton.getLoadBalancerPoolID())) {
                 throw new BadRequestException("LoadBalancerPool UUID already exists");
             }
-            loadBalancerPoolInterface.addNeutronLoadBalancerPool(singleton);
-
             Object[] instances = ServiceHelper.getGlobalInstances(INeutronLoadBalancerPoolAware.class, this, null);
             if (instances != null) {
                 for (Object instance : instances) {
