@@ -19,6 +19,8 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants.RPC_REPLY_KEY;
 import static org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0;
@@ -27,9 +29,15 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ListenableFuture;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.util.HashedWheelTimer;
+import io.netty.util.Timer;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
+import io.netty.util.concurrent.GlobalEventExecutor;
 import java.io.ByteArrayInputStream;
+import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.UUID;
@@ -45,11 +53,18 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
+import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
 import org.opendaylight.controller.netconf.client.NetconfClientSession;
+import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
+import org.opendaylight.controller.netconf.client.conf.NetconfReconnectingClientConfigurationBuilder;
+import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.LoginPassword;
 import org.opendaylight.controller.sal.connect.api.RemoteDevice;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceCommunicator;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
+import org.opendaylight.protocol.framework.ReconnectStrategy;
+import org.opendaylight.protocol.framework.ReconnectStrategyFactory;
+import org.opendaylight.protocol.framework.TimedReconnectStrategy;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -318,6 +333,60 @@ public class NetconfDeviceCommunicatorTest {
                       errorInfo.contains( "<bad-attribute>foo</bad-attribute>" ) );
         assertEquals( "Error info contains \"bar\"", true,
                       errorInfo.contains( "<bad-element>bar</bad-element>" ) );
+    }
+
+    /**
+     * Test whether reconnect is scheduled properly
+     */
+    @Test
+    public void testNetconfDeviceReconnectInCommunicator() throws Exception {
+        final RemoteDevice<NetconfSessionCapabilities, NetconfMessage> device = mock(RemoteDevice.class);
+
+        final TimedReconnectStrategy timedReconnectStrategy = new TimedReconnectStrategy(GlobalEventExecutor.INSTANCE, 10000, 0, 1.0, null, 100L, null);
+        final ReconnectStrategy reconnectStrategy = spy(new ReconnectStrategy() {
+            @Override
+            public int getConnectTimeout() throws Exception {
+                return timedReconnectStrategy.getConnectTimeout();
+            }
+
+            @Override
+            public Future<Void> scheduleReconnect(final Throwable cause) {
+                return timedReconnectStrategy.scheduleReconnect(cause);
+            }
+
+            @Override
+            public void reconnectSuccessful() {
+                timedReconnectStrategy.reconnectSuccessful();
+            }
+        });
+
+        final NetconfDeviceCommunicator listener = new NetconfDeviceCommunicator(new RemoteDeviceId("test"), device);
+        final EventLoopGroup group = new NioEventLoopGroup();
+        final Timer time = new HashedWheelTimer();
+        try {
+            final NetconfClientConfiguration cfg = NetconfReconnectingClientConfigurationBuilder.create()
+                    .withAddress(new InetSocketAddress("localhost", 65000))
+                    .withReconnectStrategy(reconnectStrategy)
+                    .withConnectStrategyFactory(new ReconnectStrategyFactory() {
+                        @Override
+                        public ReconnectStrategy createReconnectStrategy() {
+                            return reconnectStrategy;
+                        }
+                    })
+                    .withAuthHandler(new LoginPassword("admin", "admin"))
+                    .withConnectionTimeoutMillis(10000)
+                    .withProtocol(NetconfClientConfiguration.NetconfClientProtocol.SSH)
+                    .withSessionListener(listener)
+                    .build();
+
+
+            listener.initializeRemoteConnection(new NetconfClientDispatcherImpl(group, group, time), cfg);
+
+            verify(reconnectStrategy, timeout((int) TimeUnit.MINUTES.toMillis(3)).times(101)).scheduleReconnect(any(Throwable.class));
+        } finally {
+            time.stop();
+            group.shutdownGracefully();
+        }
     }
 
     @Test
