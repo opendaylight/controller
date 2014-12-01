@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.netconf.auth.usermanager;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.opendaylight.controller.netconf.auth.AuthProvider;
 import org.opendaylight.controller.sal.authorization.AuthResultEnum;
 import org.opendaylight.controller.usermanager.IUserManager;
@@ -17,13 +18,11 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.annotations.VisibleForTesting;
-
 /**
  * AuthProvider implementation delegating to AD-SAL UserManager instance.
  */
 public class AuthProviderImpl implements AuthProvider {
-    private static final Logger logger = LoggerFactory.getLogger(AuthProviderImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AuthProviderImpl.class);
 
     private IUserManager nullableUserManager;
 
@@ -32,20 +31,20 @@ public class AuthProviderImpl implements AuthProvider {
         final ServiceTrackerCustomizer<IUserManager, IUserManager> customizer = new ServiceTrackerCustomizer<IUserManager, IUserManager>() {
             @Override
             public IUserManager addingService(final ServiceReference<IUserManager> reference) {
-                logger.trace("UerManager {} added", reference);
+                LOG.trace("UerManager {} added", reference);
                 nullableUserManager = bundleContext.getService(reference);
                 return nullableUserManager;
             }
 
             @Override
             public void modifiedService(final ServiceReference<IUserManager> reference, final IUserManager service) {
-                logger.trace("Replacing modified UerManager {}", reference);
+                LOG.trace("Replacing modified UerManager {}", reference);
                 nullableUserManager = service;
             }
 
             @Override
             public void removedService(final ServiceReference<IUserManager> reference, final IUserManager service) {
-                logger.trace("Removing UerManager {}. This AuthProvider will fail to authenticate every time", reference);
+                LOG.trace("Removing UerManager {}. This AuthProvider will fail to authenticate every time", reference);
                 synchronized (AuthProviderImpl.this) {
                     nullableUserManager = null;
                 }
@@ -62,11 +61,11 @@ public class AuthProviderImpl implements AuthProvider {
     @Override
     public synchronized boolean authenticated(final String username, final String password) {
         if (nullableUserManager == null) {
-            logger.warn("Cannot authenticate user '{}', user manager service is missing", username);
+            LOG.warn("Cannot authenticate user '{}', user manager service is missing", username);
             throw new IllegalStateException("User manager service is not available");
         }
         final AuthResultEnum authResult = nullableUserManager.authenticate(username, password);
-        logger.debug("Authentication result for user '{}' : {}", username, authResult);
+        LOG.debug("Authentication result for user '{}' : {}", username, authResult);
         return authResult.equals(AuthResultEnum.AUTH_ACCEPT) || authResult.equals(AuthResultEnum.AUTH_ACCEPT_LOC);
     }
 
