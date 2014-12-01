@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_665a5085",
+        "filename": "opendaylight/md-sal/topology-manager/src/main/java/org/opendaylight/controller/config/yang/config/topology_manager/FlowCapableTopologyProviderModule.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2014-12-01T09:49:48Z",
+      "side": 1,
+      "message": "Why we want to push TODO ?\nWhere can I find close method ?",
+      "revId": "d46c52bda611e66b767d5b745230c6f9e77a8466",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_a67938fe",
+        "filename": "opendaylight/md-sal/topology-manager/src/main/java/org/opendaylight/md/controller/topology/manager/FlowCapableTopologyProvider.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2014-12-01T09:49:48Z",
+      "side": 1,
+      "message": "Please add the input validations.\nPreconditions.checkNotNull(dataBroker)\nPreconditions.checkNotNull(notificationService)",
+      "revId": "d46c52bda611e66b767d5b745230c6f9e77a8466",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_668330cd",
+        "filename": "opendaylight/md-sal/topology-manager/src/main/java/org/opendaylight/md/controller/topology/manager/FlowCapableTopologyProvider.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2014-12-01T09:49:48Z",
+      "side": 1,
+      "message": "You don\u0027t wish to do anything extra for a stop (close) provider method ?",
+      "revId": "d46c52bda611e66b767d5b745230c6f9e77a8466",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
