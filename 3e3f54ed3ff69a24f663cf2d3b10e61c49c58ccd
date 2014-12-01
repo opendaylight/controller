@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_5302753f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/SnapshotTracker.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-12-01T19:21:47Z",
+      "side": 1,
+      "message": "Minor observation:  Do we need the InvalidChunkException message to be verbose, as we do not seem to be doing anything with it in the follower?\n\nAlso do we need the hashcode to be printed in the logs as i guess that info wont help us in debugging. Probably the followerId and leaderIds would help, at the follower end.",
+      "revId": "3e3f54ed3ff69a24f663cf2d3b10e61c49c58ccd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
