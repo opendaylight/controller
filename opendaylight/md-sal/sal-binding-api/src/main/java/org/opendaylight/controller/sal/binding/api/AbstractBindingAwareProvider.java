@@ -15,6 +15,7 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderCo
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.osgi.framework.BundleContext;
 
+@Deprecated
 public abstract class AbstractBindingAwareProvider extends AbstractBrokerAwareActivator implements BindingAwareProvider {
 
     @Override
