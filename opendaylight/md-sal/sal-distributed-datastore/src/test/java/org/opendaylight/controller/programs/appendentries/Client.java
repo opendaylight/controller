@@ -13,18 +13,17 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import com.typesafe.config.ConfigFactory;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationPayload;
+import java.util.ArrayList;
+import java.util.List;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.example.messages.KeyValue;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationPayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class Client {
 
@@ -93,6 +92,11 @@ public class Client {
             @Override public long getIndex() {
                 return 1;
             }
+
+            @Override
+            public int size() {
+                return getData().size();
+            }
         });
 
         return new AppendEntries(1, "member-1", 0, 100, modification, 1);
@@ -112,6 +116,11 @@ public class Client {
 
             @Override public long getIndex() {
                 return 1;
+            }
+
+            @Override
+            public int size() {
+                return getData().size();
             }
         });
 
