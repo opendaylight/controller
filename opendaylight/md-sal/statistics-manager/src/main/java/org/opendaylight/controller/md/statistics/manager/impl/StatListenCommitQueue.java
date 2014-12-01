@@ -26,6 +26,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.Fl
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionAware;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.Queue;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.QueueBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.QueueKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
@@ -167,11 +168,13 @@ public class StatListenCommitQueue extends StatAbstractListenCommit<Queue, Opend
                             new FlowCapableNodeConnectorQueueStatisticsDataBuilder();
                     statBuild.setFlowCapableNodeConnectorQueueStatistics(statChild);
                     final QueueKey qKey = new QueueKey(queueStat.getQueueId());
-                    final InstanceIdentifier<FlowCapableNodeConnectorQueueStatisticsData> queueStatIdent = nodeIdent
+                    final InstanceIdentifier<Queue> queueIdent = nodeIdent
                             .child(NodeConnector.class, new NodeConnectorKey(queueStat.getNodeConnectorId()))
                             .augmentation(FlowCapableNodeConnector.class)
-                            .child(Queue.class, qKey).augmentation(FlowCapableNodeConnectorQueueStatisticsData.class);
+                            .child(Queue.class, qKey);
+                    final InstanceIdentifier<FlowCapableNodeConnectorQueueStatisticsData> queueStatIdent = queueIdent.augmentation(FlowCapableNodeConnectorQueueStatisticsData.class);
                     existQueueKeys.remove(qKey);
+                    tx.merge(LogicalDatastoreType.OPERATIONAL, queueIdent, new QueueBuilder().setKey(qKey).build());
                     tx.put(LogicalDatastoreType.OPERATIONAL, queueStatIdent, statBuild.build());
                 }
             }
