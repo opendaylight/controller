@@ -121,7 +121,7 @@ public class SSHTest {
             Thread.sleep(100);
         }
         assertFalse(echoClientHandler.isConnected());
-        assertEquals(State.CONNECTION_CLOSED, echoClientHandler.getState());
+        assertEquals(State.FAILED_TO_CONNECT, echoClientHandler.getState());
     }
 
 }
