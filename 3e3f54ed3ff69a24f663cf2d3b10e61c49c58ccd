@@ -16,6 +16,24 @@
       "revId": "3e3f54ed3ff69a24f663cf2d3b10e61c49c58ccd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_b3409957",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/SnapshotTracker.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-12-01T20:18:17Z",
+      "side": 1,
+      "message": "What do you mean by does it need to be verbose? There are multiple conditions where we may end up with an Invalid chunk - we could either use separate exceptions or the message could have more information. \n\nI agree the hash codes are probably not going to be useful. But at the same time I do not see much use for the leader and follower id as well in this scenario. All I really need to know is someone is that someone sent an chunk out of order. \n\nToday we do not log these exceptions because we have a way to handle them but we could if we wanted to.",
+      "parentUuid": "7a96c907_5302753f",
+      "revId": "3e3f54ed3ff69a24f663cf2d3b10e61c49c58ccd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
