@@ -75,7 +75,7 @@ public class ReconnectImmediatelyStrategyModuleTest extends AbstractConfigTest {
         createInstance();
         final ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
         assertBeanCount(1, FACTORY_NAME);
-        final ReconnectImmediatelyStrategyFactoryModuleMXBean mxBean = transaction.newMBeanProxy(
+        final ReconnectImmediatelyStrategyFactoryModuleMXBean mxBean = transaction.newMXBeanProxy(
                 transaction.lookupConfigBean(FACTORY_NAME, INSTANCE_NAME),
                 ReconnectImmediatelyStrategyFactoryModuleMXBean.class);
         mxBean.setReconnectTimeout(200);
@@ -97,7 +97,7 @@ public class ReconnectImmediatelyStrategyModuleTest extends AbstractConfigTest {
     private static ObjectName createInstance(final ConfigTransactionJMXClient transaction, final Integer timeout)
             throws InstanceAlreadyExistsException {
         final ObjectName nameCreated = transaction.createModule(FACTORY_NAME, INSTANCE_NAME);
-        final ReconnectImmediatelyStrategyFactoryModuleMXBean mxBean = transaction.newMBeanProxy(nameCreated,
+        final ReconnectImmediatelyStrategyFactoryModuleMXBean mxBean = transaction.newMXBeanProxy(nameCreated,
                 ReconnectImmediatelyStrategyFactoryModuleMXBean.class);
         mxBean.setReconnectTimeout(timeout);
         mxBean.setReconnectExecutor(GlobalEventExecutorUtil.create(transaction));

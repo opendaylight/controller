@@ -76,7 +76,7 @@ public class NeverReconnectStrategyModuleTest extends AbstractConfigTest {
         createInstance();
         final ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
         assertBeanCount(1, FACTORY_NAME);
-        final NeverReconnectStrategyFactoryModuleMXBean mxBean = transaction.newMBeanProxy(
+        final NeverReconnectStrategyFactoryModuleMXBean mxBean = transaction.newMXBeanProxy(
                 transaction.lookupConfigBean(FACTORY_NAME, INSTANCE_NAME), NeverReconnectStrategyFactoryModuleMXBean.class);
         mxBean.setTimeout(200);
         final CommitStatus status = transaction.commit();
@@ -98,7 +98,7 @@ public class NeverReconnectStrategyModuleTest extends AbstractConfigTest {
     private static ObjectName createInstance(final ConfigTransactionJMXClient transaction, final Integer timeout)
             throws InstanceAlreadyExistsException {
         final ObjectName nameCreated = transaction.createModule(FACTORY_NAME, INSTANCE_NAME);
-        final NeverReconnectStrategyFactoryModuleMXBean mxBean = transaction.newMBeanProxy(nameCreated,
+        final NeverReconnectStrategyFactoryModuleMXBean mxBean = transaction.newMXBeanProxy(nameCreated,
                 NeverReconnectStrategyFactoryModuleMXBean.class);
         mxBean.setTimeout(timeout);
         mxBean.setExecutor(GlobalEventExecutorUtil.create(transaction));

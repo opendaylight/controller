@@ -117,7 +117,7 @@ public class TimedReconnectStrategyModuleTest extends AbstractConfigTest {
         createInstance();
         final ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
         assertBeanCount(1, FACTORY_NAME);
-        final TimedReconnectStrategyFactoryModuleMXBean mxBean = transaction.newMBeanProxy(
+        final TimedReconnectStrategyFactoryModuleMXBean mxBean = transaction.newMXBeanProxy(
                 transaction.lookupConfigBean(FACTORY_NAME, INSTANCE_NAME), TimedReconnectStrategyFactoryModuleMXBean.class);
         assertEquals(mxBean.getMinSleep(), new Long(100));
         mxBean.setMinSleep(200L);
@@ -149,7 +149,7 @@ public class TimedReconnectStrategyModuleTest extends AbstractConfigTest {
             final Integer connectTime, final Long minSleep, final BigDecimal sleepFactor, final Long maxSleep,
             final Long maxAttempts, final Long deadline) throws InstanceAlreadyExistsException {
         final ObjectName nameCreated = transaction.createModule(FACTORY_NAME, instanceName);
-        final TimedReconnectStrategyFactoryModuleMXBean mxBean = transaction.newMBeanProxy(nameCreated,
+        final TimedReconnectStrategyFactoryModuleMXBean mxBean = transaction.newMXBeanProxy(nameCreated,
                 TimedReconnectStrategyFactoryModuleMXBean.class);
         mxBean.setConnectTime(connectTime);
         mxBean.setDeadline(deadline);

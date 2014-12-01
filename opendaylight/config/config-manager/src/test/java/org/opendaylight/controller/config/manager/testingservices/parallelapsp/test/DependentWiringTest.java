@@ -108,7 +108,7 @@ public class DependentWiringTest extends AbstractParallelAPSPTest {
 
         // test reported apsp number of threads
         TestingParallelAPSPConfigMXBean parallelAPSPRuntimeProxy = configRegistryClient
-                .newMBeanProxy(apspON, TestingParallelAPSPConfigMXBean.class);
+                .newMXBeanProxy(apspON, TestingParallelAPSPConfigMXBean.class);
         assertEquals(
                 (Integer) TestingParallelAPSPImpl.MINIMAL_NUMBER_OF_THREADS,
                 parallelAPSPRuntimeProxy.getMaxNumberOfThreads());

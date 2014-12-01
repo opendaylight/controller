@@ -212,11 +212,9 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
         ObjectName fixed1name = firstCommit();
 
         // 2, check that configuration was copied to platform
-        DynamicMBean dynamicMBean = configRegistryClient.newMBeanProxy(
-                ObjectNameUtil.withoutTransactionName(fixed1name),
-                DynamicMBean.class);
-        dynamicMBean.getMBeanInfo();
-        assertEquals(numberOfThreads, dynamicMBean.getAttribute("ThreadCount"));
+        ObjectName on = ObjectNameUtil.withoutTransactionName(fixed1name);
+        platformMBeanServer.getMBeanInfo(on);
+        assertEquals(numberOfThreads, platformMBeanServer.getAttribute(on, "ThreadCount"));
 
         // 3, shutdown fixed1 in new transaction
         assertFalse(TestingFixedThreadPool.allExecutors.get(0).isShutdown());
@@ -249,10 +247,10 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
 
         // dynamic config should be removed from platform
         try {
-            dynamicMBean.getMBeanInfo();
+            platformMBeanServer.getMBeanInfo(on);
             fail();
         } catch (Exception e) {
-            assertTrue(e.getCause() instanceof InstanceNotFoundException);
+            assertTrue(e instanceof InstanceNotFoundException);
         }
     }
 
