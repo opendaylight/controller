@@ -206,7 +206,7 @@ public class NeutronNetworksNorthbound {
              * network ID can't already exist
              */
             if (networkInterface.networkExists(singleton.getID())) {
-                throw new BadRequestException("network UUID already exists");
+                throw new ResourceConflictException("network UUID already exists");
             }
 
             Object[] instances = ServiceHelper.getGlobalInstances(INeutronNetworkAware.class, this, null);
@@ -243,10 +243,10 @@ public class NeutronNetworksNorthbound {
                  * already in this bulk request
                  */
                 if (networkInterface.networkExists(test.getID())) {
-                    throw new BadRequestException("network UUID already exists");
+                    throw new ResourceConflictException("network UUID already exists");
                 }
                 if (testMap.containsKey(test.getID())) {
-                    throw new BadRequestException("network UUID already exists");
+                    throw new ResourceConflictException("network UUID already exists");
                 }
                 if (instances != null) {
                     for (Object instance: instances) {
