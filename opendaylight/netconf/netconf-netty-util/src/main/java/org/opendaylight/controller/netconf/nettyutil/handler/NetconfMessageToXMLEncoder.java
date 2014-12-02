@@ -17,10 +17,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
@@ -30,7 +27,6 @@ import org.w3c.dom.Comment;
 
 public class NetconfMessageToXMLEncoder extends MessageToByteEncoder<NetconfMessage> {
     private static final Logger LOG = LoggerFactory.getLogger(NetconfMessageToXMLEncoder.class);
-    private static final TransformerFactory FACTORY = TransformerFactory.newInstance();
 
     private final Optional<String> clientId;
 
@@ -38,13 +34,13 @@ public class NetconfMessageToXMLEncoder extends MessageToByteEncoder<NetconfMess
         this(Optional.<String>absent());
     }
 
-    public NetconfMessageToXMLEncoder(Optional<String> clientId) {
+    public NetconfMessageToXMLEncoder(final Optional<String> clientId) {
         this.clientId = clientId;
     }
 
     @Override
     @VisibleForTesting
-    public void encode(ChannelHandlerContext ctx, NetconfMessage msg, ByteBuf out) throws IOException, TransformerException {
+    public void encode(final ChannelHandlerContext ctx, final NetconfMessage msg, final ByteBuf out) throws IOException, TransformerException {
         LOG.trace("Sent to encode : {}", msg);
 
         if (clientId.isPresent()) {
@@ -53,14 +49,10 @@ public class NetconfMessageToXMLEncoder extends MessageToByteEncoder<NetconfMess
         }
 
         try (OutputStream os = new ByteBufOutputStream(out)) {
-            Transformer transformer = FACTORY.newTransformer();
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-
             // Wrap OutputStreamWriter with BufferedWriter as suggested in javadoc for OutputStreamWriter
             StreamResult result = new StreamResult(new BufferedWriter(new OutputStreamWriter(os)));
             DOMSource source = new DOMSource(msg.getDocument());
-            transformer.transform(source, result);
+            ThreadLocalTransformers.getPrettyTransformer().transform(source, result);
         }
     }
 }
