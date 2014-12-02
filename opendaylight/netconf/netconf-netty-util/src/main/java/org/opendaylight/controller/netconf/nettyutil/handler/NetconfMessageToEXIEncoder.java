@@ -21,16 +21,26 @@ import javax.xml.transform.sax.SAXResult;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.openexi.proc.common.EXIOptionsException;
+import org.openexi.sax.SAXTransmogrifier;
 import org.openexi.sax.Transmogrifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class NetconfMessageToEXIEncoder extends MessageToByteEncoder<NetconfMessage> {
     private static final Logger LOG = LoggerFactory.getLogger(NetconfMessageToEXIEncoder.class);
-    private final NetconfEXICodec codec;
+    /**
+     * This class is not marked as shared, so it can be attached to only a single channel,
+     * which means that {@link #encode(ChannelHandlerContext, NetconfMessage, ByteBuf)}
+     * cannot be invoked concurrently. Hence we can reuse the transmogrifier.
+     */
+    private final Transmogrifier transmogrifier;
 
-    public NetconfMessageToEXIEncoder(final NetconfEXICodec codec) {
-        this.codec = Preconditions.checkNotNull(codec);
+    private NetconfMessageToEXIEncoder(final Transmogrifier transmogrifier) {
+        this.transmogrifier = Preconditions.checkNotNull(transmogrifier);
+    }
+
+    public static NetconfMessageToEXIEncoder create(final NetconfEXICodec codec) throws EXIOptionsException {
+        return new NetconfMessageToEXIEncoder(codec.getTransmogrifier());
     }
 
     @Override
@@ -39,16 +49,17 @@ public final class NetconfMessageToEXIEncoder extends MessageToByteEncoder<Netco
             LOG.trace("Sent to encode : {}", XmlUtil.toString(msg.getDocument()));
         }
 
+        // Performs an internal reset
+        final SAXTransmogrifier sax = transmogrifier.getSAXTransmogrifier();
+
         try (final OutputStream os = new ByteBufOutputStream(out)) {
-            final Transmogrifier transmogrifier = codec.getTransmogrifier();
             /*
              * Writing directly into ByteButOutputStream is costly due to sanity checks
              * done by Netty. Instantiating a frontend buffer improves efficiency here,
              * because OpenEXI performs many of single-byte writes.
              */
             transmogrifier.setOutputStream(new BufferedOutputStream(os));
-
-            ThreadLocalTransformers.getDefaultTransformer().transform(new DOMSource(msg.getDocument()), new SAXResult(transmogrifier.getSAXTransmogrifier()));
+            ThreadLocalTransformers.getDefaultTransformer().transform(new DOMSource(msg.getDocument()), new SAXResult(sax));
         }
     }
 }
