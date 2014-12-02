@@ -69,7 +69,10 @@ public final class NetconfXMLToHelloMessageDecoder extends ByteToMessageDecoder 
 
         in.markReaderIndex();
         try {
-            LOG.trace("Received to decode: {}", ByteBufUtil.hexDump(in));
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Received to decode: {}", ByteBufUtil.hexDump(in));
+            }
+
             byte[] bytes = new byte[in.readableBytes()];
             in.readBytes(bytes);
 
