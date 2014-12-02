@@ -25,6 +25,7 @@ import org.opendaylight.controller.netconf.nettyutil.handler.exi.EXIParameters;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.protocol.framework.AbstractProtocolSession;
 import org.openexi.proc.common.EXIOptionsException;
+import org.openexi.sax.TransmogrifierException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -123,7 +124,14 @@ public abstract class AbstractNetconfSession<S extends NetconfSession, L extends
         }
 
         final NetconfEXICodec exiCodec = new NetconfEXICodec(exiParams.getOptions());
-        final NetconfMessageToEXIEncoder exiEncoder = new NetconfMessageToEXIEncoder(exiCodec);
+        final NetconfMessageToEXIEncoder exiEncoder;
+        try {
+            exiEncoder = NetconfMessageToEXIEncoder.create(exiCodec);
+        } catch (EXIOptionsException | TransmogrifierException e) {
+            LOG.warn("Failed to instantiate EXI encoder for {} on session {}", exiCodec, this, e);
+            throw new IllegalStateException("Cannot instantiate encoder for options", e);
+        }
+
         final NetconfEXIToMessageDecoder exiDecoder = new NetconfEXIToMessageDecoder(exiCodec);
         addExiHandlers(exiDecoder, exiEncoder);
 
