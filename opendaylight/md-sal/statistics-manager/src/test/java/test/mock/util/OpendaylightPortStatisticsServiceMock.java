@@ -1,6 +1,10 @@
 package test.mock.util;
 
 import com.google.common.util.concurrent.Futures;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Future;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
@@ -18,15 +22,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.n
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicLong;
-
 public class OpendaylightPortStatisticsServiceMock implements OpendaylightPortStatisticsService {
     NotificationProviderServiceHelper notifService;
-    AtomicLong transNum = new AtomicLong();
 
     public OpendaylightPortStatisticsServiceMock(NotificationProviderServiceHelper notifService) {
         this.notifService = notifService;
@@ -35,7 +32,7 @@ public class OpendaylightPortStatisticsServiceMock implements OpendaylightPortSt
     @Override
     public Future<RpcResult<GetAllNodeConnectorsStatisticsOutput>> getAllNodeConnectorsStatistics(GetAllNodeConnectorsStatisticsInput input) {
         GetAllNodeConnectorsStatisticsOutputBuilder builder = new GetAllNodeConnectorsStatisticsOutputBuilder();
-        TransactionId transId = new TransactionId(BigInteger.valueOf(transNum.incrementAndGet()));
+        TransactionId transId = new TransactionId(BigInteger.valueOf(TestUtils.getNewTransactionId()));
         builder.setTransactionId(transId);
         NodeConnectorStatisticsUpdateBuilder ncsuBuilder = new NodeConnectorStatisticsUpdateBuilder();
         NodeConnectorStatisticsAndPortNumberMapBuilder ncsapnmBuilder = new NodeConnectorStatisticsAndPortNumberMapBuilder();
@@ -43,7 +40,7 @@ public class OpendaylightPortStatisticsServiceMock implements OpendaylightPortSt
         ncsapnmBuilder.setKey(new NodeConnectorStatisticsAndPortNumberMapKey(StatisticsManagerTest.getNodeConnectorId()));
         ncsapnmBuilder.setReceiveDrops(StatisticsManagerTest.BIG_INTEGER_TEST_VALUE);
         nodeConnectorStatisticsAndPortNumberMaps.add(ncsapnmBuilder.build());
-        ncsuBuilder.setTransactionId(new TransactionId(BigInteger.valueOf(1)));
+        ncsuBuilder.setTransactionId(transId);
         ncsuBuilder.setId(input.getNode().getValue().firstKeyOf(Node.class, NodeKey.class).getId());
         ncsuBuilder.setNodeConnectorStatisticsAndPortNumberMap(nodeConnectorStatisticsAndPortNumberMaps);
         ncsuBuilder.setMoreReplies(true);
@@ -60,7 +57,7 @@ public class OpendaylightPortStatisticsServiceMock implements OpendaylightPortSt
     @Override
     public Future<RpcResult<GetNodeConnectorStatisticsOutput>> getNodeConnectorStatistics(GetNodeConnectorStatisticsInput input) {
         GetNodeConnectorStatisticsOutputBuilder builder = new GetNodeConnectorStatisticsOutputBuilder();
-        TransactionId transId = new TransactionId(BigInteger.valueOf(transNum.incrementAndGet()));
+        TransactionId transId = new TransactionId(BigInteger.valueOf(TestUtils.getNewTransactionId()));
         builder.setTransactionId(transId);
         return Futures.immediateFuture(RpcResultBuilder.success(builder.build()).build());
     }
