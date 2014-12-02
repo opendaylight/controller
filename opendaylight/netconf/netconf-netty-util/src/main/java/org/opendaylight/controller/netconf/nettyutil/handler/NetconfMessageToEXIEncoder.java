@@ -12,6 +12,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import javax.xml.transform.Transformer;
@@ -45,7 +46,12 @@ public final class NetconfMessageToEXIEncoder extends MessageToByteEncoder<Netco
 
         try (final OutputStream os = new ByteBufOutputStream(out)) {
             final Transmogrifier transmogrifier = codec.getTransmogrifier();
-            transmogrifier.setOutputStream(os);
+            /*
+             * Writing directly into ByteButOutputStream is costly due to sanity checks
+             * done by Netty. Instantiating a frontend buffer improves efficiency here,
+             * because OpenEXI performs many of single-byte writes.
+             */
+            transmogrifier.setOutputStream(new BufferedOutputStream(os));
 
             final Transformer transformer = saxTransformerFactory.newTransformer();
             transformer.transform(new DOMSource(msg.getDocument()), new SAXResult(transmogrifier.getSAXTransmogrifier()));
