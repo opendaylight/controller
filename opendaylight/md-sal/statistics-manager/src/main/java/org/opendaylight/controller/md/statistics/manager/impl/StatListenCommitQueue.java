@@ -137,7 +137,7 @@ public class StatListenCommitQueue extends StatAbstractListenCommit<Queue, Opend
                 /* Delete all not presented Group Nodes */
                 deleteAllNotPresentedNodes(nodeIdent, tx, Collections.unmodifiableMap(existQueueKeys));
                 /* Notification for continue collecting statistics */
-                notifyToCollectNextStatistics(nodeIdent);
+                notifyToCollectNextStatistics(nodeIdent, transId);
             }
         });
     }
