@@ -55,7 +55,7 @@ public class NetconfClientSessionTest {
 
         NetconfClientSession session = new NetconfClientSession(sessionListener, channel, sessId, caps);
         final NetconfMessageToEXIEncoder exiEncoder = NetconfMessageToEXIEncoder.create(codec);
-        final NetconfEXIToMessageDecoder exiDecoder = new NetconfEXIToMessageDecoder(codec);
+        final NetconfEXIToMessageDecoder exiDecoder = NetconfEXIToMessageDecoder.create(codec);
         session.addExiHandlers(exiDecoder, exiEncoder);
         session.stopExiCommunication();
 
