@@ -12,7 +12,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
-
 import com.google.common.collect.Lists;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
@@ -24,6 +23,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.netconf.nettyutil.handler.NetconfEXICodec;
+import org.opendaylight.controller.netconf.nettyutil.handler.NetconfEXIToMessageDecoder;
+import org.opendaylight.controller.netconf.nettyutil.handler.NetconfMessageToEXIEncoder;
 import org.openexi.proc.common.EXIOptions;
 
 public class NetconfClientSessionTest {
@@ -53,7 +54,9 @@ public class NetconfClientSessionTest {
         Mockito.doReturn("").when(channelHandler).toString();
 
         NetconfClientSession session = new NetconfClientSession(sessionListener, channel, sessId, caps);
-        session.addExiHandlers(codec);
+        final NetconfMessageToEXIEncoder exiEncoder = new NetconfMessageToEXIEncoder(codec);
+        final NetconfEXIToMessageDecoder exiDecoder = new NetconfEXIToMessageDecoder(codec);
+        session.addExiHandlers(exiDecoder, exiEncoder);
         session.stopExiCommunication();
 
         assertEquals(caps, session.getServerCapabilities());
