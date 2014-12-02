@@ -9,14 +9,12 @@
 package org.opendaylight.controller.netconf.util.messages;
 
 import com.google.common.base.Preconditions;
-
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
-
-import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
@@ -39,17 +37,20 @@ public final class SendErrorExceptionUtil {
         f.addListener(new SendErrorVerifyingListener(sendErrorException));
     }
 
-    public static void sendErrorMessage(Channel channel, NetconfDocumentedException sendErrorException) {
+    public static void sendErrorMessage(final Channel channel, final NetconfDocumentedException sendErrorException) {
         logger.trace("Sending error {}", sendErrorException.getMessage(), sendErrorException);
         final Document errorDocument = createDocument(sendErrorException);
         ChannelFuture f = channel.writeAndFlush(new NetconfMessage(errorDocument));
         f.addListener(new SendErrorVerifyingListener(sendErrorException));
     }
 
-    public static void sendErrorMessage(NetconfSession session, NetconfDocumentedException sendErrorException,
-            NetconfMessage incommingMessage) {
+    public static void sendErrorMessage(final NetconfSession session, final NetconfDocumentedException sendErrorException,
+            final NetconfMessage incommingMessage) {
         final Document errorDocument = createDocument(sendErrorException);
-        logger.trace("Sending error {}", XmlUtil.toString(errorDocument));
+
+        if (logger.isTraceEnabled()) {
+            logger.trace("Sending error {}", XmlUtil.toString(errorDocument));
+        }
         tryToCopyAttributes(incommingMessage.getDocument(), errorDocument, sendErrorException);
         ChannelFuture f = session.sendMessage(new NetconfMessage(errorDocument));
         f.addListener(new SendErrorVerifyingListener(sendErrorException));
