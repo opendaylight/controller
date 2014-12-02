@@ -123,7 +123,14 @@ public abstract class AbstractNetconfSession<S extends NetconfSession, L extends
         }
 
         final NetconfEXICodec exiCodec = new NetconfEXICodec(exiParams.getOptions());
-        final NetconfMessageToEXIEncoder exiEncoder = new NetconfMessageToEXIEncoder(exiCodec);
+        final NetconfMessageToEXIEncoder exiEncoder;
+        try {
+            exiEncoder = NetconfMessageToEXIEncoder.create(exiCodec);
+        } catch (EXIOptionsException e) {
+            LOG.warn("Failed to instantiate EXI encoder for {} on session {}", exiCodec, this, e);
+            throw new IllegalStateException("Cannot instantiate encoder for options", e);
+        }
+
         final NetconfEXIToMessageDecoder exiDecoder = new NetconfEXIToMessageDecoder(exiCodec);
         addExiHandlers(exiDecoder, exiEncoder);
 
