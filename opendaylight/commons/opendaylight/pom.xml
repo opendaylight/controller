@@ -87,6 +87,7 @@
     <controllermanager.northbound.version>0.1.0-SNAPSHOT</controllermanager.northbound.version>
     <devices.web.version>0.5.0-SNAPSHOT</devices.web.version>
     <dummy-console.version>1.2.0-SNAPSHOT</dummy-console.version>
+    <config.statistics.manager.configfile>30-statistics-manager.xml</config.statistics.manager.configfile>
     <eclipse.persistence.version>2.5.0</eclipse.persistence.version>
     <eclipse.jdt.core.compiler.batch.version>3.8.0.I20120518-2145</eclipse.jdt.core.compiler.batch.version>
     <!-- enforcer version -->
