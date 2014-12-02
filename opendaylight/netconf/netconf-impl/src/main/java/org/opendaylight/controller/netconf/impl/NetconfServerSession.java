@@ -10,15 +10,15 @@ package org.opendaylight.controller.netconf.impl;
 
 import com.google.common.base.Preconditions;
 import io.netty.channel.Channel;
+import io.netty.handler.codec.ByteToMessageDecoder;
+import io.netty.handler.codec.MessageToByteEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfManagementSession;
 import org.opendaylight.controller.netconf.nettyutil.AbstractNetconfSession;
-import org.opendaylight.controller.netconf.nettyutil.handler.NetconfEXICodec;
-import org.opendaylight.controller.netconf.nettyutil.handler.NetconfEXIToMessageDecoder;
-import org.opendaylight.controller.netconf.nettyutil.handler.NetconfMessageToEXIEncoder;
 import org.opendaylight.controller.netconf.nettyutil.handler.NetconfMessageToXMLEncoder;
 import org.opendaylight.controller.netconf.nettyutil.handler.NetconfXMLToMessageDecoder;
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAdditionalHeader;
@@ -46,8 +46,8 @@ public final class NetconfServerSession extends AbstractNetconfSession<NetconfSe
     private Date loginTime;
     private long inRpcSuccess, inRpcFail, outRpcError;
 
-    public NetconfServerSession(NetconfServerSessionListener sessionListener, Channel channel, long sessionId,
-            NetconfHelloMessageAdditionalHeader header) {
+    public NetconfServerSession(final NetconfServerSessionListener sessionListener, final Channel channel, final long sessionId,
+            final NetconfHelloMessageAdditionalHeader header) {
         super(sessionListener, channel, sessionId);
         this.header = header;
         LOG.debug("Session {} created", toString());
@@ -109,7 +109,7 @@ public final class NetconfServerSession extends AbstractNetconfSession<NetconfSe
         return builder.build();
     }
 
-    private Class<? extends Transport> getTransportForString(String transport) {
+    private Class<? extends Transport> getTransportForString(final String transport) {
         switch(transport) {
         case "ssh" :
             return NetconfSsh.class;
@@ -120,7 +120,7 @@ public final class NetconfServerSession extends AbstractNetconfSession<NetconfSe
         }
     }
 
-    private String formatDateTime(Date loginTime) {
+    private String formatDateTime(final Date loginTime) {
         SimpleDateFormat dateFormat = new SimpleDateFormat(ISO_DATE_FORMAT);
         return dateFormat.format(loginTime);
     }
@@ -131,9 +131,9 @@ public final class NetconfServerSession extends AbstractNetconfSession<NetconfSe
     }
 
     @Override
-    protected void addExiHandlers(NetconfEXICodec exiCodec) {
-        replaceMessageDecoder(new NetconfEXIToMessageDecoder(exiCodec));
-        replaceMessageEncoderAfterNextMessage(new NetconfMessageToEXIEncoder(exiCodec));
+    protected void addExiHandlers(final ByteToMessageDecoder decoder, final MessageToByteEncoder<NetconfMessage> encoder) {
+        replaceMessageDecoder(decoder);
+        replaceMessageEncoderAfterNextMessage(encoder);
     }
 
     @Override
