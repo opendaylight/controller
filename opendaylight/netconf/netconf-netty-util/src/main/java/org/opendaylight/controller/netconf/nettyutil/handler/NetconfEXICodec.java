@@ -1,6 +1,9 @@
 package org.opendaylight.controller.netconf.nettyutil.handler;
 
 import com.google.common.base.Preconditions;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import org.openexi.proc.HeaderOptionsOutputType;
 import org.openexi.proc.common.EXIOptions;
 import org.openexi.proc.common.EXIOptionsException;
@@ -31,6 +34,17 @@ public final class NetconfEXICodec {
     };
 
     /**
+     * Since we have a limited number of options we can have, instantiating a weak cache
+     * will allow us to reuse instances where possible.
+     */
+    private static final LoadingCache<Short, GrammarCache> GRAMMAR_CACHES = CacheBuilder.newBuilder().weakValues().build(new CacheLoader<Short, GrammarCache>() {
+        @Override
+        public GrammarCache load(final Short key) {
+            return new GrammarCache(key);
+        }
+    });
+
+    /**
      * Grammar cache acts as a template and is duplicated by the Transmogrifier and the Reader
      * before use. It is safe to reuse a single instance.
      */
@@ -57,7 +71,7 @@ public final class NetconfEXICodec {
             go = GrammarOptions.addPI(go);
         }
 
-        return new GrammarCache(go);
+        return GRAMMAR_CACHES.getUnchecked(go);
     }
 
     EXIReader getReader() throws EXIOptionsException {
