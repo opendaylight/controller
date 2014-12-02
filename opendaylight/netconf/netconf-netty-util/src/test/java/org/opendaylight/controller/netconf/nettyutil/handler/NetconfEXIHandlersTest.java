@@ -10,7 +10,6 @@ package org.opendaylight.controller.netconf.nettyutil.handler;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-
 import com.google.common.collect.Lists;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -41,7 +40,7 @@ public class NetconfEXIHandlersTest {
     @Before
     public void setUp() throws Exception {
         final NetconfEXICodec codec = new NetconfEXICodec(new EXIOptions());
-        netconfMessageToEXIEncoder = new NetconfMessageToEXIEncoder(codec);
+        netconfMessageToEXIEncoder = NetconfMessageToEXIEncoder.create(codec);
         netconfEXIToMessageDecoder = new NetconfEXIToMessageDecoder(codec);
 
         msg = new NetconfMessage(XmlUtil.readXmlToDocument(msgAsString));
