@@ -137,7 +137,7 @@ public class StatListenCommitMeter extends StatAbstractListenCommit<Meter, Opend
                 /* Delete all not presented Meter Nodes */
                 deleteAllNotPresentedNodes(fNodeIdent, tx, Collections.unmodifiableList(existMeterKeys));
                 /* Notification for continue collecting statistics */
-                notifyToCollectNextStatistics(nodeIdent);
+                notifyToCollectNextStatistics(nodeIdent, transId);
             }
         });
     }
@@ -247,8 +247,8 @@ public class StatListenCommitMeter extends StatAbstractListenCommit<Meter, Opend
                     }
                     statMeterCommit(((MeterStatisticsUpdated) notif).getMeterStats(), nodeIdent, tx);
                 }
-                if (notifMeter.isPresent()) {
-                    notifyToCollectNextStatistics(nodeIdent);
+                if ( ! notifMeter.isPresent()) {
+                    notifyToCollectNextStatistics(nodeIdent, transId);
                 }
             }
         });
