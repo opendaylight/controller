@@ -16,13 +16,20 @@ public final class NetconfEXICodec {
      * of the stream. This is really useful, so let's output it now.
      */
     private static final boolean OUTPUT_EXI_COOKIE = true;
+
+    /**
+     * Grammar cache acts as a template and is duplicated by the Transmogrifier and the Reader
+     * before use. It is safe to reuse a single instance.
+     */
+    private final GrammarCache exiGrammarCache;
     private final EXIOptions exiOptions;
 
     public NetconfEXICodec(final EXIOptions exiOptions) {
         this.exiOptions = Preconditions.checkNotNull(exiOptions);
+        this.exiGrammarCache = createGrammarCache(exiOptions);
     }
 
-    private GrammarCache getGrammarCache() {
+    private static GrammarCache createGrammarCache(final EXIOptions exiOptions) {
         short go = GrammarOptions.DEFAULT_OPTIONS;
         if (exiOptions.getPreserveComments()) {
             go = GrammarOptions.addCM(go);
@@ -37,13 +44,13 @@ public final class NetconfEXICodec {
             go = GrammarOptions.addPI(go);
         }
 
-        return new GrammarCache(null, go);
+        return new GrammarCache(go);
     }
 
     EXIReader getReader() throws EXIOptionsException {
         final EXIReader r = new EXIReader();
         r.setPreserveLexicalValues(exiOptions.getPreserveLexicalValues());
-        r.setGrammarCache(getGrammarCache());
+        r.setGrammarCache(exiGrammarCache);
         return r;
     }
 
@@ -51,7 +58,7 @@ public final class NetconfEXICodec {
         final Transmogrifier transmogrifier = new Transmogrifier();
         transmogrifier.setAlignmentType(exiOptions.getAlignmentType());
         transmogrifier.setBlockSize(exiOptions.getBlockSize());
-        transmogrifier.setGrammarCache(getGrammarCache());
+        transmogrifier.setGrammarCache(exiGrammarCache);
         transmogrifier.setOutputCookie(OUTPUT_EXI_COOKIE);
         transmogrifier.setOutputOptions(HeaderOptionsOutputType.all);
         return transmogrifier;
