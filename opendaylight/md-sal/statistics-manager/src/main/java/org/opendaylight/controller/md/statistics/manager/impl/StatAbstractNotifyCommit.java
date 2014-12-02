@@ -84,9 +84,9 @@ public abstract class StatAbstractNotifyCommit<N extends NotificationListener> i
         return manager.isProvidedFlowNodeActive(nodeIdent);
     }
 
-    protected void notifyToCollectNextStatistics(final InstanceIdentifier<Node> nodeIdent) {
+    protected void notifyToCollectNextStatistics(final InstanceIdentifier<Node> nodeIdent, final TransactionId xid) {
         Preconditions.checkNotNull(nodeIdent, "FlowCapableNode ident can not be null!");
-        manager.collectNextStatistics(nodeIdent);
+        manager.collectNextStatistics(nodeIdent, xid);
     }
 
     /**

@@ -105,7 +105,7 @@ public class StatNotifyCommitTable extends StatAbstractNotifyCommit<Opendaylight
                 statTableCommit(tableStats, nodeIdent, trans);
                 /* Notification for continue collecting statistics - Tables statistics are still same size
                  * and they are small - don't need to wait to whole apply operation */
-                notifyToCollectNextStatistics(nodeIdent);
+                notifyToCollectNextStatistics(nodeIdent, transId);
             }
         });
     }

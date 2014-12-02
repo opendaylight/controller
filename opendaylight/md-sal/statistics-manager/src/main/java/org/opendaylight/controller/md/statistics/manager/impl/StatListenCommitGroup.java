@@ -137,7 +137,7 @@ public class StatListenCommitGroup extends StatAbstractListenCommit<Group, Opend
                 /* Delete all not presented Group Nodes */
                 deleteAllNotPresentNode(fNodeIdent, tx, Collections.unmodifiableList(existGroupKeys));
                 /* Notification for continue collecting statistics */
-                notifyToCollectNextStatistics(nodeIdent);
+                notifyToCollectNextStatistics(nodeIdent, transId);
             }
         });
     }
@@ -248,7 +248,7 @@ public class StatListenCommitGroup extends StatAbstractListenCommit<Group, Opend
                     statGroupCommit(((GroupStatisticsUpdated) notif).getGroupStats(), nodeIdent, tx);
                 }
                 if (notifGroup.isPresent()) {
-                    notifyToCollectNextStatistics(nodeIdent);
+                    notifyToCollectNextStatistics(nodeIdent, transId);
                 }
             }
         });

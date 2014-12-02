@@ -21,6 +21,7 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
 import com.google.common.base.Optional;
+import com.google.common.util.concurrent.SettableFuture;
 
 /**
  * statistics-manager
@@ -77,7 +78,8 @@ public interface StatRpcMsgManager extends Runnable, AutoCloseable {
      *
      * @param future - result every Device RPC call
      */
-    <T extends TransactionAware, D extends DataObject> void registrationRpcFutureCallBack(Future<RpcResult<T>> future, D inputObj, NodeRef ref);
+    <T extends TransactionAware, D extends DataObject> void registrationRpcFutureCallBack(
+            Future<RpcResult<T>> future, D inputObj, NodeRef ref, SettableFuture<TransactionId> resultTransId);
 
     /**
      * Method adds Notification which is marked as Multipart to the transaction cash
@@ -104,7 +106,7 @@ public interface StatRpcMsgManager extends Runnable, AutoCloseable {
      *
      * @param NodeRef nodeRef
      */
-    void getAllGroupsStat(NodeRef nodeRef);
+    Future<TransactionId> getAllGroupsStat(NodeRef nodeRef);
 
     /**
      * Method wraps OpendaylightGroupStatisticsService.getGroupDescription
@@ -112,7 +114,7 @@ public interface StatRpcMsgManager extends Runnable, AutoCloseable {
      *
      * @param NodeRef nodeRef
      */
-    void getAllGroupsConfStats(NodeRef nodeRef);
+    Future<TransactionId> getAllGroupsConfStats(NodeRef nodeRef);
 
     /**
      * Method wraps OpendaylightMeterStatisticsService.getGroupFeatures
@@ -128,7 +130,7 @@ public interface StatRpcMsgManager extends Runnable, AutoCloseable {
      *
      * @param NodeRef nodeRef
      */
-    void getAllMetersStat(NodeRef nodeRef);
+    Future<TransactionId> getAllMetersStat(NodeRef nodeRef);
 
     /**
      * Method wraps OpendaylightMeterStatisticsService.getAllMeterConfigStatistics
@@ -136,7 +138,7 @@ public interface StatRpcMsgManager extends Runnable, AutoCloseable {
      *
      * @param NodeRef nodeRef
      */
-    void getAllMeterConfigStat(NodeRef nodeRef);
+    Future<TransactionId> getAllMeterConfigStat(NodeRef nodeRef);
 
     /**
      * Method wraps OpendaylightMeterStatisticsService.getMeterFeatures
@@ -152,7 +154,7 @@ public interface StatRpcMsgManager extends Runnable, AutoCloseable {
      *
      * @param NodeRef nodeRef
      */
-    void getAllFlowsStat(NodeRef nodeRef);
+    Future<TransactionId> getAllFlowsStat(NodeRef nodeRef);
 
     /**
      * Method wraps OpendaylightFlowStatisticsService.getAggregateFlowStatisticsFromFlowTableForAllFlows
@@ -169,7 +171,7 @@ public interface StatRpcMsgManager extends Runnable, AutoCloseable {
      *
      * @param NodeRef nodeRef
      */
-    void getAllPortsStat(NodeRef nodeRef);
+    Future<TransactionId> getAllPortsStat(NodeRef nodeRef);
 
     /**
      * Method wraps OpendaylightFlowTableStatisticsService.getFlowTablesStatistics
@@ -177,7 +179,7 @@ public interface StatRpcMsgManager extends Runnable, AutoCloseable {
      *
      * @param NodeRef nodeRef
      */
-    void getAllTablesStat(NodeRef nodeRef);
+    Future<TransactionId> getAllTablesStat(NodeRef nodeRef);
 
     /**
      * Method wraps OpendaylightQueueStatisticsService.getAllQueuesStatisticsFromAllPorts
@@ -185,7 +187,7 @@ public interface StatRpcMsgManager extends Runnable, AutoCloseable {
      *
      * @param NodeRef nodeRef
      */
-    void getAllQueueStat(NodeRef nodeRef);
+    Future<TransactionId> getAllQueueStat(NodeRef nodeRef);
 
 }
 
