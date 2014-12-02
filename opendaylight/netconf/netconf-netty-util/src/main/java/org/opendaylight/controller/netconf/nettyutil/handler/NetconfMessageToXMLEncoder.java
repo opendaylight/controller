@@ -46,7 +46,9 @@ public class NetconfMessageToXMLEncoder extends MessageToByteEncoder<NetconfMess
     @Override
     @VisibleForTesting
     public void encode(ChannelHandlerContext ctx, NetconfMessage msg, ByteBuf out) throws IOException, TransformerException {
-        LOG.trace("Sent to encode : {}", XmlUtil.toString(msg.getDocument()));
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Sent to encode : {}", XmlUtil.toString(msg.getDocument()));
+        }
 
         if (clientId.isPresent()) {
             Comment comment = msg.getDocument().createComment("clientId:" + clientId.get());
