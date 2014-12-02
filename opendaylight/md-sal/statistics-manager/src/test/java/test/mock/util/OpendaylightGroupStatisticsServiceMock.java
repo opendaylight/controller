@@ -1,6 +1,10 @@
 package test.mock.util;
 
 import com.google.common.util.concurrent.Futures;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Future;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GetAllGroupStatisticsInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GetAllGroupStatisticsOutput;
@@ -29,15 +33,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicLong;
-
 public class OpendaylightGroupStatisticsServiceMock implements OpendaylightGroupStatisticsService {
     NotificationProviderServiceHelper notifService;
-    AtomicLong transNum = new AtomicLong();
 
     public OpendaylightGroupStatisticsServiceMock(NotificationProviderServiceHelper notifService) {
         this.notifService = notifService;
@@ -46,7 +43,7 @@ public class OpendaylightGroupStatisticsServiceMock implements OpendaylightGroup
     @Override
     public Future<RpcResult<GetAllGroupStatisticsOutput>> getAllGroupStatistics(GetAllGroupStatisticsInput input) {
         GetAllGroupStatisticsOutputBuilder builder = new GetAllGroupStatisticsOutputBuilder();
-        TransactionId transId = new TransactionId(BigInteger.valueOf(transNum.incrementAndGet()));
+        TransactionId transId = new TransactionId(BigInteger.valueOf(TestUtils.getNewTransactionId()));
         builder.setTransactionId(transId);
         List<GroupStats> groupStats = new ArrayList<>();
         GroupStatsBuilder gsBuilder = new GroupStatsBuilder();
@@ -66,7 +63,7 @@ public class OpendaylightGroupStatisticsServiceMock implements OpendaylightGroup
     @Override
     public Future<RpcResult<GetGroupDescriptionOutput>> getGroupDescription(GetGroupDescriptionInput input) {
         GetGroupDescriptionOutputBuilder builder = new GetGroupDescriptionOutputBuilder();
-        TransactionId transId = new TransactionId(BigInteger.valueOf(transNum.incrementAndGet()));
+        TransactionId transId = new TransactionId(BigInteger.valueOf(TestUtils.getNewTransactionId()));
         builder.setTransactionId(transId);
         List<GroupDescStats> groupDescStats = new ArrayList<>();
         GroupDescStatsUpdatedBuilder gdsuBuilder = new GroupDescStatsUpdatedBuilder();
@@ -89,7 +86,7 @@ public class OpendaylightGroupStatisticsServiceMock implements OpendaylightGroup
     @Override
     public Future<RpcResult<GetGroupFeaturesOutput>> getGroupFeatures(GetGroupFeaturesInput input) {
         GetGroupFeaturesOutputBuilder builder = new GetGroupFeaturesOutputBuilder();
-        TransactionId transId = new TransactionId(BigInteger.valueOf(transNum.incrementAndGet()));
+        TransactionId transId = new TransactionId(BigInteger.valueOf(TestUtils.getNewTransactionId()));
         builder.setTransactionId(transId);
         GroupFeaturesUpdatedBuilder gfuBuilder = new GroupFeaturesUpdatedBuilder();
         gfuBuilder.setTransactionId(transId);
@@ -105,7 +102,7 @@ public class OpendaylightGroupStatisticsServiceMock implements OpendaylightGroup
     @Override
     public Future<RpcResult<GetGroupStatisticsOutput>> getGroupStatistics(GetGroupStatisticsInput input) {
         GetGroupStatisticsOutputBuilder builder = new GetGroupStatisticsOutputBuilder();
-        TransactionId transId = new TransactionId(BigInteger.valueOf(transNum.incrementAndGet()));
+        TransactionId transId = new TransactionId(BigInteger.valueOf(TestUtils.getNewTransactionId()));
         builder.setTransactionId(transId);
         GroupStatsBuilder gsBuilder = new GroupStatsBuilder();
         List<GroupStats> groupStats = new ArrayList<>();

@@ -1,6 +1,10 @@
 package test.mock.util;
 
 import com.google.common.util.concurrent.Futures;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Future;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
@@ -28,15 +32,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.meter
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicLong;
-
 public class OpendaylightMeterStatisticsServiceMock implements OpendaylightMeterStatisticsService {
     NotificationProviderServiceHelper notifService;
-    AtomicLong transNum = new AtomicLong();
 
     public OpendaylightMeterStatisticsServiceMock(NotificationProviderServiceHelper notifService) {
         this.notifService = notifService;
@@ -45,7 +42,7 @@ public class OpendaylightMeterStatisticsServiceMock implements OpendaylightMeter
     @Override
     public Future<RpcResult<GetAllMeterConfigStatisticsOutput>> getAllMeterConfigStatistics(GetAllMeterConfigStatisticsInput input) {
         GetAllMeterConfigStatisticsOutputBuilder builder = new GetAllMeterConfigStatisticsOutputBuilder();
-        TransactionId transId = new TransactionId(BigInteger.valueOf(transNum.incrementAndGet()));
+        TransactionId transId = new TransactionId(BigInteger.valueOf(TestUtils.getNewTransactionId()));
         builder.setTransactionId(transId);
         List<MeterConfigStats> meterConfigStats = new ArrayList<>();
         MeterConfigStatsBuilder mcsBuilder = new MeterConfigStatsBuilder();
@@ -66,7 +63,7 @@ public class OpendaylightMeterStatisticsServiceMock implements OpendaylightMeter
     @Override
     public Future<RpcResult<GetAllMeterStatisticsOutput>> getAllMeterStatistics(GetAllMeterStatisticsInput input) {
         GetAllMeterStatisticsOutputBuilder builder = new GetAllMeterStatisticsOutputBuilder();
-        TransactionId transId = new TransactionId(BigInteger.valueOf(transNum.incrementAndGet()));
+        TransactionId transId = new TransactionId(BigInteger.valueOf(TestUtils.getNewTransactionId()));
         builder.setTransactionId(transId);
         MeterStatsBuilder msBuilder = new MeterStatsBuilder();
         msBuilder.setByteInCount(StatisticsManagerTest.COUNTER_64_TEST_VALUE);
@@ -86,7 +83,7 @@ public class OpendaylightMeterStatisticsServiceMock implements OpendaylightMeter
     @Override
     public Future<RpcResult<GetMeterFeaturesOutput>> getMeterFeatures(GetMeterFeaturesInput input) {
         GetMeterFeaturesOutputBuilder builder = new GetMeterFeaturesOutputBuilder();
-        TransactionId transId = new TransactionId(BigInteger.valueOf(transNum.incrementAndGet()));
+        TransactionId transId = new TransactionId(BigInteger.valueOf(TestUtils.getNewTransactionId()));
         builder.setTransactionId(transId);
         MeterFeaturesUpdatedBuilder mfuBuilder = new MeterFeaturesUpdatedBuilder();
         mfuBuilder.setTransactionId(transId);
@@ -100,7 +97,7 @@ public class OpendaylightMeterStatisticsServiceMock implements OpendaylightMeter
     @Override
     public Future<RpcResult<GetMeterStatisticsOutput>> getMeterStatistics(GetMeterStatisticsInput input) {
         GetMeterStatisticsOutputBuilder builder = new GetMeterStatisticsOutputBuilder();
-        TransactionId transId = new TransactionId(BigInteger.valueOf(transNum.incrementAndGet()));
+        TransactionId transId = new TransactionId(BigInteger.valueOf(TestUtils.getNewTransactionId()));
         builder.setTransactionId(transId);
         MeterStatsBuilder msBuilder = new MeterStatsBuilder();
         msBuilder.setKey(new MeterStatsKey(input.getMeterId()));

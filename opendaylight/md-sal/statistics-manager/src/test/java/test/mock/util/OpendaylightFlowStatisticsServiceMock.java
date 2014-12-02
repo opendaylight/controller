@@ -1,6 +1,10 @@
 package test.mock.util;
 
 import com.google.common.util.concurrent.Futures;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Future;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.AggregateFlowStatisticsUpdateBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.FlowsStatisticsUpdateBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetAggregateFlowStatisticsFromFlowTableForAllFlowsInput;
@@ -27,15 +31,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicLong;
-
 public class OpendaylightFlowStatisticsServiceMock implements OpendaylightFlowStatisticsService {
     NotificationProviderServiceHelper notifService;
-    AtomicLong transNum = new AtomicLong();
 
     public OpendaylightFlowStatisticsServiceMock(NotificationProviderServiceHelper notifService) {
         this.notifService = notifService;
@@ -44,7 +41,7 @@ public class OpendaylightFlowStatisticsServiceMock implements OpendaylightFlowSt
     @Override
     public Future<RpcResult<GetAggregateFlowStatisticsFromFlowTableForAllFlowsOutput>> getAggregateFlowStatisticsFromFlowTableForAllFlows(GetAggregateFlowStatisticsFromFlowTableForAllFlowsInput input) {
         GetAggregateFlowStatisticsFromFlowTableForAllFlowsOutputBuilder builder = new GetAggregateFlowStatisticsFromFlowTableForAllFlowsOutputBuilder();
-        TransactionId transId = new TransactionId(BigInteger.valueOf(transNum.incrementAndGet()));
+        TransactionId transId = new TransactionId(BigInteger.valueOf(TestUtils.getNewTransactionId()));
         builder.setTransactionId(transId);
         return Futures.immediateFuture(RpcResultBuilder.success(builder.build()).build());
     }
@@ -52,7 +49,7 @@ public class OpendaylightFlowStatisticsServiceMock implements OpendaylightFlowSt
     @Override
     public Future<RpcResult<GetAggregateFlowStatisticsFromFlowTableForGivenMatchOutput>> getAggregateFlowStatisticsFromFlowTableForGivenMatch(GetAggregateFlowStatisticsFromFlowTableForGivenMatchInput input) {
         GetAggregateFlowStatisticsFromFlowTableForGivenMatchOutputBuilder builder = new GetAggregateFlowStatisticsFromFlowTableForGivenMatchOutputBuilder();
-        TransactionId transId = new TransactionId(BigInteger.valueOf(transNum.incrementAndGet()));
+        TransactionId transId = new TransactionId(BigInteger.valueOf(TestUtils.getNewTransactionId()));
         builder.setTransactionId(transId);
         AggregateFlowStatisticsUpdateBuilder afsuBuilder = new AggregateFlowStatisticsUpdateBuilder();
         afsuBuilder.setMoreReplies(false);
@@ -66,7 +63,7 @@ public class OpendaylightFlowStatisticsServiceMock implements OpendaylightFlowSt
     @Override
     public Future<RpcResult<GetAllFlowStatisticsFromFlowTableOutput>> getAllFlowStatisticsFromFlowTable(GetAllFlowStatisticsFromFlowTableInput input) {
         GetAllFlowStatisticsFromFlowTableOutputBuilder builder = new GetAllFlowStatisticsFromFlowTableOutputBuilder();
-        TransactionId transId = new TransactionId(BigInteger.valueOf(transNum.incrementAndGet()));
+        TransactionId transId = new TransactionId(BigInteger.valueOf(TestUtils.getNewTransactionId()));
         builder.setTransactionId(transId);
         return Futures.immediateFuture(RpcResultBuilder.success(builder.build()).build());
     }
@@ -74,7 +71,7 @@ public class OpendaylightFlowStatisticsServiceMock implements OpendaylightFlowSt
     @Override
     public Future<RpcResult<GetAllFlowsStatisticsFromAllFlowTablesOutput>> getAllFlowsStatisticsFromAllFlowTables(GetAllFlowsStatisticsFromAllFlowTablesInput input) {
         GetAllFlowsStatisticsFromAllFlowTablesOutputBuilder builder = new GetAllFlowsStatisticsFromAllFlowTablesOutputBuilder();
-        TransactionId transId = new TransactionId(BigInteger.valueOf(transNum.incrementAndGet()));
+        TransactionId transId = new TransactionId(BigInteger.valueOf(TestUtils.getNewTransactionId()));
         builder.setTransactionId(transId);
         List<FlowAndStatisticsMapList> flowAndStatisticsMapLists = new ArrayList<>();
         FlowsStatisticsUpdateBuilder flowsStatisticsUpdateBuilder = new FlowsStatisticsUpdateBuilder();
@@ -95,7 +92,7 @@ public class OpendaylightFlowStatisticsServiceMock implements OpendaylightFlowSt
     @Override
     public Future<RpcResult<GetFlowStatisticsFromFlowTableOutput>> getFlowStatisticsFromFlowTable(GetFlowStatisticsFromFlowTableInput input) {
         GetFlowStatisticsFromFlowTableOutputBuilder builder = new GetFlowStatisticsFromFlowTableOutputBuilder();
-        TransactionId transId = new TransactionId(BigInteger.valueOf(transNum.incrementAndGet()));
+        TransactionId transId = new TransactionId(BigInteger.valueOf(TestUtils.getNewTransactionId()));
         builder.setTransactionId(transId);
         List<FlowAndStatisticsMapList> flowAndStatisticsMapLists = new ArrayList<>();
         FlowsStatisticsUpdateBuilder flowsStatisticsUpdateBuilder = new FlowsStatisticsUpdateBuilder();
