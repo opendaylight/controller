@@ -10,6 +10,8 @@ package org.opendaylight.controller.netconf.nettyutil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
+import io.netty.handler.codec.ByteToMessageDecoder;
+import io.netty.handler.codec.MessageToByteEncoder;
 import java.io.IOException;
 import org.opendaylight.controller.netconf.api.NetconfExiSession;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
@@ -17,6 +19,8 @@ import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfSessionListener;
 import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
 import org.opendaylight.controller.netconf.nettyutil.handler.NetconfEXICodec;
+import org.opendaylight.controller.netconf.nettyutil.handler.NetconfEXIToMessageDecoder;
+import org.opendaylight.controller.netconf.nettyutil.handler.NetconfMessageToEXIEncoder;
 import org.opendaylight.controller.netconf.nettyutil.handler.exi.EXIParameters;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.protocol.framework.AbstractProtocolSession;
@@ -116,12 +120,22 @@ public abstract class AbstractNetconfSession<S extends NetconfSession, L extends
             LOG.warn("Unable to parse EXI parameters from {} on session {}", startExiMessage, this, e);
             throw new IllegalArgumentException("Cannot parse options", e);
         }
+
         final NetconfEXICodec exiCodec = new NetconfEXICodec(exiParams.getOptions());
-        addExiHandlers(exiCodec);
+        final NetconfMessageToEXIEncoder exiEncoder = new NetconfMessageToEXIEncoder(exiCodec);
+        final NetconfEXIToMessageDecoder exiDecoder = new NetconfEXIToMessageDecoder(exiCodec);
+        addExiHandlers(exiDecoder, exiEncoder);
+
         LOG.debug("Session {} EXI handlers added to pipeline", this);
     }
 
-    protected abstract void addExiHandlers(NetconfEXICodec exiCodec);
+    /**
+     * Add a set encoder/decoder tuple into the channel pipeline as appropriate.
+     *
+     * @param decoder EXI decoder
+     * @param encoder EXI encoder
+     */
+    protected abstract void addExiHandlers(ByteToMessageDecoder decoder, MessageToByteEncoder<NetconfMessage> encoder);
 
     public final boolean isUp() {
         return up;
