@@ -15,6 +15,7 @@ import io.netty.handler.codec.MessageToByteEncoder;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXResult;
@@ -23,13 +24,23 @@ import org.openexi.proc.common.EXIOptionsException;
 import org.openexi.sax.Transmogrifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.ContentHandler;
 
 public final class NetconfMessageToEXIEncoder extends MessageToByteEncoder<NetconfMessage> {
     private static final Logger LOG = LoggerFactory.getLogger(NetconfMessageToEXIEncoder.class);
-    private final NetconfEXICodec codec;
+    /**
+     * This class is not marked as shared, so it can be attached to only a single channel,
+     * which means that {@link #encode(ChannelHandlerContext, NetconfMessage, ByteBuf)}
+     * cannot be invoked concurrently. Hence we can reuse the transmogrifier.
+     */
+    private final Transmogrifier transmogrifier;
 
-    public NetconfMessageToEXIEncoder(final NetconfEXICodec codec) {
-        this.codec = Preconditions.checkNotNull(codec);
+    private NetconfMessageToEXIEncoder(final Transmogrifier transmogrifier) {
+        this.transmogrifier = Preconditions.checkNotNull(transmogrifier);
+    }
+
+    public static NetconfMessageToEXIEncoder create(final NetconfEXICodec codec) throws EXIOptionsException {
+        return new NetconfMessageToEXIEncoder(codec.getTransmogrifier());
     }
 
     @Override
@@ -37,7 +48,6 @@ public final class NetconfMessageToEXIEncoder extends MessageToByteEncoder<Netco
         LOG.trace("Sent to encode : {}", msg);
 
         try (final OutputStream os = new ByteBufOutputStream(out)) {
-            final Transmogrifier transmogrifier = codec.getTransmogrifier();
             /*
              * Writing directly into ByteButOutputStream is costly due to sanity checks
              * done by Netty. Instantiating a frontend buffer improves efficiency here,
@@ -45,7 +55,14 @@ public final class NetconfMessageToEXIEncoder extends MessageToByteEncoder<Netco
              */
             transmogrifier.setOutputStream(new BufferedOutputStream(os));
 
-            ThreadLocalTransformers.getDefaultTransformer().transform(new DOMSource(msg.getDocument()), new SAXResult(transmogrifier.getSAXTransmogrifier()));
+            final ContentHandler handler = transmogrifier.getSAXTransmogrifier();
+            final Transformer transformer = ThreadLocalTransformers.getDefaultTransformer();
+            transformer.transform(new DOMSource(msg.getDocument()), new SAXResult(handler));
+        } finally {
+            // Make sure we do not retain any reference to state by removing
+            // the output stream reference and resetting internal state.
+            transmogrifier.setOutputStream(null);
+            transmogrifier.getSAXTransmogrifier();
         }
     }
 }
