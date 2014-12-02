@@ -15,11 +15,9 @@ import io.netty.handler.codec.MessageToByteEncoder;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXResult;
-import javax.xml.transform.sax.SAXTransformerFactory;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.openexi.proc.common.EXIOptionsException;
@@ -28,10 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class NetconfMessageToEXIEncoder extends MessageToByteEncoder<NetconfMessage> {
-
     private static final Logger LOG = LoggerFactory.getLogger(NetconfMessageToEXIEncoder.class);
-
-    private static final SAXTransformerFactory saxTransformerFactory = (SAXTransformerFactory)SAXTransformerFactory.newInstance();
     private final NetconfEXICodec codec;
 
     public NetconfMessageToEXIEncoder(final NetconfEXICodec codec) {
@@ -53,8 +48,7 @@ public final class NetconfMessageToEXIEncoder extends MessageToByteEncoder<Netco
              */
             transmogrifier.setOutputStream(new BufferedOutputStream(os));
 
-            final Transformer transformer = saxTransformerFactory.newTransformer();
-            transformer.transform(new DOMSource(msg.getDocument()), new SAXResult(transmogrifier.getSAXTransmogrifier()));
+            ThreadLocalTransformers.getDefaultTransformer().transform(new DOMSource(msg.getDocument()), new SAXResult(transmogrifier.getSAXTransmogrifier()));
         }
     }
 }
