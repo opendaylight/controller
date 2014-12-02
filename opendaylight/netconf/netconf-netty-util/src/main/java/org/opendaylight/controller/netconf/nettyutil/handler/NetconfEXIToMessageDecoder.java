@@ -13,18 +13,22 @@ import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TransformerHandler;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.openexi.proc.common.EXIOptionsException;
 import org.openexi.sax.EXIReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 public final class NetconfEXIToMessageDecoder extends ByteToMessageDecoder {
 
@@ -37,7 +41,7 @@ public final class NetconfEXIToMessageDecoder extends ByteToMessageDecoder {
     }
 
     @Override
-    protected void decode(final ChannelHandlerContext ctx, final ByteBuf in, final List<Object> out) throws Exception {
+    protected void decode(final ChannelHandlerContext ctx, final ByteBuf in, final List<Object> out) throws EXIOptionsException, IOException, SAXException, TransformerConfigurationException  {
         /*
          * Note that we could loop here and process all the messages, but we can't do that.
          * The reason is <stop-exi> operation, which has the contract of immediately stopping
@@ -46,12 +50,14 @@ public final class NetconfEXIToMessageDecoder extends ByteToMessageDecoder {
          */
 
         // If empty Byte buffer is passed to r.parse, EOFException is thrown
-        if (in.isReadable() == false) {
+        if (!in.isReadable()) {
             LOG.debug("No more content in incoming buffer.");
             return;
         }
 
-        LOG.trace("Received to decode: {}", ByteBufUtil.hexDump(in));
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Received to decode: {}", ByteBufUtil.hexDump(in));
+        }
 
         final EXIReader r = codec.getReader();
 
