@@ -131,9 +131,15 @@ public abstract class AbstractNetconfSession<S extends NetconfSession, L extends
             throw new IllegalStateException("Cannot instantiate encoder for options", e);
         }
 
-        final NetconfEXIToMessageDecoder exiDecoder = new NetconfEXIToMessageDecoder(exiCodec);
-        addExiHandlers(exiDecoder, exiEncoder);
+        final NetconfEXIToMessageDecoder exiDecoder;
+        try {
+            exiDecoder = NetconfEXIToMessageDecoder.create(exiCodec);
+        } catch (EXIOptionsException e) {
+            LOG.warn("Failed to instantiate EXI decodeer for {} on session {}", exiCodec, this, e);
+            throw new IllegalStateException("Cannot instantiate encoder for options", e);
+        }
 
+        addExiHandlers(exiDecoder, exiEncoder);
         LOG.debug("Session {} EXI handlers added to pipeline", this);
     }
 
