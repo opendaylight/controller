@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TransformerHandler;
@@ -33,6 +32,7 @@ import org.xml.sax.SAXException;
 public final class NetconfEXIToMessageDecoder extends ByteToMessageDecoder {
 
     private static final Logger LOG = LoggerFactory.getLogger(NetconfEXIToMessageDecoder.class);
+    private static final SAXTransformerFactory FACTORY = (SAXTransformerFactory) SAXTransformerFactory.newInstance();
 
     private final NetconfEXICodec codec;
 
@@ -60,10 +60,7 @@ public final class NetconfEXIToMessageDecoder extends ByteToMessageDecoder {
         }
 
         final EXIReader r = codec.getReader();
-
-        final SAXTransformerFactory transformerFactory
-            = (SAXTransformerFactory) TransformerFactory.newInstance();
-        final TransformerHandler handler = transformerFactory.newTransformerHandler();
+        final TransformerHandler handler = FACTORY.newTransformerHandler();
         r.setContentHandler(handler);
 
         final DOMResult domResult = new DOMResult();
