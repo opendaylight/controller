@@ -9,11 +9,11 @@
 package org.opendaylight.controller.netconf.client;
 
 import io.netty.channel.Channel;
+import io.netty.handler.codec.ByteToMessageDecoder;
+import io.netty.handler.codec.MessageToByteEncoder;
 import java.util.Collection;
+import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.nettyutil.AbstractNetconfSession;
-import org.opendaylight.controller.netconf.nettyutil.handler.NetconfEXICodec;
-import org.opendaylight.controller.netconf.nettyutil.handler.NetconfEXIToMessageDecoder;
-import org.opendaylight.controller.netconf.nettyutil.handler.NetconfMessageToEXIEncoder;
 import org.opendaylight.controller.netconf.nettyutil.handler.NetconfMessageToXMLEncoder;
 import org.opendaylight.controller.netconf.nettyutil.handler.NetconfXMLToMessageDecoder;
 import org.slf4j.Logger;
@@ -49,10 +49,10 @@ public class NetconfClientSession extends AbstractNetconfSession<NetconfClientSe
     }
 
     @Override
-    protected void addExiHandlers(final NetconfEXICodec exiCodec) {
+    protected void addExiHandlers(final ByteToMessageDecoder decoder, final MessageToByteEncoder<NetconfMessage> encoder) {
         // TODO used only in negotiator, client supports only auto start-exi
-        replaceMessageDecoder(new NetconfEXIToMessageDecoder(exiCodec));
-        replaceMessageEncoder(new NetconfMessageToEXIEncoder(exiCodec));
+        replaceMessageDecoder(decoder);
+        replaceMessageEncoder(encoder);
     }
 
     @Override
