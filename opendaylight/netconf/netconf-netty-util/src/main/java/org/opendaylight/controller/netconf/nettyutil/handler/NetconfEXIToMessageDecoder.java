@@ -33,11 +33,19 @@ public final class NetconfEXIToMessageDecoder extends ByteToMessageDecoder {
 
     private static final Logger LOG = LoggerFactory.getLogger(NetconfEXIToMessageDecoder.class);
     private static final SAXTransformerFactory FACTORY = (SAXTransformerFactory) SAXTransformerFactory.newInstance();
+    /**
+     * This class is not marked as shared, so it can be attached to only a single channel,
+     * which means that {@link #decode(ChannelHandlerContext, ByteBuf, List)}
+     * cannot be invoked concurrently. Hence we can reuse the reader.
+     */
+    private final EXIReader reader;
 
-    private final NetconfEXICodec codec;
+    private NetconfEXIToMessageDecoder(final EXIReader reader) {
+        this.reader = Preconditions.checkNotNull(reader);
+    }
 
-    public NetconfEXIToMessageDecoder(final NetconfEXICodec codec) {
-        this.codec = Preconditions.checkNotNull(codec);
+    public static NetconfEXIToMessageDecoder create(final NetconfEXICodec codec) throws EXIOptionsException {
+        return new NetconfEXIToMessageDecoder(codec.getReader());
     }
 
     @Override
@@ -59,15 +67,15 @@ public final class NetconfEXIToMessageDecoder extends ByteToMessageDecoder {
             LOG.trace("Received to decode: {}", ByteBufUtil.hexDump(in));
         }
 
-        final EXIReader r = codec.getReader();
         final TransformerHandler handler = FACTORY.newTransformerHandler();
-        r.setContentHandler(handler);
+        reader.setContentHandler(handler);
 
         final DOMResult domResult = new DOMResult();
         handler.setResult(domResult);
 
         try (final InputStream is = new ByteBufInputStream(in)) {
-            r.parse(new InputSource(is));
+            // Performs internal reset before doing anything
+            reader.parse(new InputSource(is));
         }
 
         out.add(new NetconfMessage((Document) domResult.getNode()));
