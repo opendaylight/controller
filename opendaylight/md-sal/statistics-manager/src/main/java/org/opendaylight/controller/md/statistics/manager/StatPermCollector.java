@@ -10,6 +10,7 @@ package org.opendaylight.controller.md.statistics.manager;
 
 import java.util.List;
 
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
@@ -112,7 +113,7 @@ public interface StatPermCollector extends Runnable, AutoCloseable {
      * It is call from collecting allStatistics methods as a future result for
      * Operational/DS statistic store call (does not matter in the outcome).
      */
-    void collectNextStatistics();
+    void collectNextStatistics(TransactionId xid);
 
     /**
      * Method returns true if collector has registered some active nodes

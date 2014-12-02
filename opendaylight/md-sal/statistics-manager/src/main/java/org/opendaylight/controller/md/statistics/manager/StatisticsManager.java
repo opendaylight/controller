@@ -20,6 +20,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.me
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.OpendaylightFlowStatisticsListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.OpendaylightFlowTableStatisticsListener;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.Queue;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.OpendaylightGroupStatisticsListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.groups.Group;
@@ -97,7 +98,7 @@ public interface StatisticsManager extends AutoCloseable, TransactionChainListen
       *
       * @param nodeIdent
       */
-     void collectNextStatistics(InstanceIdentifier<Node> nodeIdent);
+     void collectNextStatistics(InstanceIdentifier<Node> nodeIdent, TransactionId xid);
 
      /**
       * Method wraps {@link StatPermCollector}.connectedNodeRegistration to provide
