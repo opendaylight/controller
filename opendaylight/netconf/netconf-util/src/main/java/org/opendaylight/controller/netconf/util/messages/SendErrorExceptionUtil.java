@@ -37,17 +37,20 @@ public final class SendErrorExceptionUtil {
         f.addListener(new SendErrorVerifyingListener(sendErrorException));
     }
 
-    public static void sendErrorMessage(Channel channel, NetconfDocumentedException sendErrorException) {
+    public static void sendErrorMessage(final Channel channel, final NetconfDocumentedException sendErrorException) {
         LOG.trace("Sending error {}", sendErrorException.getMessage(), sendErrorException);
         final Document errorDocument = createDocument(sendErrorException);
         ChannelFuture f = channel.writeAndFlush(new NetconfMessage(errorDocument));
         f.addListener(new SendErrorVerifyingListener(sendErrorException));
     }
 
-    public static void sendErrorMessage(NetconfSession session, NetconfDocumentedException sendErrorException,
-            NetconfMessage incommingMessage) {
+    public static void sendErrorMessage(final NetconfSession session, final NetconfDocumentedException sendErrorException,
+            final NetconfMessage incommingMessage) {
         final Document errorDocument = createDocument(sendErrorException);
-        LOG.trace("Sending error {}", XmlUtil.toString(errorDocument));
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Sending error {}", XmlUtil.toString(errorDocument));
+        }
+
         tryToCopyAttributes(incommingMessage.getDocument(), errorDocument, sendErrorException);
         ChannelFuture f = session.sendMessage(new NetconfMessage(errorDocument));
         f.addListener(new SendErrorVerifyingListener(sendErrorException));
