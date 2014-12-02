@@ -54,7 +54,7 @@ public class NetconfClientSessionTest {
         Mockito.doReturn("").when(channelHandler).toString();
 
         NetconfClientSession session = new NetconfClientSession(sessionListener, channel, sessId, caps);
-        final NetconfMessageToEXIEncoder exiEncoder = new NetconfMessageToEXIEncoder(codec);
+        final NetconfMessageToEXIEncoder exiEncoder = NetconfMessageToEXIEncoder.create(codec);
         final NetconfEXIToMessageDecoder exiDecoder = new NetconfEXIToMessageDecoder(codec);
         session.addExiHandlers(exiDecoder, exiEncoder);
         session.stopExiCommunication();
