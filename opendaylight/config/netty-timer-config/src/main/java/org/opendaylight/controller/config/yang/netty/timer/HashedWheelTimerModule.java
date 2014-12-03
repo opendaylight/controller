@@ -24,6 +24,7 @@ import io.netty.util.TimerTask;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.config.api.JmxAttributeValidationException;
+import sun.misc.Unsafe;
 
 /**
 *

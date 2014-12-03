@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.config.manager.impl.dependencyresolver;
 
+import com.google.common.base.Preconditions;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.manager.impl.ModuleInternalInfo;
@@ -70,10 +71,7 @@ public class ModuleInternalTransactionalInfo implements Identifiable<ModuleIdent
 
     @Nullable
     public ModuleInternalInfo getOldInternalInfo() {
-        if (maybeOldInternalInfo == null) {
-            throw new NullPointerException();
-        }
-        return maybeOldInternalInfo;
+        return Preconditions.checkNotNull(maybeOldInternalInfo);
     }
 
     public TransactionModuleJMXRegistration getTransactionModuleJMXRegistration() {
