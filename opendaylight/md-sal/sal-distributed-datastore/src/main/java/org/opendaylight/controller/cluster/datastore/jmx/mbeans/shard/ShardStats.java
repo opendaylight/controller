@@ -220,12 +220,12 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
         this.lastCommittedTransactionTime = lastCommittedTransactionTime;
     }
 
-    public void setDataSize(long dataSize){
+    public void setInMemoryJournalDataSize(long dataSize){
         this.dataSize = dataSize;
     }
 
     @Override
-    public long getDataSize(){
+    public long getInMemoryJournalDataSize(){
         return dataSize;
     }
 

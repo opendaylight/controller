@@ -52,5 +52,5 @@ public interface ShardStatsMXBean {
 
    void resetTransactionCounters();
 
-   long getDataSize();
+   long getInMemoryJournalDataSize();
 }
