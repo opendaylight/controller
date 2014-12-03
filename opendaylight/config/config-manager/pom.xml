@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>config-subsystem</artifactId>
-    <version>0.3.0-SNAPSHOT</version>
+    <version>0.3.1-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
   <artifactId>config-manager</artifactId>
@@ -83,7 +83,7 @@
             <Bundle-Activator>org.opendaylight.controller.config.manager.impl.osgi.ConfigManagerActivator</Bundle-Activator>
             <Private-Package>org.opendaylight.controller.config.manager.*,
                             javax.annotation.*,</Private-Package>
-            <Export-Package></Export-Package>
+            <Export-Package />
           </instructions>
         </configuration>
       </plugin>

@@ -66,7 +66,7 @@
     <commons.httpclient.version>0.2.0-SNAPSHOT</commons.httpclient.version>
     <concepts.version>0.6.0-SNAPSHOT</concepts.version>
     <concurrentlinkedhashmap.version>1.4</concurrentlinkedhashmap.version>
-    <config.version>0.3.0-SNAPSHOT</config.version>
+    <config.version>0.3.1-SNAPSHOT</config.version>
     <aaa.version>0.2.0-SNAPSHOT</aaa.version>
     <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
     <config.clustering.configfile>05-clustering.xml</config.clustering.configfile>

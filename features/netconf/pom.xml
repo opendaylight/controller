@@ -109,14 +109,14 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>netconf-config</artifactId>
-      <version>${config.version}</version>
+      <version>${netconf.version}</version>
       <type>xml</type>
       <classifier>config</classifier>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>netconf-connector-config</artifactId>
-      <version>${config.version}</version>
+      <version>${netconf.version}</version>
       <type>xml</type>
       <classifier>config</classifier>
     </dependency>
