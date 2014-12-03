@@ -15,10 +15,11 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import javax.annotation.Nullable;
-import javax.management.DynamicMBean;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
+import javax.management.IntrospectionException;
 import javax.management.ObjectName;
+import javax.management.ReflectionException;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
@@ -37,20 +38,17 @@ public class TwoInterfacesExportTest extends AbstractScheduledTest {
 
     private void assertExists(@Nullable final ConfigTransactionJMXClient transaction,
             final String moduleName, final String instanceName)
-            throws InstanceNotFoundException {
+            throws InstanceNotFoundException, IntrospectionException, ReflectionException {
         if (transaction != null) {
             transaction.lookupConfigBean(moduleName, instanceName);
             // make a dummy call
-            configRegistryClient.newMBeanProxy(
-                    ObjectNameUtil.createTransactionModuleON(
-                            transaction.getTransactionName(), moduleName,
-                            instanceName), DynamicMBean.class).getMBeanInfo();
+            platformMBeanServer.getMBeanInfo(ObjectNameUtil.createTransactionModuleON(
+                    transaction.getTransactionName(), moduleName, instanceName));
         } else {
             configRegistryClient.lookupConfigBean(moduleName, instanceName);
             // make a dummy call
-            configRegistryClient.newMBeanProxy(
-                    ObjectNameUtil.createReadOnlyModuleON(moduleName,
-                            instanceName), DynamicMBean.class).getMBeanInfo();
+            platformMBeanServer.getMBeanInfo(ObjectNameUtil.createReadOnlyModuleON(moduleName,
+                    instanceName));
         }
     }
 
@@ -173,7 +171,7 @@ public class TwoInterfacesExportTest extends AbstractScheduledTest {
 
         ObjectName apspName = transaction.createModule(
                 TestingParallelAPSPModuleFactory.NAME, "apsp1");
-        TestingParallelAPSPConfigMXBean apspProxy = transaction.newMBeanProxy(
+        TestingParallelAPSPConfigMXBean apspProxy = transaction.newMXBeanProxy(
                 apspName, TestingParallelAPSPConfigMXBean.class);
         apspProxy.setThreadPool(scheduledName);
         apspProxy.setSomeParam("someParam");
@@ -190,7 +188,7 @@ public class TwoInterfacesExportTest extends AbstractScheduledTest {
 
         ObjectName apspName = transaction.createModule(
                 TestingParallelAPSPModuleFactory.NAME, "apsp1");
-        TestingParallelAPSPConfigMXBean apspProxy = transaction.newMBeanProxy(
+        TestingParallelAPSPConfigMXBean apspProxy = transaction.newMXBeanProxy(
                 apspName, TestingParallelAPSPConfigMXBean.class);
         apspProxy.setThreadPool(ObjectNameUtil.createReadOnlyModuleON(
                 TestingScheduledThreadPoolModuleFactory.NAME, scheduled1));

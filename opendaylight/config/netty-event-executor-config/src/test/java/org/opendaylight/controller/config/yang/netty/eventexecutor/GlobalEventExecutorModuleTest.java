@@ -79,7 +79,7 @@ public class GlobalEventExecutorModuleTest extends AbstractConfigTest {
     private ObjectName createInstance(ConfigTransactionJMXClient transaction, String instanceName)
             throws InstanceAlreadyExistsException {
         ObjectName nameCreated = transaction.createModule(factory.getImplementationName(), instanceName);
-        transaction.newMBeanProxy(nameCreated, GlobalEventExecutorModuleMXBean.class);
+        transaction.newMXBeanProxy(nameCreated, GlobalEventExecutorModuleMXBean.class);
         return nameCreated;
     }
 
