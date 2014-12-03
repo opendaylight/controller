@@ -120,5 +120,4 @@ public class ConfigTransactionControllerImplTest extends
                 moduleName124, instanceName134);
         assertEquals(Sets.newHashSet(name1), beans);
     }
-
 }
