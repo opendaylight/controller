@@ -40,6 +40,7 @@ public class NetconfMonitoringActivatorTest {
         ServiceReference<?>[] refs = new ServiceReference[2];
         doReturn(Arrays.asList(refs)).when(context).getServiceReferences(any(Class.class), anyString());
         doReturn(refs).when(context).getServiceReferences(anyString(), anyString());
+        doNothing().when(context).removeServiceListener(any(ServiceListener.class));
     }
 
     @Test
