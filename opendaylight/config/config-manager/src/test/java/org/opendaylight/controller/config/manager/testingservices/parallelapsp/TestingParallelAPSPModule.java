@@ -147,6 +147,11 @@ public class TestingParallelAPSPModule implements Module,
     }
 
     @Override
+    public boolean canReuse(final Module oldModule) {
+        return false;
+    }
+
+    @Override
     public ModuleIdentifier getIdentifier() {
         return identifier;
     }
