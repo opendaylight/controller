@@ -54,4 +54,17 @@ public interface Module extends Identifiable<ModuleIdentifier>{
      */
     AutoCloseable getInstance();
 
+
+    /**
+     * Compare current module with oldModule and if the instance/live object
+     * produced by the old module can be reused in this module as well return true.
+     * Typically true should be returned if the old module had the same configuration.
+     *
+     *
+     * @param oldModule old instance of Module
+     * @return true if the instance produced by oldModule can be reused with current instance as well.
+     */
+    public boolean canReuse(Module oldModule);
+
+
 }

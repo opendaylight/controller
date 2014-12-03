@@ -40,6 +40,7 @@ public class FixedThreadPoolConfigBeanTest extends AbstractConfigTest {
 
     private FixedThreadPoolModuleFactory factory;
     private final String nameInstance = "fixedInstance";
+    private ObjectName threadFactoryON;
 
     @Before
     public void setUp() {
@@ -73,10 +74,12 @@ public class FixedThreadPoolConfigBeanTest extends AbstractConfigTest {
         assertBeanCount(1, factory.getImplementationName());
 
         transaction = configRegistryClient.createTransaction();
+        NamingThreadFactoryModuleMXBean namingThreadFactoryModuleMXBean = transaction.newMXBeanProxy(threadFactoryON, NamingThreadFactoryModuleMXBean.class);
+        namingThreadFactoryModuleMXBean.setNamePrefix("newPrefix");
         CommitStatus status = transaction.commit();
 
         assertBeanCount(1, factory.getImplementationName());
-        assertStatus(status, 0, 0, 2);
+        assertStatus(status, 0, 2, 0);
     }
 
     @Test
@@ -161,7 +164,7 @@ public class FixedThreadPoolConfigBeanTest extends AbstractConfigTest {
         FixedThreadPoolModuleMXBean mxBean = transaction.newMXBeanProxy(nameCreated, FixedThreadPoolModuleMXBean.class);
         mxBean.setMaxThreadCount(numberOfThreads);
 
-        ObjectName threadFactoryON = transaction.createModule(NamingThreadFactoryModuleFactory.NAME, "naming");
+        threadFactoryON = transaction.createModule(NamingThreadFactoryModuleFactory.NAME, "naming");
         NamingThreadFactoryModuleMXBean namingThreadFactoryModuleMXBean = transaction.newMXBeanProxy(threadFactoryON,
                 NamingThreadFactoryModuleMXBean.class);
         namingThreadFactoryModuleMXBean.setNamePrefix(prefix);
