@@ -468,7 +468,23 @@ module config-test-impl {
                         }
                     }
                 }
+
+                container single {
+                        uses config:service-ref {
+                            refine type {
+                                mandatory false;
+                                config:required-identity test:testing;
+                            }
+                        }
+                }
+
+                leaf simple {
+                    type boolean;
+                    default false;
+                }
+
             }
+
         }
     }
 

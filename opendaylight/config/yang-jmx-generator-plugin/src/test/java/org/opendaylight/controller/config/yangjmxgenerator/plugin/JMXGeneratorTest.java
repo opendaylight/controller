@@ -63,6 +63,7 @@ import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
 import org.opendaylight.controller.config.api.annotations.Description;
 import org.opendaylight.controller.config.api.annotations.RequireInterface;
 import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation;
+import org.opendaylight.controller.config.spi.AbstractModule;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.controller.config.yangjmxgenerator.ConfigConstants;
@@ -520,11 +521,11 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
         assertContains(visitor.implmts,
                 PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
                         + ".threads.java.DynamicThreadPoolModuleMXBean",
-                Module.class.getCanonicalName(),
                 PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
                         + ".threads.ScheduledThreadPoolServiceInterface",
                 PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
                         + ".threads.ThreadPoolServiceInterface");
+        assertContains(visitor.extnds, AbstractModule.class.getCanonicalName());
         assertEquals(2, visitor.constructors.size());
         Set<String> fieldDeclarations = visitor.fieldDeclarations;
         assertDeclaredField(fieldDeclarations,
@@ -538,7 +539,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
         assertDeclaredField(fieldDeclarations,
                 "private java.lang.Long coreSize");
         assertDeclaredField(fieldDeclarations, "private byte[] binary");
-        assertEquals(22, fieldDeclarations.size());
+        assertEquals(17, fieldDeclarations.size());
 
         assertEquals(1, visitor.requireIfc.size());
         String reqIfc = visitor.requireIfc.get("setThreadfactory");
@@ -546,7 +547,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
         assertContains(reqIfc, PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
                 + ".threads.ThreadFactoryServiceInterface");
 
-        assertEquals("Incorrenct number of generated methods", 27,
+        assertEquals("Incorrenct number of generated methods", 26,
                 visitor.methods.size());
         assertEquals("Incorrenct number of generated method descriptions", 3,
                 visitor.methodDescriptions.size());
