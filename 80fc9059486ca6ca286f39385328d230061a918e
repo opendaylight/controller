@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_e7097796",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/raft/protobuff/client/messages/CompositeModificationByteStringPayload.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-12-03T23:58:24Z",
+      "side": 1,
+      "message": "This is actually called when we need to send an append entry - so there will be a perf hit there. This transient object though gets cleaned up quickly vs the replicated log entry which hangs around for a while and gets into old-gen.",
+      "parentUuid": "7a96c907_c788fb24",
+      "revId": "80fc9059486ca6ca286f39385328d230061a918e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_67924759",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/raft/protobuff/client/messages/CompositeModificationByteStringPayload.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-12-03T21:39:55Z",
       "side": 1,
       "message": "Is this a performance hit? I assume this is called to decode from persistence. The constructor will serialize back to byte stream even though we just de-serialized. When Shard  calls getModification, we de-serialized again. So it seems we\u0027re doing extra an serialization and de-serialization.",
+      "revId": "80fc9059486ca6ca286f39385328d230061a918e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_c7047b80",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/raft/protobuff/client/messages/CompositeModificationByteStringPayload.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-12-03T23:58:24Z",
+      "side": 1,
+      "message": "Agreed, I should use the byte string here.",
+      "parentUuid": "7a96c907_67924759",
       "revId": "80fc9059486ca6ca286f39385328d230061a918e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
