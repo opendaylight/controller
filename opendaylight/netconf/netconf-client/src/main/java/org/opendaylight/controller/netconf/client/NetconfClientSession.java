@@ -36,7 +36,7 @@ public class NetconfClientSession extends AbstractNetconfSession<NetconfClientSe
             final Collection<String> capabilities) {
         super(sessionListener, channel, sessionId);
         this.capabilities = capabilities;
-        LOG.debug("Client Session {} created", toString());
+        LOG.debug("Client Session {} created", this);
     }
 
     public Collection<String> getServerCapabilities() {
