@@ -23,7 +23,7 @@ import org.opendaylight.controller.config.api.IdentityAttributeRef;
 import org.opendaylight.controller.config.api.RuntimeBeanRegistratorAwareModule;
 import org.opendaylight.controller.config.api.annotations.AbstractServiceInterface;
 import org.opendaylight.controller.config.api.runtime.RuntimeBean;
-import org.opendaylight.controller.config.spi.Module;
+import org.opendaylight.controller.config.spi.AbstractModule;
 import org.opendaylight.controller.config.yangjmxgenerator.AbstractEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
@@ -196,7 +196,6 @@ public class TemplateFactory {
 
         List<ModuleField> moduleFields = attrProcessor.getModuleFields();
         List<String> implementedIfcs = Lists.newArrayList(
-                Module.class.getCanonicalName(),
                 mbe.getFullyQualifiedName(mbe.getMXBeanInterfaceName()));
 
         for (String implementedService : mbe.getProvidedServices().keySet()) {
@@ -218,9 +217,11 @@ public class TemplateFactory {
                     .getCanonicalName());
         }
 
+        List<String> extendedClasses = Collections.singletonList(AbstractModule.class.getCanonicalName() + "<" + mbe.getAbstractModuleName() + ">");
+
         AbstractModuleTemplate abstractModuleTemplate = new AbstractModuleTemplate(
                 getHeaderFromEntry(mbe), mbe.getPackageName(),
-                mbe.getAbstractModuleName(), implementedIfcs, moduleFields,
+                mbe.getAbstractModuleName(), extendedClasses, implementedIfcs, moduleFields,
                 attrProcessor.getMethods(), generateRuntime,
                 registratorFullyQualifiedName);
 
