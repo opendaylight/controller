@@ -14,7 +14,6 @@ import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -84,11 +83,11 @@ public class ConcurrentClientsTest {
     private static final int CONCURRENCY = 32;
     private static final InetSocketAddress netconfAddress = new InetSocketAddress("127.0.0.1", 8303);
 
-    private int nettyThreads;
-    private Class<? extends Runnable> clientRunnable;
-    private Set<String> serverCaps;
+    private final int nettyThreads;
+    private final Class<? extends Runnable> clientRunnable;
+    private final Set<String> serverCaps;
 
-    public ConcurrentClientsTest(int nettyThreads, Class<? extends Runnable> clientRunnable, Set<String> serverCaps) {
+    public ConcurrentClientsTest(final int nettyThreads, final Class<? extends Runnable> clientRunnable, final Set<String> serverCaps) {
         this.nettyThreads = nettyThreads;
         this.clientRunnable = clientRunnable;
         this.serverCaps = serverCaps;
@@ -156,10 +155,10 @@ public class ConcurrentClientsTest {
         commitNot = new DefaultCommitNotificationProducer(ManagementFactory.getPlatformMBeanServer());
 
         NetconfServerDispatcher.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerChannelInitializer(serverNegotiatorFactory);
-        final NetconfServerDispatcher dispatch = new NetconfServerDispatcher(serverChannelInitializer, nettyGroup, nettyGroup);
-
-        ChannelFuture s = dispatch.createServer(netconfAddress);
-        s.await();
+        try (final NetconfServerDispatcher dispatch = new NetconfServerDispatcher(serverChannelInitializer, nettyGroup, nettyGroup)) {
+            ChannelFuture s = dispatch.createServer(netconfAddress);
+            s.await();
+        }
     }
 
     @After
@@ -227,14 +226,14 @@ public class ConcurrentClientsTest {
         private final AtomicLong counter = new AtomicLong();
 
         @Override
-        public HandlingPriority canHandle(Document message) {
+        public HandlingPriority canHandle(final Document message) {
             return XmlUtil.toString(message).contains(NetconfStartExiMessage.START_EXI) ?
                     HandlingPriority.CANNOT_HANDLE :
                     HandlingPriority.HANDLE_WITH_MAX_PRIORITY;
         }
 
         @Override
-        public Document handle(Document requestMessage, NetconfOperationChainedExecution subsequentOperation) throws NetconfDocumentedException {
+        public Document handle(final Document requestMessage, final NetconfOperationChainedExecution subsequentOperation) throws NetconfDocumentedException {
             try {
                 LOG.info("Handling netconf message from test {}", XmlUtil.toString(requestMessage));
                 counter.getAndIncrement();
@@ -260,7 +259,7 @@ public class ConcurrentClientsTest {
         }
 
         @Override
-        public NetconfOperationService createService(String netconfSessionIdForReporting) {
+        public NetconfOperationService createService(final String netconfSessionIdForReporting) {
             return new NetconfOperationService() {
                 @Override
                 public Set<Capability> getCapabilities() {
