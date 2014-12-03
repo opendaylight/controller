@@ -53,6 +53,7 @@ public class DistributedConfigDataStoreProviderModule extends
                 .shardJournalRecoveryLogBatchSize(props.getShardJournalRecoveryLogBatchSize().
                         getValue().intValue())
                 .shardSnapshotBatchCount(props.getShardSnapshotBatchCount().getValue().intValue())
+                .shardSnapshotDataThresholdPercentage(props.getShardSnapshotDataThresholdPercentage().getValue().intValue())
                 .shardHeartbeatIntervalInMillis(props.getShardHearbeatIntervalInMillis().getValue())
                 .shardInitializationTimeout(props.getShardInitializationTimeoutInSeconds().getValue(),
                         TimeUnit.SECONDS)
