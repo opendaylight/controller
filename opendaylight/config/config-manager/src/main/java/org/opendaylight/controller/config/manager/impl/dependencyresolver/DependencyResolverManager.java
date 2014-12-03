@@ -88,7 +88,7 @@ public class DependencyResolverManager implements DependencyResolverFactory, Aut
      * things?
      */
     private List<DependencyResolverImpl> getAllSorted() {
-        transactionStatus.checkCommitted();
+        transactionStatus.checkCommitStarted();
         List<DependencyResolverImpl> sorted = new ArrayList<>(
                 moduleIdentifiersToDependencyResolverMap.values());
         for (DependencyResolverImpl dri : sorted) {

@@ -70,6 +70,11 @@ public class TestingFixedThreadPoolModule implements
     }
 
     @Override
+    public boolean canReuse(final Module oldModule) {
+        return isReusable() && triggerNewInstanceCreation == false;
+    }
+
+    @Override
     public Closeable getInstance() {
         if (instance == null) {
             if (isReusable() && triggerNewInstanceCreation == false) { // simulate

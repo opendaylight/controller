@@ -430,8 +430,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
             }
         }
 
-        // destroy all live objects one after another in order of the dependency
-        // hierarchy
+        // destroy all live objects one after another in order of the dependency hierarchy, from top to bottom
         List<DestroyedModule> destroyedModules = currentConfig
                 .getModulesToBeDestroyed();
         for (DestroyedModule destroyedModule : destroyedModules) {

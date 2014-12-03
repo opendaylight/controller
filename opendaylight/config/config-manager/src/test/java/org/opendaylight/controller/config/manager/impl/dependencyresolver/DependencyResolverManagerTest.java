@@ -69,7 +69,10 @@ public class DependencyResolverManagerTest extends AbstractLockedPlatformMBeanSe
 
         // switch to second phase committed
         reset(transactionStatus);
+        doNothing().when(transactionStatus).checkCommitStarted();
         doNothing().when(transactionStatus).checkCommitted();
+        doNothing().when(transactionStatus).checkNotCommitted();
+
         List<ModuleIdentifier> sortedModuleIdentifiers = tested
                 .getSortedModuleIdentifiers();
         assertEquals(
@@ -109,6 +112,7 @@ public class DependencyResolverManagerTest extends AbstractLockedPlatformMBeanSe
     private static Module mockedModule() {
         Module mockedModule = mock(Module.class);
         doReturn(mock(AutoCloseable.class)).when(mockedModule).getInstance();
+        doReturn(new ModuleIdentifier("fact", "instance")).when(mockedModule).getIdentifier();
         return mockedModule;
     }
 

@@ -18,6 +18,6 @@ module config-test {
             "Test api";
 
         base "config:service-type";
-        config:java-class "java.lang.AutoCloseable";
+        config:java-class "org.opendaylight.controller.config.yang.test.impl.CheckedAutoCloseable";
     }
 }

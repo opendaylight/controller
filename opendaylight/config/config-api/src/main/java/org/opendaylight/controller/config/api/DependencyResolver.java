@@ -51,6 +51,7 @@ public interface DependencyResolver extends Identifiable<ModuleIdentifier> {
     <T> T resolveInstance(Class<T> expectedType, ObjectName objectName,
                           JmxAttribute jmxAttribute);
 
+
     /**
      * To be used during commit phase to resolve identity-ref config attributes.
      *
@@ -86,4 +87,12 @@ public interface DependencyResolver extends Identifiable<ModuleIdentifier> {
      */
     <T> T newMXBeanProxy(ObjectName objectName, Class<T> interfaceClass);
 
+    /**
+     * Check whether a dependency will be reused or (re)created. Useful when deciding if current module could be also reused.
+     *
+     * @param objectName ObjectName ID of a dependency
+     * @param jmxAttribute JMXAttribute ID of a dependency
+     * @return true if the dependency will be reused false otherwise
+     */
+    boolean canReuseDependency(ObjectName objectName, JmxAttribute jmxAttribute);
 }
