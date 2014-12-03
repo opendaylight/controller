@@ -33,5 +33,4 @@ public class TestingFixedThreadPoolModule extends AbstractMockedModule implement
         doReturn(mock(ExecutorService.class)).when(pool).getExecutor();
         return pool;
     }
-
 }

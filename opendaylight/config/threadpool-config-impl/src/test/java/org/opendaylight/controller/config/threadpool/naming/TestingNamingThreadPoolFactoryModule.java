@@ -63,4 +63,9 @@ public class TestingNamingThreadPoolFactoryModule implements Module, ThreadFacto
         return fact;
     }
 
+    @Override
+    public boolean canReuseInstance(Module oldModule) {
+        return false;
+    }
+
 }
