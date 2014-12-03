@@ -21,6 +21,7 @@ import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.annotations.Description;
 import org.opendaylight.controller.config.api.runtime.RootRuntimeBeanRegistrator;
+import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.AbstractModuleTemplate;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.TemplateFactory;
@@ -111,6 +112,7 @@ public class AbsModuleGeneratedObjectFactory {
         b.addToBody(getCachesOfResolvedDependencies(moduleFields));
         b.addToBody(getCachesOfResolvedIdentityRefs(moduleFields));
         b.addToBody(getGetInstance(moduleFields));
+        b.addToBody(getResolveDependencies(moduleFields));
         b.addToBody(getReuseLogic(moduleFields, abstractFQN));
         b.addToBody(getEqualsAndHashCode(abstractFQN));
 
@@ -145,6 +147,11 @@ public class AbsModuleGeneratedObjectFactory {
 
     private static String getReuseLogic(List<ModuleField> moduleFields, FullyQualifiedName abstractFQN) {
         String result = "\n"+
+                "@Override\n" +
+            format("public boolean canReuseInstance(%s oldModule){\n", Module.class.getCanonicalName()) +
+            format("return oldModule instanceof %1$s ? canReuseInstance((%1$s)oldModule) : false;\n", abstractFQN.getTypeName())+
+            "}\n"+
+            "\n"+
             format("public boolean canReuseInstance(%s oldModule){\n", abstractFQN.getTypeName())+
                 "// allow reusing of old instance if no parameters was changed\n"+
                 "return isSame(oldModule);\n"+
@@ -163,28 +170,31 @@ public class AbsModuleGeneratedObjectFactory {
         // loop through fields, do deep equals on each field
 
         for (ModuleField moduleField : moduleFields) {
+            result += format(
+                "if (java.util.Objects.deepEquals(%s, other.%1$s) == false) {\n"+
+                    "return false;\n"+
+                "}\n", moduleField.getName());
+
             if (moduleField.isListOfDependencies()) {
                 result += format(
-                    "if (%1$sDependency.equals(other.%1$sDependency) == false) {\n"+
-                        "return false;\n"+
-                    "}\n"+
-                    "for (int idx = 0; idx < %1$sDependency.size(); idx++) {\n"+
-                        "if (%1$sDependency.get(idx) != other.%1$sDependency.get(idx)) {\n"+
-                            "return false;\n"+
-                        "}\n"+
-                    "}\n" ,moduleField.getName());
+                        "for (int idx = 0; idx < %1$s.size(); idx++) {\n"+
+                            "if (!dependencyResolver.canReuseDependency(%1$s.get(idx), %1$sJmxAttribute)) {\n"+
+                                "return false;\n"+
+                            "}\n"+
+                        "}\n" , moduleField.getName());
             } else if (moduleField.isDependent()) {
                 result += format(
-                    "if (%sDependency != other.%1$sDependency) { // reference to dependency must be same\n"+
-                        "return false;\n"+
-                    "}\n",moduleField.getName());
-            } else {
-                result += format(
-                    "if (java.util.Objects.deepEquals(%s, other.%1$s) == false) {\n"+
-                        "return false;\n"+
-                    "}\n", moduleField.getName());
+                        // If a reference is null (ie optional reference) it makes no sens to call canReuse on it
+                        // In such case we continue in the isSame method because if we have null here, the previous value was null as well
+                        // If the previous value was not null and current is or vice verse, the deepEquals comparison would return false
+                        "if(%1$s!= null) {\n" +
+                            "if (!dependencyResolver.canReuseDependency(%1$s, %1$sJmxAttribute)) { // reference to dependency must be reusable as well\n" +
+                                "return false;\n" +
+                            "}\n" +
+                        "}\n", moduleField.getName());
             }
         }
+
         result += "\n"+
                 "return true;\n"+
             "}\n";
@@ -199,6 +209,37 @@ public class AbsModuleGeneratedObjectFactory {
                 "if(instance==null) {\n";
         // create instance start
 
+        // create instance end: reuse and recreate logic
+        result +=   "if(oldInstance!=null && canReuseInstance(oldModule)) {\n";
+        result += "resolveDependencies();\n";
+
+        result +=  "instance = reuseInstance(oldInstance);\n"+
+                    "} else {\n"+
+                        "if(oldInstance!=null) {\n"+
+                           "try {\n"+
+                                "oldInstance.close();\n"+
+                            "} catch(Exception e) {\n"+
+                                "logger.error(\"An error occurred while closing old instance \" + oldInstance, e);\n"+
+                            "}\n"+
+                        "}\n";
+
+        // loop through dependent fields, use dependency resolver to instantiate dependencies. Do it in loop in case field represents list of dependencies.
+        result += "resolveDependencies();\n";
+
+        result +=       "instance = createInstance();\n"+
+                        "if (instance == null) {\n"+
+                            "throw new IllegalStateException(\"Error in createInstance - null is not allowed as return value\");\n"+
+                        "}\n"+
+                    "}\n"+
+                "}\n"+
+                "return instance;\n"+
+            "}\n"+
+            format("public abstract %s createInstance();\n", AutoCloseable.class.getCanonicalName());
+
+        return result;
+    }
+
+    private static String getResolveDependencies(final List<ModuleField> moduleFields) {
         // loop through dependent fields, use dependency resolver to instantiate dependencies. Do it in loop in case field represents list of dependencies.
         Map<ModuleField, String> resolveDependenciesMap = new HashMap<>();
         for(ModuleField moduleField: moduleFields) {
@@ -207,19 +248,21 @@ public class AbsModuleGeneratedObjectFactory {
                 String osgi = moduleField.getDependency().getSie().getExportedOsgiClassName();
                 if (moduleField.isList()) {
                     str = format(
-                        "%sDependency = new java.util.ArrayList<%s>();\n"+
-                        "for(javax.management.ObjectName dep : %1$s) {\n"+
-                            "%1$sDependency.add(dependencyResolver.resolveInstance(%2$s.class, dep, %1$sJmxAttribute));\n"+
-                        "}\n", moduleField.getName(), osgi);
+                            "%sDependency = new java.util.ArrayList<%s>();\n"+
+                                    "for(javax.management.ObjectName dep : %1$s) {\n"+
+                                    "%1$sDependency.add(dependencyResolver.resolveInstance(%2$s.class, dep, %1$sJmxAttribute));\n"+
+                                    "}\n", moduleField.getName(), osgi);
                 } else {
                     str = format(
-                        "%1$sDependency = dependencyResolver.resolveInstance(%2$s.class, %1$s, %1$sJmxAttribute);\n",
-                        moduleField.getName(), osgi);
+                            "%1$sDependency = dependencyResolver.resolveInstance(%2$s.class, %1$s, %1$sJmxAttribute);\n",
+                            moduleField.getName(), osgi);
                 }
                 resolveDependenciesMap.put(moduleField, str);
             }
         }
 
+        String result = "\n"
+                + "private final void resolveDependencies() {\n";
         // wrap each field resolvation statement with if !=null when dependency is not mandatory
         for (Map.Entry<ModuleField, String> entry : resolveDependenciesMap.entrySet()) {
             if (entry.getKey().getDependency().isMandatory() == false) {
@@ -236,9 +279,9 @@ public class AbsModuleGeneratedObjectFactory {
                 result += format("if (%s!=null){\n", moduleField.getName());
                 if (moduleField.isList()) {
                     result += format(
-                        "for(%s candidate : %s) {\n"+
-                            "candidate.injectDependencyResolver(dependencyResolver);\n"+
-                        "}\n", moduleField.getGenericInnerType(), moduleField.getName());
+                            "for(%s candidate : %s) {\n"+
+                                    "candidate.injectDependencyResolver(dependencyResolver);\n"+
+                                    "}\n", moduleField.getGenericInnerType(), moduleField.getName());
                 } else {
                     result += format("%s.injectDependencyResolver(dependencyResolver);\n", moduleField.getName());
                 }
@@ -256,28 +299,7 @@ public class AbsModuleGeneratedObjectFactory {
                 result += "}\n";
             }
         }
-
-        // create instance end: reuse and recreate logic
-        result +=   "if(oldInstance!=null && canReuseInstance(oldModule)) {\n"+
-                        "instance = reuseInstance(oldInstance);\n"+
-                    "} else {\n"+
-                        "if(oldInstance!=null) {\n"+
-                           "try {\n"+
-                                "oldInstance.close();\n"+
-                            "} catch(Exception e) {\n"+
-                                "logger.error(\"An error occurred while closing old instance \" + oldInstance, e);\n"+
-                            "}\n"+
-                        "}\n"+
-                        "instance = createInstance();\n"+
-                        "if (instance == null) {\n"+
-                            "throw new IllegalStateException(\"Error in createInstance - null is not allowed as return value\");\n"+
-                        "}\n"+
-                    "}\n"+
-                "}\n"+
-                "return instance;\n"+
-            "}\n"+
-            format("public abstract %s createInstance();\n", AutoCloseable.class.getCanonicalName());
-
+        result += "}\n";
         return result;
     }
 
@@ -355,7 +377,7 @@ public class AbsModuleGeneratedObjectFactory {
             "public void validate() {\n";
         // validate each mandatory dependency
         for(ModuleField moduleField: moduleFields) {
-            if (moduleField.isDependent() && moduleField.getDependency().isMandatory()) {
+            if (moduleField.isDependent()) {
                 if (moduleField.isList()) {
                     result += "" +
                             format("for(javax.management.ObjectName dep : %s) {\n", moduleField.getName()) +
@@ -363,8 +385,14 @@ public class AbsModuleGeneratedObjectFactory {
                                     moduleField.getDependency().getSie().getFullyQualifiedName(), moduleField.getName()) +
                             "}\n";
                 } else {
-                    result += format("dependencyResolver.validateDependency(%s.class, %s, %sJmxAttribute);",
+                    if(moduleField.getDependency().isMandatory() == false) {
+                        result += format("if(%s != null) {\n", moduleField.getName());
+                    }
+                    result += format("dependencyResolver.validateDependency(%s.class, %s, %sJmxAttribute);\n",
                             moduleField.getDependency().getSie().getFullyQualifiedName(), moduleField.getName(), moduleField.getName());
+                    if(moduleField.getDependency().isMandatory() == false) {
+                        result += "}\n";
+                    }
                 }
             }
         }
