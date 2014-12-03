@@ -11,7 +11,6 @@ package org.opendaylight.controller.netconf.client;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
-
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelPromise;
@@ -82,17 +81,17 @@ public class NetconfClientDispatcherImplTest {
                 withConnectStrategyFactory(reconnectStrategyFactory).
                 withAuthHandler(handler).build();
 
-        NetconfClientDispatcherImpl dispatcher = new NetconfClientDispatcherImpl(bossGroup, workerGroup, timer);
-        Future<NetconfClientSession> sshSession = dispatcher.createClient(cfg);
-        Future<NetconfClientSession> tcpSession = dispatcher.createClient(cfg2);
+        try (NetconfClientDispatcherImpl dispatcher = new NetconfClientDispatcherImpl(bossGroup, workerGroup, timer)) {
+            Future<NetconfClientSession> sshSession = dispatcher.createClient(cfg);
+            Future<NetconfClientSession> tcpSession = dispatcher.createClient(cfg2);
 
-        Future<Void> sshReconn = dispatcher.createReconnectingClient(cfg);
-        Future<Void> tcpReconn = dispatcher.createReconnectingClient(cfg2);
+            Future<Void> sshReconn = dispatcher.createReconnectingClient(cfg);
+            Future<Void> tcpReconn = dispatcher.createReconnectingClient(cfg2);
 
-        assertNotNull(sshSession);
-        assertNotNull(tcpSession);
-        assertNotNull(sshReconn);
-        assertNotNull(tcpReconn);
-
+            assertNotNull(sshSession);
+            assertNotNull(tcpSession);
+            assertNotNull(sshReconn);
+            assertNotNull(tcpReconn);
+        }
     }
 }
