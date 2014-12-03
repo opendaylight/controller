@@ -11,13 +11,17 @@ package org.opendaylight.controller.config.yang.test.impl;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.opendaylight.controller.config.api.jmx.ObjectNameUtil.getInstanceName;
 import static org.opendaylight.controller.config.api.jmx.ObjectNameUtil.getTransactionName;
 
 import java.util.List;
 import javax.management.ObjectName;
+import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
@@ -48,5 +52,54 @@ public class MultipleDependenciesModuleTest extends AbstractConfigTest {
         // d1,2 contained tx name, found doesn't
         assertNull(getTransactionName(d1WithoutTxName));
         transaction.commit();
+    }
+
+    @Test
+    public void testCloseOrdering() throws Exception {
+        // Tests whether close is called in correct order on the module instances on following graph
+        // Each module tests whether its dependencies were closed before it (to simulate resource clean up failure)
+        // R1
+        // | \
+        // M1 M2
+        // |
+        // L1
+        ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
+        ObjectName r1 = transaction.createModule(factory.getImplementationName(), "root1");
+        ObjectName m1 = transaction.createModule(factory.getImplementationName(), "middle1");
+        ObjectName m2 = transaction.createModule(factory.getImplementationName(), "middle2");
+        ObjectName l1 = transaction.createModule(factory.getImplementationName(), "leaf1");
+
+        MultipleDependenciesModuleMXBean r1Proxy = transaction.newMXBeanProxy(r1, MultipleDependenciesModuleMXBean.class);
+        MultipleDependenciesModuleMXBean i1Proxy = transaction.newMXBeanProxy(m1, MultipleDependenciesModuleMXBean.class);
+        r1Proxy.setSingle(m1);
+        i1Proxy.setSingle(l1);
+        r1Proxy.setTestingDeps(asList(m2));
+        transaction.commit();
+
+        configRegistryClient.createTransaction().commit();
+        transaction = configRegistryClient.createTransaction();
+        MultipleDependenciesModuleMXBean l1Proxy = transaction.newMXBeanProxy(l1, MultipleDependenciesModuleMXBean.class);
+        l1Proxy.setSimple(true);
+        transaction.commit();
+    }
+
+    @Test
+    public void testDestroyModuleDependency() throws Exception {
+        ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
+        ObjectName r1 = transaction.createModule(factory.getImplementationName(), "root1");
+        ObjectName m1 = transaction.createModule(factory.getImplementationName(), "middle1");
+
+        MultipleDependenciesModuleMXBean r1Proxy = transaction.newMXBeanProxy(r1, MultipleDependenciesModuleMXBean.class);
+        r1Proxy.setSingle(m1);
+        transaction.commit();
+
+        transaction = configRegistryClient.createTransaction();
+        transaction.destroyModule(factory.getImplementationName(), "middle1");
+        try {
+            transaction.commit();
+            fail("Validation exception expected");
+        } catch (ValidationException e) {
+            assertThat(e.getFailedValidations().keySet(), CoreMatchers.hasItem("multiple-dependencies"));
+        }
     }
 }

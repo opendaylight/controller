@@ -10,9 +10,13 @@ package org.opendaylight.controller.config.yangjmxgenerator.plugin.gofactory;
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
-import java.util.ArrayList;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -25,8 +29,10 @@ import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.AbstractModuleTemplate;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.TemplateFactory;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Annotation;
+import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Field;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.IdentityRefModuleField;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Method;
+import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.MethodDefinition;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.ModuleField;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.java.FullyQualifiedName;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.java.GeneratedObject;
@@ -39,16 +45,26 @@ import org.slf4j.LoggerFactory;
 
 public class AbsModuleGeneratedObjectFactory {
 
+    private static final Function<String, FullyQualifiedName> FULLY_QUALIFIED_NAME_FUNCTION = new Function<String, FullyQualifiedName>() {
+        @Override
+        public FullyQualifiedName apply(final String input) {
+            return FullyQualifiedName.fromString(input);
+        }
+    };
+
     public GeneratedObject toGeneratedObject(ModuleMXBeanEntry mbe, Optional<String> copyright) {
         FullyQualifiedName abstractFQN = new FullyQualifiedName(mbe.getPackageName(), mbe.getAbstractModuleName());
         Optional<String> classJavaDoc = Optional.fromNullable(mbe.getNullableDescription());
         AbstractModuleTemplate abstractModuleTemplate = TemplateFactory.abstractModuleTemplateFromMbe(mbe);
         Optional<String> header = abstractModuleTemplate.getHeaderString();
 
-        List<FullyQualifiedName> implementedInterfaces = new ArrayList<>();
-        for(String implemented: abstractModuleTemplate.getTypeDeclaration().getImplemented()) {
-            implementedInterfaces.add(FullyQualifiedName.fromString(implemented));
-        }
+        List<FullyQualifiedName> implementedInterfaces = Lists.transform(abstractModuleTemplate.getTypeDeclaration().getImplemented(), FULLY_QUALIFIED_NAME_FUNCTION);
+
+        Optional<FullyQualifiedName> extended =
+                Optional.fromNullable(
+                        Iterables.getFirst(
+                                Collections2.transform(abstractModuleTemplate.getTypeDeclaration().getExtended(), FULLY_QUALIFIED_NAME_FUNCTION), null));
+
         Optional<FullyQualifiedName> maybeRegistratorType;
         if (abstractModuleTemplate.isRuntime()) {
             maybeRegistratorType = Optional.of(FullyQualifiedName.fromString(abstractModuleTemplate.getRegistratorType()));
@@ -56,7 +72,7 @@ public class AbsModuleGeneratedObjectFactory {
             maybeRegistratorType = Optional.absent();
         }
 
-        return toGeneratedObject(abstractFQN, copyright, header, classJavaDoc, implementedInterfaces,
+        return toGeneratedObject(abstractFQN, copyright, header, classJavaDoc, extended, implementedInterfaces,
                 abstractModuleTemplate.getModuleFields(), maybeRegistratorType, abstractModuleTemplate.getMethods(),
                 mbe.getYangModuleQName());
     }
@@ -65,6 +81,7 @@ public class AbsModuleGeneratedObjectFactory {
                                              Optional<String> copyright,
                                              Optional<String> header,
                                              Optional<String> classJavaDoc,
+                                             Optional<FullyQualifiedName> extended,
                                              List<FullyQualifiedName> implementedInterfaces,
                                              List<ModuleField> moduleFields,
                                              Optional<FullyQualifiedName> maybeRegistratorType,
@@ -84,6 +101,9 @@ public class AbsModuleGeneratedObjectFactory {
         for(FullyQualifiedName implemented: implementedInterfaces) {
             b.addImplementsFQN(implemented);
         }
+        if(extended.isPresent()) {
+            b.addExtendsFQN(extended.get());
+        }
         if (classJavaDoc.isPresent()) {
             b.addClassAnnotation(format("@%s(value=\"%s\")", Description.class.getCanonicalName(), classJavaDoc.get()));
         }
@@ -99,9 +119,6 @@ public class AbsModuleGeneratedObjectFactory {
         b.addToBody("//attributes end");
 
 
-        b.addToBody(getCommonFields(abstractFQN));
-
-
         b.addToBody(getNewConstructor(abstractFQN));
         b.addToBody(getCopyFromOldConstructor(abstractFQN));
 
@@ -110,11 +127,12 @@ public class AbsModuleGeneratedObjectFactory {
 
         b.addToBody(getCachesOfResolvedDependencies(moduleFields));
         b.addToBody(getCachesOfResolvedIdentityRefs(moduleFields));
-        b.addToBody(getGetInstance(moduleFields));
+        b.addToBody(getResolveDependencies(moduleFields));
         b.addToBody(getReuseLogic(moduleFields, abstractFQN));
         b.addToBody(getEqualsAndHashCode(abstractFQN));
 
         b.addToBody(getMethods(methods));
+        b.addToBody(getGetLogger());
 
         return new GeneratedObjectBuilder(b.build()).toGeneratedObject();
     }
@@ -163,28 +181,31 @@ public class AbsModuleGeneratedObjectFactory {
         // loop through fields, do deep equals on each field
 
         for (ModuleField moduleField : moduleFields) {
+            result += format(
+                "if (java.util.Objects.deepEquals(%s, other.%1$s) == false) {\n"+
+                    "return false;\n"+
+                "}\n", moduleField.getName());
+
             if (moduleField.isListOfDependencies()) {
                 result += format(
-                    "if (%1$sDependency.equals(other.%1$sDependency) == false) {\n"+
-                        "return false;\n"+
-                    "}\n"+
-                    "for (int idx = 0; idx < %1$sDependency.size(); idx++) {\n"+
-                        "if (%1$sDependency.get(idx) != other.%1$sDependency.get(idx)) {\n"+
-                            "return false;\n"+
-                        "}\n"+
-                    "}\n" ,moduleField.getName());
+                        "for (int idx = 0; idx < %1$s.size(); idx++) {\n"+
+                            "if (!dependencyResolver.canReuseDependency(%1$s.get(idx), %1$sJmxAttribute)) {\n"+
+                                "return false;\n"+
+                            "}\n"+
+                        "}\n" , moduleField.getName());
             } else if (moduleField.isDependent()) {
                 result += format(
-                    "if (%sDependency != other.%1$sDependency) { // reference to dependency must be same\n"+
-                        "return false;\n"+
-                    "}\n",moduleField.getName());
-            } else {
-                result += format(
-                    "if (java.util.Objects.deepEquals(%s, other.%1$s) == false) {\n"+
-                        "return false;\n"+
-                    "}\n", moduleField.getName());
+                        // If a reference is null (ie optional reference) it makes no sens to call canReuse on it
+                        // In such case we continue in the isSame method because if we have null here, the previous value was null as well
+                        // If the previous value was not null and current is or vice verse, the deepEquals comparison would return false
+                        "if(%1$s!= null) {\n" +
+                            "if (!dependencyResolver.canReuseDependency(%1$s, %1$sJmxAttribute)) { // reference to dependency must be reusable as well\n" +
+                                "return false;\n" +
+                            "}\n" +
+                        "}\n", moduleField.getName());
             }
         }
+
         result += "\n"+
                 "return true;\n"+
             "}\n";
@@ -192,13 +213,7 @@ public class AbsModuleGeneratedObjectFactory {
         return result;
     }
 
-    private static String getGetInstance(List<ModuleField> moduleFields) {
-        String result = "\n"+
-            "@Override\n"+
-            format("public final %s getInstance() {\n", AutoCloseable.class.getCanonicalName())+
-                "if(instance==null) {\n";
-        // create instance start
-
+    private static String getResolveDependencies(final List<ModuleField> moduleFields) {
         // loop through dependent fields, use dependency resolver to instantiate dependencies. Do it in loop in case field represents list of dependencies.
         Map<ModuleField, String> resolveDependenciesMap = new HashMap<>();
         for(ModuleField moduleField: moduleFields) {
@@ -207,19 +222,21 @@ public class AbsModuleGeneratedObjectFactory {
                 String osgi = moduleField.getDependency().getSie().getExportedOsgiClassName();
                 if (moduleField.isList()) {
                     str = format(
-                        "%sDependency = new java.util.ArrayList<%s>();\n"+
-                        "for(javax.management.ObjectName dep : %1$s) {\n"+
-                            "%1$sDependency.add(dependencyResolver.resolveInstance(%2$s.class, dep, %1$sJmxAttribute));\n"+
-                        "}\n", moduleField.getName(), osgi);
+                            "%sDependency = new java.util.ArrayList<%s>();\n"+
+                                    "for(javax.management.ObjectName dep : %1$s) {\n"+
+                                    "%1$sDependency.add(dependencyResolver.resolveInstance(%2$s.class, dep, %1$sJmxAttribute));\n"+
+                                    "}\n", moduleField.getName(), osgi);
                 } else {
                     str = format(
-                        "%1$sDependency = dependencyResolver.resolveInstance(%2$s.class, %1$s, %1$sJmxAttribute);\n",
-                        moduleField.getName(), osgi);
+                            "%1$sDependency = dependencyResolver.resolveInstance(%2$s.class, %1$s, %1$sJmxAttribute);\n",
+                            moduleField.getName(), osgi);
                 }
                 resolveDependenciesMap.put(moduleField, str);
             }
         }
 
+        String result = "\n"
+                + "protected final void resolveDependencies() {\n";
         // wrap each field resolvation statement with if !=null when dependency is not mandatory
         for (Map.Entry<ModuleField, String> entry : resolveDependenciesMap.entrySet()) {
             if (entry.getKey().getDependency().isMandatory() == false) {
@@ -236,9 +253,9 @@ public class AbsModuleGeneratedObjectFactory {
                 result += format("if (%s!=null){\n", moduleField.getName());
                 if (moduleField.isList()) {
                     result += format(
-                        "for(%s candidate : %s) {\n"+
-                            "candidate.injectDependencyResolver(dependencyResolver);\n"+
-                        "}\n", moduleField.getGenericInnerType(), moduleField.getName());
+                            "for(%s candidate : %s) {\n"+
+                                    "candidate.injectDependencyResolver(dependencyResolver);\n"+
+                                    "}\n", moduleField.getGenericInnerType(), moduleField.getName());
                 } else {
                     result += format("%s.injectDependencyResolver(dependencyResolver);\n", moduleField.getName());
                 }
@@ -256,42 +273,8 @@ public class AbsModuleGeneratedObjectFactory {
                 result += "}\n";
             }
         }
-
-        // create instance end: reuse and recreate logic
-        result +=   "if(oldInstance!=null && canReuseInstance(oldModule)) {\n"+
-                        "instance = reuseInstance(oldInstance);\n"+
-                    "} else {\n"+
-                        "if(oldInstance!=null) {\n"+
-                           "try {\n"+
-                                "oldInstance.close();\n"+
-                            "} catch(Exception e) {\n"+
-                                "logger.error(\"An error occurred while closing old instance \" + oldInstance, e);\n"+
-                            "}\n"+
-                        "}\n"+
-                        "instance = createInstance();\n"+
-                        "if (instance == null) {\n"+
-                            "throw new IllegalStateException(\"Error in createInstance - null is not allowed as return value\");\n"+
-                        "}\n"+
-                    "}\n"+
-                "}\n"+
-                "return instance;\n"+
-            "}\n"+
-            format("public abstract %s createInstance();\n", AutoCloseable.class.getCanonicalName());
-
+        result += "}\n";
         return result;
-    }
-
-    private static String getCommonFields(FullyQualifiedName abstractFQN) {
-        return "\n"+
-            format("private final %s oldModule;\n", abstractFQN.getTypeName())+
-            format("private final %s oldInstance;\n", AutoCloseable.class.getCanonicalName())+
-            format("private %s instance;\n", AutoCloseable.class.getCanonicalName())+
-            format("protected final %s dependencyResolver;\n", DependencyResolver.class.getCanonicalName())+
-            format("private final %s identifier;\n", ModuleIdentifier.class.getCanonicalName())+
-            "@Override\n"+
-            format("public %s getIdentifier() {\n", ModuleIdentifier.class.getCanonicalName())+
-                "return identifier;\n"+
-            "}\n";
     }
 
     private static String getCachesOfResolvedIdentityRefs(List<ModuleField> moduleFields) {
@@ -355,7 +338,7 @@ public class AbsModuleGeneratedObjectFactory {
             "public void validate() {\n";
         // validate each mandatory dependency
         for(ModuleField moduleField: moduleFields) {
-            if (moduleField.isDependent() && moduleField.getDependency().isMandatory()) {
+            if (moduleField.isDependent()) {
                 if (moduleField.isList()) {
                     result += "" +
                             format("for(javax.management.ObjectName dep : %s) {\n", moduleField.getName()) +
@@ -363,8 +346,14 @@ public class AbsModuleGeneratedObjectFactory {
                                     moduleField.getDependency().getSie().getFullyQualifiedName(), moduleField.getName()) +
                             "}\n";
                 } else {
-                    result += format("dependencyResolver.validateDependency(%s.class, %s, %sJmxAttribute);",
+                    if(moduleField.getDependency().isMandatory() == false) {
+                        result += format("if(%s != null) {\n", moduleField.getName());
+                    }
+                    result += format("dependencyResolver.validateDependency(%s.class, %s, %sJmxAttribute);\n",
                             moduleField.getDependency().getSie().getFullyQualifiedName(), moduleField.getName(), moduleField.getName());
+                    if(moduleField.getDependency().isMandatory() == false) {
+                        result += "}\n";
+                    }
                 }
             }
         }
@@ -378,7 +367,7 @@ public class AbsModuleGeneratedObjectFactory {
     }
 
     private static String getLoggerDefinition(FullyQualifiedName fqn) {
-        return format("private static final %s logger = %s.getLogger(%s.class);",
+        return format("private static final %s LOGGER = %s.getLogger(%s.class);",
                 Logger.class.getCanonicalName(), LoggerFactory.class.getCanonicalName(), fqn);
     }
 
@@ -386,14 +375,9 @@ public class AbsModuleGeneratedObjectFactory {
     private static String getConstructorStart(FullyQualifiedName fqn,
                                               LinkedHashMap<String, String> parameters, String after) {
         String paramString = Joiner.on(",").withKeyValueSeparator(" ").join(parameters);
-        String setters = "";
-        for (String paramName : parameters.values()) {
-            setters += format("this.%s = %1$s;\n", paramName);
-        }
         return format("public %s(", fqn.getTypeName()) +
                 paramString +
                 ") {\n" +
-                setters +
                 after +
                 "}\n";
     }
@@ -402,10 +386,8 @@ public class AbsModuleGeneratedObjectFactory {
         LinkedHashMap<String, String> parameters = new LinkedHashMap<>();
         parameters.put(ModuleIdentifier.class.getCanonicalName(), "identifier");
         parameters.put(DependencyResolver.class.getCanonicalName(), "dependencyResolver");
-
-        String setToNulls = "this.oldInstance=null;\n" +
-                "this.oldModule=null;\n";
-        return getConstructorStart(abstractFQN, parameters, setToNulls);
+        String init = "super(identifier, dependencyResolver);\n";
+        return getConstructorStart(abstractFQN, parameters, init);
     }
 
     private static String getCopyFromOldConstructor(FullyQualifiedName abstractFQN) {
@@ -414,6 +396,11 @@ public class AbsModuleGeneratedObjectFactory {
         parameters.put(DependencyResolver.class.getCanonicalName(), "dependencyResolver");
         parameters.put(abstractFQN.getTypeName(), "oldModule");
         parameters.put(AutoCloseable.class.getCanonicalName(), "oldInstance");
-        return getConstructorStart(abstractFQN, parameters, "");
+        String init = "super(identifier, dependencyResolver, oldModule, oldInstance);\n";
+        return getConstructorStart(abstractFQN, parameters, init);
+    }
+
+    public String getGetLogger() {
+        return new MethodDefinition(Logger.class.getCanonicalName(), "getLogger", Collections.<Field>emptyList(), "return LOGGER;").toString();
     }
 }

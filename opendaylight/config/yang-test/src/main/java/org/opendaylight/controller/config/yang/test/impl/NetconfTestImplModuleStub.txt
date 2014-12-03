@@ -1,1 +1,7 @@
-        return org.opendaylight.controller.config.yang.test.util.NetconfTestImplModuleUtil.registerRuntimeBeans(this);
+        final AutoCloseable runtime = org.opendaylight.controller.config.yang.test.util.NetconfTestImplModuleUtil.registerRuntimeBeans(this);
+        return new org.opendaylight.controller.config.yang.test.impl.CheckedAutoCloseable() {
+            @Override
+            public synchronized void close() throws Exception {
+                runtime.close();
+            }
+        };

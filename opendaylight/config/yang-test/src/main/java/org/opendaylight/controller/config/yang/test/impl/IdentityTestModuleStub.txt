@@ -9,8 +9,4 @@
         }
         logger.info("IdentityContainer Afi class: {}", getIdentitiesContainer().resolveAfi());
 
-        return new AutoCloseable() {
-            @Override
-            public void close() throws Exception {
-            }
-        };
+        return new org.opendaylight.controller.config.yang.test.impl.CheckedAutoCloseable();

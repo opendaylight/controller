@@ -1,5 +1,16 @@
-        return new AutoCloseable() {
+        return new org.opendaylight.controller.config.yang.test.impl.CheckedAutoCloseable() {
             @Override
-            public void close() throws Exception {
+            public synchronized void close() throws Exception {
+                if(getSingleDependency() != null && getSingleDependency().isClosed() == true) {
+                    // Simulate a cleanup on dependencies that should not be closed yet
+                    throw new java.lang.Error("Dependency was closed first");
+                }
+                for (org.opendaylight.controller.config.yang.test.impl.CheckedAutoCloseable autoCloseable : getTestingDepsDependency()) {
+                    if(autoCloseable.isClosed() == true) {
+                        // Simulate a cleanup on dependencies that should not be closed yet
+                        throw new java.lang.Error("Dependency was closed first");
+                    }
+                }
+                super.close();
             }
         };
