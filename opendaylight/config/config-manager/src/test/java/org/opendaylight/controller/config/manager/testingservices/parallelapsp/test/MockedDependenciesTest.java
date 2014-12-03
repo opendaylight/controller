@@ -74,6 +74,11 @@ public class MockedDependenciesTest extends AbstractParallelAPSPTest {
         }
 
         @Override
+        public boolean canReuse(Module oldModule) {
+            return false;
+        }
+
+        @Override
         public Closeable getInstance() {
             return new MockedThreadPool(threadCount);
         }
