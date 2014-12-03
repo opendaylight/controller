@@ -22,13 +22,12 @@ public class AbstractModuleTemplate extends GeneralClassTemplate {
     private final String registratorType;
 
     public AbstractModuleTemplate(Header header, String packageName,
-            String abstractModuleName, List<String> implementedIfcs,
-            List<ModuleField> moduleFields, List<MethodDefinition> methods,
+            String abstractModuleName, List<String> extendedClasses,
+            List<String> implementedIfcs, List<ModuleField> moduleFields, List<MethodDefinition> methods,
             boolean isRuntime, String registratorType) {
-        super(header, packageName, abstractModuleName, Collections
-                .<String> emptyList(), implementedIfcs, Collections
-                .<Field> emptyList(), methods, true, false, Collections
-                .<Constructor> emptyList());
+        super(header, packageName, abstractModuleName, extendedClasses,
+                implementedIfcs, Collections.<Field> emptyList(), methods,
+                true, false, Collections.<Constructor> emptyList());
         this.moduleFields = moduleFields;
         this.runtime = isRuntime;
         this.registratorType = registratorType;
