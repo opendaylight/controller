@@ -62,6 +62,11 @@ public class TestingScheduledThreadPoolModule implements Module,
     }
 
     @Override
+    public boolean canReuseInstance(final Module oldModule) {
+        return false;
+    }
+
+    @Override
     public int getThreadCount() {
         return threadCount;
     }
