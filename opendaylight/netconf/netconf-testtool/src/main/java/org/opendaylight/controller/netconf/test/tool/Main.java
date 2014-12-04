@@ -46,7 +46,7 @@ public final class Main {
 
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
 
-    static class Params {
+    public static class Params {
 
         @Arg(dest = "schemas-dir")
         public File schemasDir;
