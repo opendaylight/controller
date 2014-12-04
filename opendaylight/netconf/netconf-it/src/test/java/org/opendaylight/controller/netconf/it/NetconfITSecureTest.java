@@ -41,8 +41,6 @@ import org.apache.sshd.server.session.ServerSession;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.auth.AuthProvider;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
@@ -116,7 +114,7 @@ public class NetconfITSecureTest extends AbstractNetconfConfigTest {
     @Test
     public void testSecure() throws Exception {
         final NetconfClientDispatcher dispatch = new NetconfClientDispatcherImpl(getNettyThreadgroup(), getNettyThreadgroup(), getHashedWheelTimer());
-        try (TestingNetconfClient netconfClient = new TestingNetconfClient("testing-ssh-client", dispatch, getClientConfiguration(new SimpleNetconfClientSessionListener()))) {
+        try (TestingNetconfClient netconfClient = new TestingNetconfClient("testing-ssh-client", dispatch, getClientConfiguration(new SimpleNetconfClientSessionListener(), TLS_ADDRESS))) {
             NetconfMessage response = netconfClient.sendMessage(getGetConfig());
             assertFalse("Unexpected error message " + XmlUtil.toString(response.getDocument()),
                     NetconfMessageUtil.isErrorMessage(response));
@@ -143,7 +141,7 @@ public class NetconfITSecureTest extends AbstractNetconfConfigTest {
 
         final NetconfClientDispatcher dispatch = new NetconfClientDispatcherImpl(getNettyThreadgroup(), getNettyThreadgroup(), getHashedWheelTimer());
         final NetconfDeviceCommunicator sessionListener = getSessionListener();
-        try (TestingNetconfClient netconfClient = new TestingNetconfClient("testing-ssh-client", dispatch, getClientConfiguration(sessionListener))) {
+        try (TestingNetconfClient netconfClient = new TestingNetconfClient("testing-ssh-client", dispatch, getClientConfiguration(sessionListener, TLS_ADDRESS))) {
 
             final AtomicInteger responseCounter = new AtomicInteger(0);
             final List<ListenableFuture<RpcResult<NetconfMessage>>> futures = Lists.newArrayList();
@@ -182,15 +180,15 @@ public class NetconfITSecureTest extends AbstractNetconfConfigTest {
         }
     }
 
-    private NetconfMessage changeMessageId(final NetconfMessage getConfig, final int i) throws IOException, SAXException {
+    public static NetconfMessage changeMessageId(final NetconfMessage getConfig, final int i) throws IOException, SAXException {
         String s = XmlUtil.toString(getConfig.getDocument(), false);
         s = s.replace("101", Integer.toString(i));
         return new NetconfMessage(XmlUtil.readXmlToDocument(s));
     }
 
-    public NetconfClientConfiguration getClientConfiguration(final NetconfClientSessionListener sessionListener) throws IOException {
+    static NetconfClientConfiguration getClientConfiguration(final NetconfClientSessionListener sessionListener,final InetSocketAddress tlsAddress) throws IOException {
         final NetconfClientConfigurationBuilder b = NetconfClientConfigurationBuilder.create();
-        b.withAddress(TLS_ADDRESS);
+        b.withAddress(tlsAddress);
         // Using session listener from sal-netconf-connector since stress test cannot be performed with simple listener
         b.withSessionListener(sessionListener);
         b.withReconnectStrategy(new NeverReconnectStrategy(GlobalEventExecutor.INSTANCE, 5000));
@@ -200,11 +198,8 @@ public class NetconfITSecureTest extends AbstractNetconfConfigTest {
         return b.build();
     }
 
-    @Mock
-    private RemoteDevice<NetconfSessionCapabilities, NetconfMessage> mockedRemoteDevice;
-
-    private NetconfDeviceCommunicator getSessionListener() {
-        MockitoAnnotations.initMocks(this);
+    static NetconfDeviceCommunicator getSessionListener() {
+        RemoteDevice<NetconfSessionCapabilities, NetconfMessage> mockedRemoteDevice = mock(RemoteDevice.class);
         doNothing().when(mockedRemoteDevice).onRemoteSessionUp(any(NetconfSessionCapabilities.class), any(RemoteDeviceCommunicator.class));
         doNothing().when(mockedRemoteDevice).onRemoteSessionDown();
         return new NetconfDeviceCommunicator(new RemoteDeviceId("secure-test"), mockedRemoteDevice);
@@ -217,7 +212,7 @@ public class NetconfITSecureTest extends AbstractNetconfConfigTest {
         return mockAuth;
     }
 
-    public AuthenticationHandler getAuthHandler() throws IOException {
+    public static AuthenticationHandler getAuthHandler() throws IOException {
         return new LoginPassword(USERNAME, PASSWORD);
     }
 
