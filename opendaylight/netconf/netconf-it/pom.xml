@@ -123,6 +123,12 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+       <groupId>${project.groupId}</groupId>
+       <artifactId>netconf-testtool</artifactId>
+       <version>${project.version}</version>
+       <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>netconf-ssh</artifactId>
       <type>test-jar</type>
