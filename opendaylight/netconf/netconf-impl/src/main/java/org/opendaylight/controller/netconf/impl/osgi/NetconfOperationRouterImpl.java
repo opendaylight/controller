@@ -96,35 +96,31 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
             final NetconfServerSession session) throws NetconfDocumentedException {
         Preconditions.checkNotNull(allNetconfOperations, "Operation router was not initialized properly");
 
-        NetconfOperationExecution netconfOperationExecution;
-
-        String messageAsString = "";
+        final NetconfOperationExecution netconfOperationExecution;
         try {
-            messageAsString = XmlUtil.toString(message);
             netconfOperationExecution = getNetconfOperationWithHighestPriority(message, session);
         } catch (IllegalArgumentException | IllegalStateException e) {
+            final String messageAsString = XmlUtil.toString(message);
             LOG.warn("Unable to handle rpc {} on session {}", messageAsString, session, e);
 
-            String errorMessage = String.format("Unable to handle rpc %s on session %s", messageAsString, session);
-            Map<String, String> errorInfo = Maps.newHashMap();
-
-            NetconfDocumentedException.ErrorTag tag;
+            final NetconfDocumentedException.ErrorTag tag;
             if (e instanceof IllegalArgumentException) {
-                errorInfo.put(NetconfDocumentedException.ErrorTag.operation_not_supported.toString(), e.getMessage());
                 tag = NetconfDocumentedException.ErrorTag.operation_not_supported;
             } else {
-                errorInfo.put(NetconfDocumentedException.ErrorTag.operation_failed.toString(), e.getMessage());
                 tag = NetconfDocumentedException.ErrorTag.operation_failed;
             }
 
-            throw new NetconfDocumentedException(errorMessage, e, NetconfDocumentedException.ErrorType.application,
-                    tag, NetconfDocumentedException.ErrorSeverity.error, errorInfo);
+            throw new NetconfDocumentedException(
+                String.format("Unable to handle rpc %s on session %s", messageAsString, session),
+                e, NetconfDocumentedException.ErrorType.application,
+                tag, NetconfDocumentedException.ErrorSeverity.error,
+                Collections.singletonMap(tag.toString(), e.getMessage()));
         } catch (RuntimeException e) {
             throw handleUnexpectedEx("Unexpected exception during netconf operation sort", e);
         }
 
         try {
-            return executeOperationWithHighestPriority(message, netconfOperationExecution, messageAsString);
+            return executeOperationWithHighestPriority(message, netconfOperationExecution);
         } catch (RuntimeException e) {
             throw handleUnexpectedEx("Unexpected exception during netconf operation execution", e);
         }
@@ -147,9 +143,12 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
     }
 
     private Document executeOperationWithHighestPriority(final Document message,
-            final NetconfOperationExecution netconfOperationExecution, final String messageAsString)
+            final NetconfOperationExecution netconfOperationExecution)
             throws NetconfDocumentedException {
-        LOG.debug("Forwarding netconf message {} to {}", messageAsString, netconfOperationExecution.netconfOperation);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Forwarding netconf message {} to {}", XmlUtil.toString(message), netconfOperationExecution.netconfOperation);
+        }
+
         return netconfOperationExecution.execute(message);
     }
 
