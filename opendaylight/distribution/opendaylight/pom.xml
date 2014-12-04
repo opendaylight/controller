@@ -742,6 +742,7 @@
             <configuration>
                <outputDirectory>${project.build.directory}/configuration</outputDirectory>
                <includeArtifactIds>sal-rest-connector-config,config-netty-config,md-sal-config,netconf-config,toaster-config,netconf-connector-config,sal-clustering-config,statistics-manager-config</includeArtifactIds>
+               <includeArtifactIds>sal-rest-connector-config,config-netty-config,md-sal-config,netconf-config,toaster-config,netconf-connector-config,sal-clustering-config,forwardingrules-manager-config</includeArtifactIds>
                <includes>**\/*.xml,**/*.conf</includes>
                <excludeTransitive>true</excludeTransitive>
                <ignorePermissions>false</ignorePermissions>
@@ -1096,6 +1097,11 @@
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller.md</groupId>
+          <artifactId>forwardingrules-manager-config</artifactId>
+          <version>1.1.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller.md</groupId>
           <artifactId>inventory-manager</artifactId>
         </dependency>
         <dependency>
@@ -1408,6 +1414,7 @@
                 <configuration>
                    <outputDirectory>${project.build.directory}/configuration</outputDirectory>
                     <includeArtifactIds>sal-rest-connector-config,config-netty-config,md-sal-config,netconf-config,toaster-config,netconf-connector-config,sal-clustering-config,statistics-manager-config</includeArtifactIds>
+                    <includeArtifactIds>sal-rest-connector-config,config-netty-config,md-sal-config,netconf-config,toaster-config,netconf-connector-config,sal-clustering-config,forwardingrules-manager-config</includeArtifactIds>
                     <includes>**\/*.xml,**/*.conf</includes>
                    <excludeTransitive>true</excludeTransitive>
                    <ignorePermissions>false</ignorePermissions>

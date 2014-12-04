@@ -54,6 +54,7 @@
     <module>statistics-manager-config</module>
     <module>topology-manager</module>
     <module>forwardingrules-manager</module>
+    <module>forwardingrules-manager-config</module>
     <module>topology-lldp-discovery</module>
 
     <!-- Compability Packages -->

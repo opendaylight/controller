@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.frm.impl;
 
+import com.google.common.base.Preconditions;
 import org.opendaylight.controller.frm.ForwardingRulesManager;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
@@ -32,17 +33,14 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-
 /**
  * GroupForwarder
  * It implements {@link org.opendaylight.controller.md.sal.binding.api.DataChangeListener}}
  * for WildCardedPath to {@link Flow} and ForwardingRulesCommiter interface for methods:
- *  add, update and remove {@link Flow} processing for
- *  {@link org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent}.
+ * add, update and remove {@link Flow} processing for
+ * {@link org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent}.
  *
  * @author <a href="mailto:vdemcak@cisco.com">Vaclav Demcak</a>
- *
  */
 public class FlowForwarder extends AbstractListeningCommiter<Flow> {
 
@@ -50,7 +48,7 @@ public class FlowForwarder extends AbstractListeningCommiter<Flow> {
 
     private ListenerRegistration<DataChangeListener> listenerRegistration;
 
-    public FlowForwarder (final ForwardingRulesManager manager, final DataBroker db) {
+    public FlowForwarder(final ForwardingRulesManager manager, final DataBroker db) {
         super(manager, Flow.class);
         Preconditions.checkNotNull(db, "DataBroker can not be null!");
         registrationListener(db, 5);
@@ -61,18 +59,8 @@ public class FlowForwarder extends AbstractListeningCommiter<Flow> {
             listenerRegistration = db.registerDataChangeListener(LogicalDatastoreType.CONFIGURATION,
                     getWildCardPath(), FlowForwarder.this, DataChangeScope.SUBTREE);
         } catch (final Exception e) {
-            if (i >= 1) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e1) {
-                    LOG.error("Thread interrupted '{}'", e1);
-                    Thread.currentThread().interrupt();
-                }
-                registrationListener(db, --i);
-            } else {
-                LOG.error("FRM Flow DataChange listener registration fail!", e);
-                throw new IllegalStateException("FlowForwarder registration Listener fail! System needs restart.", e);
-            }
+            LOG.error("FRM Flow DataChange listener registration fail!", e);
+            throw new IllegalStateException("FlowForwarder registration Listener fail! System needs restart.", e);
         }
     }
 
@@ -157,10 +145,10 @@ public class FlowForwarder extends AbstractListeningCommiter<Flow> {
                 .augmentation(FlowCapableNode.class).child(Table.class).child(Flow.class);
     }
 
-    private boolean tableIdValidationPrecondition (final TableKey tableKey, final Flow flow) {
+    private boolean tableIdValidationPrecondition(final TableKey tableKey, final Flow flow) {
         Preconditions.checkNotNull(tableKey, "TableKey can not be null or empty!");
         Preconditions.checkNotNull(flow, "Flow can not be null or empty!");
-        if (! tableKey.getId().equals(flow.getTableId())) {
+        if (!tableKey.getId().equals(flow.getTableId())) {
             LOG.error("TableID in URI tableId={} and in palyload tableId={} is not same.",
                     flow.getTableId(), tableKey.getId());
             return false;
