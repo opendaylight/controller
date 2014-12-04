@@ -25,6 +25,10 @@
     <!-- adsal -->
     <module>opendaylight/adsal</module>
 
+    <!-- flow -->
+    <!-- adsal -->
+    <module>opendaylight/flow</module>
+
     <!--  Neutron -->
     <module>opendaylight/networkconfiguration/neutron</module>
     <module>opendaylight/networkconfiguration/neutron/implementation</module>

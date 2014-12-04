@@ -3,21 +3,46 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>sal-parent</artifactId>
+    <artifactId>flow-parent</artifactId>
     <version>1.2.0-SNAPSHOT</version>
+    <relativePath>../</relativePath>
   </parent>
   <groupId>org.opendaylight.controller.md</groupId>
-  <artifactId>inventory-manager</artifactId>
+  <artifactId>topology-lldp-discovery</artifactId>
   <packaging>bundle</packaging>
-
+  <properties>
+    <bundle.plugin.version>2.4.0</bundle.plugin.version>
+    <guava.version>14.0.1</guava.version>
+    <maven.clean.plugin.version>2.5</maven.clean.plugin.version>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
     </dependency>
     <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>equinoxSDK381</groupId>
+      <artifactId>org.eclipse.osgi</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-binding-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>liblldp</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller.model</groupId>
+      <artifactId>model-flow-base</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller.model</groupId>
@@ -27,11 +52,7 @@
       <groupId>org.opendaylight.controller.model</groupId>
       <artifactId>model-inventory</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
-      <scope>provided</scope>
-    </dependency>
+
   </dependencies>
 
   <build>
@@ -39,11 +60,16 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-Activator>org.opendaylight.controller.md.inventory.manager.InventoryActivator</Bundle-Activator>
-            <Private-Package>org.opendaylight.controller.md.inventory.manager</Private-Package>
+            <Bundle-Activator>org.opendaylight.md.controller.topology.lldp.LLDPActivator</Bundle-Activator>
+            <Export-Package>org.opendaylight.md.controller.topology.lldp.utils</Export-Package>
+            <Embed-Dependency>commons-lang</Embed-Dependency>
+            &gt;
+            <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
           </instructions>
+          <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>
       </plugin>
     </plugins>
@@ -52,6 +78,5 @@
     <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
     <tag>HEAD</tag>
-    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
   </scm>
 </project>

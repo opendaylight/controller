@@ -9,78 +9,20 @@
     <relativePath>../commons/opendaylight</relativePath>
   </parent>
 
-  <artifactId>sal-parent</artifactId>
+  <artifactId>flow-parent</artifactId>
   <version>1.2.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <modules>
-    <module>mdsal-artifacts</module>
-
-    <!-- Common APIs & Implementation -->
-    <module>sal-common</module>
-    <module>sal-common-api</module>
-    <module>sal-common-impl</module>
-    <module>sal-common-util</module>
-
-    <!-- Binding Independent -->
-    <module>sal-dom-api</module>
-    <module>sal-dom-broker</module>
-    <module>sal-dom-spi</module>
-
-    <!-- Binding Aware -->
-    <module>sal-binding-api</module>
-    <module>sal-binding-config</module>
-    <module>sal-binding-broker</module>
-
-    <module>sal-binding-util</module>
-
-    <!-- Configuration File -->
-    <module>md-sal-config</module>
-
-    <!-- Samples -->
-    <module>samples</module>
-
     <!-- Base Models -->
     <module>model</module>
-    <module>sal-remote</module>
-    <module>sal-restconf-broker</module>
+    <module>inventory-manager</module>
+    <module>statistics-manager</module>
+    <module>statistics-manager-config</module>
+    <module>topology-manager</module>
+    <module>forwardingrules-manager</module>
+    <module>topology-lldp-discovery</module>
 
-    <!-- Connectors -->
-    <module>sal-connector-api</module>
-    <module>sal-rest-connector</module>
-    <module>sal-rest-connector-config</module>
-    <module>sal-netconf-connector</module>
-
-    <!-- Compability Packages -->
-    <module>compatibility</module>
-
-    <!-- Documentation -->
-    <module>sal-rest-docgen</module>
-
-    <module>sal-akka-raft</module>
-
-    <!--InMemory DOM DataStore-->
-    <module>sal-inmemory-datastore</module>
-
-    <!--sal-protocolbuffer-encoding is now part of sal-clutering-commons-->
-    <module>sal-clustering-commons</module>
-
-    <!-- sal clustering configuration -->
-    <module>sal-clustering-config</module>
-
-    <!-- sal-distributed-datastore -->
-    <module>sal-distributed-datastore</module>
-
-    <!-- XSQL -->
-    <module>sal-dom-xsql</module>
-    <module>sal-karaf-xsql</module>
-    <module>sal-dom-xsql-config</module>
-
-    <!-- Yang Test Models for MD-SAL -->
-    <module>sal-test-model</module>
-
-    <!-- Clustering -->
-    <module>sal-remoterpc-connector</module>
   </modules>
 
   <build>

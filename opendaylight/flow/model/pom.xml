@@ -5,16 +5,17 @@
 
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>sal-parent</artifactId>
+    <artifactId>flow-parent</artifactId>
     <version>1.2.0-SNAPSHOT</version>
   </parent>
   <groupId>org.opendaylight.controller.model</groupId>
-  <artifactId>model-parent</artifactId>
+  <artifactId>flow-model-parent</artifactId>
   <packaging>pom</packaging>
 
   <modules>
-    <module>model-inventory</module>
-    <module>model-topology</module>
+    <module>model-flow-base</module>
+    <module>model-flow-service</module>
+    <module>model-flow-statistics</module>
   </modules>
 
   <properties>
