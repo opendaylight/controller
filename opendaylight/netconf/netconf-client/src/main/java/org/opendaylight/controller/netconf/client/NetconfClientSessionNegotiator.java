@@ -169,14 +169,13 @@ public class NetconfClientSessionNegotiator extends
             } else if(NetconfMessageUtil.isErrorMessage(netconfMessage)) {
                 LOG.warn(
                         "Error response to start-exi message {}, Communication will continue without exi on session {}",
-                        XmlUtil.toString(netconfMessage.getDocument()), session);
+                        netconfMessage, session);
 
                 // Unexpected response to start-exi, throwing message away, continue without exi
             } else {
-                LOG.warn(
-                        "Unexpected response to start-exi message, should be ok, was {}, ",XmlUtil.toString(netconfMessage.getDocument()),
-                        "Communication will continue without exi and response message will be thrown away on session {}",
-                         session);
+                LOG.warn("Unexpected response to start-exi message, should be ok, was {}, " +
+                         "Communication will continue without exi and response message will be thrown away on session {}",
+                         netconfMessage, session);
             }
 
             negotiationSuccessful(session);

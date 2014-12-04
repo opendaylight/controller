@@ -19,7 +19,6 @@ import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
 import org.opendaylight.controller.netconf.nettyutil.handler.NetconfEXICodec;
 import org.opendaylight.controller.netconf.nettyutil.handler.exi.EXIParameters;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.protocol.framework.AbstractProtocolSession;
 import org.openexi.proc.common.EXIOptionsException;
 import org.slf4j.Logger;
@@ -114,8 +113,8 @@ public abstract class AbstractNetconfSession<S extends NetconfSession, L extends
         try {
             exiParams = EXIParameters.fromXmlElement(XmlElement.fromDomDocument(startExiMessage.getDocument()));
         } catch (final EXIOptionsException e) {
-            LOG.warn("Unable to parse EXI parameters from {} om session {}", XmlUtil.toString(startExiMessage.getDocument()), this, e);
-            throw new IllegalArgumentException(e);
+            LOG.warn("Unable to parse EXI parameters from {} on session {}", startExiMessage, this, e);
+            throw new IllegalArgumentException("Cannot parse options", e);
         }
         final NetconfEXICodec exiCodec = new NetconfEXICodec(exiParams.getOptions());
         addExiHandlers(exiCodec);

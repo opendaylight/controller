@@ -46,20 +46,7 @@
         <configuration>
           <instructions>
             <Private-Package></Private-Package>
-            <Import-Package>javax.management,
-                            javax.xml.parsers,
-                            org.opendaylight.controller.config.api,
-                            org.opendaylight.controller.config.api.jmx,
-                            org.opendaylight.protocol.framework,
-                            io.netty.channel,
-                            io.netty.util.concurrent,
-                            org.w3c.dom,
-                            org.slf4j,
-                            org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924,
-                            org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924,
-                            org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state,
-                            org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.sessions,
-                            com.google.common.base,</Import-Package>
+            <Import-Package>*</Import-Package>
             <Export-Package>org.opendaylight.controller.netconf.api,
                             org.opendaylight.controller.netconf.api.jmx,
                             org.opendaylight.controller.netconf.api.xml,

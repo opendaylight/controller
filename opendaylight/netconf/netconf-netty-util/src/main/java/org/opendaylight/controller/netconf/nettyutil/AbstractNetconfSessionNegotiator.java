@@ -34,7 +34,6 @@ import org.opendaylight.controller.netconf.nettyutil.handler.NetconfXMLToHelloMe
 import org.opendaylight.controller.netconf.nettyutil.handler.NetconfXMLToMessageDecoder;
 import org.opendaylight.controller.netconf.util.messages.FramingMechanism;
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessage;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.protocol.framework.AbstractSessionNegotiator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,8 +65,8 @@ public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionP
     private final long connectionTimeoutMillis;
 
     // TODO shrink constructor
-    protected AbstractNetconfSessionNegotiator(P sessionPreferences, Promise<S> promise, Channel channel, Timer timer,
-            L sessionListener, long connectionTimeoutMillis) {
+    protected AbstractNetconfSessionNegotiator(final P sessionPreferences, final Promise<S> promise, final Channel channel, final Timer timer,
+            final L sessionListener, final long connectionTimeoutMillis) {
         super(promise, channel);
         this.sessionPreferences = sessionPreferences;
         this.promise = promise;
@@ -83,7 +82,7 @@ public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionP
             Future<Channel> future = sslHandler.get().handshakeFuture();
             future.addListener(new GenericFutureListener<Future<? super Channel>>() {
                 @Override
-                public void operationComplete(Future<? super Channel> future) {
+                public void operationComplete(final Future<? super Channel> future) {
                     Preconditions.checkState(future.isSuccess(), "Ssl handshake was not successful");
                     LOG.debug("Ssl handshake complete");
                     start();
@@ -94,7 +93,7 @@ public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionP
         }
     }
 
-    private static Optional<SslHandler> getSslHandler(Channel channel) {
+    private static Optional<SslHandler> getSslHandler(final Channel channel) {
         final SslHandler sslHandler = channel.pipeline().get(SslHandler.class);
         return sslHandler == null ? Optional.<SslHandler> absent() : Optional.of(sslHandler);
     }
@@ -105,7 +104,7 @@ public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionP
 
     private void start() {
         final NetconfMessage helloMessage = this.sessionPreferences.getHelloMessage();
-        LOG.debug("Session negotiation started with hello message {} on channel {}", XmlUtil.toString(helloMessage.getDocument()), channel);
+        LOG.debug("Session negotiation started with hello message {} on channel {}", helloMessage, channel);
 
         channel.pipeline().addLast(NAME_OF_EXCEPTION_HANDLER, new ExceptionHandlingInboundChannelHandler());
 
@@ -131,7 +130,7 @@ public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionP
 
                             channel.closeFuture().addListener(new GenericFutureListener<ChannelFuture>() {
                                 @Override
-                                public void operationComplete(ChannelFuture future) throws Exception {
+                                public void operationComplete(final ChannelFuture future) throws Exception {
                                     if(future.isSuccess()) {
                                         LOG.debug("Channel {} closed: success", future.channel());
                                     } else {
@@ -159,7 +158,7 @@ public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionP
         }
     }
 
-    protected final S getSessionForHelloMessage(NetconfHelloMessage netconfMessage) throws NetconfDocumentedException {
+    protected final S getSessionForHelloMessage(final NetconfHelloMessage netconfMessage) throws NetconfDocumentedException {
         Preconditions.checkNotNull(netconfMessage, "netconfMessage");
 
         final Document doc = netconfMessage.getDocument();
@@ -182,7 +181,7 @@ public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionP
                 new NetconfChunkAggregator());
     }
 
-    private boolean shouldUseChunkFraming(Document doc) {
+    private boolean shouldUseChunkFraming(final Document doc) {
         return containsBase11Capability(doc)
                 && containsBase11Capability(sessionPreferences.getHelloMessage().getDocument());
     }
@@ -216,7 +215,7 @@ public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionP
         replaceChannelHandler(channel, AbstractChannelInitializer.NETCONF_MESSAGE_ENCODER, new NetconfMessageToXMLEncoder());
     }
 
-    private static ChannelHandler replaceChannelHandler(Channel channel, String handlerKey, ChannelHandler decoder) {
+    private static ChannelHandler replaceChannelHandler(final Channel channel, final String handlerKey, final ChannelHandler decoder) {
         return channel.pipeline().replace(handlerKey, handlerKey, decoder);
     }
 
@@ -239,7 +238,7 @@ public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionP
         return false;
     }
 
-    private static boolean isStateChangePermitted(State state, State newState) {
+    private static boolean isStateChangePermitted(final State state, final State newState) {
         if (state == State.IDLE && newState == State.OPEN_WAIT) {
             return true;
         }
@@ -258,7 +257,7 @@ public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionP
      */
     private final class ExceptionHandlingInboundChannelHandler extends ChannelInboundHandlerAdapter {
         @Override
-        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        public void exceptionCaught(final ChannelHandlerContext ctx, final Throwable cause) {
             LOG.warn("An exception occurred during negotiation with {}", channel.remoteAddress(), cause);
             cancelTimeout();
             negotiationFailed(cause);
