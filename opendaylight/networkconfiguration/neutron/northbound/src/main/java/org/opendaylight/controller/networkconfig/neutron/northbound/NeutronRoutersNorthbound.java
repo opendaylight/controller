@@ -11,6 +11,7 @@ package org.opendaylight.controller.networkconfig.neutron.northbound;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -36,12 +37,6 @@ import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
 import org.opendaylight.controller.networkconfig.neutron.NeutronRouter;
 import org.opendaylight.controller.networkconfig.neutron.NeutronRouter_Interface;
 import org.opendaylight.controller.networkconfig.neutron.NeutronSubnet;
-import org.opendaylight.controller.northbound.commons.RestMessages;
-import org.opendaylight.controller.northbound.commons.exception.BadRequestException;
-import org.opendaylight.controller.northbound.commons.exception.ResourceConflictException;
-import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
-import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
-import org.opendaylight.controller.sal.utils.ServiceHelper;
 
 
 /**
@@ -197,7 +192,7 @@ public class NeutronRoutersNorthbound {
                 if (!externNetwork.isRouterExternal())
                     throw new BadRequestException("External Network Pointer isn't marked as router:external");
             }
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronRouterAware.class, this, null);
+            Object[] instances = NeutronUtil.getInstances(INeutronRouterAware.class, this);
             if (instances != null) {
                 for (Object instance : instances) {
                     INeutronRouterAware service = (INeutronRouterAware) instance;
@@ -273,7 +268,7 @@ public class NeutronRoutersNorthbound {
                 singleton.getStatus() != null)
             throw new BadRequestException("Request attribute change not allowed");
 
-        Object[] instances = ServiceHelper.getGlobalInstances(INeutronRouterAware.class, this, null);
+        Object[] instances = NeutronUtil.getInstances(INeutronRouterAware.class, this);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronRouterAware service = (INeutronRouterAware) instance;
@@ -338,7 +333,7 @@ public class NeutronRoutersNorthbound {
         if (routerInterface.routerInUse(routerUUID))
             throw new ResourceConflictException("Router UUID in Use");
         NeutronRouter singleton = routerInterface.getRouter(routerUUID);
-        Object[] instances = ServiceHelper.getGlobalInstances(INeutronRouterAware.class, this, null);
+        Object[] instances = NeutronUtil.getInstances(INeutronRouterAware.class, this);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronRouterAware service = (INeutronRouterAware) instance;
@@ -418,7 +413,7 @@ public class NeutronRoutersNorthbound {
         if (targetPort.getDeviceID() != null ||
                 targetPort.getDeviceOwner() != null)
             throw new ResourceConflictException("Target Port already allocated");
-        Object[] instances = ServiceHelper.getGlobalInstances(INeutronRouterAware.class, this, null);
+        Object[] instances = NeutronUtil.getInstances(INeutronRouterAware.class, this);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronRouterAware service = (INeutronRouterAware) instance;
@@ -496,7 +491,7 @@ public class NeutronRoutersNorthbound {
             input.setID(target.getID());
             input.setTenantID(target.getTenantID());
 
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronRouterAware.class, this, null);
+            Object[] instances = NeutronUtil.getInstances(INeutronRouterAware.class, this);
             if (instances != null) {
                 for (Object instance : instances) {
                     INeutronRouterAware service = (INeutronRouterAware) instance;
@@ -537,7 +532,7 @@ public class NeutronRoutersNorthbound {
             port.setDeviceID(null);
             port.setDeviceOwner(null);
             target.removeInterface(input.getPortUUID());
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronRouterAware.class, this, null);
+            Object[] instances = NeutronUtil.getInstances(INeutronRouterAware.class, this);
             for (Object instance : instances) {
                 INeutronRouterAware service = (INeutronRouterAware) instance;
                 service.neutronRouterInterfaceDetached(target, input);
@@ -567,7 +562,7 @@ public class NeutronRoutersNorthbound {
                 throw new ResourceConflictException("Target Port IP not in Target Subnet");
             input.setID(target.getID());
             input.setTenantID(target.getTenantID());
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronRouterAware.class, this, null);
+            Object[] instances = NeutronUtil.getInstances(INeutronRouterAware.class, this);
             if (instances != null) {
                 for (Object instance : instances) {
                     INeutronRouterAware service = (INeutronRouterAware) instance;

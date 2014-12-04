@@ -9,18 +9,10 @@
 package org.opendaylight.controller.networkconfig.neutron.northbound;
 
 
-import org.codehaus.enunciate.jaxrs.ResponseCode;
-import org.codehaus.enunciate.jaxrs.StatusCodes;
-import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallPolicyCRUD;
-import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallRuleAware;
-import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallRuleCRUD;
-import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
-import org.opendaylight.controller.networkconfig.neutron.NeutronFirewallRule;
-import org.opendaylight.controller.northbound.commons.RestMessages;
-import org.opendaylight.controller.northbound.commons.exception.BadRequestException;
-import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
-import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
-import org.opendaylight.controller.sal.utils.ServiceHelper;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -33,10 +25,14 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+
+import org.codehaus.enunciate.jaxrs.ResponseCode;
+import org.codehaus.enunciate.jaxrs.StatusCodes;
+import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallPolicyCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallRuleAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallRuleCRUD;
+import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
+import org.opendaylight.controller.networkconfig.neutron.NeutronFirewallRule;
 
 /**
  * Neutron Northbound REST APIs for Firewall Rule.<br>
@@ -222,7 +218,7 @@ public class NeutronFirewallRulesNorthbound {
                 throw new BadRequestException("Firewall Rule UUID already exists");
             }
             firewallRuleInterface.addNeutronFirewallRule(singleton);
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronFirewallRuleAware.class, this, null);
+            Object[] instances = NeutronUtil.getInstances(INeutronFirewallRuleAware.class, this);
             if (instances != null) {
                 for (Object instance : instances) {
                     INeutronFirewallRuleAware service = (INeutronFirewallRuleAware) instance;
@@ -245,7 +241,7 @@ public class NeutronFirewallRulesNorthbound {
             List<NeutronFirewallRule> bulk = input.getBulk();
             Iterator<NeutronFirewallRule> i = bulk.iterator();
             HashMap<String, NeutronFirewallRule> testMap = new HashMap<String, NeutronFirewallRule>();
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronFirewallRuleAware.class, this, null);
+            Object[] instances = NeutronUtil.getInstances(INeutronFirewallRuleAware.class, this);
             while (i.hasNext()) {
                 NeutronFirewallRule test = i.next();
 
@@ -344,7 +340,7 @@ public class NeutronFirewallRulesNorthbound {
             throw new BadRequestException("Attribute edit blocked by Neutron");
         }
 
-        Object[] instances = ServiceHelper.getGlobalInstances(INeutronFirewallRuleAware.class, this, null);
+        Object[] instances = NeutronUtil.getInstances(INeutronFirewallRuleAware.class, this);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronFirewallRuleAware service = (INeutronFirewallRuleAware) instance;
@@ -401,7 +397,7 @@ public class NeutronFirewallRulesNorthbound {
             return Response.status(409).build();
         }
         NeutronFirewallRule singleton = firewallRuleInterface.getNeutronFirewallRule(firewallRuleUUID);
-        Object[] instances = ServiceHelper.getGlobalInstances(INeutronFirewallRuleAware.class, this, null);
+        Object[] instances = NeutronUtil.getInstances(INeutronFirewallRuleAware.class, this);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronFirewallRuleAware service = (INeutronFirewallRuleAware) instance;

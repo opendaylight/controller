@@ -9,17 +9,10 @@
 package org.opendaylight.controller.networkconfig.neutron.northbound;
 
 
-import org.codehaus.enunciate.jaxrs.ResponseCode;
-import org.codehaus.enunciate.jaxrs.StatusCodes;
-import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallPolicyAware;
-import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallPolicyCRUD;
-import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
-import org.opendaylight.controller.networkconfig.neutron.NeutronFirewallPolicy;
-import org.opendaylight.controller.northbound.commons.RestMessages;
-import org.opendaylight.controller.northbound.commons.exception.BadRequestException;
-import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
-import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
-import org.opendaylight.controller.sal.utils.ServiceHelper;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -32,10 +25,13 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+
+import org.codehaus.enunciate.jaxrs.ResponseCode;
+import org.codehaus.enunciate.jaxrs.StatusCodes;
+import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallPolicyAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallPolicyCRUD;
+import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
+import org.opendaylight.controller.networkconfig.neutron.NeutronFirewallPolicy;
 
 /**
  * Neutron Northbound REST APIs for Firewall Policies.<br>
@@ -186,7 +182,7 @@ public class NeutronFirewallPolicyNorthbound {
             }
             firewallPolicyInterface.addNeutronFirewallPolicy(singleton);
 
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronFirewallPolicyAware.class, this, null);
+            Object[] instances = NeutronUtil.getInstances(INeutronFirewallPolicyAware.class, this);
             if (instances != null) {
                 for (Object instance : instances) {
                     INeutronFirewallPolicyAware service = (INeutronFirewallPolicyAware) instance;
@@ -207,7 +203,7 @@ public class NeutronFirewallPolicyNorthbound {
             List<NeutronFirewallPolicy> bulk = input.getBulk();
             Iterator<NeutronFirewallPolicy> i = bulk.iterator();
             HashMap<String, NeutronFirewallPolicy> testMap = new HashMap<String, NeutronFirewallPolicy>();
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronFirewallPolicyAware.class, this, null);
+            Object[] instances = NeutronUtil.getInstances(INeutronFirewallPolicyAware.class, this);
             while (i.hasNext()) {
                 NeutronFirewallPolicy test = i.next();
 
@@ -297,7 +293,7 @@ public class NeutronFirewallPolicyNorthbound {
             throw new BadRequestException("Attribute edit blocked by Neutron");
         }
 
-        Object[] instances = ServiceHelper.getGlobalInstances(INeutronFirewallPolicyAware.class, this, null);
+        Object[] instances = NeutronUtil.getInstances(INeutronFirewallPolicyAware.class, this);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronFirewallPolicyAware service = (INeutronFirewallPolicyAware) instance;
@@ -351,7 +347,7 @@ public class NeutronFirewallPolicyNorthbound {
             return Response.status(409).build();
         }
         NeutronFirewallPolicy singleton = firewallPolicyInterface.getNeutronFirewallPolicy(firewallPolicyUUID);
-        Object[] instances = ServiceHelper.getGlobalInstances(INeutronFirewallPolicyAware.class, this, null);
+        Object[] instances = NeutronUtil.getInstances(INeutronFirewallPolicyAware.class, this);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronFirewallPolicyAware service = (INeutronFirewallPolicyAware) instance;
