@@ -6,8 +6,8 @@
         </encoder>
     </appender>
 
-  <logger name="org.opendaylight.controller.netconf" level="TRACE"/>
-  <logger name="org.opendaylight.controller.sal.connect.netconf" level="TRACE"/>
+  <logger name="org.opendaylight.controller.netconf" level="INFO"/>
+  <logger name="org.opendaylight.controller.sal.connect.netconf" level="DEBUG"/>
 
   <root level="error">
     <appender-ref ref="STDOUT" />
