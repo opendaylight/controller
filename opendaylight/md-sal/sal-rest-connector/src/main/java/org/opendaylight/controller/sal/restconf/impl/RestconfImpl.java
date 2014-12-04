@@ -641,12 +641,9 @@ public class RestconfImpl implements RestconfService {
         NormalizedNode<?, ?> data = null;
         YangInstanceIdentifier normalizedII;
         if (mountPoint != null) {
-            normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData
-                    .getInstanceIdentifier());
-            data = broker.readConfigurationData(mountPoint, normalizedII);
+            data = broker.readConfigurationData(mountPoint, iiWithData.getInstanceIdentifier());
         } else {
-            normalizedII = controllerContext.toNormalized(iiWithData.getInstanceIdentifier());
-            data = broker.readConfigurationData(normalizedII);
+            data = broker.readConfigurationData(iiWithData.getInstanceIdentifier());
         }
         return new NormalizedNodeContext(iiWithData, data);
     }
@@ -700,12 +697,9 @@ public class RestconfImpl implements RestconfService {
         NormalizedNode<?, ?> data = null;
         YangInstanceIdentifier normalizedII;
         if (mountPoint != null) {
-            normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData
-                    .getInstanceIdentifier());
-            data = broker.readOperationalData(mountPoint, normalizedII);
+            data = broker.readOperationalData(mountPoint, iiWithData.getInstanceIdentifier());
         } else {
-            normalizedII = controllerContext.toNormalized(iiWithData.getInstanceIdentifier());
-            data = broker.readOperationalData(normalizedII);
+            data = broker.readOperationalData(iiWithData.getInstanceIdentifier());
         }
 
         return new NormalizedNodeContext(iiWithData, data);
@@ -729,15 +723,6 @@ public class RestconfImpl implements RestconfService {
         final NormalizedNode<?, ?> datastoreNormalizedNode = compositeNodeToDatastoreNormalizedNode(value,
                 iiWithData.getSchemaNode());
 
-
-        YangInstanceIdentifier normalizedII;
-        if (mountPoint != null) {
-            normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(
-                    iiWithData.getInstanceIdentifier());
-        } else {
-            normalizedII = controllerContext.toNormalized(iiWithData.getInstanceIdentifier());
-        }
-
         /*
          * There is a small window where another write transaction could be updating the same data
          * simultaneously and we get an OptimisticLockFailedException. This error is likely
@@ -755,10 +740,10 @@ public class RestconfImpl implements RestconfService {
         while(true) {
             try {
                 if (mountPoint != null) {
-                    broker.commitConfigurationDataPut(mountPoint, normalizedII,
+                    broker.commitConfigurationDataPut(mountPoint, iiWithData.getInstanceIdentifier(),
                             datastoreNormalizedNode).checkedGet();
                 } else {
-                    broker.commitConfigurationDataPut(normalizedII,
+                    broker.commitConfigurationDataPut(iiWithData.getInstanceIdentifier(),
                             datastoreNormalizedNode).checkedGet();
                 }
 
