@@ -10,10 +10,11 @@ package org.opendaylight.controller.netconf.client;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSet;
 import io.netty.channel.Channel;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.Promise;
+import java.util.Set;
 import org.opendaylight.controller.netconf.api.NetconfClientSessionPreferences;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
@@ -32,28 +33,43 @@ import org.slf4j.LoggerFactory;
 
 public class NetconfClientSessionNegotiatorFactory implements SessionNegotiatorFactory<NetconfMessage, NetconfClientSession, NetconfClientSessionListener> {
 
-    public static final java.util.Set<String> CLIENT_CAPABILITIES = Sets.newHashSet(
+    public static final Set<String> CLIENT_CAPABILITIES = ImmutableSet.of(
             XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_BASE_1_0,
             XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_BASE_1_1,
             XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_CAPABILITY_EXI_1_0);
 
+    private static final Logger LOG = LoggerFactory.getLogger(NetconfClientSessionNegotiatorFactory.class);
     private static final String START_EXI_MESSAGE_ID = "default-start-exi";
+    private static final EXIOptions DEFAULT_OPTIONS;
 
     private final Optional<NetconfHelloMessageAdditionalHeader> additionalHeader;
     private final long connectionTimeoutMillis;
     private final Timer timer;
     private final EXIOptions options;
-    private static final Logger LOG = LoggerFactory.getLogger(NetconfClientSessionNegotiatorFactory.class);
 
-    public NetconfClientSessionNegotiatorFactory(Timer timer,
-                                                 Optional<NetconfHelloMessageAdditionalHeader> additionalHeader,
-                                                 long connectionTimeoutMillis) {
+    static {
+        final EXIOptions opts = new EXIOptions();
+        try {
+            opts.setPreserveDTD(true);
+            opts.setPreserveNS(true);
+            opts.setPreserveLexicalValues(true);
+            opts.setAlignmentType(AlignmentType.byteAligned);
+        } catch (EXIOptionsException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+
+        DEFAULT_OPTIONS = opts;
+    }
+
+    public NetconfClientSessionNegotiatorFactory(final Timer timer,
+                                                 final Optional<NetconfHelloMessageAdditionalHeader> additionalHeader,
+                                                 final long connectionTimeoutMillis) {
         this(timer, additionalHeader, connectionTimeoutMillis, DEFAULT_OPTIONS);
     }
 
-    public NetconfClientSessionNegotiatorFactory(Timer timer,
-                                                 Optional<NetconfHelloMessageAdditionalHeader> additionalHeader,
-                                                 long connectionTimeoutMillis, EXIOptions exiOptions) {
+    public NetconfClientSessionNegotiatorFactory(final Timer timer,
+                                                 final Optional<NetconfHelloMessageAdditionalHeader> additionalHeader,
+                                                 final long connectionTimeoutMillis, final EXIOptions exiOptions) {
         this.timer = Preconditions.checkNotNull(timer);
         this.additionalHeader = additionalHeader;
         this.connectionTimeoutMillis = connectionTimeoutMillis;
@@ -61,9 +77,9 @@ public class NetconfClientSessionNegotiatorFactory implements SessionNegotiatorF
     }
 
     @Override
-    public SessionNegotiator<NetconfClientSession> getSessionNegotiator(SessionListenerFactory<NetconfClientSessionListener> sessionListenerFactory,
-                                                                        Channel channel,
-            Promise<NetconfClientSession> promise) {
+    public SessionNegotiator<NetconfClientSession> getSessionNegotiator(final SessionListenerFactory<NetconfClientSessionListener> sessionListenerFactory,
+                                                                        final Channel channel,
+            final Promise<NetconfClientSession> promise) {
 
         NetconfMessage startExiMessage = NetconfStartExiMessage.create(options, START_EXI_MESSAGE_ID);
         NetconfHelloMessage helloMessage = null;
@@ -77,18 +93,5 @@ public class NetconfClientSessionNegotiatorFactory implements SessionNegotiatorF
         NetconfClientSessionPreferences proposal = new NetconfClientSessionPreferences(helloMessage, startExiMessage);
         return new NetconfClientSessionNegotiator(proposal, promise, channel, timer,
                 sessionListenerFactory.getSessionListener(),connectionTimeoutMillis);
-    }
-
-    private static final EXIOptions DEFAULT_OPTIONS = new EXIOptions();
-    static {
-        try {
-            DEFAULT_OPTIONS.setPreserveDTD(true);
-            DEFAULT_OPTIONS.setPreserveNS(true);
-            DEFAULT_OPTIONS.setPreserveLexicalValues(true);
-            DEFAULT_OPTIONS.setAlignmentType(AlignmentType.preCompress);
-        } catch (EXIOptionsException e) {
-            // Should not happen since DEFAULT_OPTIONS are still the same
-            throw new IllegalStateException("Unable to create EXI DEFAULT_OPTIONS");
-        }
     }
 }
