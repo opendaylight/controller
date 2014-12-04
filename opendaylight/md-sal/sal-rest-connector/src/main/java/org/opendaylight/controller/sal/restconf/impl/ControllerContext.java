@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.sal.restconf.impl;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
@@ -31,7 +33,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.ws.rs.core.Response.Status;
-import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationOperation;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizer;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
@@ -43,7 +44,6 @@ import org.opendaylight.yangtools.concepts.Codec;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.InstanceIdentifierBuilder;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
@@ -146,12 +146,19 @@ public class ControllerContext implements SchemaContextListener {
                     ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
         }
 
-        InstanceIdentifierBuilder builder = YangInstanceIdentifier.builder();
         Module latestModule = globalSchema.findModuleByName(startModule, null);
-        InstanceIdentifierContext iiWithSchemaNode = this.collectPathArguments(builder, pathArgs, latestModule, null,
-                toMountPointIdentifier);
+        DataNormalizationOperation<?> operation = DataNormalizationOperation.from(globalSchema);
+        InstanceIdentifierContext iiWithSchemaNode;
+        try {
+            iiWithSchemaNode = this.collectPathArguments(new ArrayList<PathArgument>(), pathArgs, latestModule, null,
+                    toMountPointIdentifier, operation);
+        } catch (DataNormalizationException e) {
+            LOG.error("Problem with normalization of URI has occured");
+            throw new RestconfDocumentedException("Problem with normalization of URI has occured", ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
+        }
 
         if (iiWithSchemaNode == null) {
+            LOG.error("URI has bad format");
             throw new RestconfDocumentedException("URI has bad format", ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
         }
 
@@ -466,9 +473,9 @@ public class ControllerContext implements SchemaContextListener {
         return object == null ? "" : URLEncoder.encode(object.toString(), ControllerContext.URI_ENCODING_CHAR_SET);
     }
 
-    private InstanceIdentifierContext collectPathArguments(final InstanceIdentifierBuilder builder,
+    private InstanceIdentifierContext collectPathArguments(final List<PathArgument> pathArguments,
             final List<String> strings, final DataNodeContainer parentNode, final DOMMountPoint mountPoint,
-            final boolean returnJustMountPoint) {
+            final boolean returnJustMountPoint, DataNormalizationOperation<?> operation) throws DataNormalizationException {
         Preconditions.<List<String>> checkNotNull(strings);
 
         if (parentNode == null) {
@@ -476,7 +483,7 @@ public class ControllerContext implements SchemaContextListener {
         }
 
         if (strings.isEmpty()) {
-            return new InstanceIdentifierContext(builder.toInstance(), ((DataSchemaNode) parentNode), mountPoint,mountPoint != null ? mountPoint.getSchemaContext() : globalSchema);
+            return new InstanceIdentifierContext(YangInstanceIdentifier.create(pathArguments), ((DataSchemaNode) parentNode), mountPoint,mountPoint != null ? mountPoint.getSchemaContext() : globalSchema);
         }
 
         String head = strings.iterator().next();
@@ -498,7 +505,7 @@ public class ControllerContext implements SchemaContextListener {
                             ErrorType.APPLICATION, ErrorTag.OPERATION_NOT_SUPPORTED);
                 }
 
-                final YangInstanceIdentifier partialPath = builder.toInstance();
+                final YangInstanceIdentifier partialPath = YangInstanceIdentifier.create(pathArguments);
                 final Optional<DOMMountPoint> mountOpt = mountService.getMountPoint(partialPath);
                 if (!mountOpt.isPresent()) {
                     LOG.debug("Instance identifier to missing mount point: {}", partialPath);
@@ -537,8 +544,10 @@ public class ControllerContext implements SchemaContextListener {
                 }
 
                 List<String> subList = strings.subList(1, strings.size());
-                return this.collectPathArguments(YangInstanceIdentifier.builder(), subList, moduleBehindMountPoint, mount,
-                        returnJustMountPoint);
+                final DataNormalizationOperation<?> operationBehindMount = DataNormalizationOperation.from(mountPointSchema);
+
+                return this.collectPathArguments(new ArrayList<PathArgument>(), subList, moduleBehindMountPoint, mount,
+                        returnJustMountPoint, operationBehindMount);
             }
 
             Module module = null;
@@ -598,6 +607,7 @@ public class ControllerContext implements SchemaContextListener {
                     + "\" must be Container or List yang type.", ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
         }
 
+        PathArgument pathArgument = null;
         int consumed = 1;
         if ((targetNode instanceof ListSchemaNode)) {
             final ListSchemaNode listNode = ((ListSchemaNode) targetNode);
@@ -625,18 +635,28 @@ public class ControllerContext implements SchemaContextListener {
             }
 
             consumed = consumed + i;
-            builder.nodeWithKey(targetNode.getQName(), keyValues);
+
+            pathArgument = new YangInstanceIdentifier.NodeIdentifierWithPredicates(targetNode.getQName(), keyValues);
         } else {
-            builder.node(targetNode.getQName());
+            pathArgument = new YangInstanceIdentifier.NodeIdentifier(targetNode.getQName());
         }
+        DataNormalizationOperation<?> currentOp = operation.getChild(pathArgument);
+        checkArgument(currentOp != null,
+                "Part of instance identifier %s is not correct. Normalized Instance Identifier so far %s",
+                pathArgument, pathArguments);
+        while (currentOp.isMixin()) {
+            pathArguments.add(currentOp.getIdentifier());
+            currentOp = currentOp.getChild(pathArgument.getNodeType());
+        }
+        pathArguments.add(pathArgument);
 
         if ((targetNode instanceof DataNodeContainer)) {
             final List<String> remaining = strings.subList(consumed, strings.size());
-            return this.collectPathArguments(builder, remaining, ((DataNodeContainer) targetNode), mountPoint,
-                    returnJustMountPoint);
+            return this.collectPathArguments(pathArguments, remaining, ((DataNodeContainer) targetNode), mountPoint,
+                    returnJustMountPoint, currentOp);
         }
 
-        return new InstanceIdentifierContext(builder.toInstance(), targetNode, mountPoint,mountPoint != null ? mountPoint.getSchemaContext() : globalSchema);
+        return new InstanceIdentifierContext(YangInstanceIdentifier.create(pathArguments), targetNode, mountPoint,mountPoint != null ? mountPoint.getSchemaContext() : globalSchema);
     }
 
     public static DataSchemaNode findInstanceDataChildByNameAndNamespace(final DataNodeContainer container, final String name,
@@ -914,7 +934,7 @@ public class ControllerContext implements SchemaContextListener {
         }
     }
 
-    public DataNormalizationOperation<?> getRootOperation() {
+    public org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationOperation<?> getRootOperation() {
         return dataNormalizer.getRootOperation();
     }
 
