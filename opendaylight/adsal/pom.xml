@@ -95,6 +95,7 @@
     <module>samples/northbound/loadbalancer</module>
 
     <module>dummy-console</module>
+    <module>compatibility</module>
 
     <!-- features -->
     <module>features/base</module>

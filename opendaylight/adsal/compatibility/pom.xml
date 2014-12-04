@@ -1,104 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.opendaylight</artifactId>
     <version>1.5.0-SNAPSHOT</version>
-    <relativePath>../commons/opendaylight</relativePath>
+    <relativePath>../../commons/opendaylight</relativePath>
   </parent>
-
-  <artifactId>sal-parent</artifactId>
+  <artifactId>compatibility-parent</artifactId>
   <version>1.2.0-SNAPSHOT</version>
   <packaging>pom</packaging>
+  <name>MD-SAL to AD-SAL Adaptation Parent</name>
 
   <modules>
-    <module>mdsal-artifacts</module>
-
-    <!-- Common APIs & Implementation -->
-    <module>sal-common</module>
-    <module>sal-common-api</module>
-    <module>sal-common-impl</module>
-    <module>sal-common-util</module>
-
-    <!-- Binding Independent -->
-    <module>sal-dom-api</module>
-    <module>sal-dom-broker</module>
-    <module>sal-dom-spi</module>
-
-    <!-- Binding Aware -->
-    <module>sal-binding-api</module>
-    <module>sal-binding-config</module>
-    <module>sal-binding-broker</module>
-
-    <module>sal-binding-util</module>
-
-    <!-- Configuration File -->
-    <module>md-sal-config</module>
-
-    <!-- Samples -->
-    <module>samples</module>
-
-    <!-- Base Models -->
-    <module>model</module>
-    <module>sal-remote</module>
-    <module>sal-restconf-broker</module>
-
-    <!-- Connectors -->
-    <module>sal-connector-api</module>
-    <module>sal-rest-connector</module>
-    <module>sal-rest-connector-config</module>
-    <module>sal-netconf-connector</module>
-
-    <module>inventory-manager</module>
-    <module>statistics-manager</module>
-    <module>statistics-manager-config</module>
-    <module>topology-manager</module>
-    <module>forwardingrules-manager</module>
-    <module>topology-lldp-discovery</module>
-
-    <!-- Documentation -->
-    <module>sal-rest-docgen</module>
-    <module>sal-rest-docgen-maven</module>
-
-    <module>sal-akka-raft</module>
-
-    <!--InMemory DOM DataStore-->
-    <module>sal-inmemory-datastore</module>
-
-    <!--sal-protocolbuffer-encoding is now part of sal-clutering-commons-->
-    <module>sal-clustering-commons</module>
-
-    <!-- sal clustering configuration -->
-    <module>sal-clustering-config</module>
-
-    <!-- sal-distributed-datastore -->
-    <module>sal-distributed-datastore</module>
-
-    <!-- XSQL -->
-    <module>sal-dom-xsql</module>
-    <module>sal-karaf-xsql</module>
-    <module>sal-dom-xsql-config</module>
-
-    <!-- Yang Test Models for MD-SAL -->
-    <module>sal-test-model</module>
-
-    <!-- Clustering -->
-    <module>sal-remoterpc-connector</module>
+    <module>sal-compatibility</module>
   </modules>
 
+  <dependencies>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-binding-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-common-util</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller.model</groupId>
+      <artifactId>model-flow-service</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
   <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.felix</groupId>
-          <artifactId>maven-bundle-plugin</artifactId>
-          <version>${bundle.plugin.version}</version>
-          <extensions>true</extensions>
-          <!--executions> <execution> <id>bundle-manifest</id>
-                        <phase>process-classes</phase> <goals> <goal>manifest</goal> </goals> </execution>
-                        </executions -->
+      <pluginManagement>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>maven-bundle-plugin</artifactId>
+            <version>${bundle.plugin.version}</version>
+            <extensions>true</extensions>
+            <!--executions> <execution> <id>bundle-manifest</id>
+            <phase>process-classes</phase> <goals> <goal>manifest</goal> </goals> </execution>
+          </executions -->
           <configuration>
             <instructions>
               <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
@@ -107,7 +63,7 @@
           </configuration>
         </plugin>
         <!--This plugin's configuration is used to store Eclipse
-                    m2e settings only. It has no influence on the Maven build itself. -->
+        m2e settings only. It has no influence on the Maven build itself. -->
         <plugin>
           <groupId>org.eclipse.m2e</groupId>
           <artifactId>lifecycle-mapping</artifactId>
@@ -165,7 +121,6 @@
           <version>${jacoco.version}</version>
         </plugin>
       </plugins>
-
     </pluginManagement>
     <plugins>
       <plugin>
@@ -214,26 +169,4 @@
     <tag>HEAD</tag>
     <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
   </scm>
-
-  <profiles>
-    <profile>
-      <id>integrationtests</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
-      <modules>
-        <module>sal-binding-it</module>
-        <module>sal-binding-dom-it</module>
-      </modules>
-    </profile>
-    <profile>
-      <id>benchmarks</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
-      <modules>
-        <module>benchmark-data-store</module>
-      </modules>
-    </profile>
-  </profiles>
 </project>
