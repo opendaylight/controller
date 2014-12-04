@@ -1,0 +1,28 @@
+module mount {
+    namespace "ns:mount";
+
+    prefix "smpl";
+    revision 2014-12-04 {
+    }
+
+    container cont-mount {
+        list lst1-mount {
+            key "key11-mount";
+
+            leaf key11-mount {
+                type string;
+            }
+
+            choice ch11-mount {
+                case cs11A-mount {
+                    choice ch11A1-mount {
+                        case cs11A1A-mount {
+                            container cont11A1A1-mount {
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
