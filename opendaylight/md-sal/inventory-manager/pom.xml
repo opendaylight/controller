@@ -32,20 +32,55 @@
       <artifactId>org.osgi.core</artifactId>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>sal-binding-config</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>config-api</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
     <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <configuration>
-          <instructions>
-            <Bundle-Activator>org.opendaylight.controller.md.inventory.manager.InventoryActivator</Bundle-Activator>
-            <Private-Package>org.opendaylight.controller.md.inventory.manager</Private-Package>
-          </instructions>
-        </configuration>
-      </plugin>
+        <plugin>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>maven-bundle-plugin</artifactId>
+            <configuration>
+                <instructions>
+                    <Import-Package>*</Import-Package>
+                </instructions>
+            </configuration>
+        </plugin>
+        <plugin>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>yang-maven-plugin</artifactId>
+            <executions>
+                <execution>
+                    <id>config</id>
+                    <goals>
+                        <goal>generate-sources</goal>
+                    </goals>
+                    <configuration>
+                        <codeGenerators>
+                            <generator>
+                                <codeGeneratorClass>org.opendaylight.controller.config.yangjmxgenerator.plugin.JMXGenerator</codeGeneratorClass>
+                                <outputBaseDir>${jmxGeneratorPath}</outputBaseDir>
+                                <additionalConfiguration>
+                                    <namespaceToPackage1>urn:opendaylight:params:xml:ns:yang:controller==org.opendaylight.controller.config.yang</namespaceToPackage1>
+                                </additionalConfiguration>
+                            </generator>
+                            <generator>
+                                <codeGeneratorClass>org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl</codeGeneratorClass>
+                                <outputBaseDir>${salGeneratorPath}</outputBaseDir>
+                            </generator>
+                        </codeGenerators>
+                        <inspectDependencies>true</inspectDependencies>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
     </plugins>
   </build>
   <scm>

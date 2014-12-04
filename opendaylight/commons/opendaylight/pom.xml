@@ -78,6 +78,7 @@
     <config.restconf.configfile>10-rest-connector.xml</config.restconf.configfile>
     <config.netconf.connector.configfile>99-netconf-connector.xml</config.netconf.connector.configfile>
     <config.statistics.manager.configfile>30-statistics-manager.xml</config.statistics.manager.configfile>
+    <config.inventory.manager.configfile>30-inventory-manager.xml</config.inventory.manager.configfile>
     <configuration.implementation.version>0.4.5-SNAPSHOT</configuration.implementation.version>
     <configuration.version>0.4.5-SNAPSHOT</configuration.version>
     <connectionmanager.version>0.1.4-SNAPSHOT</connectionmanager.version>
