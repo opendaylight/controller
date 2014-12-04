@@ -1,0 +1,76 @@
+module simple {
+  namespace "ns:simple";  
+
+  prefix "smpl";
+  revision 2014-12-04 {    
+  }
+
+	container cont {
+		list lst1 {
+			key "key11 key12";
+			
+			leaf key11 {
+				type string;
+			}
+			
+			leaf key12 {
+				type string;
+			}
+			
+			container cont12 {
+			}
+			
+			choice ch11 {
+				case cs11A {
+					container cont11A1 {
+					}
+				}
+				case cs11B {
+					container cont11B1 {
+					}
+				}
+				case cs11D {
+					choice ch11D1 {
+					  	case cs11D1A {
+					  	    container cont11D1A1 {
+					  	    }
+					  	}
+					}
+				}
+			}
+			
+		}
+	    container cont1 {
+	    	
+	    }
+	}
+	
+	/** added whole choice **/
+	augment "/cont/lst1" {
+		choice ch12 {
+			case cs12A {
+				container cont12A1 {
+				}
+			}
+			case cs12B {
+				container cont12B1 {
+				}
+			}
+		}
+	}
+	
+	/** added only one case **/
+	augment "/cont/lst1/ch11" {
+		case cs11C {
+			container cont11C1 {
+			}
+		}
+	}
+	
+	/** added node to case **/
+	augment "/cont/lst1/ch11/cs11A" {
+		container cont11A2 {
+		}
+	}
+  
+}

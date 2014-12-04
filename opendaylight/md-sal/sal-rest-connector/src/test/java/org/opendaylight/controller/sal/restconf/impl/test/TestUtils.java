@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.sal.restconf.impl.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -14,6 +15,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -50,6 +52,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
+import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
 import org.opendaylight.controller.sal.restconf.impl.NodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError;
@@ -61,6 +64,9 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.composite.node.schema.cnsn.parser.CnSnToNormalizedNodeParserFactory;
@@ -428,4 +434,42 @@ public final class TestUtils {
 
         return mapEntryNode.build();
     }
+
+    static void compareInstanceIdentifier(String uri, SchemaContext schemaContext, Object... expPath) {
+        InstanceIdentifierContext normalizedIIContext = ControllerContext.getInstance().toInstanceIdentifier(uri);
+        YangInstanceIdentifier normalizedIINew = normalizedIIContext.getInstanceIdentifier();
+
+        for (int i = 0; i < expPath.length; i++) {
+            PathArgument actualArg = Iterables.get(normalizedIINew.getPathArguments(), i);
+            if (expPath[i] instanceof Object[]) { // NodeIdentifierWithPredicates
+                Object[] exp = (Object[]) expPath[i];
+                assertTrue("Odd number of element expected.", exp.length % 2 == 1);
+
+                assertEquals("Actual path arg " + (i + 1) + " class", NodeIdentifierWithPredicates.class,
+                        actualArg.getClass());
+                NodeIdentifierWithPredicates actualNode = (NodeIdentifierWithPredicates) actualArg;
+                assertEquals("Missing key parts.", (exp.length - 1) / 2, actualNode.getKeyValues().size());
+                Map<QName, Object> keyValues = actualNode.getKeyValues();
+                assertEquals("Actual path arg " + (i + 1) + " node type", exp[0], actualNode.getNodeType());
+
+                int j = 1;
+                while (j < exp.length) {
+                    Object keyValue = keyValues.get(exp[j]);
+                    assertNotNull("Key " + exp[j] + " wasn't found.", keyValue);
+                    j++;
+                    assertEquals("Value of key " + exp[j - 1], exp[j], keyValue);
+                    j++;
+                }
+            } else if (expPath[i] instanceof Set) { // AugmentationIdentifier
+                assertEquals("Actual path arg " + (i + 1) + " class", AugmentationIdentifier.class,
+                        actualArg.getClass());
+                AugmentationIdentifier actualNode = (AugmentationIdentifier) actualArg;
+                assertEquals("Actual path arg " + (i + 1) + " PossibleChildNames", expPath[i],
+                        actualNode.getPossibleChildNames());
+            } else {
+                assertEquals("Actual path arg " + (i + 1) + " node type", expPath[i], actualArg.getNodeType());
+            }
+        }
+    }
+
 }

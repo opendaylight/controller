@@ -13,10 +13,14 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.opendaylight.controller.sal.restconf.impl.test.TestUtils.compareInstanceIdentifier;
+
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import java.io.FileNotFoundException;
+import java.net.URI;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Set;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -29,6 +33,8 @@ import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.QNameModule;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
@@ -117,14 +123,26 @@ public class URITest {
         controllerContext.toInstanceIdentifier("simple-nodes");
     }
 
+
+    private static QNameModule TEST_INTERFACE2_QNAME;
+    static {
+        try {
+            TEST_INTERFACE2_QNAME = QNameModule.create(URI.create("urn:ietf:params:xml:ns:yang:test-interface2"),
+                    new SimpleDateFormat("yyyy-MM-dd").parse("2014-08-01"));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+    private static QName CLASS_QNAME = QName.create(TEST_INTERFACE2_QNAME, "class");
+    private static QName STUDENT_QNAME = QName.create(TEST_INTERFACE2_QNAME, "student");
+    private static QName NAME_KEY_QNAME = QName.create(TEST_INTERFACE2_QNAME, "name");
+    private static String NAME_KEY_VALUE = "name";
+
     @Test
     public void testMountPointWithExternModul() throws FileNotFoundException {
         initMountService(true);
-        InstanceIdentifierContext instanceIdentifier = controllerContext
-                .toInstanceIdentifier("simple-nodes:users/yang-ext:mount/test-interface2:class/student/name");
-        assertEquals(
-                "[(urn:ietf:params:xml:ns:yang:test-interface2?revision=2014-08-01)class, (urn:ietf:params:xml:ns:yang:test-interface2?revision=2014-08-01)student[{(urn:ietf:params:xml:ns:yang:test-interface2?revision=2014-08-01)name=name}]]",
-                ImmutableList.copyOf(instanceIdentifier.getInstanceIdentifier().getPathArguments()).toString());
+        compareInstanceIdentifier("simple-nodes:users/yang-ext:mount/test-interface2:class/student/name",
+                controllerContext.getGlobalSchema(), CLASS_QNAME, STUDENT_QNAME, new Object[] {STUDENT_QNAME, NAME_KEY_QNAME, NAME_KEY_VALUE});
     }
 
     @Test
