@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_6779e72e",
+        "filename": "opendaylight/config/yang-test/src/main/java/org/opendaylight/controller/config/yang/test/impl/CheckedAutoCloseable.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-12-04T09:23:01Z",
+      "side": 1,
+      "message": "missing copyright",
+      "revId": "9013d712c10a85cc9194bd7c2b7335714b99b337",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_2773df4e",
+        "filename": "opendaylight/config/yang-test/src/main/java/org/opendaylight/controller/config/yang/test/impl/CheckedAutoCloseable.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-12-04T09:23:01Z",
+      "side": 1,
+      "message": "what is the intention of this class? do we want to detect sources of duplicate close()s, or want to protect the applications (like an AbstractObjectRegistration)? what amount of thread safety?",
+      "revId": "9013d712c10a85cc9194bd7c2b7335714b99b337",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_0776e33e",
+        "filename": "opendaylight/config/yang-test/src/main/java/org/opendaylight/controller/config/yang/test/impl/CheckedAutoCloseable.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-12-04T09:23:01Z",
+      "side": 1,
+      "message": "does not throw anything",
+      "revId": "9013d712c10a85cc9194bd7c2b7335714b99b337",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
