@@ -8,8 +8,8 @@
 
 package org.opendaylight.controller.netconf.impl.osgi;
 
-import java.util.Collections;
-import java.util.HashSet;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
 import java.util.Set;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
@@ -21,16 +21,14 @@ public class NetconfOperationServiceSnapshotImpl implements NetconfOperationServ
     private final Set<NetconfOperationService> services;
     private final String netconfSessionIdForReporting;
 
-    public NetconfOperationServiceSnapshotImpl(Set<NetconfOperationServiceFactory> factories, String sessionIdForReporting) {
-        Set<NetconfOperationService> services = new HashSet<>();
+    public NetconfOperationServiceSnapshotImpl(final Set<NetconfOperationServiceFactory> factories, final String sessionIdForReporting) {
+        final Builder<NetconfOperationService> b = ImmutableSet.builder();
         netconfSessionIdForReporting = sessionIdForReporting;
         for (NetconfOperationServiceFactory factory : factories) {
-            services.add(factory.createService(netconfSessionIdForReporting));
+            b.add(factory.createService(netconfSessionIdForReporting));
         }
-        this.services = Collections.unmodifiableSet(services);
+        this.services = b.build();
     }
-
-
 
     @Override
     public String getNetconfSessionIdForReporting() {
