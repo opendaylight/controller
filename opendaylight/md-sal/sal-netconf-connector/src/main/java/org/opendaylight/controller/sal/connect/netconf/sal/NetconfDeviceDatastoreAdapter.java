@@ -58,7 +58,7 @@ final class NetconfDeviceDatastoreAdapter implements AutoCloseable {
 
         final ReadWriteTransaction transaction = dataService.newReadWriteTransaction();
         logger.trace("{}: Update device state transaction {} merging operational data started.", id, transaction.getIdentifier());
-        transaction.merge(LogicalDatastoreType.OPERATIONAL, id.getBindingPath(), data);
+        transaction.put(LogicalDatastoreType.OPERATIONAL, id.getBindingPath(), data);
         logger.trace("{}: Update device state transaction {} merging operational data ended.", id, transaction.getIdentifier());
 
         commitTransaction(transaction, "update");
@@ -83,11 +83,11 @@ final class NetconfDeviceDatastoreAdapter implements AutoCloseable {
         final Node nodeWithId = getNodeWithId(id);
 
         logger.trace("{}: Init device state transaction {} putting if absent operational data started.", id, transaction.getIdentifier());
-        transaction.merge(LogicalDatastoreType.OPERATIONAL, path, nodeWithId);
+        transaction.put(LogicalDatastoreType.OPERATIONAL, path, nodeWithId);
         logger.trace("{}: Init device state transaction {} putting operational data ended.", id, transaction.getIdentifier());
 
         logger.trace("{}: Init device state transaction {} putting if absent config data started.", id, transaction.getIdentifier());
-        transaction.merge(LogicalDatastoreType.CONFIGURATION, path, nodeWithId);
+        transaction.put(LogicalDatastoreType.CONFIGURATION, path, nodeWithId);
         logger.trace("{}: Init device state transaction {} putting config data ended.", id, transaction.getIdentifier());
 
         commitTransaction(transaction, "init");
