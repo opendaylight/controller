@@ -22,10 +22,10 @@ public class NetconfServerSessionListenerFactory implements SessionListenerFacto
     private final NetconfOperationServiceSnapshot netconfOperationServiceSnapshot;
     private final CapabilityProvider capabilityProvider;
 
-    public NetconfServerSessionListenerFactory(DefaultCommitNotificationProducer commitNotifier,
-                                               SessionMonitoringService monitor,
-                                               NetconfOperationServiceSnapshot netconfOperationServiceSnapshot,
-                                               CapabilityProvider capabilityProvider) {
+    public NetconfServerSessionListenerFactory(final DefaultCommitNotificationProducer commitNotifier,
+                                               final SessionMonitoringService monitor,
+                                               final NetconfOperationServiceSnapshot netconfOperationServiceSnapshot,
+                                               final CapabilityProvider capabilityProvider) {
 
         this.commitNotifier = commitNotifier;
         this.monitor = monitor;
@@ -35,8 +35,7 @@ public class NetconfServerSessionListenerFactory implements SessionListenerFacto
 
     @Override
     public NetconfServerSessionListener getSessionListener() {
-        NetconfOperationRouter operationRouter = NetconfOperationRouterImpl.createOperationRouter(
-                netconfOperationServiceSnapshot, capabilityProvider, commitNotifier);
+        NetconfOperationRouter operationRouter = new NetconfOperationRouterImpl(netconfOperationServiceSnapshot, capabilityProvider, commitNotifier);
         return new NetconfServerSessionListener(operationRouter, monitor, netconfOperationServiceSnapshot);
     }
 }
