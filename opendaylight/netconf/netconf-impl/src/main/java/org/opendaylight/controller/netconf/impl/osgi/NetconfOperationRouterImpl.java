@@ -8,11 +8,11 @@
 package org.opendaylight.controller.netconf.impl.osgi;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
@@ -39,61 +39,35 @@ import org.w3c.dom.Document;
 public class NetconfOperationRouterImpl implements NetconfOperationRouter {
 
     private static final Logger LOG = LoggerFactory.getLogger(NetconfOperationRouterImpl.class);
-
     private final NetconfOperationServiceSnapshot netconfOperationServiceSnapshot;
-    private Set<NetconfOperation> allNetconfOperations;
+    private final Collection<NetconfOperation> allNetconfOperations;
 
-    private NetconfOperationRouterImpl(final NetconfOperationServiceSnapshot netconfOperationServiceSnapshot) {
-        this.netconfOperationServiceSnapshot = netconfOperationServiceSnapshot;
-    }
-
-    private synchronized void initNetconfOperations(final Set<NetconfOperation> allOperations) {
-        allNetconfOperations = allOperations;
-    }
-
-    /**
-     * Factory method to produce instance of NetconfOperationRouter
-     */
-    public static NetconfOperationRouter createOperationRouter(final NetconfOperationServiceSnapshot netconfOperationServiceSnapshot,
-                                                               final CapabilityProvider capabilityProvider, final DefaultCommitNotificationProducer commitNotifier) {
-        NetconfOperationRouterImpl router = new NetconfOperationRouterImpl(netconfOperationServiceSnapshot);
-
-        Preconditions.checkNotNull(netconfOperationServiceSnapshot);
-        Preconditions.checkNotNull(capabilityProvider);
+    public NetconfOperationRouterImpl(final NetconfOperationServiceSnapshot netconfOperationServiceSnapshot, final CapabilityProvider capabilityProvider,
+            final DefaultCommitNotificationProducer commitNotifier) {
+        this.netconfOperationServiceSnapshot = Preconditions.checkNotNull(netconfOperationServiceSnapshot);
 
         final String sessionId = netconfOperationServiceSnapshot.getNetconfSessionIdForReporting();
 
-        final Set<NetconfOperation> defaultNetconfOperations = Sets.newHashSet();
-        defaultNetconfOperations.add(new DefaultGetSchema(capabilityProvider, sessionId));
-        defaultNetconfOperations.add(new DefaultCloseSession(sessionId, router));
-        defaultNetconfOperations.add(new DefaultStartExi(sessionId));
-        defaultNetconfOperations.add(new DefaultStopExi(sessionId));
-        defaultNetconfOperations.add(new DefaultCommit(commitNotifier, capabilityProvider, sessionId, router));
-
-        router.initNetconfOperations(getAllNetconfOperations(defaultNetconfOperations, netconfOperationServiceSnapshot));
-
-        return router;
-    }
-
-    private static Set<NetconfOperation> getAllNetconfOperations(final Set<NetconfOperation> defaultNetconfOperations,
-            final NetconfOperationServiceSnapshot netconfOperationServiceSnapshot) {
-        Set<NetconfOperation> result = new HashSet<>();
-        result.addAll(defaultNetconfOperations);
+        final Set<NetconfOperation> ops = new HashSet<>();
+        ops.add(new DefaultGetSchema(capabilityProvider, sessionId));
+        ops.add(new DefaultCloseSession(sessionId, this));
+        ops.add(new DefaultStartExi(sessionId));
+        ops.add(new DefaultStopExi(sessionId));
+        ops.add(new DefaultCommit(commitNotifier, capabilityProvider, sessionId, this));
 
         for (NetconfOperationService netconfOperationService : netconfOperationServiceSnapshot.getServices()) {
-            final Set<NetconfOperation> netOpsFromService = netconfOperationService.getNetconfOperations();
-            for (NetconfOperation netconfOperation : netOpsFromService) {
-                Preconditions.checkState(!result.contains(netconfOperation),
+            for (NetconfOperation netconfOperation : netconfOperationService.getNetconfOperations()) {
+                Preconditions.checkState(!ops.contains(netconfOperation),
                         "Netconf operation %s already present", netconfOperation);
-                result.add(netconfOperation);
+                ops.add(netconfOperation);
             }
         }
-        return Collections.unmodifiableSet(result);
+
+        allNetconfOperations = ImmutableSet.copyOf(ops);
     }
 
     @Override
-    public synchronized Document onNetconfMessage(final Document message,
-            final NetconfServerSession session) throws NetconfDocumentedException {
+    public Document onNetconfMessage(final Document message, final NetconfServerSession session) throws NetconfDocumentedException {
         Preconditions.checkNotNull(allNetconfOperations, "Operation router was not initialized properly");
 
         final NetconfOperationExecution netconfOperationExecution;
@@ -131,15 +105,13 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
         netconfOperationServiceSnapshot.close();
     }
 
-    private NetconfDocumentedException handleUnexpectedEx(final String s, final Exception e) throws NetconfDocumentedException {
-        LOG.error(s, e);
-
-        Map<String, String> info = Maps.newHashMap();
-        info.put(NetconfDocumentedException.ErrorSeverity.error.toString(), e.toString());
+    private static NetconfDocumentedException handleUnexpectedEx(final String s, final Exception e) throws NetconfDocumentedException {
+        LOG.error("{}", s, e);
         return new NetconfDocumentedException("Unexpected error",
                 NetconfDocumentedException.ErrorType.application,
                 NetconfDocumentedException.ErrorTag.operation_failed,
-                NetconfDocumentedException.ErrorSeverity.error, info);
+                NetconfDocumentedException.ErrorSeverity.error,
+                Collections.singletonMap(NetconfDocumentedException.ErrorSeverity.error.toString(), e.toString()));
     }
 
     private Document executeOperationWithHighestPriority(final Document message,
