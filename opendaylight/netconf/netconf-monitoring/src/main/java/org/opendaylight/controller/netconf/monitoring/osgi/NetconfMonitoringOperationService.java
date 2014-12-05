@@ -9,7 +9,8 @@ package org.opendaylight.controller.netconf.monitoring.osgi;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
-import java.util.List;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.mapping.api.Capability;
@@ -48,14 +49,14 @@ public class NetconfMonitoringOperationService implements NetconfOperationServic
         }
 
         @Override
-        public Optional<List<String>> getLocation() {
-            return Optional.absent();
+        public Collection<String> getLocation() {
+            return Collections.emptyList();
         }
     });
 
     private final NetconfMonitoringService monitor;
 
-    public NetconfMonitoringOperationService(NetconfMonitoringService monitor) {
+    public NetconfMonitoringOperationService(final NetconfMonitoringService monitor) {
         this.monitor = monitor;
     }
 

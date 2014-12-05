@@ -9,7 +9,7 @@
 package org.opendaylight.controller.netconf.mapping.api;
 
 import com.google.common.base.Optional;
-import java.util.List;
+import java.util.Collection;
 
 /**
  * Contains capability URI announced by server hello message and optionally its
@@ -27,5 +27,5 @@ public interface Capability {
 
     public Optional<String> getCapabilitySchema();
 
-    public Optional<List<String>> getLocation();
+    public Collection<String> getLocation();
 }
