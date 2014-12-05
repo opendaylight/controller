@@ -8,13 +8,12 @@
 
 package org.opendaylight.controller.netconf.nettyutil.handler;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageConstants;
-import org.opendaylight.controller.netconf.util.messages.NetconfMessageHeader;
 
 public class ChunkedFramingMechanismEncoder extends MessageToByteEncoder<ByteBuf> {
     public static final int DEFAULT_CHUNK_SIZE = 8192;
@@ -27,9 +26,8 @@ public class ChunkedFramingMechanismEncoder extends MessageToByteEncoder<ByteBuf
         this(DEFAULT_CHUNK_SIZE);
     }
 
-    public ChunkedFramingMechanismEncoder(int chunkSize) {
-        Preconditions.checkArgument(chunkSize > MIN_CHUNK_SIZE);
-        Preconditions.checkArgument(chunkSize < MAX_CHUNK_SIZE);
+    public ChunkedFramingMechanismEncoder(final int chunkSize) {
+        Preconditions.checkArgument(chunkSize >= MIN_CHUNK_SIZE && chunkSize <= MAX_CHUNK_SIZE, "Unsupported chunk size %s", chunkSize);
         this.chunkSize = chunkSize;
     }
 
@@ -38,19 +36,17 @@ public class ChunkedFramingMechanismEncoder extends MessageToByteEncoder<ByteBuf
     }
 
     @Override
-    protected void encode(ChannelHandlerContext ctx, ByteBuf msg, ByteBuf out)  {
-        while (msg.readableBytes() > chunkSize) {
-            ByteBuf chunk = Unpooled.buffer(chunkSize);
-            chunk.writeBytes(createChunkHeader(chunkSize));
-            chunk.writeBytes(msg.readBytes(chunkSize));
-            ctx.write(chunk);
-        }
-        out.writeBytes(createChunkHeader(msg.readableBytes()));
-        out.writeBytes(msg.readBytes(msg.readableBytes()));
-        out.writeBytes(NetconfMessageConstants.END_OF_CHUNK);
-    }
+    protected void encode(final ChannelHandlerContext ctx, final ByteBuf msg, final ByteBuf out)  {
+        do {
+            final int xfer = Math.min(chunkSize, msg.readableBytes());
 
-    private ByteBuf createChunkHeader(int chunkSize) {
-        return Unpooled.wrappedBuffer(NetconfMessageHeader.toBytes(chunkSize));
+            out.writeBytes(NetconfMessageConstants.START_OF_CHUNK);
+            out.writeBytes(String.valueOf(xfer).getBytes(Charsets.US_ASCII));
+            out.writeChar('\n');
+
+            out.writeBytes(msg, xfer);
+        } while (msg.isReadable());
+
+        out.writeBytes(NetconfMessageConstants.END_OF_CHUNK);
     }
 }
