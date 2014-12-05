@@ -31,6 +31,7 @@ public class DefaultStopExiTest {
         DefaultStopExi exi = new DefaultStopExi("");
         Document doc = XmlUtil.newDocument();
         Channel channel = mock(Channel.class);
+        doReturn("mockChannel").when(channel).toString();
         ChannelPipeline pipeline = mock(ChannelPipeline.class);
         doReturn(pipeline).when(channel).pipeline();
         ChannelHandler channelHandler = mock(ChannelHandler.class);

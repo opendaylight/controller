@@ -98,6 +98,7 @@ public class NetconfMonitoringServiceImplTest {
 
         NetconfServerSessionListener sessionListener = mock(NetconfServerSessionListener.class);
         Channel channel = mock(Channel.class);
+        doReturn("mockChannel").when(channel).toString();
         NetconfHelloMessageAdditionalHeader header = new NetconfHelloMessageAdditionalHeader("name", "addr", "2", "tcp", "id");
         NetconfServerSession sm = new NetconfServerSession(sessionListener, channel, 10, header);
         doNothing().when(sessionListener).onSessionUp(any(NetconfServerSession.class));
