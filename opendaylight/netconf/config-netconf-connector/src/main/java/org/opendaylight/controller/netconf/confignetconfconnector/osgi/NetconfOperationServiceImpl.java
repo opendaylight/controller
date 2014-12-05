@@ -12,8 +12,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.opendaylight.controller.config.api.LookupRegistry;
@@ -36,8 +37,8 @@ public class NetconfOperationServiceImpl implements NetconfOperationService {
     private final Set<Capability> capabilities;
     private final TransactionProvider transactionProvider;
 
-    public NetconfOperationServiceImpl(YangStoreService yangStoreService, ConfigRegistryJMXClient jmxClient,
-            String netconfSessionIdForReporting) throws YangStoreException {
+    public NetconfOperationServiceImpl(final YangStoreService yangStoreService, final ConfigRegistryJMXClient jmxClient,
+            final String netconfSessionIdForReporting) throws YangStoreException {
 
         yangStoreSnapshot = yangStoreService.getYangStoreSnapshot();
         checkConsistencyBetweenYangStoreAndConfig(jmxClient, yangStoreSnapshot);
@@ -50,7 +51,7 @@ public class NetconfOperationServiceImpl implements NetconfOperationService {
 
 
     @VisibleForTesting
-    static void checkConsistencyBetweenYangStoreAndConfig(LookupRegistry jmxClient, YangStoreSnapshot yangStoreSnapshot) {
+    static void checkConsistencyBetweenYangStoreAndConfig(final LookupRegistry jmxClient, final YangStoreSnapshot yangStoreSnapshot) {
         Set<String> missingModulesFromConfig = Sets.newHashSet();
 
         Set<String> modulesSeenByConfig = jmxClient.getAvailableModuleFactoryQNames();
@@ -89,7 +90,7 @@ public class NetconfOperationServiceImpl implements NetconfOperationService {
         return operationProvider.getOperations();
     }
 
-    private static Set<Capability> setupCapabilities(YangStoreSnapshot yangStoreSnapshot) {
+    private static Set<Capability> setupCapabilities(final YangStoreSnapshot yangStoreSnapshot) {
         Set<Capability> capabilities = new HashSet<>();
         // [RFC6241] 8.3.  Candidate Configuration Capability
         capabilities.add(new BasicCapability("urn:ietf:params:netconf:capability:candidate:1.0"));
@@ -110,7 +111,7 @@ public class NetconfOperationServiceImpl implements NetconfOperationService {
 
         private final String capability;
 
-        private BasicCapability(String capability) {
+        private BasicCapability(final String capability) {
             this.capability = capability;
         }
 
@@ -140,8 +141,8 @@ public class NetconfOperationServiceImpl implements NetconfOperationService {
         }
 
         @Override
-        public Optional<List<String>> getLocation() {
-            return Optional.absent();
+        public Collection<String> getLocation() {
+            return Collections.emptyList();
         }
 
         @Override
@@ -157,7 +158,7 @@ public class NetconfOperationServiceImpl implements NetconfOperationService {
         private final String moduleName;
         private final String moduleNamespace;
 
-        public YangStoreCapability(Module module, String moduleContent) {
+        public YangStoreCapability(final Module module, final String moduleContent) {
             super(toCapabilityURI(module));
             this.content = moduleContent;
             this.moduleName = module.getName();
@@ -170,7 +171,7 @@ public class NetconfOperationServiceImpl implements NetconfOperationService {
             return Optional.of(content);
         }
 
-        private static String toCapabilityURI(Module module) {
+        private static String toCapabilityURI(final Module module) {
             return String.valueOf(module.getNamespace()) + "?module="
                     + module.getName() + "&revision=" + Util.writeDate(module.getRevision());
         }
