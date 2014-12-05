@@ -200,7 +200,7 @@ public class NetconfDeviceSimulator implements Closeable {
                 server = dispatcher.createLocalServer(tcpLocalAddress);
                 try {
                     final SshProxyServer sshServer = new SshProxyServer(minaTimerExecutor, nettyThreadgroup, nioExecutor);
-                    sshServer.bind(getSshConfiguration(bindingAddress, tcpLocalAddress));
+                    sshServer.bind(getSshConfiguration(bindingAddress, tcpLocalAddress, keyPairProvider));
                     sshWrappers.add(sshServer);
                 } catch (final BindException e) {
                     LOG.warn("Cannot start simulated device on {}, port already in use. Skipping.", address);
@@ -259,7 +259,7 @@ public class NetconfDeviceSimulator implements Closeable {
         return openDevices;
     }
 
-    private SshProxyServerConfiguration getSshConfiguration(final InetSocketAddress bindingAddress, final LocalAddress tcpLocalAddress) throws IOException {
+    private SshProxyServerConfiguration getSshConfiguration(final InetSocketAddress bindingAddress, final LocalAddress tcpLocalAddress, final PEMGeneratorHostKeyProvider keyPairProvider) throws IOException {
         return new SshProxyServerConfigurationBuilder()
                 .setBindingAddress(bindingAddress)
                 .setLocalAddress(tcpLocalAddress)
@@ -269,7 +269,7 @@ public class NetconfDeviceSimulator implements Closeable {
                         return true;
                     }
                 })
-                .setKeyPairProvider(new PEMGeneratorHostKeyProvider(Files.createTempFile("prefix", "suffix").toAbsolutePath().toString()))
+                .setKeyPairProvider(keyPairProvider)
                 .setIdleTimeout(Integer.MAX_VALUE)
                 .createSshProxyServerConfiguration();
     }
