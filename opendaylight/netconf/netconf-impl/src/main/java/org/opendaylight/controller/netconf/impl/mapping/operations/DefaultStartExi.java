@@ -28,14 +28,16 @@ public class DefaultStartExi extends AbstractSingletonNetconfOperation implement
     private static final Logger LOG = LoggerFactory.getLogger(DefaultStartExi.class);
     private NetconfServerSession netconfSession;
 
-    public DefaultStartExi(String netconfSessionIdForReporting) {
+    public DefaultStartExi(final String netconfSessionIdForReporting) {
         super(netconfSessionIdForReporting);
     }
 
     @Override
-    public Document handle(Document message,
-                           NetconfOperationChainedExecution subsequentOperation) throws NetconfDocumentedException {
-        LOG.debug("Received start-exi message {} ", XmlUtil.toString(message));
+    public Document handle(final Document message,
+                           final NetconfOperationChainedExecution subsequentOperation) throws NetconfDocumentedException {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Received start-exi message {} ", XmlUtil.toString(message));
+        }
 
         try {
             netconfSession.startExiCommunication(new NetconfMessage(message));
@@ -48,7 +50,7 @@ public class DefaultStartExi extends AbstractSingletonNetconfOperation implement
     }
 
     @Override
-    protected Element handleWithNoSubsequentOperations(Document document, XmlElement operationElement) throws NetconfDocumentedException {
+    protected Element handleWithNoSubsequentOperations(final Document document, final XmlElement operationElement) throws NetconfDocumentedException {
         Element getSchemaResult = document.createElementNS( XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0, XmlNetconfConstants.OK);
         LOG.trace("{} operation successful", START_EXI);
         return getSchemaResult;
@@ -65,7 +67,7 @@ public class DefaultStartExi extends AbstractSingletonNetconfOperation implement
     }
 
     @Override
-    public void setNetconfSession(NetconfServerSession s) {
+    public void setNetconfSession(final NetconfServerSession s) {
         netconfSession = s;
     }
 }

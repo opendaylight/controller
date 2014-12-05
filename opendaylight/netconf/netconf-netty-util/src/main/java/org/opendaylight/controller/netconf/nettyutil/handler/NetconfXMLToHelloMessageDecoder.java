@@ -56,12 +56,12 @@ public final class NetconfXMLToHelloMessageDecoder extends ByteToMessageDecoder 
     // State variables do not have to by synchronized
     // Netty uses always the same (1) thread per pipeline
     // We use instance of this per pipeline
-    private List<NetconfMessage> nonHelloMessages = Lists.newArrayList();
+    private final List<NetconfMessage> nonHelloMessages = Lists.newArrayList();
     private boolean helloReceived = false;
 
     @Override
     @VisibleForTesting
-    public void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws IOException, SAXException, NetconfDocumentedException {
+    public void decode(final ChannelHandlerContext ctx, final ByteBuf in, final List<Object> out) throws IOException, SAXException, NetconfDocumentedException {
         if (in.readableBytes() == 0) {
             LOG.debug("No more content in incoming buffer.");
             return;
@@ -69,7 +69,10 @@ public final class NetconfXMLToHelloMessageDecoder extends ByteToMessageDecoder 
 
         in.markReaderIndex();
         try {
-            LOG.trace("Received to decode: {}", ByteBufUtil.hexDump(in));
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Received to decode: {}", ByteBufUtil.hexDump(in));
+            }
+
             byte[] bytes = new byte[in.readableBytes()];
             in.readBytes(bytes);
 
@@ -92,16 +95,13 @@ public final class NetconfXMLToHelloMessageDecoder extends ByteToMessageDecoder 
             final NetconfMessage message = getNetconfMessage(additionalHeader, doc);
             if (message instanceof NetconfHelloMessage) {
                 Preconditions.checkState(helloReceived == false,
-                        "Multiple hello messages received, unexpected hello: %s",
-                        XmlUtil.toString(message.getDocument()));
+                        "Multiple hello messages received, unexpected hello: %s", message);
                 out.add(message);
                 helloReceived = true;
             // Non hello message, suspend the message and insert into cache
             } else {
-                Preconditions.checkState(helloReceived, "Hello message not received, instead received: %s",
-                        XmlUtil.toString(message.getDocument()));
-                LOG.debug("Netconf message received during negotiation, caching {}",
-                        XmlUtil.toString(message.getDocument()));
+                Preconditions.checkState(helloReceived, "Hello message not received, instead received: %s", message);
+                LOG.debug("Netconf message received during negotiation, caching {}", message);
                 nonHelloMessages.add(message);
             }
         } finally {
@@ -122,7 +122,7 @@ public final class NetconfXMLToHelloMessageDecoder extends ByteToMessageDecoder 
         return msg;
     }
 
-    private int getAdditionalHeaderEndIndex(byte[] bytes) {
+    private int getAdditionalHeaderEndIndex(final byte[] bytes) {
         for (byte[] possibleEnd : POSSIBLE_ENDS) {
             int idx = findByteSequence(bytes, possibleEnd);
 
@@ -160,12 +160,12 @@ public final class NetconfXMLToHelloMessageDecoder extends ByteToMessageDecoder 
     }
 
 
-    private void logMessage(byte[] bytes) {
+    private void logMessage(final byte[] bytes) {
         String s = Charsets.UTF_8.decode(ByteBuffer.wrap(bytes)).toString();
         LOG.debug("Parsing message \n{}", s);
     }
 
-    private boolean startsWithAdditionalHeader(byte[] bytes) {
+    private boolean startsWithAdditionalHeader(final byte[] bytes) {
         for (byte[] possibleStart : POSSIBLE_STARTS) {
             int i = 0;
             for (byte b : possibleStart) {
@@ -182,7 +182,7 @@ public final class NetconfXMLToHelloMessageDecoder extends ByteToMessageDecoder 
         return false;
     }
 
-    private String additionalHeaderToString(byte[] bytes) {
+    private String additionalHeaderToString(final byte[] bytes) {
         return Charsets.UTF_8.decode(ByteBuffer.wrap(bytes)).toString();
     }
 

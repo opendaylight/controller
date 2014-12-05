@@ -35,25 +35,25 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
     private final NetconfOperationRouter operationRouter;
     private final AutoCloseable onSessionDownCloseable;
 
-    public NetconfServerSessionListener(NetconfOperationRouter operationRouter, SessionMonitoringService monitoringService,
-                                        AutoCloseable onSessionDownCloseable) {
+    public NetconfServerSessionListener(final NetconfOperationRouter operationRouter, final SessionMonitoringService monitoringService,
+                                        final AutoCloseable onSessionDownCloseable) {
         this.operationRouter = operationRouter;
         this.monitoringService = monitoringService;
         this.onSessionDownCloseable = onSessionDownCloseable;
     }
 
     @Override
-    public void onSessionUp(NetconfServerSession netconfNetconfServerSession) {
+    public void onSessionUp(final NetconfServerSession netconfNetconfServerSession) {
         monitoringService.onSessionUp(netconfNetconfServerSession);
     }
 
     @Override
-    public void onSessionDown(NetconfServerSession netconfNetconfServerSession, Exception cause) {
+    public void onSessionDown(final NetconfServerSession netconfNetconfServerSession, final Exception cause) {
         LOG.debug("Session {} down, reason: {}", netconfNetconfServerSession, cause.getMessage());
         onDown(netconfNetconfServerSession);
     }
 
-    public void onDown(NetconfServerSession netconfNetconfServerSession) {
+    public void onDown(final NetconfServerSession netconfNetconfServerSession) {
         monitoringService.onSessionDown(netconfNetconfServerSession);
 
         try {
@@ -69,15 +69,15 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
     }
 
     @Override
-    public void onSessionTerminated(NetconfServerSession netconfNetconfServerSession,
-            NetconfTerminationReason netconfTerminationReason) {
+    public void onSessionTerminated(final NetconfServerSession netconfNetconfServerSession,
+            final NetconfTerminationReason netconfTerminationReason) {
         LOG.debug("Session {} terminated, reason: {}", netconfNetconfServerSession,
                 netconfTerminationReason.getErrorMessage());
         onDown(netconfNetconfServerSession);
     }
 
     @Override
-    public void onMessage(NetconfServerSession session, NetconfMessage netconfMessage) {
+    public void onMessage(final NetconfServerSession session, final NetconfMessage netconfMessage) {
         try {
 
             Preconditions.checkState(operationRouter != null, "Cannot handle message, session up was not yet received");
@@ -85,7 +85,7 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
             // schemas
             final NetconfMessage message = processDocument(netconfMessage,
                     session);
-            LOG.debug("Responding with message {}", XmlUtil.toString(message.getDocument()));
+            LOG.debug("Responding with message {}", message);
             session.sendMessage(message);
 
             if (isCloseSession(netconfMessage)) {
@@ -105,7 +105,7 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
         }
     }
 
-    private void closeNetconfSession(NetconfServerSession session) {
+    private void closeNetconfSession(final NetconfServerSession session) {
         // destroy NetconfOperationService
         session.close();
         LOG.info("Session {} closed successfully", session.getSessionId());
@@ -113,7 +113,7 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
 
 
 
-    private NetconfMessage processDocument(final NetconfMessage netconfMessage, NetconfServerSession session)
+    private NetconfMessage processDocument(final NetconfMessage netconfMessage, final NetconfServerSession session)
             throws NetconfDocumentedException {
 
         final Document incomingDocument = netconfMessage.getDocument();
@@ -146,7 +146,7 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
         }
     }
 
-    private void checkMessageId(Node rootNode) throws NetconfDocumentedException {
+    private void checkMessageId(final Node rootNode) throws NetconfDocumentedException {
 
         NamedNodeMap attributes = rootNode.getAttributes();
 
