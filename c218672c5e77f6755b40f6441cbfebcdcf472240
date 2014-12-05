@@ -1,0 +1,225 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_5d1d9e0e",
+        "filename": "opendaylight/netconf/netconf-it/src/test/java/org/opendaylight/controller/netconf/it/NetconfITSecureSTestTool.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-12-05T09:31:18Z",
+      "side": 1,
+      "message": "Extending AbstractNetconfConfigTest is probably not necessary in this test. Have you checked what it does ?",
+      "revId": "c218672c5e77f6755b40f6441cbfebcdcf472240",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_9d1486f6",
+        "filename": "opendaylight/netconf/netconf-it/src/test/java/org/opendaylight/controller/netconf/it/NetconfITSecureSTestTool.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-12-05T09:31:18Z",
+      "side": 1,
+      "message": "Lots of unused fields",
+      "revId": "c218672c5e77f6755b40f6441cbfebcdcf472240",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3df9b2c8",
+        "filename": "opendaylight/netconf/netconf-it/src/test/java/org/opendaylight/controller/netconf/it/NetconfITSecureSTestTool.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-12-05T09:31:18Z",
+      "side": 1,
+      "message": "Why is the sshProxy server here ?",
+      "revId": "c218672c5e77f6755b40f6441cbfebcdcf472240",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_9d2b2630",
+        "filename": "opendaylight/netconf/netconf-it/src/test/java/org/opendaylight/controller/netconf/it/NetconfITSecureSTestTool.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-12-05T09:31:18Z",
+      "side": 1,
+      "message": "Why is this iterating over errors and not doing anything with them ?",
+      "revId": "c218672c5e77f6755b40f6441cbfebcdcf472240",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_7d265a6a",
+        "filename": "opendaylight/netconf/netconf-it/src/test/java/org/opendaylight/controller/netconf/it/NetconfITSecureSTestTool.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-12-05T09:31:18Z",
+      "side": 1,
+      "message": "Does this make the test fail ? Please test, since the callback is from another thread.",
+      "revId": "c218672c5e77f6755b40f6441cbfebcdcf472240",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3d20d248",
+        "filename": "opendaylight/netconf/netconf-it/src/test/java/org/opendaylight/controller/netconf/it/NetconfITSecureSTestTool.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-12-05T09:31:18Z",
+      "side": 1,
+      "message": "Same as with errors, test if this is correct error handling",
+      "revId": "c218672c5e77f6755b40f6441cbfebcdcf472240",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_fd026ab3",
+        "filename": "opendaylight/netconf/netconf-it/src/test/java/org/opendaylight/controller/netconf/it/NetconfITSecureSTestTool.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-12-05T09:31:18Z",
+      "side": 1,
+      "message": "Why are we \"waiting\" until the executor is shut ? We just need to wait for the all the futures to complete, which we do in next loop.",
+      "revId": "c218672c5e77f6755b40f6441cbfebcdcf472240",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_1d0076a9",
+        "filename": "opendaylight/netconf/netconf-it/src/test/java/org/opendaylight/controller/netconf/it/NetconfITSecureSTestTool.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-12-05T09:31:18Z",
+      "side": 1,
+      "message": "This is exactly the same as in the original Secure Test. Reuse.",
+      "revId": "c218672c5e77f6755b40f6441cbfebcdcf472240",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_bd2ce24b",
+        "filename": "opendaylight/netconf/netconf-it/src/test/java/org/opendaylight/controller/netconf/it/NetconfITSecureSTestTool.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-12-05T09:31:18Z",
+      "side": 1,
+      "message": "This is exactly the same as in the original Secure Test. Reuse.",
+      "revId": "c218672c5e77f6755b40f6441cbfebcdcf472240",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_dd31aea3",
+        "filename": "opendaylight/netconf/netconf-it/src/test/java/org/opendaylight/controller/netconf/it/NetconfITSecureSTestTool.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-12-05T09:31:18Z",
+      "side": 1,
+      "message": "Probably same as original test. Reuse",
+      "revId": "c218672c5e77f6755b40f6441cbfebcdcf472240",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5df6fed8",
+        "filename": "opendaylight/netconf/netconf-it/src/test/java/org/opendaylight/controller/netconf/it/NetconfITSecureSTestTool.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-12-05T09:31:18Z",
+      "side": 1,
+      "message": "AuthProvider is probably not necessary at all",
+      "revId": "c218672c5e77f6755b40f6441cbfebcdcf472240",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_fd190a23",
+        "filename": "opendaylight/netconf/netconf-testtool/src/main/java/org/opendaylight/controller/netconf/test/tool/SimulatedEditConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-12-05T09:31:18Z",
+      "side": 1,
+      "message": "Please remove synchronized. If we need synchronization, the DataList class needs to perform it. Not the operations on top of it.",
+      "revId": "c218672c5e77f6755b40f6441cbfebcdcf472240",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_7d0f3ae2",
+        "filename": "opendaylight/netconf/netconf-util/src/test/resources/netconfMessages/getConfig.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-12-05T09:31:18Z",
+      "side": 1,
+      "message": "The \"id\" attribute is irrelevant. Only the message-id is checked in tests so this should not be changed (probably breaks another test)",
+      "revId": "c218672c5e77f6755b40f6441cbfebcdcf472240",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
