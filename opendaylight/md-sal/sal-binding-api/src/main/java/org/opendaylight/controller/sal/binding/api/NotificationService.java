@@ -91,7 +91,10 @@ import org.opendaylight.yangtools.yang.binding.Notification;
  * </pre>
  * The <code>onStart</code> method will be invoked when someone publishes a <code>Start</code> notification and
  * the <code>onStop</code> method will be invoked when someone publishes a <code>Stop</code> notification.
+ *
+ * @deprecated Please use {@link org.opendaylight.controller.md.sal.binding.api.NotificationService} instead.
  */
+@Deprecated
 public interface NotificationService extends BindingAwareService {
     /**
      * Registers a generic listener implementation for a specified notification type.
