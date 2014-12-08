@@ -47,13 +47,12 @@ final class ReconnectPromise<S extends ProtocolSession<?>, L extends SessionList
         pending = this.dispatcher.createClient(this.address, cs, b, new AbstractDispatcher.PipelineInitializer<S>() {
             @Override
             public void initializeChannel(final SocketChannel channel, final Promise<S> promise) {
-                // add closed channel handler
-                // This handler has to be added before initializer.initializeChannel is called
-                // Initializer might add some handlers using addFirst e.g. AsyncSshHandler and in that case
-                // closed channel handler is before the handler that invokes channel inactive event
-                channel.pipeline().addFirst(new ClosedChannelHandler(ReconnectPromise.this));
-
                 initializer.initializeChannel(channel, promise);
+                // add closed channel handler
+                // This handler has to be added as last channel handler and the channel inactive event has to be caught by it
+                // Handlers in front of it can react to channelInactive event, but have to forward the event or the reconnect will not work
+                // This handler is last so all handlers in front of it can handle channel inactive (to e.g. resource cleanup) before a new connection is started
+                channel.pipeline().addLast(new ClosedChannelHandler(ReconnectPromise.this));
             }
         });
     }
@@ -91,9 +90,7 @@ final class ReconnectPromise<S extends ProtocolSession<?>, L extends SessionList
 
         @Override
         public void channelInactive(final ChannelHandlerContext ctx) throws Exception {
-            // Pass info about disconnect further and then reconnect
-            super.channelInactive(ctx);
-
+            // This is the ultimate channel inactive handler, not forwarding
             if (promise.isCancelled()) {
                 return;
             }

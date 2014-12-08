@@ -60,6 +60,7 @@ public class AbstractNetconfSessionTest {
 
         doReturn(mock(ChannelFuture.class)).when(channel).writeAndFlush(any(NetconfMessage.class));
         doReturn(pipeline).when(channel).pipeline();
+        doReturn("mockChannel").when(channel).toString();
         doReturn(mock(ChannelFuture.class)).when(channel).close();
 
         doReturn(null).when(pipeline).replace(anyString(), anyString(), any(ChannelHandler.class));

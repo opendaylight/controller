@@ -176,6 +176,7 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
 
     @Override
     public synchronized void connect(final ChannelHandlerContext ctx, final SocketAddress remoteAddress, final SocketAddress localAddress, final ChannelPromise promise) throws Exception {
+        LOG.debug("XXX session connecting on channel {}. promise: {} ", ctx.channel(), connectPromise);
         this.connectPromise = promise;
         startSsh(ctx, remoteAddress);
     }
@@ -187,21 +188,19 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
 
     @Override
     public synchronized void disconnect(final ChannelHandlerContext ctx, final ChannelPromise promise) {
-        // Super disconnect is necessary in this case since we are using NioSocketChannel and it needs to cleanup its resources
-        // e.g. Socket that it tries to open in its constructor (https://bugs.opendaylight.org/show_bug.cgi?id=2430)
-        // TODO better solution would be to implement custom ChannelFactory + Channel that will use mina SSH lib internally: port this to custom channel implementation
-        try {
-            super.disconnect(ctx, ctx.newPromise());
-        } catch (final Exception e) {
-            LOG.warn("Unable to cleanup all resources for channel: {}. Ignoring.", ctx.channel(), e);
-        }
+        LOG.trace("Closing SSH session on channel: {} with connect promise in state: {}", ctx.channel(), connectPromise);
 
-        if(sshReadAsyncListener != null) {
-            sshReadAsyncListener.close();
+        // If we have already succeeded and the session was dropped after, we need to fire inactive to notify reconnect logic
+        if(connectPromise.isSuccess()) {
+            ctx.fireChannelInactive();
         }
 
         if(sshWriteAsyncHandler != null) {
             sshWriteAsyncHandler.close();
+        }
+
+        if(sshReadAsyncListener != null) {
+            sshReadAsyncListener.close();
         }
 
         if(session!= null && !session.isClosed() && !session.isClosing()) {
@@ -216,13 +215,17 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
             });
         }
 
-        // If we have already succeeded and the session was dropped after, we need to fire inactive to notify reconnect logic
-        if(connectPromise.isSuccess()) {
-            ctx.fireChannelInactive();
+        // Super disconnect is necessary in this case since we are using NioSocketChannel and it needs to cleanup its resources
+        // e.g. Socket that it tries to open in its constructor (https://bugs.opendaylight.org/show_bug.cgi?id=2430)
+        // TODO better solution would be to implement custom ChannelFactory + Channel that will use mina SSH lib internally: port this to custom channel implementation
+        try {
+            // Disconnect has to be closed after inactive channel event was fired, because it interferes with it
+            super.disconnect(ctx, ctx.newPromise());
+        } catch (final Exception e) {
+            LOG.warn("Unable to cleanup all resources for channel: {}. Ignoring.", ctx.channel(), e);
         }
 
         channel = null;
-
         promise.setSuccess();
         LOG.debug("SSH session closed on channel: {}", ctx.channel());
     }

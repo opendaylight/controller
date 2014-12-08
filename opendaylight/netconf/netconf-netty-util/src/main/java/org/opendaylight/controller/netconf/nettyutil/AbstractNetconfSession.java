@@ -87,6 +87,7 @@ public abstract class AbstractNetconfSession<S extends NetconfSession, L extends
     public String toString() {
         final StringBuffer sb = new StringBuffer(getClass().getSimpleName() + "{");
         sb.append("sessionId=").append(sessionId);
+        sb.append(", channel=").append(channel);
         sb.append('}');
         return sb.toString();
     }
