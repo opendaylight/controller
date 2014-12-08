@@ -9,7 +9,6 @@ package org.opendaylight.controller.sal.binding.api;
 
 import java.util.EventListener;
 import java.util.concurrent.ExecutorService;
-
 import org.opendaylight.controller.md.sal.common.api.notify.NotificationPublishService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.Notification;
@@ -18,7 +17,10 @@ import org.opendaylight.yangtools.yang.binding.Notification;
  * Interface for a notification service that provides publish/subscribe capabilities for YANG
  * modeled notifications. This interface is a combination of the {@link NotificationService} and
  * {@link NotificationPublishService} interfaces.
+ *
+ * @deprecated Please use {@link org.opendaylight.controller.md.sal.binding.api.NotificationPublishService}.
  */
+@Deprecated
 public interface NotificationProviderService extends NotificationService, NotificationPublishService<Notification> {
 
     /**
