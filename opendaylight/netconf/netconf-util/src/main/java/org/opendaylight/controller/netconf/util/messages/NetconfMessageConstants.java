@@ -27,6 +27,7 @@ public final class NetconfMessageConstants {
 
     public static final int MAX_HEADER_LENGTH = 13;
 
+    public static final byte[] START_OF_CHUNK = "\n#".getBytes(Charsets.UTF_8);
     public static final byte[] END_OF_CHUNK = "\n##\n".getBytes(Charsets.UTF_8);
 
 }

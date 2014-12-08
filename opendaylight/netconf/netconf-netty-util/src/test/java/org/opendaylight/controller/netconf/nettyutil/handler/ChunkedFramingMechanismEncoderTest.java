@@ -9,20 +9,16 @@
 package org.opendaylight.controller.netconf.nettyutil.handler;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.doAnswer;
-import com.google.common.collect.Lists;
+import static org.junit.Assert.assertTrue;
+import com.google.common.base.Charsets;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
-import java.util.List;
+import java.nio.ByteBuffer;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.opendaylight.controller.netconf.util.messages.NetconfMessageConstants;
 
 public class ChunkedFramingMechanismEncoderTest {
 
@@ -48,30 +44,20 @@ public class ChunkedFramingMechanismEncoderTest {
 
     @Test
     public void testEncode() throws Exception {
-        final List<ByteBuf> chunks = Lists.newArrayList();
-        doAnswer(new Answer<Object>() {
-            @Override
-            public Object answer(final InvocationOnMock invocation) throws Throwable {
-                chunks.add((ByteBuf) invocation.getArguments()[0]);
-                return null;
-            }
-        }).when(ctx).write(anyObject());
-
         final ChunkedFramingMechanismEncoder encoder = new ChunkedFramingMechanismEncoder(chunkSize);
         final int lastChunkSize = 20;
         final ByteBuf src = Unpooled.wrappedBuffer(getByteArray(chunkSize * 4 + lastChunkSize));
         final ByteBuf destination = Unpooled.buffer();
         encoder.encode(ctx, src, destination);
-        assertEquals(4, chunks.size());
 
-        final int framingSize = "#256\n".getBytes().length + 1/* new line at end */;
+        assertEquals(1077, destination.readableBytes());
 
-        for (final ByteBuf chunk : chunks) {
-            assertEquals(chunkSize + framingSize, chunk.readableBytes());
-        }
+        byte[] buf = new byte[destination.readableBytes()];
+        destination.readBytes(buf);
+        String s = Charsets.US_ASCII.decode(ByteBuffer.wrap(buf)).toString();
 
-        final int lastFramingSize = "#20\n".length() + NetconfMessageConstants.END_OF_CHUNK.length + 1/* new line at end */;
-        assertEquals(lastChunkSize + lastFramingSize, destination.readableBytes());
+        assertTrue(s.startsWith("\n#256\na"));
+        assertTrue(s.endsWith("\n#20\naaaaaaaaaaaaaaaaaaaa\n##\n"));
     }
 
     private byte[] getByteArray(final int size) {
