@@ -8,7 +8,6 @@
 package org.opendaylight.controller.sal.binding.api;
 
 import java.util.EventListener;
-
 import org.opendaylight.yangtools.yang.binding.Notification;
 
 /**
@@ -17,7 +16,9 @@ import org.opendaylight.yangtools.yang.binding.Notification;
  * capture of this interface.
  *
  * @param <T> the interested notification type
+ * @deprecated Deprecated unused API.
  */
+@Deprecated
 public interface NotificationListener<T extends Notification> extends EventListener {
     /**
      * Invoked to deliver a notification.
