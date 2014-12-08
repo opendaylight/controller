@@ -62,7 +62,11 @@ public class DataChangeListener extends AbstractUntypedActor {
 
         LOG.debug("Sending change notification {} to listener {}", change, listener);
 
-        this.listener.onDataChanged(change);
+        try {
+            this.listener.onDataChanged(change);
+        } catch (RuntimeException e) {
+            LOG.error( String.format( "Error notifying listener %s", this.listener ), e );
+        }
 
         // It seems the sender is never null but it doesn't hurt to check. If the caller passes in
         // a null sender (ActorRef.noSender()), akka translates that to the deadLetters actor.
