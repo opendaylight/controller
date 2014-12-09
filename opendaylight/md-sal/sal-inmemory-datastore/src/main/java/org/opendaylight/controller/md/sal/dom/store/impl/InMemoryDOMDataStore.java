@@ -241,6 +241,11 @@ public class InMemoryDOMDataStore extends TransactionReadyPrototype implements D
                 LOG.warn("Store Tx: {} Data Precondition failed for {}.", transaction.getIdentifier(),
                         e.getPath(), e);
                 transaction.warnDebugContext(LOG);
+
+                // For debugging purposes, allow dumping of the modification. Coupled with the above
+                // precondition log, it should allow us to understand what went on.
+                LOG.trace("Store Tx: {} modifications: {}", modification);
+
                 return Futures.immediateFailedFuture(new TransactionCommitFailedException("Data did not pass validation.", e));
             } catch (Exception e) {
                 LOG.warn("Unexpected failure in validation phase", e);
