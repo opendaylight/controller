@@ -78,17 +78,9 @@ public class ConfigPusherImpl implements ConfigPusher {
                 synchronized (autoCloseables) {
                     autoCloseables.add(jmxNotificationHandler);
                 }
-                /*
-                 * We have completed initial configuration. At this point
-                 * it is good idea to perform garbage collection to prune
-                 * any garbage we have accumulated during startup.
-                 */
-                LOG.debug("Running post-initialization garbage collection...");
-                System.gc();
-                LOG.debug("Post-initialization garbage collection completed.");
-                LOG.debug("ConfigPusher has pushed configs {}, gc completed", configs);
-            }
-            catch (NetconfDocumentedException e) {
+
+                LOG.debug("ConfigPusher has pushed configs {}", configs);
+            } catch (NetconfDocumentedException e) {
                 LOG.error("Error pushing configs {}",configs);
                 throw new IllegalStateException(e);
             }
