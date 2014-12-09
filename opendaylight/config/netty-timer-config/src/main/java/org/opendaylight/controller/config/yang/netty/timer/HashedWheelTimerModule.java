@@ -21,10 +21,8 @@ import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timeout;
 import io.netty.util.Timer;
 import io.netty.util.TimerTask;
-
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-
 import org.opendaylight.controller.config.api.JmxAttributeValidationException;
 
 /**
