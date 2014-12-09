@@ -397,7 +397,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      * @param identifier
      * @param data
      */
-    protected void persistData(ActorRef clientActor, String identifier,
+    protected void persistData(final ActorRef clientActor, final String identifier,
         Payload data) {
 
         ReplicatedLogEntry replicatedLogEntry = new ReplicatedLogImplEntry(
@@ -409,7 +409,19 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
 
         replicatedLog
-            .appendAndPersist(clientActor, identifier, replicatedLogEntry);
+            .appendAndPersist(replicatedLogEntry, new Procedure<ReplicatedLogEntry>() {
+                @Override
+                public void apply(ReplicatedLogEntry replicatedLogEntry) throws Exception {
+                    // Send message for replication
+                    if (clientActor != null) {
+                        currentBehavior.handleMessage(getSelf(),
+                                new Replicate(clientActor, identifier,
+                                        replicatedLogEntry)
+                        );
+                    }
+
+                }
+            });
     }
 
     protected String getId() {
@@ -685,79 +697,75 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
 
         @Override public void appendAndPersist(
-            final ReplicatedLogEntry replicatedLogEntry) {
-            appendAndPersist(null, null, replicatedLogEntry);
-        }
+            final ReplicatedLogEntry replicatedLogEntry, Procedure<ReplicatedLogEntry> callback) {
 
-        @Override
-        public int dataSize() {
-            return dataSize;
-        }
-
-        public void appendAndPersist(final ActorRef clientActor,
-            final String identifier,
-            final ReplicatedLogEntry replicatedLogEntry) {
-
-            if(LOG.isDebugEnabled()) {
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("Append log entry and persist {} ", replicatedLogEntry);
             }
 
             // FIXME : By adding the replicated log entry to the in-memory journal we are not truly ensuring durability of the logs
             journal.add(replicatedLogEntry);
 
+            persist(replicatedLogEntry, callback);
+        }
+
+        @Override
+        public void persist(final ReplicatedLogEntry replicatedLogEntry, final Procedure<ReplicatedLogEntry> callback) {
             // When persisting events with persist it is guaranteed that the
             // persistent actor will not receive further commands between the
             // persist call and the execution(s) of the associated event
             // handler. This also holds for multiple persist calls in context
             // of a single command.
             persistence().persist(replicatedLogEntry,
-                new Procedure<ReplicatedLogEntry>() {
-                    @Override
-                    public void apply(ReplicatedLogEntry evt) throws Exception {
-                        dataSize += replicatedLogEntry.size();
+                    new Procedure<ReplicatedLogEntry>() {
+                        @Override
+                        public void apply(ReplicatedLogEntry evt) throws Exception {
+                            dataSize += replicatedLogEntry.size();
 
-                        long dataThreshold = Runtime.getRuntime().totalMemory() *
-                                getRaftActorContext().getConfigParams().getSnapshotDataThresholdPercentage() / 100;
+                            long dataThreshold = Runtime.getRuntime().totalMemory() *
+                                    getRaftActorContext().getConfigParams().getSnapshotDataThresholdPercentage() / 100;
 
-                        // when a snaphsot is being taken, captureSnapshot != null
-                        if (hasSnapshotCaptureInitiated == false &&
-                                ( journal.size() % context.getConfigParams().getSnapshotBatchCount() == 0 ||
-                                        dataSize > dataThreshold)) {
+                            // when a snaphsot is being taken, captureSnapshot != null
+                            if (hasSnapshotCaptureInitiated == false &&
+                                    ( journal.size() % context.getConfigParams().getSnapshotBatchCount() == 0 ||
+                                            dataSize > dataThreshold)) {
 
-                            LOG.info("Initiating Snapshot Capture..");
-                            long lastAppliedIndex = -1;
-                            long lastAppliedTerm = -1;
+                                LOG.info("Initiating Snapshot Capture..");
+                                long lastAppliedIndex = -1;
+                                long lastAppliedTerm = -1;
 
-                            ReplicatedLogEntry lastAppliedEntry = get(context.getLastApplied());
-                            if (lastAppliedEntry != null) {
-                                lastAppliedIndex = lastAppliedEntry.getIndex();
-                                lastAppliedTerm = lastAppliedEntry.getTerm();
+                                ReplicatedLogEntry lastAppliedEntry = get(context.getLastApplied());
+                                if (lastAppliedEntry != null) {
+                                    lastAppliedIndex = lastAppliedEntry.getIndex();
+                                    lastAppliedTerm = lastAppliedEntry.getTerm();
+                                }
+
+                                if(LOG.isDebugEnabled()) {
+                                    LOG.debug("Snapshot Capture logSize: {}", journal.size());
+                                    LOG.debug("Snapshot Capture lastApplied:{} ",
+                                            context.getLastApplied());
+                                    LOG.debug("Snapshot Capture lastAppliedIndex:{}", lastAppliedIndex);
+                                    LOG.debug("Snapshot Capture lastAppliedTerm:{}", lastAppliedTerm);
+                                }
+
+                                // send a CaptureSnapshot to self to make the expensive operation async.
+                                getSelf().tell(new CaptureSnapshot(
+                                                lastIndex(), lastTerm(), lastAppliedIndex, lastAppliedTerm),
+                                        null);
+                                hasSnapshotCaptureInitiated = true;
                             }
 
-                            if(LOG.isDebugEnabled()) {
-                                LOG.debug("Snapshot Capture logSize: {}", journal.size());
-                                LOG.debug("Snapshot Capture lastApplied:{} ",
-                                    context.getLastApplied());
-                                LOG.debug("Snapshot Capture lastAppliedIndex:{}", lastAppliedIndex);
-                                LOG.debug("Snapshot Capture lastAppliedTerm:{}", lastAppliedTerm);
+                            if(callback != null){
+                                callback.apply(replicatedLogEntry);
                             }
-
-                            // send a CaptureSnapshot to self to make the expensive operation async.
-                            getSelf().tell(new CaptureSnapshot(
-                                lastIndex(), lastTerm(), lastAppliedIndex, lastAppliedTerm),
-                                null);
-                            hasSnapshotCaptureInitiated = true;
-                        }
-                        // Send message for replication
-                        if (clientActor != null) {
-                            currentBehavior.handleMessage(getSelf(),
-                                new Replicate(clientActor, identifier,
-                                    replicatedLogEntry)
-                            );
                         }
                     }
-                }
             );
+        }
+
+        @Override
+        public int dataSize() {
+            return dataSize;
         }
 
     }

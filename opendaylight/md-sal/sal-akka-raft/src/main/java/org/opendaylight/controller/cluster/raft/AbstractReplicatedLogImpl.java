@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import akka.japi.Procedure;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -160,7 +161,7 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     }
 
     @Override
-    public abstract void appendAndPersist(ReplicatedLogEntry replicatedLogEntry);
+    public abstract void appendAndPersist(ReplicatedLogEntry replicatedLogEntry, Procedure<ReplicatedLogEntry> callback);
 
     @Override
     public abstract void removeFromAndPersist(long index);
