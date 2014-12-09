@@ -28,17 +28,21 @@ public class Dependency {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
+        }
 
         Dependency that = (Dependency) o;
 
-        if (mandatory != that.mandatory)
+        if (mandatory != that.mandatory) {
             return false;
-        if (!sie.equals(that.sie))
+        }
+        if (!sie.equals(that.sie)) {
             return false;
+        }
 
         return true;
     }
