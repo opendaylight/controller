@@ -28,6 +28,7 @@
         <feature version='${mdsal.version}'>odl-mdsal-common</feature>
         <feature version='${config.version}'>odl-config-startup</feature>
         <feature version='${config.version}'>odl-config-netty</feature>
+        <bundle>mvn:com.lmax/disruptor/${lmax.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-core-api/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-core-spi/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-broker-impl/${project.version}</bundle>
