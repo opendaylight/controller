@@ -13,7 +13,7 @@
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.opendaylight</artifactId>
     <version>1.5.0-SNAPSHOT</version>
-    <relativePath>../../commons/opendaylight</relativePath>
+    <relativePath>../../opendaylight/commons/opendaylight</relativePath>
   </parent>
   <artifactId>opendaylight-karaf-resources</artifactId>
   <description>Resources for opendaylight-karaf</description>
@@ -43,6 +43,28 @@
                     <destFileName>bcprov-jdk15on-${bouncycastle.version}.jar</destFileName>
                 </artifactItem>
               </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-artifacts</id>
+            <goals>
+              <goal>attach-artifact</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <artifacts>
+                <artifact>
+                  <file>src/main/assembly/etc/org.ops4j.pax.url.mvn.cfg</file>
+                  <type>properties</type>
+                  <classifier>config</classifier>
+                </artifact>
+              </artifacts>
             </configuration>
           </execution>
         </executions>
