@@ -41,10 +41,7 @@
     <module>opendaylight/commons/liblldp</module>
 
     <!-- Karaf Distribution -->
-    <module>opendaylight/karaf-branding</module>
-    <module>opendaylight/distribution/opendaylight-karaf-empty</module>
-    <module>opendaylight/distribution/opendaylight-karaf</module>
-    <module>opendaylight/distribution/opendaylight-karaf-resources</module>
+    <module>karaf</module>
     <module>features</module>
 
     <!-- archetypes -->
