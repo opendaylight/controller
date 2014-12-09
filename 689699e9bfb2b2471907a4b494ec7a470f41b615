@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_45e5c0a6",
+        "filename": "opendaylight/config/yang-jmx-generator/src/main/java/org/opendaylight/controller/config/yangjmxgenerator/RuntimeBeanEntry.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-12-09T10:42:15Z",
+      "side": 1,
+      "message": "Multimap?",
+      "revId": "689699e9bfb2b2471907a4b494ec7a470f41b615",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_c5e8f07e",
+        "filename": "opendaylight/config/yang-jmx-generator/src/main/java/org/opendaylight/controller/config/yangjmxgenerator/RuntimeBeanEntry.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-12-09T10:42:15Z",
+      "side": 1,
+      "message": "looks like a multimap",
+      "revId": "689699e9bfb2b2471907a4b494ec7a470f41b615",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_a5d844f0",
+        "filename": "opendaylight/config/yang-jmx-generator/src/main/java/org/opendaylight/controller/config/yangjmxgenerator/RuntimeBeanEntry.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 323,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-12-09T10:42:15Z",
+      "side": 1,
+      "message": "share this function as a contant",
+      "revId": "689699e9bfb2b2471907a4b494ec7a470f41b615",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
