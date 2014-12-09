@@ -208,6 +208,7 @@
     <yangtools.version>0.7.0-SNAPSHOT</yangtools.version>
     <sshd-core.version>0.12.0</sshd-core.version>
     <jmh.version>0.9.7</jmh.version>
+    <lmax.version>3.3.0</lmax.version>
   </properties>
 
   <dependencyManagement>
@@ -317,6 +318,12 @@
         <artifactId>guava</artifactId>
         <version>${guava.version}</version>
       </dependency>
+      <dependency>
+        <groupId>com.lmax</groupId>
+        <artifactId>disruptor</artifactId>
+        <version>${lmax.version}</version>
+      </dependency>
+
       <!-- 3rd party dependencies needed by config-->
       <dependency>
         <groupId>com.jcabi</groupId>
