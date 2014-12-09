@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import akka.japi.Procedure;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -147,7 +148,13 @@ public class AbstractReplicatedLogImplTest {
     }
     class MockAbstractReplicatedLogImpl extends AbstractReplicatedLogImpl {
         @Override
-        public void appendAndPersist(final ReplicatedLogEntry replicatedLogEntry) {
+        public void appendAndPersist(ReplicatedLogEntry replicatedLogEntry, Procedure<ReplicatedLogEntry> callback) {
+
+        }
+
+        @Override
+        public void persist(ReplicatedLogEntry replicatedLogEntry, Procedure<ReplicatedLogEntry> callback) {
+
         }
 
         @Override
