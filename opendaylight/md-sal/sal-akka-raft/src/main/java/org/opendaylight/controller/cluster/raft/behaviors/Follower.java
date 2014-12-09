@@ -186,7 +186,7 @@ public class Follower extends AbstractRaftActorBehavior {
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("Append entry to log {}", appendEntries.getEntries().get(i).getData());
                 }
-                context.getReplicatedLog().appendAndPersist(appendEntries.getEntries().get(i));
+                context.getReplicatedLog().appendAndPersist(appendEntries.getEntries().get(i), null);
             }
 
             if(LOG.isDebugEnabled()) {

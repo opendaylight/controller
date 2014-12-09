@@ -14,6 +14,7 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
+import akka.japi.Procedure;
 import com.google.common.base.Preconditions;
 import com.google.protobuf.GeneratedMessage;
 import java.io.Serializable;
@@ -186,14 +187,20 @@ public class MockRaftActorContext implements RaftActorContext {
     }
 
     public static class SimpleReplicatedLog extends AbstractReplicatedLogImpl {
-        @Override public void appendAndPersist(
-            ReplicatedLogEntry replicatedLogEntry) {
-            append(replicatedLogEntry);
-        }
 
         @Override
         public int dataSize() {
             return -1;
+        }
+
+        @Override
+        public void appendAndPersist(ReplicatedLogEntry replicatedLogEntry, Procedure<ReplicatedLogEntry> callback) {
+            append(replicatedLogEntry);
+        }
+
+        @Override
+        public void persist(ReplicatedLogEntry replicatedLogEntry, Procedure<ReplicatedLogEntry> callback) {
+
         }
 
         @Override public void removeFromAndPersist(long index) {
