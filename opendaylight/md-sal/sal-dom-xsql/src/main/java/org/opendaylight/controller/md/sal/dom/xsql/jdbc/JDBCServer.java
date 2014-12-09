@@ -193,10 +193,12 @@ public class JDBCServer extends Thread {
             int braketCount = 0;
             int endSubQuery = startSubQuery;
             do {
-                if (sql.charAt(endSubQuery) == '(')
+                if (sql.charAt(endSubQuery) == '(') {
                     braketCount++;
-                else if (sql.charAt(endSubQuery) == ')')
+                }
+                else if (sql.charAt(endSubQuery) == ')') {
                     braketCount--;
+                }
                 endSubQuery++;
             } while (braketCount > 0 || endSubQuery == sql.length());
             String subQuerySQL = sql.substring(startSubQuery + 1,endSubQuery - 1);
@@ -338,8 +340,9 @@ public class JDBCServer extends Thread {
             whereTo = order;
         }
 
-        if(whereTo==-1)
+        if(whereTo==-1) {
             whereTo=lowSQL.length();
+        }
 
         String whereStatement = rs.getSQL().substring(where + 5, whereTo)
                 .trim();

@@ -66,16 +66,18 @@ public class JDBCResultSet implements Serializable, ResultSet,
     }
 
     public JDBCResultSet addSubQuery(String _sql,String logicalName) {
-        if(subQueries == null)
+        if (subQueries == null) {
             subQueries = new HashMap<String,JDBCResultSet>();
+        }
         JDBCResultSet rs = new JDBCResultSet(_sql);
         this.subQueries.put(logicalName,rs);
         return rs;
     }
 
     public Map<String,JDBCResultSet> getSubQueries() {
-        if(this.subQueries==null)
+        if (this.subQueries==null) {
             this.subQueries = new HashMap<>();
+        }
         return this.subQueries;
     }
 
@@ -381,13 +383,15 @@ public class JDBCResultSet implements Serializable, ResultSet,
         for (Object child : children) {
 
             String odlNodeName = XSQLODLUtils.getNodeIdentiofier(child);
-            if (odlNodeName == null)
+            if (odlNodeName == null) {
                 continue;
+            }
 
             XSQLBluePrintNode eNodes[] = bluePrint
                     .getBluePrintNodeByODLTableName(odlNodeName);
-            if (eNodes == null)
+            if (eNodes == null) {
                 continue;
+            }
 
             boolean match = false;
             for (XSQLBluePrintNode enode : eNodes) {
@@ -397,8 +401,9 @@ public class JDBCResultSet implements Serializable, ResultSet,
                 }
             }
 
-            if (!match)
+            if (!match) {
                 continue;
+            }
 
             if (child.getClass().getName().endsWith("ImmutableContainerNode")) {
                 result.add(child);
@@ -466,8 +471,9 @@ public class JDBCResultSet implements Serializable, ResultSet,
                     for (XSQLBluePrintNode eNode : eNodes) {
                         bpn = this.tablesInQueryMap.get(eNode
                                 .getBluePrintNodeName());
-                        if (bpn != null)
+                        if (bpn != null) {
                             break;
+                        }
                     }
                     boolean isObjectInCriteria = true;
                     if (bpn != null) {
@@ -482,8 +488,9 @@ public class JDBCResultSet implements Serializable, ResultSet,
 
                     if (isObjectInCriteria) {
                         if (root) {
-                            if (!rec.data.isEmpty())
+                            if (!rec.data.isEmpty()) {
                                 addRecord(rec.data);
+                            }
                         } else {
                             result.add(rec);
                         }
