@@ -146,8 +146,9 @@ public class LoadBalancerService implements IListenDataPacket, IConfigManager {
      * requires
      */
     public String getContainerName() {
-        if (containerName == null)
+        if (containerName == null) {
             return GlobalConstants.DEFAULT.toString();
+        }
         return containerName;
     }
 

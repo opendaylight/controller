@@ -176,17 +176,19 @@ public class ConfigManager implements IConfigManager{
 
     @Override
     public boolean memberExists(String name, String poolName) {
-        if(this.pools.containsKey(poolName)){
-            if(this.pools.get(poolName).getMember(name) != null )
+        if (this.pools.containsKey(poolName)) {
+            if (this.pools.get(poolName).getMember(name) != null) {
                 return true;
+            }
         }
         return false;
     }
 
     @Override
-    public boolean memberExists(String name, String memberIP,String poolName){
-        if(!this.pools.containsKey(poolName))
+    public boolean memberExists(String name, String memberIP,String poolName) {
+        if (!this.pools.containsKey(poolName)) {
             return false;
+        }
 
         return this.pools.get(poolName).poolMemberExists(new PoolMember(name, memberIP, poolName));
     }
