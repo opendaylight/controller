@@ -10,8 +10,8 @@ package org.opendaylight.controller.test.sal.binding.it;
 import static org.ops4j.pax.exam.CoreOptions.frameworkProperty;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.options.DefaultCompositeOption;
 import org.ops4j.pax.exam.util.PathUtils;
@@ -47,7 +47,7 @@ public class TestHelper {
                 bindingAwareSalBundles(),
                 mavenBundle("commons-codec", "commons-codec").versionAsInProject(),
 
-                systemProperty("org.osgi.framework.system.packages.extra").value("sun.nio.ch"),
+                systemPackages("sun.nio.ch", "sun.misc"),
                 mavenBundle("io.netty", "netty-common").versionAsInProject(), //
                 mavenBundle("io.netty", "netty-buffer").versionAsInProject(), //
                 mavenBundle("io.netty", "netty-handler").versionAsInProject(), //
@@ -123,7 +123,8 @@ public class TestHelper {
                 mavenBundle(CONTROLLER, "sal-common-util").versionAsInProject(), // //
 
 
-                mavenBundle(CONTROLLER, "sal-inmemory-datastore").versionAsInProject(), // /
+                mavenBundle("com.lmax", "disruptor").versionAsInProject(),
+                mavenBundle(CONTROLLER, "sal-inmemory-datastore").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "sal-broker-impl").versionAsInProject(), // //
                 mavenBundle(CONTROLLER, "sal-core-spi").versionAsInProject().update(), //
 
