@@ -18,7 +18,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import com.google.common.collect.Sets;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
@@ -31,11 +30,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
-
 import javax.management.openmbean.ArrayType;
 import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.SimpleType;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;

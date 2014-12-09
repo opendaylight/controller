@@ -7,13 +7,11 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.util;
 
+import com.google.common.base.Preconditions;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.opendaylight.yangtools.yang.model.api.Module;
-
-import com.google.common.base.Preconditions;
 
 public class YangModelSearchUtils {
 
