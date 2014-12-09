@@ -54,7 +54,9 @@ public class BridgeDomainNorthbound {
 
     @Context
     public void setSecurityContext(SecurityContext context) {
-        if (context != null && context.getUserPrincipal() != null) username = context.getUserPrincipal().getName();
+        if (context != null && context.getUserPrincipal() != null) {
+          username = context.getUserPrincipal().getName();
+        }
     }
     protected String getUserName() {
         return username;
