@@ -4,16 +4,15 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import java.util.List;
+import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.java.FullyQualifiedName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.regex.Pattern;
-
 public class StringUtil {
-    private static final Logger logger = LoggerFactory.getLogger(StringUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(StringUtil.class);
 
     /**
      * @param list   of strings to be joined by ','
@@ -66,7 +65,7 @@ public class StringUtil {
                     return Optional.of(IOUtils.toString(in));
                 }
             } catch (IOException e) {
-                logger.warn("Cannot load copyright.txt", e);
+                LOG.warn("Cannot load copyright.txt", e);
             }
 
         */

@@ -1,14 +1,13 @@
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.util;
 
-import org.junit.Ignore;
-import org.junit.Test;
-import org.opendaylight.controller.config.yangjmxgenerator.plugin.java.FullyQualifiedName;
-
-import java.io.IOException;
-
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.opendaylight.controller.config.yangjmxgenerator.plugin.java.FullyQualifiedName;
 
 public class StringUtilTest {
     @Test
@@ -33,19 +32,19 @@ public class StringUtilTest {
     @Test
     public void testFormatting() {
         {
-        String input = "  \tpack;\n" +
+            String input = "  \tpack;\n" +
                 "class Bar{ \n" +
                 " method() {\n" +
                 "  body\n" +
                 "}\n" +
                 "  }";
-        String expected = "pack;\n" +
+            String expected = "pack;\n" +
                 "class Bar{\n" +
                 "    method() {\n" +
                 "        body\n" +
                 "    }\n" +
                 "}\n";
-        assertEquals(expected, StringUtil.formatJavaSource(input));
+            assertEquals(expected, StringUtil.formatJavaSource(input));
         }
         {
             String input = "{\n" +

@@ -7,19 +7,18 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.plugin;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
 import org.junit.Test;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeRegistratorTest;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.FtlTemplate;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.RuntimeRegistratorFtlTemplate;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Map;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 
 public class RuntimeRegistratorFtlFileTest extends RuntimeRegistratorTest {
 

@@ -8,11 +8,10 @@
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl;
 
 import com.google.common.collect.Lists;
+import java.util.Collections;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Field;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Header;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.MethodDefinition;
-
-import java.util.Collections;
 
 public class StubFactoryTemplate extends GeneralClassTemplate {
 

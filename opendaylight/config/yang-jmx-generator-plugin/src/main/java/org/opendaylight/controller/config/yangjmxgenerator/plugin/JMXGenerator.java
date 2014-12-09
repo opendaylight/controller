@@ -12,6 +12,16 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.io.File;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
@@ -30,17 +40,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.impl.StaticLoggerBinder;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 /**
  * This class interfaces with yang-maven-plugin. Gets parsed yang modules in
  * {@link SchemaContext}, and parameters form the plugin configuration, and
@@ -54,7 +53,7 @@ public class JMXGenerator implements CodeGenerator {
 
     private PackageTranslator packageTranslator;
     private final CodeWriter codeWriter;
-    private static final Logger LOGGER = LoggerFactory
+    private static final Logger LOG = LoggerFactory
             .getLogger(JMXGenerator.class);
     private Map<String, String> namespaceToPackageMapping;
     private File resourceBaseDir;
@@ -167,7 +166,7 @@ public class JMXGenerator implements CodeGenerator {
                         fullyQualifiedNamesOfFactories.toString());
             } catch (IOException e) {
                 String message = "Cannot write to " + serviceLoaderFile;
-                LOGGER.error(message);
+                LOG.error(message);
                 throw new RuntimeException(message, e);
             }
         }
@@ -185,8 +184,8 @@ public class JMXGenerator implements CodeGenerator {
 
     @Override
     public void setAdditionalConfig(Map<String, String> additionalCfg) {
-        if (LOGGER != null) {
-            LOGGER.debug(getClass().getCanonicalName(),
+        if (LOG != null) {
+            LOG.debug(getClass().getCanonicalName(),
                     ": Additional configuration received: ",
                     additionalCfg.toString());
         }
@@ -254,8 +253,8 @@ public class JMXGenerator implements CodeGenerator {
     public void setMavenProject(MavenProject project) {
         this.projectBaseDir = project.getBasedir();
 
-        if (LOGGER != null)
-            LOGGER.debug(getClass().getCanonicalName(), " project base dir: ",
+        if (LOG != null)
+            LOG.debug(getClass().getCanonicalName(), " project base dir: ",
                     projectBaseDir);
     }
 
@@ -272,7 +271,7 @@ public class JMXGenerator implements CodeGenerator {
                     }
                 }
                 if (undeletedFiles.isEmpty() == false) {
-                    LOGGER.error(
+                    LOG.error(
                             "Illegal state occurred: Unable to delete already generated files, undeleted files: {}",
                             undeletedFiles);
                 }
