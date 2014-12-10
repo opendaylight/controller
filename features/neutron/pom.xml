@@ -17,6 +17,17 @@
 
   <dependencies>
     <dependency>
+      <groupId>org.opendaylight.aaa</groupId>
+      <artifactId>features-aaa</artifactId>
+      <version>${aaa.version}</version>
+      <classifier>features</classifier>
+      <type>xml</type>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>networkconfig.neutron</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
     </dependency>
