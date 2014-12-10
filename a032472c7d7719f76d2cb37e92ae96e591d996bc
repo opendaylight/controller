@@ -22,6 +22,24 @@
       "revId": "a032472c7d7719f76d2cb37e92ae96e591d996bc",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_ab3ed5b6",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 3110
+      },
+      "writtenOn": "2014-12-10T06:40:53Z",
+      "side": 1,
+      "message": "I\u0027ll add sentences required as per the modifications done.\nBut I didn\u0027t get you on \"keep the first commit unchanged\".",
+      "parentUuid": "7a96c907_8c9f7a03",
+      "revId": "a032472c7d7719f76d2cb37e92ae96e591d996bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
