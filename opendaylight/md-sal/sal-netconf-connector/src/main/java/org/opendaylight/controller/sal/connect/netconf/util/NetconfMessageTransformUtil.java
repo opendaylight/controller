@@ -14,6 +14,7 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.net.URI;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorSeverity;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.ModifyAction;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -59,35 +61,41 @@ public class NetconfMessageTransformUtil {
     public static final QName IETF_NETCONF_MONITORING_SCHEMA_VERSION = QName.create(IETF_NETCONF_MONITORING, "version");
     public static final QName IETF_NETCONF_MONITORING_SCHEMA_NAMESPACE = QName.create(IETF_NETCONF_MONITORING, "namespace");
 
-    public static final URI NETCONF_URI = URI.create("urn:ietf:params:xml:ns:netconf:base:1.0");
-    public static final QName NETCONF_QNAME = QName.create(NETCONF_URI, null, "netconf");
-    public static final QName NETCONF_DATA_QNAME = QName.create(NETCONF_QNAME, "data");
-    public static final QName NETCONF_RPC_REPLY_QNAME = QName.create(NETCONF_QNAME, "rpc-reply");
-    public static final QName NETCONF_ERROR_OPTION_QNAME = QName.create(NETCONF_QNAME, "error-option");
-    public static final QName NETCONF_RUNNING_QNAME = QName.create(NETCONF_QNAME, "running");
-    static final List<Node<?>> RUNNING = Collections.<Node<?>> singletonList(new SimpleNodeTOImpl<>(NETCONF_RUNNING_QNAME, null, null));
-    public static final QName NETCONF_SOURCE_QNAME = QName.create(NETCONF_QNAME, "source");
-    public static final CompositeNode CONFIG_SOURCE_RUNNING = new CompositeNodeTOImpl(NETCONF_SOURCE_QNAME, null, RUNNING);
-    public static final QName NETCONF_CANDIDATE_QNAME = QName.create(NETCONF_QNAME, "candidate");
-    public static final QName NETCONF_TARGET_QNAME = QName.create(NETCONF_QNAME, "target");
-    public static final QName NETCONF_CONFIG_QNAME = QName.create(NETCONF_QNAME, "config");
-    public static final QName NETCONF_COMMIT_QNAME = QName.create(NETCONF_QNAME, "commit");
-    public static final QName NETCONF_OPERATION_QNAME = QName.create(NETCONF_QNAME, "operation");
-    public static final QName NETCONF_DEFAULT_OPERATION_QNAME = QName.create(NETCONF_OPERATION_QNAME, "default-operation");
-    public static final QName NETCONF_EDIT_CONFIG_QNAME = QName.create(NETCONF_QNAME, "edit-config");
-    public static final QName NETCONF_GET_CONFIG_QNAME = QName.create(NETCONF_QNAME, "get-config");
-    public static final QName NETCONF_DISCARD_CHANGES_QNAME = QName.create(NETCONF_QNAME, "discard-changes");
-    public static final QName NETCONF_TYPE_QNAME = QName.create(NETCONF_QNAME, "type");
-    public static final QName NETCONF_FILTER_QNAME = QName.create(NETCONF_QNAME, "filter");
-    public static final QName NETCONF_GET_QNAME = QName.create(NETCONF_QNAME, "get");
-    public static final QName NETCONF_RPC_QNAME = QName.create(NETCONF_QNAME, "rpc");
+    public static URI NETCONF_URI = URI.create("urn:ietf:params:xml:ns:netconf:base:1.0");
+    public static QName NETCONF_QNAME = QName.create(NETCONF_URI, null, "netconf");
+    public static QName NETCONF_DATA_QNAME = QName.create(NETCONF_QNAME, "data");
+    public static QName NETCONF_RPC_REPLY_QNAME = QName.create(NETCONF_QNAME, "rpc-reply");
+    public static QName NETCONF_ERROR_OPTION_QNAME = QName.create(NETCONF_QNAME, "error-option");
+    public static QName NETCONF_RUNNING_QNAME = QName.create(NETCONF_QNAME, "running");
+    public static QName NETCONF_SOURCE_QNAME = QName.create(NETCONF_QNAME, "source");
+    public static QName NETCONF_CANDIDATE_QNAME = QName.create(NETCONF_QNAME, "candidate");
+    public static QName NETCONF_TARGET_QNAME = QName.create(NETCONF_QNAME, "target");
+    public static QName NETCONF_CONFIG_QNAME = QName.create(NETCONF_QNAME, "config");
+    public static QName NETCONF_COMMIT_QNAME = QName.create(NETCONF_QNAME, "commit");
+    public static QName NETCONF_VALIDATE_QNAME = QName.create(NETCONF_QNAME, "validate");
+    public static QName NETCONF_COPY_CONFIG_QNAME = QName.create(NETCONF_QNAME, "copy-config");
+    public static QName NETCONF_OPERATION_QNAME = QName.create(NETCONF_QNAME, "operation");
+    public static QName NETCONF_DEFAULT_OPERATION_QNAME = QName.create(NETCONF_OPERATION_QNAME, "default-operation");
+    public static QName NETCONF_EDIT_CONFIG_QNAME = QName.create(NETCONF_QNAME, "edit-config");
+    public static QName NETCONF_GET_CONFIG_QNAME = QName.create(NETCONF_QNAME, "get-config");
+    public static QName NETCONF_DISCARD_CHANGES_QNAME = QName.create(NETCONF_QNAME, "discard-changes");
+    public static QName NETCONF_TYPE_QNAME = QName.create(NETCONF_QNAME, "type");
+    public static QName NETCONF_FILTER_QNAME = QName.create(NETCONF_QNAME, "filter");
+    public static QName NETCONF_GET_QNAME = QName.create(NETCONF_QNAME, "get");
+    public static QName NETCONF_RPC_QNAME = QName.create(NETCONF_QNAME, "rpc");
 
-    public static final URI NETCONF_ROLLBACK_ON_ERROR_URI = URI
+    public static URI NETCONF_ROLLBACK_ON_ERROR_URI = URI
             .create("urn:ietf:params:netconf:capability:rollback-on-error:1.0");
-    public static final String ROLLBACK_ON_ERROR_OPTION = "rollback-on-error";
+    public static String ROLLBACK_ON_ERROR_OPTION = "rollback-on-error";
 
-    public static final URI NETCONF_CANDIDATE_URI = URI
+    public static URI NETCONF_CANDIDATE_URI = URI
             .create("urn:ietf:params:netconf:capability:candidate:1.0");
+
+    public static URI NETCONF_RUNNING_WRITABLE_URI = URI
+            .create("urn:ietf:params:netconf:capability:writable-running:1.0");
+
+    public static QName NETCONF_LOCK_QNAME = QName.create(NETCONF_QNAME, "lock");
+    public static QName NETCONF_UNLOCK_QNAME = QName.create(NETCONF_QNAME, "unlock");
 
     // Discard changes message
     public static final CompositeNode DISCARD_CHANGES_RPC_CONTENT =
@@ -116,7 +124,7 @@ public class NetconfMessageTransformUtil {
     static Node<?> toNode(final YangInstanceIdentifier.NodeIdentifierWithPredicates argument, final Node<?> node) {
         final List<Node<?>> list = new ArrayList<>();
         for (final Map.Entry<QName, Object> arg : argument.getKeyValues().entrySet()) {
-            list.add(new SimpleNodeTOImpl<>(arg.getKey(), null, arg.getValue()));
+            list.add(new SimpleNodeTOImpl(arg.getKey(), null, arg.getValue()));
         }
         if (node != null) {
             list.add(node);
@@ -410,5 +418,72 @@ public class NetconfMessageTransformUtil {
             }
         }
         return current;
+    }
+
+    public static String modifyOperationToXmlString(final ModifyAction operation) {
+        return operation.name().toLowerCase();
+    }
+
+
+    public static CompositeNode createEditConfigStructure(final YangInstanceIdentifier dataPath, final Optional<ModifyAction> operation,
+                                                    final Optional<CompositeNode> lastChildOverride) {
+        Preconditions.checkArgument(Iterables.isEmpty(dataPath.getPathArguments()) == false, "Instance identifier with empty path %s", dataPath);
+
+        List<YangInstanceIdentifier.PathArgument> reversedPath = Lists.reverse(dataPath.getPath());
+
+        // Create deepest edit element with expected edit operation
+        CompositeNode previous = getDeepestEditElement(reversedPath.get(0), operation, lastChildOverride);
+
+        // Remove already processed deepest child
+        reversedPath = Lists.newArrayList(reversedPath);
+        reversedPath.remove(0);
+
+        // Create edit structure in reversed order
+        for (final YangInstanceIdentifier.PathArgument arg : reversedPath) {
+            final CompositeNodeBuilder<ImmutableCompositeNode> builder = ImmutableCompositeNode.builder();
+            builder.setQName(arg.getNodeType());
+
+            addPredicatesToCompositeNodeBuilder(getPredicates(arg), builder);
+
+            builder.add(previous);
+            previous = builder.toInstance();
+        }
+        return ImmutableCompositeNode.create(NETCONF_CONFIG_QNAME, ImmutableList.<Node<?>>of(previous));
+    }
+
+    public static void addPredicatesToCompositeNodeBuilder(final Map<QName, Object> predicates, final CompositeNodeBuilder<ImmutableCompositeNode> builder) {
+        for (final Map.Entry<QName, Object> entry : predicates.entrySet()) {
+            builder.addLeaf(entry.getKey(), entry.getValue());
+        }
+    }
+
+    public static Map<QName, Object> getPredicates(final YangInstanceIdentifier.PathArgument arg) {
+        Map<QName, Object> predicates = Collections.emptyMap();
+        if (arg instanceof YangInstanceIdentifier.NodeIdentifierWithPredicates) {
+            predicates = ((YangInstanceIdentifier.NodeIdentifierWithPredicates) arg).getKeyValues();
+        }
+        return predicates;
+    }
+
+    public static CompositeNode getDeepestEditElement(final YangInstanceIdentifier.PathArgument arg, final Optional<ModifyAction> operation, final Optional<CompositeNode> lastChildOverride) {
+        final CompositeNodeBuilder<ImmutableCompositeNode> builder = ImmutableCompositeNode.builder();
+        builder.setQName(arg.getNodeType());
+
+        final Map<QName, Object> predicates = getPredicates(arg);
+        addPredicatesToCompositeNodeBuilder(predicates, builder);
+
+        if (operation.isPresent()) {
+            builder.setAttribute(NETCONF_OPERATION_QNAME, modifyOperationToXmlString(operation.get()));
+        }
+        if (lastChildOverride.isPresent()) {
+            final List<Node<?>> children = lastChildOverride.get().getValue();
+            for(final Node<?> child : children) {
+                if(!predicates.containsKey(child.getKey())) {
+                    builder.add(child);
+                }
+            }
+        }
+
+        return builder.toInstance();
     }
 }
