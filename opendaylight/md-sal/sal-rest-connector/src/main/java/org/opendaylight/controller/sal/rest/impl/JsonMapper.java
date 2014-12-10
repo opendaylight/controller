@@ -280,11 +280,22 @@ class JsonMapper {
             writeEmptyDataTypeToJson(writer);
         } else {
             String value = String.valueOf(RestCodec.from(baseType, mountPoint).serialize(node.getValue()));
+
             if (value == null) {
                 value = String.valueOf(node.getValue());
+            } else {
+                value = replaceNewLines(value);
             }
             writer.value(value.equals("null") ? "" : value);
         }
+    }
+
+    private String replaceNewLines(final String oldString) {
+        String modified = oldString;
+        modified = modified.replace("\r\n", "\\r\\n");  //WIN
+        modified = modified.replace("\n", "\\n");       //LINUX
+        modified = modified.replace("\r", "\\r");       //MAC
+        return modified;
     }
 
     private static void writeIdentityValuesDTOToJson(final JsonWriter writer, final IdentityValuesDTO valueDTO)
