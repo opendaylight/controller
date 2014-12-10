@@ -26,12 +26,12 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 import java.util.concurrent.ExecutionException;
 
-public class NetconfDeviceReadWriteTx implements DOMDataReadWriteTransaction {
+public class ReadWriteTx implements DOMDataReadWriteTransaction {
 
     private final DOMDataReadTransaction delegateReadTx;
     private final DOMDataWriteTransaction delegateWriteTx;
 
-    public NetconfDeviceReadWriteTx(final DOMDataReadTransaction delegateReadTx, final DOMDataWriteTransaction delegateWriteTx) {
+    public ReadWriteTx(final DOMDataReadTransaction delegateReadTx, final DOMDataWriteTransaction delegateWriteTx) {
         this.delegateReadTx = delegateReadTx;
         this.delegateWriteTx = delegateWriteTx;
     }
@@ -73,9 +73,9 @@ public class NetconfDeviceReadWriteTx implements DOMDataReadWriteTransaction {
     }
 
     @Override public CheckedFuture<Boolean, ReadFailedException> exists(
-        LogicalDatastoreType store,
-        YangInstanceIdentifier path) {
-        CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException>
+        final LogicalDatastoreType store,
+        final YangInstanceIdentifier path) {
+        final CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException>
             data = read(store, path);
 
         try {
