@@ -72,7 +72,9 @@ import org.slf4j.LoggerFactory;
             boolean includeDependentBundleClasses)
     {
         BundleInfo info = bundleAnnotations.get(context.getBundle().getBundleId());
-        if (info == null) return Collections.emptyList();
+        if (info == null) {
+            return Collections.emptyList();
+        }
         Pattern pattern = mergePatterns(annotations, false);
         List<Class<?>> result = null;
         if (includeDependentBundleClasses) {
@@ -254,7 +256,9 @@ import org.slf4j.LoggerFactory;
         StringBuilder errors = new StringBuilder();
         for (String name : annotatedClasses) {
             try {
-                if (excludes != null && excludes.contains(name)) continue;
+                if (excludes != null && excludes.contains(name)) {
+                    continue;
+                }
                 result.add(initBundle.loadClass(name));
             } catch (ClassNotFoundException e) {
                 errors.append(name).append(", ");
@@ -276,7 +280,9 @@ import org.slf4j.LoggerFactory;
             if (c.endsWith("*")) {
                 c = c.substring(0, c.length() - 1);
             }
-            if (regex.length() > 0) regex.append("|");
+            if (regex.length() > 0) {
+                regex.append("|");
+            }
             regex.append("^");
             if (convert2signature) {
                 regex.append("L").append(c.replaceAll("\\.", "/"));
@@ -291,12 +297,16 @@ import org.slf4j.LoggerFactory;
     }
 
     private void validate(List<Class<?>> classes) {
-        if (classes == null || classes.size() == 0) return;
+        if (classes == null || classes.size() == 0) {
+            return;
+        }
         Map<String,String> names = new HashMap<String,String>();
         StringBuilder conflictsMsg = new StringBuilder();
         for (Class<?> c : classes) {
             XmlRootElement root = c.getAnnotation(XmlRootElement.class);
-            if (root == null) continue;
+            if (root == null) {
+                continue;
+            }
             String rootName = root.name();
             if ("##default".equals(rootName)) {
                 String clsName = c.getSimpleName();
