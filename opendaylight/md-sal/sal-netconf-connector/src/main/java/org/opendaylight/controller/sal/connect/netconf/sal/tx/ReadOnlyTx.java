@@ -7,20 +7,24 @@
  */
 package org.opendaylight.controller.sal.connect.netconf.sal.tx;
 
+import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_DATA_QNAME;
+
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationException;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizer;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
+import org.opendaylight.controller.sal.connect.netconf.util.NetconfBaseOps;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
-import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.yangtools.util.concurrent.MappingCheckedFuture;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
@@ -29,35 +33,44 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.ExecutionException;
 
-import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.CONFIG_SOURCE_RUNNING;
-import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_DATA_QNAME;
-import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_GET_CONFIG_QNAME;
-import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_GET_QNAME;
-import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.toFilterStructure;
+public final class ReadOnlyTx implements DOMDataReadOnlyTransaction {
 
+    private static final Logger LOG  = LoggerFactory.getLogger(ReadOnlyTx.class);
 
-public final class NetconfDeviceReadOnlyTx implements DOMDataReadOnlyTransaction {
-
-    private static final Logger LOG  = LoggerFactory.getLogger(NetconfDeviceReadOnlyTx.class);
-
-    private final RpcImplementation rpc;
+    private final NetconfBaseOps netconfOps;
     private final DataNormalizer normalizer;
     private final RemoteDeviceId id;
+    private final FutureCallback<RpcResult<CompositeNode>> loggingCallback;
 
-    public NetconfDeviceReadOnlyTx(final RpcImplementation rpc, final DataNormalizer normalizer, final RemoteDeviceId id) {
-        this.rpc = rpc;
+    public ReadOnlyTx(final NetconfBaseOps netconfOps, final DataNormalizer normalizer, final RemoteDeviceId id) {
+        this.netconfOps = netconfOps;
         this.normalizer = normalizer;
         this.id = id;
+        // Simple logging callback to log result of read operation
+        loggingCallback = new FutureCallback<RpcResult<CompositeNode>>() {
+            @Override
+            public void onSuccess(final RpcResult<CompositeNode> result) {
+                if(result.isSuccessful()) {
+                    LOG.trace("{}: Reading data successful", id);
+                } else {
+                    LOG.warn("{}: Reading data unsuccessful: {}", id, result.getErrors());
+                }
+
+            }
+
+            @Override
+            public void onFailure(final Throwable t) {
+                LOG.warn("{}: Reading data failed", id, t);
+            }
+        };
     }
 
     private CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readConfigurationData(
             final YangInstanceIdentifier path) {
-        final ListenableFuture<RpcResult<CompositeNode>> future = rpc.invokeRpc(NETCONF_GET_CONFIG_QNAME,
-                NetconfMessageTransformUtil.wrap(NETCONF_GET_CONFIG_QNAME, CONFIG_SOURCE_RUNNING, toFilterStructure(path)));
-
-        final ListenableFuture<Optional<NormalizedNode<?, ?>>> transformedFuture = Futures.transform(future, new Function<RpcResult<CompositeNode>, Optional<NormalizedNode<?, ?>>>() {
+        final ListenableFuture<RpcResult<CompositeNode>> configRunning = netconfOps.getConfigRunning(loggingCallback, Optional.fromNullable(path));
+        // Find data node and normalize its content
+        final ListenableFuture<Optional<NormalizedNode<?, ?>>> transformedFuture = Futures.transform(configRunning, new Function<RpcResult<CompositeNode>, Optional<NormalizedNode<?, ?>>>() {
             @Override
             public Optional<NormalizedNode<?, ?>> apply(final RpcResult<CompositeNode> result) {
                 checkReadSuccess(result, path);
@@ -77,7 +90,7 @@ public final class NetconfDeviceReadOnlyTx implements DOMDataReadOnlyTransaction
     private void checkReadSuccess(final RpcResult<CompositeNode> result, final YangInstanceIdentifier path) {
         try {
             Preconditions.checkArgument(result.isSuccessful(), "%s: Unable to read data: %s, errors: %s", id, path, result.getErrors());
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             LOG.warn("{}: Unable to read data: {}, errors: {}", id, path, result.getErrors());
             throw e;
         }
@@ -97,9 +110,10 @@ public final class NetconfDeviceReadOnlyTx implements DOMDataReadOnlyTransaction
 
     private CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readOperationalData(
             final YangInstanceIdentifier path) {
-        final ListenableFuture<RpcResult<CompositeNode>> future = rpc.invokeRpc(NETCONF_GET_QNAME, NetconfMessageTransformUtil.wrap(NETCONF_GET_QNAME, toFilterStructure(path)));
+        final ListenableFuture<RpcResult<CompositeNode>> configCandidate = netconfOps.getConfigRunning(loggingCallback, Optional.fromNullable(path));
 
-        final ListenableFuture<Optional<NormalizedNode<?, ?>>> transformedFuture = Futures.transform(future, new Function<RpcResult<CompositeNode>, Optional<NormalizedNode<?, ?>>>() {
+        // Find data node and normalize its content
+        final ListenableFuture<Optional<NormalizedNode<?, ?>>> transformedFuture = Futures.transform(configCandidate, new Function<RpcResult<CompositeNode>, Optional<NormalizedNode<?, ?>>>() {
             @Override
             public Optional<NormalizedNode<?, ?>> apply(final RpcResult<CompositeNode> result) {
                 checkReadSuccess(result, path);
@@ -138,10 +152,9 @@ public final class NetconfDeviceReadOnlyTx implements DOMDataReadOnlyTransaction
         throw new IllegalArgumentException(String.format("%s, Cannot read data %s for %s datastore, unknown datastore type", id, path, store));
     }
 
-    @Override public CheckedFuture<Boolean, ReadFailedException> exists(
-        LogicalDatastoreType store,
-        YangInstanceIdentifier path) {
-        CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException>
+    @Override
+    public CheckedFuture<Boolean, ReadFailedException> exists(final LogicalDatastoreType store, final YangInstanceIdentifier path) {
+        final CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException>
             data = read(store, path);
 
         try {

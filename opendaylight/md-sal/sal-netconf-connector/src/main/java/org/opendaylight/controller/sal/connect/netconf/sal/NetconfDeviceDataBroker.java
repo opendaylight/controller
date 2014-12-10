@@ -18,9 +18,12 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionCapabilities;
-import org.opendaylight.controller.sal.connect.netconf.sal.tx.NetconfDeviceReadOnlyTx;
-import org.opendaylight.controller.sal.connect.netconf.sal.tx.NetconfDeviceReadWriteTx;
-import org.opendaylight.controller.sal.connect.netconf.sal.tx.NetconfDeviceWriteOnlyTx;
+import org.opendaylight.controller.sal.connect.netconf.sal.tx.ReadOnlyTx;
+import org.opendaylight.controller.sal.connect.netconf.sal.tx.ReadWriteTx;
+import org.opendaylight.controller.sal.connect.netconf.sal.tx.WriteCandidateTx;
+import org.opendaylight.controller.sal.connect.netconf.sal.tx.WriteCandidateRunningTx;
+import org.opendaylight.controller.sal.connect.netconf.sal.tx.WriteRunningTx;
+import org.opendaylight.controller.sal.connect.netconf.util.NetconfBaseOps;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
@@ -29,40 +32,48 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 final class NetconfDeviceDataBroker implements DOMDataBroker {
     private final RemoteDeviceId id;
-    private final RpcImplementation rpc;
+    private final NetconfBaseOps netconfOps;
     private final NetconfSessionCapabilities netconfSessionPreferences;
     private final DataNormalizer normalizer;
 
-    public NetconfDeviceDataBroker(final RemoteDeviceId id, final RpcImplementation rpc, final SchemaContext schemaContext, NetconfSessionCapabilities netconfSessionPreferences) {
+    public NetconfDeviceDataBroker(final RemoteDeviceId id, final RpcImplementation rpc, final SchemaContext schemaContext, final NetconfSessionCapabilities netconfSessionPreferences) {
         this.id = id;
-        this.rpc = rpc;
+        this.netconfOps = new NetconfBaseOps(rpc);
         this.netconfSessionPreferences = netconfSessionPreferences;
         normalizer = new DataNormalizer(schemaContext);
     }
 
     @Override
     public DOMDataReadOnlyTransaction newReadOnlyTransaction() {
-        return new NetconfDeviceReadOnlyTx(rpc, normalizer, id);
+        return new ReadOnlyTx(netconfOps, normalizer, id);
     }
 
     @Override
     public DOMDataReadWriteTransaction newReadWriteTransaction() {
-        return new NetconfDeviceReadWriteTx(newReadOnlyTransaction(), newWriteOnlyTransaction());
+        return new ReadWriteTx(newReadOnlyTransaction(), newWriteOnlyTransaction());
     }
 
     @Override
     public DOMDataWriteTransaction newWriteOnlyTransaction() {
-        return new NetconfDeviceWriteOnlyTx(id, rpc, normalizer, netconfSessionPreferences.isCandidateSupported(), netconfSessionPreferences.isRollbackSupported());
+        if(netconfSessionPreferences.isCandidateSupported()) {
+            if(netconfSessionPreferences.isRunningWritable()) {
+                return new WriteCandidateRunningTx(id, netconfOps, normalizer, netconfSessionPreferences);
+            } else {
+                return new WriteCandidateTx(id, netconfOps, normalizer, netconfSessionPreferences);
+            }
+        } else {
+            return new WriteRunningTx(id, netconfOps, normalizer, netconfSessionPreferences);
+        }
     }
 
     @Override
     public ListenerRegistration<DOMDataChangeListener> registerDataChangeListener(final LogicalDatastoreType store, final YangInstanceIdentifier path, final DOMDataChangeListener listener, final DataChangeScope triggeringScope) {
-        throw new UnsupportedOperationException("Data change listeners not supported for netconf mount point");
+        throw new UnsupportedOperationException(id + ": Data change listeners not supported for netconf mount point");
     }
 
     @Override
     public DOMTransactionChain createTransactionChain(final TransactionChainListener listener) {
-        // TODO implement
-        throw new UnsupportedOperationException("Transaction chains not supported for netconf mount point");
+        throw new UnsupportedOperationException(id + ": Transaction chains not supported for netconf mount point");
     }
+
 }
