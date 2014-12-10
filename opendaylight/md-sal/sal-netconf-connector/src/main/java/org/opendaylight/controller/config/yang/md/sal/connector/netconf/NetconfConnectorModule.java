@@ -27,6 +27,7 @@ import org.opendaylight.controller.sal.connect.netconf.NetconfDevice;
 import org.opendaylight.controller.sal.connect.netconf.NetconfStateSchemas;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfDeviceCommunicator;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionCapabilities;
+import org.opendaylight.controller.sal.connect.netconf.sal.NetconfDeviceBrokerFactory;
 import org.opendaylight.controller.sal.connect.netconf.sal.NetconfDeviceSalFacade;
 import org.opendaylight.controller.sal.connect.netconf.schema.mapping.NetconfMessageTransformer;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
@@ -104,8 +105,9 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         final Broker domBroker = getDomRegistryDependency();
         final BindingAwareBroker bindingBroker = getBindingRegistryDependency();
 
-        final RemoteDeviceHandler<NetconfSessionCapabilities> salFacade
-                = new NetconfDeviceSalFacade(id, domBroker, bindingBroker, bundleContext, globalProcessingExecutor);
+        final NetconfDeviceSalFacade salFacade
+                = new NetconfDeviceSalFacade(id, globalProcessingExecutor, new NetconfDeviceBrokerFactory());
+        salFacade.registerToSal(domBroker, bindingBroker, bundleContext);
 
         final NetconfDevice.SchemaResourcesDTO schemaResourcesDTO =
                 new NetconfDevice.SchemaResourcesDTO(schemaRegistry, schemaContextFactory, new NetconfStateSchemas.NetconfStateSchemasResolverImpl());
