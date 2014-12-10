@@ -121,6 +121,14 @@
       <type>xml</type>
     </dependency>
 
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>features-neutron</artifactId>
+      <classifier>features</classifier>
+      <type>xml</type>
+      <scope>runtime</scope>
+    </dependency>
+
   </dependencies>
 
   <build>
