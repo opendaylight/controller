@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- vi: set et smarttab sw=4 tabstop=4: -->
+<!--
+ Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+
+ This program and the accompanying materials are made available under the
+ terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ and is available at http://www.eclipse.org/legal/epl-v10.html
+-->
+<snapshot>
+    <configuration>
+        <data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+            <modules xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+                <module>
+                    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:clustering-service-provider">
+                        prefix:clustering-service-provider
+                    </type>
+                    <name>clustering-service-provider</name>
+
+                    <rpc-registry>
+                        <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-rpc-registry</type>
+                        <name>binding-rpc-broker</name>
+                    </rpc-registry>
+
+                </module>
+            </modules>
+        </data>
+
+    </configuration>
+
+    <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+        <service>
+            <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:clustering-service-provider">prefix:clustering-service-change-registry</type>
+            <instance>
+                <name>openflow-role-change-registry</name>
+                <provider>/modules/module[type='clustering-service-provider'][name='clustering-service-provider']</provider>
+            </instance>
+        </service>
+    </services>
+
+    <required-capabilities>
+        <capability>urn:opendaylight:params:xml:ns:yang:controller:config:clustering-service-provider?module=clustering-service-provider&amp;revision=2014-11-19</capability>
+
+    </required-capabilities>
+
+</snapshot>

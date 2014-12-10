@@ -36,6 +36,7 @@ public class ConfigSnapshot {
         return new ConfigSnapshot(cfg.getConfigSnapshot(), cfg.getCapabilities());
     }
 
+
     @XmlAnyElement(SnapshotHandler.class)
     public String getConfigSnapshot() {
         return configSnapshot;
