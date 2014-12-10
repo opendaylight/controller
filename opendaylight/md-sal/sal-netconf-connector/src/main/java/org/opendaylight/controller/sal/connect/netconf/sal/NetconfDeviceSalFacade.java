@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
+import org.opendaylight.controller.sal.connect.api.DataBrokerFactory;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceHandler;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionCapabilities;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
@@ -40,14 +41,15 @@ public final class NetconfDeviceSalFacade implements AutoCloseable, RemoteDevice
     private static final Logger logger= LoggerFactory.getLogger(NetconfDeviceSalFacade.class);
 
     private final RemoteDeviceId id;
+    private final DataBrokerFactory brokerFactory;
     private final NetconfDeviceSalProvider salProvider;
 
     private final List<AutoCloseable> salRegistrations = Lists.newArrayList();
 
-    public NetconfDeviceSalFacade(final RemoteDeviceId id, final Broker domBroker, final BindingAwareBroker bindingBroker, final BundleContext bundleContext, final ExecutorService executor) {
+    public NetconfDeviceSalFacade(final RemoteDeviceId id, final ExecutorService executor, final DataBrokerFactory brokerFactory) {
         this.id = id;
-        this.salProvider = new NetconfDeviceSalProvider(id, executor);
-        registerToSal(domBroker, bindingBroker, bundleContext);
+        this.brokerFactory = brokerFactory;
+        this.salProvider = new NetconfDeviceSalProvider(id);
     }
 
     public void registerToSal(final Broker domRegistryDependency, final BindingAwareBroker bindingBroker, final BundleContext bundleContext) {
@@ -72,7 +74,7 @@ public final class NetconfDeviceSalFacade implements AutoCloseable, RemoteDevice
             }
         });
         registerRpcsToSal(schemaContext, rpcRegistry, deviceRpc);
-        final DOMDataBroker domBroker = new NetconfDeviceDataBroker(id, deviceRpc, schemaContext, netconfSessionPreferences);
+        final DOMDataBroker domBroker = brokerFactory.createBroker(id, deviceRpc, schemaContext, netconfSessionPreferences);
 
         // TODO NotificationPublishService and NotificationRouter have the same interface
         final NotificationPublishService notificationService = new NotificationPublishService() {
