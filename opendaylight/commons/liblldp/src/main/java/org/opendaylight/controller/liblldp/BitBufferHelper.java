@@ -359,8 +359,9 @@ public abstract class BitBufferHelper {
         int value = 0;
         for (int i = 0; i < length; i++) {
             value = array[i];
-            if (value < 0)
+            if (value < 0) {
                 value += 256;
+            }
             ret = ret
                     | (long) ((long) value << ((length - i - 1) * NetUtils.NumBitsInAByte));
         }
@@ -390,8 +391,9 @@ public abstract class BitBufferHelper {
 
         for (int i = startOffset; i < array.length; i++) {
             value = array[i];
-            if (value < 0)
+            if (value < 0) {
                 value += 256;
+            }
             ret = ret
                     | (long) ((long) value << ((array.length - i - 1) * NetUtils.NumBitsInAByte));
         }
@@ -637,8 +639,9 @@ public abstract class BitBufferHelper {
             }
         } else {
             for (i = 0; i < numBytes; i++) {
-                if (i != 0)
+                if (i != 0) {
                     InputLSBbits = (inputdata[i - 1] & getLSBMask(extraOffsetBits));
+                }
                 InputMSBbits = (byte) (inputdata[i] & (getMSBMask(NetUtils.NumBitsInAByte
                         - extraOffsetBits)));
                 InputMSBbits = (InputMSBbits >= 0) ? InputMSBbits
@@ -648,16 +651,18 @@ public abstract class BitBufferHelper {
                 InputMSBbits = InputLSBbits = 0;
             }
             if (RestBits < (NetUtils.NumBitsInAByte - extraOffsetBits)) {
-                if (numBytes != 0)
+                if (numBytes != 0) {
                     InputLSBbits = (inputdata[i - 1] & getLSBMask(extraOffsetBits));
+                }
                 InputMSBbits = (byte) (inputdata[i] & (getMSBMask(RestBits)));
                 InputMSBbits = (InputMSBbits >= 0) ? InputMSBbits
                         : InputMSBbits + 256;
                 data[startByteOffset + i] = (byte) ((data[startByteOffset + i])
                         | (InputLSBbits << (NetUtils.NumBitsInAByte - extraOffsetBits)) | (InputMSBbits >> extraOffsetBits));
             } else if (RestBits == (NetUtils.NumBitsInAByte - extraOffsetBits)) {
-                if (numBytes != 0)
+                if (numBytes != 0) {
                     InputLSBbits = (inputdata[i - 1] & getLSBMask(extraOffsetBits));
+                }
                 InputMSBbits = (byte) (inputdata[i] & (getMSBMask(NetUtils.NumBitsInAByte
                         - extraOffsetBits)));
                 InputMSBbits = (InputMSBbits >= 0) ? InputMSBbits
@@ -665,8 +670,9 @@ public abstract class BitBufferHelper {
                 data[startByteOffset + i] = (byte) (data[startByteOffset + i]
                         | (InputLSBbits << (NetUtils.NumBitsInAByte - extraOffsetBits)) | (InputMSBbits >> extraOffsetBits));
             } else {
-                if (numBytes != 0)
+                if (numBytes != 0) {
                     InputLSBbits = (inputdata[i - 1] & getLSBMask(extraOffsetBits));
+                }
                 InputMSBbits = (byte) (inputdata[i] & (getMSBMask(NetUtils.NumBitsInAByte
                         - extraOffsetBits)));
                 InputMSBbits = (InputMSBbits >= 0) ? InputMSBbits
