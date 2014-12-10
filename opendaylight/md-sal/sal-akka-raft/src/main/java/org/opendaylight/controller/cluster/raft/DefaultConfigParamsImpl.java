@@ -49,6 +49,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     // 12 is just an arbitrary percentage. This is the amount of the total memory that a raft actor's
     // in-memory journal can use before it needs to snapshot
     private int snapshotDataThresholdPercentage = 12;
+    private boolean experimental = false;
 
     public void setHeartBeatInterval(FiniteDuration heartBeatInterval) {
         this.heartBeatInterval = heartBeatInterval;
@@ -68,6 +69,10 @@ public class DefaultConfigParamsImpl implements ConfigParams {
 
     public void setIsolatedLeaderCheckInterval(FiniteDuration isolatedLeaderCheckInterval) {
         this.isolatedLeaderCheckInterval = isolatedLeaderCheckInterval;
+    }
+
+    public void setExperimental(boolean experimental){
+        this.experimental = experimental;
     }
 
     @Override
@@ -111,4 +116,11 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     public FiniteDuration getIsolatedCheckInterval() {
         return isolatedLeaderCheckInterval;
     }
+
+    @Override
+    public boolean isExperimental() {
+        return experimental;
+    }
+
+
 }

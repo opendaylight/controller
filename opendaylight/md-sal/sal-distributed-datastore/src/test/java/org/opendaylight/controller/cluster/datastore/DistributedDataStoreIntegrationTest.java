@@ -16,6 +16,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
@@ -44,8 +45,14 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
 
-    private final DatastoreContext.Builder datastoreContextBuilder =
+    private DatastoreContext.Builder datastoreContextBuilder =
             DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(100);
+
+    @Before
+    public void setUp(){
+        datastoreContextBuilder =
+                DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(100);
+    }
 
     @Test
     public void testWriteTransactionWithSingleShard() throws Exception{
@@ -893,6 +900,26 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
                 }
             }, expType);
         }
+    }
+
+
+    @Test
+    public void testExperimentalWriteTransactionWithSingleShard() throws Exception{
+        new IntegrationTestKit(getSystem()) {{
+
+            datastoreContextBuilder.experimental(true);
+
+            DistributedDataStore dataStore =
+                    setupDistributedDataStore("transactionIntegrationTest", "test-1");
+
+            testWriteTransaction(dataStore, TestModel.TEST_PATH,
+                    ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+
+            testWriteTransaction(dataStore, TestModel.OUTER_LIST_PATH,
+                    ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
+
+            cleanup(dataStore);
+        }};
     }
 
 }

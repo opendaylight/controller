@@ -173,6 +173,13 @@ module distributed-datastore-provider {
             description "The interval at which the leader of the shard will check if its majority
                         followers are active and term itself as isolated";
         }
+
+         leaf experimental {
+            default false;
+            type boolean;
+            description "Enables or disables experimental code";
+         }
+
     }
 
     // Augments the 'configuration' choice node under modules/module.
