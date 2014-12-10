@@ -10,7 +10,6 @@ package org.opendaylight.controller.sal.connect.netconf.sal;
 import com.google.common.base.Preconditions;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.concurrent.ExecutorService;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
@@ -34,13 +33,11 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
     private static final Logger logger = LoggerFactory.getLogger(NetconfDeviceSalProvider.class);
 
     private final RemoteDeviceId id;
-    private final ExecutorService executor;
     private volatile NetconfDeviceDatastoreAdapter datastoreAdapter;
     private MountInstance mountInstance;
 
-    public NetconfDeviceSalProvider(final RemoteDeviceId deviceId, final ExecutorService executor) {
+    public NetconfDeviceSalProvider(final RemoteDeviceId deviceId) {
         this.id = deviceId;
-        this.executor = executor;
     }
 
     public MountInstance getMountInstance() {
