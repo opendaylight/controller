@@ -36,13 +36,14 @@ public class DatastoreContext {
     private final Timeout shardLeaderElectionTimeout;
     private final boolean persistent;
     private final ConfigurationReader configurationReader;
+    private final boolean experimental;
 
     private DatastoreContext(InMemoryDOMDataStoreConfigProperties dataStoreProperties,
             ConfigParams shardRaftConfig, String dataStoreMXBeanType, int operationTimeoutInSeconds,
             Duration shardTransactionIdleTimeout, int shardTransactionCommitTimeoutInSeconds,
             int shardTransactionCommitQueueCapacity, Timeout shardInitializationTimeout,
             Timeout shardLeaderElectionTimeout,
-            boolean persistent, ConfigurationReader configurationReader) {
+            boolean persistent, ConfigurationReader configurationReader, boolean experimental) {
         this.dataStoreProperties = dataStoreProperties;
         this.shardRaftConfig = shardRaftConfig;
         this.dataStoreMXBeanType = dataStoreMXBeanType;
@@ -54,6 +55,7 @@ public class DatastoreContext {
         this.shardLeaderElectionTimeout = shardLeaderElectionTimeout;
         this.persistent = persistent;
         this.configurationReader = configurationReader;
+        this.experimental = experimental;
     }
 
     public static Builder newBuilder() {
@@ -120,6 +122,7 @@ public class DatastoreContext {
         private ConfigurationReader configurationReader = new FileConfigurationReader();
         private int shardIsolatedLeaderCheckIntervalInMillis = shardHeartbeatIntervalInMillis * 10;
         private int shardSnapshotDataThresholdPercentage = 12;
+        private boolean experimental = false;
 
         public Builder shardTransactionIdleTimeout(Duration shardTransactionIdleTimeout) {
             this.shardTransactionIdleTimeout = shardTransactionIdleTimeout;
@@ -192,6 +195,12 @@ public class DatastoreContext {
             return this;
         }
 
+        public Builder experimental(boolean experimental){
+            this.experimental = experimental;
+            return this;
+        }
+
+
         public Builder shardIsolatedLeaderCheckIntervalInMillis(int shardIsolatedLeaderCheckIntervalInMillis) {
             this.shardIsolatedLeaderCheckIntervalInMillis = shardIsolatedLeaderCheckIntervalInMillis;
             return this;
@@ -207,12 +216,13 @@ public class DatastoreContext {
             raftConfig.setSnapshotDataThresholdPercentage(shardSnapshotDataThresholdPercentage);
             raftConfig.setIsolatedLeaderCheckInterval(
                 new FiniteDuration(shardIsolatedLeaderCheckIntervalInMillis, TimeUnit.MILLISECONDS));
+            raftConfig.setExperimental(experimental);
 
             return new DatastoreContext(dataStoreProperties, raftConfig, dataStoreMXBeanType,
                     operationTimeoutInSeconds, shardTransactionIdleTimeout,
                     shardTransactionCommitTimeoutInSeconds, shardTransactionCommitQueueCapacity,
                     shardInitializationTimeout, shardLeaderElectionTimeout,
-                    persistent, configurationReader);
+                    persistent, configurationReader, experimental);
         }
     }
 }

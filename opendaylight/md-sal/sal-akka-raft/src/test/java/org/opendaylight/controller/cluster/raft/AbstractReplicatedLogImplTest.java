@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import akka.japi.Procedure;
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +22,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
+
 /**
 *
 */
@@ -146,6 +149,25 @@ public class AbstractReplicatedLogImplTest {
         return map;
 
     }
+
+    @Test
+    public void testFakeSnapshot(){
+        MockAbstractReplicatedLogImpl log = new MockAbstractReplicatedLogImpl();
+        log.append(new MockReplicatedLogEntry(0,5,mock(Payload.class)));
+
+        log.setSnapshotIndex(4);
+        assertEquals(1, log.size());
+        assertEquals(5, log.lastIndex());
+
+        log.snapshotPreCommit(5,0);
+        log.snapshotCommit();
+
+        assertEquals(0, log.size());
+        assertEquals(5, log.lastIndex());
+        assertEquals(5, log.getSnapshotIndex());
+    }
+
+
     class MockAbstractReplicatedLogImpl extends AbstractReplicatedLogImpl {
         @Override
         public void appendAndPersist(ReplicatedLogEntry replicatedLogEntry, Procedure<ReplicatedLogEntry> callback) {
