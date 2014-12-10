@@ -14,6 +14,8 @@ import java.util.Set;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Commit;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.DiscardChanges;
+import org.opendaylight.controller.netconf.confignetconfconnector.operations.Lock;
+import org.opendaylight.controller.netconf.confignetconfconnector.operations.UnLock;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Validate;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.get.Get;
@@ -48,6 +50,8 @@ final class NetconfOperationProvider {
         ops.add(new EditConfig(yangStoreSnapshot, transactionProvider, configRegistryClient,
                 netconfSessionIdForReporting));
         ops.add(new Commit(transactionProvider, configRegistryClient, netconfSessionIdForReporting));
+        ops.add(new Lock(netconfSessionIdForReporting));
+        ops.add(new UnLock(netconfSessionIdForReporting));
         ops.add(new Get(yangStoreSnapshot, configRegistryClient, netconfSessionIdForReporting));
         ops.add(new DiscardChanges(transactionProvider, configRegistryClient, netconfSessionIdForReporting));
         ops.add(new Validate(transactionProvider, configRegistryClient, netconfSessionIdForReporting));
