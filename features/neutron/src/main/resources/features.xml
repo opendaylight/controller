@@ -3,15 +3,18 @@
 <features name="odl-neutron-${networkconfig.neutron.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+   <repository>mvn:org.opendaylight.aaa/features-aaa/${aaa.version}/xml/features</repository>
    <feature name='odl-neutron-all' version='${networkconfig.neutron.version}' description="OpenDaylight :: Neutron :: API">
     <feature version='${networkconfig.neutron.version}'>odl-neutron-api</feature>
     <feature version='${networkconfig.neutron.version}'>odl-neutron-northbound</feature>
     <feature version='${networkconfig.neutron.version}'>odl-neutron-implementation</feature>
   </feature>
   <feature name='odl-neutron-northbound' version='${networkconfig.neutron.version}' description="OpenDaylight :: Neutron :: Northbound">
+    <feature version='${aaa.version}'>odl-aaa-authn</feature>
     <feature version='${networkconfig.neutron.version}'>odl-neutron-api</feature>
     <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.moxy/${eclipse.persistence.version}</bundle>
     <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.core/${eclipse.persistence.version}</bundle>
+    <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.antlr/${eclipse.persistence.version}</bundle>
     <bundle>mvn:org.opendaylight.controller/networkconfig.neutron.northbound/${networkconfig.neutron.northbound.version}</bundle>
     <bundle>mvn:com.sun.jersey/jersey-core/${jersey.version}</bundle>
     <bundle>mvn:com.sun.jersey/jersey-server/${jersey.version}</bundle>
@@ -26,6 +29,7 @@
   </feature>
   <feature name='odl-neutron-implementation' version='${networkconfig.neutron.version}' description="OpenDaylight :: Neutron :: Implementation">
     <feature version='${networkconfig.neutron.version}'>odl-neutron-api</feature>
+    <feature>war</feature>
     <bundle>mvn:org.opendaylight.controller/networkconfig.neutron.implementation/${networkconfig.neutron.implementation.version}</bundle>
     <bundle>mvn:org.osgi/org.osgi.core/${osgi.core.version}</bundle>
   </feature>
