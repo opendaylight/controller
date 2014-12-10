@@ -14,8 +14,9 @@ public class FullyQualifiedNameHelper {
 
     public static String getFullyQualifiedName(String packageName,
             String className) {
-        if (packageName.isEmpty())
+        if (packageName.isEmpty()) {
             return className;
+        }
         return packageName + "." + className;
     }
 }

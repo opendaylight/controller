@@ -56,23 +56,30 @@ public class IPMacHostId implements IHostId, Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         IPMacHostId other = (IPMacHostId) obj;
         if (ipAddress == null) {
-            if (other.ipAddress != null)
+            if (other.ipAddress != null) {
                 return false;
-        } else if (!ipAddress.equals(other.ipAddress))
+            }
+        } else if (!ipAddress.equals(other.ipAddress)) {
             return false;
+        }
         if (macAddr == null) {
-            if (other.macAddr != null)
+            if (other.macAddr != null) {
                 return false;
-        } else if (!macAddr.equals(other.macAddr))
+            }
+        } else if (!macAddr.equals(other.macAddr)) {
             return false;
+        }
         return true;
     }
 

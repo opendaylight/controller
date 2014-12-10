@@ -73,8 +73,9 @@ public class JDBCConnection implements Connection, Runnable {
     }
 
     private void init() throws Exception {
-        if (addr.startsWith("http://"))
+        if (addr.startsWith("http://")) {
             addr = addr.substring(7);
+        }
         System.err.print("Address is:" + addr);
         socket = new Socket(addr, 40004);
         try {

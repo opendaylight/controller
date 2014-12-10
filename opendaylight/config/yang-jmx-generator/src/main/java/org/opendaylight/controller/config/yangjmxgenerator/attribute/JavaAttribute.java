@@ -281,8 +281,9 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
 
     // TODO verify
     private boolean isPrimitive(String innerTypeFullyQName) {
-        if (innerTypeFullyQName.contains("."))
+        if (innerTypeFullyQName.contains(".")) {
             return false;
+        }
 
         return true;
     }

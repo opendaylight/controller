@@ -80,8 +80,9 @@ class ConfigPersisterNotificationListener implements NotificationListener {
 
     @Override
     public void handleNotification(final Notification notification, final Object handback) {
-        if (!(notification instanceof NetconfJMXNotification))
+        if (!(notification instanceof NetconfJMXNotification)) {
             return;
+        }
 
         // Socket should not be closed at this point
         // Activator unregisters this as JMX listener before close is called

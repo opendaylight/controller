@@ -166,10 +166,11 @@ public class TemplateFactory {
                 Lists.<MethodDeclaration> newArrayList());
         sieTemplate.setJavadoc(sie.getNullableDescription());
 
-        if (sie.getNullableDescription() != null)
+        if (sie.getNullableDescription() != null) {
             sieTemplate.getAnnotations().add(
                     Annotation.createDescriptionAnnotation(sie
                             .getNullableDescription()));
+        }
         sieTemplate.getAnnotations().addAll(Annotation.createSieAnnotations(sie));
 
         return sieTemplate;
@@ -223,10 +224,11 @@ public class TemplateFactory {
                 attrProcessor.getMethods(), generateRuntime,
                 registratorFullyQualifiedName);
 
-        if (mbe.getNullableDescription() != null)
+        if (mbe.getNullableDescription() != null) {
             abstractModuleTemplate.getAnnotations().add(
                     Annotation.createDescriptionAnnotation(mbe
                             .getNullableDescription()));
+        }
         return abstractModuleTemplate;
     }
 
@@ -687,8 +689,9 @@ public class TemplateFactory {
 
 
     private static boolean needsDepResolver(AttributeIfc value) {
-        if(value instanceof TOAttribute)
+        if(value instanceof TOAttribute) {
             return true;
+        }
         if(value instanceof ListAttribute) {
             AttributeIfc innerAttribute = ((ListAttribute) value).getInnerAttribute();
             return needsDepResolver(innerAttribute);

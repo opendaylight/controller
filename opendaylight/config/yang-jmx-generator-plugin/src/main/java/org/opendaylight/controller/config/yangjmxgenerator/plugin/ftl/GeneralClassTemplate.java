@@ -38,9 +38,10 @@ public class GeneralClassTemplate extends AbstractFtlTemplate {
     }
 
     static List<String> checkCardinality(List<String> extendedClass) {
-        if (extendedClass.size() > 1)
+        if (extendedClass.size() > 1) {
             throw new IllegalArgumentException(
                     "Class cannot have more than one super " + "class");
+        }
         return extendedClass;
     }
 

@@ -99,15 +99,19 @@ public class EthernetAddress extends DataLinkAddress {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         EthernetAddress other = (EthernetAddress) obj;
-        if (!Arrays.equals(macAddress, other.macAddress))
+        if (!Arrays.equals(macAddress, other.macAddress)) {
             return false;
+        }
         return true;
     }
 

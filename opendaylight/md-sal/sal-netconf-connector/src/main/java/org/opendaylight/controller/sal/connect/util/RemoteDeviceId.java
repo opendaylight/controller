@@ -71,13 +71,21 @@ public class RemoteDeviceId {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (!(o instanceof RemoteDeviceId)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof RemoteDeviceId)) {
+            return false;
+        }
 
         final RemoteDeviceId that = (RemoteDeviceId) o;
 
-        if (!name.equals(that.name)) return false;
-        if (!bindingPath.equals(that.bindingPath)) return false;
+        if (!name.equals(that.name)) {
+            return false;
+        }
+        if (!bindingPath.equals(that.bindingPath)) {
+            return false;
+        }
 
         return true;
     }
