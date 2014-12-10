@@ -24,24 +24,30 @@ public class ServiceRegistryWrapper {
         this.configServiceRefRegistry = configServiceRefRegistry;
     }
 
-    public ObjectName getByServiceAndRefName(String namespace, String serviceName, String refName) {
-        Map<String, Map<String, String>> serviceNameToRefNameToInstance = getMappedServices().get(namespace);
+    public ObjectName getByServiceAndRefName(String namespace, String serviceType, String refName) {
+        Map<String, Map<String, Map<String, String>>> mappedServices = getMappedServices();
+        Map<String, Map<String, String>> serviceNameToRefNameToInstance = mappedServices.get(namespace);
 
-        Preconditions.checkNotNull(serviceNameToRefNameToInstance, "No serviceInstances mapped to " + namespace);
+        Preconditions.checkArgument(serviceNameToRefNameToInstance != null,
+                "No service mapped to %s:%s:%s. Wrong namespace, available namespaces: %s",
+                namespace, serviceType, refName, mappedServices.keySet());
 
-        Map<String, String> refNameToInstance = serviceNameToRefNameToInstance.get(serviceName);
-        Preconditions.checkNotNull(refNameToInstance, "No serviceInstances mapped to " + serviceName + " , "
-                + serviceNameToRefNameToInstance.keySet());
+        Map<String, String> refNameToInstance = serviceNameToRefNameToInstance.get(serviceType);
+        Preconditions.checkArgument(refNameToInstance != null,
+                "No service mapped to %s:%s:%s. Wrong service type, available service types: %s"
+                , namespace, serviceType, refName, serviceNameToRefNameToInstance.keySet());
 
         String instanceId = refNameToInstance.get(refName);
-        Preconditions.checkArgument(instanceId != null, "No serviceInstances mapped to " + serviceName + ":"
-                + refName + ", " + serviceNameToRefNameToInstance.keySet());
+        Preconditions.checkArgument(instanceId != null,
+                "No service mapped to %s:%s:%s. Wrong ref name, available ref names: %s"
+                ,namespace, serviceType, refName, refNameToInstance.keySet());
 
         Services.ServiceInstance serviceInstance = Services.ServiceInstance.fromString(instanceId);
-        Preconditions.checkArgument(serviceInstance != null, "No serviceInstance mapped to " + refName
-                + " under service name " + serviceName + " , " + refNameToInstance.keySet());
+        Preconditions.checkArgument(serviceInstance != null,
+                "No service mapped to %s:%s:%s. Wrong ref name, available ref names: %s"
+                ,namespace, serviceType, refName, refNameToInstance.keySet());
 
-        String qNameOfService = configServiceRefRegistry.getServiceInterfaceName(namespace, serviceName);
+        String qNameOfService = configServiceRefRegistry.getServiceInterfaceName(namespace, serviceType);
         try {
             /*
              Remove transaction name as this is redundant - will be stripped in DynamicWritableWrapper,
@@ -51,7 +57,7 @@ public class ServiceRegistryWrapper {
                     configServiceRefRegistry.getServiceReference(qNameOfService, refName));
         } catch (InstanceNotFoundException e) {
             throw new IllegalArgumentException("No serviceInstance mapped to " + refName
-                    + " under service name " + serviceName + " , " + refNameToInstance.keySet(), e);
+                    + " under service name " + serviceType + " , " + refNameToInstance.keySet(), e);
 
         }
     }
