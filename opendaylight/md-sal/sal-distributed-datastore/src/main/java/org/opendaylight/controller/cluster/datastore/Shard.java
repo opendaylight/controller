@@ -321,8 +321,13 @@ public class Shard extends RaftActor {
             // currently uses a same thread executor anyway.
             cohortEntry.getCohort().preCommit().get();
 
-            Shard.this.persistData(getSender(), transactionID,
-                    new CompositeModificationByteStringPayload(cohortEntry.getModification().toSerializable()));
+            if(isExperimental() && !hasFollowers() && !persistence().isRecoveryApplicable()){
+                applyModificationToState(getSender(), transactionID, cohortEntry.getModification());
+                updateJournalStats();
+            } else {
+                Shard.this.persistData(getSender(), transactionID,
+                        new CompositeModificationByteStringPayload(cohortEntry.getModification().toSerializable()));
+            }
         } catch (InterruptedException | ExecutionException e) {
             LOG.error(e, "An exception occurred while preCommitting transaction {}",
                     cohortEntry.getTransactionID());

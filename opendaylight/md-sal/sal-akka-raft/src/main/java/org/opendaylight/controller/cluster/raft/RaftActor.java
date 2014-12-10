@@ -113,6 +113,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     private int currentRecoveryBatchCount;
 
+    private long dataSizeSinceLastSnapshot = 0;
+
     public RaftActor(String id, Map<String, String> peerAddresses) {
         this(id, peerAddresses, Optional.<ConfigParams>absent());
     }
@@ -398,7 +400,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      * @param data
      */
     protected void persistData(final ActorRef clientActor, final String identifier,
-        Payload data) {
+        final Payload data) {
 
         ReplicatedLogEntry replicatedLogEntry = new ReplicatedLogImplEntry(
             context.getReplicatedLog().lastIndex() + 1,
@@ -408,12 +410,33 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             LOG.debug("Persist data {}", replicatedLogEntry);
         }
 
+
+        final RaftActorContext raftContext = getRaftActorContext();
+
         replicatedLog
             .appendAndPersist(replicatedLogEntry, new Procedure<ReplicatedLogEntry>() {
                 @Override
                 public void apply(ReplicatedLogEntry replicatedLogEntry) throws Exception {
-                    // Send message for replication
-                    if (clientActor != null) {
+                    if(isExperimental() && !hasFollowers()){
+                        // Increment the Commit Index and the Last Applied values
+                        raftContext.setCommitIndex(replicatedLogEntry.getIndex());
+                        raftContext.setLastApplied(replicatedLogEntry.getIndex());
+
+                        // Apply the state immediately
+                        applyState(clientActor, identifier, data);
+
+                        self().tell(new ApplyLogEntries((int) replicatedLogEntry.getIndex()), self());
+
+                        // Check if the "real" snapshot capture has been initiated. If no then do the fake snapshot
+                        if(!hasSnapshotCaptureInitiated){
+                            raftContext.getReplicatedLog().snapshotPreCommit(raftContext.getLastApplied(),
+                                    raftContext.getTermInformation().getCurrentTerm());
+                            raftContext.getReplicatedLog().snapshotCommit();
+                        } else {
+                            LOG.info("Skipping fake snapshotting for {} because real snapshotting is in progress", getId());
+                        }
+                    } else if (clientActor != null) {
+                        // Send message for replication
                         currentBehavior.handleMessage(getSelf(),
                                 new Replicate(clientActor, identifier,
                                         replicatedLogEntry)
@@ -662,6 +685,14 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         hasSnapshotCaptureInitiated = false;
     }
 
+    protected boolean isExperimental(){
+        return getRaftActorContext().getConfigParams().isExperimental();
+    }
+
+    protected boolean hasFollowers(){
+        return getRaftActorContext().getPeerAddresses().keySet().size() > 0;
+    }
+
     private class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
 
         public ReplicatedLogImpl(Snapshot snapshot) {
@@ -720,17 +751,27 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                     new Procedure<ReplicatedLogEntry>() {
                         @Override
                         public void apply(ReplicatedLogEntry evt) throws Exception {
+                            long journalSize = journal.size();
                             dataSize += replicatedLogEntry.size();
+                            long dataSizeForCheck = dataSize;
+
+                            if(isExperimental()){
+                                dataSizeSinceLastSnapshot += replicatedLogEntry.size();
+                                journalSize = lastIndex()+1;
+                                dataSizeForCheck = dataSizeSinceLastSnapshot / 5;
+                            }
 
                             long dataThreshold = Runtime.getRuntime().totalMemory() *
                                     getRaftActorContext().getConfigParams().getSnapshotDataThresholdPercentage() / 100;
 
                             // when a snaphsot is being taken, captureSnapshot != null
                             if (hasSnapshotCaptureInitiated == false &&
-                                    ( journal.size() % context.getConfigParams().getSnapshotBatchCount() == 0 ||
-                                            dataSize > dataThreshold)) {
+                                    ( journalSize % context.getConfigParams().getSnapshotBatchCount() == 0 ||
+                                            dataSizeForCheck > dataThreshold)) {
 
-                                LOG.info("Initiating Snapshot Capture..");
+                                dataSizeSinceLastSnapshot = 0;
+
+                                LOG.info("Initiating Snapshot Capture for {}", getId());
                                 long lastAppliedIndex = -1;
                                 long lastAppliedTerm = -1;
 
@@ -738,6 +779,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                                 if (lastAppliedEntry != null) {
                                     lastAppliedIndex = lastAppliedEntry.getIndex();
                                     lastAppliedTerm = lastAppliedEntry.getTerm();
+                                }
+
+                                if(isExperimental()){
+                                    lastAppliedIndex = replicatedLogEntry.getIndex();
+                                    lastAppliedTerm = replicatedLogEntry.getTerm();
                                 }
 
                                 if(LOG.isDebugEnabled()) {

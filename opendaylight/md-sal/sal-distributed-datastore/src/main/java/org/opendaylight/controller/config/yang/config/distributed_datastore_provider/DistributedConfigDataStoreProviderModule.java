@@ -66,6 +66,7 @@ public class DistributedConfigDataStoreProviderModule extends
                 .persistent(props.getPersistent().booleanValue())
                 .shardIsolatedLeaderCheckIntervalInMillis(
                     props.getShardIsolatedLeaderCheckIntervalInMillis().getValue())
+                .experimental(props.getExperimental().booleanValue())
                 .build();
 
         return DistributedDataStoreFactory.createInstance("config", getConfigSchemaServiceDependency(),

@@ -76,4 +76,6 @@ public interface ConfigParams {
      * @return FiniteDuration
      */
     FiniteDuration getIsolatedCheckInterval();
+
+    boolean isExperimental();
 }
