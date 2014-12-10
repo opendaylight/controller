@@ -27,9 +27,9 @@ import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO.Predicate
 import org.opendaylight.controller.sal.restconf.impl.RestCodec;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceNode;
@@ -46,6 +46,7 @@ import org.opendaylight.yangtools.yang.model.api.type.EmptyTypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.InstanceIdentifierTypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.IntegerTypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.type.StringTypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.UnsignedIntegerTypeDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -280,11 +281,22 @@ class JsonMapper {
             writeEmptyDataTypeToJson(writer);
         } else {
             String value = String.valueOf(RestCodec.from(baseType, mountPoint).serialize(node.getValue()));
+            if (baseType instanceof StringTypeDefinition) {
+                value = replaceNewLines(value);
+            }
             if (value == null) {
                 value = String.valueOf(node.getValue());
             }
             writer.value(value.equals("null") ? "" : value);
         }
+    }
+
+    private String replaceNewLines(final String oldString) {
+        String modified = oldString;
+        modified = modified.replace("\r\n", "\\r\\n");  //WIN
+        modified = modified.replace("\n", "\\n");       //LINUX
+        modified = modified.replace("\r", "\\r");       //MAC
+        return modified;
     }
 
     private static void writeIdentityValuesDTOToJson(final JsonWriter writer, final IdentityValuesDTO valueDTO)
