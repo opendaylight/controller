@@ -88,6 +88,8 @@ public final class NetconfSessionCapabilities {
                 .add("moduleBasedCapabilities", moduleBasedCaps)
                 .add("rollback", isRollbackSupported())
                 .add("monitoring", isMonitoringSupported())
+                .add("candidate", isCandidateSupported())
+                .add("writableRunning", isRunningWritable())
                 .toString();
     }
 
@@ -97,6 +99,10 @@ public final class NetconfSessionCapabilities {
 
     public boolean isCandidateSupported() {
         return containsNonModuleCapability(NetconfMessageTransformUtil.NETCONF_CANDIDATE_URI.toString());
+    }
+
+    public boolean isRunningWritable() {
+        return containsNonModuleCapability(NetconfMessageTransformUtil.NETCONF_RUNNING_WRITABLE_URI.toString());
     }
 
     public boolean isMonitoringSupported() {
