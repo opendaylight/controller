@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_f65fe470",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/raft/protobuff/client/messages/CompositeModificationByteStringPayload.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-12-11T12:34:55Z",
+      "side": 1,
+      "message": "I think this can be final.",
+      "revId": "0bc53acd1b2c7074c0eebb98ee4ec7557518cdb5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3666ac52",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/raft/protobuff/client/messages/CompositeModificationByteStringPayload.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-12-11T12:34:55Z",
+      "side": 1,
+      "message": "Can you put the annotation on a separate line?",
+      "revId": "0bc53acd1b2c7074c0eebb98ee4ec7557518cdb5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_767434fd",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 684,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-12-11T12:34:55Z",
+      "side": 1,
+      "message": "I just noticed this is indented too much.",
+      "revId": "0bc53acd1b2c7074c0eebb98ee4ec7557518cdb5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
