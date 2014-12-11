@@ -16,7 +16,6 @@ import static org.opendaylight.controller.sal.rest.api.Draft02.RestConfModule.ER
 import static org.opendaylight.controller.sal.rest.api.Draft02.RestConfModule.ERROR_TAG_QNAME;
 import static org.opendaylight.controller.sal.rest.api.Draft02.RestConfModule.ERROR_TYPE_QNAME;
 import static org.opendaylight.controller.sal.rest.api.Draft02.RestConfModule.NAMESPACE;
-
 import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -69,6 +68,7 @@ import org.xml.sax.InputSource;
 public class RestconfDocumentedExceptionMapper implements ExceptionMapper<RestconfDocumentedException> {
 
     private final static Logger LOG = LoggerFactory.getLogger(RestconfDocumentedExceptionMapper.class);
+    private static final TransformerFactory TRANSFORMER_FACTORY = TransformerFactory.newInstance();
 
     @Context
     private HttpHeaders headers;
@@ -178,8 +178,7 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
 
     private Transformer createTransformer() throws TransformerFactoryConfigurationError,
             TransformerConfigurationException {
-        TransformerFactory tf = TransformerFactory.newInstance();
-        Transformer transformer = tf.newTransformer();
+        Transformer transformer = TRANSFORMER_FACTORY.newTransformer();
         transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
         transformer.setOutputProperty(OutputKeys.METHOD, "xml");
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
