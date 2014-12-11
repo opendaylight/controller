@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_7690b4ec",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 430,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-12-11T13:51:42Z",
+      "side": 1,
+      "message": "Why do we do a fake snapshot? Can you add comments explaining this?",
+      "revId": "63499191b217cfb92fb3a4de4413032dc1cea28c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_9689c0cc",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 761,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-12-11T13:51:42Z",
+      "side": 1,
+      "message": "Why are we dividing by 5 here? Can you add a comment and/or maybe define a constant for 5?",
+      "revId": "63499191b217cfb92fb3a4de4413032dc1cea28c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_569338fa",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 787,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-12-11T13:51:42Z",
+      "side": 1,
+      "message": "It seems this could be combined with the code above to make it clearer, i.e.:\n\n   if(isExperimental()) {\n   } else if (lastAppliedEntry !\u003d null) {\n   }",
+      "revId": "63499191b217cfb92fb3a4de4413032dc1cea28c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
