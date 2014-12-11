@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.netconf.util.xml;
 
+import javax.xml.namespace.NamespaceContext;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
@@ -15,14 +16,17 @@ import javax.xml.xpath.XPathFactory;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 
 public final class XMLNetconfUtil {
+    private static final XPathFactory FACTORY = XPathFactory.newInstance();
+    private static final NamespaceContext NS_CONTEXT = new HardcodedNamespaceResolver("netconf",
+        XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
 
-    private XMLNetconfUtil() {}
+    private XMLNetconfUtil() {
+        throw new UnsupportedOperationException("Utility class");
+    }
 
-    public static XPathExpression compileXPath(String xPath) {
-        final XPathFactory xPathfactory = XPathFactory.newInstance();
-        final XPath xpath = xPathfactory.newXPath();
-        xpath.setNamespaceContext(new HardcodedNamespaceResolver("netconf",
-                XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0));
+    public static XPathExpression compileXPath(final String xPath) {
+        final XPath xpath = FACTORY.newXPath();
+        xpath.setNamespaceContext(NS_CONTEXT);
         try {
             return xpath.compile(xPath);
         } catch (final XPathExpressionException e) {
