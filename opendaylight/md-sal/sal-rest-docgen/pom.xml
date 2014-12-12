@@ -73,11 +73,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>yang-maven-plugin-spi</artifactId>
-    </dependency>
-
-    <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
     </dependency>
