@@ -128,7 +128,7 @@ public class ObjectNameUtil {
         if (quoted == null) {
             throw new IllegalArgumentException("Cannot find " + SERVICE_QNAME_KEY + " in " + objectName);
         }
-        if (quoted.startsWith("\"") == false || quoted.endsWith("\"") == false) {
+        if (!quoted.startsWith("\"") || !quoted.endsWith("\"")) {
             throw new IllegalArgumentException("Quotes not found in " + objectName);
         }
         String substring = quoted.substring(1);
@@ -201,7 +201,7 @@ public class ObjectNameUtil {
             throw new IllegalArgumentException(
                     "Expected ObjectName with transaction:" + inputON);
         }
-        if (ON_DOMAIN.equals(inputON.getDomain()) == false) {
+        if (!ON_DOMAIN.equals(inputON.getDomain())) {
             throw new IllegalArgumentException("Expected different domain: "
                     + inputON);
         }
@@ -263,7 +263,7 @@ public class ObjectNameUtil {
         Map<String, String> allProperties = getAdditionalProperties(on);
         Map<String, String> result = new HashMap<>();
         for (Entry<String, String> entry : allProperties.entrySet()) {
-            if (blacklist.contains(entry.getKey()) == false) {
+            if (!blacklist.contains(entry.getKey())) {
                 result.put(entry.getKey(), entry.getValue());
             }
         }
