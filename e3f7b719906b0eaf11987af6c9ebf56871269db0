@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_71a75e50",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/impl/JsonMapper.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2014-12-12T12:27:57Z",
+      "side": 1,
+      "message": "Taking to account next two lines, \"\\r\" and \"\\n\" would end up double-escaped whenever they appear in this order?",
+      "range": {
+        "startLine": 293,
+        "startChar": 58,
+        "endLine": 293,
+        "endChar": 61
+      },
+      "revId": "e3f7b719906b0eaf11987af6c9ebf56871269db0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_d16d1206",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/impl/JsonMapper.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 295,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2014-12-12T12:27:57Z",
+      "side": 1,
+      "message": "What about \u0027\"\u0027, \u0027\\b\u0027, \u0027\\f\u0027, \u0027\\u\u0027(with hexa) and \u0027\\\u0027?",
+      "range": {
+        "startLine": 295,
+        "startChar": 58,
+        "endLine": 295,
+        "endChar": 61
+      },
+      "revId": "e3f7b719906b0eaf11987af6c9ebf56871269db0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
