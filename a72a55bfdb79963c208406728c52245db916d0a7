@@ -1,0 +1,175 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_f1884ee9",
+        "filename": "karaf/karaf-parent/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 2759
+      },
+      "writtenOn": "2014-12-12T05:45:59Z",
+      "side": 1,
+      "message": "Should karaf-parent be contributed to the odlparent project so that all projects can take advantage of this?",
+      "revId": "a72a55bfdb79963c208406728c52245db916d0a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_117a9af1",
+        "filename": "karaf/karaf-parent/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 2759
+      },
+      "writtenOn": "2014-12-12T05:45:59Z",
+      "side": 1,
+      "message": "Copyright",
+      "range": {
+        "startLine": 2,
+        "startChar": 11,
+        "endLine": 2,
+        "endChar": 14
+      },
+      "revId": "a72a55bfdb79963c208406728c52245db916d0a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_d183d2ca",
+        "filename": "karaf/karaf-parent/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 2759
+      },
+      "writtenOn": "2014-12-12T05:45:59Z",
+      "side": 1,
+      "message": "All rights reserved. should be on the same line as \"This program and the ...\"\n\nFor example a full EPL header should look like.\n\n\u003c!--\n  Copyright (c) 2014 The Linux Foundation and others.\n  All rights reserved. This program and the accompanying materials\n  are made available under the terms of the Eclipse Distribution License v1.0\n  which accompanies this distribution, and is available at\n  http://www.eclipse.org/org/documents/edl-v10.php\n \n  Contributors:\n    Thanh Ha (The Linux Foundation) - initial implementation\n--\u003e",
+      "revId": "a72a55bfdb79963c208406728c52245db916d0a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_317f96e2",
+        "filename": "karaf/karaf-parent/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 2759
+      },
+      "writtenOn": "2014-12-12T05:45:59Z",
+      "side": 1,
+      "message": "Typically EPL projects also have a contributor section. For example:\n\n  Contributors:\n    Thanh Ha (The Linux Foundation) - initial implementation",
+      "range": {
+        "startLine": 6,
+        "startChar": 6,
+        "endLine": 6,
+        "endChar": 7
+      },
+      "revId": "a72a55bfdb79963c208406728c52245db916d0a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_916d4a35",
+        "filename": "karaf/karaf-parent/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 2759
+      },
+      "writtenOn": "2014-12-12T05:45:59Z",
+      "side": 1,
+      "message": "Should leave a blank line after \u003c/parent\u003e so that visually it\u0027s easier to tell when the next sections start. For example:\n\n\u003c/parent\u003e\n\n\u003cmodelVersion\u003e...",
+      "revId": "a72a55bfdb79963c208406728c52245db916d0a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_b16ac618",
+        "filename": "karaf/karaf-parent/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 2759
+      },
+      "writtenOn": "2014-12-12T05:45:59Z",
+      "side": 1,
+      "message": "Leave a blank line after \u003cpackaging\u003e.",
+      "range": {
+        "startLine": 20,
+        "startChar": 3,
+        "endLine": 20,
+        "endChar": 12
+      },
+      "revId": "a72a55bfdb79963c208406728c52245db916d0a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5177c202",
+        "filename": "karaf/karaf-parent/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 2759
+      },
+      "writtenOn": "2014-12-12T05:45:59Z",
+      "side": 1,
+      "message": "Blank line",
+      "revId": "a72a55bfdb79963c208406728c52245db916d0a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_71743efd",
+        "filename": "karaf/karaf-parent/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 2759
+      },
+      "writtenOn": "2014-12-12T05:45:59Z",
+      "side": 1,
+      "message": "Blank line",
+      "revId": "a72a55bfdb79963c208406728c52245db916d0a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_11613a39",
+        "filename": "karaf/karaf-parent/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 2759
+      },
+      "writtenOn": "2014-12-12T05:45:59Z",
+      "side": 1,
+      "message": "Blank line",
+      "revId": "a72a55bfdb79963c208406728c52245db916d0a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
