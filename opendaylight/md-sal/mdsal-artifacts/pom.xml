@@ -246,6 +246,11 @@
                 <artifactId>sal-rest-docgen</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.opendaylight.controller</groupId>
+                <artifactId>sal-rest-docgen-maven</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <!-- Toaster -->
             <dependency>

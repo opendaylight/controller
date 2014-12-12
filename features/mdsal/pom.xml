@@ -439,7 +439,7 @@
           </dependency>
           <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>sal-rest-docgen</artifactId>
+            <artifactId>sal-rest-docgen-maven</artifactId>
             <version>${mdsal.version}</version>
             <type>jar</type>
           </dependency>
@@ -453,7 +453,7 @@
               <yangFilesRootDir>src</yangFilesRootDir>
               <codeGenerators>
                 <generator>
-                  <codeGeneratorClass>org.opendaylight.controller.sal.rest.doc.impl.StaticDocGenerator</codeGeneratorClass>
+                  <codeGeneratorClass>org.opendaylight.controller.sal.rest.doc.maven.StaticDocGenerator</codeGeneratorClass>
                   <outputBaseDir>${project.build.directory}/generated-resources/swagger-api-documentation/explorer/static</outputBaseDir>
                 </generator>
               </codeGenerators>
