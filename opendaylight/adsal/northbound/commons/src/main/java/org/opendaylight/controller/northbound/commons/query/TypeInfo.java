@@ -107,7 +107,9 @@ import org.slf4j.LoggerFactory;
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("retrieve: {}/{} type:{}", index, query.length, target.getClass());
         }
-        if (index >= query.length) return null;
+        if (index >= query.length) {
+            return null;
+        }
         explore();
         if (!target.getClass().equals(_class)) {
             if (_class.isAssignableFrom(target.getClass())) {
@@ -124,7 +126,9 @@ import org.slf4j.LoggerFactory;
             }
         }
         TypeInfo child = getChild(query[index]);
-        if (child == null) return null;
+        if (child == null) {
+            return null;
+        }
         target = child.getAccessor().getValue(target);
         if (index+1 == query.length) {
             // match found
@@ -137,27 +141,35 @@ import org.slf4j.LoggerFactory;
      * Explore the type info for children.
      */
     public synchronized void explore() {
-        if (_explored) return;
+        if (_explored) {
+            return;
+        }
         for (Class<?> c = _class; c != null; c = c.getSuperclass()) {
-            if (c.equals(Object.class)) break;
+            if (c.equals(Object.class)) {
+                break;
+            }
             // Currently only fields and methods annotated with JAXB annotations are
             // considered as valid for search purposes.
             //check methods first
             for (Method m : c.getDeclaredMethods()) {
                 String tn = getTypeName(m, _accessType);
                 if (tn != null) {
-                    if (LOGGER.isDebugEnabled()) LOGGER.debug(
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug(
                             "exploring type: {} name: {} method: {}",
                             _class.getSimpleName(), tn, m);
+                    }
                     _types.put(tn, createTypeInfo(tn, new Accessor(m)));
                 }
             }
             for (Field f : c.getDeclaredFields()) {
                 String tn = getTypeName(f, _accessType);
                 if (tn != null) {
-                    if (LOGGER.isDebugEnabled()) LOGGER.debug(
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug(
                             "exploring type: {} name: {} field: {}",
                             _class.getSimpleName(), tn, f);
+                    }
                     _types.put(tn, createTypeInfo(tn, new Accessor(f)));
                 }
             }
@@ -219,7 +231,9 @@ import org.slf4j.LoggerFactory;
             PropertyDescriptor[] props = info.getPropertyDescriptors();
             for (PropertyDescriptor pd : props)
             {
-                if (m.equals(pd.getReadMethod())) return pd.getName();
+                if (m.equals(pd.getReadMethod())) {
+                    return pd.getName();
+                }
             }
         }
         catch (IntrospectionException e)
@@ -234,8 +248,12 @@ import org.slf4j.LoggerFactory;
         // root is always a composite type
         // FIXME assert its a JAXB type
         XmlRootElement root = clz.getAnnotation(XmlRootElement.class);
-        if (root == null) throw new IllegalArgumentException("Not a JAXB type: " + clz);
-        if (name == null) name = getRootName(clz);
+        if (root == null) {
+            throw new IllegalArgumentException("Not a JAXB type: " + clz);
+        }
+        if (name == null) {
+            name = getRootName(clz);
+        }
         return new TypeInfo(name, clz, null);
     }
 
@@ -252,7 +270,9 @@ import org.slf4j.LoggerFactory;
 
     public static String getRootName(Class<?> cls) {
         XmlRootElement root = cls.getAnnotation(XmlRootElement.class);
-        if (root == null) return null;
+        if (root == null) {
+            return null;
+        }
         String rootName = root.name();
         if (DEFAULT_NAME.equals(rootName)) {
             String clsName = cls.getSimpleName();
@@ -281,7 +301,9 @@ import org.slf4j.LoggerFactory;
                 return null;
             }
         }
-        if (DEFAULT_NAME.equals(name)) return dflt;
+        if (DEFAULT_NAME.equals(name)) {
+            return dflt;
+        }
         return name;
     }
 
