@@ -1,9 +1,10 @@
 package org.opendaylight.controller.sal.binding.impl.connect.dom;
 
+import com.google.common.base.Optional;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.WeakHashMap;
-
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChange;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
@@ -17,8 +18,6 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
-
-import com.google.common.base.Optional;
 
 /**
  * Manager responsible for instantiating forwarders responsible for
@@ -69,16 +68,21 @@ class DomToBindingRpcForwardingManager implements
 
     @Override
     public void onRouteChange(final RouteChange<RpcContextIdentifier, InstanceIdentifier<?>> change) {
-        for (Map.Entry<RpcContextIdentifier, Set<InstanceIdentifier<?>>> entry : change.getAnnouncements().entrySet()) {
-            bindingRoutesAdded(entry);
+        // Process removals first
+        for (Entry<RpcContextIdentifier, Set<InstanceIdentifier<?>>> entry : change.getRemovals().entrySet()) {
+            final Class<? extends BaseIdentity> context = entry.getKey().getRoutingContext();
+            if (context != null) {
+                final Class<? extends RpcService> service = entry.getKey().getRpcService();
+                getRpcForwarder(service, context).removePaths(context, service, entry.getValue());
+            }
         }
-    }
 
-    private void bindingRoutesAdded(final Map.Entry<RpcContextIdentifier, Set<InstanceIdentifier<?>>> entry) {
-        Class<? extends BaseIdentity> context = entry.getKey().getRoutingContext();
-        Class<? extends RpcService> service = entry.getKey().getRpcService();
-        if (context != null) {
-            getRpcForwarder(service, context).registerPaths(context, service, entry.getValue());
+        for (Entry<RpcContextIdentifier, Set<InstanceIdentifier<?>>> entry : change.getAnnouncements().entrySet()) {
+            final Class<? extends BaseIdentity> context = entry.getKey().getRoutingContext();
+            if (context != null) {
+                final Class<? extends RpcService> service = entry.getKey().getRpcService();
+                getRpcForwarder(service, context).registerPaths(context, service, entry.getValue());
+            }
         }
     }
 
