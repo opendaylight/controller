@@ -89,8 +89,7 @@ public class RpcProviderRegistryImpl implements RpcProviderRegistry, RouteChange
     }
 
     @Override
-    public final <T extends RpcService> RpcRegistration<T> addRpcImplementation(final Class<T> type, final T implementation)
-            throws IllegalStateException {
+    public final <T extends RpcService> RpcRegistration<T> addRpcImplementation(final Class<T> type, final T implementation) {
 
         // FIXME: This should be well documented - addRpcImplementation for
         // routed RPCs
