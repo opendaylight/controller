@@ -8,11 +8,14 @@
 package org.opendaylight.controller.sal.binding.codegen.impl;
 
 import static org.opendaylight.controller.sal.binding.codegen.RuntimeCodeHelper.setRoutingTable;
-
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
+import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChange;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RoutedRpcRegistration;
@@ -28,9 +31,6 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 
 public class RpcRouterCodegenInstance<T extends RpcService> implements //
 RpcRouter<T>, RouteChangeListener<Class<? extends BaseIdentity>, InstanceIdentifier<?>> {
@@ -133,7 +133,14 @@ RpcRouter<T>, RouteChangeListener<Class<? extends BaseIdentity>, InstanceIdentif
         return new DefaultRpcImplementationRegistration(service);
     }
 
-    private class RoutedRpcRegistrationImpl extends AbstractObjectRegistration<T> implements RoutedRpcRegistration<T> {
+    private final class RoutedRpcRegistrationImpl extends AbstractObjectRegistration<T> implements RoutedRpcRegistration<T> {
+        /*
+         * FIXME: retaining this collection is not completely efficient. We really should be storing
+         *        a reference to this registration, as a particular listener may be registered multiple
+         *        times -- and then this goes kaboom in various aspects.
+         */
+        @GuardedBy("this")
+        private final Collection<Class<? extends BaseIdentity>> contexts = new ArrayList<>(1);
 
         public RoutedRpcRegistrationImpl(final T instance) {
             super(instance);
@@ -145,32 +152,49 @@ RpcRouter<T>, RouteChangeListener<Class<? extends BaseIdentity>, InstanceIdentif
         }
 
         @Override
-        public void registerPath(final Class<? extends BaseIdentity> context, final InstanceIdentifier<?> path) {
+        public synchronized void registerPath(final Class<? extends BaseIdentity> context, final InstanceIdentifier<?> path) {
+            if (isClosed()) {
+                LOG.debug("Closed registration of {} ignoring new path {}", getInstance(), path);
+                return;
+            }
+
             routingTables.get(context).updateRoute(path, getInstance());
+            contexts.add(context);
         }
 
         @Override
-        public void unregisterPath(final Class<? extends BaseIdentity> context, final InstanceIdentifier<?> path) {
+        public synchronized void unregisterPath(final Class<? extends BaseIdentity> context, final InstanceIdentifier<?> path) {
+            if (isClosed()) {
+                LOG.debug("Closed unregistration of {} ignoring new path {}", getInstance(), path);
+                return;
+            }
+
             routingTables.get(context).removeRoute(path, getInstance());
+            contexts.remove(context);
         }
 
+        @Deprecated
         @Override
         public void registerInstance(final Class<? extends BaseIdentity> context, final InstanceIdentifier<?> instance) {
             registerPath(context, instance);
         }
 
+        @Deprecated
         @Override
         public void unregisterInstance(final Class<? extends BaseIdentity> context, final InstanceIdentifier<?> instance) {
             unregisterPath(context, instance);
         }
 
         @Override
-        protected void removeRegistration() {
-
+        protected synchronized void removeRegistration() {
+            for (Class<? extends BaseIdentity> ctx : contexts) {
+                routingTables.get(ctx).removeAllReferences(getInstance());
+            }
+            contexts.clear();
         }
     }
 
-    private class DefaultRpcImplementationRegistration extends AbstractObjectRegistration<T> implements RpcRegistration<T> {
+    private final class DefaultRpcImplementationRegistration extends AbstractObjectRegistration<T> implements RpcRegistration<T> {
 
 
         protected DefaultRpcImplementationRegistration(final T instance) {
