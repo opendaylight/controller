@@ -8,7 +8,13 @@
 package org.opendaylight.controller.sal.binding.impl;
 
 import static com.google.common.base.Preconditions.checkState;
-
+import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +23,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChange;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangePublisher;
@@ -39,13 +44,6 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Throwables;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.util.concurrent.UncheckedExecutionException;
 
 public class RpcProviderRegistryImpl implements RpcProviderRegistry, RouteChangePublisher<RpcContextIdentifier, InstanceIdentifier<?>> {
 
@@ -222,11 +220,10 @@ public class RpcProviderRegistryImpl implements RpcProviderRegistry, RouteChange
 
     }
 
-    private class RouteChangeForwarder<T extends RpcService> implements RouteChangeListener<Class<? extends BaseIdentity>, InstanceIdentifier<?>> {
-
+    private final class RouteChangeForwarder<T extends RpcService> implements RouteChangeListener<Class<? extends BaseIdentity>, InstanceIdentifier<?>> {
         private final Class<T> type;
 
-        public RouteChangeForwarder(final Class<T> type) {
+        RouteChangeForwarder(final Class<T> type) {
             this.type = type;
         }
 
@@ -256,15 +253,14 @@ public class RpcProviderRegistryImpl implements RpcProviderRegistry, RouteChange
         }
     }
 
-    public static class RpcProxyRegistration<T extends RpcService> extends AbstractObjectRegistration<T> implements RpcRegistration<T> {
-
+    private static final class RpcProxyRegistration<T extends RpcService> extends AbstractObjectRegistration<T> implements RpcRegistration<T> {
+        private final RpcProviderRegistryImpl registry;
         private final Class<T> serviceType;
-        private RpcProviderRegistryImpl registry;
 
-        public RpcProxyRegistration(final Class<T> type, final T service, final RpcProviderRegistryImpl registry) {
+        RpcProxyRegistration(final Class<T> type, final T service, final RpcProviderRegistryImpl registry) {
             super(service);
+            this.registry =  Preconditions.checkNotNull(registry);
             this.serviceType = type;
-            this.registry =  registry;
         }
 
         @Override
@@ -274,13 +270,10 @@ public class RpcProviderRegistryImpl implements RpcProviderRegistry, RouteChange
 
         @Override
         protected void removeRegistration() {
-            if (registry != null) {
-                T publicProxy = registry.getRpcService(serviceType);
-                RpcService currentDelegate = RuntimeCodeHelper.getDelegate(publicProxy);
-                if (currentDelegate == getInstance()) {
-                    RuntimeCodeHelper.setDelegate(publicProxy, null);
-                }
-                registry = null;
+            T publicProxy = registry.getRpcService(serviceType);
+            RpcService currentDelegate = RuntimeCodeHelper.getDelegate(publicProxy);
+            if (currentDelegate == getInstance()) {
+                RuntimeCodeHelper.setDelegate(publicProxy, null);
             }
         }
     }
