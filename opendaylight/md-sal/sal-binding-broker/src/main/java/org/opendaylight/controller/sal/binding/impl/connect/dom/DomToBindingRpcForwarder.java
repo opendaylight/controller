@@ -19,7 +19,7 @@ import java.util.concurrent.Callable;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcRouter;
 import org.opendaylight.controller.sal.binding.impl.RpcProviderRegistryImpl;
-import org.opendaylight.controller.sal.core.api.Broker;
+import org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
 import org.opendaylight.yangtools.concepts.CompositeObjectRegistration;
@@ -45,7 +45,7 @@ class DomToBindingRpcForwarder implements RpcImplementation, InvocationHandler {
 
     private final Set<QName> supportedRpcs;
     private final WeakReference<Class<? extends RpcService>> rpcServiceType;
-    private Set<org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration> registrations;
+    private Set<RoutedRpcRegistration> registrations;
     private final Map<QName, RpcInvocationStrategy> strategiesByQName = new HashMap<>();
     private final WeakHashMap<Method, RpcInvocationStrategy> strategiesByMethod = new WeakHashMap<>();
     private final RpcService proxy;
@@ -102,7 +102,7 @@ class DomToBindingRpcForwarder implements RpcImplementation, InvocationHandler {
         final RpcProvisionRegistry biRpcRegistry, final RpcProviderRegistry baRpcRegistry, final RpcProviderRegistryImpl registryImpl) {
         this(service, mappingService, biRpcRegistry, baRpcRegistry,registryImpl);
 
-        final ImmutableSet.Builder<Broker.RoutedRpcRegistration> registrationsBuilder = ImmutableSet.builder();
+        final ImmutableSet.Builder<RoutedRpcRegistration> registrationsBuilder = ImmutableSet.builder();
         try {
             for (QName rpc : supportedRpcs) {
                 registrationsBuilder.add(biRpcRegistry.addRoutedRpcImplementation(rpc, this));
@@ -160,7 +160,7 @@ class DomToBindingRpcForwarder implements RpcImplementation, InvocationHandler {
         final Class<? extends RpcService> service, final Set<InstanceIdentifier<?>> set) {
         QName ctx = BindingReflections.findQName(context);
         for (YangInstanceIdentifier path : Collections2.transform(set, toDOMInstanceIdentifier)) {
-            for (org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration reg : registrations) {
+            for (RoutedRpcRegistration reg : registrations) {
                 reg.registerPath(ctx, path);
             }
         }
@@ -185,7 +185,7 @@ class DomToBindingRpcForwarder implements RpcImplementation, InvocationHandler {
         final Set<InstanceIdentifier<?>> set) {
         QName ctx = BindingReflections.findQName(context);
         for (YangInstanceIdentifier path : Collections2.transform(set, toDOMInstanceIdentifier)) {
-            for (org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration reg : registrations) {
+            for (RoutedRpcRegistration reg : registrations) {
                 reg.unregisterPath(ctx, path);
             }
         }
