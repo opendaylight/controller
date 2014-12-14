@@ -3,7 +3,7 @@ package org.opendaylight.controller.sal.binding.impl.connect.dom;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -159,8 +159,7 @@ class DomToBindingRpcForwarder implements RpcImplementation, InvocationHandler {
     public void registerPaths(final Class<? extends BaseIdentity> context,
         final Class<? extends RpcService> service, final Set<InstanceIdentifier<?>> set) {
         QName ctx = BindingReflections.findQName(context);
-        for (YangInstanceIdentifier path : FluentIterable.from(set).transform(
-            toDOMInstanceIdentifier)) {
+        for (YangInstanceIdentifier path : Collections2.transform(set, toDOMInstanceIdentifier)) {
             for (org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration reg : registrations) {
                 reg.registerPath(ctx, path);
             }
@@ -185,8 +184,7 @@ class DomToBindingRpcForwarder implements RpcImplementation, InvocationHandler {
     public void removePaths(final Class<? extends BaseIdentity> context, final Class<? extends RpcService> service,
         final Set<InstanceIdentifier<?>> set) {
         QName ctx = BindingReflections.findQName(context);
-        for (YangInstanceIdentifier path : FluentIterable.from(set).transform(
-            toDOMInstanceIdentifier)) {
+        for (YangInstanceIdentifier path : Collections2.transform(set, toDOMInstanceIdentifier)) {
             for (org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration reg : registrations) {
                 reg.unregisterPath(ctx, path);
             }
