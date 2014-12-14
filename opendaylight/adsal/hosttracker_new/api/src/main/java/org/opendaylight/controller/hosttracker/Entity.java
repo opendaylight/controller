@@ -165,8 +165,9 @@ public class Entity implements Comparable<Entity> {
     public void setLastSeenTimestamp(Date lastSeenTimestamp) {
         if (activeSince == null
                 || (activeSince.getTime() + ACTIVITY_TIMEOUT) < lastSeenTimestamp
-                        .getTime())
+                        .getTime()) {
             this.activeSince = lastSeenTimestamp;
+        }
         this.lastSeenTimestamp = lastSeenTimestamp;
     }
 
@@ -180,8 +181,9 @@ public class Entity implements Comparable<Entity> {
 
     @Override
     public int hashCode() {
-        if (hashCode != 0)
+        if (hashCode != 0) {
             return hashCode;
+        }
         final int prime = 31;
         hashCode = 1;
         hashCode = prime * hashCode
@@ -194,30 +196,40 @@ public class Entity implements Comparable<Entity> {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         Entity other = (Entity) obj;
         if (ipv4Address == null) {
-            if (other.ipv4Address != null)
+            if (other.ipv4Address != null) {
                 return false;
-        } else if (!ipv4Address.equals(other.ipv4Address))
+            }
+        } else if (!ipv4Address.equals(other.ipv4Address)) {
             return false;
-        if (macAddress != other.macAddress)
+        }
+        if (macAddress != other.macAddress) {
             return false;
+        }
         if (port == null) {
-            if (other.port != null)
+            if (other.port != null) {
                 return false;
-        } else if (!port.equals(other.port))
+            }
+        } else if (!port.equals(other.port)) {
             return false;
+        }
         if (vlan == null) {
-            if (other.vlan != null)
+            if (other.vlan != null) {
                 return false;
-        } else if (!vlan.equals(other.vlan))
+            }
+        } else if (!vlan.equals(other.vlan)) {
             return false;
+        }
         return true;
     }
 
@@ -257,8 +269,9 @@ public class Entity implements Comparable<Entity> {
             Comparable switchId = (Comparable) port.getNode().getID();
             Comparable oswitchId = (Comparable) o.port.getNode().getID();
             r = switchId.compareTo(oswitchId);
-            if (r != 0)
+            if (r != 0) {
                 return r;
+            }
 
             Comparable portId = (Comparable) port.getID();
             Comparable oportId = (Comparable) o.port.getID();
