@@ -24,10 +24,14 @@ public class WrapperTypeInfo extends TypeInfo {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("retrieve collection: {}/{}", index, query.length);
         }
-        if (index >= query.length) return null;
+        if (index >= query.length) {
+            return null;
+        }
         explore();
         TypeInfo child = getChild(query[index]);
-        if (child == null) return null;
+        if (child == null) {
+            return null;
+        }
         if (query.length == index+1) { // skipping this node
             return target;
         }else { // if list of list go to next node to get value
@@ -37,7 +41,9 @@ public class WrapperTypeInfo extends TypeInfo {
 
     @Override
     public synchronized void explore() {
-        if (_explored) return;
+        if (_explored) {
+            return;
+        }
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("exploring wrapper type: {} gtype: {}", _class,
                     _accessor.getGenericType());

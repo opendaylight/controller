@@ -29,7 +29,9 @@ import java.util.List;
             Object item = it.next();
             for (TypeInfo child : _types.values()) {
                 Object val = child.retrieve(item, query, index);
-                if (val != null) objects.add(val);
+                if (val != null) {
+                    objects.add(val);
+                }
             }
         }
         return objects;
@@ -38,7 +40,9 @@ import java.util.List;
 
     @Override
     public synchronized void explore() {
-        if (_explored) return;
+        if (_explored) {
+            return;
+        }
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("exploring iteratable type: {} gtype: {}", _class,
                     _accessor.getGenericType());

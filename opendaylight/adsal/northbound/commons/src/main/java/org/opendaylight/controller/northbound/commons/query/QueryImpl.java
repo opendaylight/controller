@@ -158,7 +158,9 @@ import org.slf4j.LoggerFactory;
     }
 
     private boolean compare(Object valueToMatch, Object actualValue, OP operator) {
-        if (valueToMatch == null || actualValue == null) return false;
+        if (valueToMatch == null || actualValue == null) {
+            return false;
+        }
         if (ALLOW_OBJECT_STRING_COMPARE && (valueToMatch instanceof String)
                 && !(actualValue instanceof String)) {
             actualValue = actualValue.toString();
@@ -203,7 +205,9 @@ import org.slf4j.LoggerFactory;
         }
     }
     private Object parse(String arg, Object value) {
-        if (value == null) return null;
+        if (value == null) {
+            return null;
+        }
 
         try {
             if (value instanceof String) {
