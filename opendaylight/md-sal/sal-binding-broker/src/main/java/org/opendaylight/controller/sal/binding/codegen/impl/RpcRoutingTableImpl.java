@@ -8,10 +8,10 @@
 package org.opendaylight.controller.sal.binding.codegen.impl;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangePublisher;
 import org.opendaylight.controller.md.sal.common.impl.routing.RoutingUtils;
@@ -25,8 +25,7 @@ import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class RpcRoutingTableImpl<C extends BaseIdentity, S extends RpcService> //
-implements //
+final class RpcRoutingTableImpl<C extends BaseIdentity, S extends RpcService> implements
         Mutable, //
         RpcRoutingTable<C, S>, //
         RouteChangePublisher<Class<? extends BaseIdentity>, InstanceIdentifier<?>> {
@@ -42,7 +41,7 @@ implements //
     private RouteChangeListener<Class<? extends BaseIdentity>, InstanceIdentifier<?>> listener;
     private S defaultRoute;
 
-    public RpcRoutingTableImpl(String routerName,Class<C> contextType, Class<S> serviceType) {
+    public RpcRoutingTableImpl(final String routerName,final Class<C> contextType, final Class<S> serviceType) {
         super();
         this.routerName = routerName;
         this.serviceType = serviceType;
@@ -52,7 +51,7 @@ implements //
     }
 
     @Override
-    public void setDefaultRoute(S target) {
+    public void setDefaultRoute(final S target) {
         defaultRoute = target;
     }
 
@@ -63,7 +62,7 @@ implements //
 
     @Override
     public <L extends RouteChangeListener<Class<? extends BaseIdentity>, InstanceIdentifier<?>>> ListenerRegistration<L> registerRouteChangeListener(
-            L listener) {
+            final L listener) {
         return new SingletonListenerRegistration<L>(listener);
     }
 
@@ -74,7 +73,7 @@ implements //
 
     @Override
     @SuppressWarnings("unchecked")
-    public void updateRoute(InstanceIdentifier<?> path, S service) {
+    public void updateRoute(final InstanceIdentifier<?> path, final S service) {
         S previous = this.routes.put(path, service);
 
         LOGGER.debug("Route {} updated to {} in routing table {}",path,service,this);
@@ -88,7 +87,7 @@ implements //
 
     @Override
     @SuppressWarnings("unchecked")
-    public void removeRoute(InstanceIdentifier<?> path) {
+    public void removeRoute(final InstanceIdentifier<?> path) {
         S previous = this.routes.remove(path);
         LOGGER.debug("Route {} to {} removed in routing table {}",path,previous,this);
         @SuppressWarnings("rawtypes")
@@ -98,7 +97,7 @@ implements //
         }
     }
 
-    public void removeRoute(InstanceIdentifier<?> path, S service) {
+    void removeRoute(final InstanceIdentifier<?> path, final S service) {
         @SuppressWarnings("rawtypes")
         RouteChangeListener listenerCapture = listener;
         if (routes.remove(path, service) && listenerCapture != null) {
@@ -108,7 +107,7 @@ implements //
     }
 
     @Override
-    public S getRoute(InstanceIdentifier<?> nodeInstance) {
+    public S getRoute(final InstanceIdentifier<?> nodeInstance) {
         S route = routes.get(nodeInstance);
         if (route != null) {
             return route;
@@ -121,11 +120,16 @@ implements //
         return unmodifiableRoutes;
     }
 
-    protected void removeAllReferences(S service) {
-
+    void removeAllReferences(final S service) {
+        // FIXME: replace this via properly-synchronized BiMap (or something)
+        final Iterator<S> it = routes.values().iterator();
+        while (it.hasNext()) {
+            final S s = it.next();
+            if (service.equals(s)) {
+                it.remove();
+            }
+        }
     }
-
-
 
     @Override
     public String toString() {
@@ -133,13 +137,11 @@ implements //
                 + contextType.getSimpleName() + "]";
     }
 
-
-
     private class SingletonListenerRegistration<L extends RouteChangeListener<Class<? extends BaseIdentity>, InstanceIdentifier<?>>> extends
             AbstractObjectRegistration<L>
             implements ListenerRegistration<L> {
 
-        public SingletonListenerRegistration(L instance) {
+        public SingletonListenerRegistration(final L instance) {
             super(instance);
             listener = instance;
         }
