@@ -127,20 +127,26 @@ public class SwitchPort {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         SwitchPort other = (SwitchPort) obj;
-        if (errorStatus != other.errorStatus)
+        if (errorStatus != other.errorStatus) {
             return false;
+        }
         if (port == null) {
-            if (other.port != null)
+            if (other.port != null) {
                 return false;
-        } else if (!port.equals(other.port))
+            }
+        } else if (!port.equals(other.port)) {
             return false;
+        }
         return true;
     }
 

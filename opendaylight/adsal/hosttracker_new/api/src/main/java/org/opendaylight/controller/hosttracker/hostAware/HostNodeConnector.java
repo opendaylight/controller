@@ -150,22 +150,29 @@ public class HostNodeConnector extends Host {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         HostNodeConnector other = (HostNodeConnector) obj;
         if (nodeConnector == null) {
-            if (other.nodeConnector != null)
+            if (other.nodeConnector != null) {
                 return false;
-        } else if (!nodeConnector.equals(other.nodeConnector))
+            }
+        } else if (!nodeConnector.equals(other.nodeConnector)) {
             return false;
-        if (staticHost != other.staticHost)
+        }
+        if (staticHost != other.staticHost) {
             return false;
-        if (vlan != other.vlan)
+        }
+        if (vlan != other.vlan) {
             return false;
+        }
         return true;
     }
 
@@ -181,8 +188,9 @@ public class HostNodeConnector extends Host {
             EthernetAddress e = (EthernetAddress) getDataLayerAddress();
             macaddr = e.getValue();
         }
-        if (macaddr == null)
+        if (macaddr == null) {
             return false;
+        }
         return !Arrays.equals(emptyArray, macaddr);
     }
 
