@@ -8,9 +8,10 @@
 package org.opendaylight.controller.md.sal.dom.store.benchmark;
 
 import java.util.concurrent.TimeUnit;
+
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
-import org.opendaylight.controller.md.sal.dom.broker.impl.DOMDataBrokerImpl;
+import org.opendaylight.controller.md.sal.dom.broker.impl.SerializedDOMDataBroker;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Measurement;
@@ -21,7 +22,7 @@ import org.openjdk.jmh.annotations.Warmup;
  */
 public abstract class AbstractInMemoryBrokerWriteTransactionBenchmark extends AbstractInMemoryWriteTransactionBenchmark {
 
-    protected DOMDataBrokerImpl domBroker;
+    protected SerializedDOMDataBroker domBroker;
 
     protected void initTestNode() throws Exception {
         final YangInstanceIdentifier testPath = YangInstanceIdentifier.builder(BenchmarkModel.TEST_PATH)
