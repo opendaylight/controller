@@ -16,7 +16,7 @@ import org.opendaylight.controller.sal.utils.NodeCreator;
 
 import java.util.Hashtable;
 
-import static junit.framework.Assert.assertNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertEquals;
 
 public class ContainerImplTest {

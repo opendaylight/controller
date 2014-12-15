@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.sal.binding.test.connect.dom;
 
-import static junit.framework.Assert.assertNotNull;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
 
 import java.math.BigInteger;
