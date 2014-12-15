@@ -16,12 +16,15 @@ import akka.event.LoggingAdapter;
 import akka.japi.Option;
 import akka.japi.Pair;
 import akka.pattern.Patterns;
+
 import com.google.common.base.Preconditions;
+
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;
 import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Bucket;
 import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStore;
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
+
 import scala.concurrent.Future;
 
 import java.util.ArrayList;
@@ -152,12 +155,12 @@ public class RpcRegistry extends AbstractUntypedActorWithMetering {
      * @return
      */
     private Messages.FindRoutersReply createReplyWithRouters(
-            Map<Address, Bucket> buckets, RpcRouter.RouteIdentifier<?, ?, ?> routeId) {
+            Map<Address, Bucket<RoutingTable>> buckets, RpcRouter.RouteIdentifier<?, ?, ?> routeId) {
 
         List<Pair<ActorRef, Long>> routers = new ArrayList<>();
         Option<Pair<ActorRef, Long>> routerWithUpdateTime = null;
 
-        for (Bucket bucket : buckets.values()) {
+        for (Bucket<RoutingTable> bucket : buckets.values()) {
 
             RoutingTable table = (RoutingTable) bucket.getData();
             if (table == null)
@@ -194,7 +197,7 @@ public class RpcRegistry extends AbstractUntypedActorWithMetering {
                 if (replyMessage instanceof GetAllBucketsReply) {
 
                     GetAllBucketsReply reply = (GetAllBucketsReply) replyMessage;
-                    Map<Address, Bucket> buckets = reply.getBuckets();
+                    Map<Address, Bucket<RoutingTable>> buckets = reply.getBuckets();
 
                     if (buckets == null || buckets.isEmpty()) {
                         sender.tell(createEmptyReply(), getSelf());

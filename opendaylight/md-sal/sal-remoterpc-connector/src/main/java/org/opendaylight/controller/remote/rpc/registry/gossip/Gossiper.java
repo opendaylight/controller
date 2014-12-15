@@ -20,8 +20,11 @@ import akka.dispatch.Mapper;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import akka.pattern.Patterns;
+
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;
 import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
+import org.opendaylight.controller.remote.rpc.registry.RoutingTable;
+
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -263,7 +266,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
      *
      * @param buckets
      */
-    void updateRemoteBuckets(Map<Address, Bucket> buckets) {
+    void updateRemoteBuckets(Map<Address, Bucket<RoutingTable>> buckets) {
 
         UpdateRemoteBuckets updateRemoteBuckets = new UpdateRemoteBuckets(buckets);
         getContext().parent().tell(updateRemoteBuckets, getSelf());
@@ -423,7 +426,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
             @Override
             public Void apply(Object msg) {
                 if (msg instanceof GetBucketsByMembersReply) {
-                    Map<Address, Bucket> buckets = ((GetBucketsByMembersReply) msg).getBuckets();
+                    Map<Address, Bucket<RoutingTable>> buckets = ((GetBucketsByMembersReply) msg).getBuckets();
                     if(log.isDebugEnabled()) {
                         log.debug("Buckets to send from {}: {}", selfAddress, buckets);
                     }

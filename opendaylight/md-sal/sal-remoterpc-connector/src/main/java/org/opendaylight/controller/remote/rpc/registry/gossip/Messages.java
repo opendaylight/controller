@@ -8,6 +8,7 @@
 package org.opendaylight.controller.remote.rpc.registry.gossip;
 
 import akka.actor.Address;
+
 import com.google.common.base.Preconditions;
 
 import java.io.Serializable;
@@ -16,6 +17,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import org.opendaylight.controller.remote.rpc.registry.RoutingTable;
 
 import static org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.ContainsBucketVersions;
 import static org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.ContainsBuckets;
@@ -35,14 +38,14 @@ public class Messages {
 
         public static class ContainsBucket implements Serializable {
             private static final long serialVersionUID = 1L;
-            final private Bucket bucket;
+            final private Bucket<RoutingTable> bucket;
 
-            public ContainsBucket(Bucket bucket){
+            public ContainsBucket(Bucket<RoutingTable> bucket){
                 Preconditions.checkArgument(bucket != null, "bucket can not be null");
                 this.bucket = bucket;
             }
 
-            public Bucket getBucket(){
+            public Bucket<RoutingTable> getBucket(){
                 return bucket;
             }
 
@@ -50,14 +53,14 @@ public class Messages {
 
         public static class UpdateBucket extends ContainsBucket implements Serializable {
             private static final long serialVersionUID = 1L;
-            public UpdateBucket(Bucket bucket){
+            public UpdateBucket(Bucket<RoutingTable> bucket){
                 super(bucket);
             }
         }
 
         public static class GetLocalBucketReply extends ContainsBucket implements Serializable {
             private static final long serialVersionUID = 1L;
-            public GetLocalBucketReply(Bucket bucket){
+            public GetLocalBucketReply(Bucket<RoutingTable> bucket){
                 super(bucket);
             }
         }
@@ -82,17 +85,17 @@ public class Messages {
 
         public static class ContainsBuckets implements Serializable{
             private static final long serialVersionUID = 1L;
-            private Map<Address, Bucket> buckets;
+            private Map<Address, Bucket<RoutingTable>> buckets;
 
-            public ContainsBuckets(Map<Address, Bucket> buckets){
+            public ContainsBuckets(Map<Address, Bucket<RoutingTable>> buckets){
                 Preconditions.checkArgument(buckets != null, "buckets can not be null");
                 this.buckets = buckets;
             }
 
-            public Map<Address, Bucket> getBuckets() {
-                Map<Address, Bucket> copy = new HashMap<>(buckets.size());
+            public Map<Address, Bucket<RoutingTable>> getBuckets() {
+                Map<Address, Bucket<RoutingTable>> copy = new HashMap<>(buckets.size());
 
-                for (Map.Entry<Address, Bucket> entry : buckets.entrySet()){
+                for (Map.Entry<Address, Bucket<RoutingTable>> entry : buckets.entrySet()){
                     //ignore null entries
                     if ( (entry.getKey() == null) || (entry.getValue() == null) )
                         continue;
@@ -104,14 +107,14 @@ public class Messages {
 
         public static class GetAllBucketsReply extends ContainsBuckets implements Serializable{
             private static final long serialVersionUID = 1L;
-            public GetAllBucketsReply(Map<Address, Bucket> buckets) {
+            public GetAllBucketsReply(Map<Address, Bucket<RoutingTable>> buckets) {
                 super(buckets);
             }
         }
 
         public static class GetBucketsByMembersReply extends ContainsBuckets implements Serializable{
             private static final long serialVersionUID = 1L;
-            public GetBucketsByMembersReply(Map<Address, Bucket> buckets) {
+            public GetBucketsByMembersReply(Map<Address, Bucket<RoutingTable>> buckets) {
                 super(buckets);
             }
         }
@@ -145,7 +148,7 @@ public class Messages {
 
         public static class UpdateRemoteBuckets extends ContainsBuckets implements Serializable{
             private static final long serialVersionUID = 1L;
-            public UpdateRemoteBuckets(Map<Address, Bucket> buckets) {
+            public UpdateRemoteBuckets(Map<Address, Bucket<RoutingTable>> buckets) {
                 super(buckets);
             }
         }
@@ -179,7 +182,7 @@ public class Messages {
             private final Address from;
             private final Address to;
 
-            public GossipEnvelope(Address from, Address to, Map<Address, Bucket> buckets) {
+            public GossipEnvelope(Address from, Address to, Map<Address, Bucket<RoutingTable>> buckets) {
                 super(buckets);
                 Preconditions.checkArgument(to != null, "Recipient of message must not be null");
                 this.to = to;

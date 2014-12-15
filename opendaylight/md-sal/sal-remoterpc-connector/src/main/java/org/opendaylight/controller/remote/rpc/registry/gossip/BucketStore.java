@@ -15,13 +15,16 @@ import akka.actor.Props;
 import akka.cluster.ClusterActorRefProvider;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;
 import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
+import org.opendaylight.controller.remote.rpc.registry.RoutingTable;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetAllBuckets;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetAllBucketsReply;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetBucketVersions;
@@ -50,12 +53,12 @@ public class BucketStore extends AbstractUntypedActorWithMetering {
     /**
      * Bucket owned by the node
      */
-    private BucketImpl localBucket = new BucketImpl();
+    private Bucket<RoutingTable> localBucket = new BucketImpl<RoutingTable>();
 
     /**
      * Buckets ownded by other known nodes in the cluster
      */
-    private ConcurrentMap<Address, Bucket> remoteBuckets = new ConcurrentHashMap<>();
+    private ConcurrentMap<Address, Bucket<RoutingTable>> remoteBuckets = new ConcurrentHashMap<>();
 
     /**
      * Bucket version for every known node in the cluster including this node
@@ -134,9 +137,9 @@ public class BucketStore extends AbstractUntypedActorWithMetering {
      *
      * @param updatedBucket
      */
-    void receiveUpdateBucket(Bucket updatedBucket){
+    void receiveUpdateBucket(Bucket<RoutingTable> updatedBucket){
 
-        localBucket = (BucketImpl) updatedBucket;
+        localBucket = updatedBucket;
         versions.put(selfAddress, localBucket.getVersion());
     }
 
@@ -153,8 +156,8 @@ public class BucketStore extends AbstractUntypedActorWithMetering {
      *
      * @return self owned + remote buckets
      */
-    Map<Address, Bucket> getAllBuckets(){
-        Map<Address, Bucket> all = new HashMap<>(remoteBuckets.size() + 1);
+    Map<Address, Bucket<RoutingTable>> getAllBuckets(){
+        Map<Address, Bucket<RoutingTable>> all = new HashMap<>(remoteBuckets.size() + 1);
 
         //first add the local bucket
         all.put(selfAddress, localBucket);
@@ -172,7 +175,7 @@ public class BucketStore extends AbstractUntypedActorWithMetering {
      */
     void receiveGetBucketsByMembers(Set<Address> members){
         final ActorRef sender = getSender();
-        Map<Address, Bucket> buckets = getBucketsByMembers(members);
+        Map<Address, Bucket<RoutingTable>> buckets = getBucketsByMembers(members);
         sender.tell(new GetBucketsByMembersReply(buckets), getSelf());
     }
 
@@ -182,8 +185,8 @@ public class BucketStore extends AbstractUntypedActorWithMetering {
      * @param members requested members
      * @return buckets for requested memebers
      */
-    Map<Address, Bucket> getBucketsByMembers(Set<Address> members) {
-        Map<Address, Bucket> buckets = new HashMap<>();
+    Map<Address, Bucket<RoutingTable>> getBucketsByMembers(Set<Address> members) {
+        Map<Address, Bucket<RoutingTable>> buckets = new HashMap<>();
 
         //first add the local bucket if asked
         if (members.contains(selfAddress)) {
@@ -215,7 +218,7 @@ public class BucketStore extends AbstractUntypedActorWithMetering {
      * @param receivedBuckets buckets sent by remote
      *                        {@link org.opendaylight.controller.remote.rpc.registry.gossip.Gossiper}
      */
-    void receiveUpdateRemoteBuckets(Map<Address, Bucket> receivedBuckets){
+    void receiveUpdateRemoteBuckets(Map<Address, Bucket<RoutingTable>> receivedBuckets){
 
         if (receivedBuckets == null || receivedBuckets.isEmpty())
          {
@@ -225,14 +228,14 @@ public class BucketStore extends AbstractUntypedActorWithMetering {
         //Remote cant update self's bucket
         receivedBuckets.remove(selfAddress);
 
-        for (Map.Entry<Address, Bucket> entry : receivedBuckets.entrySet()){
+        for (Map.Entry<Address, Bucket<RoutingTable>> entry : receivedBuckets.entrySet()){
 
             Long localVersion = versions.get(entry.getKey());
             if (localVersion == null) {
                 localVersion = -1L;
             }
 
-            Bucket receivedBucket = entry.getValue();
+            Bucket<RoutingTable> receivedBucket = entry.getValue();
 
             if (receivedBucket == null) {
                 continue;
@@ -258,19 +261,19 @@ public class BucketStore extends AbstractUntypedActorWithMetering {
     ///Getter Setters
     ///
 
-    BucketImpl getLocalBucket() {
+    Bucket<RoutingTable> getLocalBucket() {
         return localBucket;
     }
 
-    void setLocalBucket(BucketImpl localBucket) {
+    void setLocalBucket(Bucket<RoutingTable> localBucket) {
         this.localBucket = localBucket;
     }
 
-    ConcurrentMap<Address, Bucket> getRemoteBuckets() {
+    ConcurrentMap<Address, Bucket<RoutingTable>> getRemoteBuckets() {
         return remoteBuckets;
     }
 
-    void setRemoteBuckets(ConcurrentMap<Address, Bucket> remoteBuckets) {
+    void setRemoteBuckets(ConcurrentMap<Address, Bucket<RoutingTable>> remoteBuckets) {
         this.remoteBuckets = remoteBuckets;
     }
 

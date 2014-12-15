@@ -11,12 +11,15 @@ import akka.actor.ActorSystem;
 import akka.actor.Address;
 import akka.actor.Props;
 import akka.testkit.TestActorRef;
+
 import com.typesafe.config.ConfigFactory;
+
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.remote.rpc.TerminationMonitor;
+import org.opendaylight.controller.remote.rpc.registry.RoutingTable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,7 +49,7 @@ public class BucketStoreTest {
      */
     @Test
     public void testReceiveUpdateBucket(){
-        Bucket bucket = new BucketImpl();
+        Bucket<RoutingTable> bucket = new BucketImpl<>();
         Long expectedVersion = bucket.getVersion();
 
         store.receiveUpdateBucket(bucket);
@@ -63,17 +66,17 @@ public class BucketStoreTest {
     public void testReceiveUpdateRemoteBuckets(){
 
         Address localAddress = system.provider().getDefaultAddress();
-        Bucket localBucket = new BucketImpl();
+        Bucket<RoutingTable> localBucket = new BucketImpl<>();
 
         Address a1 = new Address("tcp", "system1");
         Address a2 = new Address("tcp", "system2");
         Address a3 = new Address("tcp", "system3");
 
-        Bucket b1 = new BucketImpl();
-        Bucket b2 = new BucketImpl();
-        Bucket b3 = new BucketImpl();
+        Bucket<RoutingTable> b1 = new BucketImpl<>();
+        Bucket<RoutingTable> b2 = new BucketImpl<>();
+        Bucket<RoutingTable> b3 = new BucketImpl<>();
 
-        Map<Address, Bucket> remoteBuckets = new HashMap<>(3);
+        Map<Address, Bucket<RoutingTable>> remoteBuckets = new HashMap<>(3);
         remoteBuckets.put(a1, b1);
         remoteBuckets.put(a2, b2);
         remoteBuckets.put(a3, b3);
@@ -84,13 +87,13 @@ public class BucketStoreTest {
 
         //Should NOT contain local bucket
         //Should contain ONLY 3 entries i.e a1, a2, a3
-        Map<Address, Bucket> remoteBucketsInStore = store.getRemoteBuckets();
+        Map<Address, Bucket<RoutingTable>> remoteBucketsInStore = store.getRemoteBuckets();
         Assert.assertFalse("remote buckets contains local bucket", remoteBucketsInStore.containsKey(localAddress));
         Assert.assertTrue(remoteBucketsInStore.size() == 3);
 
         //Add a new remote bucket
         Address a4 = new Address("tcp", "system4");
-        Bucket b4 = new BucketImpl();
+        Bucket<RoutingTable> b4 = new BucketImpl<>();
         remoteBuckets.clear();
         remoteBuckets.put(a4, b4);
         store.receiveUpdateRemoteBuckets(remoteBuckets);
@@ -102,7 +105,7 @@ public class BucketStoreTest {
         Assert.assertTrue(remoteBucketsInStore.size() == 4);
 
         //Update a bucket
-        Bucket b3_new = new BucketImpl();
+        Bucket<RoutingTable> b3_new = new BucketImpl<>();
         remoteBuckets.clear();
         remoteBuckets.put(a3, b3_new);
         remoteBuckets.put(a1, null);
@@ -111,12 +114,12 @@ public class BucketStoreTest {
 
         //Should only update a3
         remoteBucketsInStore = store.getRemoteBuckets();
-        Bucket b3_inStore = remoteBucketsInStore.get(a3);
+        Bucket<RoutingTable> b3_inStore = remoteBucketsInStore.get(a3);
         Assert.assertEquals(b3_new.getVersion(), b3_inStore.getVersion());
 
         //Should NOT update a1 and a2
-        Bucket b1_inStore = remoteBucketsInStore.get(a1);
-        Bucket b2_inStore = remoteBucketsInStore.get(a2);
+        Bucket<RoutingTable> b1_inStore = remoteBucketsInStore.get(a1);
+        Bucket<RoutingTable> b2_inStore = remoteBucketsInStore.get(a2);
         Assert.assertEquals(b1.getVersion(), b1_inStore.getVersion());
         Assert.assertEquals(b2.getVersion(), b2_inStore.getVersion());
         Assert.assertTrue(remoteBucketsInStore.size() == 4);
