@@ -25,6 +25,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_0cd91c57",
+        "filename": "opendaylight/config/config-api/src/main/java/org/opendaylight/controller/config/spi/AbstractModule.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-12-15T16:14:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_8cc1ac82",
+      "revId": "508bbd5de9678a89521d085c6822cf37f60a81ec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_ec3710af",
         "filename": "opendaylight/config/config-api/src/main/java/org/opendaylight/controller/config/spi/Module.java",
         "patchSetId": 5
@@ -42,6 +60,24 @@
         "endLine": 67,
         "endChar": 46
       },
+      "revId": "508bbd5de9678a89521d085c6822cf37f60a81ec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_acdd8844",
+        "filename": "opendaylight/config/config-api/src/main/java/org/opendaylight/controller/config/spi/Module.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-12-15T16:14:23Z",
+      "side": 1,
+      "message": "Yes this is necessary on this level, since we need to find out if an instance can be reused by having only Module typed old and new instance in DependencyResolver inside config-manager. This is basically a workaround for a module to find out if it is going to be reused(to find this out, we need to know if all dependencies and their dependencies are going to be reused as well)",
+      "parentUuid": "7a96c907_ec3710af",
       "revId": "508bbd5de9678a89521d085c6822cf37f60a81ec",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
