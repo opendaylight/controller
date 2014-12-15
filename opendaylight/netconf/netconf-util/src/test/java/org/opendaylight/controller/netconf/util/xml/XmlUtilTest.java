@@ -61,6 +61,18 @@ public class XmlUtilTest {
 
     }
 
+    @Test(expected = SAXParseException.class)
+    public void testXXEFlaw() throws Exception {
+        XmlUtil.readXmlToDocument("<!DOCTYPE foo [  \n" +
+                "<!ELEMENT foo ANY >\n" +
+                "<!ENTITY xxe SYSTEM \"file:///etc/passwd\" >]>\n" +
+                "<hello xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
+                "  <capabilities>\n" +
+                "    <capability>urn:ietf:params:netconf:base:1.0 &xxe;</capability>\n" +
+                "  </capabilities>\n" +
+                "  </hello>]]>]]>");
+    }
+
     @Test
     public void testXPath() throws Exception {
         final XPathExpression correctXPath = XMLNetconfUtil.compileXPath("/top/innerText");
