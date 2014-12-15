@@ -244,7 +244,7 @@ public class CnSnToJsonBasicDataTypesTest extends YangAndXmlAndDataSchemaLoader 
         expectedMap.put("lfnuint8Max", new NumberVerifier(Integer.valueOf(255)));
         expectedMap.put("lfnuint16Max", new NumberVerifier(Integer.valueOf(65535)));
         expectedMap.put("lfnuint32Max", new NumberVerifier(Long.valueOf(4294967295L)));
-        expectedMap.put("lfstr", new StringVerifier("lfstr"));
+        expectedMap.put("lfstr", new StringVerifier("row1\\\\\\nro\\\"w2\\nrow3"));  //output should containe "row1\\\nro\"w2\nrow3"
         expectedMap.put("lfstr1", new StringVerifier(""));
         expectedMap.put("lfbool1", new BooleanVerifier(true));
         expectedMap.put("lfbool2", new BooleanVerifier(false));

@@ -15,8 +15,10 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.activation.UnsupportedDataTypeException;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
@@ -27,9 +29,9 @@ import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO.Predicate
 import org.opendaylight.controller.sal.restconf.impl.RestCodec;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceNode;
@@ -53,6 +55,17 @@ import org.slf4j.LoggerFactory;
 class JsonMapper {
     private static final Logger LOG = LoggerFactory.getLogger(JsonMapper.class);
     private final DOMMountPoint mountPoint;
+    private static final Map<Character,String> charMapper;
+
+    static {
+        charMapper = new HashMap<Character, String>();
+        charMapper.put('\\', "\\\\");
+        charMapper.put('\"', "\\\"");
+        charMapper.put('\n', "\\n");
+        charMapper.put('\r', "\\r");
+        charMapper.put('\b', "\\b");
+        charMapper.put('\f', "\\f");
+    }
 
     public JsonMapper(final DOMMountPoint mountPoint) {
         this.mountPoint = mountPoint;
@@ -283,6 +296,7 @@ class JsonMapper {
             if (value == null) {
                 value = String.valueOf(node.getValue());
             }
+            value = escapeIllegalCharacters(value);
             writer.value(value.equals("null") ? "" : value);
         }
     }
@@ -358,6 +372,21 @@ class JsonMapper {
             }
         }
         writer.name(nameForOutput);
+    }
+
+    private static String escapeIllegalCharacters(final String input) {
+        final StringBuilder result = new StringBuilder();
+
+        for (int i = 0; i < input.length(); i++) {
+            final char c = input.charAt(i);
+            String placeholder = charMapper.get(c);
+            if (placeholder != null) {
+                result.append(placeholder);
+            } else {
+                result.append(c);
+            }
+        }
+        return result.toString();
     }
 
     private static final class NumberForJsonWriter extends Number {
