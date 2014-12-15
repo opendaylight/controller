@@ -13,6 +13,6 @@ public interface BarListener extends NotificationListener {
 
     void onBarUpdate(BarUpdate notification);
 
-    void onFlowDelete(FlowDelete notification);
+    void onFooDelete(FooDelete notification);
 
 }
