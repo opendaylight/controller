@@ -2,13 +2,11 @@ package org.opendaylight.controller.sal.binding.impl.connect.dom;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
-
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-
 import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -18,7 +16,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
-
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcRouter;
 import org.opendaylight.controller.sal.binding.impl.RpcProviderRegistryImpl;
@@ -37,6 +34,7 @@ import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +56,7 @@ class DomToBindingRpcForwarder implements RpcImplementation, InvocationHandler {
     private final RpcProviderRegistry baRpcRegistry;
     private final RpcProviderRegistryImpl baRpcRegistryImpl;
 
-    private final Function<InstanceIdentifier<?>, org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier> toDOMInstanceIdentifier;
+    private final Function<InstanceIdentifier<?>, YangInstanceIdentifier> toDOMInstanceIdentifier;
 
     private final static Method EQUALS_METHOD;
 
@@ -75,10 +73,9 @@ class DomToBindingRpcForwarder implements RpcImplementation, InvocationHandler {
         this.rpcServiceType = new WeakReference<Class<? extends RpcService>>(service);
         this.supportedRpcs = mappingService.getRpcQNamesFor(service);
 
-        toDOMInstanceIdentifier = new Function<InstanceIdentifier<?>, org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier>() {
-
+        this.toDOMInstanceIdentifier = new Function<InstanceIdentifier<?>, YangInstanceIdentifier>() {
             @Override
-            public org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier apply(final InstanceIdentifier<?> input) {
+            public YangInstanceIdentifier apply(final InstanceIdentifier<?> input) {
                 return mappingService.toDataDom(input);
             }
         };
@@ -162,7 +159,7 @@ class DomToBindingRpcForwarder implements RpcImplementation, InvocationHandler {
     public void registerPaths(final Class<? extends BaseIdentity> context,
         final Class<? extends RpcService> service, final Set<InstanceIdentifier<?>> set) {
         QName ctx = BindingReflections.findQName(context);
-        for (org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier path : FluentIterable.from(set).transform(
+        for (YangInstanceIdentifier path : FluentIterable.from(set).transform(
             toDOMInstanceIdentifier)) {
             for (org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration reg : registrations) {
                 reg.registerPath(ctx, path);
@@ -188,7 +185,7 @@ class DomToBindingRpcForwarder implements RpcImplementation, InvocationHandler {
     public void removePaths(final Class<? extends BaseIdentity> context, final Class<? extends RpcService> service,
         final Set<InstanceIdentifier<?>> set) {
         QName ctx = BindingReflections.findQName(context);
-        for (org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier path : FluentIterable.from(set).transform(
+        for (YangInstanceIdentifier path : FluentIterable.from(set).transform(
             toDOMInstanceIdentifier)) {
             for (org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration reg : registrations) {
                 reg.unregisterPath(ctx, path);
