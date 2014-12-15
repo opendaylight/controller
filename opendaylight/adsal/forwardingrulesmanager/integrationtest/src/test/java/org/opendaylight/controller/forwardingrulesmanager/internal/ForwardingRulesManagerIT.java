@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.forwardingrulesmanager.internal;
 
-import static junit.framework.Assert.fail;
+import static org.junit.Assert.fail;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;

@@ -22,7 +22,7 @@ import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.NodeCreator;
 
-import static junit.framework.Assert.fail;
+import static org.junit.Assert.fail;
 
 public class StaticRouteTest {
 
