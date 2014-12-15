@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_8cc1ac82",
+        "filename": "opendaylight/config/config-api/src/main/java/org/opendaylight/controller/config/spi/AbstractModule.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-12-15T15:23:33Z",
+      "side": 1,
+      "message": "Is this intended to point to same class which extends this class?\n\nIn that case please use AbstractModule\u003cM extends AbstractModule\u003cM\u003e\u003e which is commonly uses for classes which takes subclass as generic argument.",
+      "range": {
+        "startLine": 12,
+        "startChar": 37,
+        "endLine": 12,
+        "endChar": 53
+      },
+      "revId": "508bbd5de9678a89521d085c6822cf37f60a81ec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_ec3710af",
+        "filename": "opendaylight/config/config-api/src/main/java/org/opendaylight/controller/config/spi/Module.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-12-15T15:23:33Z",
+      "side": 1,
+      "message": "Is this required on interface level, or it is part of only contract for AbstractModule implementations?",
+      "range": {
+        "startLine": 67,
+        "startChar": 4,
+        "endLine": 67,
+        "endChar": 46
+      },
+      "revId": "508bbd5de9678a89521d085c6822cf37f60a81ec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
