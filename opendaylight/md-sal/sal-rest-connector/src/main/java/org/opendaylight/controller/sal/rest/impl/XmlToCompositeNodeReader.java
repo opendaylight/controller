@@ -32,6 +32,9 @@ import org.opendaylight.yangtools.yang.data.api.Node;
 public class XmlToCompositeNodeReader {
 
     private final static XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+    static {
+        xmlInputFactory.setProperty("javax.xml.stream.isSupportingExternalEntities", true);
+    }
     private XMLEventReader eventReader;
 
     public Node<?> read(InputStream entityStream) throws XMLStreamException,

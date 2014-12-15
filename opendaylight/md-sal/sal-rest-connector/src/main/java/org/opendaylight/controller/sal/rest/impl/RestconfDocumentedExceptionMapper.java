@@ -16,6 +16,7 @@ import static org.opendaylight.controller.sal.rest.api.Draft02.RestConfModule.ER
 import static org.opendaylight.controller.sal.rest.api.Draft02.RestConfModule.ERROR_TAG_QNAME;
 import static org.opendaylight.controller.sal.rest.api.Draft02.RestConfModule.ERROR_TYPE_QNAME;
 import static org.opendaylight.controller.sal.rest.api.Draft02.RestConfModule.NAMESPACE;
+
 import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -211,6 +212,7 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
         }
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+
         factory.setNamespaceAware(true);
         factory.setCoalescing(true);
         factory.setIgnoringElementContentWhitespace(true);
