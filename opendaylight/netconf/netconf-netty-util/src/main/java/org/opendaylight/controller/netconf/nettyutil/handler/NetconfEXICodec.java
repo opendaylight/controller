@@ -8,6 +8,9 @@ import org.openexi.proc.common.GrammarOptions;
 import org.openexi.proc.grammars.GrammarCache;
 import org.openexi.sax.EXIReader;
 import org.openexi.sax.Transmogrifier;
+import org.openexi.sax.TransmogrifierException;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
 
 public final class NetconfEXICodec {
     /**
@@ -16,6 +19,17 @@ public final class NetconfEXICodec {
      * of the stream. This is really useful, so let's output it now.
      */
     private static final boolean OUTPUT_EXI_COOKIE = true;
+    /**
+     * OpenEXI does not allow us to directly prevent resolution of external entities. In order
+     * to prevent XXE attacks, we reuse a single no-op entity resolver.
+     */
+    private static final EntityResolver ENTITY_RESOLVER = new EntityResolver() {
+        @Override
+        public InputSource resolveEntity(final String publicId, final String systemId) {
+            return new InputSource();
+        }
+    };
+
     private final EXIOptions exiOptions;
 
     public NetconfEXICodec(final EXIOptions exiOptions) {
@@ -44,16 +58,18 @@ public final class NetconfEXICodec {
         final EXIReader r = new EXIReader();
         r.setPreserveLexicalValues(exiOptions.getPreserveLexicalValues());
         r.setGrammarCache(getGrammarCache());
+        r.setEntityResolver(ENTITY_RESOLVER);
         return r;
     }
 
-    Transmogrifier getTransmogrifier() throws EXIOptionsException {
+    Transmogrifier getTransmogrifier() throws EXIOptionsException, TransmogrifierException {
         final Transmogrifier transmogrifier = new Transmogrifier();
         transmogrifier.setAlignmentType(exiOptions.getAlignmentType());
         transmogrifier.setBlockSize(exiOptions.getBlockSize());
         transmogrifier.setGrammarCache(getGrammarCache());
         transmogrifier.setOutputCookie(OUTPUT_EXI_COOKIE);
         transmogrifier.setOutputOptions(HeaderOptionsOutputType.all);
+        transmogrifier.setResolveExternalGeneralEntities(false);
         return transmogrifier;
     }
 }
