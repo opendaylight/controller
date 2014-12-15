@@ -45,6 +45,15 @@ public class NetconfDocumentedException extends Exception {
 
     static {
         BUILDER_FACTORY = DocumentBuilderFactory.newInstance();
+        try {
+            BUILDER_FACTORY.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            BUILDER_FACTORY.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            BUILDER_FACTORY.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            BUILDER_FACTORY.setXIncludeAware(false);
+            BUILDER_FACTORY.setExpandEntityReferences(false);
+        } catch (ParserConfigurationException e) {
+            throw new ExceptionInInitializerError(e);
+        }
         BUILDER_FACTORY.setNamespaceAware(true);
         BUILDER_FACTORY.setCoalescing(true);
         BUILDER_FACTORY.setIgnoringElementContentWhitespace(true);
