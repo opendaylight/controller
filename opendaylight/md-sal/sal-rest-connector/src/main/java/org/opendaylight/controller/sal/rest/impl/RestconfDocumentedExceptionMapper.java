@@ -211,6 +211,7 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
         }
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+
         factory.setNamespaceAware(true);
         factory.setCoalescing(true);
         factory.setIgnoringElementContentWhitespace(true);
