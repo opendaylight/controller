@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_57f1f2cb",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/sal/binding/codegen/impl/RpcRoutingTableImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-12-15T07:56:55Z",
+      "side": 1,
+      "message": "BiMap will require one instance per route and vice-versa,\nwhich was not intended.",
+      "range": {
+        "startLine": 124,
+        "startChar": 57,
+        "endLine": 124,
+        "endChar": 62
+      },
+      "revId": "940751adf968a6789514566281bb0817bbf07878",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
