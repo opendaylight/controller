@@ -20,6 +20,7 @@ import javax.xml.transform.sax.SAXResult;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.openexi.proc.common.EXIOptionsException;
 import org.openexi.sax.Transmogrifier;
+import org.openexi.sax.TransmogrifierException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +33,7 @@ public final class NetconfMessageToEXIEncoder extends MessageToByteEncoder<Netco
     }
 
     @Override
-    protected void encode(final ChannelHandlerContext ctx, final NetconfMessage msg, final ByteBuf out) throws EXIOptionsException, IOException, TransformerException {
+    protected void encode(final ChannelHandlerContext ctx, final NetconfMessage msg, final ByteBuf out) throws EXIOptionsException, IOException, TransformerException, TransmogrifierException {
         LOG.trace("Sent to encode : {}", msg);
 
         try (final OutputStream os = new ByteBufOutputStream(out)) {

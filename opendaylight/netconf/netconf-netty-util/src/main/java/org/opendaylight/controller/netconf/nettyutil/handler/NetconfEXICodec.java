@@ -8,6 +8,7 @@ import org.openexi.proc.common.GrammarOptions;
 import org.openexi.proc.grammars.GrammarCache;
 import org.openexi.sax.EXIReader;
 import org.openexi.sax.Transmogrifier;
+import org.openexi.sax.TransmogrifierException;
 
 public final class NetconfEXICodec {
     /**
@@ -47,13 +48,14 @@ public final class NetconfEXICodec {
         return r;
     }
 
-    Transmogrifier getTransmogrifier() throws EXIOptionsException {
+    Transmogrifier getTransmogrifier() throws EXIOptionsException, TransmogrifierException {
         final Transmogrifier transmogrifier = new Transmogrifier();
         transmogrifier.setAlignmentType(exiOptions.getAlignmentType());
         transmogrifier.setBlockSize(exiOptions.getBlockSize());
         transmogrifier.setGrammarCache(getGrammarCache());
         transmogrifier.setOutputCookie(OUTPUT_EXI_COOKIE);
         transmogrifier.setOutputOptions(HeaderOptionsOutputType.all);
+        transmogrifier.setResolveExternalGeneralEntities(false);
         return transmogrifier;
     }
 }
