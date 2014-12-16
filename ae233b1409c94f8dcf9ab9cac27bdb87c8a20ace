@@ -22,6 +22,24 @@
       "revId": "ae233b1409c94f8dcf9ab9cac27bdb87c8a20ace",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_7fc72446",
+        "filename": "opendaylight/md-sal/sal-dom-broker/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-12-16T13:22:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_17904a42",
+      "revId": "ae233b1409c94f8dcf9ab9cac27bdb87c8a20ace",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
