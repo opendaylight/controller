@@ -86,6 +86,7 @@ import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.LeafrefTypeDefinition;
 import org.opendaylight.yangtools.yang.model.util.EmptyType;
+import org.opendaylight.yangtools.yang.model.util.ExtendedType;
 import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil;
 import org.opendaylight.yangtools.yang.parser.builder.impl.ContainerSchemaNodeBuilder;
 import org.opendaylight.yangtools.yang.parser.builder.impl.LeafSchemaNodeBuilder;
@@ -110,7 +111,15 @@ public class RestconfImpl implements RestconfService {
         }
     }
 
+    private static class TypeDef {
+        public final TypeDefinition<? extends Object> typedef;
+        public final QName qName;
 
+        TypeDef(final TypeDefinition<? extends Object> typedef, final QName qName) {
+            this.typedef = typedef;
+            this.qName = qName;
+        }
+    }
 
     private final static RestconfImpl INSTANCE = new RestconfImpl();
 
@@ -1322,11 +1331,16 @@ public class RestconfImpl implements RestconfService {
             final DOMMountPoint mountPoint) {
         final Object value = simpleNode.getValue();
         Object inputValue = value;
-        TypeDefinition<? extends Object> typeDefinition = this.typeDefinition(schema);
+        TypeDef typeDef = this.typeDefinition(schema);
+        TypeDefinition<? extends Object> typeDefinition = typeDef != null ? typeDef.typedef : null;
 
         // For leafrefs, extract the type it is pointing to
         if(typeDefinition instanceof LeafrefTypeDefinition) {
-            typeDefinition = SchemaContextUtil.getBaseTypeForLeafRef(((LeafrefTypeDefinition) typeDefinition), mountPoint == null ? this.controllerContext.getGlobalSchema() : mountPoint.getSchemaContext(), schema);
+            if (schema.getQName().equals(typeDef.qName)) {
+                typeDefinition = SchemaContextUtil.getBaseTypeForLeafRef(((LeafrefTypeDefinition) typeDefinition), mountPoint == null ? this.controllerContext.getGlobalSchema() : mountPoint.getSchemaContext(), schema);
+            } else {
+                typeDefinition = SchemaContextUtil.getBaseTypeForLeafRef(((LeafrefTypeDefinition) typeDefinition), mountPoint == null ? this.controllerContext.getGlobalSchema() : mountPoint.getSchemaContext(), typeDef.qName);
+            }
         }
 
         if (typeDefinition instanceof IdentityrefTypeDefinition) {
@@ -1498,29 +1512,25 @@ public class RestconfImpl implements RestconfService {
         }
     }
 
-    private TypeDefinition<? extends Object> _typeDefinition(final LeafSchemaNode node) {
-        TypeDefinition<?> baseType = node.getType();
+    private TypeDef typeDefinition(final TypeDefinition<?> type, final QName nodeQName) {
+        TypeDefinition<?> baseType = type;
+        QName qName = nodeQName;
         while (baseType.getBaseType() != null) {
+            if (baseType instanceof ExtendedType) {
+                qName = baseType.getQName();
+            }
             baseType = baseType.getBaseType();
         }
 
-        return baseType;
+        return new TypeDef(baseType, qName);
+
     }
 
-    private TypeDefinition<? extends Object> typeDefinition(final LeafListSchemaNode node) {
-        TypeDefinition<?> baseType = node.getType();
-        while (baseType.getBaseType() != null) {
-            baseType = baseType.getBaseType();
-        }
-
-        return baseType;
-    }
-
-    private TypeDefinition<? extends Object> typeDefinition(final DataSchemaNode node) {
+    private TypeDef typeDefinition(final DataSchemaNode node) {
         if (node instanceof LeafListSchemaNode) {
-            return typeDefinition((LeafListSchemaNode) node);
+            return typeDefinition(((LeafListSchemaNode)node).getType(), node.getQName());
         } else if (node instanceof LeafSchemaNode) {
-            return _typeDefinition((LeafSchemaNode) node);
+            return typeDefinition(((LeafSchemaNode)node).getType(), node.getQName());
         } else if (node instanceof AnyXmlSchemaNode) {
             return null;
         } else {

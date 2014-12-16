@@ -2,6 +2,8 @@ module leafref-module {
   namespace "leafref:module";  
 
   prefix "lfrfmo";
+  
+  import augment-leafref-module {prefix augleafref; revision-date 2014-12-16;}
   revision 2013-11-18 {    
   }
 
@@ -13,6 +15,9 @@ module leafref-module {
             type leafref {
                 path "/cont/lf1"; 
             }
+        }
+        leaf lf4 {
+            type augleafref:leafreftype;
         }
     }
   
