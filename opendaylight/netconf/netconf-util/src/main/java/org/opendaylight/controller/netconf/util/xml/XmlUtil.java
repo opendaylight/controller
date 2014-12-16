@@ -46,7 +46,9 @@ public final class XmlUtil {
 
     public static final String XMLNS_ATTRIBUTE_KEY = "xmlns";
     public static final String XMLNS_URI = "http://www.w3.org/2000/xmlns/";
-    private static final DocumentBuilderFactory BUILDERFACTORY;
+    private static final DocumentBuilderFactory BUILDER_FACTORY;
+    private static final TransformerFactory TRANSFORMER_FACTORY = TransformerFactory.newInstance();
+    private static final SchemaFactory SCHEMA_FACTORY = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 
     static {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -63,32 +65,34 @@ public final class XmlUtil {
         factory.setCoalescing(true);
         factory.setIgnoringElementContentWhitespace(true);
         factory.setIgnoringComments(true);
-        BUILDERFACTORY = factory;
+        BUILDER_FACTORY = factory;
     }
 
-    private XmlUtil() {}
+    private XmlUtil() {
+        throw new UnsupportedOperationException("Utility class");
+    }
 
-    public static Element readXmlToElement(String xmlContent) throws SAXException, IOException {
+    public static Element readXmlToElement(final String xmlContent) throws SAXException, IOException {
         Document doc = readXmlToDocument(xmlContent);
         return doc.getDocumentElement();
     }
 
-    public static Element readXmlToElement(InputStream xmlContent) throws SAXException, IOException {
+    public static Element readXmlToElement(final InputStream xmlContent) throws SAXException, IOException {
         Document doc = readXmlToDocument(xmlContent);
         return doc.getDocumentElement();
     }
 
-    public static Document readXmlToDocument(String xmlContent) throws SAXException, IOException {
+    public static Document readXmlToDocument(final String xmlContent) throws SAXException, IOException {
         return readXmlToDocument(new ByteArrayInputStream(xmlContent.getBytes(Charsets.UTF_8)));
     }
 
     // TODO improve exceptions throwing
     // along with XmlElement
 
-    public static Document readXmlToDocument(InputStream xmlContent) throws SAXException, IOException {
+    public static Document readXmlToDocument(final InputStream xmlContent) throws SAXException, IOException {
         DocumentBuilder dBuilder;
         try {
-            dBuilder = BUILDERFACTORY.newDocumentBuilder();
+            dBuilder = BUILDER_FACTORY.newDocumentBuilder();
         } catch (ParserConfigurationException e) {
             throw new IllegalStateException("Failed to parse XML document", e);
         }
@@ -98,20 +102,20 @@ public final class XmlUtil {
         return doc;
     }
 
-    public static Element readXmlToElement(File xmlFile) throws SAXException, IOException {
+    public static Element readXmlToElement(final File xmlFile) throws SAXException, IOException {
         return readXmlToDocument(new FileInputStream(xmlFile)).getDocumentElement();
     }
 
     public static Document newDocument() {
         try {
-            DocumentBuilder builder = BUILDERFACTORY.newDocumentBuilder();
+            DocumentBuilder builder = BUILDER_FACTORY.newDocumentBuilder();
             return builder.newDocument();
         } catch (ParserConfigurationException e) {
             throw new IllegalStateException("Failed to create document", e);
         }
     }
 
-    public static Element createElement(final Document document, String qName, Optional<String> namespaceURI) {
+    public static Element createElement(final Document document, final String qName, final Optional<String> namespaceURI) {
         if(namespaceURI.isPresent()) {
             final Element element = document.createElementNS(namespaceURI.get(), qName);
             String name = XMLNS_ATTRIBUTE_KEY;
@@ -124,20 +128,20 @@ public final class XmlUtil {
         return document.createElement(qName);
     }
 
-    public static Element createTextElement(Document document, String qName, String content, Optional<String> namespaceURI) {
+    public static Element createTextElement(final Document document, final String qName, final String content, final Optional<String> namespaceURI) {
         Element typeElement = createElement(document, qName, namespaceURI);
         typeElement.appendChild(document.createTextNode(content));
         return typeElement;
     }
 
-    public static Element createTextElementWithNamespacedContent(Document document, String qName, String prefix,
-                                                                 String namespace, String contentWithoutPrefix) {
+    public static Element createTextElementWithNamespacedContent(final Document document, final String qName, final String prefix,
+                                                                 final String namespace, final String contentWithoutPrefix) {
 
        return createTextElementWithNamespacedContent(document, qName, prefix, namespace, contentWithoutPrefix, Optional.<String>absent());
     }
 
-    public static Element createTextElementWithNamespacedContent(Document document, String qName, String prefix,
-                                                                 String namespace, String contentWithoutPrefix, Optional<String> namespaceURI) {
+    public static Element createTextElementWithNamespacedContent(final Document document, final String qName, final String prefix,
+                                                                 final String namespace, final String contentWithoutPrefix, final Optional<String> namespaceURI) {
 
         String content = createPrefixedValue(XmlNetconfConstants.PREFIX, contentWithoutPrefix);
         Element element = createTextElement(document, qName, content, namespaceURI);
@@ -146,25 +150,25 @@ public final class XmlUtil {
         return element;
     }
 
-    public static String createPrefixedValue(String prefix, String value) {
+    public static String createPrefixedValue(final String prefix, final String value) {
         return prefix + ":" + value;
     }
 
-    public static String toString(Document document) {
+    public static String toString(final Document document) {
         return toString(document.getDocumentElement());
     }
 
-    public static String toString(Element xml) {
+    public static String toString(final Element xml) {
         return toString(xml, false);
     }
 
-    public static String toString(XmlElement xmlElement) {
+    public static String toString(final XmlElement xmlElement) {
         return toString(xmlElement.getDomElement(), false);
     }
 
-    public static String toString(Element xml, boolean addXmlDeclaration) {
+    public static String toString(final Element xml, final boolean addXmlDeclaration) {
         try {
-            Transformer transformer = TransformerFactory.newInstance().newTransformer();
+            Transformer transformer = TRANSFORMER_FACTORY.newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, addXmlDeclaration ? "no" : "yes");
 
@@ -178,26 +182,25 @@ public final class XmlUtil {
         }
     }
 
-    public static String toString(Document doc, boolean addXmlDeclaration) {
+    public static String toString(final Document doc, final boolean addXmlDeclaration) {
         return toString(doc.getDocumentElement(), addXmlDeclaration);
     }
 
-    public static Schema loadSchema(InputStream... fromStreams) {
+    public static Schema loadSchema(final InputStream... fromStreams) {
         Source[] sources = new Source[fromStreams.length];
         int i = 0;
         for (InputStream stream : fromStreams) {
             sources[i++] = new StreamSource(stream);
         }
 
-        final SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         try {
-            return schemaFactory.newSchema(sources);
+            return SCHEMA_FACTORY.newSchema(sources);
         } catch (SAXException e) {
             throw new IllegalStateException("Failed to instantiate XML schema", e);
         }
     }
 
-    public static Object evaluateXPath(XPathExpression expr, Object rootNode, QName returnType) {
+    public static Object evaluateXPath(final XPathExpression expr, final Object rootNode, final QName returnType) {
         try {
             return expr.evaluate(rootNode, returnType);
         } catch (XPathExpressionException e) {
@@ -205,7 +208,7 @@ public final class XmlUtil {
         }
     }
 
-    public static Document createDocumentCopy(Document original) {
+    public static Document createDocumentCopy(final Document original) {
         final Document copiedDocument = newDocument();
         final Node copiedRoot = copiedDocument.importNode(original.getDocumentElement(), true);
         copiedDocument.appendChild(copiedRoot);
