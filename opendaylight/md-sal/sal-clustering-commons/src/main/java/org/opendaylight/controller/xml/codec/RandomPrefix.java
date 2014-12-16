@@ -29,19 +29,15 @@ final class RandomPrefix {
     String encodeQName(final QName qname) {
         String prefix = prefixes.get(qname.getNamespace());
         if (prefix == null) {
-            prefix = qname.getPrefix();
-            if (prefix == null || prefix.isEmpty() || prefixes.containsValue(prefix)) {
-                final ThreadLocalRandom random = ThreadLocalRandom.current();
-                do {
-                    final StringBuilder sb = new StringBuilder();
-                    for (int i = 0; i < 4; i++) {
-                        sb.append((char)('a' + random.nextInt(25)));
-                    }
+            final ThreadLocalRandom random = ThreadLocalRandom.current();
+            do {
+                final StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < 4; i++) {
+                    sb.append((char)('a' + random.nextInt(25)));
+                }
 
-                    prefix = sb.toString();
-                } while (prefixes.containsValue(prefix));
-            }
-
+                prefix = sb.toString();
+            } while (prefixes.containsValue(prefix));
             prefixes.put(qname.getNamespace(), prefix);
         }
 

@@ -96,13 +96,13 @@ public class ListenerAdapter implements DOMDataChangeListener {
     }
 
     @Override
-    public void onDataChanged(AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
+    public void onDataChanged(final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
         // TODO Auto-generated method stub
 
         if (!change.getCreatedData().isEmpty() || !change.getUpdatedData().isEmpty()
                 || !change.getRemovedPaths().isEmpty()) {
-            String xml = prepareXmlFrom(change);
-            Event event = new Event(EventType.NOTIFY);
+            final String xml = prepareXmlFrom(change);
+            final Event event = new Event(EventType.NOTIFY);
             event.setData(xml);
             eventBus.post(event);
         }
@@ -115,7 +115,7 @@ public class ListenerAdapter implements DOMDataChangeListener {
         @Subscribe
         public void recordCustomerChange(final Event event) {
             if (event.getType() == EventType.REGISTER) {
-                Channel subscriber = event.getSubscriber();
+                final Channel subscriber = event.getSubscriber();
                 if (!subscribers.contains(subscriber)) {
                     subscribers.add(subscriber);
                 }
@@ -123,7 +123,7 @@ public class ListenerAdapter implements DOMDataChangeListener {
                 subscribers.remove(event.getSubscriber());
                 Notificator.removeListenerIfNoSubscriberExists(ListenerAdapter.this);
             } else if (event.getType() == EventType.NOTIFY) {
-                for (Channel subscriber : subscribers) {
+                for (final Channel subscriber : subscribers) {
                     if (subscriber.isActive()) {
                         LOG.debug("Data are sent to subscriber {}:", subscriber.remoteAddress());
                         subscriber.writeAndFlush(new TextWebSocketFrame(event.getData()));
@@ -218,34 +218,34 @@ public class ListenerAdapter implements DOMDataChangeListener {
      *            DataChangeEvent
      * @return Data in printable form.
      */
-    private String prepareXmlFrom(AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
-        Document doc = createDocument();
-        Element notificationElement = doc.createElementNS("urn:ietf:params:xml:ns:netconf:notification:1.0",
+    private String prepareXmlFrom(final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
+        final Document doc = createDocument();
+        final Element notificationElement = doc.createElementNS("urn:ietf:params:xml:ns:netconf:notification:1.0",
                 "notification");
         doc.appendChild(notificationElement);
 
-        Element eventTimeElement = doc.createElement("eventTime");
+        final Element eventTimeElement = doc.createElement("eventTime");
         eventTimeElement.setTextContent(toRFC3339(new Date()));
         notificationElement.appendChild(eventTimeElement);
 
-        Element dataChangedNotificationEventElement = doc.createElementNS(
+        final Element dataChangedNotificationEventElement = doc.createElementNS(
                 "urn:opendaylight:params:xml:ns:yang:controller:md:sal:remote", "data-changed-notification");
         addValuesToDataChangedNotificationEventElement(doc, dataChangedNotificationEventElement, change);
         notificationElement.appendChild(dataChangedNotificationEventElement);
 
         try {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            Transformer transformer = FACTORY.newTransformer();
+            final ByteArrayOutputStream out = new ByteArrayOutputStream();
+            final Transformer transformer = FACTORY.newTransformer();
             transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
             transformer.setOutputProperty(OutputKeys.METHOD, "xml");
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
             transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
             transformer.transform(new DOMSource(doc), new StreamResult(new OutputStreamWriter(out, Charsets.UTF_8)));
-            byte[] charData = out.toByteArray();
+            final byte[] charData = out.toByteArray();
             return new String(charData, "UTF-8");
         } catch (TransformerException | UnsupportedEncodingException e) {
-            String msg = "Error during transformation of Document into String";
+            final String msg = "Error during transformation of Document into String";
             LOG.error(msg, e);
             return msg;
         }
@@ -270,7 +270,7 @@ public class ListenerAdapter implements DOMDataChangeListener {
         final DocumentBuilder bob;
         try {
             bob = DBF.newDocumentBuilder();
-        } catch (ParserConfigurationException e) {
+        } catch (final ParserConfigurationException e) {
             return null;
         }
         return bob.newDocument();
@@ -288,7 +288,7 @@ public class ListenerAdapter implements DOMDataChangeListener {
      */
     private void addValuesToDataChangedNotificationEventElement(final Document doc,
             final Element dataChangedNotificationEventElement,
-            AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
+            final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
         addValuesFromDataToElement(doc, change.getCreatedData().keySet(), dataChangedNotificationEventElement,
                 Operation.CREATED);
         if (change.getCreatedData().isEmpty()) {
@@ -313,13 +313,13 @@ public class ListenerAdapter implements DOMDataChangeListener {
      * @param operation
      *            {@link Operation}
      */
-    private void addValuesFromDataToElement(Document doc, Set<YangInstanceIdentifier> data, Element element,
-            Operation operation) {
+    private void addValuesFromDataToElement(final Document doc, final Set<YangInstanceIdentifier> data, final Element element,
+            final Operation operation) {
         if (data == null || data.isEmpty()) {
             return;
         }
-        for (YangInstanceIdentifier path : data) {
-            Node node = createDataChangeEventElement(doc, path, null, operation);
+        for (final YangInstanceIdentifier path : data) {
+            final Node node = createDataChangeEventElement(doc, path, null, operation);
             element.appendChild(node);
         }
     }
@@ -338,13 +338,13 @@ public class ListenerAdapter implements DOMDataChangeListener {
      * @param operation
      *            {@link Operation}
      */
-    private void addValuesFromDataToElement(Document doc, Map<YangInstanceIdentifier, CompositeNode> data, Element element,
-            Operation operation) {
+    private void addValuesFromDataToElement(final Document doc, final Map<YangInstanceIdentifier, CompositeNode> data, final Element element,
+            final Operation operation) {
         if (data == null || data.isEmpty()) {
             return;
         }
-        for (Entry<YangInstanceIdentifier, CompositeNode> entry : data.entrySet()) {
-            Node node = createDataChangeEventElement(doc, entry.getKey(), entry.getValue(), operation);
+        for (final Entry<YangInstanceIdentifier, CompositeNode> entry : data.entrySet()) {
+            final Node node = createDataChangeEventElement(doc, entry.getKey(), entry.getValue(), operation);
             element.appendChild(node);
         }
     }
@@ -364,11 +364,10 @@ public class ListenerAdapter implements DOMDataChangeListener {
      *            {@link Operation}
      * @return {@link Node} node represented by changed event element.
      */
-    private Node createDataChangeEventElement(Document doc, YangInstanceIdentifier path, CompositeNode data,
-            Operation operation) {
-        Element dataChangeEventElement = doc.createElement("data-change-event");
-
-        Element pathElement = doc.createElement("path");
+    private Node createDataChangeEventElement(final Document doc, final YangInstanceIdentifier path, final CompositeNode data,
+            final Operation operation) {
+        final Element dataChangeEventElement = doc.createElement("data-change-event");
+        final Element pathElement = doc.createElement("path");
         addPathAsValueToElement(path, pathElement);
         dataChangeEventElement.appendChild(pathElement);
 
@@ -376,14 +375,14 @@ public class ListenerAdapter implements DOMDataChangeListener {
         // storeElement.setTextContent(store.value);
         // dataChangeEventElement.appendChild(storeElement);
 
-        Element operationElement = doc.createElement("operation");
+        final Element operationElement = doc.createElement("operation");
         operationElement.setTextContent(operation.value);
         dataChangeEventElement.appendChild(operationElement);
 
         if (data != null) {
-            Element dataElement = doc.createElement("data");
-            Node dataAnyXml = translateToXml(path, data);
-            Node adoptedNode = doc.adoptNode(dataAnyXml);
+            final Element dataElement = doc.createElement("data");
+            final Node dataAnyXml = translateToXml(path, data);
+            final Node adoptedNode = doc.adoptNode(dataAnyXml);
             dataElement.appendChild(adoptedNode);
             dataChangeEventElement.appendChild(dataElement);
         }
@@ -401,7 +400,7 @@ public class ListenerAdapter implements DOMDataChangeListener {
      * @return Data in XML format.
      */
     private Node translateToXml(final YangInstanceIdentifier path, final CompositeNode data) {
-        DataNodeContainer schemaNode = ControllerContext.getInstance().getDataNodeContainerFor(path);
+        final DataNodeContainer schemaNode = ControllerContext.getInstance().getDataNodeContainerFor(path);
         if (schemaNode == null) {
             LOG.info(
                     "Path '{}' contains node with unsupported type (supported type is Container or List) or some node was not found.",
@@ -409,9 +408,9 @@ public class ListenerAdapter implements DOMDataChangeListener {
             return null;
         }
         try {
-            Document xml = xmlMapper.write(data, schemaNode);
+            final Document xml = xmlMapper.write(data, schemaNode);
             return xml.getFirstChild();
-        } catch (UnsupportedDataTypeException e) {
+        } catch (final UnsupportedDataTypeException e) {
             LOG.error("Error occured during translation of notification to XML.", e);
             return null;
         }
@@ -427,18 +426,18 @@ public class ListenerAdapter implements DOMDataChangeListener {
      */
     private void addPathAsValueToElement(final YangInstanceIdentifier path, final Element element) {
         // Map< key = namespace, value = prefix>
-        Map<String, String> prefixes = new HashMap<>();
-        YangInstanceIdentifier instanceIdentifier = path;
-        StringBuilder textContent = new StringBuilder();
+        final Map<String, String> prefixes = new HashMap<>();
+        final YangInstanceIdentifier instanceIdentifier = path;
+        final StringBuilder textContent = new StringBuilder();
 
         // FIXME: BUG-1281: this is duplicated code from yangtools (BUG-1275)
-        for (PathArgument pathArgument : instanceIdentifier.getPathArguments()) {
+        for (final PathArgument pathArgument : instanceIdentifier.getPathArguments()) {
             textContent.append("/");
             writeIdentifierWithNamespacePrefix(element, textContent, pathArgument.getNodeType(), prefixes);
             if (pathArgument instanceof NodeIdentifierWithPredicates) {
-                Map<QName, Object> predicates = ((NodeIdentifierWithPredicates) pathArgument).getKeyValues();
-                for (QName keyValue : predicates.keySet()) {
-                    String predicateValue = String.valueOf(predicates.get(keyValue));
+                final Map<QName, Object> predicates = ((NodeIdentifierWithPredicates) pathArgument).getKeyValues();
+                for (final QName keyValue : predicates.keySet()) {
+                    final String predicateValue = String.valueOf(predicates.get(keyValue));
                     textContent.append("[");
                     writeIdentifierWithNamespacePrefix(element, textContent, keyValue, prefixes);
                     textContent.append("='");
@@ -470,13 +469,10 @@ public class ListenerAdapter implements DOMDataChangeListener {
      */
     private static void writeIdentifierWithNamespacePrefix(final Element element, final StringBuilder textContent,
             final QName qName, final Map<String, String> prefixes) {
-        String namespace = qName.getNamespace().toString();
+        final String namespace = qName.getNamespace().toString();
         String prefix = prefixes.get(namespace);
         if (prefix == null) {
-            prefix = qName.getPrefix();
-            if (prefix == null || prefix.isEmpty() || prefixes.containsValue(prefix)) {
-                prefix = generateNewPrefix(prefixes.values());
-            }
+            prefix = generateNewPrefix(prefixes.values());
         }
 
         element.setAttribute("xmlns:" + prefix, namespace);
@@ -496,11 +492,11 @@ public class ListenerAdapter implements DOMDataChangeListener {
      */
     private static String generateNewPrefix(final Collection<String> prefixes) {
         StringBuilder result = null;
-        Random random = new Random();
+        final Random random = new Random();
         do {
             result = new StringBuilder();
             for (int i = 0; i < 4; i++) {
-                int randomNumber = 0x61 + (Math.abs(random.nextInt()) % 26);
+                final int randomNumber = 0x61 + (Math.abs(random.nextInt()) % 26);
                 result.append(Character.toChars(randomNumber));
             }
         } while (prefixes.contains(result.toString()));
@@ -566,7 +562,7 @@ public class ListenerAdapter implements DOMDataChangeListener {
         if (!subscriber.isActive()) {
             LOG.debug("Channel is not active between websocket server and subscriber {}" + subscriber.remoteAddress());
         }
-        Event event = new Event(EventType.REGISTER);
+        final Event event = new Event(EventType.REGISTER);
         event.setSubscriber(subscriber);
         eventBus.post(event);
     }
@@ -579,7 +575,7 @@ public class ListenerAdapter implements DOMDataChangeListener {
      */
     public void removeSubscriber(final Channel subscriber) {
         LOG.debug("Subscriber {} is removed.", subscriber.remoteAddress());
-        Event event = new Event(EventType.DEREGISTER);
+        final Event event = new Event(EventType.DEREGISTER);
         event.setSubscriber(subscriber);
         eventBus.post(event);
     }

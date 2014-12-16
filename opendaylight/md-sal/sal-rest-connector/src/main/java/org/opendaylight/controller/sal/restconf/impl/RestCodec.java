@@ -97,7 +97,7 @@ public class RestCodec {
                             input == null ? "null" : input.getClass(), String.valueOf(input));
                     return null;
                 } else {
-                    TypeDefinitionAwareCodec<Object, ? extends TypeDefinition<?>> typeAwarecodec = TypeDefinitionAwareCodec
+                    final TypeDefinitionAwareCodec<Object, ? extends TypeDefinition<?>> typeAwarecodec = TypeDefinitionAwareCodec
                             .from(type);
                     if (typeAwarecodec != null) {
                         if (input instanceof IdentityValuesDTO) {
@@ -110,7 +110,7 @@ public class RestCodec {
                         return null;
                     }
                 }
-            } catch (ClassCastException e) { // TODO remove this catch when everyone use codecs
+            } catch (final ClassCastException e) { // TODO remove this catch when everyone use codecs
                 logger.error(
                         "ClassCastException was thrown when codec is invoked with parameter " + String.valueOf(input),
                         e);
@@ -129,7 +129,7 @@ public class RestCodec {
                 } else if (type instanceof InstanceIdentifierTypeDefinition) {
                     return instanceIdentifier.serialize(input);
                 } else {
-                    TypeDefinitionAwareCodec<Object, ? extends TypeDefinition<?>> typeAwarecodec = TypeDefinitionAwareCodec
+                    final TypeDefinitionAwareCodec<Object, ? extends TypeDefinition<?>> typeAwarecodec = TypeDefinitionAwareCodec
                             .from(type);
                     if (typeAwarecodec != null) {
                         return typeAwarecodec.serialize(input);
@@ -139,7 +139,7 @@ public class RestCodec {
                         return null;
                     }
                 }
-            } catch (ClassCastException e) { // TODO remove this catch when everyone use codecs
+            } catch (final ClassCastException e) { // TODO remove this catch when everyone use codecs
                 logger.error(
                         "ClassCastException was thrown when codec is invoked with parameter " + String.valueOf(input),
                         e);
@@ -161,13 +161,13 @@ public class RestCodec {
 
         @Override
         public IdentityValuesDTO serialize(final QName data) {
-            return new IdentityValuesDTO(data.getNamespace().toString(), data.getLocalName(), data.getPrefix(), null);
+            return new IdentityValuesDTO(data.getNamespace().toString(), data.getLocalName(), null, null);
         }
 
         @Override
         public QName deserialize(final IdentityValuesDTO data) {
-            IdentityValue valueWithNamespace = data.getValuesWithNamespaces().get(0);
-            Module module = getModuleByNamespace(valueWithNamespace.getNamespace(), mountPoint);
+            final IdentityValue valueWithNamespace = data.getValuesWithNamespaces().get(0);
+            final Module module = getModuleByNamespace(valueWithNamespace.getNamespace(), mountPoint);
             if (module == null) {
                 logger.info("Module was not found for namespace {}", valueWithNamespace.getNamespace());
                 logger.info("Idenetityref will be translated as NULL for data - {}", String.valueOf(valueWithNamespace));
@@ -203,16 +203,16 @@ public class RestCodec {
 
         @Override
         public IdentityValuesDTO serialize(final YangInstanceIdentifier data) {
-            IdentityValuesDTO identityValuesDTO = new IdentityValuesDTO();
-            for (PathArgument pathArgument : data.getPathArguments()) {
-                IdentityValue identityValue = qNameToIdentityValue(pathArgument.getNodeType());
+            final IdentityValuesDTO identityValuesDTO = new IdentityValuesDTO();
+            for (final PathArgument pathArgument : data.getPathArguments()) {
+                final IdentityValue identityValue = qNameToIdentityValue(pathArgument.getNodeType());
                 if (pathArgument instanceof NodeIdentifierWithPredicates && identityValue != null) {
-                    List<Predicate> predicates = keyValuesToPredicateList(((NodeIdentifierWithPredicates) pathArgument)
+                    final List<Predicate> predicates = keyValuesToPredicateList(((NodeIdentifierWithPredicates) pathArgument)
                             .getKeyValues());
                     identityValue.setPredicates(predicates);
                 } else if (pathArgument instanceof NodeWithValue && identityValue != null) {
-                    List<Predicate> predicates = new ArrayList<>();
-                    String value = String.valueOf(((NodeWithValue) pathArgument).getValue());
+                    final List<Predicate> predicates = new ArrayList<>();
+                    final String value = String.valueOf(((NodeWithValue) pathArgument).getValue());
                     predicates.add(new Predicate(null, value));
                     identityValue.setPredicates(predicates);
                 }
@@ -223,9 +223,9 @@ public class RestCodec {
 
         @Override
         public YangInstanceIdentifier deserialize(final IdentityValuesDTO data) {
-            List<PathArgument> result = new ArrayList<PathArgument>();
-            IdentityValue valueWithNamespace = data.getValuesWithNamespaces().get(0);
-            Module module = getModuleByNamespace(valueWithNamespace.getNamespace(), mountPoint);
+            final List<PathArgument> result = new ArrayList<PathArgument>();
+            final IdentityValue valueWithNamespace = data.getValuesWithNamespaces().get(0);
+            final Module module = getModuleByNamespace(valueWithNamespace.getNamespace(), mountPoint);
             if (module == null) {
                 logger.info("Module by namespace '{}' of first node in instance-identifier was not found.",
                         valueWithNamespace.getNamespace());
@@ -235,11 +235,11 @@ public class RestCodec {
             }
 
             DataNodeContainer parentContainer = module;
-            List<IdentityValue> identities = data.getValuesWithNamespaces();
+            final List<IdentityValue> identities = data.getValuesWithNamespaces();
             for (int i = 0; i < identities.size(); i++) {
-                IdentityValue identityValue = identities.get(i);
+                final IdentityValue identityValue = identities.get(i);
                 URI validNamespace = resolveValidNamespace(identityValue.getNamespace(), mountPoint);
-                DataSchemaNode node = ControllerContext.findInstanceDataChildByNameAndNamespace(
+                final DataSchemaNode node = ControllerContext.findInstanceDataChildByNameAndNamespace(
                         parentContainer, identityValue.getValue(), validNamespace);
                 if (node == null) {
                     logger.info("'{}' node was not found in {}", identityValue, parentContainer.getChildNodes());
@@ -247,13 +247,13 @@ public class RestCodec {
                             String.valueOf(identityValue.getValue()));
                     return null;
                 }
-                QName qName = node.getQName();
+                final QName qName = node.getQName();
                 PathArgument pathArgument = null;
                 if (identityValue.getPredicates().isEmpty()) {
                     pathArgument = new NodeIdentifier(qName);
                 } else {
                     if (node instanceof LeafListSchemaNode) { // predicate is value of leaf-list entry
-                        Predicate leafListPredicate = identityValue.getPredicates().get(0);
+                        final Predicate leafListPredicate = identityValue.getPredicates().get(0);
                         if (!leafListPredicate.isLeafList()) {
                             logger.info("Predicate's data is not type of leaf-list. It should be in format \".='value'\"");
                             logger.info("Instance-identifier will be translated as NULL for data - {}",
@@ -262,11 +262,11 @@ public class RestCodec {
                         }
                         pathArgument = new NodeWithValue(qName, leafListPredicate.getValue());
                     } else if (node instanceof ListSchemaNode) { // predicates are keys of list
-                        DataNodeContainer listNode = (DataNodeContainer) node;
-                        Map<QName, Object> predicatesMap = new HashMap<>();
-                        for (Predicate predicate : identityValue.getPredicates()) {
+                        final DataNodeContainer listNode = (DataNodeContainer) node;
+                        final Map<QName, Object> predicatesMap = new HashMap<>();
+                        for (final Predicate predicate : identityValue.getPredicates()) {
                             validNamespace = resolveValidNamespace(predicate.getName().getNamespace(), mountPoint);
-                            DataSchemaNode listKey = ControllerContext
+                            final DataSchemaNode listKey = ControllerContext
                                     .findInstanceDataChildByNameAndNamespace(listNode, predicate.getName().getValue(),
                                             validNamespace);
                             predicatesMap.put(listKey.getQName(), predicate.getValue());
@@ -297,9 +297,9 @@ public class RestCodec {
         }
 
         private List<Predicate> keyValuesToPredicateList(final Map<QName, Object> keyValues) {
-            List<Predicate> result = new ArrayList<>();
-            for (QName qName : keyValues.keySet()) {
-                Object value = keyValues.get(qName);
+            final List<Predicate> result = new ArrayList<>();
+            for (final QName qName : keyValues.keySet()) {
+                final Object value = keyValues.get(qName);
                 result.add(new Predicate(qNameToIdentityValue(qName), String.valueOf(value)));
             }
             return result;
@@ -307,14 +307,14 @@ public class RestCodec {
 
         private IdentityValue qNameToIdentityValue(final QName qName) {
             if (qName != null) {
-                return new IdentityValue(qName.getNamespace().toString(), qName.getLocalName(), qName.getPrefix());
+                return new IdentityValue(qName.getNamespace().toString(), qName.getLocalName());
             }
             return null;
         }
     }
 
     private static Module getModuleByNamespace(final String namespace, final DOMMountPoint mountPoint) {
-        URI validNamespace = resolveValidNamespace(namespace, mountPoint);
+        final URI validNamespace = resolveValidNamespace(namespace, mountPoint);
 
         Module module = null;
         if (mountPoint != null) {
