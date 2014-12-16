@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_ec95d0e4",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 2759
+      },
+      "writtenOn": "2014-12-16T00:37:15Z",
+      "side": 1,
+      "message": "The first line in a Git commit message is generally a summary line which in practice should be \u003c\u003d72 characters. The preferred way to write commit messages is to use the present tense as well.\n\nSomething like:\n\n    Replace deprecated junit.frameowrk.Assert with org.junit.Assert\n\n\n(Note:  This is just a suggestion which you\u0027re welcome to ignore if you disagree)",
+      "range": {
+        "startLine": 7,
+        "startChar": 18,
+        "endLine": 7,
+        "endChar": 26
+      },
+      "revId": "6e537e941dc6df86f9b5b153f617df907817921c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
