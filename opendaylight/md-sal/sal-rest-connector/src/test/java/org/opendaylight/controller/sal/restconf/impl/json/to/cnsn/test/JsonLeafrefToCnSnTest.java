@@ -24,7 +24,7 @@ public class JsonLeafrefToCnSnTest extends YangAndXmlAndDataSchemaLoader {
 
     @BeforeClass
     public static void initialize() {
-        dataLoad("/json-to-cnsn/leafref");
+        dataLoad("/json-to-cnsn/leafref",2,"leafref-module","cont");
     }
 
     /**

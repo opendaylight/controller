@@ -1,0 +1,21 @@
+module augment-leafref-module {
+  namespace "augment:leafref:module";  
+
+  prefix "auglfrfmo";
+  revision 2014-12-16 {    
+  }
+
+
+  typedef leafreftype {
+    type leafref {
+        path "/cont/lf3";
+    
+    }
+  }
+  
+  container cont {
+    leaf lf3 {
+        type string;
+    }
+  }
+}
