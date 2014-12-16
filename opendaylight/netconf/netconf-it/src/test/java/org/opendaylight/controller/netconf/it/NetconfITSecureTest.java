@@ -108,12 +108,12 @@ public class NetconfITSecureTest extends AbstractNetconfConfigTest {
     @After
     public void tearDown() throws Exception {
         sshProxyServer.close();
-        clientGroup.shutdownGracefully().await();
+        clientGroup.shutdownGracefully();
         minaTimerEx.shutdownNow();
         nioExec.shutdownNow();
     }
 
-    @Test
+    @Test(timeout = 2*60*1000)
     public void testSecure() throws Exception {
         final NetconfClientDispatcher dispatch = new NetconfClientDispatcherImpl(getNettyThreadgroup(), getNettyThreadgroup(), getHashedWheelTimer());
         try (TestingNetconfClient netconfClient = new TestingNetconfClient("testing-ssh-client", dispatch, getClientConfiguration(new SimpleNetconfClientSessionListener()))) {
