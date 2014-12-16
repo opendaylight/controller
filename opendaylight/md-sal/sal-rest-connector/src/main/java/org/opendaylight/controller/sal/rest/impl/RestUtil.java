@@ -34,25 +34,25 @@ public final class RestUtil {
     }
 
     public static IdentityValuesDTO asInstanceIdentifier(final String value, final PrefixesMaping prefixMap) {
-        String valueTrimmed = value.trim();
+        final String valueTrimmed = value.trim();
         if (!valueTrimmed.startsWith("/")) {
             return null;
         }
-        String[] xPathParts = valueTrimmed.split("/");
+        final String[] xPathParts = valueTrimmed.split("/");
         if (xPathParts.length < 2) { // must be at least "/pr:node"
             return null;
         }
-        IdentityValuesDTO identityValuesDTO = new IdentityValuesDTO(value);
+        final IdentityValuesDTO identityValuesDTO = new IdentityValuesDTO(value);
         for (int i = 1; i < xPathParts.length; i++) {
-            String xPathPartTrimmed = xPathParts[i].trim();
+            final String xPathPartTrimmed = xPathParts[i].trim();
 
-            String xPathPartStr = getIdAndPrefixAsStr(xPathPartTrimmed);
-            IdentityValue identityValue = toIdentity(xPathPartStr, prefixMap);
+            final String xPathPartStr = getIdAndPrefixAsStr(xPathPartTrimmed);
+            final IdentityValue identityValue = toIdentity(xPathPartStr, prefixMap);
             if (identityValue == null) {
                 return null;
             }
 
-            List<Predicate> predicates = toPredicates(xPathPartTrimmed, prefixMap);
+            final List<Predicate> predicates = toPredicates(xPathPartTrimmed, prefixMap);
             if (predicates == null) {
                 return null;
             }
@@ -64,47 +64,47 @@ public final class RestUtil {
     }
 
     private static String getIdAndPrefixAsStr(final String pathPart) {
-        int predicateStartIndex = pathPart.indexOf("[");
+        final int predicateStartIndex = pathPart.indexOf("[");
         return predicateStartIndex == -1 ? pathPart : pathPart.substring(0, predicateStartIndex);
     }
 
     private static IdentityValue toIdentity(final String xPathPart, final PrefixesMaping prefixMap) {
-        String xPathPartTrimmed = xPathPart.trim();
+        final String xPathPartTrimmed = xPathPart.trim();
         if (xPathPartTrimmed.isEmpty()) {
             return null;
         }
-        String[] prefixAndIdentifier = xPathPartTrimmed.split(":");
+        final String[] prefixAndIdentifier = xPathPartTrimmed.split(":");
         // it is not "prefix:value"
         if (prefixAndIdentifier.length != 2) {
             return null;
         }
-        String prefix = prefixAndIdentifier[0].trim();
-        String identifier = prefixAndIdentifier[1].trim();
+        final String prefix = prefixAndIdentifier[0].trim();
+        final String identifier = prefixAndIdentifier[1].trim();
         if (prefix.isEmpty() || identifier.isEmpty()) {
             return null;
         }
-        String namespace = prefixMap.getNamespace(prefix);
-        return new IdentityValue(namespace, identifier, namespace.equals(prefix) ? null : prefix);
+        final String namespace = prefixMap.getNamespace(prefix);
+        return new IdentityValue(namespace, identifier);
     }
 
     private static List<Predicate> toPredicates(final String predicatesStr, final PrefixesMaping prefixMap) {
-        List<Predicate> result = new ArrayList<>();
-        List<String> predicates = new ArrayList<>();
-        Matcher matcher = PREDICATE_PATTERN.matcher(predicatesStr);
+        final List<Predicate> result = new ArrayList<>();
+        final List<String> predicates = new ArrayList<>();
+        final Matcher matcher = PREDICATE_PATTERN.matcher(predicatesStr);
         while (matcher.find()) {
             predicates.add(matcher.group(1).trim());
         }
-        for (String predicate : predicates) {
-            int indexOfEqualityMark = predicate.indexOf("=");
+        for (final String predicate : predicates) {
+            final int indexOfEqualityMark = predicate.indexOf("=");
             if (indexOfEqualityMark != -1) {
-                String predicateValue = toPredicateValue(predicate.substring(indexOfEqualityMark + 1));
+                final String predicateValue = toPredicateValue(predicate.substring(indexOfEqualityMark + 1));
                 if (predicate.startsWith(".")) { // it is leaf-list
                     if (predicateValue == null) {
                         return null;
                     }
                     result.add(new Predicate(null, predicateValue));
                 } else {
-                    IdentityValue identityValue = toIdentity(predicate.substring(0, indexOfEqualityMark), prefixMap);
+                    final IdentityValue identityValue = toIdentity(predicate.substring(0, indexOfEqualityMark), prefixMap);
                     if (identityValue == null || predicateValue == null) {
                         return null;
                     }
@@ -116,7 +116,7 @@ public final class RestUtil {
     }
 
     private static String toPredicateValue(final String predicatedValue) {
-        String predicatedValueTrimmed = predicatedValue.trim();
+        final String predicatedValueTrimmed = predicatedValue.trim();
         if ((predicatedValueTrimmed.startsWith(DQUOTE) || predicatedValueTrimmed.startsWith(SQUOTE))
                 && (predicatedValueTrimmed.endsWith(DQUOTE) || predicatedValueTrimmed.endsWith(SQUOTE))) {
             return predicatedValueTrimmed.substring(1, predicatedValueTrimmed.length() - 1);

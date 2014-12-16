@@ -13,14 +13,14 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -34,9 +34,6 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
-
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 
 public class RpcInvocationStrategyTest {
 
@@ -68,11 +65,11 @@ public class RpcInvocationStrategyTest {
 
     public class MockRpcService implements RpcService {
 
-        public Future<?> rpcnameWithInputNoOutput(DataObject input) {
+        public Future<?> rpcnameWithInputNoOutput(final DataObject input) {
             return futureDataObj;
         }
 
-        public Future<RpcResult<DataObject>> rpcnameWithInputWithOutput(DataObject input) {
+        public Future<RpcResult<DataObject>> rpcnameWithInputWithOutput(final DataObject input) {
             return futureDataObj;
         }
 
@@ -94,7 +91,7 @@ public class RpcInvocationStrategyTest {
         urn = new URI(new String("urn:a:valid:urn"));
     }
 
-    private void setupForForwardToDom(boolean hasOutput, boolean hasInput, int expectedErrorSize) {
+    private void setupForForwardToDom(final boolean hasOutput, final boolean hasInput, final int expectedErrorSize) {
 
         if (expectedErrorSize > 0) {
             errors.add(rpcError);
@@ -117,8 +114,8 @@ public class RpcInvocationStrategyTest {
 
     }
 
-    private void validateForwardToDomBroker(ListenableFuture<RpcResult<?>> forwardToDomBroker,
-            boolean expectedSuccess, DataObject expectedResult, int expectedErrorSize)
+    private void validateForwardToDomBroker(final ListenableFuture<RpcResult<?>> forwardToDomBroker,
+            final boolean expectedSuccess, final DataObject expectedResult, final int expectedErrorSize)
             throws InterruptedException, ExecutionException {
         assertNotNull(forwardToDomBroker);
         assertEquals(expectedSuccess, forwardToDomBroker.get().isSuccessful());
@@ -126,9 +123,9 @@ public class RpcInvocationStrategyTest {
         assertEquals(expectedErrorSize, forwardToDomBroker.get().getErrors().size());
     }
 
-    private void setupTestMethod(String rpcName, String testMethodName, boolean hasInput)
+    private void setupTestMethod(final String rpcName, final String testMethodName, final boolean hasInput)
             throws NoSuchMethodException {
-        mockQName = new QName(urn, new Date(0L), new String("prefix"), new String(rpcName));
+        mockQName = QName.create(urn, new Date(0L), new String(rpcName));
         java.lang.reflect.Method rpcMethod = hasInput ? MockRpcService.class.getMethod(rpcName,
                 DataObject.class) : MockRpcService.class.getMethod(rpcName);
         rpcInvocationStrategy = new RpcInvocationStrategy(mockQName, rpcMethod, mockMappingService,
@@ -192,7 +189,7 @@ public class RpcInvocationStrategyTest {
     /*
      * invokeOn Tests
      */
-    private void setupRpcResultsWithOutput(int expectedErrorSize) {
+    private void setupRpcResultsWithOutput(final int expectedErrorSize) {
         if (expectedErrorSize > 0) {
             errors.add(rpcError);
         }
@@ -206,7 +203,7 @@ public class RpcInvocationStrategyTest {
         when(mockMappingService.toDataDom(toDataDomInput)).thenReturn(outputInvokeOn);
     }
 
-    private void setupRpcResultsNoOutput(int expectedErrorSize) {
+    private void setupRpcResultsNoOutput(final int expectedErrorSize) {
         if (expectedErrorSize > 0) {
             errors.add(rpcError);
         }
@@ -219,8 +216,8 @@ public class RpcInvocationStrategyTest {
     }
 
     private void validateReturnedImmediateFuture(
-            ListenableFuture<RpcResult<CompositeNode>> immediateFuture, boolean expectedSuccess,
-            CompositeNode expectedReturn, int expectedErrorSize) throws InterruptedException,
+            final ListenableFuture<RpcResult<CompositeNode>> immediateFuture, final boolean expectedSuccess,
+            final CompositeNode expectedReturn, final int expectedErrorSize) throws InterruptedException,
             ExecutionException {
         assertNotNull(immediateFuture);
         assertEquals(expectedSuccess, immediateFuture.get().isSuccessful());

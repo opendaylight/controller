@@ -87,7 +87,7 @@ public final class TestUtils {
 
     private final static YangContextParser parser = new YangParserImpl();
 
-    private static Set<Module> loadModules(String resourceDirectory) throws FileNotFoundException {
+    private static Set<Module> loadModules(final String resourceDirectory) throws FileNotFoundException {
         final File testDir = new File(resourceDirectory);
         final String[] fileList = testDir.list();
         final List<File> testFiles = new ArrayList<File>();
@@ -95,7 +95,7 @@ public final class TestUtils {
             throw new FileNotFoundException(resourceDirectory);
         }
         for (int i = 0; i < fileList.length; i++) {
-            String fileName = fileList[i];
+            final String fileName = fileList[i];
             if (new File(testDir, fileName).isDirectory() == false) {
                 testFiles.add(new File(testDir, fileName));
             }
@@ -103,26 +103,26 @@ public final class TestUtils {
         return parser.parseYangModels(testFiles);
     }
 
-    public static Set<Module> loadModulesFrom(String yangPath) {
+    public static Set<Module> loadModulesFrom(final String yangPath) {
         try {
             return TestUtils.loadModules(TestUtils.class.getResource(yangPath).getPath());
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             LOG.error("Yang files at path: " + yangPath + " weren't loaded.");
         }
 
         return null;
     }
 
-    public static SchemaContext loadSchemaContext(Set<Module> modules) {
+    public static SchemaContext loadSchemaContext(final Set<Module> modules) {
         return parser.resolveSchemaContext(modules);
     }
 
-    public static SchemaContext loadSchemaContext(String resourceDirectory) throws FileNotFoundException {
+    public static SchemaContext loadSchemaContext(final String resourceDirectory) throws FileNotFoundException {
         return parser.resolveSchemaContext(loadModulesFrom(resourceDirectory));
     }
 
-    public static Module findModule(Set<Module> modules, String moduleName) {
-        for (Module module : modules) {
+    public static Module findModule(final Set<Module> modules, final String moduleName) {
+        for (final Module module : modules) {
             if (module.getName().equals(moduleName)) {
                 return module;
             }
@@ -130,10 +130,10 @@ public final class TestUtils {
         return null;
     }
 
-    public static Document loadDocumentFrom(InputStream inputStream) {
+    public static Document loadDocumentFrom(final InputStream inputStream) {
         try {
-            DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
-            DocumentBuilder docBuilder = dbfac.newDocumentBuilder();
+            final DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
+            final DocumentBuilder docBuilder = dbfac.newDocumentBuilder();
             return docBuilder.parse(inputStream);
         } catch (SAXException | IOException | ParserConfigurationException e) {
             LOG.error("Error during loading Document from XML", e);
@@ -141,12 +141,12 @@ public final class TestUtils {
         }
     }
 
-    public static String getDocumentInPrintableForm(Document doc) {
+    public static String getDocumentInPrintableForm(final Document doc) {
         Preconditions.checkNotNull(doc);
         try {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            TransformerFactory tf = TransformerFactory.newInstance();
-            Transformer transformer = tf.newTransformer();
+            final ByteArrayOutputStream out = new ByteArrayOutputStream();
+            final TransformerFactory tf = TransformerFactory.newInstance();
+            final Transformer transformer = tf.newTransformer();
             transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
             transformer.setOutputProperty(OutputKeys.METHOD, "xml");
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
@@ -154,10 +154,10 @@ public final class TestUtils {
             transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
 
             transformer.transform(new DOMSource(doc), new StreamResult(new OutputStreamWriter(out, "UTF-8")));
-            byte[] charData = out.toByteArray();
+            final byte[] charData = out.toByteArray();
             return new String(charData, "UTF-8");
         } catch (IOException | TransformerException e) {
-            String msg = "Error during transformation of Document into String";
+            final String msg = "Error during transformation of Document into String";
             LOG.error(msg, e);
             return msg;
         }
@@ -170,8 +170,8 @@ public final class TestUtils {
      * {@code dataSchemaNode}. The method {@link RestconfImpl#createConfigurationData createConfigurationData} is used
      * because it contains calling of method {code normalizeNode}
      */
-    public static void normalizeCompositeNode(Node<?> node, Set<Module> modules, String schemaNodePath) {
-        RestconfImpl restconf = RestconfImpl.getInstance();
+    public static void normalizeCompositeNode(final Node<?> node, final Set<Module> modules, final String schemaNodePath) {
+        final RestconfImpl restconf = RestconfImpl.getInstance();
         ControllerContext.getInstance().setSchemas(TestUtils.loadSchemaContext(modules));
 
         prepareMocksForRestconf(modules, restconf);
@@ -183,10 +183,10 @@ public final class TestUtils {
      * module set has only one element then this element is returned.
      *
      */
-    public static Module resolveModule(String searchedModuleName, Set<Module> modules) {
+    public static Module resolveModule(final String searchedModuleName, final Set<Module> modules) {
         assertNotNull("Modules can't be null.", modules);
         if (searchedModuleName != null) {
-            for (Module m : modules) {
+            for (final Module m : modules) {
                 if (m.getName().equals(searchedModuleName)) {
                     return m;
                 }
@@ -197,11 +197,11 @@ public final class TestUtils {
         return null;
     }
 
-    public static DataSchemaNode resolveDataSchemaNode(String searchedDataSchemaName, Module module) {
+    public static DataSchemaNode resolveDataSchemaNode(final String searchedDataSchemaName, final Module module) {
         assertNotNull("Module can't be null", module);
 
         if (searchedDataSchemaName != null) {
-            for (DataSchemaNode dsn : module.getChildNodes()) {
+            for (final DataSchemaNode dsn : module.getChildNodes()) {
                 if (dsn.getQName().getLocalName().equals(searchedDataSchemaName)) {
                     return dsn;
                 }
@@ -212,39 +212,39 @@ public final class TestUtils {
         return null;
     }
 
-    public static QName buildQName(String name, String uri, String date, String prefix) {
+    public static QName buildQName(final String name, final String uri, final String date, final String prefix) {
         try {
-            URI u = new URI(uri);
+            final URI u = new URI(uri);
             Date dt = null;
             if (date != null) {
                 dt = Date.valueOf(date);
             }
-            return new QName(u, dt, prefix, name);
-        } catch (URISyntaxException e) {
+            return QName.create(u, dt, name);
+        } catch (final URISyntaxException e) {
             return null;
         }
     }
 
-    public static QName buildQName(String name, String uri, String date) {
+    public static QName buildQName(final String name, final String uri, final String date) {
         return buildQName(name, uri, date, null);
     }
 
-    public static QName buildQName(String name) {
+    public static QName buildQName(final String name) {
         return buildQName(name, "", null);
     }
 
-    private static void addDummyNamespaceToAllNodes(NodeWrapper<?> wrappedNode) throws URISyntaxException {
+    private static void addDummyNamespaceToAllNodes(final NodeWrapper<?> wrappedNode) throws URISyntaxException {
         wrappedNode.setNamespace(new URI(""));
         if (wrappedNode instanceof CompositeNodeWrapper) {
-            for (NodeWrapper<?> childNodeWrapper : ((CompositeNodeWrapper) wrappedNode).getValues()) {
+            for (final NodeWrapper<?> childNodeWrapper : ((CompositeNodeWrapper) wrappedNode).getValues()) {
                 addDummyNamespaceToAllNodes(childNodeWrapper);
             }
         }
     }
 
-    private static void prepareMocksForRestconf(Set<Module> modules, RestconfImpl restconf) {
-        ControllerContext controllerContext = ControllerContext.getInstance();
-        BrokerFacade mockedBrokerFacade = mock(BrokerFacade.class);
+    private static void prepareMocksForRestconf(final Set<Module> modules, final RestconfImpl restconf) {
+        final ControllerContext controllerContext = ControllerContext.getInstance();
+        final BrokerFacade mockedBrokerFacade = mock(BrokerFacade.class);
 
         controllerContext.setSchemas(TestUtils.loadSchemaContext(modules));
 
@@ -255,10 +255,10 @@ public final class TestUtils {
         restconf.setBroker(mockedBrokerFacade);
     }
 
-    public static Node<?> readInputToCnSn(String path, boolean dummyNamespaces,
-            MessageBodyReader<Node<?>> reader) throws WebApplicationException {
+    public static Node<?> readInputToCnSn(final String path, final boolean dummyNamespaces,
+            final MessageBodyReader<Node<?>> reader) throws WebApplicationException {
 
-        InputStream inputStream = TestUtils.class.getResourceAsStream(path);
+        final InputStream inputStream = TestUtils.class.getResourceAsStream(path);
         try {
             final Node<?> node = reader.readFrom(null, null, null, null, null, inputStream);
             assertTrue(node instanceof CompositeNodeWrapper);
@@ -266,13 +266,13 @@ public final class TestUtils {
                 try {
                     TestUtils.addDummyNamespaceToAllNodes((CompositeNodeWrapper) node);
                     return ((CompositeNodeWrapper) node).unwrap();
-                } catch (URISyntaxException e) {
+                } catch (final URISyntaxException e) {
                     LOG.error(e.getMessage());
                     assertTrue(e.getMessage(), false);
                 }
             }
             return node;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             LOG.error(e.getMessage());
             assertTrue(e.getMessage(), false);
         }
@@ -290,17 +290,17 @@ public final class TestUtils {
 //        return null;
 //    }
 
-    public static Node<?> readInputToCnSn(String path, MessageBodyReader<Node<?>> reader) {
+    public static Node<?> readInputToCnSn(final String path, final MessageBodyReader<Node<?>> reader) {
         return readInputToCnSn(path, false, reader);
     }
 
-    public static String writeCompNodeWithSchemaContextToOutput(Node<?> node, Set<Module> modules,
-            DataSchemaNode dataSchemaNode, MessageBodyWriter<StructuredData> messageBodyWriter) throws IOException,
+    public static String writeCompNodeWithSchemaContextToOutput(final Node<?> node, final Set<Module> modules,
+            final DataSchemaNode dataSchemaNode, final MessageBodyWriter<StructuredData> messageBodyWriter) throws IOException,
             WebApplicationException {
 
         assertNotNull(dataSchemaNode);
         assertNotNull("Composite node can't be null", node);
-        ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
+        final ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
 
         ControllerContext.getInstance().setSchemas(loadSchemaContext(modules));
 
@@ -311,12 +311,12 @@ public final class TestUtils {
         return byteArrayOS.toString();
     }
 
-    public static String loadTextFile(String filePath) throws IOException {
-        FileReader fileReader = new FileReader(filePath);
-        BufferedReader bufReader = new BufferedReader(fileReader);
+    public static String loadTextFile(final String filePath) throws IOException {
+        final FileReader fileReader = new FileReader(filePath);
+        final BufferedReader bufReader = new BufferedReader(fileReader);
 
         String line = null;
-        StringBuilder result = new StringBuilder();
+        final StringBuilder result = new StringBuilder();
         while ((line = bufReader.readLine()) != null) {
             result.append(line);
         }
@@ -324,10 +324,10 @@ public final class TestUtils {
         return result.toString();
     }
 
-    private static Pattern patternForStringsSeparatedByWhiteChars(String... substrings) {
-        StringBuilder pattern = new StringBuilder();
+    private static Pattern patternForStringsSeparatedByWhiteChars(final String... substrings) {
+        final StringBuilder pattern = new StringBuilder();
         pattern.append(".*");
-        for (String substring : substrings) {
+        for (final String substring : substrings) {
             pattern.append(substring);
             pattern.append("\\s*");
         }
@@ -335,15 +335,15 @@ public final class TestUtils {
         return Pattern.compile(pattern.toString(), Pattern.DOTALL);
     }
 
-    public static boolean containsStringData(String jsonOutput, String... substrings) {
-        Pattern pattern = patternForStringsSeparatedByWhiteChars(substrings);
-        Matcher matcher = pattern.matcher(jsonOutput);
+    public static boolean containsStringData(final String jsonOutput, final String... substrings) {
+        final Pattern pattern = patternForStringsSeparatedByWhiteChars(substrings);
+        final Matcher matcher = pattern.matcher(jsonOutput);
         return matcher.matches();
     }
 
     public static NormalizedNode compositeNodeToDatastoreNormalizedNode(final CompositeNode compositeNode,
             final DataSchemaNode schema) {
-        List<Node<?>> lst = new ArrayList<Node<?>>();
+        final List<Node<?>> lst = new ArrayList<Node<?>>();
         lst.add(compositeNode);
         if (schema instanceof ContainerSchemaNode) {
             return CnSnToNormalizedNodeParserFactory.getInstance().getContainerNodeParser()
@@ -359,15 +359,15 @@ public final class TestUtils {
                 "It wasn't possible to translate specified data to datastore readable form."));
     }
 
-    public static YangInstanceIdentifier.NodeIdentifier getNodeIdentifier(String localName, String namespace,
-            String revision) throws ParseException {
+    public static YangInstanceIdentifier.NodeIdentifier getNodeIdentifier(final String localName, final String namespace,
+            final String revision) throws ParseException {
         return new YangInstanceIdentifier.NodeIdentifier(QName.create(namespace, revision, localName));
     }
 
-    public static YangInstanceIdentifier.NodeIdentifierWithPredicates getNodeIdentifierPredicate(String localName,
-            String namespace, String revision, Map<String, Object> keys) throws ParseException {
-        Map<QName, Object> predicate = new HashMap<>();
-        for (String key : keys.keySet()) {
+    public static YangInstanceIdentifier.NodeIdentifierWithPredicates getNodeIdentifierPredicate(final String localName,
+            final String namespace, final String revision, final Map<String, Object> keys) throws ParseException {
+        final Map<QName, Object> predicate = new HashMap<>();
+        for (final String key : keys.keySet()) {
             predicate.put(QName.create(namespace, revision, key), keys.get(key));
         }
 
@@ -376,13 +376,13 @@ public final class TestUtils {
         QName.create(namespace, revision, localName), predicate);
     }
 
-    public static YangInstanceIdentifier.NodeIdentifierWithPredicates getNodeIdentifierPredicate(String localName,
-            String namespace, String revision, String... keysAndValues) throws ParseException {
-        java.util.Date date = new SimpleDateFormat("yyyy-MM-dd").parse(revision);
+    public static YangInstanceIdentifier.NodeIdentifierWithPredicates getNodeIdentifierPredicate(final String localName,
+            final String namespace, final String revision, final String... keysAndValues) throws ParseException {
+        final java.util.Date date = new SimpleDateFormat("yyyy-MM-dd").parse(revision);
         if (keysAndValues.length % 2 != 0) {
             new IllegalArgumentException("number of keys argument have to be divisible by 2 (map)");
         }
-        Map<QName, Object> predicate = new HashMap<>();
+        final Map<QName, Object> predicate = new HashMap<>();
 
         int i = 0;
         while (i < keysAndValues.length) {
@@ -394,7 +394,7 @@ public final class TestUtils {
     }
 
     public static CompositeNode prepareCompositeNodeWithIetfInterfacesInterfacesData() {
-        CompositeNodeBuilder<ImmutableCompositeNode> interfaceBuilder = ImmutableCompositeNode.builder();
+        final CompositeNodeBuilder<ImmutableCompositeNode> interfaceBuilder = ImmutableCompositeNode.builder();
         interfaceBuilder.addLeaf(buildQName("name", "dummy", "2014-07-29"), "eth0");
         interfaceBuilder.addLeaf(buildQName("type", "dummy", "2014-07-29"), "ethernetCsmacd");
         interfaceBuilder.addLeaf(buildQName("enabled", "dummy", "2014-07-29"), "false");
@@ -403,11 +403,11 @@ public final class TestUtils {
     }
 
     static NormalizedNode<?,?> prepareNormalizedNodeWithIetfInterfacesInterfacesData() throws ParseException {
-        String ietfInterfacesDate = "2013-07-04";
-        String namespace = "urn:ietf:params:xml:ns:yang:ietf-interfaces";
-        DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> mapEntryNode = ImmutableMapEntryNodeBuilder.create();
+        final String ietfInterfacesDate = "2013-07-04";
+        final String namespace = "urn:ietf:params:xml:ns:yang:ietf-interfaces";
+        final DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> mapEntryNode = ImmutableMapEntryNodeBuilder.create();
 
-        Map<String, Object> predicates = new HashMap<>();
+        final Map<String, Object> predicates = new HashMap<>();
         predicates.put("name", "eth0");
 
         mapEntryNode.withNodeIdentifier(getNodeIdentifierPredicate("interface", namespace, ietfInterfacesDate,
