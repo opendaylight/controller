@@ -16,6 +16,29 @@
       "revId": "7f5192e3f4077dae98b2c00d1702c16cd3659ea9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_7ff5e481",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-12-16T15:31:32Z",
+      "side": 1,
+      "message": "Could you pass ActorRef.noSender() instead of null?",
+      "range": {
+        "startLine": 125,
+        "startChar": 28,
+        "endLine": 125,
+        "endChar": 32
+      },
+      "revId": "7f5192e3f4077dae98b2c00d1702c16cd3659ea9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
