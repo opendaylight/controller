@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_7fc1647f",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/impl/JsonMapper.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2014-12-16T12:04:18Z",
+      "side": 1,
+      "message": "\"null\" seem to be a perfectly valid string value.\nI guess this line is just a relic of this change: https://git.opendaylight.org/gerrit/#/c/3134/1/opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/impl/JsonMapper.java",
+      "range": {
+        "startLine": 289,
+        "startChar": 12,
+        "endLine": 289,
+        "endChar": 18
+      },
+      "revId": "c10c472e00bda3140a4a027e9a759b4cdfe3f0bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
