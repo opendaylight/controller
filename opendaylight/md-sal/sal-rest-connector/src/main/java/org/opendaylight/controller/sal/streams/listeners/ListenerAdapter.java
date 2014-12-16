@@ -96,7 +96,7 @@ public class ListenerAdapter implements DOMDataChangeListener {
     }
 
     @Override
-    public void onDataChanged(AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
+    public void onDataChanged(final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
         // TODO Auto-generated method stub
 
         if (!change.getCreatedData().isEmpty() || !change.getUpdatedData().isEmpty()
@@ -218,7 +218,7 @@ public class ListenerAdapter implements DOMDataChangeListener {
      *            DataChangeEvent
      * @return Data in printable form.
      */
-    private String prepareXmlFrom(AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
+    private String prepareXmlFrom(final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
         Document doc = createDocument();
         Element notificationElement = doc.createElementNS("urn:ietf:params:xml:ns:netconf:notification:1.0",
                 "notification");
@@ -288,7 +288,7 @@ public class ListenerAdapter implements DOMDataChangeListener {
      */
     private void addValuesToDataChangedNotificationEventElement(final Document doc,
             final Element dataChangedNotificationEventElement,
-            AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
+            final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
         addValuesFromDataToElement(doc, change.getCreatedData().keySet(), dataChangedNotificationEventElement,
                 Operation.CREATED);
         if (change.getCreatedData().isEmpty()) {
@@ -313,8 +313,8 @@ public class ListenerAdapter implements DOMDataChangeListener {
      * @param operation
      *            {@link Operation}
      */
-    private void addValuesFromDataToElement(Document doc, Set<YangInstanceIdentifier> data, Element element,
-            Operation operation) {
+    private void addValuesFromDataToElement(final Document doc, final Set<YangInstanceIdentifier> data, final Element element,
+            final Operation operation) {
         if (data == null || data.isEmpty()) {
             return;
         }
@@ -338,8 +338,8 @@ public class ListenerAdapter implements DOMDataChangeListener {
      * @param operation
      *            {@link Operation}
      */
-    private void addValuesFromDataToElement(Document doc, Map<YangInstanceIdentifier, CompositeNode> data, Element element,
-            Operation operation) {
+    private void addValuesFromDataToElement(final Document doc, final Map<YangInstanceIdentifier, CompositeNode> data, final Element element,
+            final Operation operation) {
         if (data == null || data.isEmpty()) {
             return;
         }
@@ -364,8 +364,8 @@ public class ListenerAdapter implements DOMDataChangeListener {
      *            {@link Operation}
      * @return {@link Node} node represented by changed event element.
      */
-    private Node createDataChangeEventElement(Document doc, YangInstanceIdentifier path, CompositeNode data,
-            Operation operation) {
+    private Node createDataChangeEventElement(final Document doc, final YangInstanceIdentifier path, final CompositeNode data,
+            final Operation operation) {
         Element dataChangeEventElement = doc.createElement("data-change-event");
 
         Element pathElement = doc.createElement("path");
@@ -473,10 +473,7 @@ public class ListenerAdapter implements DOMDataChangeListener {
         String namespace = qName.getNamespace().toString();
         String prefix = prefixes.get(namespace);
         if (prefix == null) {
-            prefix = qName.getPrefix();
-            if (prefix == null || prefix.isEmpty() || prefixes.containsValue(prefix)) {
-                prefix = generateNewPrefix(prefixes.values());
-            }
+            prefix = generateNewPrefix(prefixes.values());
         }
 
         element.setAttribute("xmlns:" + prefix, namespace);
