@@ -1,0 +1,78 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_9d6558e3",
+        "filename": "opendaylight/adsal/topologymanager/implementation/src/main/java/org/opendaylight/controller/topologymanager/internal/TopologyManagerImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2014-12-17T21:29:13Z",
+      "side": 1,
+      "message": "Hideyuki, I would defer it to Cisco team to change the copyright content. Just pointing out because i noticed that your mail id domain is not cisco.",
+      "range": {
+        "startLine": 2,
+        "startChar": 16,
+        "endLine": 2,
+        "endChar": 27
+      },
+      "revId": "c7386f921eca615d993136584b837e6fd740de27",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_fd9b3cc7",
+        "filename": "opendaylight/adsal/topologymanager/implementation/src/main/java/org/opendaylight/controller/topologymanager/internal/TopologyManagerImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2014-12-17T21:29:13Z",
+      "side": 1,
+      "message": "Any specific reason for using List of PendingUpdateTask? Each node connector will have only one edge where that node connector will be head node connector, so wondering this is really required. We can get more then one update related to the same edge, but i believe we don\u0027t have to cache them all, because the latest one is going to be the one that is current state of the edge. I believe neither there is a way to find out the correct order between edge update for same node connector.",
+      "revId": "c7386f921eca615d993136584b837e6fd740de27",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_bda5b405",
+        "filename": "opendaylight/adsal/topologymanager/implementation/src/main/java/org/opendaylight/controller/topologymanager/internal/TopologyManagerImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2014-12-17T21:29:13Z",
+      "side": 1,
+      "message": "It\u0027s good to use ScheduledExecutorService rather then Timer. Timer are susceptible to System clock and in sometime in clustering mode it creates problem. But i would leave that decision to you.",
+      "revId": "c7386f921eca615d993136584b837e6fd740de27",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_1d886870",
+        "filename": "opendaylight/adsal/topologymanager/implementation/src/main/java/org/opendaylight/controller/topologymanager/internal/TopologyManagerImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 1108,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2014-12-17T21:29:13Z",
+      "side": 1,
+      "message": "I think we should listen to node remove events and clean up the internal udpateQ and pendingEvents lists. Assume a scenario where switch disconnects and connects back within 500 ms and you get node connector add event, and it finds  pendingEvent in the cache for that node connector, it might show wrong initial state of the edge.",
+      "revId": "c7386f921eca615d993136584b837e6fd740de27",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
