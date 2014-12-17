@@ -205,6 +205,7 @@ public class BrokerFacade {
             if (optionalDatastoreData.isPresent() && payload.equals(optionalDatastoreData.get())) {
                 String errMsg = "Post Configuration via Restconf was not executed because data already exists";
                 LOG.trace(errMsg + ":{}", path);
+                rWTransaction.cancel();
                 throw new RestconfDocumentedException("Data already exists for path: " + path, ErrorType.PROTOCOL,
                         ErrorTag.DATA_EXISTS);
             }
@@ -250,6 +251,7 @@ public class BrokerFacade {
             try {
                 currentOp = currentOp.getChild(currentArg);
             } catch (DataNormalizationException e) {
+                rwTx.cancel();
                 throw new IllegalArgumentException(
                         String.format("Invalid child encountered in path %s", normalizedPath), e);
             }
@@ -264,6 +266,7 @@ public class BrokerFacade {
                 exists = future.checkedGet();
             } catch (ReadFailedException e) {
                 LOG.error("Failed to read pre-existing data from store {} path {}", store, currentPath, e);
+                rwTx.cancel();
                 throw new IllegalStateException("Failed to read pre-existing data", e);
             }
 
