@@ -29,6 +29,10 @@ import java.util.Set;
 import java.util.SortedSet;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.stream.StreamSource;
 
 public class XmlDirectoryPersister implements Persister {
     private static final Logger logger = LoggerFactory.getLogger(XmlDirectoryPersister.class);
@@ -104,8 +108,15 @@ public class XmlDirectoryPersister implements Persister {
     public static ConfigSnapshotHolder loadLastConfig(File file) throws JAXBException {
         JAXBContext jaxbContext = JAXBContext.newInstance(ConfigSnapshot.class);
         Unmarshaller um = jaxbContext.createUnmarshaller();
-
-        return asHolder((ConfigSnapshot) um.unmarshal(file));
+        XMLInputFactory xif = XMLInputFactory.newFactory();
+        xif.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+        xif.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+        try {
+            XMLStreamReader xsr = xif.createXMLStreamReader(new StreamSource(file));
+            return asHolder((ConfigSnapshot) um.unmarshal(xsr));
+        } catch (final XMLStreamException e) {
+            throw new JAXBException(e);
+        }
     }
 
     private static ConfigSnapshotHolder asHolder(final ConfigSnapshot unmarshalled) {
