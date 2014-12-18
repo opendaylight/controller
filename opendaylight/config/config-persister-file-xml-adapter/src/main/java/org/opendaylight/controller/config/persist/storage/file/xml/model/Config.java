@@ -22,6 +22,10 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.stream.StreamSource;
 import org.apache.commons.lang3.StringUtils;
 
 @XmlRootElement(name = "persisted-snapshots")
@@ -72,9 +76,12 @@ public final class Config {
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(Config.class);
             Unmarshaller um = jaxbContext.createUnmarshaller();
-
-            return (Config) um.unmarshal(from);
-        } catch (JAXBException e) {
+            XMLInputFactory xif = XMLInputFactory.newFactory();
+            xif.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+            xif.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+            XMLStreamReader xsr = xif.createXMLStreamReader(new StreamSource(from));
+            return ((Config) um.unmarshal(xsr));
+        } catch (JAXBException | XMLStreamException e) {
             throw new PersistException("Unable to restore configuration", e);
         }
     }
