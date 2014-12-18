@@ -20,6 +20,10 @@ import java.util.SortedSet;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.stream.StreamSource;
 import org.apache.karaf.features.ConfigFileInfo;
 import org.apache.karaf.features.Feature;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
@@ -59,10 +63,18 @@ public class FeatureConfigSnapshotHolder implements ConfigSnapshotHolder {
         Preconditions.checkNotNull(feature);
         this.fileInfo = fileInfo;
         this.featureChain.add(feature);
+        // TODO extract utility method for umarshalling config snapshots
         JAXBContext jaxbContext = JAXBContext.newInstance(ConfigSnapshot.class);
         Unmarshaller um = jaxbContext.createUnmarshaller();
-        File file = new File(fileInfo.getFinalname());
-        unmarshalled = ((ConfigSnapshot) um.unmarshal(file));
+        XMLInputFactory xif = XMLInputFactory.newFactory();
+        xif.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+        xif.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+        try {
+            XMLStreamReader xsr = xif.createXMLStreamReader(new StreamSource(new File(fileInfo.getFinalname())));
+            unmarshalled = ((ConfigSnapshot) um.unmarshal(xsr));
+        } catch (final XMLStreamException e) {
+            throw new JAXBException(e);
+        }
     }
     /*
      * (non-Javadoc)
