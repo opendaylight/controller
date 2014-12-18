@@ -113,6 +113,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     private int currentRecoveryBatchCount;
 
+    private long dataSizeSinceLastSnapshot = 0;
+
     public RaftActor(String id, Map<String, String> peerAddresses) {
         this(id, peerAddresses, Optional.<ConfigParams>absent());
     }
@@ -397,8 +399,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      * @param identifier
      * @param data
      */
-    protected void persistData(ActorRef clientActor, String identifier,
-        Payload data) {
+    protected void persistData(final ActorRef clientActor, final String identifier,
+        final Payload data) {
 
         ReplicatedLogEntry replicatedLogEntry = new ReplicatedLogImplEntry(
             context.getReplicatedLog().lastIndex() + 1,
@@ -408,9 +410,42 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             LOG.debug("Persist data {}", replicatedLogEntry);
         }
 
+        final RaftActorContext raftContext = getRaftActorContext();
+
         replicatedLog
-            .appendAndPersist(clientActor, identifier, replicatedLogEntry);
-    }
+                .appendAndPersist(replicatedLogEntry, new Procedure<ReplicatedLogEntry>() {
+                    @Override
+                    public void apply(ReplicatedLogEntry replicatedLogEntry) throws Exception {
+                        if(!hasFollowers()){
+                            // Increment the Commit Index and the Last Applied values
+                            raftContext.setCommitIndex(replicatedLogEntry.getIndex());
+                            raftContext.setLastApplied(replicatedLogEntry.getIndex());
+
+                            // Apply the state immediately
+                            applyState(clientActor, identifier, data);
+
+                            // Send a ApplyLogEntries message so that we write the fact that we applied
+                            // the state to durable storage
+                            self().tell(new ApplyLogEntries((int) replicatedLogEntry.getIndex()), self());
+
+                            // Check if the "real" snapshot capture has been initiated. If no then do the fake snapshot
+                            if(!hasSnapshotCaptureInitiated){
+                                raftContext.getReplicatedLog().snapshotPreCommit(raftContext.getLastApplied(),
+                                        raftContext.getTermInformation().getCurrentTerm());
+                                raftContext.getReplicatedLog().snapshotCommit();
+                            } else {
+                                LOG.info("Skipping fake snapshotting for {} because real snapshotting is in progress", getId());
+                            }
+                        } else if (clientActor != null) {
+                            // Send message for replication
+                            currentBehavior.handleMessage(getSelf(),
+                                    new Replicate(clientActor, identifier,
+                                            replicatedLogEntry)
+                            );
+                        }
+
+                    }
+                });    }
 
     protected String getId() {
         return context.getId();
@@ -650,6 +685,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         hasSnapshotCaptureInitiated = false;
     }
 
+    protected boolean hasFollowers(){
+        return getRaftActorContext().getPeerAddresses().keySet().size() > 0;
+    }
+
     private class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
 
         public ReplicatedLogImpl(Snapshot snapshot) {
@@ -686,7 +725,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         @Override public void appendAndPersist(
             final ReplicatedLogEntry replicatedLogEntry) {
-            appendAndPersist(null, null, replicatedLogEntry);
+            appendAndPersist(replicatedLogEntry, null);
         }
 
         @Override
@@ -694,9 +733,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             return dataSize;
         }
 
-        public void appendAndPersist(final ActorRef clientActor,
-            final String identifier,
-            final ReplicatedLogEntry replicatedLogEntry) {
+        public void appendAndPersist(
+            final ReplicatedLogEntry replicatedLogEntry,
+            final Procedure<ReplicatedLogEntry> callback)  {
 
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Append log entry and persist {} ", replicatedLogEntry);
@@ -715,14 +754,35 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                     @Override
                     public void apply(ReplicatedLogEntry evt) throws Exception {
                         dataSize += replicatedLogEntry.size();
+                        long dataSizeForCheck = dataSize;
+
+                        dataSizeSinceLastSnapshot += replicatedLogEntry.size();
+                        long journalSize = lastIndex()+1;
+
+                        if(!hasFollowers()) {
+                            // When we do not have followers we do not maintain an in-memory log
+                            // due to this the journalSize will never become anything close to the
+                            // snapshot batch count. In fact will mostly be 1.
+                            // Similarly since the journal's dataSize depends on the entries in the
+                            // journal the journal's dataSize will never reach a value close to the
+                            // memory threshold.
+                            // By maintaining the dataSize outside the journal we are tracking essentially
+                            // what we have written to the disk however since we no longer are in
+                            // need of doing a snapshot just for the sake of freeing up memory we adjust
+                            // the real size of data by 5 so that we do not snapshot as often as if we
+                            // were maintaining a real snapshot
+                            dataSizeForCheck = dataSizeSinceLastSnapshot / 5;
+                        }
 
                         long dataThreshold = Runtime.getRuntime().totalMemory() *
                                 getRaftActorContext().getConfigParams().getSnapshotDataThresholdPercentage() / 100;
 
                         // when a snaphsot is being taken, captureSnapshot != null
                         if (hasSnapshotCaptureInitiated == false &&
-                                ( journal.size() % context.getConfigParams().getSnapshotBatchCount() == 0 ||
-                                        dataSize > dataThreshold)) {
+                                ( journalSize % context.getConfigParams().getSnapshotBatchCount() == 0 ||
+                                        dataSizeForCheck > dataThreshold)) {
+
+                            dataSizeSinceLastSnapshot = 0;
 
                             LOG.info("Initiating Snapshot Capture..");
                             long lastAppliedIndex = -1;
@@ -732,6 +792,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                             if (lastAppliedEntry != null) {
                                 lastAppliedIndex = lastAppliedEntry.getIndex();
                                 lastAppliedTerm = lastAppliedEntry.getTerm();
+                            }
+
+                            if(!hasFollowers()) {
+                                lastAppliedIndex = replicatedLogEntry.getIndex();
+                                lastAppliedTerm = replicatedLogEntry.getTerm();
                             }
 
                             if(LOG.isDebugEnabled()) {
@@ -748,12 +813,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                                 null);
                             hasSnapshotCaptureInitiated = true;
                         }
-                        // Send message for replication
-                        if (clientActor != null) {
-                            currentBehavior.handleMessage(getSelf(),
-                                new Replicate(clientActor, identifier,
-                                    replicatedLogEntry)
-                            );
+                        if(callback != null){
+                            callback.apply(replicatedLogEntry);
                         }
                     }
                 }
