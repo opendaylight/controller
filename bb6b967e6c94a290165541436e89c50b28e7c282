@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_f3792bfd",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/consensus/TwoNodeStrategy.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 2508
+      },
+      "writtenOn": "2014-12-19T21:10:47Z",
+      "side": 1,
+      "message": "Allowed Active Secondary to have a different specified behavior than Primary so that we can allow Secondary to become a Candidate on its way to becoming a leader. This is done so that we have a guaranteed increment of ElectionTerm by the Secondary from which to distinguish its dataset from the Primary (which is never allowed to become a Candidate in this strategy so its election term is always zero).",
+      "revId": "bb6b967e6c94a290165541436e89c50b28e7c282",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
