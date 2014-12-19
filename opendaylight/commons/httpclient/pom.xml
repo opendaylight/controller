@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.opendaylight</artifactId>
-    <version>1.4.3-Helium-SR1</version>
+    <version>1.4.3-Helium-SR1.1</version>
     <relativePath>../../commons/opendaylight</relativePath>
   </parent>
 
   <artifactId>commons.httpclient</artifactId>
-  <version>0.1.3-Helium-SR1</version>
+  <version>0.1.3-Helium-SR1.1</version>
   <packaging>bundle</packaging>
   <dependencies>
     <dependency>
@@ -71,7 +71,7 @@
           <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>checkstyle</artifactId>
-            <version>0.0.4-Helium-SR1</version>
+            <version>0.0.4-Helium-SR1.1</version>
           </dependency>
         </dependencies>
       </plugin>

@@ -10,14 +10,14 @@
    <parent>
      <groupId>org.opendaylight.controller</groupId>
      <artifactId>commons.opendaylight</artifactId>
-     <version>1.4.3-Helium-SR1</version>
+     <version>1.4.3-Helium-SR1.1</version>
      <relativePath>../../opendaylight/commons/opendaylight</relativePath>
    </parent>
    <artifactId>features-adsal-compatibility</artifactId>
    <packaging>jar</packaging>
    <properties>
       <features.file>features.xml</features.file>
-      <feature.test.version>0.6.3-Helium-SR1</feature.test.version>
+      <feature.test.version>0.6.3-Helium-SR1.1</feature.test.version>
    </properties>
    <dependencies>
     <!--
@@ -34,21 +34,21 @@
         <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>features-yangtools</artifactId>
-          <version>0.6.3-Helium-SR1</version>
+          <version>0.6.3-Helium-SR1.1</version>
           <classifier>features</classifier>
           <type>xml</type>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>features-mdsal</artifactId>
-          <version>1.1.1-Helium-SR1</version>
+          <version>1.1.1-Helium-SR1.1</version>
           <classifier>features</classifier>
           <type>xml</type>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.openflowplugin</groupId>
           <artifactId>features-openflowplugin</artifactId>
-          <version>0.0.4-Helium-SR1</version>
+          <version>0.0.4-Helium-SR1.1</version>
           <classifier>features</classifier>
           <type>xml</type>
         </dependency>

@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>netconf-subsystem</artifactId>
-    <version>0.2.6-Helium-SR1</version>
+    <version>0.2.6-Helium-SR1.1</version>
   </parent>
   <artifactId>netconf-mapping-api</artifactId>
 
