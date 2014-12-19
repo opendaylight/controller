@@ -13,7 +13,6 @@ import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
-import akka.japi.Creator;
 import org.opendaylight.controller.cluster.example.messages.KeyValue;
 import org.opendaylight.controller.cluster.example.messages.KeyValueSaved;
 
@@ -27,14 +26,8 @@ public class ClientActor extends UntypedActor {
         this.target = target;
     }
 
-    public static Props props(final ActorRef target){
-        return Props.create(new Creator<ClientActor>(){
-            private static final long serialVersionUID = 1L;
-
-            @Override public ClientActor create() throws Exception {
-                return new ClientActor(target);
-            }
-        });
+    public static Props props(final ActorRef target) {
+        return Props.create(ClientActor.class, target);
     }
 
     @Override public void onReceive(Object message) throws Exception {

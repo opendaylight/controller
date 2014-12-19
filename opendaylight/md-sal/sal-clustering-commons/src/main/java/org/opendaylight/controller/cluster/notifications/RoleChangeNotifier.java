@@ -8,11 +8,9 @@
 
 package org.opendaylight.controller.cluster.notifications;
 
-import akka.actor.Actor;
 import akka.actor.ActorPath;
 import akka.actor.ActorRef;
 import akka.actor.Props;
-import akka.japi.Creator;
 import akka.serialization.Serialization;
 import com.google.common.collect.Maps;
 import java.util.Map;
@@ -35,12 +33,7 @@ public class RoleChangeNotifier extends AbstractUntypedActor implements AutoClos
     }
 
     public static Props getProps(final String memberId) {
-        return Props.create(new Creator<Actor>() {
-            @Override
-            public Actor create() throws Exception {
-                return new RoleChangeNotifier(memberId);
-            }
-        });
+        return Props.create(RoleChangeNotifier.class, memberId);
     }
 
     @Override

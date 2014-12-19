@@ -1,10 +1,8 @@
 package org.opendaylight.controller.cluster.example;
 
-import akka.actor.Actor;
 import akka.actor.ActorRef;
 import akka.actor.Cancellable;
 import akka.actor.Props;
-import akka.japi.Creator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -46,12 +44,7 @@ public class ExampleRoleChangeListener extends AbstractUntypedActor implements A
     }
 
     public static Props getProps(final String memberName) {
-        return Props.create(new Creator<Actor>() {
-            @Override
-            public Actor create() throws Exception {
-                return new ExampleRoleChangeListener(memberName);
-            }
-        });
+        return Props.create(ExampleRoleChangeListener.class, memberName);
     }
 
     @Override

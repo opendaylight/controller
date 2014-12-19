@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.example;
 
 import akka.actor.ActorRef;
 import akka.actor.Props;
-import akka.japi.Creator;
 import com.google.common.base.Optional;
 import com.google.protobuf.ByteString;
 import java.io.ByteArrayInputStream;
@@ -53,13 +52,8 @@ public class ExampleActor extends RaftActor {
     }
 
     public static Props props(final String id, final Map<String, String> peerAddresses,
-        final Optional<ConfigParams> configParams){
-        return Props.create(new Creator<ExampleActor>(){
-
-            @Override public ExampleActor create() throws Exception {
-                return new ExampleActor(id, peerAddresses, configParams);
-            }
-        });
+            final Optional<ConfigParams> configParams) {
+        return Props.create(ExampleActor.class, id, peerAddresses, configParams);
     }
 
     @Override public void onReceiveCommand(Object message) throws Exception{

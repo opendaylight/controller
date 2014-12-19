@@ -12,7 +12,6 @@ import akka.actor.ActorSystem;
 import akka.actor.DeadLetter;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
-import akka.japi.Creator;
 import akka.testkit.JavaTestKit;
 import org.junit.After;
 import org.junit.Before;
@@ -80,13 +79,7 @@ public class MeteredBoundedMailboxTest {
         }
 
         public static Props props(final ReentrantLock lock){
-            return Props.create(new Creator<PingPongActor>(){
-                private static final long serialVersionUID = 1L;
-                @Override
-                public PingPongActor create() throws Exception {
-                    return new PingPongActor(lock);
-                }
-            });
+            return Props.create(PingPongActor.class, lock);
         }
 
         @Override
