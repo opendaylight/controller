@@ -9,12 +9,29 @@ package org.opendaylight.controller.remote.rpc.registry.gossip;
 
 import java.io.Serializable;
 
-public class BucketImpl<T extends Copier<T>> implements Bucket<T>, Serializable {
+public class BucketImpl<T> implements Bucket<T>, Serializable {
     private static final long serialVersionUID = 1L;
 
     private Long version = System.currentTimeMillis();
 
     private T data;
+
+    public BucketImpl() {
+    }
+
+    public BucketImpl(T data) {
+        this.data = data;
+    }
+
+    public BucketImpl(Bucket<T> other) {
+        this.version = other.getVersion();
+        this.data = other.getData();
+    }
+
+    public void setData(T data) {
+        this.data = data;
+        this.version = System.currentTimeMillis()+1;
+    }
 
     @Override
     public Long getVersion() {
@@ -23,15 +40,7 @@ public class BucketImpl<T extends Copier<T>> implements Bucket<T>, Serializable 
 
     @Override
     public T getData() {
-        if (this.data == null)
-            return null;
-
-        return data.copy();
-    }
-
-    public void setData(T data){
-        this.version = System.currentTimeMillis()+1;
-        this.data = data;
+        return data;
     }
 
     @Override

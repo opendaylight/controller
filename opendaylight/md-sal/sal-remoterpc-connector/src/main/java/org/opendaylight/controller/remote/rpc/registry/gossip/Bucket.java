@@ -8,8 +8,7 @@
 package org.opendaylight.controller.remote.rpc.registry.gossip;
 
 
-public interface Bucket<T extends Copier<T>> {
+public interface Bucket<T> {
     public Long getVersion();
     public T getData();
-    public void setData(T data);
 }
