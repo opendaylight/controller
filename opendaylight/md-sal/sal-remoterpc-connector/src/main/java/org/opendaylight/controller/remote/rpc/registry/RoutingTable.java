@@ -10,23 +10,22 @@ package org.opendaylight.controller.remote.rpc.registry;
 import akka.actor.ActorRef;
 import akka.japi.Option;
 import akka.japi.Pair;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Copier;
-import org.opendaylight.controller.sal.connector.api.RpcRouter;
-
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import org.opendaylight.controller.remote.rpc.registry.gossip.Copier;
+import org.opendaylight.controller.sal.connector.api.RpcRouter;
 
 public class RoutingTable implements Copier<RoutingTable>, Serializable {
     private static final long serialVersionUID = 1L;
 
-    private Map<RpcRouter.RouteIdentifier<?, ?, ?>, Long> table = new HashMap<>();
+    private final Map<RpcRouter.RouteIdentifier<?, ?, ?>, Long> table = new HashMap<>();
     private ActorRef router;
 
     @Override
     public RoutingTable copy() {
         RoutingTable copy = new RoutingTable();
-        copy.setTable(new HashMap<>(table));
+        copy.table.putAll(table);
         copy.setRouter(this.getRouter());
 
         return copy;
@@ -35,10 +34,11 @@ public class RoutingTable implements Copier<RoutingTable>, Serializable {
     public Option<Pair<ActorRef, Long>> getRouterFor(RpcRouter.RouteIdentifier<?, ?, ?> routeId){
         Long updatedTime = table.get(routeId);
 
-        if (updatedTime == null || router == null)
+        if (updatedTime == null || router == null) {
             return Option.none();
-        else
+        } else {
             return Option.option(new Pair<>(router, updatedTime));
+        }
     }
 
     public void addRoute(RpcRouter.RouteIdentifier<?,?,?> routeId){
@@ -49,23 +49,16 @@ public class RoutingTable implements Copier<RoutingTable>, Serializable {
         table.remove(routeId);
     }
 
-    public Boolean contains(RpcRouter.RouteIdentifier<?, ?, ?> routeId){
+    public boolean contains(RpcRouter.RouteIdentifier<?, ?, ?> routeId){
         return table.containsKey(routeId);
     }
 
-    public Boolean isEmpty(){
+    public boolean isEmpty(){
         return table.isEmpty();
     }
-    ///
-    /// Getter, Setters
-    ///
-    //TODO: Remove public
-    public Map<RpcRouter.RouteIdentifier<?, ?, ?>, Long> getTable() {
-        return table;
-    }
 
-    void setTable(Map<RpcRouter.RouteIdentifier<?, ?, ?>, Long> table) {
-        this.table = table;
+    public int size() {
+        return table.size();
     }
 
     public ActorRef getRouter() {
