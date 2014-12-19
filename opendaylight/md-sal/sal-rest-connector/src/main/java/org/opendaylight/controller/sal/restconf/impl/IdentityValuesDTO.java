@@ -16,12 +16,12 @@ public final class IdentityValuesDTO {
     private final List<IdentityValue> elementData = new ArrayList<>();
     private final String originValue;
 
-    public IdentityValuesDTO(String namespace, String value, String prefix, String originValue) {
-        elementData.add(new IdentityValue(namespace, value, prefix));
+    public IdentityValuesDTO(final String namespace, final String value, final String prefix, final String originValue) {
+        elementData.add(new IdentityValue(namespace, value));
         this.originValue = originValue;
     }
 
-    public IdentityValuesDTO(String originValue) {
+    public IdentityValuesDTO(final String originValue) {
         this.originValue = originValue;
     }
 
@@ -29,11 +29,11 @@ public final class IdentityValuesDTO {
         originValue = null;
     }
 
-    public void add(String namespace, String value, String prefix) {
-        elementData.add(new IdentityValue(namespace, value, prefix));
+    public void add(final String namespace, final String value, final String prefix) {
+        elementData.add(new IdentityValue(namespace, value));
     }
 
-    public void add(IdentityValue identityValue) {
+    public void add(final IdentityValue identityValue) {
         elementData.add(identityValue);
     }
 
@@ -54,13 +54,11 @@ public final class IdentityValuesDTO {
 
         private final String namespace;
         private final String value;
-        private final String prefix;
         private List<Predicate> predicates;
 
-        public IdentityValue(String namespace, String value, String prefix) {
+        public IdentityValue(final String namespace, final String value) {
             this.namespace = namespace;
             this.value = value;
-            this.prefix = prefix;
         }
 
         public String getNamespace() {
@@ -71,9 +69,6 @@ public final class IdentityValuesDTO {
             return value;
         }
 
-        public String getPrefix() {
-            return prefix;
-        }
 
         public List<Predicate> getPredicates() {
             if (predicates == null) {
@@ -82,24 +77,21 @@ public final class IdentityValuesDTO {
             return Collections.unmodifiableList(predicates);
         }
 
-        public void setPredicates(List<Predicate> predicates) {
+        public void setPredicates(final List<Predicate> predicates) {
             this.predicates = predicates;
         }
 
         @Override
         public String toString() {
-            StringBuilder sb = new StringBuilder();
+            final StringBuilder sb = new StringBuilder();
             if (namespace != null) {
                 sb.append(namespace);
-            }
-            if (prefix != null) {
-                sb.append("(").append(prefix).append(")");
             }
             if (value != null) {
                 sb.append(" - ").append(value);
             }
             if (predicates != null && !predicates.isEmpty()) {
-                for (Predicate predicate : predicates) {
+                for (final Predicate predicate : predicates) {
                     sb.append("[");
                     predicate.toString();
                     sb.append("]");
@@ -115,7 +107,7 @@ public final class IdentityValuesDTO {
         private final IdentityValue name;
         private final String value;
 
-        public Predicate(IdentityValue name, String value) {
+        public Predicate(final IdentityValue name, final String value) {
             super();
             this.name = name;
             this.value = value;
@@ -131,7 +123,7 @@ public final class IdentityValuesDTO {
 
         @Override
         public String toString() {
-            StringBuilder sb = new StringBuilder();
+            final StringBuilder sb = new StringBuilder();
             if (name != null) {
                 sb.append(name.toString());
             }

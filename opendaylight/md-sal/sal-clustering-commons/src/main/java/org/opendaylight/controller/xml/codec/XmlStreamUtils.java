@@ -9,6 +9,12 @@ package org.opendaylight.controller.xml.codec;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
+import java.net.URI;
+import java.util.Map.Entry;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.AttributesContainer;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
@@ -28,13 +34,6 @@ import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.InstanceIdentifierTypeDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
-import java.net.URI;
-import java.util.Map.Entry;
 
 /**
  * Utility class for bridging JAXP Stream and YANG Data APIs. Note that the definition of this class
@@ -136,15 +135,14 @@ public class XmlStreamUtils {
    */
   public void writeElement(final XMLStreamWriter writer, final @Nonnull Node<?> data, final SchemaNode schema) throws XMLStreamException {
     final QName qname = data.getNodeType();
-    final String pfx = qname.getPrefix() != null ? qname.getPrefix() : "";
     final String ns = qname.getNamespace() != null ? qname.getNamespace().toString() : "";
 
     if (isEmptyElement(data)) {
-      writer.writeEmptyElement(pfx, qname.getLocalName(), ns);
+      writer.writeEmptyElement("", qname.getLocalName(), ns);
       return;
     }
 
-    writer.writeStartElement(pfx, qname.getLocalName(), ns);
+    writer.writeStartElement("", qname.getLocalName(), ns);
     if (data instanceof AttributesContainer && ((AttributesContainer) data).getAttributes() != null) {
       for (Entry<QName, String> attribute : ((AttributesContainer) data).getAttributes().entrySet()) {
         writer.writeAttribute(attribute.getKey().getNamespace().toString(), attribute.getKey().getLocalName(), attribute.getValue());
@@ -226,15 +224,9 @@ public class XmlStreamUtils {
   private static void write(final @Nonnull XMLStreamWriter writer, final @Nonnull IdentityrefTypeDefinition type, final @Nonnull Object value) throws XMLStreamException {
     if (value instanceof QName) {
       final QName qname = (QName) value;
-      final String prefix;
-      if (qname.getPrefix() != null && !qname.getPrefix().isEmpty()) {
-        prefix = qname.getPrefix();
-      } else {
-        prefix = "x";
-      }
 
-      writer.writeNamespace(prefix, qname.getNamespace().toString());
-      writer.writeCharacters(prefix + ':' + qname.getLocalName());
+      writer.writeNamespace("x", qname.getNamespace().toString());
+      writer.writeCharacters("x:" + qname.getLocalName());
     } else {
       if(LOG.isDebugEnabled()) {
         LOG.debug("Value of {}:{} is not a QName but {}", type.getQName().getNamespace(), type.getQName().getLocalName(), value.getClass());
