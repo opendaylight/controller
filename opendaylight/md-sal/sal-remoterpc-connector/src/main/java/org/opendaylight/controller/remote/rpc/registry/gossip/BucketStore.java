@@ -15,23 +15,24 @@ import akka.actor.Props;
 import akka.cluster.ClusterActorRefProvider;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
+import com.google.common.annotations.VisibleForTesting;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;
 import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
+import org.opendaylight.controller.remote.rpc.registry.RoutingTableImpl;
+import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.AddToLocalBucket;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetAllBuckets;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetAllBucketsReply;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetBucketVersions;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetBucketVersionsReply;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetBucketsByMembers;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetBucketsByMembersReply;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetLocalBucket;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetLocalBucketReply;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.UpdateBucket;
+import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.RemoveFromLocalBucket;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.UpdateRemoteBuckets;
+import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.controller.utils.ConditionalProbe;
 
 /**
@@ -45,22 +46,24 @@ import org.opendaylight.controller.utils.ConditionalProbe;
  */
 public class BucketStore extends AbstractUntypedActorWithMetering {
 
+    private static final Long NO_VERSION = -1L;
+
     final LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
     /**
      * Bucket owned by the node
      */
-    private BucketImpl localBucket = new BucketImpl();
+    private final BucketImpl<RoutingTableImpl> localBucket = new BucketImpl<>(new RoutingTableImpl());
 
     /**
      * Buckets ownded by other known nodes in the cluster
      */
-    private ConcurrentMap<Address, Bucket> remoteBuckets = new ConcurrentHashMap<>();
+    private final Map<Address, Bucket<?>> remoteBuckets = new HashMap<>();
 
     /**
      * Bucket version for every known node in the cluster including this node
      */
-    private ConcurrentMap<Address, Long> versions = new ConcurrentHashMap<>();
+    private final Map<Address, Long> versions = new HashMap<>();
 
     /**
      * Cluster address for this node
@@ -91,19 +94,19 @@ public class BucketStore extends AbstractUntypedActorWithMetering {
         if (probe != null) {
             probe.tell(message, getSelf());
         }
-
+        
         if (message instanceof ConditionalProbe) {
             // The ConditionalProbe is only used for unit tests.
             log.info("Received probe {} {}", getSelf(), message);
             probe = (ConditionalProbe) message;
             // Send back any message to tell the caller we got the probe.
             getSender().tell("Got it", getSelf());
-        } else if (message instanceof UpdateBucket) {
-            receiveUpdateBucket(((UpdateBucket) message).getBucket());
+        } else if(message instanceof AddToLocalBucket) {
+            receiveAddToLocalBucket((AddToLocalBucket)message);
+        } else if(message instanceof RemoveFromLocalBucket) {
+            receiveRemoveFromLocalBucket((RemoveFromLocalBucket)message);
         } else if (message instanceof GetAllBuckets) {
             receiveGetAllBucket();
-        } else if (message instanceof GetLocalBucket) {
-            receiveGetLocalBucket();
         } else if (message instanceof GetBucketsByMembers) {
             receiveGetBucketsByMembers(
                     ((GetBucketsByMembers) message).getMembers());
@@ -120,23 +123,24 @@ public class BucketStore extends AbstractUntypedActorWithMetering {
         }
     }
 
-    /**
-     * Returns a copy of bucket owned by this node
-     */
-    private void receiveGetLocalBucket() {
-        final ActorRef sender = getSender();
-        GetLocalBucketReply reply = new GetLocalBucketReply(localBucket);
-        sender.tell(reply, getSelf());
+    private void receiveRemoveFromLocalBucket(RemoveFromLocalBucket message) {
+        RoutingTableImpl table = localBucket.getData().copy();
+        for (RpcRouter.RouteIdentifier<?, ?, ?> routeId : message.getRouteIds()) {
+            table.removeRoute(routeId);
+        }
+
+        localBucket.setData(table);
+        versions.put(selfAddress, localBucket.getVersion());
     }
 
-    /**
-     * Updates the bucket owned by this node
-     *
-     * @param updatedBucket
-     */
-    void receiveUpdateBucket(Bucket updatedBucket){
+    private void receiveAddToLocalBucket(AddToLocalBucket message) {
+        RoutingTableImpl table = localBucket.getData().copy();
+        table.setRouter(message.getLocalRouter());
+        for(RpcRouter.RouteIdentifier<?, ?, ?> routeId : message.getRouteIds()) {
+            table.addRoute(routeId);
+        }
 
-        localBucket = (BucketImpl) updatedBucket;
+        localBucket.setData(table);
         versions.put(selfAddress, localBucket.getVersion());
     }
 
@@ -153,11 +157,12 @@ public class BucketStore extends AbstractUntypedActorWithMetering {
      *
      * @return self owned + remote buckets
      */
+    @SuppressWarnings("rawtypes")
     Map<Address, Bucket> getAllBuckets(){
         Map<Address, Bucket> all = new HashMap<>(remoteBuckets.size() + 1);
 
         //first add the local bucket
-        all.put(selfAddress, localBucket);
+        all.put(selfAddress, new BucketImpl<>(localBucket));
 
         //then get all remote buckets
         all.putAll(remoteBuckets);
@@ -170,6 +175,7 @@ public class BucketStore extends AbstractUntypedActorWithMetering {
      *
      * @param members requested members
      */
+    @SuppressWarnings("rawtypes")
     void receiveGetBucketsByMembers(Set<Address> members){
         final ActorRef sender = getSender();
         Map<Address, Bucket> buckets = getBucketsByMembers(members);
@@ -182,12 +188,13 @@ public class BucketStore extends AbstractUntypedActorWithMetering {
      * @param members requested members
      * @return buckets for requested memebers
      */
+    @SuppressWarnings("rawtypes")
     Map<Address, Bucket> getBucketsByMembers(Set<Address> members) {
         Map<Address, Bucket> buckets = new HashMap<>();
 
         //first add the local bucket if asked
         if (members.contains(selfAddress)) {
-            buckets.put(selfAddress, localBucket);
+            buckets.put(selfAddress, new BucketImpl<>(localBucket));
         }
 
         //then get buckets for requested remote nodes
@@ -215,8 +222,9 @@ public class BucketStore extends AbstractUntypedActorWithMetering {
      * @param receivedBuckets buckets sent by remote
      *                        {@link org.opendaylight.controller.remote.rpc.registry.gossip.Gossiper}
      */
+    @SuppressWarnings("rawtypes")
     void receiveUpdateRemoteBuckets(Map<Address, Bucket> receivedBuckets){
-
+        log.info("{}: receiveUpdateRemoteBuckets: {}", selfAddress, receivedBuckets);
         if (receivedBuckets == null || receivedBuckets.isEmpty())
          {
             return; //nothing to do
@@ -229,7 +237,7 @@ public class BucketStore extends AbstractUntypedActorWithMetering {
 
             Long localVersion = versions.get(entry.getKey());
             if (localVersion == null) {
-                localVersion = -1L;
+                localVersion = NO_VERSION;
             }
 
             Bucket receivedBucket = entry.getValue();
@@ -240,7 +248,7 @@ public class BucketStore extends AbstractUntypedActorWithMetering {
 
             Long remoteVersion = receivedBucket.getVersion();
             if (remoteVersion == null) {
-                remoteVersion = -1L;
+                remoteVersion = NO_VERSION;
             }
 
             //update only if remote version is newer
@@ -249,40 +257,28 @@ public class BucketStore extends AbstractUntypedActorWithMetering {
                 versions.put(entry.getKey(), remoteVersion);
             }
         }
+
         if(log.isDebugEnabled()) {
             log.debug("State after update - Local Bucket [{}], Remote Buckets [{}]", localBucket, remoteBuckets);
         }
     }
 
     ///
-    ///Getter Setters
+    ///Getters for testing
     ///
 
-    BucketImpl getLocalBucket() {
+    @VisibleForTesting
+    BucketImpl<RoutingTableImpl> getLocalBucket() {
         return localBucket;
     }
 
-    void setLocalBucket(BucketImpl localBucket) {
-        this.localBucket = localBucket;
-    }
-
-    ConcurrentMap<Address, Bucket> getRemoteBuckets() {
+    @VisibleForTesting
+    Map<Address, Bucket<?>> getRemoteBuckets() {
         return remoteBuckets;
     }
 
-    void setRemoteBuckets(ConcurrentMap<Address, Bucket> remoteBuckets) {
-        this.remoteBuckets = remoteBuckets;
-    }
-
-    ConcurrentMap<Address, Long> getVersions() {
+    @VisibleForTesting
+    Map<Address, Long> getVersions() {
         return versions;
-    }
-
-    void setVersions(ConcurrentMap<Address, Long> versions) {
-        this.versions = versions;
-    }
-
-    Address getSelfAddress() {
-        return selfAddress;
     }
 }

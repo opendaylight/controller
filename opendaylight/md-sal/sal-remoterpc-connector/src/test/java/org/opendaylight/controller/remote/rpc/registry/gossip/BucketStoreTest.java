@@ -12,27 +12,23 @@ import akka.actor.Address;
 import akka.actor.Props;
 import akka.testkit.TestActorRef;
 import com.typesafe.config.ConfigFactory;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.remote.rpc.TerminationMonitor;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class BucketStoreTest {
 
     private static ActorSystem system;
-    private static BucketStore store;
 
     @BeforeClass
     public static void setup() {
 
         system = ActorSystem.create("opendaylight-rpc", ConfigFactory.load().getConfig("unit-test"));
         system.actorOf(Props.create(TerminationMonitor.class), "termination-monitor");
-
-        store = createStore();
     }
 
     @AfterClass
@@ -41,26 +37,13 @@ public class BucketStoreTest {
     }
 
     /**
-     * Given a new local bucket
-     * Should replace
-     */
-    @Test
-    public void testReceiveUpdateBucket(){
-        Bucket bucket = new BucketImpl();
-        Long expectedVersion = bucket.getVersion();
-
-        store.receiveUpdateBucket(bucket);
-
-        Assert.assertEquals(bucket, store.getLocalBucket());
-        Assert.assertEquals(expectedVersion, store.getLocalBucket().getVersion());
-    }
-
-    /**
      * Given remote buckets
      * Should merge with local copy of remote buckets
      */
     @Test
     public void testReceiveUpdateRemoteBuckets(){
+
+        BucketStore store = createStore();
 
         Address localAddress = system.provider().getDefaultAddress();
         Bucket localBucket = new BucketImpl();
@@ -84,7 +67,7 @@ public class BucketStoreTest {
 
         //Should NOT contain local bucket
         //Should contain ONLY 3 entries i.e a1, a2, a3
-        Map<Address, Bucket> remoteBucketsInStore = store.getRemoteBuckets();
+        Map<Address, Bucket<?>> remoteBucketsInStore = store.getRemoteBuckets();
         Assert.assertFalse("remote buckets contains local bucket", remoteBucketsInStore.containsKey(localAddress));
         Assert.assertTrue(remoteBucketsInStore.size() == 3);
 
@@ -122,11 +105,9 @@ public class BucketStoreTest {
         Assert.assertTrue(remoteBucketsInStore.size() == 4);
 
         //Should update versions map
-        //versions map contains versions for all remote buckets (4) + local bucket
-        //so it should have total 5.
+        //versions map contains versions for all remote buckets (4).
         Map<Address, Long> versionsInStore = store.getVersions();
-        Assert.assertTrue(String.format("Expected:%s, Actual:%s", 5, versionsInStore.size()),
-                          versionsInStore.size() == 5);
+        Assert.assertEquals(4, versionsInStore.size());
         Assert.assertEquals(b1.getVersion(), versionsInStore.get(a1));
         Assert.assertEquals(b2.getVersion(), versionsInStore.get(a2));
         Assert.assertEquals(b3_new.getVersion(), versionsInStore.get(a3));
