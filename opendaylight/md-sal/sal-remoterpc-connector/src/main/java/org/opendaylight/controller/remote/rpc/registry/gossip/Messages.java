@@ -9,16 +9,14 @@ package org.opendaylight.controller.remote.rpc.registry.gossip;
 
 import akka.actor.Address;
 import com.google.common.base.Preconditions;
-
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-import static org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.ContainsBucketVersions;
-import static org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.ContainsBuckets;
+import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.ContainsBucketVersions;
+import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.ContainsBuckets;
 
 
 /**
@@ -29,38 +27,13 @@ public class Messages {
 
     public static class BucketStoreMessages{
 
-        public static class GetLocalBucket implements Serializable{}
-
-        public static class ContainsBucket implements Serializable {
-            final private Bucket bucket;
-
-            public ContainsBucket(Bucket bucket){
-                Preconditions.checkArgument(bucket != null, "bucket can not be null");
-                this.bucket = bucket;
-            }
-
-            public Bucket getBucket(){
-                return bucket;
-            }
-
+        public static class GetAllBuckets implements Serializable {
+            private static final long serialVersionUID = 1L;
         }
-
-        public static class UpdateBucket extends ContainsBucket implements Serializable {
-            public UpdateBucket(Bucket bucket){
-                super(bucket);
-            }
-        }
-
-        public static class GetLocalBucketReply extends ContainsBucket implements Serializable {
-            public GetLocalBucketReply(Bucket bucket){
-                super(bucket);
-            }
-        }
-
-        public static class GetAllBuckets implements Serializable{}
 
         public static class GetBucketsByMembers implements Serializable{
-            private Set<Address> members;
+            private static final long serialVersionUID = 1L;
+            private final Set<Address> members;
 
             public GetBucketsByMembers(Set<Address> members){
                 Preconditions.checkArgument(members != null, "members can not be null");
@@ -73,7 +46,8 @@ public class Messages {
         }
 
         public static class ContainsBuckets implements Serializable{
-            private Map<Address, Bucket> buckets;
+            private static final long serialVersionUID = 1L;
+            private final Map<Address, Bucket> buckets;
 
             public ContainsBuckets(Map<Address, Bucket> buckets){
                 Preconditions.checkArgument(buckets != null, "buckets can not be null");
@@ -85,29 +59,35 @@ public class Messages {
 
                 for (Map.Entry<Address, Bucket> entry : buckets.entrySet()){
                     //ignore null entries
-                    if ( (entry.getKey() == null) || (entry.getValue() == null) )
+                    if ( (entry.getKey() == null) || (entry.getValue() == null) ) {
                         continue;
+                    }
                     copy.put(entry.getKey(), entry.getValue());
                 }
-                return new HashMap<>(copy);
+                return copy;
             }
         }
 
         public static class GetAllBucketsReply extends ContainsBuckets implements Serializable{
+            private static final long serialVersionUID = 1L;
             public GetAllBucketsReply(Map<Address, Bucket> buckets) {
                 super(buckets);
             }
         }
 
         public static class GetBucketsByMembersReply extends ContainsBuckets implements Serializable{
+            private static final long serialVersionUID = 1L;
             public GetBucketsByMembersReply(Map<Address, Bucket> buckets) {
                 super(buckets);
             }
         }
 
-        public static class GetBucketVersions implements Serializable{}
+        public static class GetBucketVersions implements Serializable {
+            private static final long serialVersionUID = 1L;
+        }
 
         public static class ContainsBucketVersions implements Serializable{
+            private static final long serialVersionUID = 1L;
             Map<Address, Long> versions;
 
             public ContainsBucketVersions(Map<Address, Long> versions) {
@@ -123,12 +103,14 @@ public class Messages {
         }
 
         public static class GetBucketVersionsReply extends ContainsBucketVersions implements Serializable{
+            private static final long serialVersionUID = 1L;
             public GetBucketVersionsReply(Map<Address, Long> versions) {
                 super(versions);
             }
         }
 
         public static class UpdateRemoteBuckets extends ContainsBuckets implements Serializable{
+            private static final long serialVersionUID = 1L;
             public UpdateRemoteBuckets(Map<Address, Bucket> buckets) {
                 super(buckets);
             }
@@ -136,12 +118,17 @@ public class Messages {
     }
 
     public static class GossiperMessages{
-        public static class Tick implements Serializable {}
+        public static class Tick implements Serializable {
+            private static final long serialVersionUID = 1L;
+        }
 
-        public static final class GossipTick extends Tick {}
+        public static final class GossipTick extends Tick {
+            private static final long serialVersionUID = 1L;
+        }
 
         public static final class GossipStatus extends ContainsBucketVersions implements Serializable{
-            private Address from;
+            private static final long serialVersionUID = 1L;
+            private final Address from;
 
             public GossipStatus(Address from, Map<Address, Long> versions) {
                 super(versions);
@@ -154,6 +141,7 @@ public class Messages {
         }
 
         public static final class GossipEnvelope extends ContainsBuckets implements Serializable {
+            private static final long serialVersionUID = 1L;
             private final Address from;
             private final Address to;
 
