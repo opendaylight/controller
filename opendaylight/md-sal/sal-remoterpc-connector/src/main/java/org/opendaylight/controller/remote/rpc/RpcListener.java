@@ -10,15 +10,14 @@ package org.opendaylight.controller.remote.rpc;
 
 
 import akka.actor.ActorRef;
+import java.util.ArrayList;
+import java.util.List;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.controller.sal.core.api.RpcRegistrationListener;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class RpcListener implements RpcRegistrationListener{
 
@@ -29,8 +28,15 @@ public class RpcListener implements RpcRegistrationListener{
     this.rpcRegistry = rpcRegistry;
   }
 
+  private volatile boolean first = true;
+
   @Override
   public void onRpcImplementationAdded(QName rpc) {
+    LOG.info("onRpcImplementationAdded: {}",rpc);
+    if(first) {
+        first = false;
+        Thread.dumpStack();
+    }
     if(LOG.isDebugEnabled()) {
         LOG.debug("Adding registration for [{}]", rpc);
     }

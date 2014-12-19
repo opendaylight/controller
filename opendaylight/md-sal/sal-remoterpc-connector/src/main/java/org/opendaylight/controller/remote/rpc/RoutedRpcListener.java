@@ -11,6 +11,10 @@ package org.opendaylight.controller.remote.rpc;
 
 import akka.actor.ActorRef;
 import com.google.common.base.Preconditions;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChange;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
@@ -19,11 +23,6 @@ import org.opendaylight.controller.sal.core.api.RpcRoutingContext;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 public class RoutedRpcListener implements RouteChangeListener<RpcRoutingContext, YangInstanceIdentifier>{
   private static final Logger LOG = LoggerFactory.getLogger(RoutedRpcListener.class);
@@ -52,7 +51,15 @@ public class RoutedRpcListener implements RouteChangeListener<RpcRoutingContext,
    *
    * @param announcements
    */
+  private volatile boolean first = true;
+
   private void announce(Set<RpcRouter.RouteIdentifier<?, ?, ?>> announcements) {
+      LOG.info("onRouteChange: {}",announcements);
+      if(first) {
+          first = false;
+          Thread.dumpStack();
+      }
+
     if(LOG.isDebugEnabled()) {
         LOG.debug("Announcing [{}]", announcements);
     }
