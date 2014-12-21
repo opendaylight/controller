@@ -135,7 +135,7 @@
     <logging.bridge.version>0.5.0-SNAPSHOT</logging.bridge.version>
     <maven.plugin.api.version>3.0.5</maven.plugin.api.version>
     <mimepull.version>1.9.4</mimepull.version>
-    <mdsal.version>1.2.0-SNAPSHOT</mdsal.version>
+    <mdsal.version>2.0.0-SNAPSHOT</mdsal.version>
     <netconf.version>0.3.0-SNAPSHOT</netconf.version>
     <networkconfig.bridgedomain.northbound.version>0.1.0-SNAPSHOT</networkconfig.bridgedomain.northbound.version>
     <networkconfig.neutron.implementation.version>0.5.0-SNAPSHOT</networkconfig.neutron.implementation.version>

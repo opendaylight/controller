@@ -51,7 +51,7 @@ public class SalRemoteServiceBroker implements BindingAwareBroker,AutoCloseable 
                 .put(RpcConsumerRegistry.class,servicesFactory.getRpcConsumerRegistry() ).build();
     }
 
-    public ProviderContext registerProvider(BindingAwareProvider provider, BundleContext ctx) {
+    public ProviderContext registerProvider(BindingAwareProvider provider) {
         throw new UnsupportedOperationException();
     }
     @Override
@@ -59,9 +59,21 @@ public class SalRemoteServiceBroker implements BindingAwareBroker,AutoCloseable 
         //TODO decide if serviceFactory should close clientContext or it has to be closed by consumer
     }
     @Override
-    public ConsumerContext registerConsumer(BindingAwareConsumer consumer, BundleContext ctx) {
+    public ConsumerContext registerConsumer(BindingAwareConsumer consumer) {
         checkState(supportedConsumerServices != null, "Broker is not initialized.");
         return BindingContextUtils.createConsumerContextAndInitialize(consumer, supportedConsumerServices);
+    }
+
+    @Override
+    public ConsumerContext registerConsumer(BindingAwareConsumer consumer,
+            BundleContext ctx) {
+        return registerConsumer(consumer);
+    }
+
+    @Override
+    public ProviderContext registerProvider(BindingAwareProvider provider,
+            BundleContext ctx) {
+        return registerProvider(provider);
     }
 
 }
