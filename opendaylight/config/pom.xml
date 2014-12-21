@@ -43,6 +43,7 @@
     <module>config-netty-config</module>
 
     <module>config-artifacts</module>
+    <module>config-parent</module>
   </modules>
 
   <dependencies>
