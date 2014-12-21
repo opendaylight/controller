@@ -86,7 +86,7 @@
     <containermanager.version>0.6.0-SNAPSHOT</containermanager.version>
     <controllermanager.northbound.version>0.1.0-SNAPSHOT</controllermanager.northbound.version>
     <devices.web.version>0.5.0-SNAPSHOT</devices.web.version>
-    <dummy-console.version>1.2.0-SNAPSHOT</dummy-console.version>
+    <dummy-console.version>2.0.0-SNAPSHOT</dummy-console.version>
     <config.statistics.manager.configfile>30-statistics-manager.xml</config.statistics.manager.configfile>
     <eclipse.persistence.version>2.5.0</eclipse.persistence.version>
     <eclipse.jdt.core.compiler.batch.version>3.8.0.I20120518-2145</eclipse.jdt.core.compiler.batch.version>
@@ -135,7 +135,7 @@
     <logging.bridge.version>0.5.0-SNAPSHOT</logging.bridge.version>
     <maven.plugin.api.version>3.0.5</maven.plugin.api.version>
     <mimepull.version>1.9.4</mimepull.version>
-    <mdsal.version>1.2.0-SNAPSHOT</mdsal.version>
+    <mdsal.version>2.0.0-SNAPSHOT</mdsal.version>
     <netconf.version>0.3.0-SNAPSHOT</netconf.version>
     <networkconfig.bridgedomain.northbound.version>0.1.0-SNAPSHOT</networkconfig.bridgedomain.northbound.version>
     <networkconfig.neutron.implementation.version>0.5.0-SNAPSHOT</networkconfig.neutron.implementation.version>
