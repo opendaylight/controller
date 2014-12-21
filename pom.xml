@@ -11,7 +11,8 @@
   <artifactId>releasepom</artifactId>
   <version>0.2.0-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>controller</name> <!-- Used by Sonar to set project name -->
+  <name>controller</name>
+  <!-- Used by Sonar to set project name -->
 
   <prerequisites>
     <maven>3.0</maven>

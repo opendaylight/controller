@@ -16,7 +16,6 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RoutedRpcR
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistration;
 import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
-import org.opendaylight.controller.sal.binding.api.BindingAwareProvider.ProviderFunctionality;
 import org.opendaylight.controller.sal.binding.api.BindingAwareService;
 import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
@@ -131,18 +130,6 @@ public class BindingContextUtils {
         public <T extends RpcService> RpcRegistration<T> addRpcImplementation(Class<T> type, T implementation)
                 throws IllegalStateException {
             return getSALService(RpcProviderRegistry.class).addRpcImplementation(type, implementation);
-        }
-
-        @Deprecated
-        @Override
-        public void registerFunctionality(ProviderFunctionality functionality) {
-            // NOOP
-        }
-
-        @Deprecated
-        @Override
-        public void unregisterFunctionality(ProviderFunctionality functionality) {
-            // NOOP
         }
     }
 }
