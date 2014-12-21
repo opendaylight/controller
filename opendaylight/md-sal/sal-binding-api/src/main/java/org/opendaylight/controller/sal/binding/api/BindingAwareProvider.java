@@ -7,11 +7,7 @@
  */
 package org.opendaylight.controller.sal.binding.api;
 
-import java.util.Collection;
-
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
-import org.opendaylight.yangtools.yang.binding.RpcService;
 
 /**
  *
@@ -108,55 +104,6 @@ import org.opendaylight.yangtools.yang.binding.RpcService;
 public interface BindingAwareProvider {
 
     /**
-     * @deprecated
-     *
-     * This interface was originally intended to solve problems of how to get Implementations
-     * of functionality from a provider, but that is no longer necessary because the Provider
-     * Registers RPCs in onSessionInitiated.
-     *
-     * Recommend:
-     * {code
-     * public Collection<? extends RpcService> getImplementations() {
-     *   return Collections.emptySet();
-     * }
-     * }
-     */
-    @Deprecated
-    Collection<? extends RpcService> getImplementations();
-
-    /**
-     * @deprecated
-     *
-     * This interface was originally intended to solve problems of how to get Functionality
-     *  a provider could provide, but that is no longer necessary because the Provider
-     * Registers RPCs in onSessionInitiated.
-     *
-     * Recommend:
-     * {code
-     * public Collection<? extends ProviderFunctionality> getFunctionality() {
-     *   return Collections.emptySet();
-     * }
-     * }
-     *
-     */
-    @Deprecated
-    Collection<? extends ProviderFunctionality> getFunctionality();
-
-    /**
-     * Functionality provided by the {@link BindingAwareProvider}
-     *
-     * <p>
-     * Marker interface used to mark the interfaces describing specific
-     * functionality which could be exposed by providers to other components.
-     *
-     *
-     *
-     */
-    @Deprecated
-    public interface ProviderFunctionality {
-
-    }
-    /**
      * Callback signaling initialization of the consumer session to the SAL.
      *
      * The consumer MUST use the session for all communication with SAL or
@@ -168,22 +115,4 @@ public interface BindingAwareProvider {
      * @param session Unique session between consumer and SAL.
      */
     void onSessionInitiated(ProviderContext session);
-
-    /*
-     * @deprecated
-     *
-     * A provider was at one point considered an extension of a consumer, thus this
-     * call.  It is deprecated and the @see org.opendaylight.controller.sal.binding.api.BindingAwareConsumer#onSessionInitiated
-     * used, or you should simply use {@link #onSessionInitiated(ProviderContext)}
-     *
-     * Recommend:
-     * {code
-     * public final void onSessionInitialized(ConsumerContext session) {
-     *   // NOOP - as method is deprecated
-     * }
-     * }
-     */
-    @Deprecated
-    void onSessionInitialized(ConsumerContext session);
-
 }

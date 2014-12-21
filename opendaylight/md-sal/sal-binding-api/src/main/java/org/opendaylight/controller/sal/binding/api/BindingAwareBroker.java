@@ -8,7 +8,6 @@
 package org.opendaylight.controller.sal.binding.api;
 
 import org.opendaylight.controller.md.sal.common.api.routing.RoutedRegistration;
-import org.opendaylight.controller.sal.binding.api.BindingAwareProvider.ProviderFunctionality;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.yang.binding.BaseIdentity;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -149,11 +148,6 @@ public interface BindingAwareBroker {
      */
     public interface ProviderContext extends ConsumerContext, RpcProviderRegistry {
 
-        @Deprecated
-        void registerFunctionality(ProviderFunctionality functionality);
-
-        @Deprecated
-        void unregisterFunctionality(ProviderFunctionality functionality);
     }
 
     /**
