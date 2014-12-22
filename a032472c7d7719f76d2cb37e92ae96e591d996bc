@@ -58,6 +58,24 @@
       "revId": "a032472c7d7719f76d2cb37e92ae96e591d996bc",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_70374e00",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 2850
+      },
+      "writtenOn": "2014-12-22T10:21:16Z",
+      "side": 1,
+      "message": "The first commit message was better.",
+      "parentUuid": "7a96c907_9058da57",
+      "revId": "a032472c7d7719f76d2cb37e92ae96e591d996bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
