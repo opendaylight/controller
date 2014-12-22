@@ -669,7 +669,7 @@ public class TransactionProxyTest {
     }
 
     @Test(expected=IllegalStateException.class)
-    public void testxistsPreConditionCheck() {
+    public void testExistsPreConditionCheck() {
 
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
                 WRITE_ONLY);
