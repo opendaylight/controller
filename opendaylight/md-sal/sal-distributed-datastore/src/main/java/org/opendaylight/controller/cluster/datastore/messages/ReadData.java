@@ -12,7 +12,7 @@ import org.opendaylight.controller.cluster.datastore.util.InstanceIdentifierUtil
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
-public class ReadData {
+public class ReadData implements SerializableMessage {
   public static final Class<ShardTransactionMessages.ReadData> SERIALIZABLE_CLASS =
           ShardTransactionMessages.ReadData.class;
   private final YangInstanceIdentifier path;
