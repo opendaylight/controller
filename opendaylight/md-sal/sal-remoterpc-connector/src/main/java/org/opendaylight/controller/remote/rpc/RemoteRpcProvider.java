@@ -73,6 +73,8 @@ public class RemoteRpcProvider implements AutoCloseable, Provider, SchemaContext
                                      config.getRpcManagerName());
 
     LOG.debug("rpc manager started");
+
+    schemaService.registerSchemaContextListener(this);
   }
 
   @Override
