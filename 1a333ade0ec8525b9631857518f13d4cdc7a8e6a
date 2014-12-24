@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_39f9b1e9",
+        "filename": "opendaylight/md-sal/compatibility/sal-compatibility/src/main/java/org/opendaylight/controller/sal/compatibility/NodeMapping.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1045
+      },
+      "writtenOn": "2014-12-24T16:28:44Z",
+      "side": 1,
+      "message": "Why assign to a variable, if this is the only use in the next conditional? Perhaps the compiler/optimizer will \"do the right thing\", but might as well not use a variable.",
+      "revId": "1a333ade0ec8525b9631857518f13d4cdc7a8e6a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
