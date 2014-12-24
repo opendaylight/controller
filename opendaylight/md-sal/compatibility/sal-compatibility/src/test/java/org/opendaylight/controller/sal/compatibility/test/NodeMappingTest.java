@@ -106,7 +106,7 @@ public class NodeMappingTest {
         nodeId = new NodeId(nodeUriPrefix + "iosv-2");
         try {
             observed = NodeMapping.toADNode(nodeId);
-            Assert.assertEquals("PR|opendaylight-inventory:nodes/node/iosv-2", observed.toString());
+            Assert.assertEquals("MD_SAL_DEPRECATED|opendaylight-inventory:nodes/node/iosv-2", observed.toString());
         } catch (ConstructionException e) {
             Assert.fail("should succeed to construct Node: "+e.getMessage());
         }

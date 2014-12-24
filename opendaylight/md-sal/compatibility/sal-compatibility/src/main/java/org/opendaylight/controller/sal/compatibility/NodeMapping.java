@@ -99,13 +99,17 @@ public final class NodeMapping {
 
     public static org.opendaylight.controller.sal.core.Node toADNode(final NodeId id) throws ConstructionException {
         String nodeId = NodeMapping.toADNodeId(id);
-        String nodeIdasNumber = nodeId.replaceFirst("^.*:", "");
-        if (isInteger(nodeIdasNumber)) {
-            Long aDNodeId = openflowFullNodeIdToLong(nodeIdasNumber);
-            return new org.opendaylight.controller.sal.core.Node(NodeIDType.OPENFLOW, aDNodeId);
+        if(nodeId != null){
+            if (isInteger(nodeId.replaceFirst("^.*:", ""))) {
+                Long aDNodeId = openflowFullNodeIdToLong(nodeId);
+                return new org.opendaylight.controller.sal.core.Node(NodeIDType.OPENFLOW, aDNodeId);
         } else {
-            return new org.opendaylight.controller.sal.core.Node(NodeIDType.PRODUCTION, nodeId);
+                LOG.debug("NodeId does not match openflow id type, using " + NodeMapping.MD_SAL_TYPE +  "instead");
+                NodeIDType.registerIDType(MD_SAL_TYPE, String.class);
+                return new org.opendaylight.controller.sal.core.Node(MD_SAL_TYPE, nodeId);
+          }
         }
+        return null;
     }
 
     /**
@@ -117,7 +121,7 @@ public final class NodeMapping {
         if (adNodeId == null) {
             return null;
         }
-        return new BigInteger(adNodeId).longValue();
+        return new BigInteger(adNodeId.replaceFirst("^.*:", "")).longValue();
     }
 
     public static NodeId toNodeId(final InstanceIdentifier<?> id) {
@@ -165,6 +169,31 @@ public final class NodeMapping {
     }
 
     /**
+     * Checks if the passed NodeId is a production level node (non-SDN).
+     * or OpenFlow specific node
+     * If the passed NodeId is a number, its an OF node..
+     *
+     * Examples of OpenFlow nodeId: 'OF|1' or '2'
+     * Examples of MdSal    nodeId: 'MD_SAL_DEPRECATED|VM1' or 'VM2'
+     * @param nodeConnectorIdVal
+     * @return
+     */
+    public static boolean checkMdSalNodeType(String nodeId) {
+       if (nodeId != null) {
+            if (nodeId.contains("|")) {
+               nodeId = nodeId.substring(nodeId.indexOf("|") + 1);
+            }
+            String nodeIdAsNumber = nodeId.replaceFirst("^.*:", "");
+            if (isInteger(nodeIdAsNumber)) {
+               return false;
+            } else {
+               return true;
+            }
+        }
+        return false;
+     }
+
+    /**
      * @param aDNode
      * @return
      */
@@ -195,7 +224,15 @@ public final class NodeMapping {
         } else if (ncId.equals(toControllerNodeConnectorId(nodeId))) {
             return NodeConnectorIDType.CONTROLLER;
         }
-        return NodeConnectorIDType.OPENFLOW;
+
+        boolean isMdsalNode = checkMdSalNodeType(nodeId.getValue());
+        if (isMdsalNode) {
+            LOG.debug("NodeConnectorId does not match openflow id type, using " + NodeMapping.MD_SAL_TYPE +  "instead");
+            NodeConnectorIDType.registerIDType(MD_SAL_TYPE, String.class, MD_SAL_TYPE);
+            return MD_SAL_TYPE;
+        }else{
+            return NodeConnectorIDType.OPENFLOW;
+        }
     }
 
     public static Object toADNodeConnectorId(final NodeConnectorId nodeConnectorId, final NodeId nodeId) {
@@ -205,9 +242,11 @@ public final class NodeMapping {
             return org.opendaylight.controller.sal.core.NodeConnector.SPECIALNODECONNECTORID;
         }
 
+        boolean isMdsalNode = checkMdSalNodeType(nodeId.getValue());
+
         String nodeConnectorIdStripped = ALL_CHARS_TO_COLON.matcher(nodeConnectorId.getValue()).replaceFirst("");
 
-        if (NUMBERS_ONLY.matcher(nodeConnectorIdStripped).matches()) {
+        if (!isMdsalNode && NUMBERS_ONLY.matcher(nodeConnectorIdStripped).matches()) {
             Short nodeConnectorIdVal = null;
             try {
                 nodeConnectorIdVal = Short.valueOf(nodeConnectorIdStripped);
@@ -215,6 +254,8 @@ public final class NodeMapping {
             } catch (NumberFormatException e) {
                 LOG.warn("nodeConnectorId not supported (long): {}", nodeConnectorIdStripped, e);
             }
+        }else if(isMdsalNode){
+            return nodeConnectorId.getValue();
         }
         return nodeConnectorIdStripped;
     }
@@ -240,9 +281,14 @@ public final class NodeMapping {
     }
 
     public static NodeRef toNodeRef(final org.opendaylight.controller.sal.core.Node node) {
-        Preconditions.checkArgument(NodeIDType.OPENFLOW.equals(node.getType()));
-        final Long nodeId = Arguments.<Long>checkInstanceOf(node.getID(), Long.class);
-        final NodeKey nodeKey = new NodeKey(new NodeId(OPENFLOW_ID_PREFIX + nodeId));
+        NodeKey nodeKey = null;
+        if(node.getType().equals(NodeIDType.OPENFLOW)){
+            Preconditions.checkArgument(NodeIDType.OPENFLOW.equals(node.getType()));
+            final Long nodeId = Arguments.<Long>checkInstanceOf(node.getID(), Long.class);
+            nodeKey = new NodeKey(new NodeId(OPENFLOW_ID_PREFIX + nodeId));
+        } else {
+            nodeKey = new NodeKey(new NodeId(node.getNodeIDString()));
+        }
         final InstanceIdentifier<Node> nodePath = InstanceIdentifier.builder(Nodes.class).child(NODE_CLASS, nodeKey).toInstance();
         return new NodeRef(nodePath);
     }
@@ -254,8 +300,8 @@ public final class NodeMapping {
         final InstanceIdentifier<Node> nodePath = ((InstanceIdentifier<Node>) node.getValue());
         NodeConnectorId nodeConnectorId = null;
 
+        final NodeId nodeId = toNodeId(nodePath);
         if (nodeConnector.getID().equals(org.opendaylight.controller.sal.core.NodeConnector.SPECIALNODECONNECTORID)) {
-            final NodeId nodeId = toNodeId(nodePath);
             final String nodeConnectorType = nodeConnector.getType();
             if (nodeConnectorType.equals(NodeConnectorIDType.SWSTACK)) {
                 nodeConnectorId = toLocalNodeConnectorId(nodeId);
@@ -265,8 +311,14 @@ public final class NodeMapping {
                 nodeConnectorId = toControllerNodeConnectorId(nodeId);
             }
         } else {
-            nodeConnectorId = new NodeConnectorId(OPENFLOW_ID_PREFIX
+            boolean isMdSalNodetype = checkMdSalNodeType(nodeId.getValue());
+            if(!isMdSalNodetype){
+               nodeConnectorId = new NodeConnectorId(OPENFLOW_ID_PREFIX
                     + Arguments.<Short>checkInstanceOf(nodeConnector.getID(), Short.class));
+            }else{
+                // Ciena devices...
+                nodeConnectorId = new NodeConnectorId(nodeConnector.getNodeConnectorIDString());
+            }
         }
         final NodeConnectorKey connectorKey = new NodeConnectorKey(nodeConnectorId);
         final InstanceIdentifier<NodeConnector> path = nodePath.child(NODECONNECTOR_CLASS, connectorKey);
