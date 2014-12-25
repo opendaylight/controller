@@ -120,6 +120,7 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
 
             LOG.debug("Submitting transaction {}", tx);
             final CheckedFuture<Void, ?> f = tx.getTransaction().submit();
+            LOG.debug("Transaction {} submitted", tx);
             bufferTransaction = null;
             inflightTransaction = tx;
 
