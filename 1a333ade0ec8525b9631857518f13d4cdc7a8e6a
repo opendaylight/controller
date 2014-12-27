@@ -16,6 +16,24 @@
       "revId": "1a333ade0ec8525b9631857518f13d4cdc7a8e6a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_24f984e9",
+        "filename": "opendaylight/md-sal/compatibility/sal-compatibility/src/main/java/org/opendaylight/controller/sal/compatibility/NodeMapping.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 2895
+      },
+      "writtenOn": "2014-12-27T20:06:41Z",
+      "side": 1,
+      "message": "Thanks, I agree; its not needed here. Will fix it.",
+      "parentUuid": "7a96c907_39f9b1e9",
+      "revId": "1a333ade0ec8525b9631857518f13d4cdc7a8e6a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
