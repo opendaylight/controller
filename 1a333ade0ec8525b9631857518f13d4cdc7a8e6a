@@ -34,6 +34,29 @@
       "revId": "1a333ade0ec8525b9631857518f13d4cdc7a8e6a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_04f488f0",
+        "filename": "opendaylight/md-sal/compatibility/sal-compatibility/src/main/java/org/opendaylight/controller/sal/compatibility/NodeMapping.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 319,
+      "author": {
+        "id": 391
+      },
+      "writtenOn": "2014-12-28T14:09:07Z",
+      "side": 1,
+      "message": "Drop the Ciena comment",
+      "range": {
+        "startLine": 319,
+        "startChar": 0,
+        "endLine": 319,
+        "endChar": 35
+      },
+      "revId": "1a333ade0ec8525b9631857518f13d4cdc7a8e6a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
