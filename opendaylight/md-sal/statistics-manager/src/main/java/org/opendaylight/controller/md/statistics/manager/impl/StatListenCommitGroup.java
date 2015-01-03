@@ -139,6 +139,11 @@ public class StatListenCommitGroup extends StatAbstractListenCommit<Group, Opend
                 /* Notification for continue collecting statistics */
                 notifyToCollectNextStatistics(nodeIdent, transId);
             }
+
+            @Override
+            public NodeId getNodeId() {
+                return nodeId;
+            }
         });
     }
 
@@ -192,6 +197,11 @@ public class StatListenCommitGroup extends StatAbstractListenCommit<Group, Opend
                         manager.registerAdditionalNodeFeature(nodeIdent, StatCapabTypes.GROUP_STATS);
                     }
                 }
+            }
+
+            @Override
+            public NodeId getNodeId() {
+                return nodeId;
             }
         });
     }
@@ -250,6 +260,11 @@ public class StatListenCommitGroup extends StatAbstractListenCommit<Group, Opend
                 if ( ! notifGroup.isPresent()) {
                     notifyToCollectNextStatistics(nodeIdent, transId);
                 }
+            }
+
+            @Override
+            public NodeId getNodeId() {
+                return nodeId;
             }
         });
     }
