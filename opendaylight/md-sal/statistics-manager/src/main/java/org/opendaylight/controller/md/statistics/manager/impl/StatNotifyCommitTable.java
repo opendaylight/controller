@@ -107,6 +107,11 @@ public class StatNotifyCommitTable extends StatAbstractNotifyCommit<Opendaylight
                  * and they are small - don't need to wait to whole apply operation */
                 notifyToCollectNextStatistics(nodeIdent, transId);
             }
+
+            @Override
+            public NodeId getNodeId() {
+                return nodeId;
+            }
         });
     }
 

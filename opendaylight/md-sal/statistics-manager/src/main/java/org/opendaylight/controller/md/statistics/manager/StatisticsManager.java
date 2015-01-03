@@ -24,6 +24,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.Queue;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.OpendaylightGroupStatisticsListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.groups.Group;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.OpendaylightMeterStatisticsListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.OpendaylightPortStatisticsListener;
@@ -53,14 +54,41 @@ public interface StatisticsManager extends AutoCloseable, TransactionChainListen
      * Internal {@link TransactionChainListener} joining all DS commits
      * to Set of chained changes for prevent often DataStore touches.
      */
-    public interface StatDataStoreOperation {
+    public abstract class StatDataStoreOperation {
+        public enum StatsManagerOperationType {
+            /**
+             * Operation will carry out work related to new node addition /
+             * update
+             */
+            NODE_UPDATE,
+            /**
+             * Operation will carry out work related to node removal
+             */
+            NODE_REMOVAL,
+            /**
+             * Operation will commit data to the operational data store
+             */
+            DATA_COMMIT_OPER_DS
+        }
 
         /**
-         * Apply all read / write (put|merge) operation
-         * for DataStore
+         * Return type of the operation. Individual operations should override
+         * it accordingly.
+         *
+         * @return
+         */
+        public StatsManagerOperationType getType() {
+            return StatsManagerOperationType.DATA_COMMIT_OPER_DS;
+        }
+
+        public abstract NodeId getNodeId();
+
+        /**
+         * Apply all read / write (put|merge) operation for DataStore
+         *
          * @param {@link ReadWriteTransaction} tx
          */
-        void applyOperation(ReadWriteTransaction tx);
+        public abstract void applyOperation(ReadWriteTransaction tx);
 
     }
 

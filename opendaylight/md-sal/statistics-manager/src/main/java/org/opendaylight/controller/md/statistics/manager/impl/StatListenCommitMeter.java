@@ -139,6 +139,11 @@ public class StatListenCommitMeter extends StatAbstractListenCommit<Meter, Opend
                 /* Notification for continue collecting statistics */
                 notifyToCollectNextStatistics(nodeIdent, transId);
             }
+
+            @Override
+            public NodeId getNodeId() {
+                return nodeId;
+            }
         });
     }
 
@@ -192,6 +197,11 @@ public class StatListenCommitMeter extends StatAbstractListenCommit<Meter, Opend
                         manager.registerAdditionalNodeFeature(nodeIdent, StatCapabTypes.METER_STATS);
                     }
                 }
+            }
+
+            @Override
+            public NodeId getNodeId() {
+                return nodeId;
             }
         });
     }
@@ -250,6 +260,11 @@ public class StatListenCommitMeter extends StatAbstractListenCommit<Meter, Opend
                 if ( ! notifMeter.isPresent()) {
                     notifyToCollectNextStatistics(nodeIdent, transId);
                 }
+            }
+
+            @Override
+            public NodeId getNodeId() {
+                return nodeId;
             }
         });
     }

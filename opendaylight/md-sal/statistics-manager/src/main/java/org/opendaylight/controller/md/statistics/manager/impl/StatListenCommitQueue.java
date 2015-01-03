@@ -139,6 +139,11 @@ public class StatListenCommitQueue extends StatAbstractListenCommit<Queue, Opend
                 /* Notification for continue collecting statistics */
                 notifyToCollectNextStatistics(nodeIdent, transId);
             }
+
+            @Override
+            public NodeId getNodeId() {
+                return nodeId;
+            }
         });
     }
 

@@ -35,11 +35,13 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.Fl
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.flow.node.SwitchFeatures;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorRemoved;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorUpdated;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRemoved;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeUpdated;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -116,6 +118,11 @@ public class StatNodeRegistrationImpl implements StatNodeRegistration, DataChang
 
         manager.enqueue(new StatDataStoreOperation() {
             @Override
+            public StatsManagerOperationType getType(){
+                return StatsManagerOperationType.NODE_UPDATE;
+            }
+
+            @Override
             public void applyOperation(final ReadWriteTransaction tx) {
 
                 final List<StatCapabTypes> statCapabTypes = new ArrayList<>();
@@ -142,6 +149,11 @@ public class StatNodeRegistrationImpl implements StatNodeRegistration, DataChang
                 manager.connectedNodeRegistration(nodeIdent,
                         Collections.unmodifiableList(statCapabTypes), maxTables.get());
             }
+
+            @Override
+            public NodeId getNodeId() {
+                return nodeIdent.firstKeyOf(Node.class, NodeKey.class).getId();
+            }
         });
     }
 
@@ -152,8 +164,18 @@ public class StatNodeRegistrationImpl implements StatNodeRegistration, DataChang
                 "InstanceIdentifier {} is WildCarded!", nodeIdent);
         manager.enqueue(new StatDataStoreOperation() {
             @Override
+            public StatsManagerOperationType getType(){
+                return StatsManagerOperationType.NODE_REMOVAL;
+            }
+
+            @Override
             public void applyOperation(final ReadWriteTransaction tx) {
                 manager.disconnectedNodeUnregistration(nodeIdent);
+            }
+
+            @Override
+            public NodeId getNodeId() {
+                return nodeIdent.firstKeyOf(Node.class, NodeKey.class).getId();
             }
         });
     }
