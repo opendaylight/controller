@@ -14,6 +14,13 @@
         <feature version='${project.version}'>odl-mdsal-xsql</feature>
         <feature version='${project.version}'>odl-toaster</feature>
     </feature>
+    <feature name='odl-mdsal-common' version='${mdsal.version}' description="OpenDaylight :: Config :: All">
+      <feature version='${yangtools.version}'>odl-yangtools-data-binding</feature>
+      <bundle>mvn:org.opendaylight.controller/sal-common/${mdsal.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/sal-common-api/${mdsal.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/sal-common-impl/${mdsal.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/sal-common-util/${mdsal.version}</bundle>
+    </feature>
     <feature name='odl-mdsal-broker' version='${project.version}' description="OpenDaylight :: MDSAL :: Broker">
         <feature version='${yangtools.version}'>odl-yangtools-common</feature>
         <feature version='${yangtools.version}'>odl-yangtools-binding</feature>

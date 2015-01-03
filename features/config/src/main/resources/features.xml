@@ -6,19 +6,10 @@
   <repository>mvn:org.opendaylight.yangtools/features-yangtools/${yangtools.version}/xml/features</repository>
 
   <feature name='odl-config-all' version='${project.version}' description="OpenDaylight :: Config :: All">
-      <feature version='${mdsal.version}'>odl-mdsal-common</feature>
       <feature version='${project.version}'>odl-config-api</feature>
       <feature version='${project.version}'>odl-config-netty-config-api</feature>
       <feature version='${project.version}'>odl-config-core</feature>
       <feature version='${project.version}'>odl-config-manager</feature>
-  </feature>
-
-  <feature name='odl-mdsal-common' version='${mdsal.version}' description="OpenDaylight :: Config :: All">
-      <feature version='${yangtools.version}'>odl-yangtools-data-binding</feature>
-      <bundle>mvn:org.opendaylight.controller/sal-common/${mdsal.version}</bundle>
-      <bundle>mvn:org.opendaylight.controller/sal-common-api/${mdsal.version}</bundle>
-      <bundle>mvn:org.opendaylight.controller/sal-common-impl/${mdsal.version}</bundle>
-      <bundle>mvn:org.opendaylight.controller/sal-common-util/${mdsal.version}</bundle>
   </feature>
 
   <feature name='odl-config-api' version='${project.version}' description="OpenDaylight :: Config :: API">
@@ -39,7 +30,6 @@
     <feature version='${yangtools.version}'>odl-yangtools-common</feature>
     <feature version='${yangtools.version}'>odl-yangtools-binding</feature>
     <feature version='${yangtools.version}'>odl-yangtools-binding-generator</feature>
-    <feature version='${mdsal.version}'>odl-mdsal-common</feature>
     <feature version='${project.version}'>odl-config-api</feature>
     <bundle>mvn:org.opendaylight.controller/config-util/${project.version}</bundle>
     <bundle>mvn:org.opendaylight.controller/yang-jmx-generator/${project.version}</bundle>
