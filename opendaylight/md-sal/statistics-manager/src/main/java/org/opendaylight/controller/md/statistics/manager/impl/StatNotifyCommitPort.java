@@ -107,6 +107,11 @@ public class StatNotifyCommitPort extends StatAbstractNotifyCommit<OpendaylightP
                  * and they are small - don't need to wait for whole apply operation*/
                 notifyToCollectNextStatistics(nodeIdent, transId);
             }
+
+            @Override
+            public NodeId getNodeId() {
+                return nodeId;
+            }
         });
     }
 

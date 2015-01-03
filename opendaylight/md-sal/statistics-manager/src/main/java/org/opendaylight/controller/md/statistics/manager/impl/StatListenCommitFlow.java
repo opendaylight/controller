@@ -157,6 +157,11 @@ public class StatListenCommitFlow extends StatAbstractListenCommit<Flow, Openday
                     }
                 }
             }
+
+            @Override
+            public NodeId getNodeId() {
+                return nodeId;
+            }
         });
     }
 
@@ -217,6 +222,11 @@ public class StatListenCommitFlow extends StatAbstractListenCommit<Flow, Openday
                 }
                 /* Notification for continue collecting statistics */
                 notifyToCollectNextStatistics(nodeIdent, transId);
+            }
+
+            @Override
+            public NodeId getNodeId() {
+                return nodeId;
             }
         });
     }
