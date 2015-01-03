@@ -20,6 +20,7 @@ import org.opendaylight.controller.md.statistics.manager.StatPermCollector.StatC
 import org.opendaylight.controller.md.statistics.manager.StatRpcMsgManager.TransactionCacheContainer;
 import org.opendaylight.controller.md.statistics.manager.StatisticsManager;
 import org.opendaylight.controller.md.statistics.manager.StatisticsManager.StatDataStoreOperation;
+import org.opendaylight.controller.md.statistics.manager.StatisticsManager.StatDataStoreOperation.StatsManagerOperationType;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.Meter;
@@ -101,7 +102,7 @@ public class StatListenCommitMeter extends StatAbstractListenCommit<Meter, Opend
         }
 
         /* Don't block RPC Notification thread */
-        manager.enqueue(new StatDataStoreOperation() {
+        manager.enqueue(new StatDataStoreOperation(StatsManagerOperationType.DATA_COMMIT_OPER_DS,nodeId) {
             @Override
             public void applyOperation(final ReadWriteTransaction tx) {
 
@@ -157,7 +158,7 @@ public class StatListenCommitMeter extends StatAbstractListenCommit<Meter, Opend
         }
 
         /* Don't block RPC Notification thread */
-        manager.enqueue(new StatDataStoreOperation() {
+        manager.enqueue(new StatDataStoreOperation(StatsManagerOperationType.DATA_COMMIT_OPER_DS,nodeId) {
             @Override
             public void applyOperation(final ReadWriteTransaction tx) {
                 /* Get and Validate TransactionCacheContainer */
@@ -211,7 +212,7 @@ public class StatListenCommitMeter extends StatAbstractListenCommit<Meter, Opend
         }
 
         /* Don't block RPC Notification thread */
-        manager.enqueue(new StatDataStoreOperation() {
+        manager.enqueue(new StatDataStoreOperation(StatsManagerOperationType.DATA_COMMIT_OPER_DS,nodeId) {
             @Override
             public void applyOperation(final ReadWriteTransaction tx) {
 
