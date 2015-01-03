@@ -21,6 +21,7 @@ import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.statistics.manager.StatRpcMsgManager.TransactionCacheContainer;
 import org.opendaylight.controller.md.statistics.manager.StatisticsManager;
 import org.opendaylight.controller.md.statistics.manager.StatisticsManager.StatDataStoreOperation;
+import org.opendaylight.controller.md.statistics.manager.StatisticsManager.StatDataStoreOperation.StatsManagerOperationType;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionAware;
@@ -95,7 +96,7 @@ public class StatListenCommitQueue extends StatAbstractListenCommit<Queue, Opend
         }
 
         /* Don't block RPC Notification thread */
-        manager.enqueue(new StatDataStoreOperation() {
+        manager.enqueue(new StatDataStoreOperation(StatsManagerOperationType.DATA_COMMIT_OPER_DS,nodeId) {
             @Override
             public void applyOperation(final ReadWriteTransaction tx) {
 

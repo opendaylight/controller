@@ -29,6 +29,7 @@ import org.opendaylight.controller.md.statistics.manager.StatPermCollector;
 import org.opendaylight.controller.md.statistics.manager.StatPermCollector.StatCapabTypes;
 import org.opendaylight.controller.md.statistics.manager.StatRpcMsgManager;
 import org.opendaylight.controller.md.statistics.manager.StatisticsManager;
+import org.opendaylight.controller.md.statistics.manager.StatisticsManager.StatDataStoreOperation.StatsManagerOperationType;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.Meter;
@@ -223,7 +224,18 @@ public class StatisticsManagerImpl implements StatisticsManager, Runnable {
    private synchronized void cleanDataStoreOperQueue() {
        // Drain all events, making sure any blocked threads are unblocked
        while (! dataStoreOperQueue.isEmpty()) {
-           dataStoreOperQueue.poll();
+           StatDataStoreOperation op = dataStoreOperQueue.poll();
+
+           // Execute the node removal clean up operation if queued in the
+           // operational queue.
+           if (op.getType() == StatsManagerOperationType.NODE_REMOVAL) {
+               try {
+                   LOG.debug("Node {} disconnected. Cleaning internal data.",op.getNodeId());
+                   op.applyOperation(null);
+               } catch (final Exception ex) {
+                   LOG.warn("Unhandled exception while cleaning up internal data of node [{}]",op.getNodeId());
+               }
+           }
        }
    }
 

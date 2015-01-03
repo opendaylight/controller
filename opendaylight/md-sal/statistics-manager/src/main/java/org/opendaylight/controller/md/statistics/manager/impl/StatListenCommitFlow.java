@@ -25,6 +25,7 @@ import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.statistics.manager.StatRpcMsgManager.TransactionCacheContainer;
 import org.opendaylight.controller.md.statistics.manager.StatisticsManager;
 import org.opendaylight.controller.md.statistics.manager.StatisticsManager.StatDataStoreOperation;
+import org.opendaylight.controller.md.statistics.manager.StatisticsManager.StatDataStoreOperation.StatsManagerOperationType;
 import org.opendaylight.controller.md.statistics.manager.impl.helper.FlowComparator;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
@@ -120,7 +121,7 @@ public class StatListenCommitFlow extends StatAbstractListenCommit<Flow, Openday
             return;
         }
         /* check flow Capable Node and write statistics */
-        manager.enqueue(new StatDataStoreOperation() {
+        manager.enqueue(new StatDataStoreOperation(StatsManagerOperationType.DATA_COMMIT_OPER_DS,nodeId) {
             @Override
             public void applyOperation(final ReadWriteTransaction tx) {
 
@@ -179,7 +180,7 @@ public class StatListenCommitFlow extends StatAbstractListenCommit<Flow, Openday
             return;
         }
         /* add flow's statistics */
-        manager.enqueue(new StatDataStoreOperation() {
+        manager.enqueue(new StatDataStoreOperation(StatsManagerOperationType.DATA_COMMIT_OPER_DS,nodeId) {
             @Override
             public void applyOperation(final ReadWriteTransaction tx) {
                 final Optional<TransactionCacheContainer<?>> txContainer = getTransactionCacheContainer(transId, nodeId);
@@ -218,6 +219,7 @@ public class StatListenCommitFlow extends StatAbstractListenCommit<Flow, Openday
                 /* Notification for continue collecting statistics */
                 notifyToCollectNextStatistics(nodeIdent, transId);
             }
+
         });
     }
 
