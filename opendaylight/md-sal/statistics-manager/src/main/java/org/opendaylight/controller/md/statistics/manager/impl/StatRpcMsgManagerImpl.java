@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.md.statistics.manager.impl;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -50,6 +51,7 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
@@ -174,13 +176,15 @@ public class StatRpcMsgManagerImpl implements StatRpcMsgManager {
             @Override
             public void onSuccess(final RpcResult<? extends TransactionAware> result) {
                 final TransactionId id = result.getResult().getTransactionId();
+                final NodeKey nodeKey = nodeRef.getValue().firstKeyOf(Node.class, NodeKey.class);
                 if (id == null) {
-                    LOG.warn("No protocol support");
+                    String[] multipartRequestName = result.getResult().getClass().getSimpleName().split("(?=\\p{Upper})");
+                    LOG.warn("Node [{}] does not support statistics request type : {}",
+                            nodeKey.getId(),Joiner.on(" ").join(Arrays.copyOfRange(multipartRequestName, 2, multipartRequestName.length-2)));
                 } else {
                     if (resultTransId != null) {
                         resultTransId.set(id);
                     }
-                    final NodeKey nodeKey = nodeRef.getValue().firstKeyOf(Node.class, NodeKey.class);
                     final String cacheKey = buildCacheKey(id, nodeKey.getId());
                     final TransactionCacheContainer<? super TransactionAware> container =
                             new TransactionCacheContainerImpl<>(id, inputObj, nodeKey.getId());
