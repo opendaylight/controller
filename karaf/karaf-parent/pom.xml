@@ -178,6 +178,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <!-- no startupFeatures -->
             <bootFeatures>
               <feature>standard</feature>
+              <feature>${karaf.localFeature}</feature>
             </bootFeatures>
             <!-- no installedFeatures -->
           </configuration>
