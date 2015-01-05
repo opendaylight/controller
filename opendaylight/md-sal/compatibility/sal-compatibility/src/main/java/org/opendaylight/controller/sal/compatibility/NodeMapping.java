@@ -225,8 +225,7 @@ public final class NodeMapping {
             return NodeConnectorIDType.CONTROLLER;
         }
 
-        boolean isMdsalNode = checkMdSalNodeType(nodeId.getValue());
-        if (isMdsalNode) {
+        if (checkMdSalNodeType(nodeId.getValue())) {
             LOG.debug("NodeConnectorId does not match openflow id type, using " + NodeMapping.MD_SAL_TYPE +  "instead");
             NodeConnectorIDType.registerIDType(MD_SAL_TYPE, String.class, MD_SAL_TYPE);
             return MD_SAL_TYPE;
@@ -311,12 +310,10 @@ public final class NodeMapping {
                 nodeConnectorId = toControllerNodeConnectorId(nodeId);
             }
         } else {
-            boolean isMdSalNodetype = checkMdSalNodeType(nodeId.getValue());
-            if(!isMdSalNodetype){
+            if(!checkMdSalNodeType(nodeId.getValue())){
                nodeConnectorId = new NodeConnectorId(OPENFLOW_ID_PREFIX
                     + Arguments.<Short>checkInstanceOf(nodeConnector.getID(), Short.class));
             }else{
-                // Ciena devices...
                 nodeConnectorId = new NodeConnectorId(nodeConnector.getNodeConnectorIDString());
             }
         }

@@ -102,8 +102,8 @@ public final class TopologyMapping {
     public static NodeConnector toADNodeConnector(final TpId source, final NodeId nodeId) throws ConstructionException {
         checkNotNull(source);
         String nodeConnectorIdStripped = toADNodeConnectorId(source);
-        boolean isMdsalNodeType = NodeMapping.checkMdSalNodeType(nodeId.getValue());
-        if (NUMBERS_ONLY.matcher(nodeConnectorIdStripped).matches() && !isMdsalNodeType) {
+		if (NUMBERS_ONLY.matcher(nodeConnectorIdStripped).matches()
+				&& !NodeMapping.checkMdSalNodeType(nodeId.getValue())) {
             return new NodeConnector(NodeConnectorIDType.OPENFLOW, Short.valueOf(nodeConnectorIdStripped), toADNode(nodeId));
         }
         LOG.debug("NodeConnectorId does not match openflow id type, using " + NodeMapping.MD_SAL_TYPE +  "instead");
@@ -118,8 +118,8 @@ public final class TopologyMapping {
     public static Node toADNode(final NodeId nodeId) throws ConstructionException {
         checkNotNull(nodeId);
         String nodeIdStripped = toADNodeId(nodeId);
-        boolean isMdsalNodeType = NodeMapping.checkMdSalNodeType(nodeId.getValue());
-        if (NUMBERS_ONLY.matcher(nodeIdStripped).matches() && !isMdsalNodeType) {
+		if (NUMBERS_ONLY.matcher(nodeIdStripped).matches()
+				&& !NodeMapping.checkMdSalNodeType(nodeId.getValue())) {
             return new Node(NodeIDType.OPENFLOW, Long.valueOf(nodeIdStripped));
         }
         LOG.debug("NodeId does not match openflow id type, using " + NodeMapping.MD_SAL_TYPE +  "instead");
