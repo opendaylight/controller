@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_eaf605d7",
+        "filename": "opendaylight/md-sal/statistics-manager/src/main/java/org/opendaylight/controller/md/statistics/manager/StatisticsManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-01-05T20:33:43Z",
+      "side": 1,
+      "message": "Although this method is not abstract, and derived class need to override this method if the anonymous class object is doing different operation then default. But yes i agree that it\u0027s better to provide ctor then overriding.",
+      "parentUuid": "7a96c907_ca96a994",
+      "revId": "66a6833a4f6a67a5c2c43e007310235b4e63bc23",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_2a82ad4f",
         "filename": "opendaylight/md-sal/statistics-manager/src/main/java/org/opendaylight/controller/md/statistics/manager/StatisticsManager.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-01-05T17:40:35Z",
       "side": 1,
       "message": "Similar to getType() - i.e. pass NodeId to the ctor...",
+      "revId": "66a6833a4f6a67a5c2c43e007310235b4e63bc23",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_8a03c1b7",
+        "filename": "opendaylight/md-sal/statistics-manager/src/main/java/org/opendaylight/controller/md/statistics/manager/StatisticsManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-01-05T20:33:43Z",
+      "side": 1,
+      "message": "Agree, will push the patch.",
+      "parentUuid": "7a96c907_2a82ad4f",
       "revId": "66a6833a4f6a67a5c2c43e007310235b4e63bc23",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
