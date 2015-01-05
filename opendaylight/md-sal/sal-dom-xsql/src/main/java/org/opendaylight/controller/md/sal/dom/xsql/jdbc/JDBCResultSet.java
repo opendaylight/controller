@@ -423,20 +423,20 @@ public class JDBCResultSet implements Serializable, ResultSet,
         return result;
     }
 
-    public List<Record> addRecords(Object element, XSQLBluePrintNode node,
-            boolean root, String tableName, XSQLBluePrint bluePrint) {
-
+    public List<Record> addRecords(Object element, XSQLBluePrintNode node,boolean root, String tableName, XSQLBluePrint bluePrint) {
         List<Record> result = new LinkedList<Record>();
+        //In case this is a sibling to the requested table, the elenment type
+        //won't be in the path of the leaf node
+        if(node==null){
+            return result;
+        }
         String nodeID = XSQLODLUtils.getNodeIdentiofier(element);
         if (node.getODLTableName().equals(nodeID)) {
-            XSQLBluePrintNode bluePrintNode = bluePrint
-                    .getBluePrintNodeByODLTableName(nodeID)[0];
+            XSQLBluePrintNode bluePrintNode = bluePrint.getBluePrintNodeByODLTableName(nodeID)[0];
             Record rec = new Record();
             rec.element = element;
-            XSQLBluePrintNode bpn = this.tablesInQueryMap.get(bluePrintNode
-                    .getBluePrintNodeName());
-            if (this.criteria.containsKey(bluePrintNode.getBluePrintNodeName())
-                    || bpn != null) {
+            XSQLBluePrintNode bpn = this.tablesInQueryMap.get(bluePrintNode.getBluePrintNodeName());
+            if (this.criteria.containsKey(bluePrintNode.getBluePrintNodeName()) || bpn != null) {
                 Map<String, Object> allKeyValues = collectColumnValues(element, bpn);
                 if (!(isObjectFitCriteria(allKeyValues,
                         bpn.getBluePrintNodeName()) == 1)) {
@@ -453,8 +453,7 @@ public class JDBCResultSet implements Serializable, ResultSet,
         }
 
         XSQLBluePrintNode parent = node.getParent();
-        List<Record> subRecords = addRecords(element, parent, false, tableName,
-                bluePrint);
+        List<Record> subRecords = addRecords(element, parent, false, tableName,bluePrint);
         for (Record subRec : subRecords) {
             List<Object> subO = getChildren(subRec.element, tableName,
                     bluePrint);
