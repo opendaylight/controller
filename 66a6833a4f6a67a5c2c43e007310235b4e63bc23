@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_ca96a994",
+        "filename": "opendaylight/md-sal/statistics-manager/src/main/java/org/opendaylight/controller/md/statistics/manager/StatisticsManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-01-05T17:40:35Z",
+      "side": 1,
+      "message": "Perhaps StatsManagerOperationType could be passed to the ctor so this method doesn\u0027t need to be abstract and implemented in all derived classes?",
+      "revId": "66a6833a4f6a67a5c2c43e007310235b4e63bc23",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_2a82ad4f",
+        "filename": "opendaylight/md-sal/statistics-manager/src/main/java/org/opendaylight/controller/md/statistics/manager/StatisticsManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-01-05T17:40:35Z",
+      "side": 1,
+      "message": "Similar to getType() - i.e. pass NodeId to the ctor...",
+      "revId": "66a6833a4f6a67a5c2c43e007310235b4e63bc23",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
