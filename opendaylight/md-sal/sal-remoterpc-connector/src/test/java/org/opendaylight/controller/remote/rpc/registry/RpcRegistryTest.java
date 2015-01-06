@@ -1,38 +1,41 @@
 package org.opendaylight.controller.remote.rpc.registry;
 
-import akka.actor.ActorPath;
 import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
-import akka.actor.ChildActorPath;
+import akka.actor.Address;
 import akka.actor.Props;
-import akka.pattern.Patterns;
+import akka.japi.Pair;
 import akka.testkit.JavaTestKit;
-import akka.util.Timeout;
-import com.google.common.base.Predicate;
+import com.google.common.util.concurrent.Uninterruptibles;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import javax.annotation.Nullable;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
 import org.opendaylight.controller.remote.rpc.RouteIdentifierImpl;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.AddOrUpdateRoutes;
+import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.FindRouters;
+import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.FindRoutersReply;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.RemoveRoutes;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.SetLocalRouter;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages;
+import org.opendaylight.controller.remote.rpc.registry.gossip.Bucket;
+import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetAllBuckets;
+import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetAllBucketsReply;
+import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetBucketVersions;
+import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetBucketVersionsReply;
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
-import org.opendaylight.controller.utils.ConditionalProbe;
+import org.opendaylight.controller.sal.connector.api.RpcRouter.RouteIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
-import scala.concurrent.Await;
-import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -45,6 +48,8 @@ public class RpcRegistryTest {
     private ActorRef registry1;
     private ActorRef registry2;
     private ActorRef registry3;
+
+    private int routeIdCounter = 1;
 
     @BeforeClass
     public static void staticSetup() throws InterruptedException {
@@ -97,27 +102,30 @@ public class RpcRegistryTest {
 
         final JavaTestKit mockBroker = new JavaTestKit(node1);
 
-        final ActorPath bucketStorePath = new ChildActorPath(registry1.path(), "store");
+        Address nodeAddress = node1.provider().getDefaultAddress();
 
         // Add rpc on node 1
         registry1.tell(new SetLocalRouter(mockBroker.getRef()), mockBroker.getRef());
 
-        // install probe
-        final JavaTestKit probe1 = createProbeForMessage(node1, bucketStorePath,
-                Messages.BucketStoreMessages.UpdateBucket.class);
+        List<RpcRouter.RouteIdentifier<?, ?, ?>> addedRouteIds = createRouteIds();
 
-        registry1.tell(getAddRouteMessage(), mockBroker.getRef());
+        registry1.tell(new AddOrUpdateRoutes(addedRouteIds), mockBroker.getRef());
 
         // Bucket store should get an update bucket message. Updated bucket contains added rpc.
-        probe1.expectMsgClass(FiniteDuration.apply(10, TimeUnit.SECONDS),
-                Messages.BucketStoreMessages.UpdateBucket.class);
+
+        Map<Address, Bucket> buckets = retrieveBuckets(registry1, mockBroker, nodeAddress);
+        verifyBucket(buckets.get(nodeAddress), addedRouteIds);
+
+        Map<Address, Long> versions = retrieveVersions(registry1, mockBroker);
+        Assert.assertEquals("Version for bucket " + nodeAddress, buckets.get(nodeAddress).getVersion(),
+                versions.get(nodeAddress));
 
         // Now remove rpc
-        registry1.tell(getRemoveRouteMessage(), mockBroker.getRef());
+        registry1.tell(new RemoveRoutes(addedRouteIds), mockBroker.getRef());
 
         // Bucket store should get an update bucket message. Rpc is removed in the updated bucket
-        probe1.expectMsgClass(FiniteDuration.apply(10, TimeUnit.SECONDS),
-                Messages.BucketStoreMessages.UpdateBucket.class);
+
+        verifyEmptyBucket(mockBroker, registry1, nodeAddress);
 
         System.out.println("testAddRemoveRpcOnSameNode ending");
 
@@ -136,28 +144,50 @@ public class RpcRegistryTest {
         System.out.println("testRpcAddRemoveInCluster starting");
 
         final JavaTestKit mockBroker1 = new JavaTestKit(node1);
+        final JavaTestKit mockBroker2 = new JavaTestKit(node2);
 
-        // install probe on node2's bucket store
-        final ActorPath bucketStorePath = new ChildActorPath(registry2.path(), "store");
-        final JavaTestKit probe2 = createProbeForMessage(node2, bucketStorePath,
-                Messages.BucketStoreMessages.UpdateRemoteBuckets.class);
+        List<RpcRouter.RouteIdentifier<?, ?, ?>> addedRouteIds = createRouteIds();
+
+        Address node1Address = node1.provider().getDefaultAddress();
 
         // Add rpc on node 1
         registry1.tell(new SetLocalRouter(mockBroker1.getRef()), mockBroker1.getRef());
-        registry1.tell(getAddRouteMessage(), mockBroker1.getRef());
+        registry1.tell(new AddOrUpdateRoutes(addedRouteIds), mockBroker1.getRef());
 
         // Bucket store on node2 should get a message to update its local copy of remote buckets
-        probe2.expectMsgClass(FiniteDuration.apply(10, TimeUnit.SECONDS),
-                Messages.BucketStoreMessages.UpdateRemoteBuckets.class);
+
+        Map<Address, Bucket> buckets = retrieveBuckets(registry2, mockBroker2, node1Address);
+        verifyBucket(buckets.get(node1Address), addedRouteIds);
 
         // Now remove
-        registry1.tell(getRemoveRouteMessage(), mockBroker1.getRef());
+        registry1.tell(new RemoveRoutes(addedRouteIds), mockBroker1.getRef());
 
-        // Bucket store on node2 should get a message to update its local copy of remote buckets
-        probe2.expectMsgClass(FiniteDuration.apply(10, TimeUnit.SECONDS),
-                Messages.BucketStoreMessages.UpdateRemoteBuckets.class);
+        // Bucket store on node2 should get a message to update its local copy of remote buckets.
+        // Wait for the bucket for node1 to be empty.
+
+        verifyEmptyBucket(mockBroker2, registry2, node1Address);
 
         System.out.println("testRpcAddRemoveInCluster ending");
+    }
+
+    private void verifyEmptyBucket(JavaTestKit testKit, ActorRef registry, Address address)
+            throws AssertionError {
+        Map<Address, Bucket> buckets;
+        int nTries = 0;
+        while(true) {
+            buckets = retrieveBuckets(registry1, testKit, address);
+
+            try {
+                verifyBucket(buckets.get(address), Collections.<RouteIdentifier<?, ?, ?>>emptyList());
+                break;
+            } catch (AssertionError e) {
+                if(++nTries >= 50) {
+                    throw e;
+                }
+            }
+
+            Uninterruptibles.sleepUninterruptibly(200, TimeUnit.MILLISECONDS);
+        }
     }
 
     /**
@@ -174,76 +204,142 @@ public class RpcRegistryTest {
 
         registry3.tell(new SetLocalRouter(mockBroker3.getRef()), mockBroker3.getRef());
 
-        // install probe on node 3
-        final ActorPath bucketStorePath = new ChildActorPath(registry3.path(), "store");
-        final JavaTestKit probe3 = createProbeForMessage(node3, bucketStorePath,
-                Messages.BucketStoreMessages.UpdateRemoteBuckets.class);
-
         // Add rpc on node 1
+        List<RpcRouter.RouteIdentifier<?, ?, ?>> addedRouteIds1 = createRouteIds();
         registry1.tell(new SetLocalRouter(mockBroker1.getRef()), mockBroker1.getRef());
-        registry1.tell(getAddRouteMessage(), mockBroker1.getRef());
+        registry1.tell(new AddOrUpdateRoutes(addedRouteIds1), mockBroker1.getRef());
 
-        probe3.expectMsgClass(FiniteDuration.apply(10, TimeUnit.SECONDS),
-                Messages.BucketStoreMessages.UpdateRemoteBuckets.class);
-
-        // Add same rpc on node 2
+        // Add rpc on node 2
+        List<RpcRouter.RouteIdentifier<?, ?, ?>> addedRouteIds2 = createRouteIds();
         registry2.tell(new SetLocalRouter(mockBroker2.getRef()), mockBroker2.getRef());
-        registry2.tell(getAddRouteMessage(), mockBroker2.getRef());
+        registry2.tell(new AddOrUpdateRoutes(addedRouteIds2), mockBroker2.getRef());
 
-        probe3.expectMsgClass(FiniteDuration.apply(10, TimeUnit.SECONDS),
-                Messages.BucketStoreMessages.UpdateRemoteBuckets.class);
+        Address node1Address = node1.provider().getDefaultAddress();
+        Address node2Address = node2.provider().getDefaultAddress();
+
+        Map<Address, Bucket> buckets = retrieveBuckets(registry3, mockBroker3, node1Address,
+                node2Address);
+
+        verifyBucket(buckets.get(node1Address), addedRouteIds1);
+        verifyBucket(buckets.get(node2Address), addedRouteIds2);
+
+        Map<Address, Long> versions = retrieveVersions(registry3, mockBroker3);
+        Assert.assertEquals("Version for bucket " + node1Address, buckets.get(node1Address).getVersion(),
+                versions.get(node1Address));
+        Assert.assertEquals("Version for bucket " + node2Address, buckets.get(node2Address).getVersion(),
+                versions.get(node2Address));
+
+        RouteIdentifier<?, ?, ?> routeID = addedRouteIds1.get(0);
+        registry3.tell(new FindRouters(routeID), mockBroker3.getRef());
+
+        FindRoutersReply reply = mockBroker3.expectMsgClass(Duration.create(3, TimeUnit.SECONDS),
+                FindRoutersReply.class);
+
+        List<Pair<ActorRef, Long>> respList = reply.getRouterWithUpdateTime();
+        Assert.assertEquals("getRouterWithUpdateTime size", 1, respList.size());
+
+        respList.get(0).first().tell("hello", ActorRef.noSender());
+        mockBroker1.expectMsgEquals(Duration.create(3, TimeUnit.SECONDS), "hello");
     }
 
-    private JavaTestKit createProbeForMessage(ActorSystem node, ActorPath subjectPath, final Class<?> clazz)
-            throws Exception {
-        final JavaTestKit probe = new JavaTestKit(node);
+    private Map<Address, Long> retrieveVersions(ActorRef bucketStore, JavaTestKit testKit) {
+        bucketStore.tell(new GetBucketVersions(), testKit.getRef());
+        GetBucketVersionsReply reply = testKit.expectMsgClass(Duration.create(3, TimeUnit.SECONDS),
+                GetBucketVersionsReply.class);
+        return reply.getVersions();
+    }
 
-        ConditionalProbe conditionalProbe = new ConditionalProbe(probe.getRef(), new Predicate<Object>() {
-            @Override
-            public boolean apply(@Nullable Object input) {
-                if (input != null) {
-                    return clazz.equals(input.getClass());
-                } else {
-                    return false;
-                }
-            }
-        });
-
-        FiniteDuration duration = Duration.create(3, TimeUnit.SECONDS);
-        Timeout timeout = new Timeout(duration);
-        int maxTries = 30;
-        int i = 0;
-        while(true) {
-            ActorSelection subject = node.actorSelection(subjectPath);
-            Future<Object> future = Patterns.ask(subject, conditionalProbe, timeout);
-
-            try {
-                Await.ready(future, duration);
-                break;
-            } catch (TimeoutException | InterruptedException e) {
-                if(++i > maxTries) {
-                    throw e;
-                }
+    private void verifyBucket(Bucket<RoutingTable> bucket, List<RouteIdentifier<?, ?, ?>> expRouteIds) {
+        RoutingTable table = bucket.getData();
+        Assert.assertNotNull("Bucket RoutingTable is null", table);
+        for(RouteIdentifier<?, ?, ?> r: expRouteIds) {
+            if(!table.contains(r)) {
+                Assert.fail("RoutingTable does not contain " + r + ". Actual: " + table);
             }
         }
 
-        return probe;
-
+        Assert.assertEquals("RoutingTable size", expRouteIds.size(), table.size());
     }
 
-    private AddOrUpdateRoutes getAddRouteMessage() throws URISyntaxException {
-        return new AddOrUpdateRoutes(createRouteIds());
+    private Map<Address, Bucket> retrieveBuckets(ActorRef bucketStore, JavaTestKit testKit,
+            Address... addresses) {
+        int nTries = 0;
+        while(true) {
+            bucketStore.tell(new GetAllBuckets(), testKit.getRef());
+            GetAllBucketsReply reply = testKit.expectMsgClass(Duration.create(3, TimeUnit.SECONDS),
+                    GetAllBucketsReply.class);
+
+            Map<Address, Bucket> buckets = reply.getBuckets();
+            boolean foundAll = true;
+            for(Address addr: addresses) {
+                Bucket bucket = buckets.get(addr);
+                if(bucket  == null) {
+                    foundAll = false;
+                    break;
+                }
+            }
+
+            if(foundAll) {
+                return buckets;
+            }
+
+            if(++nTries >= 50) {
+                Assert.fail("Missing expected buckets for addresses: " + Arrays.toString(addresses)
+                        + ", Actual: " + buckets);
+            }
+
+            Uninterruptibles.sleepUninterruptibly(200, TimeUnit.MILLISECONDS);
+        }
     }
 
-    private RemoveRoutes getRemoveRouteMessage() throws URISyntaxException {
-        return new RemoveRoutes(createRouteIds());
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testAddRoutesConcurrency() throws Exception {
+        final JavaTestKit testKit = new JavaTestKit(node1);
+
+        registry1.tell(new SetLocalRouter(testKit.getRef()), ActorRef.noSender());
+
+        final int nRoutes = 500;
+        final RouteIdentifier<?, ?, ?>[] added = new RouteIdentifier<?, ?, ?>[nRoutes];
+        for(int i = 0; i < nRoutes; i++) {
+            final RouteIdentifierImpl routeId = new RouteIdentifierImpl(null,
+                    new QName(new URI("/mockrpc"), "type" + i), null);
+            added[i] = routeId;
+
+            //Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
+            registry1.tell(new AddOrUpdateRoutes(Arrays.<RouteIdentifier<?, ?, ?>>asList(routeId)),
+                    ActorRef.noSender());
+        }
+
+        GetAllBuckets getAllBuckets = new GetAllBuckets();
+        FiniteDuration duration = Duration.create(3, TimeUnit.SECONDS);
+        int nTries = 0;
+        while(true) {
+            registry1.tell(getAllBuckets, testKit.getRef());
+            GetAllBucketsReply reply = testKit.expectMsgClass(duration, GetAllBucketsReply.class);
+
+            Bucket<RoutingTable> localBucket = reply.getBuckets().values().iterator().next();
+            RoutingTable table = localBucket.getData();
+            if(table != null && table.size() == nRoutes) {
+                for(RouteIdentifier<?, ?, ?> r: added) {
+                    Assert.assertEquals("RoutingTable contains " + r, true, table.contains(r));
+                }
+
+                break;
+            }
+
+            if(++nTries >= 50) {
+                Assert.fail("Expected # routes: " + nRoutes + ", Actual: " + table.size());
+            }
+
+            Uninterruptibles.sleepUninterruptibly(200, TimeUnit.MILLISECONDS);
+        }
     }
 
     private List<RpcRouter.RouteIdentifier<?, ?, ?>> createRouteIds() throws URISyntaxException {
-        QName type = new QName(new URI("/mockrpc"), "mockrpc");
+        QName type = new QName(new URI("/mockrpc"), "mockrpc" + routeIdCounter++);
         List<RpcRouter.RouteIdentifier<?, ?, ?>> routeIds = new ArrayList<>();
         routeIds.add(new RouteIdentifierImpl(null, type, null));
         return routeIds;
     }
-
 }
