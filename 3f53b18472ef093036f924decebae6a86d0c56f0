@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_a51d8ebf",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-01-06T23:32:18Z",
+      "side": 1,
+      "message": "This streamlines the code more and avoids some duplication. The only slight downside is that it incurs an extra Object creation (ReadOperation instance) that always occurs even if there is a valid transactionContext. I was trying to avoid this originally so I opted for a little code duplication. But it\u0027s probably negligible and the first operation will always be queued anyway.",
+      "revId": "3f53b18472ef093036f924decebae6a86d0c56f0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_85773202",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 470,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-01-06T23:32:18Z",
+      "side": 1,
+      "message": "Instead of AkkaOperation, how about FutureOperation?",
+      "revId": "3f53b18472ef093036f924decebae6a86d0c56f0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_a574aefd",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 547,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-01-06T23:32:18Z",
+      "side": 1,
+      "message": "Similar as above - how about enqueueFutureOperation?",
+      "revId": "3f53b18472ef093036f924decebae6a86d0c56f0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
