@@ -13,8 +13,8 @@ import akka.actor.ActorRef;
 import akka.actor.OneForOneStrategy;
 import akka.actor.Props;
 import akka.actor.SupervisorStrategy;
-import akka.japi.Creator;
 import akka.japi.Function;
+import java.util.Set;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.remote.rpc.messages.UpdateSchemaContext;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
@@ -25,8 +25,6 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.Duration;
-
-import java.util.Set;
 
 /**
  * This class acts as a supervisor, creates all the actors, resumes them, if an exception is thrown.
@@ -61,17 +59,10 @@ public class RpcManager extends AbstractUntypedActor {
   }
 
 
-  public static Props props(final SchemaContext schemaContext,
-                            final Broker.ProviderSession brokerSession,
-                            final RpcProvisionRegistry rpcProvisionRegistry) {
-    return Props.create(new Creator<RpcManager>() {
-      private static final long serialVersionUID = 1L;
-      @Override
-      public RpcManager create() throws Exception {
-        return new RpcManager(schemaContext, brokerSession, rpcProvisionRegistry);
-      }
-    });
-  }
+    public static Props props(final SchemaContext schemaContext, final Broker.ProviderSession brokerSession,
+            final RpcProvisionRegistry rpcProvisionRegistry) {
+        return Props.create(RpcManager.class, schemaContext, brokerSession, rpcProvisionRegistry);
+    }
 
   private void createRpcActors() {
     LOG.debug("Create rpc registry and broker actors");
