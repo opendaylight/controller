@@ -13,6 +13,7 @@ import org.opendaylight.controller.cluster.datastore.messages.EnableNotification
 import org.opendaylight.controller.md.cluster.datastore.model.CompositeModel;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class DataChangeListenerTest extends AbstractActorTest {
 
@@ -90,6 +91,40 @@ public class DataChangeListenerTest extends AbstractActorTest {
                 Assert.assertFalse("Unexpected DataChangedReply",
                         deadLetter.message() instanceof DataChangedReply);
             }
+        }};
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Test
+    public void testDataChangedWithListenerRuntimeEx(){
+        new JavaTestKit(getSystem()) {{
+            AsyncDataChangeEvent mockChangeEvent1 = Mockito.mock(AsyncDataChangeEvent.class);
+            AsyncDataChangeEvent mockChangeEvent2 = Mockito.mock(AsyncDataChangeEvent.class);
+            AsyncDataChangeEvent mockChangeEvent3 = Mockito.mock(AsyncDataChangeEvent.class);
+
+            AsyncDataChangeListener mockListener = Mockito.mock(AsyncDataChangeListener.class);
+            Mockito.doThrow(new RuntimeException("mock")).when(mockListener).onDataChanged(mockChangeEvent2);
+
+            Props props = DataChangeListener.props(mockListener);
+            ActorRef subject = getSystem().actorOf(props, "testDataChangedWithListenerRuntimeEx");
+
+            // Let the DataChangeListener know that notifications should be enabled
+            subject.tell(new EnableNotification(true), getRef());
+
+            SchemaContext schemaContext = CompositeModel.createTestContext();
+
+            subject.tell(new DataChanged(schemaContext, mockChangeEvent1),getRef());
+            expectMsgClass(DataChangedReply.class);
+
+            subject.tell(new DataChanged(schemaContext, mockChangeEvent2),getRef());
+            expectMsgClass(DataChangedReply.class);
+
+            subject.tell(new DataChanged(schemaContext, mockChangeEvent3),getRef());
+            expectMsgClass(DataChangedReply.class);
+
+            Mockito.verify(mockListener).onDataChanged(mockChangeEvent1);
+            Mockito.verify(mockListener).onDataChanged(mockChangeEvent2);
+            Mockito.verify(mockListener).onDataChanged(mockChangeEvent3);
         }};
     }
 }
