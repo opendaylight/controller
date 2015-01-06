@@ -9,6 +9,8 @@
 package org.opendaylight.controller.topologymanager.internal;
 
 import org.junit.Assert;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Bandwidth;
 import org.opendaylight.controller.sal.core.ConstructionException;
@@ -50,6 +52,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
 public class TopologyManagerImplTest {
+    private TopologyManagerImpl topoManagerImpl;
+
     /**
      * Mockup of switch manager that only maintains existence of node
      * connector.
@@ -76,6 +80,11 @@ public class TopologyManagerImplTest {
                         NodeConnector.fromString(link.getDstNodeConnector());
                 addNodeConnectors(src, dst);
             }
+        }
+
+        private void clear() {
+            nodeSet.clear();
+            nodeConnectorSet.clear();
         }
 
         @Override
@@ -325,6 +334,20 @@ public class TopologyManagerImplTest {
         }
     }
 
+    @Before
+    public void setUp() {
+        topoManagerImpl = new TopologyManagerImpl();
+        topoManagerImpl.startTest();
+    }
+
+    @After
+    public void tearDown() {
+        if (topoManagerImpl != null) {
+            topoManagerImpl.stopTest();
+            topoManagerImpl = null;
+        }
+    }
+
     /*
      * Sets the node, edges and properties for edges here: Edge <SwitchId :
      * NodeConnectorId> : <1:1>--><11:11>; <1:2>--><11:12>; <3:3>--><13:13>;
@@ -375,11 +398,12 @@ public class TopologyManagerImplTest {
             topoedgeupdateList.add(teu2);
             topoManagerImpl.edgeUpdate(topoedgeupdateList);
         }
+
+        Assert.assertTrue(topoManagerImpl.flushUpdateQueue(5000));
     }
 
     @Test
     public void testGetNodeEdges() throws ConstructionException {
-        TopologyManagerImpl topoManagerImpl = new TopologyManagerImpl();
         TestSwitchManager swMgr = new TestSwitchManager();
         topoManagerImpl.setSwitchManager(swMgr);
         setNodeEdges(topoManagerImpl, swMgr);
@@ -412,7 +436,6 @@ public class TopologyManagerImplTest {
 
     @Test
     public void testGetEdges() throws ConstructionException {
-        TopologyManagerImpl topoManagerImpl = new TopologyManagerImpl();
         TestSwitchManager swMgr = new TestSwitchManager();
         topoManagerImpl.setSwitchManager(swMgr);
         setNodeEdges(topoManagerImpl, swMgr);
@@ -496,7 +519,6 @@ public class TopologyManagerImplTest {
         TopologyUserLinkConfig link4 = new TopologyUserLinkConfig("default20",
                 "OF|10@OF|20", "OF|10@OF|30");
 
-        TopologyManagerImpl topoManagerImpl = new TopologyManagerImpl();
         TestSwitchManager swMgr = new TestSwitchManager();
         topoManagerImpl.setSwitchManager(swMgr);
         topoManagerImpl.nonClusterObjectCreate();
@@ -529,7 +551,6 @@ public class TopologyManagerImplTest {
     public void testGetUserLink() {
         TopologyUserLinkConfig[] link = new TopologyUserLinkConfig[5];
         TopologyUserLinkConfig[] reverseLink = new TopologyUserLinkConfig[5];
-        TopologyManagerImpl topoManagerImpl = new TopologyManagerImpl();
         TestSwitchManager swMgr = new TestSwitchManager();
         topoManagerImpl.setSwitchManager(swMgr);
         topoManagerImpl.nonClusterObjectCreate();
@@ -614,7 +635,6 @@ public class TopologyManagerImplTest {
     @Test
     public void testHostLinkMethods() throws ConstructionException,
     UnknownHostException {
-        TopologyManagerImpl topoManagerImpl = new TopologyManagerImpl();
         TestSwitchManager swMgr = new TestSwitchManager();
         topoManagerImpl.setSwitchManager(swMgr);
         topoManagerImpl.nonClusterObjectCreate();
@@ -678,7 +698,6 @@ public class TopologyManagerImplTest {
     @Test
     public void testGetNodesWithNodeConnectorHost()
             throws ConstructionException, UnknownHostException {
-        TopologyManagerImpl topoManagerImpl = new TopologyManagerImpl();
         TestSwitchManager swMgr = new TestSwitchManager();
         topoManagerImpl.setSwitchManager(swMgr);
         topoManagerImpl.nonClusterObjectCreate();
@@ -738,7 +757,6 @@ public class TopologyManagerImplTest {
 
     @Test
     public void bug1348FixTest() throws ConstructionException {
-        TopologyManagerImpl topoManagerImpl = new TopologyManagerImpl();
         TestSwitchManager swMgr = new TestSwitchManager();
         topoManagerImpl.setSwitchManager(swMgr);
         topoManagerImpl.nonClusterObjectCreate();
@@ -763,7 +781,91 @@ public class TopologyManagerImplTest {
             Assert.fail("Exception was raised when trying to update edge properties: " + e.getMessage());
         }
 
+        Assert.assertTrue(topoManagerImpl.flushUpdateQueue(5000));
         Assert.assertEquals(1, topoManagerImpl.getEdges().size());
         Assert.assertNotNull(topoManagerImpl.getEdges().get(edge));
+    }
+
+    @Test
+    public void testNotifyNodeConnector() throws ConstructionException {
+        TestSwitchManager swMgr = new TestSwitchManager();
+        topoManagerImpl.setSwitchManager(swMgr);
+        topoManagerImpl.nonClusterObjectCreate();
+
+        // Test NodeConnector notification in the case that there are no
+        // related edge updates.
+        NodeConnector nc1 = NodeConnectorCreator.createOFNodeConnector(
+                (short) 1, NodeCreator.createOFNode(1000L));
+        Map<String, Property> propMap = new HashMap<>();
+        swMgr.addNodeConnectors(nc1);
+        topoManagerImpl.notifyNodeConnector(nc1, UpdateType.ADDED, propMap);
+        Assert.assertEquals(0, topoManagerImpl.getEdges().size());
+
+        topoManagerImpl.notifyNodeConnector(nc1, UpdateType.CHANGED, propMap);
+        Assert.assertEquals(0, topoManagerImpl.getEdges().size());
+
+        swMgr.clear();
+        topoManagerImpl.notifyNodeConnector(nc1, UpdateType.REMOVED, propMap);
+        Assert.assertEquals(0, topoManagerImpl.getEdges().size());
+
+        // Test NodeConnector notification in the case that there is a related
+        // edge update just before the notification.
+        NodeConnector nc2 = NodeConnectorCreator.createOFNodeConnector(
+                (short) 2, NodeCreator.createOFNode(2000L));
+        Edge edge1 = new Edge(nc1, nc2);
+        Edge edge2 = new Edge(nc2, nc1);
+        Set<Property> props = new HashSet<Property>();
+        TopoEdgeUpdate teu1 = new TopoEdgeUpdate(edge1, props, UpdateType.ADDED);
+        TopoEdgeUpdate teu2 = new TopoEdgeUpdate(edge2, props, UpdateType.ADDED);
+        List<TopoEdgeUpdate> topoedgeupdateList = new ArrayList<TopoEdgeUpdate>();
+        topoedgeupdateList.add(teu1);
+        topoedgeupdateList.add(teu2);
+        topoManagerImpl.edgeUpdate(topoedgeupdateList);
+        swMgr.addNodeConnectors(nc1);
+        topoManagerImpl.notifyNodeConnector(nc1, UpdateType.ADDED, propMap);
+        swMgr.addNodeConnectors(nc2);
+        topoManagerImpl.notifyNodeConnector(nc2, UpdateType.CHANGED, propMap);
+        Assert.assertTrue(topoManagerImpl.flushUpdateQueue(5000));
+        Assert.assertEquals(2, topoManagerImpl.getEdges().size());
+
+        teu1 = new TopoEdgeUpdate(edge1, props, UpdateType.REMOVED);
+        teu2 = new TopoEdgeUpdate(edge2, props, UpdateType.REMOVED);
+        topoedgeupdateList = new ArrayList<TopoEdgeUpdate>();
+        topoedgeupdateList.add(teu1);
+        topoedgeupdateList.add(teu2);
+        topoManagerImpl.edgeUpdate(topoedgeupdateList);
+        Assert.assertTrue(topoManagerImpl.flushUpdateQueue(5000));
+        Assert.assertEquals(0, topoManagerImpl.getEdges().size());
+        topoManagerImpl.notifyNodeConnector(nc1, UpdateType.REMOVED, propMap);
+        topoManagerImpl.notifyNodeConnector(nc2, UpdateType.REMOVED, propMap);
+
+        swMgr.clear();
+
+        // Test NodeConnector notification in the case that there are multiple
+        // edge updates related to the NodeConnector just before the notification.
+        teu1 = new TopoEdgeUpdate(edge1, props, UpdateType.ADDED);
+        teu2 = new TopoEdgeUpdate(edge2, props, UpdateType.ADDED);
+        TopoEdgeUpdate teu3 = new TopoEdgeUpdate(edge1, props, UpdateType.CHANGED);
+        TopoEdgeUpdate teu4 = new TopoEdgeUpdate(edge2, props, UpdateType.CHANGED);
+        TopoEdgeUpdate teu5 = new TopoEdgeUpdate(edge1, props, UpdateType.REMOVED);
+        TopoEdgeUpdate teu6 = new TopoEdgeUpdate(edge2, props, UpdateType.REMOVED);
+        topoedgeupdateList = new ArrayList<TopoEdgeUpdate>();
+        topoedgeupdateList.add(teu1);
+        topoedgeupdateList.add(teu2);
+        topoedgeupdateList.add(teu3);
+        topoedgeupdateList.add(teu4);
+        topoedgeupdateList.add(teu5);
+        topoedgeupdateList.add(teu6);
+        topoManagerImpl.edgeUpdate(topoedgeupdateList);
+        swMgr.addNodeConnectors(nc1);
+        topoManagerImpl.notifyNodeConnector(nc1, UpdateType.ADDED, propMap);
+        swMgr.addNodeConnectors(nc2);
+        topoManagerImpl.notifyNodeConnector(nc2, UpdateType.CHANGED, propMap);
+        Assert.assertTrue(topoManagerImpl.flushUpdateQueue(5000));
+        Assert.assertEquals(0, topoManagerImpl.getEdges().size());
+        topoManagerImpl.notifyNodeConnector(nc1, UpdateType.REMOVED, propMap);
+        topoManagerImpl.notifyNodeConnector(nc2, UpdateType.REMOVED, propMap);
+        Assert.assertTrue(topoManagerImpl.flushUpdateQueue(5000));
+        Assert.assertEquals(0, topoManagerImpl.getEdges().size());
     }
 }
