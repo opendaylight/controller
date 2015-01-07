@@ -33,6 +33,7 @@
     <module>opendaylight/networkconfiguration/neutron</module>
     <module>opendaylight/networkconfiguration/neutron/implementation</module>
     <module>opendaylight/networkconfiguration/neutron/northbound</module>
+    <module>opendaylight/networkconfiguration/neutron/model</module>
 
     <!-- Parents -->
     <module>opendaylight/commons/concepts</module>

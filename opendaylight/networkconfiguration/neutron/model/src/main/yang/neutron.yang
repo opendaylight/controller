@@ -1,0 +1,281 @@
+//
+// Copyright (c) 2012-2014 by Brocade Communications Systems, Inc. All Rights Reserved.
+//
+// This software is licensed, and not freely redistributable. See the
+// license agreement for details.
+//
+module neutron {
+
+  yang-version 1;
+
+  namespace "urn:opendaylight:neutron";
+
+  prefix neutron;
+
+  import ietf-yang-types { prefix "yang";  }
+  import ietf-inet-types { prefix "inet"; revision-date 2010-09-24; }
+
+  organization "OpenDaylight";
+
+  contact "J. Gregory Hall <ghall@brocade.com>";
+
+  description "Openstack Ice House Neutron Network, Port, & Subnet models";
+
+  revision "2014-10-02" {
+    description
+      "Openstack Neutron Ice House Network, Port, & Subnet models";
+  }
+
+  grouping segment_attrs {
+    leaf provider_._physical_network {
+      type string;
+        description "The physical network where this network object is implemented.
+                     The Networking API v2.0 does not provide a way to list available
+                      physical networks. For example, the Open vSwitch plug-in configuration
+                       file defines a symbolic name that maps to specific bridges on
+                        each Compute host.";
+    }
+
+    leaf provider_._network_type {
+      type string;
+      description "The type of physical network that maps to this network resource.
+                     Examples are flat, vlan, vxlan, and gre.";
+    }
+    leaf provider_._segmentation_id {
+      type string;
+      description "An isolated segment on the physical network. The network_type attribute
+         defines the segmentation model. For example, if network_type is vlan, this ID is
+         a vlan identifier. If network_type is gre, this ID is a gre key.";
+    }
+  }
+
+  grouping base_attrs {
+    leaf id {
+      type    string;
+      description "UUID representing the item [ network, subnet, or Port ] ";
+    }
+    leaf name {
+      type    string;
+      description "Human-readable name for the item. Might not be unique.";
+    }
+    leaf tenant_id {
+      type    string;
+      description "Admin-only. The UUID of the tenant that will own the network. This tenant
+                 can be different from the tenant that makes the create network request. However,
+                 only administrative users can specify a tenant ID other than their own. You cannot
+                 change this value through authorization policies.";
+    }
+    leaf shared {
+            type boolean;
+            description "Indicates whether this network or subnet is shared across all tenants. By default,
+                 only administrative users can change this value.";
+    }
+  }
+  grouping admin_attrs {
+    leaf admin_state_up {
+      type boolean;
+      description "The administrative state of the network, which is up (true) or down (false).";
+    }
+    leaf status {
+      type string;
+      description "The item's status.";
+    }
+  }
+
+  grouping network_attrs {
+
+    leaf-list subnets {
+      description "The associated subnets.";
+      type string;
+    }
+    leaf router_._external {
+      description "TODO: missing openstack/neutron documentation on this one.";
+      type boolean;
+    }
+    list segments {
+      description "TODO: missing openstack/neutron documentation on this one.";
+      key provider_._segmentation_id;
+      uses segment_attrs;
+    }
+    uses segment_attrs;
+  }
+
+  grouping port_attrs {
+    leaf binding_._host_id {
+        type string;
+    }
+    leaf-list allowed_address_pairs {
+          type string;
+    }
+    leaf network_id {
+        type string;
+    }
+    list extra_dhcp_opts {
+
+      key id ;
+      leaf id {
+        type string;
+      }
+      leaf opt_name {
+        type string;
+      }
+      leaf opt_value {
+        type string;
+      }
+    }
+    container binding_._vif_details {
+      leaf port_filter{
+        type boolean;
+      }
+      leaf ovs_hybrid_plug {
+       type boolean;
+      }
+    }
+    leaf binding_._vif_type {
+        type string;
+    }
+    leaf binding_._vnic_type {
+        type string;
+    }
+    leaf device_owner {
+        type string;
+    }
+    leaf mac_address {
+        type string;
+    }
+    leaf binding_._profile {
+        type string;
+    }
+
+    list fixed_ips {
+      key subnet_id;
+       leaf subnet_id {
+         type string;
+      }
+      leaf ip_address {
+         type string;
+      }
+    }
+
+    leaf-list security_groups {
+      type string;
+    }
+    leaf device_id {
+      type string;
+    }
+  }
+  grouping subnet_attrs {
+    leaf network_id {
+      type    string;
+      description "network this subnet is associated with.";
+    }
+    leaf ip_version {
+      type    uint32;
+      description "IP version";
+      // type enumeration {
+      //   enum 4;
+      //   enum 6;
+      // }
+    }
+    leaf cidr {
+      type    string;
+      description "cidr representing IP range for this subnet, based on IP version";
+    }
+    leaf gateway_ip {
+      type    string;
+      description "default gateway used by devices in this subnet";
+    }
+    leaf-list dns_nameservers {
+        type  string;
+        description "DNS name servers used by hosts in this subnet.";
+        // neutron subnet-create test-net1 40.0.0.0/24 --dns-nameservers list=true 8.8.8.7 8.8.8.8
+    }
+    leaf ipv6_address_mode {
+
+      description "neutron subnet-create --ip-version 6 --ipv6_ra_mode off --ipv6_address_mode off NETWORK CIDR
+                   neutron subnet-create --ip-version 6 --ipv6_ra_mode off --ipv6_address_mode dhcpv6-stateful NETWORK CIDR
+                   neutron subnet-create --ip-version 6 --ipv6_ra_mode slaac --ipv6_address_mode slaac NETWORK CIDR
+                   neutron subnet-create --ip-version 6 --ipv6_ra_mode dhcpv6-stateful --ipv6_address_mode off NETWORK CIDR
+                   neutron subnet-create --ip-version 6 --ipv6_ra_mode dhcpv6-stateless --ipv6_address_mode dhcpv6-stateless NETWORK CIDR
+                   Note: can't find this in the spec but OS is sending it with a null value.";
+                   // ?? Do we make this an enumeration for validation or require the writer to write good values?
+      type string;
+      // type enumeration {
+      //   enum off;
+      //   enum dhcpv6-stateful;
+      //   enum slaac;
+      //   enum dhcpv6-stateless;
+      // }
+    }
+    leaf ipv6_ra_mode {
+      type string;
+      description "TODO can't find this in the spec but OS sends it with a null value.";
+      // type enumeration {
+      //   enum off;
+      //   enum dhcpv6-stateful;
+      //   enum slaac;
+      //   enum dhcpv6-stateless;
+      // }
+    }
+    list allocation_pools {
+      description "Sub-ranges of cidr available for dynamic allocation to
+           ports";
+      key start;
+      leaf start {
+        type string;
+      }
+      leaf end {
+        type string;
+      }
+    }
+    list host_routes {
+      description "Routes that should be used by devices with IPs from this
+                     subnet (not including local subnet route).";
+      key destination;
+      leaf destination {
+        type    string; // TODO valid CIDR address
+      }
+      leaf nexthop {
+        type string; // should be valid IP Address type(s) ... need help with "choice" syntax & semantics.
+      }
+    }
+    leaf enable_dhcp {
+        type    boolean;
+        description "Specifies whether DHCP is enabled for this subnet or not.";
+    }
+  }
+  container v2.0 {
+    container networks {
+      list network {
+
+        description "A network is a virtual isolated layer-2 broadcast domain which is typically
+          reserved to the tenant who created it, unless the network has been explicitly configured
+          to be shared. Tenants can create multiple networks, until they reach the thresholds
+          specified by per-tenant Quotas (see next chapter for more details). The network is
+          the principal entity for the Neutron API. Ports and subnets must always be associated
+          with a network. ";
+
+        key "id";
+        uses base_attrs;
+        uses admin_attrs;
+        uses network_attrs;
+      }
+    }
+    container ports {
+      list port {
+        key "id";
+        uses base_attrs;
+        uses admin_attrs;
+        uses port_attrs;
+      }
+    }
+    container subnets {
+      list subnet {
+        key "id";
+        uses base_attrs;
+        uses subnet_attrs;
+      }
+    }
+
+  }
+}
