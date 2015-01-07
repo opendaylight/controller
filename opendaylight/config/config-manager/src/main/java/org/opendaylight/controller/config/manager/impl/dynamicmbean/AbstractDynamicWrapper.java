@@ -74,7 +74,7 @@ abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrapper {
         public void handleNotification(final Notification n, final Object handback) {
             if (n instanceof MBeanServerNotification
                     && n.getType()
-                    .equals(MBeanServerNotification.UNREGISTRATION_NOTIFICATION)) {
+                        .equals(MBeanServerNotification.UNREGISTRATION_NOTIFICATION)) {
                 if (((MBeanServerNotification) n).getMBeanName().equals(
                         thisWrapperObjectName)) {
                     try {
