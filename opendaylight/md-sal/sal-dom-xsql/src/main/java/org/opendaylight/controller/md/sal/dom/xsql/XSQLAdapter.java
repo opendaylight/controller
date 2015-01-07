@@ -164,13 +164,14 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
                     return result;
                 }
 
-                // XSQLAdapter.log(""+node);
                 Map<?, ?> children = XSQLODLUtils.getChildren(node);
                 for (Object c : children.values()) {
+                    result.add(c);
+                    /* I don't remember why i did this... possibly to prevent different siblings queried together
                     Map<?, ?> sons = XSQLODLUtils.getChildren(c);
                     for (Object child : sons.values()) {
                         result.add(child);
-                    }
+                    }*/
                 }
 
                 return result;
