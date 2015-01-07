@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.config.persist.storage.file.xml.model;
 
+import com.google.common.base.Preconditions;
 import java.io.StringReader;
 import java.io.StringWriter;
 import javax.xml.bind.ValidationEventHandler;
@@ -31,6 +32,8 @@ class SnapshotHandler implements DomHandler<String, StreamResult> {
         String xml = rt.getWriter().toString();
         int beginIndex = xml.indexOf(START_TAG) + START_TAG.length();
         int endIndex = xml.indexOf(END_TAG);
+        Preconditions.checkArgument(beginIndex != -1 && endIndex != -1,
+                "Unknown element present in config snapshot(expected only configuration): %s", xml);
         return xml.substring(beginIndex, endIndex);
     }
 
