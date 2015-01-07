@@ -297,6 +297,24 @@
       "revId": "ab31ae804174ada096429bfb791377d852d14ab4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_501807d3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 949,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-01-07T21:15:07Z",
+      "side": 1,
+      "message": "I also added a test with persistence disabled to cover that code branch.",
+      "parentUuid": "7a96c907_704983cf",
+      "revId": "ab31ae804174ada096429bfb791377d852d14ab4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
