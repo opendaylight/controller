@@ -1,0 +1,5 @@
+|AtestInt32|Atypedeftest|MainString2|Name      |Typedeftest|
+------------------------------------------------------------
+|2147483647|MyType [_value=Aug Typedef 553]|Augmentation 553|Sub List 1-553|MyType [_value=Test Typedef 553]|
+|2147483647|MyType [_value=Aug Typedef 553]|Augmentation 553|Sub List 2-553|MyType [_value=Test Typedef 553]|
+Total Number Of Records=2
