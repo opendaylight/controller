@@ -34,6 +34,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -77,6 +78,7 @@ public abstract class AbstractNetconfConfigTest extends AbstractConfigTest {
 
     public static final String LOOPBACK_ADDRESS = "127.0.0.1";
     public static final int SERVER_CONNECTION_TIMEOUT_MILLIS = 5000;
+    private static final int RESOURCE_TIMEOUT_MINUTES = 2;
 
     static ModuleFactory[] FACTORIES = {new TestImplModuleFactory(),
                                         new DepTestImplModuleFactory(),
@@ -145,7 +147,7 @@ public abstract class AbstractNetconfConfigTest extends AbstractConfigTest {
         } else {
             s = dispatch.createServer(((InetSocketAddress) getTcpServerAddress()));
         }
-        s.await();
+        s.await(RESOURCE_TIMEOUT_MINUTES, TimeUnit.MINUTES);
         return s.channel();
     }
 
@@ -230,9 +232,9 @@ public abstract class AbstractNetconfConfigTest extends AbstractConfigTest {
      */
     @After
     public void cleanUpNetconf() throws Exception {
-        serverTcpChannel.close().await();
+        serverTcpChannel.close().await(RESOURCE_TIMEOUT_MINUTES, TimeUnit.MINUTES);
         hashedWheelTimer.stop();
-        nettyThreadgroup.shutdownGracefully().await();
+        nettyThreadgroup.shutdownGracefully().await(RESOURCE_TIMEOUT_MINUTES, TimeUnit.MINUTES);
     }
 
     public NetconfClientConfiguration getClientConfiguration(final InetSocketAddress tcpAddress, final int timeout) {
