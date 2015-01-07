@@ -83,6 +83,8 @@ import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Commit;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.DiscardChanges;
+import org.opendaylight.controller.netconf.confignetconfconnector.operations.Lock;
+import org.opendaylight.controller.netconf.confignetconfconnector.operations.UnLock;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.get.Get;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.getconfig.GetConfig;
@@ -96,6 +98,7 @@ import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceSnap
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
+import org.opendaylight.controller.netconf.util.messages.NetconfMessageUtil;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.test.types.rev131127.TestIdentity1;
@@ -234,6 +237,12 @@ public class NetconfMappingTest extends AbstractConfigTest {
         config = getConfigCandidate();
         assertCorrectServiceNames(config, Collections.<String>emptySet());
 
+    }
+
+    @Test
+    public void testUnLock() throws Exception {
+        assertTrue(NetconfMessageUtil.isOKMessage(lockCandidate()));
+        assertTrue(NetconfMessageUtil.isOKMessage(unlockCandidate()));
     }
 
     private void assertCorrectRefNamesForDependencies(Document config) throws NodeTestException {
@@ -381,6 +390,16 @@ public class NetconfMappingTest extends AbstractConfigTest {
     private void commit() throws ParserConfigurationException, SAXException, IOException, NetconfDocumentedException {
         Commit commitOp = new Commit(transactionProvider, configRegistryClient, NETCONF_SESSION_ID);
         executeOp(commitOp, "netconfMessages/commit.xml");
+    }
+
+    private Document lockCandidate() throws ParserConfigurationException, SAXException, IOException, NetconfDocumentedException {
+        Lock commitOp = new Lock(NETCONF_SESSION_ID);
+        return executeOp(commitOp, "netconfMessages/lock.xml");
+    }
+
+    private Document unlockCandidate() throws ParserConfigurationException, SAXException, IOException, NetconfDocumentedException {
+        UnLock commitOp = new UnLock(NETCONF_SESSION_ID);
+        return executeOp(commitOp, "netconfMessages/unlock.xml");
     }
 
     private Document getConfigCandidate() throws ParserConfigurationException, SAXException, IOException,
