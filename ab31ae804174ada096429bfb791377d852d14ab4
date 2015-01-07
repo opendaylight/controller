@@ -229,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_d03c1732",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-01-07T21:14:04Z",
+      "side": 1,
+      "message": "Yes - I realized that too",
+      "parentUuid": "7a96c907_90ee8feb",
+      "revId": "ab31ae804174ada096429bfb791377d852d14ab4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_ad7c9421",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
         "patchSetId": 1
@@ -258,6 +276,24 @@
       "side": 1,
       "message": "I was thinking of doing this in a follow-up patch yes.",
       "parentUuid": "7a96c907_ad7c9421",
+      "revId": "ab31ae804174ada096429bfb791377d852d14ab4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_704983cf",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 949,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-01-07T21:14:04Z",
+      "side": 1,
+      "message": "I got this test working - I can submit in a follow-up patch.",
+      "parentUuid": "7a96c907_102cbf46",
       "revId": "ab31ae804174ada096429bfb791377d852d14ab4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
