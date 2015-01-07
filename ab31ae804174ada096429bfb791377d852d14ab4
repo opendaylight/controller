@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_cdcb2071",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-01-07T15:42:45Z",
+      "side": 1,
+      "message": "It seems this is only used in the ReplicatedLogImpl class - can we move it there?.",
+      "revId": "ab31ae804174ada096429bfb791377d852d14ab4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_8dbbd80d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 437,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-01-07T15:42:45Z",
+      "side": 1,
+      "message": "Does this need to be info? Seems like this would get logged a lot so should be debug.",
+      "revId": "ab31ae804174ada096429bfb791377d852d14ab4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_ed413c0c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 759,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-01-07T15:42:45Z",
+      "side": 1,
+      "message": "We\u0027re calling replicatedLogEntry.size() twice here. To optimize we should call it once and put in a local var.",
+      "revId": "ab31ae804174ada096429bfb791377d852d14ab4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_4d32b0a8",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 774,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-01-07T15:42:45Z",
+      "side": 1,
+      "message": "I assume the exact number 5 is a heuristic? \n\nI think I get the logic here. We won\u0027t be snapshotting the persistent log as often based on data size b/c the only reason we snapshot for this reason is to reduce the in memory log size. Technically we could eliminate  snapshotting based on size altogether in this case but it shouldn\u0027t hurt to still snapshot but at a lower rate. Is that correct?",
+      "revId": "ab31ae804174ada096429bfb791377d852d14ab4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_cde4800f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 783,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-01-07T15:42:45Z",
+      "side": 1,
+      "message": "In the prior code, we used journal.size() for the check here, which is the size of journal List itself.  Now we\u0027re using \"lastIndex() + 1\" (set to journalSize above). I understand this for the \"no follower case\" b/c the actual journal List should always be empty so we can\u0027t use size(). Is \"lastIndex() + 1\" equivalent  to size()? I just want to ensure that the previous behavior is maintained for the case when there are followers.",
+      "revId": "ab31ae804174ada096429bfb791377d852d14ab4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_edb4dcf3",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 800,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-01-07T15:42:45Z",
+      "side": 1,
+      "message": "I assume when !hasFollowers(), then lastAppliedEntry will be null. Even so, we\u0027re  overwriting lastAppliedIndex and lastAppliedTerm regardless. Can we rewrite this to make to more clear, i.e.:\n\nReplicatedLogEntry lastAppliedEntry \u003d get(context.getLastApplied());\nif(!hasFollowers()) {\n    ...\n} else if (lastAppliedEntry !\u003d null) {\n    ...\n}",
+      "revId": "ab31ae804174ada096429bfb791377d852d14ab4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_cd924057",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-01-07T15:42:45Z",
+      "side": 1,
+      "message": "Perhaps the updateJournalStats() call could be moved to applyModificationToState?  Currently it\u0027s called by applyState after it calls applyModificationToState.",
+      "revId": "ab31ae804174ada096429bfb791377d852d14ab4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_ad7c9421",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 949,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-01-07T15:42:45Z",
+      "side": 1,
+      "message": "I assume you were planning on getting this test to work in a follow-up patch? I guess we need RaftActor to think it has followers. I could work on this if you want.",
+      "revId": "ab31ae804174ada096429bfb791377d852d14ab4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
