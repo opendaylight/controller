@@ -83,10 +83,6 @@
 
     <!--TODO Create generic utilities(extract from this module) for integration tests on the controller-->
     <dependency>
-      <groupId>org.opendaylight.yangtools.thirdparty</groupId>
-      <artifactId>xtend-lib-osgi</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.openexi</groupId>
       <artifactId>nagasena</artifactId>
     </dependency>

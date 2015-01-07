@@ -13,7 +13,6 @@ import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtMethod;
 import javassist.NotFoundException;
-import org.eclipse.xtext.xbase.lib.Extension;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcRouter;
 import org.opendaylight.controller.sal.binding.codegen.RpcIsNotRoutedException;
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory;
@@ -33,8 +32,6 @@ abstract class AbstractRuntimeCodeGenerator implements org.opendaylight.controll
     @GuardedBy("this")
     private final Map<Class<? extends NotificationListener>, RuntimeGeneratedInvokerPrototype> invokerClasses = new WeakHashMap<>();
     private final CtClass brokerNotificationListener;
-
-    @Extension
     protected final JavassistUtils utils;
 
     protected AbstractRuntimeCodeGenerator(final ClassPool pool) {

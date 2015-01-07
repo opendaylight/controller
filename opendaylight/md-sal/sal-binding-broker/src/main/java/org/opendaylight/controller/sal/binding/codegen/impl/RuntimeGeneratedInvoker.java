@@ -7,15 +7,13 @@
  */
 package org.opendaylight.controller.sal.binding.codegen.impl;
 
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import java.util.Set;
-
-import org.eclipse.xtext.xbase.lib.util.ToStringHelper;
 import org.opendaylight.controller.sal.binding.codegen.RuntimeCodeHelper;
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory.NotificationInvoker;
 import org.opendaylight.yangtools.yang.binding.Notification;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
-
-import com.google.common.base.Preconditions;
 
 final class RuntimeGeneratedInvoker implements NotificationInvoker {
     private final org.opendaylight.controller.sal.binding.api.NotificationListener<Notification> invocationProxy;
@@ -85,7 +83,6 @@ final class RuntimeGeneratedInvoker implements NotificationInvoker {
 
     @Override
     public String toString() {
-        String result = new ToStringHelper().toString(this);
-        return result;
+        return Objects.toStringHelper(this).toString();
     }
 }
