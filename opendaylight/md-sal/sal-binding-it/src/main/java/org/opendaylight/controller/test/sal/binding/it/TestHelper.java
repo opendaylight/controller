@@ -38,7 +38,6 @@ public class TestHelper {
 
                 mavenBundle("org.apache.commons", "commons-lang3").versionAsInProject(), //
                 mavenBundle("com.google.guava", "guava").versionAsInProject(), // //
-                mavenBundle(YANGTOOLS + ".thirdparty", "xtend-lib-osgi").versionAsInProject() //
         );
     }
 
