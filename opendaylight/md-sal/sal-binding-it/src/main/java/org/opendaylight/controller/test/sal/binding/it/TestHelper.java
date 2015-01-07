@@ -37,8 +37,7 @@ public class TestHelper {
                 mavenBundle(CONTROLLER, "sal-common-impl").versionAsInProject(), // //
 
                 mavenBundle("org.apache.commons", "commons-lang3").versionAsInProject(), //
-                mavenBundle("com.google.guava", "guava").versionAsInProject(), // //
-                mavenBundle(YANGTOOLS + ".thirdparty", "xtend-lib-osgi").versionAsInProject() //
+                mavenBundle("com.google.guava", "guava").versionAsInProject()
         );
     }
 
