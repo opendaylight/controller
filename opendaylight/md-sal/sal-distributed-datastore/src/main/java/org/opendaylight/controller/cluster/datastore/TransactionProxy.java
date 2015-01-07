@@ -42,6 +42,7 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 import org.opendaylight.controller.cluster.datastore.messages.ReadDataReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
+import org.opendaylight.controller.cluster.datastore.messages.SerializableMessage;
 import org.opendaylight.controller.cluster.datastore.messages.WriteData;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
@@ -249,8 +250,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
     }
 
     @Override
-    public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(
-            final YangInstanceIdentifier path) {
+    public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(final YangInstanceIdentifier path) {
 
         Preconditions.checkState(transactionType != TransactionType.WRITE_ONLY,
                 "Read operation on write-only transaction is not allowed");
@@ -258,37 +258,13 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         LOG.debug("Tx {} read {}", identifier, path);
 
         TransactionFutureCallback txFutureCallback = getOrCreateTxFutureCallback(path);
-        TransactionContext transactionContext = txFutureCallback.getTransactionContext();
-
-        CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> future;
-        if(transactionContext != null) {
-            future = transactionContext.readData(path);
-        } else {
-            // The shard Tx hasn't been created yet so add the Tx operation to the Tx Future
-            // callback to be executed after the Tx is created.
-            final SettableFuture<Optional<NormalizedNode<?, ?>>> proxyFuture = SettableFuture.create();
-            txFutureCallback.addTxOperationOnComplete(new TransactionOperation() {
-                @Override
-                public void invoke(TransactionContext transactionContext) {
-                    Futures.addCallback(transactionContext.readData(path),
-                        new FutureCallback<Optional<NormalizedNode<?, ?>>>() {
-                            @Override
-                            public void onSuccess(Optional<NormalizedNode<?, ?>> data) {
-                                proxyFuture.set(data);
-                            }
-
-                            @Override
-                            public void onFailure(Throwable t) {
-                                proxyFuture.setException(t);
-                            }
-                        });
-                }
-            });
-
-            future = MappingCheckedFuture.create(proxyFuture, ReadFailedException.MAPPER);
-        }
-
-        return future;
+        return txFutureCallback.enqueueReadOperation(new ReadOperation<Optional<NormalizedNode<?, ?>>>() {
+            @Override
+            public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> invoke(
+                    TransactionContext transactionContext) {
+                return transactionContext.readData(path);
+            }
+        });
     }
 
     @Override
@@ -300,38 +276,14 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         LOG.debug("Tx {} exists {}", identifier, path);
 
         TransactionFutureCallback txFutureCallback = getOrCreateTxFutureCallback(path);
-        TransactionContext transactionContext = txFutureCallback.getTransactionContext();
-
-        CheckedFuture<Boolean, ReadFailedException> future;
-        if(transactionContext != null) {
-            future = transactionContext.dataExists(path);
-        } else {
-            // The shard Tx hasn't been created yet so add the Tx operation to the Tx Future
-            // callback to be executed after the Tx is created.
-            final SettableFuture<Boolean> proxyFuture = SettableFuture.create();
-            txFutureCallback.addTxOperationOnComplete(new TransactionOperation() {
-                @Override
-                public void invoke(TransactionContext transactionContext) {
-                    Futures.addCallback(transactionContext.dataExists(path),
-                        new FutureCallback<Boolean>() {
-                            @Override
-                            public void onSuccess(Boolean exists) {
-                                proxyFuture.set(exists);
-                            }
-
-                            @Override
-                            public void onFailure(Throwable t) {
-                                proxyFuture.setException(t);
-                            }
-                        });
-                }
-            });
-
-            future = MappingCheckedFuture.create(proxyFuture, ReadFailedException.MAPPER);
-        }
-
-        return future;
+        return txFutureCallback.enqueueReadOperation(new ReadOperation<Boolean>() {
+            @Override
+            public CheckedFuture<Boolean, ReadFailedException> invoke(TransactionContext transactionContext) {
+                return transactionContext.dataExists(path);
+            }
+        });
     }
+
 
     private void checkModificationState() {
         Preconditions.checkState(transactionType != TransactionType.READ_ONLY,
@@ -348,19 +300,12 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         LOG.debug("Tx {} write {}", identifier, path);
 
         TransactionFutureCallback txFutureCallback = getOrCreateTxFutureCallback(path);
-        TransactionContext transactionContext = txFutureCallback.getTransactionContext();
-        if(transactionContext != null) {
-            transactionContext.writeData(path, data);
-        } else {
-            // The shard Tx hasn't been created yet so add the Tx operation to the Tx Future
-            // callback to be executed after the Tx is created.
-            txFutureCallback.addTxOperationOnComplete(new TransactionOperation() {
-                @Override
-                public void invoke(TransactionContext transactionContext) {
-                    transactionContext.writeData(path, data);
-                }
-            });
-        }
+        txFutureCallback.enqueueModifyOperation(new TransactionOperation() {
+            @Override
+            public void invoke(TransactionContext transactionContext) {
+                transactionContext.writeData(path, data);
+            }
+        });
     }
 
     @Override
@@ -371,19 +316,12 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         LOG.debug("Tx {} merge {}", identifier, path);
 
         TransactionFutureCallback txFutureCallback = getOrCreateTxFutureCallback(path);
-        TransactionContext transactionContext = txFutureCallback.getTransactionContext();
-        if(transactionContext != null) {
-            transactionContext.mergeData(path, data);
-        } else {
-            // The shard Tx hasn't been created yet so add the Tx operation to the Tx Future
-            // callback to be executed after the Tx is created.
-            txFutureCallback.addTxOperationOnComplete(new TransactionOperation() {
-                @Override
-                public void invoke(TransactionContext transactionContext) {
-                    transactionContext.mergeData(path, data);
-                }
-            });
-        }
+        txFutureCallback.enqueueModifyOperation(new TransactionOperation() {
+            @Override
+            public void invoke(TransactionContext transactionContext) {
+                transactionContext.mergeData(path, data);
+            }
+        });
     }
 
     @Override
@@ -394,19 +332,12 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         LOG.debug("Tx {} delete {}", identifier, path);
 
         TransactionFutureCallback txFutureCallback = getOrCreateTxFutureCallback(path);
-        TransactionContext transactionContext = txFutureCallback.getTransactionContext();
-        if(transactionContext != null) {
-            transactionContext.deleteData(path);
-        } else {
-            // The shard Tx hasn't been created yet so add the Tx operation to the Tx Future
-            // callback to be executed after the Tx is created.
-            txFutureCallback.addTxOperationOnComplete(new TransactionOperation() {
-                @Override
-                public void invoke(TransactionContext transactionContext) {
-                    transactionContext.deleteData(path);
-                }
-            });
-        }
+        txFutureCallback.enqueueModifyOperation(new TransactionOperation() {
+            @Override
+            public void invoke(TransactionContext transactionContext) {
+                transactionContext.deleteData(path);
+            }
+        });
     }
 
     @Override
@@ -426,22 +357,14 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             LOG.debug("Tx {} Readying transaction for shard {} chain {}", identifier,
                         txFutureCallback.getShardName(), transactionChainId);
 
-            TransactionContext transactionContext = txFutureCallback.getTransactionContext();
-            if(transactionContext != null) {
-                cohortFutures.add(transactionContext.readyTransaction());
-            } else {
-                // The shard Tx hasn't been created yet so create a promise to ready the Tx later
-                // after it's created.
-                final Promise<ActorSelection> cohortPromise = akka.dispatch.Futures.promise();
-                txFutureCallback.addTxOperationOnComplete(new TransactionOperation() {
-                    @Override
-                    public void invoke(TransactionContext transactionContext) {
-                        cohortPromise.completeWith(transactionContext.readyTransaction());
-                    }
-                });
+            Future<ActorSelection> future = txFutureCallback.enqueueFutureOperation(new FutureOperation<ActorSelection>() {
+                @Override
+                public Future<ActorSelection> invoke(TransactionContext transactionContext) {
+                    return transactionContext.readyTransaction();
+                }
+            });
 
-                cohortFutures.add(cohortPromise.future());
-            }
+            cohortFutures.add(future);
         }
 
         onTransactionReady(cohortFutures);
@@ -477,18 +400,13 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
     @Override
     public void close() {
-        for(TransactionFutureCallback txFutureCallback : txFutureCallbackMap.values()) {
-            TransactionContext transactionContext = txFutureCallback.getTransactionContext();
-            if(transactionContext != null) {
-                transactionContext.closeTransaction();
-            } else {
-                txFutureCallback.addTxOperationOnComplete(new TransactionOperation() {
-                    @Override
-                    public void invoke(TransactionContext transactionContext) {
-                        transactionContext.closeTransaction();
-                    }
-                });
-            }
+        for (TransactionFutureCallback txFutureCallback : txFutureCallbackMap.values()) {
+            txFutureCallback.enqueueModifyOperation(new TransactionOperation() {
+                @Override
+                public void invoke(TransactionContext transactionContext) {
+                    transactionContext.closeTransaction();
+                }
+            });
         }
 
         txFutureCallbackMap.clear();
@@ -539,10 +457,24 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
     }
 
     /**
-     * Interface for a transaction operation to be invoked later.
+     * Interfaces for transaction operations to be invoked later.
      */
     private static interface TransactionOperation {
         void invoke(TransactionContext transactionContext);
+    }
+
+    /**
+     * This interface returns a Guava Future
+     */
+    private static interface ReadOperation<T> {
+        CheckedFuture<T, ReadFailedException> invoke(TransactionContext transactionContext);
+    }
+
+    /**
+     * This interface returns a Scala Future
+     */
+    private static interface FutureOperation<T> {
+        Future<T> invoke(TransactionContext transactionContext);
     }
 
     /**
@@ -616,6 +548,78 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                 }
             }
         }
+
+
+        <T> Future<T> enqueueFutureOperation(final FutureOperation<T> op) {
+
+            Future<T> future;
+
+            if (transactionContext != null) {
+                future = op.invoke(transactionContext);
+            } else {
+                // The shard Tx hasn't been created yet so add the Tx operation to the Tx Future
+                // callback to be executed after the Tx is created.
+                final Promise<T> promise = akka.dispatch.Futures.promise();
+                addTxOperationOnComplete(new TransactionOperation() {
+                    @Override
+                    public void invoke(TransactionContext transactionContext) {
+                        promise.completeWith(op.invoke(transactionContext));
+                    }
+                });
+
+                future = promise.future();
+            }
+
+            return future;
+        }
+
+        <T> CheckedFuture<T, ReadFailedException> enqueueReadOperation(final ReadOperation<T> op) {
+
+            CheckedFuture<T, ReadFailedException> future;
+
+            if (transactionContext != null) {
+                future = op.invoke(transactionContext);
+            } else {
+                // The shard Tx hasn't been created yet so add the Tx operation to the Tx Future
+                // callback to be executed after the Tx is created.
+                final SettableFuture<T> proxyFuture = SettableFuture.create();
+                addTxOperationOnComplete(new TransactionOperation() {
+                    @Override
+                    public void invoke(TransactionContext transactionContext) {
+                        Futures.addCallback(op.invoke(transactionContext), new FutureCallback<T>() {
+                            @Override
+                            public void onSuccess(T data) {
+                                proxyFuture.set(data);
+                            }
+
+                            @Override
+                            public void onFailure(Throwable t) {
+                                proxyFuture.setException(t);
+                            }
+                        });
+                    }
+                });
+
+                future = MappingCheckedFuture.create(proxyFuture, ReadFailedException.MAPPER);
+            }
+
+            return future;
+        }
+
+        void enqueueModifyOperation(final TransactionOperation op) {
+
+            if (transactionContext != null) {
+                op.invoke(transactionContext);
+            } else {
+                // The shard Tx hasn't been created yet so add the Tx operation to the Tx Future
+                // callback to be executed after the Tx is created.
+                addTxOperationOnComplete(op);
+            }
+        }
+
+
+
+
 
         /**
          * Performs a CreateTransaction try async.
@@ -777,6 +781,10 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             return actor;
         }
 
+        private Future<Object> executeOperationAsync(SerializableMessage msg) {
+            return actorContext.executeOperationAsync(getActor(), isTxActorLocal ? msg : msg.toSerializable());
+        }
+
         @Override
         public void closeTransaction() {
             LOG.debug("Tx {} closeTransaction called", identifier);
@@ -791,9 +799,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
             // Send the ReadyTransaction message to the Tx actor.
 
-            ReadyTransaction readyTransaction = new ReadyTransaction();
-            final Future<Object> replyFuture = actorContext.executeOperationAsync(getActor(),
-                isTxActorLocal ? readyTransaction : readyTransaction.toSerializable());
+            final Future<Object> replyFuture = executeOperationAsync(new ReadyTransaction());
 
             // Combine all the previously recorded put/merge/delete operation reply Futures and the
             // ReadyTransactionReply Future into one Future. If any one fails then the combined
@@ -859,27 +865,21 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         public void deleteData(YangInstanceIdentifier path) {
             LOG.debug("Tx {} deleteData called path = {}", identifier, path);
 
-            DeleteData deleteData = new DeleteData(path);
-            recordedOperationFutures.add(actorContext.executeOperationAsync(getActor(),
-                isTxActorLocal ? deleteData : deleteData.toSerializable()));
+            recordedOperationFutures.add(executeOperationAsync(new DeleteData(path)));
         }
 
         @Override
         public void mergeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
             LOG.debug("Tx {} mergeData called path = {}", identifier, path);
 
-            MergeData mergeData = new MergeData(path, data, schemaContext);
-            recordedOperationFutures.add(actorContext.executeOperationAsync(getActor(),
-                isTxActorLocal ? mergeData : mergeData.toSerializable()));
+            recordedOperationFutures.add(executeOperationAsync(new MergeData(path, data, schemaContext)));
         }
 
         @Override
         public void writeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
             LOG.debug("Tx {} writeData called path = {}", identifier, path);
 
-            WriteData writeData = new WriteData(path, data, schemaContext);
-            recordedOperationFutures.add(actorContext.executeOperationAsync(getActor(),
-                isTxActorLocal ? writeData : writeData.toSerializable()));
+            recordedOperationFutures.add(executeOperationAsync(new WriteData(path, data, schemaContext)));
         }
 
         @Override
@@ -962,9 +962,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                 }
             };
 
-            ReadData readData = new ReadData(path);
-            Future<Object> readFuture = actorContext.executeOperationAsync(getActor(),
-                isTxActorLocal ? readData : readData.toSerializable());
+            Future<Object> readFuture = executeOperationAsync(new ReadData(path));
 
             readFuture.onComplete(onComplete, actorContext.getActorSystem().dispatcher());
         }
@@ -1046,9 +1044,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                 }
             };
 
-            DataExists dataExists = new DataExists(path);
-            Future<Object> future = actorContext.executeOperationAsync(getActor(),
-                isTxActorLocal ? dataExists : dataExists.toSerializable());
+            Future<Object> future = executeOperationAsync(new DataExists(path));
 
             future.onComplete(onComplete, actorContext.getActorSystem().dispatcher());
         }
