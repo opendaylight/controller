@@ -756,7 +756,8 @@ public class TopologyManagerImplTest {
     }
 
     @Test
-    public void bug1348FixTest() throws ConstructionException {
+    public void bug1348FixTest() throws ConstructionException,
+           InterruptedException {
         TestSwitchManager swMgr = new TestSwitchManager();
         topoManagerImpl.setSwitchManager(swMgr);
         topoManagerImpl.nonClusterObjectCreate();
@@ -782,12 +783,15 @@ public class TopologyManagerImplTest {
         }
 
         Assert.assertTrue(topoManagerImpl.flushUpdateQueue(5000));
+        // Give TopologyManger time to update its edges DB.
+        Thread.sleep(1000);
         Assert.assertEquals(1, topoManagerImpl.getEdges().size());
         Assert.assertNotNull(topoManagerImpl.getEdges().get(edge));
     }
 
     @Test
-    public void testNotifyNodeConnector() throws ConstructionException {
+    public void testNotifyNodeConnector() throws ConstructionException,
+           InterruptedException {
         TestSwitchManager swMgr = new TestSwitchManager();
         topoManagerImpl.setSwitchManager(swMgr);
         topoManagerImpl.nonClusterObjectCreate();
@@ -826,6 +830,8 @@ public class TopologyManagerImplTest {
         swMgr.addNodeConnectors(nc2);
         topoManagerImpl.notifyNodeConnector(nc2, UpdateType.CHANGED, propMap);
         Assert.assertTrue(topoManagerImpl.flushUpdateQueue(5000));
+        // Give TopologyManger time to update its edges DB.
+        Thread.sleep(1000);
         Assert.assertEquals(2, topoManagerImpl.getEdges().size());
 
         teu1 = new TopoEdgeUpdate(edge1, props, UpdateType.REMOVED);
@@ -835,6 +841,8 @@ public class TopologyManagerImplTest {
         topoedgeupdateList.add(teu2);
         topoManagerImpl.edgeUpdate(topoedgeupdateList);
         Assert.assertTrue(topoManagerImpl.flushUpdateQueue(5000));
+        // Give TopologyManger time to update its edges DB.
+        Thread.sleep(1000);
         Assert.assertEquals(0, topoManagerImpl.getEdges().size());
         topoManagerImpl.notifyNodeConnector(nc1, UpdateType.REMOVED, propMap);
         topoManagerImpl.notifyNodeConnector(nc2, UpdateType.REMOVED, propMap);
@@ -862,10 +870,14 @@ public class TopologyManagerImplTest {
         swMgr.addNodeConnectors(nc2);
         topoManagerImpl.notifyNodeConnector(nc2, UpdateType.CHANGED, propMap);
         Assert.assertTrue(topoManagerImpl.flushUpdateQueue(5000));
+        // Give TopologyManger time to update its edges DB.
+        Thread.sleep(1000);
         Assert.assertEquals(0, topoManagerImpl.getEdges().size());
         topoManagerImpl.notifyNodeConnector(nc1, UpdateType.REMOVED, propMap);
         topoManagerImpl.notifyNodeConnector(nc2, UpdateType.REMOVED, propMap);
         Assert.assertTrue(topoManagerImpl.flushUpdateQueue(5000));
+        // Give TopologyManger time to update its edges DB.
+        Thread.sleep(1000);
         Assert.assertEquals(0, topoManagerImpl.getEdges().size());
     }
 }
