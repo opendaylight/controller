@@ -422,6 +422,119 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         }};
     }
 
+    @Test
+    public void testHandleAppendEntriesPreviousLogEntryMissing(){
+        new JavaTestKit(getSystem()) {{
+
+            MockRaftActorContext context = (MockRaftActorContext)
+                    createActorContext();
+
+            // Prepare the receivers log
+            MockRaftActorContext.SimpleReplicatedLog log =
+                    new MockRaftActorContext.SimpleReplicatedLog();
+            log.append(
+                    new MockRaftActorContext.MockReplicatedLogEntry(1, 0, new MockRaftActorContext.MockPayload("zero")));
+            log.append(
+                    new MockRaftActorContext.MockReplicatedLogEntry(1, 1, new MockRaftActorContext.MockPayload("one")));
+            log.append(
+                    new MockRaftActorContext.MockReplicatedLogEntry(1, 2, new MockRaftActorContext.MockPayload("two")));
+
+            context.setReplicatedLog(log);
+
+            // Prepare the entries to be sent with AppendEntries
+            List<ReplicatedLogEntry> entries = new ArrayList<>();
+            entries.add(
+                    new MockRaftActorContext.MockReplicatedLogEntry(1, 4, new MockRaftActorContext.MockPayload("two-1")));
+
+            AppendEntries appendEntries =
+                    new AppendEntries(1, "leader-1", 3, 1, entries, 4);
+
+            RaftActorBehavior behavior = createBehavior(context);
+
+            // Send an unknown message so that the state of the RaftActor remains unchanged
+            RaftActorBehavior expected = behavior.handleMessage(getRef(), "unknown");
+
+            RaftActorBehavior raftBehavior =
+                    behavior.handleMessage(getRef(), appendEntries);
+
+            assertEquals(expected, raftBehavior);
+
+            // Also expect an AppendEntriesReply to be sent where success is false
+            final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"),
+                    "AppendEntriesReply") {
+                // do not put code outside this method, will run afterwards
+                protected Boolean match(Object in) {
+                    if (in instanceof AppendEntriesReply) {
+                        AppendEntriesReply reply = (AppendEntriesReply) in;
+                        return reply.isSuccess();
+                    } else {
+                        throw noMatch();
+                    }
+                }
+            }.get();
+
+            assertEquals(false, out);
+
+        }};
+
+    }
+
+    @Test
+    public void testHandleAppendAfterInstallingSnapshot(){
+        new JavaTestKit(getSystem()) {{
+
+            MockRaftActorContext context = (MockRaftActorContext)
+                    createActorContext();
+
+
+            // Prepare the receivers log
+            MockRaftActorContext.SimpleReplicatedLog log =
+                    new MockRaftActorContext.SimpleReplicatedLog();
+
+            // Set up a log as if it has been snapshotted
+            log.setSnapshotIndex(3);
+            log.setSnapshotTerm(1);
+
+            context.setReplicatedLog(log);
+
+            // Prepare the entries to be sent with AppendEntries
+            List<ReplicatedLogEntry> entries = new ArrayList<>();
+            entries.add(
+                    new MockRaftActorContext.MockReplicatedLogEntry(1, 4, new MockRaftActorContext.MockPayload("two-1")));
+
+            AppendEntries appendEntries =
+                    new AppendEntries(1, "leader-1", 3, 1, entries, 4);
+
+            RaftActorBehavior behavior = createBehavior(context);
+
+            // Send an unknown message so that the state of the RaftActor remains unchanged
+            RaftActorBehavior expected = behavior.handleMessage(getRef(), "unknown");
+
+            RaftActorBehavior raftBehavior =
+                    behavior.handleMessage(getRef(), appendEntries);
+
+            assertEquals(expected, raftBehavior);
+
+            // Also expect an AppendEntriesReply to be sent where success is false
+            final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"),
+                    "AppendEntriesReply") {
+                // do not put code outside this method, will run afterwards
+                protected Boolean match(Object in) {
+                    if (in instanceof AppendEntriesReply) {
+                        AppendEntriesReply reply = (AppendEntriesReply) in;
+                        return reply.isSuccess();
+                    } else {
+                        throw noMatch();
+                    }
+                }
+            }.get();
+
+            assertEquals(true, out);
+
+        }};
+
+    }
+
 
     /**
      * This test verifies that when InstallSnapshot is received by
