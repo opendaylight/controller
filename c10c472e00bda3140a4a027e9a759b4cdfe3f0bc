@@ -22,6 +22,23 @@
       "revId": "c10c472e00bda3140a4a027e9a759b4cdfe3f0bc",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_66fc693f",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/impl/JsonMapper.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 367,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-01-08T21:39:44Z",
+      "side": 1,
+      "message": "This map should be static to avoid recreating it every time.",
+      "revId": "c10c472e00bda3140a4a027e9a759b4cdfe3f0bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
