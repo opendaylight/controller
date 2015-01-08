@@ -17,12 +17,20 @@ import javax.xml.bind.Marshaller;
 import javax.xml.transform.dom.DOMResult;
 
 public class JaxBSerializer {
+    private static final JAXBContext JAXB_CONTEXT;
+
+    static {
+        try {
+            JAXB_CONTEXT = JAXBContext.newInstance(NetconfState.class);
+        } catch (JAXBException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
 
     public Element toXml(final NetconfState monitoringModel) {
         final DOMResult res;
         try {
-            final JAXBContext jaxbContext = JAXBContext.newInstance(NetconfState.class);
-            final Marshaller marshaller = jaxbContext.createMarshaller();
+            final Marshaller marshaller = JAXB_CONTEXT.createMarshaller();
 
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 
