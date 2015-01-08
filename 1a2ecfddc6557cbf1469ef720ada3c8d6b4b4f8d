@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_ab3f9c24",
+        "filename": "opendaylight/md-sal/compatibility/sal-compatibility/src/main/java/org/opendaylight/controller/sal/compatibility/NodeMapping.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 556
+      },
+      "writtenOn": "2015-01-08T14:00:29Z",
+      "side": 1,
+      "message": "Shouldn\u0027t here be the variable \"id\"? NodeId is null and would result into useless Node object.",
+      "range": {
+        "startLine": 109,
+        "startChar": 82,
+        "endLine": 109,
+        "endChar": 88
+      },
+      "revId": "1a2ecfddc6557cbf1469ef720ada3c8d6b4b4f8d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_6b4994cf",
+        "filename": "opendaylight/md-sal/compatibility/sal-compatibility/src/main/java/org/opendaylight/controller/sal/compatibility/NodeMapping.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 556
+      },
+      "writtenOn": "2015-01-08T14:00:29Z",
+      "side": 1,
+      "message": "this can be extracted to static method - we have already ALL_CHARS_TO_COLON constant field",
+      "range": {
+        "startLine": 124,
+        "startChar": 38,
+        "endLine": 124,
+        "endChar": 63
+      },
+      "revId": "1a2ecfddc6557cbf1469ef720ada3c8d6b4b4f8d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
