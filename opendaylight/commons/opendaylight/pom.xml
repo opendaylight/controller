@@ -29,7 +29,6 @@
     <bundlescanner.api.version>0.5.0-SNAPSHOT</bundlescanner.api.version>
     <bundlescanner.implementation.version>0.5.0-SNAPSHOT</bundlescanner.implementation.version>
     <bundlescanner.version>0.5.0-SNAPSHOT</bundlescanner.version>
-    <checkstyle.version>2.12</checkstyle.version>
     <clustering.services.version>0.6.0-SNAPSHOT</clustering.services.version>
     <clustering.services_implementation.version>0.5.0-SNAPSHOT</clustering.services_implementation.version>
     <clustering.stub.version>0.5.0-SNAPSHOT</clustering.stub.version>
