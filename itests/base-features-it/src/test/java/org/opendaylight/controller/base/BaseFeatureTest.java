@@ -12,7 +12,7 @@ import java.util.EnumSet;
 
 import javax.inject.Inject;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;

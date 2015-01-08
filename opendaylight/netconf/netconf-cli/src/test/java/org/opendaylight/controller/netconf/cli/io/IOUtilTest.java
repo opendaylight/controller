@@ -9,7 +9,7 @@ package org.opendaylight.controller.netconf.cli.io;
 
 import com.google.common.collect.Maps;
 import java.util.Map;
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.netconf.cli.commands.CommandConstants;
 import org.opendaylight.yangtools.yang.common.QName;
