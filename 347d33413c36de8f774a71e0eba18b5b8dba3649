@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_6b4e74c3",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/api/DataBrokerFactory.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-01-08T13:40:25Z",
+      "side": 1,
+      "message": "This is too free-form definition for making this API usable to consumers, what are provided arguments and how they should affect construction of connector?",
+      "range": {
+        "startLine": 22,
+        "startChar": 137,
+        "endLine": 22,
+        "endChar": 162
+      },
+      "revId": "347d33413c36de8f774a71e0eba18b5b8dba3649",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
