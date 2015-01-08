@@ -9,8 +9,9 @@ package org.opendaylight.controller.config.yang.md.sal.connector.netconf;
 
 import static org.opendaylight.controller.config.api.JmxAttributeValidationException.checkCondition;
 import static org.opendaylight.controller.config.api.JmxAttributeValidationException.checkNotNull;
-
 import com.google.common.base.Optional;
+import io.netty.util.concurrent.EventExecutor;
+import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -120,13 +121,7 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         final NetconfClientDispatcher dispatcher = getClientDispatcherDependency();
         listener.initializeRemoteConnection(dispatcher, clientConfig);
 
-        return new AutoCloseable() {
-            @Override
-            public void close() throws Exception {
-                listener.close();
-                salFacade.close();
-            }
-        };
+        return new MyAutoCloseable(listener, salFacade);
     }
 
     private Optional<NetconfSessionCapabilities> getUserCapabilities() {
@@ -155,8 +150,11 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
 
     public NetconfReconnectingClientConfiguration getClientConfig(final NetconfDeviceCommunicator listener) {
         final InetSocketAddress socketAddress = getSocketAddress();
-        final ReconnectStrategy strategy = getReconnectStrategy();
         final long clientConnectionTimeoutMillis = getConnectionTimeoutMillis();
+
+        final ReconnectStrategyFactory sf = new MyReconnectStrategyFactory(
+            getEventExecutorDependency(), getMaxConnectionAttempts(), getBetweenAttemptsTimeoutMillis(), getSleepFactor());
+        final ReconnectStrategy strategy = sf.createReconnectStrategy();
 
         return NetconfReconnectingClientConfigurationBuilder.create()
         .withAddress(socketAddress)
@@ -167,30 +165,54 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         .withProtocol(getTcpOnly() ?
                 NetconfClientConfiguration.NetconfClientProtocol.TCP :
                 NetconfClientConfiguration.NetconfClientProtocol.SSH)
-        .withConnectStrategyFactory(new ReconnectStrategyFactory() {
-            @Override
-            public ReconnectStrategy createReconnectStrategy() {
-                return getReconnectStrategy();
-            }
-        })
+        .withConnectStrategyFactory(sf)
         .build();
     }
 
-    private ReconnectStrategy getReconnectStrategy() {
-        final Long connectionAttempts;
-        if (getMaxConnectionAttempts() != null && getMaxConnectionAttempts() > 0) {
-            connectionAttempts = getMaxConnectionAttempts();
-        } else {
-            logger.trace("Setting {} on {} to infinity", maxConnectionAttemptsJmxAttribute, this);
-            connectionAttempts = null;
-        }
-        final double sleepFactor = getSleepFactor().doubleValue();
-        final int minSleep = getBetweenAttemptsTimeoutMillis();
-        final Long maxSleep = null;
-        final Long deadline = null;
+    private static final class MyAutoCloseable implements AutoCloseable {
+        private final RemoteDeviceHandler<NetconfSessionCapabilities> salFacade;
+        private final NetconfDeviceCommunicator listener;
 
-        return new TimedReconnectStrategy(getEventExecutorDependency(), getBetweenAttemptsTimeoutMillis(),
-                minSleep, sleepFactor, maxSleep, connectionAttempts, deadline);
+        public MyAutoCloseable(final NetconfDeviceCommunicator listener,
+                final RemoteDeviceHandler<NetconfSessionCapabilities> salFacade) {
+            this.listener = listener;
+            this.salFacade = salFacade;
+        }
+
+        @Override
+        public void close() {
+            listener.close();
+            salFacade.close();
+        }
+    }
+
+    private static final class MyReconnectStrategyFactory implements ReconnectStrategyFactory {
+        private final Long connectionAttempts;
+        private final EventExecutor executor;
+        private final double sleepFactor;
+        private final int minSleep;
+
+        MyReconnectStrategyFactory(final EventExecutor executor, final Long maxConnectionAttempts, final int minSleep, final BigDecimal sleepFactor) {
+            if (maxConnectionAttempts != null && maxConnectionAttempts > 0) {
+                connectionAttempts = maxConnectionAttempts;
+            } else {
+                logger.trace("Setting {} on {} to infinity", maxConnectionAttemptsJmxAttribute, this);
+                connectionAttempts = null;
+            }
+
+            this.sleepFactor = sleepFactor.doubleValue();
+            this.executor = executor;
+            this.minSleep = minSleep;
+        }
+
+        @Override
+        public ReconnectStrategy createReconnectStrategy() {
+            final Long maxSleep = null;
+            final Long deadline = null;
+
+            return new TimedReconnectStrategy(executor, minSleep,
+                    minSleep, sleepFactor, maxSleep, connectionAttempts, deadline);
+        }
     }
 
     private InetSocketAddress getSocketAddress() {
