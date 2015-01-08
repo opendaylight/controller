@@ -23,7 +23,7 @@ public class XSQLModule extends org.opendaylight.yang.gen.v1.http.netconfcentral
         getSchemaServiceDependency().registerSchemaContextListener(xsqlAdapter);
         xsqlAdapter.setDataBroker(getAsyncDataBrokerDependency());
         XSQLProvider p = new XSQLProvider();
-        p.buildXSQL(getDataBrokerDependency());
+        //p.buildXSQL(getDataBrokerDependency());
         return p;
     }
 
