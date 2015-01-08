@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_a654b154",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 1118,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-01-08T21:06:01Z",
+      "side": 1,
+      "message": "It looks like findModule and findModuleByNamespace calls above can return null. This would adversely affect callers since you removed the null checks.\n\nInstead of the inline returns above, you could store in a \"module\" local var and set above. If null at the end, throw RestconfDocumentedException.",
+      "revId": "166cbce40f58d424f315df9c6d31a0b9828b393b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
