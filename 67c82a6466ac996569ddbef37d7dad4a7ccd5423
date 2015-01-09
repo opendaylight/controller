@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_21b72bda",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMNotificationRouter.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-01-09T17:24:30Z",
+      "side": 1,
+      "message": "Is an unbounded thread pool OK here?\nAlso, I\u0027ve found it useful to pass a ThreadFactory to name the threads appropriately so you can easily identify them in a thread dump.",
+      "revId": "67c82a6466ac996569ddbef37d7dad4a7ccd5423",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
