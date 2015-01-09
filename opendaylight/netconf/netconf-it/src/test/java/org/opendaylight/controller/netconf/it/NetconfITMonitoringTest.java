@@ -199,8 +199,8 @@ public class NetconfITMonitoringTest extends AbstractNetconfConfigTest {
         }
 
         @Override
-        public Optional<List<String>> getLocation() {
-            return Optional.absent();
+        public List<String> getLocation() {
+            return Collections.emptyList();
         }
     }
 }
