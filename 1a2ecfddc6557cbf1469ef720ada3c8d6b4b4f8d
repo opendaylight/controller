@@ -25,6 +25,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_616213da",
+        "filename": "opendaylight/md-sal/compatibility/sal-compatibility/src/main/java/org/opendaylight/controller/sal/compatibility/NodeMapping.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 2895
+      },
+      "writtenOn": "2015-01-09T10:26:49Z",
+      "side": 1,
+      "message": "This else is for inner-if statement - hence nodeId isn\u0027t null. \n\nThe braces are somewhat misaligned :).",
+      "parentUuid": "7a96c907_ab3f9c24",
+      "revId": "1a2ecfddc6557cbf1469ef720ada3c8d6b4b4f8d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_6b4994cf",
         "filename": "opendaylight/md-sal/compatibility/sal-compatibility/src/main/java/org/opendaylight/controller/sal/compatibility/NodeMapping.java",
         "patchSetId": 3
@@ -42,6 +60,24 @@
         "endLine": 124,
         "endChar": 63
       },
+      "revId": "1a2ecfddc6557cbf1469ef720ada3c8d6b4b4f8d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_815f1f0e",
+        "filename": "opendaylight/md-sal/compatibility/sal-compatibility/src/main/java/org/opendaylight/controller/sal/compatibility/NodeMapping.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 2895
+      },
+      "writtenOn": "2015-01-09T10:26:49Z",
+      "side": 1,
+      "message": "Thanks. will update.",
+      "parentUuid": "7a96c907_6b4994cf",
       "revId": "1a2ecfddc6557cbf1469ef720ada3c8d6b4b4f8d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
