@@ -7,7 +7,7 @@ package org.opendaylight.controller.hosttracker.shell;
 * and is available at http://www.eclipse.org/legal/epl-v10.html
 */
 
-import org.apache.felix.gogo.commands.Command;
+import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.opendaylight.controller.hosttracker.IHostTrackerShell;
 

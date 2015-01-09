@@ -7,8 +7,8 @@
 */
 package org.opendaylight.controller.topologymanager.shell;
 
-import org.apache.felix.gogo.commands.Command;
-import org.apache.felix.gogo.commands.Argument;
+import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.opendaylight.controller.topologymanager.ITopologyManagerShell;
 
