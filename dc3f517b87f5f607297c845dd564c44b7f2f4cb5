@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_e109432d",
+        "filename": "opendaylight/config/config-persister-feature-adapter/src/main/java/org/opendaylight/controller/configpusherfeature/internal/AbstractFeatureWrapper.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-01-09T08:39:17Z",
+      "side": 1,
+      "message": "I dont think that having etc/jetty.xml hardcoded here is a good idea. Does that file actually appear in any of the features ?",
+      "revId": "dc3f517b87f5f607297c845dd564c44b7f2f4cb5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_010f8f31",
+        "filename": "opendaylight/config/config-persister-feature-adapter/src/main/java/org/opendaylight/controller/configpusherfeature/internal/AbstractFeatureWrapper.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-01-09T08:39:17Z",
+      "side": 1,
+      "message": "Maybe warn level would be sufficient, since this is not a non-recoverable error and the system continues to work.",
+      "revId": "dc3f517b87f5f607297c845dd564c44b7f2f4cb5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
