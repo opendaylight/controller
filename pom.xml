@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<<<<<<< HEAD
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
@@ -57,4 +58,63 @@
     <tag>HEAD</tag>
     <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
   </scm>
+=======
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent> 
+      <groupId>org.opendaylight.odlparent</groupId>
+      <artifactId>odlparent</artifactId>
+      <version>1.5.0-SNAPSHOT</version>
+      <relativePath/>
+  </parent>
+
+  <groupId>org.opendaylight.tsdr</groupId>
+  <artifactId>tsdr</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <prerequisites>
+     <maven>3.0</maven>
+   </prerequisites>
+
+  <modules>
+    <module>model</module>
+    <module>datastorage</module>
+    <module>persistence</module>
+    <module>datacollection</module>
+    <module>features</module>
+  </modules>
+  <scm>
+      <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
+      <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
+      <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
+      <tag>HEAD</tag>
+  </scm>
+  <!--
+
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
+        <yangtools.version>0.7.0-SNAPSHOT</yangtools.version>
+        <bundle.plugin.version>2.3.7</bundle.plugin.version>
+        <sitedeploy>dav:http://nexus.opendaylight.org/content/sites/site</sitedeploy>
+        <java.version.source>1.7</java.version.source>
+        <java.version.target>1.7</java.version.target>
+        <maven.compile.plugin.version>2.5.1</maven.compile.plugin.version>
+        <mdsal.version>1.2.0-SNAPSHOT</mdsal.version>
+        <equinox.osgi.version>3.8.1.v20120830-144521</equinox.osgi.version>
+        <ietf-inet-types.version>2010.09.24.4-SNAPSHOT</ietf-inet-types.version>
+        <ietf-yang-types.version>2010.09.24.4-SNAPSHOT</ietf-yang-types.version>
+        <spring.version>3.1.3.RELEASE</spring.version>
+        <jackson.version>1.9.10</jackson.version>
+        <config.version>0.3.0-SNAPSHOT</config.version>
+        <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
+        <osgi.compendium.version>5.0.0</osgi.compendium.version>
+        <osgi.core.version>5.0.0</osgi.core.version>
+    </properties>
+    -->
+
+   
+  
+>>>>>>> 31d42b6... pom file check in.
 </project>

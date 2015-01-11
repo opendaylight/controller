@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.opendaylight.odlparent</groupId>
+        <artifactId>odlparent</artifactId>
+        <version>1.5.0-SNAPSHOT</version>
+    </parent>
+
+    <groupId>org.opendaylight.tsdr</groupId>
+    <artifactId>commons.tsdr</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <prerequisites>
+        <maven>3.0</maven>
+    </prerequisites>
+
+    <properties>
+        <!-- Plugins -->
+        <checkstyle.version>2.12</checkstyle.version>
+        <compiler.plugin.version>3.1</compiler.plugin.version>
+        <resource.plugin.version>2.6</resource.plugin.version>
+        <helper.plugin.version>1.9.1</helper.plugin.version>
+        <surefire.plugin.version>2.15</surefire.plugin.version>
+        <bundle.plugin.version>2.5.3</bundle.plugin.version>
+        <javadoc.plugin.version>2.8.1</javadoc.plugin.version>
+
+        <!-- OSGi -->
+        <osgi.metatype.version>1.0.10</osgi.metatype.version>
+
+        <!-- ODL -->
+        <ietf.inet.types.version>2010.09.24.7-SNAPSHOT</ietf.inet.types.version>
+        <ietf.yang.types.version>2010.09.24.7-SNAPSHOT</ietf.yang.types.version>
+        <yang.ext.version>2013.09.07.7-SNAPSHOT</yang.ext.version>
+        <yangtools.version>0.7.0-SNAPSHOT</yangtools.version>
+        <jmxGeneratorPath>src/main/yang-gen-config</jmxGeneratorPath>
+        <salGeneratorPath>src/main/yang-gen-sal</salGeneratorPath>
+        <mdsal.version>1.2.0-SNAPSHOT</mdsal.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- ODL -->
+            <dependency>
+                <groupId>org.opendaylight.yangtools.model</groupId>
+                <artifactId>ietf-inet-types</artifactId>
+                <version>${ietf.inet.types.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.yangtools.model</groupId>
+                <artifactId>ietf-yang-types</artifactId>
+                <version>${ietf.yang.types.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.yangtools.model</groupId>
+                <artifactId>yang-ext</artifactId>
+                <version>${yang.ext.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+<repositories>
+    <!-- OpenDayLight Repo Mirror -->
+    <repository>
+      <id>opendaylight-mirror</id>
+      <name>opendaylight-mirror</name>
+      <url>${nexusproxy}/groups/public/</url>
+      <snapshots>
+          <enabled>false</enabled>
+      </snapshots>
+      <releases>
+          <enabled>true</enabled>
+          <updatePolicy>never</updatePolicy>
+      </releases>
+    </repository>
+    <!-- OpenDayLight Snapshot artifact -->
+    <repository>
+      <id>opendaylight-snapshot</id>
+      <name>opendaylight-snapshot</name>
+      <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
+      <snapshots>
+          <enabled>true</enabled>
+      </snapshots>
+      <releases>
+          <enabled>false</enabled>
+      </releases>
+    </repository>
+  </repositories>
+
+<build>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${maven.compile.plugin.version}</version>
+          <configuration>
+            <source>${java.version.source}</source>
+            <target>${java.version.target}</target>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+
+
+  <distributionManagement>
+    <!-- OpenDayLight Released artifact -->
+    <repository>
+      <id>opendaylight-release</id>
+      <url>${nexusproxy}/repositories/opendaylight.release/</url>
+    </repository>
+    <!-- OpenDayLight Snapshot artifact -->
+    <snapshotRepository>
+      <id>opendaylight-snapshot</id>
+      <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
+    </snapshotRepository>
+    <!-- Site deployment -->
+    <site>
+      <id>website</id>
+      <url>${sitedeploy}</url>
+    </site>
+  </distributionManagement>
+
+
+
+</project>
