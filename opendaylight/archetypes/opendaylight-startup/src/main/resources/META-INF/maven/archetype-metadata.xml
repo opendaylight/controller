@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<archetype-descriptor xsi:schemaLocation="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.0.0 http://maven.apache.org/xsd/archetype-descriptor-1.0.0.xsd" name="example-aggregator"
+    xmlns="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <requiredProperties>
+    <requiredProperty key="classPrefix" >
+        <defaultValue>
+            ${artifactId.substring(0,1).toUpperCase()}${artifactId.substring(1)}
+        </defaultValue>
+    </requiredProperty>
+    <requiredProperty key="copyright" />
+  </requiredProperties>
+  <fileSets>
+
+    <!-- aggregator -->
+    <fileSet encoding="UTF-8">
+      <directory></directory>
+      <includes>
+        <include>.gitignore</include>
+      </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+      <directory></directory>
+      <includes>
+        <include>pom.xml</include>
+      </includes>
+    </fileSet>
+
+    <!-- karaf distro -->
+    <fileSet filtered="true" encoding="UTF-8">
+        <directory>__artifactId__-karaf</directory>
+        <includes>
+            <include>pom.xml</include>
+        </includes>
+    </fileSet>
+
+    <!-- features -->
+
+    <fileSet filtered="true" encoding="UTF-8">
+        <directory>__artifactId__-features</directory>
+        <includes>
+            <include>pom.xml</include>
+        </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+        <directory>__artifactId__-features/src/main/features</directory>
+        <includes>
+            <include>**/*.xml</include>
+          </includes>
+    </fileSet>
+
+    <!-- impl -->
+
+    <fileSet filtered="true" encoding="UTF-8">
+        <directory>__artifactId__-impl</directory>
+        <includes>
+            <include>pom.xml</include>
+        </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+        <directory>__artifactId__-impl/src/main/java</directory>
+        <includes>
+            <include>**/*.java</include>
+         </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+        <directory>__artifactId__-impl/src/main/config</directory>
+        <includes>
+            <include>**/*.xml</include>
+         </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+       <directory>__artifactId__-impl/src/main/yang</directory>
+       <includes>
+         <include>**/*.yang</include>
+       </includes>
+     </fileSet>
+
+     <!-- api -->
+
+     <fileSet filtered="true" encoding="UTF-8">
+       <directory>__artifactId__-api</directory>
+       <includes>
+         <include>pom.xml</include>
+       </includes>
+     </fileSet>
+     <fileSet filtered="true" encoding="UTF-8">
+       <directory>__artifactId__-api/src/main/yang</directory>
+       <includes>
+         <include>**/*.yang</include>
+       </includes>
+     </fileSet>
+
+     <!-- artifacts -->
+     <fileSet filtered="true" encoding="UTF-8">
+       <directory>__artifactId__-artifacts</directory>
+       <includes>
+         <include>pom.xml</include>
+       </includes>
+     </fileSet>
+  </fileSets>
+</archetype-descriptor>
