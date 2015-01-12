@@ -9,7 +9,6 @@ package org.opendaylight.controller.config.yangjmxgenerator;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -95,7 +94,7 @@ public class RuntimeBeanEntry {
             final List<RuntimeBeanEntry> children, final Set<Rpc> rpcs) {
 
         checkArgument(isRoot == false || keyYangName.isPresent() == false,
-                "Root RuntimeBeanEntry must not have key " + "set");
+                "Root RuntimeBeanEntry must not have key set");
         this.packageName = packageName;
         this.isRoot = isRoot;
         this.yangName = yangName;
@@ -108,16 +107,14 @@ public class RuntimeBeanEntry {
 
         for (AttributeIfc a : attributes) {
             checkState(map.containsKey(a.getAttributeYangName()) == false,
-                    "Attribute already defined: " + a.getAttributeYangName()
-                    + " in " + nodeForReporting);
+                    "Attribute already defined: %s in %s", a.getAttributeYangName(), nodeForReporting);
             map.put(a.getAttributeYangName(), a);
         }
 
         if (keyYangName.isPresent()) {
             AttributeIfc keyJavaName = map.get(keyYangName.get());
-            checkArgument(keyJavaName != null, "Key " + keyYangName.get()
-                    + " not found in attribute " + "list " + attributes
-                    + " in " + nodeForReporting);
+            checkArgument(keyJavaName != null, "Key %s not found in attribute list %s in %s", keyYangName.get(),
+                    attributes, nodeForReporting);
             this.keyJavaName = Optional
                     .of(keyJavaName.getUpperCaseCammelCase());
         } else {
