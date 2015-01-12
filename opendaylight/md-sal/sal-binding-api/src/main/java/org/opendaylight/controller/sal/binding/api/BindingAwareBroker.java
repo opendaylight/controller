@@ -8,7 +8,6 @@
 package org.opendaylight.controller.sal.binding.api;
 
 import org.opendaylight.controller.md.sal.common.api.routing.RoutedRegistration;
-import org.opendaylight.controller.sal.binding.api.BindingAwareProvider.ProviderFunctionality;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.yang.binding.BaseIdentity;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -52,6 +51,12 @@ import org.osgi.framework.BundleContext;
  * and {@link ProviderContext}
  */
 public interface BindingAwareBroker {
+    /*
+     * @deprecated Use registerConsumer(BindingAwareConsumer cons) instead (BundleContext is no longer used)
+     */
+    @Deprecated
+    ConsumerContext registerConsumer(BindingAwareConsumer consumer, BundleContext ctx);
+
     /**
      * Registers the {@link BindingAwareConsumer}, which will use the SAL layer.
      *
@@ -73,7 +78,13 @@ public interface BindingAwareBroker {
      * @throws IllegalStateException
      *             If the consumer is already registered.
      */
-    ConsumerContext registerConsumer(BindingAwareConsumer consumer, BundleContext ctx);
+    ConsumerContext registerConsumer(BindingAwareConsumer consumer);
+
+    /*
+     * @deprecated Use registerProvider(BindingAwareProvider prov) instead (BundleContext is no longer used)
+     */
+    @Deprecated
+    ProviderContext registerProvider(BindingAwareProvider provider, BundleContext ctx);
 
     /**
      * Registers the {@link BindingAwareProvider}, which will use the SAL layer.
@@ -103,7 +114,7 @@ public interface BindingAwareBroker {
      * @throws IllegalStateException
      *             If the consumer is already registered.
      */
-    ProviderContext registerProvider(BindingAwareProvider provider, BundleContext ctx);
+    ProviderContext registerProvider(BindingAwareProvider provider);
 
     /**
      * {@link BindingAwareConsumer} specific access to the SAL functionality.
@@ -149,11 +160,6 @@ public interface BindingAwareBroker {
      */
     public interface ProviderContext extends ConsumerContext, RpcProviderRegistry {
 
-        @Deprecated
-        void registerFunctionality(ProviderFunctionality functionality);
-
-        @Deprecated
-        void unregisterFunctionality(ProviderFunctionality functionality);
     }
 
     /**

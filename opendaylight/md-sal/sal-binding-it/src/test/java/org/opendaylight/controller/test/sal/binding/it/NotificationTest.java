@@ -12,7 +12,6 @@ import static org.junit.Assert.assertNotNull;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.junit.Before;
@@ -35,7 +34,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.Swit
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.FlowCookie;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
-import org.opendaylight.yangtools.yang.binding.RpcService;
 
 @Ignore
 public class NotificationTest extends AbstractTest {
@@ -115,25 +113,6 @@ public class NotificationTest extends AbstractTest {
                 listener2Reg = session.getSALService(NotificationProviderService.class).registerNotificationListener(
                         listener2);
             }
-
-            @Override
-            public void onSessionInitialized(ConsumerContext session) {
-                // TODO Auto-generated method stub
-
-            }
-
-            @Override
-            public Collection<? extends RpcService> getImplementations() {
-                // TODO Auto-generated method stub
-                return null;
-            }
-
-            @Override
-            public Collection<? extends ProviderFunctionality> getFunctionality() {
-                // TODO Auto-generated method stub
-                return null;
-            }
-
         };
 
         // registerConsumer method calls onSessionInitialized method above

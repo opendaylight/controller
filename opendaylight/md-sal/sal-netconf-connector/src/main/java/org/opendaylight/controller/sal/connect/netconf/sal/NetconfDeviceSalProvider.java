@@ -23,7 +23,6 @@ import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
 import org.opendaylight.controller.sal.core.api.notify.NotificationPublishService;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
-import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
@@ -71,25 +70,12 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
     }
 
     @Override
-    public Collection<? extends RpcService> getImplementations() {
-        return Collections.emptySet();
-    }
-
-    @Override
-    public Collection<? extends BindingAwareProvider.ProviderFunctionality> getFunctionality() {
-        return Collections.emptySet();
-    }
-
-    @Override
     public void onSessionInitiated(final BindingAwareBroker.ProviderContext session) {
         logger.debug("{}: Session with sal established {}", id, session);
 
         final DataBroker dataBroker = session.getSALService(DataBroker.class);
         datastoreAdapter = new NetconfDeviceDatastoreAdapter(id, dataBroker);
     }
-
-    @Override
-    public void onSessionInitialized(final BindingAwareBroker.ConsumerContext session) {}
 
     public void close() throws Exception {
         mountInstance.close();
