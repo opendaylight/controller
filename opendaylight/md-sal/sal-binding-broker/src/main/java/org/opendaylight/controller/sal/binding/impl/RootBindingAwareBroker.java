@@ -135,13 +135,25 @@ public class RootBindingAwareBroker implements //
     }
 
     @Override
-    public ConsumerContext registerConsumer(final BindingAwareConsumer consumer, final BundleContext ctx) {
+    public ConsumerContext registerConsumer(BindingAwareConsumer consumer,
+            BundleContext ctx) {
+        return registerConsumer(consumer);
+    }
+
+    @Override
+    public ProviderContext registerProvider(BindingAwareProvider provider,
+            BundleContext ctx) {
+        return registerProvider(provider);
+    }
+
+    @Override
+    public ConsumerContext registerConsumer(final BindingAwareConsumer consumer) {
         checkState(supportedConsumerServices != null, "Broker is not initialized.");
         return BindingContextUtils.createConsumerContextAndInitialize(consumer, supportedConsumerServices);
     }
 
     @Override
-    public ProviderContext registerProvider(final BindingAwareProvider provider, final BundleContext ctx) {
+    public ProviderContext registerProvider(final BindingAwareProvider provider) {
         checkState(supportedProviderServices != null, "Broker is not initialized.");
         return BindingContextUtils.createProviderContextAndInitialize(provider, supportedProviderServices);
     }

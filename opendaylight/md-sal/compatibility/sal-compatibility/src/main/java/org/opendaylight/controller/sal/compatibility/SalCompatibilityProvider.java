@@ -7,11 +7,7 @@
  */
 package org.opendaylight.controller.sal.compatibility;
 
-import java.util.Collection;
-import java.util.Collections;
-
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.controller.sal.binding.api.NotificationService;
@@ -26,7 +22,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev13
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev130819.FlowTopologyDiscoveryService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.packet.service.rev130709.PacketProcessingService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.OpendaylightPortStatisticsService;
-import org.opendaylight.yangtools.yang.binding.RpcService;
 
 import com.google.common.base.Preconditions;
 
@@ -35,21 +30,6 @@ class SalCompatibilityProvider implements BindingAwareProvider {
 
     public SalCompatibilityProvider(final ComponentActivator cmpAct) {
         this.activator = Preconditions.checkNotNull(cmpAct);
-    }
-
-    @Override
-    public Collection<? extends ProviderFunctionality> getFunctionality() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public Collection<? extends RpcService> getImplementations() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public void onSessionInitialized(final ConsumerContext session) {
-        // No-op
     }
 
     @Override

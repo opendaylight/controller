@@ -12,15 +12,15 @@ import static com.google.common.base.Preconditions.checkState;
 
 import java.util.Collection;
 import java.util.Collections;
-
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
 import org.opendaylight.controller.md.sal.binding.impl.AbstractForwardedDataBroker;
+import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangePublisher;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
-import org.opendaylight.controller.sal.binding.api.data.RuntimeDataProvider;
 import org.opendaylight.controller.sal.binding.impl.DataBrokerImpl;
 import org.opendaylight.controller.sal.binding.impl.MountPointManagerImpl.BindingMountPointImpl;
 import org.opendaylight.controller.sal.binding.impl.RpcProviderRegistryImpl;
@@ -41,7 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BindingIndependentConnector implements //
-        RuntimeDataProvider, //
+        DataReader<InstanceIdentifier<? extends DataObject>, DataObject>, //
         Provider, //
         AutoCloseable {
 
