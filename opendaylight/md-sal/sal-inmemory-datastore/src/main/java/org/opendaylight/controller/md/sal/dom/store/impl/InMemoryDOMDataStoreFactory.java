@@ -23,8 +23,9 @@ public final class InMemoryDOMDataStoreFactory {
     }
 
     public static InMemoryDOMDataStore create(final String name,
+    		boolean config,
             @Nullable final SchemaService schemaService) {
-        return create(name, schemaService, null);
+        return create(name, config, schemaService, null);
     }
 
     /**
@@ -37,9 +38,10 @@ public final class InMemoryDOMDataStoreFactory {
      * @return an InMemoryDOMDataStore instance
      */
     public static InMemoryDOMDataStore create(final String name,
+    		boolean config,
             @Nullable final SchemaService schemaService,
             @Nullable final InMemoryDOMDataStoreConfigProperties properties) {
-        return create(name, schemaService, false, properties);
+        return create(name, config, schemaService, false, properties);
     }
 
     /**
@@ -53,7 +55,9 @@ public final class InMemoryDOMDataStoreFactory {
      * @return an InMemoryDOMDataStore instance
      */
     public static InMemoryDOMDataStore create(final String name,
-            @Nullable final SchemaService schemaService, final boolean debugTransactions,
+    		boolean config,
+            @Nullable final SchemaService schemaService,
+            final boolean debugTransactions,
             @Nullable final InMemoryDOMDataStoreConfigProperties properties) {
 
         InMemoryDOMDataStoreConfigProperties actualProperties = properties;
@@ -71,8 +75,14 @@ public final class InMemoryDOMDataStoreFactory {
         ExecutorService dataChangeListenerExecutor = SpecialExecutors.newBlockingBoundedFastThreadPool(
                 dclExecutorMaxPoolSize, dclExecutorMaxQueueSize, name + "-DCL" );
 
-        final InMemoryDOMDataStore dataStore = new InMemoryDOMDataStore(name, dataChangeListenerExecutor,
-                actualProperties.getMaxDataChangeListenerQueueSize(), debugTransactions);
+        final InMemoryDOMDataStore dataStore;
+        if (config) {
+        	dataStore = new ConfigInMemoryDOMDataStore(name, dataChangeListenerExecutor,
+        			actualProperties.getMaxDataChangeListenerQueueSize(), debugTransactions);
+        } else {
+        	dataStore = new InMemoryDOMDataStore(name, dataChangeListenerExecutor,
+        			actualProperties.getMaxDataChangeListenerQueueSize(), debugTransactions);
+        }
 
         if (schemaService != null) {
             schemaService.registerSchemaContextListener(dataStore);
