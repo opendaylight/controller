@@ -230,18 +230,29 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
         LOG.debug("Transaction {} unlocked", tx);
 
         /*
-         * The transaction is ready. It will then be picked up by either next allocation,
-         * or a background transaction completion callback.
+         * The transaction is ready. Check if there is a in-flight transaction. If
+         * there is none, we can save two compare-and-swaps and push the transaction
+         * to the backend.
+         */
+        if (inflightTx == null) {
+            synchronized (this) {
+                processTransaction(tx);
+                return;
+            }
+        }
+
+        /*
+         * There is an in-flight transaction, so mark this transaction for reuse
+         * by either next allocation or submission when that transaction commits.
          */
         final boolean success = READY_UPDATER.compareAndSet(this, null, tx);
         Preconditions.checkState(success, "Transaction %s collided on ready state", tx, readyTx);
         LOG.debug("Transaction {} readied", tx);
 
         /*
-         * We do not see a transaction being in-flight, so we need to take care of dispatching
-         * the transaction to the backend. We are in the ready case, we cannot short-cut
-         * the checking of readyTx, as an in-flight transaction may have completed between us
-         * setting the field above and us checking.
+         * Re-check whether the in-flight transaction has not completed asynchronously.
+         * If that is the case, we need to re-check whether that async event has not
+         * picked it up from readyTx.
          */
         if (inflightTx == null) {
             synchronized (this) {
