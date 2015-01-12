@@ -1,0 +1,65 @@
+module config-statement-test-model {
+    namespace "urn:opendaylight:configtest";
+    prefix configtest;
+
+    revision "2015-01-13" {
+        description "Initial revision of action service";
+    }
+
+    grouping test-grouping {
+        leaf config-leaf-in-grouping {
+            config true;
+            type string;
+        }
+
+        leaf oper-leaf-in-grouping {
+            config false;
+            type string;
+        }
+    }
+
+    container config-cont-1 {
+        config true;
+
+        list config-list-2 {
+            config true;
+
+            key config-leaf-3;
+
+            leaf config-leaf-3 {
+                config true;
+                type int32;
+            }
+
+            list oper-list-3 {
+                config false;
+
+                key oper-leaf-4;
+
+                leaf oper-leaf-4 {
+                    config false;
+                    type string;
+                }
+            }
+        }
+
+        container config-cont-grouping-2 {
+            config true;
+            uses test-grouping;
+        }
+
+        leaf-list oper-leaf-list-2 {
+            config false;
+            type string;
+        }
+
+        leaf oper-leaf-2 {
+            config false;
+            type string;
+        }
+    }
+
+    container oper-cont-1 {
+        config false;
+    }
+}

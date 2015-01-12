@@ -73,7 +73,7 @@ public class InMemoryDOMDataStore extends TransactionReadyPrototype implements D
                 }
             };
 
-    private final DataTree dataTree = InMemoryDataTreeFactory.getInstance().create();
+    protected final DataTree dataTree = InMemoryDataTreeFactory.getInstance().create();
     private final ListenerTree listenerTree = ListenerTree.create();
     private final AtomicLong txCounter = new AtomicLong(0);
 
