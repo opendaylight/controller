@@ -90,7 +90,7 @@ public class NetconfMonitoringServiceImplTest {
         Optional<String> optRev = Optional.of("rev");
         doReturn(optRev).when(cap).getRevision();
         doReturn(Optional.of("modName")).when(cap).getModuleName();
-        doReturn(Optional.of(Lists.newArrayList("loc"))).when(cap).getLocation();
+        doReturn(Lists.newArrayList("loc")).when(cap).getLocation();
         doNothing().when(snapshot).close();
 
         assertNotNull(service.getSchemas());

@@ -12,6 +12,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
 import com.google.common.base.Optional;
+import java.util.Collections;
 import org.junit.Test;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.monitoring.MonitoringConstants;
@@ -24,8 +25,8 @@ public class NetconfMonitoringOperationServiceTest {
 
         assertEquals(1, service.getNetconfOperations().size());
 
-        assertEquals(Optional.absent(), service.getCapabilities().iterator().next().getCapabilitySchema());
-        assertEquals(Optional.absent(), service.getCapabilities().iterator().next().getLocation());
+        assertEquals(Optional.<String>absent(), service.getCapabilities().iterator().next().getCapabilitySchema());
+        assertEquals(Collections.<String>emptyList(), service.getCapabilities().iterator().next().getLocation());
         assertEquals(Optional.of(MonitoringConstants.MODULE_REVISION), service.getCapabilities().iterator().next().getRevision());
         assertEquals(Optional.of(MonitoringConstants.MODULE_NAME), service.getCapabilities().iterator().next().getModuleName());
         assertEquals(Optional.of(MonitoringConstants.NAMESPACE), service.getCapabilities().iterator().next().getModuleNamespace());

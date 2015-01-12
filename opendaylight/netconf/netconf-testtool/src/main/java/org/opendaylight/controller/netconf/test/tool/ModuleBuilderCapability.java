@@ -9,6 +9,7 @@
 package org.opendaylight.controller.netconf.test.tool;
 
 import com.google.common.base.Optional;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
@@ -58,7 +59,7 @@ final class ModuleBuilderCapability implements Capability {
     }
 
     @Override
-    public Optional<List<String>> getLocation() {
-        return Optional.absent();
+    public List<String> getLocation() {
+        return Collections.emptyList();
     }
 }
