@@ -15,6 +15,11 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.JdkFutureAdapters;
 import com.google.common.util.concurrent.ListenableFuture;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import javax.annotation.Nullable;
 import org.opendaylight.controller.md.sal.common.api.RegistrationListener;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler;
@@ -54,10 +59,8 @@ import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionInstance;
 import org.opendaylight.controller.sal.core.api.notify.NotificationListener;
 import org.opendaylight.controller.sal.core.api.notify.NotificationPublishService;
-import org.opendaylight.controller.sal.dom.broker.impl.NotificationRouterImpl;
 import org.opendaylight.controller.sal.dom.broker.impl.SchemaAwareRpcBroker;
 import org.opendaylight.controller.sal.dom.broker.impl.SchemaContextProvider;
-import org.opendaylight.controller.sal.dom.broker.spi.NotificationRouter;
 import org.opendaylight.controller.sal.dom.broker.util.ProxySchemaContext;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
@@ -67,15 +70,6 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.model.api.Module;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
-
-import javax.annotation.Nullable;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 public class BackwardsCompatibleMountPoint implements MountProvisionInstance, SchemaContextProvider, SchemaService {
 
@@ -96,7 +90,7 @@ public class BackwardsCompatibleMountPoint implements MountProvisionInstance, Sc
 
         dataReader = new DataBrokerImpl();
         readWrapper = new ReadWrapper();
-        notificationPublishService = new DelgatingNotificationPublishService();
+        notificationPublishService = new SimpleNotificationPublishService();
         rpcs = new SchemaAwareRpcBroker(path.toString(), this);
 
         mountPointBuilder.addService(DOMDataBroker.class, new BackwardsCompatibleDomStore(dataReader, this));
@@ -278,7 +272,7 @@ public class BackwardsCompatibleMountPoint implements MountProvisionInstance, Sc
     @Override
     public void setSchemaContext(final SchemaContext schemaContext) {
         this.schemaContext = schemaContext;
-        for (ListenerRegistration<SchemaContextListener> schemaServiceListenerListenerRegistration : schemaListenerRegistry.getListeners()) {
+        for (final ListenerRegistration<SchemaContextListener> schemaServiceListenerListenerRegistration : schemaListenerRegistry.getListeners()) {
             schemaServiceListenerListenerRegistration.getInstance().onGlobalContextUpdated(schemaContext);
         }
     }
@@ -405,8 +399,8 @@ public class BackwardsCompatibleMountPoint implements MountProvisionInstance, Sc
                 return Futures.immediateCheckedFuture(normalizedNodeOptional);
             }
 
-            @Override public CheckedFuture<Boolean, ReadFailedException> exists(LogicalDatastoreType store,
-                YangInstanceIdentifier path) {
+            @Override public CheckedFuture<Boolean, ReadFailedException> exists(final LogicalDatastoreType store,
+                final YangInstanceIdentifier path) {
 
                 try {
                     return Futures.immediateCheckedFuture(read(store, path).get().isPresent());
@@ -527,8 +521,8 @@ public class BackwardsCompatibleMountPoint implements MountProvisionInstance, Sc
                 return new BackwardsCompatibleReadTransaction(dataReader, dataNormalizer).read(store, path);
             }
 
-            @Override public CheckedFuture<Boolean, ReadFailedException> exists(LogicalDatastoreType store,
-                YangInstanceIdentifier path) {
+            @Override public CheckedFuture<Boolean, ReadFailedException> exists(final LogicalDatastoreType store,
+                final YangInstanceIdentifier path) {
 
                 try {
                     return Futures.immediateCheckedFuture(read(store, path).get().isPresent());
@@ -569,25 +563,5 @@ public class BackwardsCompatibleMountPoint implements MountProvisionInstance, Sc
         }
     }
 
-    private class DelgatingNotificationPublishService implements NotificationPublishService {
-        private final NotificationRouter notificationRouter;
 
-        public DelgatingNotificationPublishService(final NotificationRouter notificationRouter) {
-            this.notificationRouter = notificationRouter;
-        }
-
-        private DelgatingNotificationPublishService() {
-            this(new NotificationRouterImpl());
-        }
-
-        @Override
-        public void publish(final CompositeNode notification) {
-            notificationRouter.publish(notification);
-        }
-
-        @Override
-        public ListenerRegistration<NotificationListener> addNotificationListener(final QName notification, final NotificationListener listener) {
-            return notificationRouter.addNotificationListener(notification, listener);
-        }
-    }
 }

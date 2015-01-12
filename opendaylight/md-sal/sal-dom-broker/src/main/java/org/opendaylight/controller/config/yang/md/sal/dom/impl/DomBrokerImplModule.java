@@ -21,10 +21,13 @@ import org.opendaylight.controller.sal.core.api.data.DataStore;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
 import org.opendaylight.controller.sal.core.api.mount.MountService;
+import org.opendaylight.controller.sal.core.api.notify.NotificationPublishService;
+import org.opendaylight.controller.sal.core.api.notify.NotificationService;
 import org.opendaylight.controller.sal.dom.broker.BackwardsCompatibleMountPointManager;
 import org.opendaylight.controller.sal.dom.broker.BrokerImpl;
 import org.opendaylight.controller.sal.dom.broker.DataBrokerImpl;
 import org.opendaylight.controller.sal.dom.broker.GlobalBundleScanningSchemaServiceImpl;
+import org.opendaylight.controller.sal.dom.broker.SimpleNotificationPublishService;
 import org.opendaylight.controller.sal.dom.broker.impl.SchemaAwareDataStoreAdapter;
 import org.opendaylight.controller.sal.dom.broker.impl.SchemaAwareRpcBroker;
 import org.opendaylight.controller.sal.dom.broker.impl.SchemaContextProviders;
@@ -54,12 +57,12 @@ public final class DomBrokerImplModule extends org.opendaylight.controller.confi
         final DataStore legacyStore = getDataStoreDependency();
         final DOMDataBroker asyncBroker= getAsyncDataBrokerDependency();
 
-        ClassToInstanceMap<BrokerService> services = MutableClassToInstanceMap.create();
+        final ClassToInstanceMap<BrokerService> services = MutableClassToInstanceMap.create();
 
 
-        SchemaService schemaService = getSchemaServiceImpl();
+        final SchemaService schemaService = getSchemaServiceImpl();
         services.putInstance(SchemaService.class, schemaService);
-        SchemaAwareRpcBroker router = new SchemaAwareRpcBroker("/", SchemaContextProviders
+        final SchemaAwareRpcBroker router = new SchemaAwareRpcBroker("/", SchemaContextProviders
                 .fromSchemaService(schemaService));
         services.putInstance(RpcProvisionRegistry.class, router);
 
@@ -81,13 +84,16 @@ public final class DomBrokerImplModule extends org.opendaylight.controller.confi
         services.putInstance(MountService.class, backwardsMountService);
         services.putInstance(MountProvisionService.class, backwardsMountService);
 
+        final SimpleNotificationPublishService notification = new SimpleNotificationPublishService();
+        services.putInstance(NotificationPublishService.class, notification);
+        services.putInstance(NotificationService.class, notification);
         return new BrokerImpl(router, services);
     }
 
     private DataProviderService createLegacyDataService(final DataStore legacyStore, final SchemaService schemaService) {
-        YangInstanceIdentifier rootPath = YangInstanceIdentifier.builder().toInstance();
-        DataBrokerImpl dataService = new DataBrokerImpl();
-        SchemaAwareDataStoreAdapter wrappedStore = new SchemaAwareDataStoreAdapter();
+        final YangInstanceIdentifier rootPath = YangInstanceIdentifier.builder().toInstance();
+        final DataBrokerImpl dataService = new DataBrokerImpl();
+        final SchemaAwareDataStoreAdapter wrappedStore = new SchemaAwareDataStoreAdapter();
         wrappedStore.changeDelegate(legacyStore);
         wrappedStore.setValidationEnabled(false);
 
