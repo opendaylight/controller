@@ -155,7 +155,7 @@ public class Shard extends RaftActor {
 
         LOG.info("Shard created : {} persistent : {}", name, datastoreContext.isPersistent());
 
-        store = InMemoryDOMDataStoreFactory.create(name.toString(), null,
+        store = InMemoryDOMDataStoreFactory.create(name.toString(), false, null,
                 datastoreContext.getDataStoreProperties());
 
         if(schemaContext != null) {
