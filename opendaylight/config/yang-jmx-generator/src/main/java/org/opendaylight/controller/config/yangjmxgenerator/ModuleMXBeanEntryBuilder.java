@@ -11,7 +11,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 import static org.opendaylight.controller.config.yangjmxgenerator.ConfigConstants.createConfigQName;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -346,7 +345,7 @@ final class ModuleMXBeanEntryBuilder {
         }
     }
 
-    private void checkUniqueAttributesWithGeneratedClass(final Map<String, QName> uniqueGeneratedClassNames,
+    private static void checkUniqueAttributesWithGeneratedClass(final Map<String, QName> uniqueGeneratedClassNames,
             final QName parentQName, final Map<String, AttributeIfc> yangToAttributes) {
         for (Map.Entry<String, AttributeIfc> attr : yangToAttributes.entrySet()) {
             if (attr.getValue() instanceof TOAttribute) {
@@ -359,7 +358,7 @@ final class ModuleMXBeanEntryBuilder {
         }
     }
 
-    private void checkUniqueTOAttr(final Map<String, QName> uniqueGeneratedClassNames, final QName parentQName, final TOAttribute attr) {
+    private static void checkUniqueTOAttr(final Map<String, QName> uniqueGeneratedClassNames, final QName parentQName, final TOAttribute attr) {
         final String upperCaseCamelCase = attr.getUpperCaseCammelCase();
         if (uniqueGeneratedClassNames.containsKey(upperCaseCamelCase)) {
             QName firstDefinedQName = uniqueGeneratedClassNames.get(upperCaseCamelCase);
