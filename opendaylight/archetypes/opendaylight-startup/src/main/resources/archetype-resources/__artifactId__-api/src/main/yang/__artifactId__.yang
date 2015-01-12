@@ -1,0 +1,9 @@
+module ${artifactId} {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:example";
+    prefix "${artifactId}";
+
+    revision "2015-01-05" {
+        description "Initial revision of ${artifactId} model";
+    }
+}
