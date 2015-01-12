@@ -8,6 +8,7 @@
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
 import static com.google.common.base.Preconditions.checkState;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.Futures;
@@ -49,12 +50,11 @@ import org.slf4j.LoggerFactory;
 
 /**
  * In-memory DOM Data Store
- *
+ * <p/>
  * Implementation of {@link DOMStore} which uses {@link DataTree} and other
  * classes such as {@link SnapshotBackedWriteTransaction}.
  * {@link SnapshotBackedReadTransaction} and {@link ResolveDataChangeEventsTask}
  * to implement {@link DOMStore} contract.
- *
  */
 public class InMemoryDOMDataStore extends TransactionReadyPrototype implements DOMStore, Identifiable<String>, SchemaContextListener, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(InMemoryDOMDataStore.class);
@@ -65,7 +65,7 @@ public class InMemoryDOMDataStore extends TransactionReadyPrototype implements D
             new Invoker<DataChangeListenerRegistration<?>, DOMImmutableDataChangeEvent>() {
                 @Override
                 public void invokeListener(final DataChangeListenerRegistration<?> listener,
-                                           final DOMImmutableDataChangeEvent notification ) {
+                                           final DOMImmutableDataChangeEvent notification) {
                     final AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> inst = listener.getInstance();
                     if (inst != null) {
                         inst.onDataChanged(notification);
@@ -73,7 +73,7 @@ public class InMemoryDOMDataStore extends TransactionReadyPrototype implements D
                 }
             };
 
-    private final DataTree dataTree = InMemoryDataTreeFactory.getInstance().create();
+    protected final DataTree dataTree = InMemoryDataTreeFactory.getInstance().create();
     private final ListenerTree listenerTree = ListenerTree.create();
     private final AtomicLong txCounter = new AtomicLong(0);
 
@@ -89,7 +89,7 @@ public class InMemoryDOMDataStore extends TransactionReadyPrototype implements D
     }
 
     public InMemoryDOMDataStore(final String name, final ExecutorService dataChangeListenerExecutor,
-            final int maxDataChangeListenerQueueSize, final boolean debugTransactions) {
+                                final int maxDataChangeListenerQueueSize, final boolean debugTransactions) {
         this.name = Preconditions.checkNotNull(name);
         this.dataChangeListenerExecutor = Preconditions.checkNotNull(dataChangeListenerExecutor);
         this.debugTransactions = debugTransactions;
@@ -142,10 +142,10 @@ public class InMemoryDOMDataStore extends TransactionReadyPrototype implements D
     public void close() {
         ExecutorServiceUtil.tryGracefulShutdown(dataChangeListenerExecutor, 30, TimeUnit.SECONDS);
 
-        if(closeable != null) {
+        if (closeable != null) {
             try {
                 closeable.close();
-            } catch(Exception e) {
+            } catch (Exception e) {
                 LOG.debug("Error closing instance", e);
             }
         }

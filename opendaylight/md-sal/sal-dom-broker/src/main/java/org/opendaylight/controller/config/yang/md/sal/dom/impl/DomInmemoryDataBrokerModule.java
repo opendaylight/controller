@@ -55,13 +55,13 @@ public final class DomInmemoryDataBrokerModule extends
         DOMStore operStore =  getOperationalDataStoreDependency();
         if(operStore == null){
            //we will default to InMemoryDOMDataStore creation
-          operStore = InMemoryDOMDataStoreFactory.create("DOM-OPER", getSchemaServiceDependency());
+          operStore = InMemoryDOMDataStoreFactory.create("DOM-OPER", false, getSchemaServiceDependency());
         }
 
         DOMStore configStore = getConfigDataStoreDependency();
         if(configStore == null){
            //we will default to InMemoryDOMDataStore creation
-           configStore = InMemoryDOMDataStoreFactory.create("DOM-CFG", getSchemaServiceDependency());
+           configStore = InMemoryDOMDataStoreFactory.create("DOM-CFG", true, getSchemaServiceDependency());
         }
 
         final Map<LogicalDatastoreType, DOMStore> datastores = new EnumMap<>(LogicalDatastoreType.class);
