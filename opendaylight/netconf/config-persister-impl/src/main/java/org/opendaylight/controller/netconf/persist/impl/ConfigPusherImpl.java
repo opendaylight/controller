@@ -115,17 +115,20 @@ public class ConfigPusherImpl implements ConfigPusher {
      */
     private synchronized EditAndCommitResponse pushConfigWithConflictingVersionRetries(ConfigSnapshotHolder configSnapshotHolder) throws NetconfDocumentedException {
         ConflictingVersionException lastException;
-        Stopwatch stopwatch = new Stopwatch().start();
+        Stopwatch stopwatch = new Stopwatch();
         do {
             String idForReporting = configSnapshotHolder.toString();
             SortedSet<String> expectedCapabilities = checkNotNull(configSnapshotHolder.getCapabilities(),
                     "Expected capabilities must not be null - %s, check %s", idForReporting,
                     configSnapshotHolder.getClass().getName());
             try (NetconfOperationService operationService = getOperationServiceWithRetries(expectedCapabilities, idForReporting)) {
+                if(!stopwatch.isRunning()) {
+                    stopwatch.start();
+                }
                 return pushConfig(configSnapshotHolder, operationService);
             } catch (ConflictingVersionException e) {
                 lastException = e;
-                LOG.debug("Conflicting version detected, will retry after timeout");
+                LOG.info("Conflicting version detected, will retry after timeout");
                 sleep();
             }
         } while (stopwatch.elapsed(TimeUnit.MILLISECONDS) < conflictingVersionTimeoutMillis);
