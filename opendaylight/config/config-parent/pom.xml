@@ -102,6 +102,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
                   <include>**</include>
                 </includes>
               </fileset>
+              <fileset>
+                <directory>${salGeneratorPath}</directory>
+                <includes>
+                  <include>**</include>
+                </includes>
+              </fileset>
             </filesets>
           </configuration>
         </plugin>
