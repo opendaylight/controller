@@ -1,1 +1,1 @@
-return org.opendaylight.controller.config.yang.test.util.NetconfTestImplModuleUtil.registerRuntimeBeans(this);
+        return org.opendaylight.controller.config.yang.test.util.NetconfTestImplModuleUtil.registerRuntimeBeans(this);
