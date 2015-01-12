@@ -42,5 +42,6 @@
     <module>opendaylight-configfile-archetype</module>
     <module>opendaylight-karaf-distro-archetype</module>
     <module>opendaylight-karaf-features</module>
+    <module>opendaylight-startup</module>
   </modules>
 </project>

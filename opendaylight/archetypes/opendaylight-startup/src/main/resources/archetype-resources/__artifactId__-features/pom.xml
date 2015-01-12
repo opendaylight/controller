@@ -1,0 +1,53 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+${copyright} and others. All rights reserved.
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v1.0 which accompanies this distribution,
+and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <groupId>org.opendaylight.odlparent</groupId>
+    <artifactId>features-parent</artifactId>
+    <version>1.5.0-SNAPSHOT</version>
+  </parent>
+  <groupId>${groupId}</groupId>
+  <artifactId>${artifactId}-features</artifactId>
+  <version>${version}</version>
+  <name>${project.artifactId}</name>
+  <modelVersion>4.0.0</modelVersion>
+  <prerequisites>
+    <maven>3.1.1</maven>
+  </prerequisites>
+  <properties>
+    <mdsal.version>1.2.0-SNAPSHOT</mdsal.version>
+    <yangtools.version>0.7.0-SNAPSHOT</yangtools.version>
+  </properties>
+  <dependencyManagement>
+    <dependencies>
+      <!-- project specific dependencies -->
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>mdsal-artifacts</artifactId>
+        <version>${mdsal.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>${symbol_dollar}{groupId}</groupId>
+      <artifactId>${artifactId}-impl</artifactId>
+      <version>${symbol_dollar}{project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${symbol_dollar}{groupId}</groupId>
+      <artifactId>${artifactId}-api</artifactId>
+      <version>${symbol_dollar}{project.version}</version>
+    </dependency>
+  </dependencies>
+</project>
