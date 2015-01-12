@@ -414,7 +414,7 @@ public class ShardTest extends AbstractActorTest {
 
         // Set up the InMemorySnapshotStore.
 
-        InMemoryDOMDataStore testStore = InMemoryDOMDataStoreFactory.create("Test", null, null);
+        InMemoryDOMDataStore testStore = InMemoryDOMDataStoreFactory.create("Test", false, null, null);
         testStore.onGlobalContextUpdated(SCHEMA_CONTEXT);
 
         DOMStoreWriteTransaction writeTx = testStore.newWriteOnlyTransaction();
