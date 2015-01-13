@@ -8,6 +8,7 @@
 package org.opendaylight.controller.netconf.client;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
 import io.netty.util.concurrent.Promise;
 import java.io.IOException;
 import org.opendaylight.controller.netconf.nettyutil.AbstractChannelInitializer;
@@ -15,7 +16,7 @@ import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.
 import org.opendaylight.controller.netconf.nettyutil.handler.ssh.client.AsyncSshHandler;
 import org.opendaylight.protocol.framework.SessionListenerFactory;
 
-final class SshClientChannelInitializer extends AbstractChannelInitializer<NetconfClientSession> {
+class SshClientChannelInitializer extends AbstractChannelInitializer<NetconfClientSession> {
 
     private final AuthenticationHandler authenticationHandler;
     private final NetconfClientSessionNegotiatorFactory negotiatorFactory;
@@ -33,11 +34,19 @@ final class SshClientChannelInitializer extends AbstractChannelInitializer<Netco
     public void initialize(final Channel ch, final Promise<NetconfClientSession> promise) {
         try {
             // ssh handler has to be the first handler in pipeline
-            ch.pipeline().addFirst(AsyncSshHandler.createForNetconfSubsystem(authenticationHandler));
+            ch.pipeline().addFirst(getSshHandler());
             super.initialize(ch,promise);
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    protected ChannelHandler getSshHandler() throws IOException {
+        return AsyncSshHandler.createForNetconfSubsystem(getAuthenticationHandler());
+    }
+
+    protected AuthenticationHandler getAuthenticationHandler() {
+        return authenticationHandler;
     }
 
     @Override

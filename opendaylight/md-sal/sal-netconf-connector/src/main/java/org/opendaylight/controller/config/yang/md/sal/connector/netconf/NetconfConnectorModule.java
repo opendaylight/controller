@@ -121,7 +121,7 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         final NetconfClientDispatcher dispatcher = getClientDispatcherDependency();
         listener.initializeRemoteConnection(dispatcher, clientConfig);
 
-        return new MyAutoCloseable(listener, salFacade);
+        return new NetconfConnectorCloseable(listener, salFacade);
     }
 
     private Optional<NetconfSessionCapabilities> getUserCapabilities() {
@@ -169,12 +169,12 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         .build();
     }
 
-    private static final class MyAutoCloseable implements AutoCloseable {
+    public static final class NetconfConnectorCloseable implements AutoCloseable {
         private final RemoteDeviceHandler<NetconfSessionCapabilities> salFacade;
         private final NetconfDeviceCommunicator listener;
 
-        public MyAutoCloseable(final NetconfDeviceCommunicator listener,
-                final RemoteDeviceHandler<NetconfSessionCapabilities> salFacade) {
+        public NetconfConnectorCloseable(final NetconfDeviceCommunicator listener,
+                                         final RemoteDeviceHandler<NetconfSessionCapabilities> salFacade) {
             this.listener = listener;
             this.salFacade = salFacade;
         }

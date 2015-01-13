@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.netconf.client;
 
+import com.google.common.base.Preconditions;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.Timer;
@@ -16,6 +17,7 @@ import io.netty.util.concurrent.Promise;
 import java.io.Closeable;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
 import org.opendaylight.controller.netconf.client.conf.NetconfReconnectingClientConfiguration;
+import org.opendaylight.controller.netconf.client.conf.NetconfReversedClientConfiguration;
 import org.opendaylight.protocol.framework.AbstractDispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +43,12 @@ public class NetconfClientDispatcherImpl extends AbstractDispatcher<NetconfClien
             return createSshClient(clientConfiguration);
         }
         throw new IllegalArgumentException("Unknown client protocol " + clientConfiguration.getProtocol());
+    }
+
+    @Override
+    public Future<NetconfClientSession> createReversedClient(final NetconfReversedClientConfiguration clientConfiguration) {
+        Preconditions.checkArgument(clientConfiguration.getProtocol() == NetconfClientConfiguration.NetconfClientProtocol.SSH, "Reversed client is only available with SSH");
+        return createReversedSshClient(clientConfiguration);
     }
 
     @Override
@@ -96,6 +104,23 @@ public class NetconfClientDispatcherImpl extends AbstractDispatcher<NetconfClien
                                                   final Promise<NetconfClientSession> sessionPromise) {
                         new SshClientChannelInitializer(currentConfiguration.getAuthHandler(),
                                 getNegotiatorFactory(currentConfiguration), currentConfiguration.getSessionListener())
+                                .initialize(ch, sessionPromise);
+                    }
+
+                });
+    }
+
+    private Future<NetconfClientSession> createReversedSshClient(final NetconfReversedClientConfiguration currentConfiguration) {
+        LOG.debug("Creating reversed SSH client with configuration: {}", currentConfiguration);
+        return super.createClient(currentConfiguration.getAddress(), currentConfiguration.getReconnectStrategy(),
+                new PipelineInitializer<NetconfClientSession>() {
+
+                    @Override
+                    public void initializeChannel(final SocketChannel ch,
+                                                  final Promise<NetconfClientSession> sessionPromise) {
+                        new ReversedSshClientChannelInitializer(currentConfiguration.getAuthHandler(),
+                                getNegotiatorFactory(currentConfiguration), currentConfiguration.getSessionListener(),
+                                currentConfiguration.getTcpSession())
                                 .initialize(ch, sessionPromise);
                     }
 

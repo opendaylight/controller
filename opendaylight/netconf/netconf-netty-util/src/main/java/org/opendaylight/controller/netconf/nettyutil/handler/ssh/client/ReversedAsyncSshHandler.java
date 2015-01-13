@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -9,20 +9,32 @@
 package org.opendaylight.controller.netconf.nettyutil.handler.ssh.client;
 
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.MoreExecutors;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.nio.channels.AsynchronousChannelGroup;
 import org.apache.sshd.ClientChannel;
 import org.apache.sshd.ClientSession;
 import org.apache.sshd.SshClient;
 import org.apache.sshd.client.future.AuthFuture;
 import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.client.future.OpenFuture;
+import org.apache.sshd.common.FactoryManager;
 import org.apache.sshd.common.future.CloseFuture;
+import org.apache.sshd.common.future.DefaultSshFuture;
 import org.apache.sshd.common.future.SshFutureListener;
+import org.apache.sshd.common.io.IoConnectFuture;
+import org.apache.sshd.common.io.IoConnector;
+import org.apache.sshd.common.io.IoHandler;
+import org.apache.sshd.common.io.IoServiceFactory;
+import org.apache.sshd.common.io.IoServiceFactoryFactory;
+import org.apache.sshd.common.io.IoSession;
+import org.apache.sshd.common.io.mina.MinaServiceFactory;
+import org.apache.sshd.common.io.nio2.Nio2Connector;
 import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.AuthenticationHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,9 +42,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Netty SSH handler class. Acts as interface between Netty and SSH library.
  */
-public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
+public class ReversedAsyncSshHandler extends ChannelOutboundHandlerAdapter {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AsyncSshHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ReversedAsyncSshHandler.class);
     public static final String SUBSYSTEM = "netconf";
 
     public static final SshClient DEFAULT_CLIENT = SshClient.setUpDefaultClient();
@@ -56,21 +68,68 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
     private ChannelPromise connectPromise;
 
 
-    public static AsyncSshHandler createForNetconfSubsystem(final AuthenticationHandler authenticationHandler) throws IOException {
-        return new AsyncSshHandler(authenticationHandler, DEFAULT_CLIENT);
+    public static ReversedAsyncSshHandler createForNetconfSubsystem(final AuthenticationHandler authenticationHandler, final IoSession tcpSession) throws IOException {
+        return new ReversedAsyncSshHandler(authenticationHandler, DEFAULT_CLIENT, tcpSession);
     }
 
     /**
      *
      * @param authenticationHandler
      * @param sshClient started SshClient
-     * @throws IOException
+     * @param tcpSession
+     * @throws java.io.IOException
      */
-    public AsyncSshHandler(final AuthenticationHandler authenticationHandler, final SshClient sshClient) throws IOException {
+    public ReversedAsyncSshHandler(final AuthenticationHandler authenticationHandler, final SshClient sshClient, final IoSession tcpSession) throws IOException {
         this.authenticationHandler = Preconditions.checkNotNull(authenticationHandler);
         this.sshClient = Preconditions.checkNotNull(sshClient);
         // Start just in case
         sshClient.start();
+        sshClient.setIoServiceFactoryFactory(new IoServiceFactoryFactory() {
+            @Override
+            public IoServiceFactory create(final FactoryManager manager) {
+                return new MinaServiceFactory(manager) {
+                    @Override
+                    public IoConnector createConnector(final IoHandler handler) {
+                        try {
+                            return new Nio2Connector(manager, handler, AsynchronousChannelGroup.withThreadPool(MoreExecutors.sameThreadExecutor())) {
+                                @Override
+                                public IoConnectFuture connect(final SocketAddress address) {
+                                    DefaultIoConnectFuture defaultIoConnectFuture = new DefaultIoConnectFuture(null);
+                                    defaultIoConnectFuture.setSession(tcpSession);
+                                    return defaultIoConnectFuture;
+                                }
+                            };
+                        } catch (IOException e) {
+                            // FIXME
+                            e.printStackTrace();
+                        }
+                    }
+                };
+            }
+        });
+    }
+
+    static class DefaultIoConnectFuture extends DefaultSshFuture<IoConnectFuture> implements IoConnectFuture {
+        DefaultIoConnectFuture(Object lock) {
+            super(lock);
+        }
+        public IoSession getSession() {
+            Object v = getValue();
+            return v instanceof IoSession ? (IoSession) v : null;
+        }
+        public Throwable getException() {
+            Object v = getValue();
+            return v instanceof Throwable ? (Throwable) v : null;
+        }
+        public boolean isConnected() {
+            return getValue() instanceof IoSession;
+        }
+        public void setSession(IoSession session) {
+            setValue(session);
+        }
+        public void setException(Throwable exception) {
+            setValue(exception);
+        }
     }
 
     private void startSsh(final ChannelHandlerContext ctx, final SocketAddress address) {
@@ -147,7 +206,7 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
         sshReadAsyncListener = new AsyncSshHandlerReader(new AutoCloseable() {
             @Override
             public void close() throws Exception {
-                AsyncSshHandler.this.disconnect(ctx, ctx.newPromise());
+                ReversedAsyncSshHandler.this.disconnect(ctx, ctx.newPromise());
             }
         }, new AsyncSshHandlerReader.ReadMsgHandler() {
             @Override

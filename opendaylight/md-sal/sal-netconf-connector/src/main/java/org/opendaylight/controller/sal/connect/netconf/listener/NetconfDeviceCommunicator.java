@@ -29,6 +29,7 @@ import org.opendaylight.controller.netconf.client.NetconfClientSession;
 import org.opendaylight.controller.netconf.client.NetconfClientSessionListener;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
 import org.opendaylight.controller.netconf.client.conf.NetconfReconnectingClientConfiguration;
+import org.opendaylight.controller.netconf.client.conf.NetconfReversedClientConfiguration;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.controller.sal.connect.api.RemoteDevice;
@@ -100,6 +101,8 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
                                            final NetconfClientConfiguration config) {
         if(config instanceof NetconfReconnectingClientConfiguration) {
             initFuture = dispatch.createReconnectingClient((NetconfReconnectingClientConfiguration) config);
+        } else if(config instanceof NetconfReversedClientConfiguration){
+            initFuture = dispatch.createReversedClient((NetconfReversedClientConfiguration) config);
         } else {
             initFuture = dispatch.createClient(config);
         }
