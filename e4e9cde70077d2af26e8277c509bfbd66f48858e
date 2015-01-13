@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_1cde156e",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/sal/binding/impl/RootBindingAwareBroker.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-01-13T22:15:34Z",
+      "side": 1,
+      "message": "You may want to mark the parameters as final as before",
+      "range": {
+        "startLine": 138,
+        "startChar": 44,
+        "endLine": 138,
+        "endChar": 64
+      },
+      "revId": "e4e9cde70077d2af26e8277c509bfbd66f48858e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
