@@ -1,8 +1,10 @@
 package org.opendaylight.controller.cluster.datastore.utils;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
-import akka.actor.ActorSystem;
 import akka.actor.Address;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
@@ -20,10 +22,6 @@ import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 
 public class ActorContextTest extends AbstractActorTest{
 
@@ -224,7 +222,7 @@ public class ActorContextTest extends AbstractActorTest{
     @Test
     public void testResolvePathForRemoteActor() {
         ActorContext actorContext =
-                new ActorContext(mock(ActorSystem.class), mock(ActorRef.class), mock(
+                new ActorContext(getSystem(), mock(ActorRef.class), mock(
                         ClusterWrapper.class),
                         mock(Configuration.class));
 
