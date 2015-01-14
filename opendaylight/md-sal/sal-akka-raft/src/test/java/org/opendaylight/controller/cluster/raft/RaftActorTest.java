@@ -883,24 +883,27 @@ public class RaftActorTest extends AbstractActorTest {
             TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(), MockRaftActor.props(id,
                 Collections.<String,String>emptyMap(), Optional.<ConfigParams>of(config), notifierActor), id);
 
-            MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
-            mockRaftActor.setCurrentBehavior(new Follower(mockRaftActor.getRaftActorContext()));
-
             // sleeping for a minimum of 2 seconds, if it spans more its fine.
             Uninterruptibles.sleepUninterruptibly(2, TimeUnit.SECONDS);
 
             List<Object> matches =  MessageCollectorActor.getAllMatching(notifierActor, RoleChanged.class);
             assertNotNull(matches);
-            assertEquals(2, matches.size());
+            assertEquals(3, matches.size());
+
+            // check if the notifier got a role change from null to Follower
+            RoleChanged raftRoleChanged = (RoleChanged) matches.get(0);
+            assertEquals(id, raftRoleChanged.getMemberId());
+            assertNull(raftRoleChanged.getOldRole());
+            assertEquals(RaftState.Follower.name(), raftRoleChanged.getNewRole());
 
             // check if the notifier got a role change from Follower to Candidate
-            RoleChanged raftRoleChanged = (RoleChanged) matches.get(0);
+            raftRoleChanged = (RoleChanged) matches.get(1);
             assertEquals(id, raftRoleChanged.getMemberId());
             assertEquals(RaftState.Follower.name(), raftRoleChanged.getOldRole());
             assertEquals(RaftState.Candidate.name(), raftRoleChanged.getNewRole());
 
             // check if the notifier got a role change from Candidate to Leader
-            raftRoleChanged = (RoleChanged) matches.get(1);
+            raftRoleChanged = (RoleChanged) matches.get(2);
             assertEquals(id, raftRoleChanged.getMemberId());
             assertEquals(RaftState.Candidate.name(), raftRoleChanged.getOldRole());
             assertEquals(RaftState.Leader.name(), raftRoleChanged.getNewRole());
