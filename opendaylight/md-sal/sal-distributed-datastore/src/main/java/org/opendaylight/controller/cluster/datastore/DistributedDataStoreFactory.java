@@ -12,12 +12,11 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.osgi.BundleDelegatingClassLoader;
 import com.typesafe.config.ConfigFactory;
+import java.util.concurrent.atomic.AtomicReference;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationReader;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.osgi.framework.BundleContext;
-
-import java.util.concurrent.atomic.AtomicReference;
 
 public class DistributedDataStoreFactory {
 
@@ -38,6 +37,7 @@ public class DistributedDataStoreFactory {
 
         ShardStrategyFactory.setConfiguration(config);
         schemaService.registerSchemaContextListener(dataStore);
+        dataStore.waitTillReady();
         return dataStore;
     }
 

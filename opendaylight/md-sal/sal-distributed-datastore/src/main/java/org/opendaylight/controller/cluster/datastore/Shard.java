@@ -65,6 +65,7 @@ import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContex
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
+import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotifier;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
@@ -267,6 +268,8 @@ public class Shard extends RaftActor {
                 resolved.getPeerAddress());
         } else if(message.equals(TX_COMMIT_TIMEOUT_CHECK_MESSAGE)) {
             handleTransactionCommitTimeoutCheck();
+        } else if(message instanceof RegisterRoleChangeListener){
+            roleChangeNotifier.get().forward(message, context());
         } else {
             super.onReceiveCommand(message);
         }
