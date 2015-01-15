@@ -17,7 +17,6 @@
     <module>mdsal-artifacts</module>
 
     <!-- Common APIs & Implementation -->
-    <module>sal-common</module>
     <module>sal-common-api</module>
     <module>sal-common-impl</module>
     <module>sal-common-util</module>

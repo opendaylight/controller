@@ -17,12 +17,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- Core API/implementation -->
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>sal-common</artifactId>
-                <version>${project.version}</version>
-            </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>sal-common-api</artifactId>
