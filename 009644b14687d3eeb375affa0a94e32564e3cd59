@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_eafcb740",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/DefaultConfigParamsImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-01-15T22:10:19Z",
+      "side": 1,
+      "message": "Yes - will remove",
+      "parentUuid": "7a96c907_0aed63ef",
+      "revId": "009644b14687d3eeb375affa0a94e32564e3cd59",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_cabe9bd4",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-01-15T18:57:05Z",
       "side": 1,
       "message": "Unused?",
+      "revId": "009644b14687d3eeb375affa0a94e32564e3cd59",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_4afe0b3a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-01-15T22:10:19Z",
+      "side": 1,
+      "message": "Yes",
+      "parentUuid": "7a96c907_cabe9bd4",
       "revId": "009644b14687d3eeb375affa0a94e32564e3cd59",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
