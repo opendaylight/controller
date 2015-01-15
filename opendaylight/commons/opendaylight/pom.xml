@@ -182,7 +182,6 @@
     <sonar.jacoco.reportPath>target/code-coverage/jacoco.exec</sonar.jacoco.reportPath>
     <sonar.jacoco.itReportPath>target/code-coverage/jacoco-it.exec</sonar.jacoco.itReportPath>
     <sonar.skippedModules>org.openflow.openflowj,net.sf.jung2,org.opendaylight.controller.protobuff.messages,ch.ethz.ssh2</sonar.skippedModules>
-    <sonar.profile>Sonar way with Findbugs</sonar.profile>
     <spifly.version>1.0.0</spifly.version>
     <spring-osgi.version>1.2.1</spring-osgi.version>
     <spring-security-karaf.version>3.1.4.RELEASE</spring-security-karaf.version>
