@@ -16,7 +16,6 @@
     </feature>
     <feature name='odl-mdsal-common' version='${mdsal.version}' description="OpenDaylight :: Config :: All">
       <feature version='${yangtools.version}'>odl-yangtools-data-binding</feature>
-      <bundle>mvn:org.opendaylight.controller/sal-common/${mdsal.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/sal-common-api/${mdsal.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/sal-common-impl/${mdsal.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/sal-common-util/${mdsal.version}</bundle>
