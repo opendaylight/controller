@@ -1,8 +1,9 @@
 package org.opendaylight.controller.md.sal.binding.impl.test;
 
+import org.opendaylight.controller.md.sal.binding.compat.hydrogen.ForwardedBackwardsCompatibleDataBroker;
+
 import com.google.common.util.concurrent.MoreExecutors;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.binding.impl.ForwardedBackwardsCompatibleDataBroker;
 import org.opendaylight.controller.md.sal.binding.test.AbstractSchemaAwareTest;
 import org.opendaylight.controller.md.sal.binding.test.DataBrokerTestCustomizer;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
@@ -14,9 +15,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-
 import java.util.concurrent.ExecutionException;
-
 import static junit.framework.TestCase.assertNotNull;
 
 public class ForwardedBackwardsCompatibleDataBrokerTest extends

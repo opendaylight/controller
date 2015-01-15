@@ -96,6 +96,7 @@
 
                             <!-- Temporary until we move abstract classes out into SPI -->
                             org.opendaylight.controller.md.sal.dom.broker.impl,
+                            org.opendaylight.controller.md.sal.dom.broker.compat.*,
                             org.opendaylight.controller.md.sal.dom.broker.impl.jmx,
                             org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.dom.impl.rev131028.*,
             </Export-Package>

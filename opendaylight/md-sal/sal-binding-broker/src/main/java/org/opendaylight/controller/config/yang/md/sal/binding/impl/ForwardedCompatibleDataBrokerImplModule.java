@@ -7,11 +7,12 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 
+import org.opendaylight.controller.md.sal.binding.compat.hydrogen.ForwardedBackwardsCompatibleDataBroker;
+
 import com.google.common.util.concurrent.ListeningExecutorService;
 import java.util.Collection;
 import java.util.Collections;
 import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
-import org.opendaylight.controller.md.sal.binding.impl.ForwardedBackwardsCompatibleDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
 import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingDomConnectorDeployer;
