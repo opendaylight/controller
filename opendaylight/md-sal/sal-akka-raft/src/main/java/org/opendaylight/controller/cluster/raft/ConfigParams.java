@@ -76,4 +76,12 @@ public interface ConfigParams {
      * @return FiniteDuration
      */
     FiniteDuration getIsolatedCheckInterval();
+
+
+    /**
+     * The multiplication factor to be used to determine shard election timeout. The election timeout
+     * is determined by multiplying the election timeout factor with the heartbeat duration.
+     */
+    long getElectionTimeoutFactor();
+
 }

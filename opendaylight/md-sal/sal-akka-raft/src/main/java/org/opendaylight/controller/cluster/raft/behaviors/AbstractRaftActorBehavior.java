@@ -11,6 +11,8 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 import akka.actor.ActorRef;
 import akka.actor.Cancellable;
 import akka.event.LoggingAdapter;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
@@ -24,9 +26,6 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import scala.concurrent.duration.FiniteDuration;
 
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
-
 /**
  * Abstract class that represents the behavior of a RaftActor
  * <p/>
@@ -39,6 +38,7 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
 
+    private static final long MAGNITUDE = 10;
     /**
      * Information about the RaftActor whose behavior this class represents
      */
@@ -202,7 +202,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     protected FiniteDuration electionDuration() {
         long variance = new Random().nextInt(context.getConfigParams().getElectionTimeVariance());
         return context.getConfigParams().getElectionTimeOutInterval().$plus(
-            new FiniteDuration(variance, TimeUnit.MILLISECONDS));
+                new FiniteDuration(variance, TimeUnit.MILLISECONDS));
     }
 
     /**

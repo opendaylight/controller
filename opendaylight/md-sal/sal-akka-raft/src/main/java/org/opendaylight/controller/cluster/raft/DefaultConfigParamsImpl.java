@@ -39,6 +39,8 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     public static final FiniteDuration HEART_BEAT_INTERVAL =
         new FiniteDuration(100, TimeUnit.MILLISECONDS);
 
+    public static final int ELECTION_TIMEOUT_FACTOR = 20;
+
 
     private FiniteDuration heartBeatInterval = HEART_BEAT_INTERVAL;
     private long snapshotBatchCount = SNAPSHOT_BATCH_COUNT;
@@ -49,6 +51,8 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     // 12 is just an arbitrary percentage. This is the amount of the total memory that a raft actor's
     // in-memory journal can use before it needs to snapshot
     private int snapshotDataThresholdPercentage = 12;
+
+    private long electionTimeoutFactor = 2;
 
     public void setHeartBeatInterval(FiniteDuration heartBeatInterval) {
         this.heartBeatInterval = heartBeatInterval;
@@ -70,6 +74,10 @@ public class DefaultConfigParamsImpl implements ConfigParams {
         this.isolatedLeaderCheckInterval = isolatedLeaderCheckInterval;
     }
 
+    public void setElectionTimeoutFactor(long electionTimeoutFactor){
+        this.electionTimeoutFactor = electionTimeoutFactor;
+    }
+
     @Override
     public long getSnapshotBatchCount() {
         return snapshotBatchCount;
@@ -88,8 +96,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
 
     @Override
     public FiniteDuration getElectionTimeOutInterval() {
-        // returns 2 times the heart beat interval
-        return getHeartBeatInterval().$times(2);
+        return getHeartBeatInterval().$times(electionTimeoutFactor);
     }
 
     @Override
@@ -110,5 +117,10 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     @Override
     public FiniteDuration getIsolatedCheckInterval() {
         return isolatedLeaderCheckInterval;
+    }
+
+    @Override
+    public long getElectionTimeoutFactor() {
+        return electionTimeoutFactor;
     }
 }
