@@ -11,6 +11,8 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorSystem;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.DatastoreConfigurationMXBeanImpl;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
@@ -38,13 +40,21 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
         DatastoreContextConfigAdminOverlay.Listener, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributedDataStore.class);
-    public static final int REGISTER_DATA_CHANGE_LISTENER_TIMEOUT_FACTOR = 24; // 24 times the usual operation timeout
+    private static final String UNKNOWN_TYPE = "unknown";
+
+    private static final long READY_WAIT_FACTOR = 3;
 
     private final ActorContext actorContext;
+    private final long waitTillReadyTimeInMillis;
+
 
     private AutoCloseable closeable;
 
     private DatastoreConfigurationMXBeanImpl datastoreConfigMXBean;
+
+    private CountDownLatch waitTillReadyCountDownLatch = new CountDownLatch(1);
+
+    private final String type;
 
     public DistributedDataStore(ActorSystem actorSystem, ClusterWrapper cluster,
             Configuration configuration, DatastoreContext datastoreContext) {
@@ -53,7 +63,7 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
         Preconditions.checkNotNull(configuration, "configuration should not be null");
         Preconditions.checkNotNull(datastoreContext, "datastoreContext should not be null");
 
-        String type = datastoreContext.getDataStoreType();
+        this.type = datastoreContext.getDataStoreType();
 
         String shardManagerId = ShardManagerIdentifier.builder().type(type).build().toString();
 
@@ -63,9 +73,13 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
                 new Dispatchers(actorSystem.dispatchers()).getDispatcherPath(Dispatchers.DispatcherType.Shard);
 
         actorContext = new ActorContext(actorSystem, actorSystem.actorOf(
-                ShardManager.props(cluster, configuration, datastoreContext)
+                ShardManager.props(cluster, configuration, datastoreContext, waitTillReadyCountDownLatch)
                         .withDispatcher(shardDispatcher).withMailbox(ActorContext.MAILBOX), shardManagerId ),
                 cluster, configuration, datastoreContext);
+
+        this.waitTillReadyTimeInMillis =
+                actorContext.getDatastoreContext().getShardLeaderElectionTimeout().duration().toMillis() * READY_WAIT_FACTOR;
+
 
         datastoreConfigMXBean = new DatastoreConfigurationMXBeanImpl(datastoreContext.getDataStoreMXBeanType());
         datastoreConfigMXBean.setContext(datastoreContext);
@@ -74,6 +88,10 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
 
     public DistributedDataStore(ActorContext actorContext) {
         this.actorContext = Preconditions.checkNotNull(actorContext, "actorContext should not be null");
+        this.type = UNKNOWN_TYPE;
+        this.waitTillReadyTimeInMillis =
+                actorContext.getDatastoreContext().getShardLeaderElectionTimeout().duration().toMillis() * READY_WAIT_FACTOR;
+
     }
 
     public void setCloseable(AutoCloseable closeable) {
@@ -154,5 +172,22 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
     @VisibleForTesting
     ActorContext getActorContext() {
         return actorContext;
+    }
+
+    public void waitTillReady(){
+        LOG.info("Beginning to wait for data store to become ready : {}", type);
+
+        try {
+            waitTillReadyCountDownLatch.await(waitTillReadyTimeInMillis, TimeUnit.MILLISECONDS);
+
+            LOG.debug("Data store {} is now ready", type);
+        } catch (InterruptedException e) {
+            LOG.error("Interrupted when trying to wait for shards to become leader in a reasonable amount of time - giving up");
+        }
+    }
+
+    @VisibleForTesting
+    public CountDownLatch getWaitTillReadyCountDownLatch() {
+        return waitTillReadyCountDownLatch;
     }
 }

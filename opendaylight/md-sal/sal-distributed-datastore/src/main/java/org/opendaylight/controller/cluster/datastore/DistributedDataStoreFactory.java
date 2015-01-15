@@ -40,6 +40,7 @@ public class DistributedDataStoreFactory {
         schemaService.registerSchemaContextListener(dataStore);
 
         dataStore.setCloseable(overlay);
+        dataStore.waitTillReady();
         return dataStore;
     }
 

@@ -63,6 +63,7 @@ import org.opendaylight.controller.cluster.datastore.modification.MutableComposi
 import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
 import org.opendaylight.controller.cluster.datastore.utils.MessageTracker;
 import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
+import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotifier;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
@@ -215,7 +216,7 @@ public class Shard extends RaftActor {
     private Optional<ActorRef> createRoleChangeNotifier(String shardId) {
         ActorRef shardRoleChangeNotifier = this.getContext().actorOf(
             RoleChangeNotifier.getProps(shardId), shardId + "-notifier");
-        return Optional.<ActorRef>of(shardRoleChangeNotifier);
+        return Optional.of(shardRoleChangeNotifier);
     }
 
     @Override
@@ -288,6 +289,8 @@ public class Shard extends RaftActor {
                 handleTransactionCommitTimeoutCheck();
             } else if(message instanceof DatastoreContext) {
                 onDatastoreContext((DatastoreContext)message);
+            } else if(message instanceof RegisterRoleChangeListener){
+                roleChangeNotifier.get().forward(message, context());
             } else {
                 super.onReceiveCommand(message);
             }
