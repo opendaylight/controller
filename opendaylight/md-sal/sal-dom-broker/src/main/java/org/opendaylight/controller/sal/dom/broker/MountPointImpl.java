@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.sal.dom.broker;
 
+import org.opendaylight.controller.md.sal.dom.broker.compat.hydrogen.DataBrokerImpl;
+
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Set;
