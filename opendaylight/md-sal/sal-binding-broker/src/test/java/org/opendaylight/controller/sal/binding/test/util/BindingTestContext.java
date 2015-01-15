@@ -9,6 +9,8 @@ package org.opendaylight.controller.sal.binding.test.util;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import org.opendaylight.controller.md.sal.binding.compat.hydrogen.ForwardedBackwardsCompatibleDataBroker;
+
 import com.google.common.annotations.Beta;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ImmutableClassToInstanceMap;
@@ -22,7 +24,6 @@ import java.util.concurrent.Future;
 import javassist.ClassPool;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
-import org.opendaylight.controller.md.sal.binding.impl.ForwardedBackwardsCompatibleDataBroker;
 import org.opendaylight.controller.md.sal.binding.impl.ForwardedBindingDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
