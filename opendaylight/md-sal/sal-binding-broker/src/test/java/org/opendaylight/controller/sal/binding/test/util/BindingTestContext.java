@@ -9,8 +9,6 @@ package org.opendaylight.controller.sal.binding.test.util;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import org.opendaylight.controller.md.sal.dom.broker.compat.hydrogen.BackwardsCompatibleDataBroker;
-
 import com.google.common.annotations.Beta;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ImmutableClassToInstanceMap;
@@ -28,7 +26,10 @@ import org.opendaylight.controller.md.sal.binding.impl.ForwardedBackwardsCompati
 import org.opendaylight.controller.md.sal.binding.impl.ForwardedBindingDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
+import org.opendaylight.controller.md.sal.dom.broker.compat.hydrogen.BackwardsCompatibleDataBroker;
+import org.opendaylight.controller.md.sal.dom.broker.compat.hydrogen.BackwardsCompatibleMountPointManager;
 import org.opendaylight.controller.md.sal.dom.broker.impl.SerializedDOMDataBroker;
+import org.opendaylight.controller.md.sal.dom.broker.impl.mount.DOMMountPointServiceImpl;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
@@ -49,7 +50,6 @@ import org.opendaylight.controller.sal.core.api.RpcRegistrationListener;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.controller.sal.dom.broker.BrokerImpl;
-import org.opendaylight.controller.sal.dom.broker.MountPointManagerImpl;
 import org.opendaylight.controller.sal.dom.broker.impl.SchemaAwareRpcBroker;
 import org.opendaylight.yangtools.binding.data.codec.gen.impl.DataObjectSerializerGenerator;
 import org.opendaylight.yangtools.binding.data.codec.gen.impl.StreamWriterGenerator;
@@ -95,7 +95,7 @@ public class BindingTestContext implements AutoCloseable {
 
     private final boolean startWithSchema;
 
-    private MountPointManagerImpl biMountImpl;
+    private BackwardsCompatibleMountPointManager biMountImpl;
 
 
 
@@ -111,6 +111,8 @@ public class BindingTestContext implements AutoCloseable {
     private final MockSchemaService mockSchemaService = new MockSchemaService();
 
     private DataBroker dataBroker;
+
+    private DOMMountPointServiceImpl domMountImpl;
 
 
 
@@ -139,8 +141,8 @@ public class BindingTestContext implements AutoCloseable {
 
     public void startNewDomDataBroker() {
         checkState(executor != null, "Executor needs to be set");
-        InMemoryDOMDataStore operStore = new InMemoryDOMDataStore("OPER", MoreExecutors.sameThreadExecutor());
-        InMemoryDOMDataStore configStore = new InMemoryDOMDataStore("CFG", MoreExecutors.sameThreadExecutor());
+        final InMemoryDOMDataStore operStore = new InMemoryDOMDataStore("OPER", MoreExecutors.sameThreadExecutor());
+        final InMemoryDOMDataStore configStore = new InMemoryDOMDataStore("CFG", MoreExecutors.sameThreadExecutor());
         newDatastores = ImmutableMap.<LogicalDatastoreType, DOMStore>builder()
                 .put(LogicalDatastoreType.OPERATIONAL, operStore)
                 .put(LogicalDatastoreType.CONFIGURATION, configStore)
@@ -254,9 +256,9 @@ public class BindingTestContext implements AutoCloseable {
         mappingServiceImpl = new RuntimeGeneratedMappingServiceImpl(classPool);
         mockSchemaService.registerSchemaContextListener(mappingServiceImpl);
 
-        DataObjectSerializerGenerator generator = StreamWriterGenerator.create(JavassistUtils.forClassPool(classPool));
-        BindingNormalizedNodeCodecRegistry codecRegistry = new BindingNormalizedNodeCodecRegistry(generator);
-        GeneratedClassLoadingStrategy loading = GeneratedClassLoadingStrategy.getTCCLClassLoadingStrategy();
+        final DataObjectSerializerGenerator generator = StreamWriterGenerator.create(JavassistUtils.forClassPool(classPool));
+        final BindingNormalizedNodeCodecRegistry codecRegistry = new BindingNormalizedNodeCodecRegistry(generator);
+        final GeneratedClassLoadingStrategy loading = GeneratedClassLoadingStrategy.getTCCLClassLoadingStrategy();
         codec = new BindingToNormalizedNodeCodec(loading, mappingServiceImpl, codecRegistry);
         mockSchemaService.registerSchemaContextListener(codec);
     }
@@ -266,7 +268,7 @@ public class BindingTestContext implements AutoCloseable {
     }
 
     private SchemaContext getContext(final ImmutableSet<YangModuleInfo> moduleInfos) {
-        ModuleInfoBackedContext ctx = ModuleInfoBackedContext.create();
+        final ModuleInfoBackedContext ctx = ModuleInfoBackedContext.create();
         ctx.addModuleInfos(moduleInfos);
         return ctx.tryToCreateSchemaContext().get();
     }
@@ -289,20 +291,20 @@ public class BindingTestContext implements AutoCloseable {
     }
 
     public void startNewBindingDataBroker() {
-        ForwardedBackwardsCompatibleDataBroker forwarded = new ForwardedBackwardsCompatibleDataBroker(newDOMDataBroker, codec,mockSchemaService, executor);
+        final ForwardedBackwardsCompatibleDataBroker forwarded = new ForwardedBackwardsCompatibleDataBroker(newDOMDataBroker, codec,mockSchemaService, executor);
         baData = forwarded;
     }
 
     private void startDomMountPoint() {
-        biMountImpl = new MountPointManagerImpl();
-        biMountImpl.setDataBroker(getDomDataBroker());
+        domMountImpl = new DOMMountPointServiceImpl();
+        biMountImpl = new BackwardsCompatibleMountPointManager(domMountImpl);
     }
 
     private void startDomBroker() {
         checkState(executor != null);
 
-        SchemaAwareRpcBroker router = new SchemaAwareRpcBroker("/", mockSchemaService);
-        ClassToInstanceMap<BrokerService> services = MutableClassToInstanceMap.create();
+        final SchemaAwareRpcBroker router = new SchemaAwareRpcBroker("/", mockSchemaService);
+        final ClassToInstanceMap<BrokerService> services = MutableClassToInstanceMap.create();
         biBrokerImpl = new BrokerImpl(router,services);
 
     }
@@ -314,7 +316,7 @@ public class BindingTestContext implements AutoCloseable {
     }
 
     public void loadYangSchemaFromClasspath() {
-        ImmutableSet<YangModuleInfo> moduleInfos = BindingReflections.loadModuleInfos();
+        final ImmutableSet<YangModuleInfo> moduleInfos = BindingReflections.loadModuleInfos();
         updateYangSchema(moduleInfos);
     }
 
