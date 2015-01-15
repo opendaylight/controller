@@ -22,6 +22,7 @@ import akka.persistence.RecoveryCompleted;
 import akka.persistence.RecoveryFailure;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -34,6 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Semaphore;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActorWithMetering;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
@@ -51,6 +53,9 @@ import org.opendaylight.controller.cluster.datastore.messages.PrimaryFound;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryNotFound;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
+import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
+import org.opendaylight.controller.cluster.notifications.RoleChangeNotification;
+import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
@@ -98,10 +103,12 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private final DataPersistenceProvider dataPersistenceProvider;
 
+    private final Semaphore ready;
+
     /**
      */
     protected ShardManager(ClusterWrapper cluster, Configuration configuration,
-            DatastoreContext datastoreContext) {
+            DatastoreContext datastoreContext, Semaphore ready) {
 
         this.cluster = Preconditions.checkNotNull(cluster, "cluster should not be null");
         this.configuration = Preconditions.checkNotNull(configuration, "configuration should not be null");
@@ -110,6 +117,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         this.type = datastoreContext.getDataStoreType();
         this.shardDispatcherPath =
                 new Dispatchers(context().system().dispatchers()).getDispatcherPath(Dispatchers.DispatcherType.Shard);
+        this.ready = ready;
 
         // Subscribe this actor to cluster member events
         cluster.subscribeToMemberEvents(getSelf());
@@ -124,12 +132,14 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     public static Props props(
         final ClusterWrapper cluster,
         final Configuration configuration,
-        final DatastoreContext datastoreContext) {
+        final DatastoreContext datastoreContext,
+        final Semaphore ready) {
 
         Preconditions.checkNotNull(cluster, "cluster should not be null");
         Preconditions.checkNotNull(configuration, "configuration should not be null");
+        Preconditions.checkNotNull(ready, "ready should not be null");
 
-        return Props.create(new ShardManagerCreator(cluster, configuration, datastoreContext));
+        return Props.create(new ShardManagerCreator(cluster, configuration, datastoreContext, ready));
     }
 
     @Override
@@ -148,10 +158,50 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             memberRemoved((ClusterEvent.MemberRemoved) message);
         } else if(message instanceof ClusterEvent.UnreachableMember) {
             ignoreMessage(message);
+        } else if(message instanceof RoleChangeNotification){
+            RoleChangeNotification roleChanged = (RoleChangeNotification) message;
+            LOG.info("Received role changed for {} from {} to {}", roleChanged.getMemberId(),
+                    roleChanged.getOldRole(), roleChanged.getNewRole());
+
+            ShardInformation shardInformation = findShardInformation(roleChanged.getMemberId());
+            if(shardInformation != null) {
+                shardInformation.setRole(roleChanged.getNewRole());
+
+                if (isReady()) {
+                    LOG.info("All Shards are ready - data store {} is ready, available permits {}", type,
+                            ready.availablePermits());
+
+                    if (ready.availablePermits() == 0) {
+                        ready.release();
+                    }
+                }
+            }
         } else{
             unknownMessage(message);
         }
 
+    }
+
+
+    private ShardInformation findShardInformation(String memberId) {
+        for(ShardInformation info : localShards.values()){
+            if(info.getShardId().toString().equals(memberId)){
+                return info;
+            }
+        }
+
+        return null;
+    }
+
+    private boolean isReady() {
+        boolean isReady = true;
+        for (ShardInformation info : localShards.values()) {
+            if(RaftState.Candidate.name().equals(info.getRole()) || Strings.isNullOrEmpty(info.getRole())){
+                isReady = false;
+                break;
+            }
+        }
+        return isReady;
     }
 
     private void onActorInitialized(Object message) {
@@ -288,11 +338,12 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                     for (ShardInformation info : localShards.values()) {
                         if (info.getActor() == null) {
                             info.setActor(getContext().actorOf(Shard.props(info.getShardId(),
-                                            info.getPeerAddresses(), datastoreContext, schemaContext)
+                                    info.getPeerAddresses(), datastoreContext, schemaContext)
                                             .withDispatcher(shardDispatcherPath), info.getShardId().toString()));
                         } else {
                             info.getActor().tell(message, getSelf());
                         }
+                        info.getActor().tell(new RegisterRoleChangeListener(), self());
                     }
                 }
 
@@ -460,6 +511,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         private boolean actorInitialized = false;
 
         private final List<Runnable> runnablesOnInitialized = Lists.newArrayList();
+        private String role ;
 
         private ShardInformation(String shardName, ShardIdentifier shardId,
                 Map<ShardIdentifier, String> peerAddresses) {
@@ -527,6 +579,15 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         void addRunnableOnInitialized(Runnable runnable) {
             runnablesOnInitialized.add(runnable);
         }
+
+        public void setRole(String newRole) {
+            this.role = newRole;
+        }
+
+        public String getRole(){
+            return this.role;
+        }
+
     }
 
     private static class ShardManagerCreator implements Creator<ShardManager> {
@@ -535,17 +596,19 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         final ClusterWrapper cluster;
         final Configuration configuration;
         final DatastoreContext datastoreContext;
+        private final Semaphore ready;
 
         ShardManagerCreator(ClusterWrapper cluster,
-                Configuration configuration, DatastoreContext datastoreContext) {
+                            Configuration configuration, DatastoreContext datastoreContext, Semaphore ready) {
             this.cluster = cluster;
             this.configuration = configuration;
             this.datastoreContext = datastoreContext;
+            this.ready = ready;
         }
 
         @Override
         public ShardManager create() throws Exception {
-            return new ShardManager(cluster, configuration, datastoreContext);
+            return new ShardManager(cluster, configuration, datastoreContext, ready);
         }
     }
 

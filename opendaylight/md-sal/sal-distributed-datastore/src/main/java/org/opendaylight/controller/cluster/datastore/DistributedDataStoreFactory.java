@@ -33,6 +33,7 @@ public class DistributedDataStoreFactory {
 
         ShardStrategyFactory.setConfiguration(config);
         schemaService.registerSchemaContextListener(dataStore);
+        dataStore.waitTillReady();
         return dataStore;
     }
 

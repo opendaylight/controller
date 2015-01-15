@@ -217,7 +217,8 @@ public class MessageTracker {
         boolean done = true;
 
         public void reset(){
-            Preconditions.checkState(done);
+            Preconditions.checkState(done,
+                    String.format("Trying to reset a context that is not done (%s). currentMessage = %s", done, currentMessage));
             done = false;
             stopwatch.reset().start();
         }

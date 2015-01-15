@@ -3,7 +3,11 @@ package org.opendaylight.controller.cluster.datastore;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import akka.actor.ActorRef;
 import akka.actor.Props;
@@ -22,10 +26,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.ActorInitialized;
@@ -41,6 +48,8 @@ import org.opendaylight.controller.cluster.datastore.utils.DoNothingActor;
 import org.opendaylight.controller.cluster.datastore.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.utils.MockConfiguration;
+import org.opendaylight.controller.cluster.notifications.RoleChangeNotification;
+import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -53,10 +62,15 @@ public class ShardManagerTest extends AbstractActorTest {
     private final String shardMrgIDSuffix = "config" + ID_COUNTER++;
     private final String shardMgrID = "shard-manager-" + shardMrgIDSuffix;
 
+    @Mock
+    private static Semaphore ready;
+
     private static ActorRef mockShardActor;
 
     @Before
     public void setUp() {
+        MockitoAnnotations.initMocks(this);
+
         InMemoryJournal.clear();
 
         if(mockShardActor == null) {
@@ -71,10 +85,10 @@ public class ShardManagerTest extends AbstractActorTest {
     }
 
     private Props newShardMgrProps() {
-
         DatastoreContext.Builder builder = DatastoreContext.newBuilder();
         builder.dataStoreType(shardMrgIDSuffix);
-        return ShardManager.props(new MockClusterWrapper(), new MockConfiguration(), builder.build());
+        return ShardManager.props(new MockClusterWrapper(), new MockConfiguration(),
+                builder.build(), ready);
     }
 
     @Test
@@ -351,8 +365,10 @@ public class ShardManagerTest extends AbstractActorTest {
     public void testRecoveryApplicable(){
         new JavaTestKit(getSystem()) {
             {
-                final Props persistentProps = ShardManager.props(new MockClusterWrapper(), new MockConfiguration(),
-                        DatastoreContext.newBuilder().persistent(true).dataStoreType(shardMrgIDSuffix).build());
+                final Props persistentProps = ShardManager.props(
+                        new MockClusterWrapper(),
+                        new MockConfiguration(),
+                        DatastoreContext.newBuilder().persistent(true).build(), ready);
                 final TestActorRef<ShardManager> persistentShardManager =
                         TestActorRef.create(getSystem(), persistentProps);
 
@@ -360,8 +376,10 @@ public class ShardManagerTest extends AbstractActorTest {
 
                 assertTrue("Recovery Applicable", dataPersistenceProvider1.isRecoveryApplicable());
 
-                final Props nonPersistentProps = ShardManager.props(new MockClusterWrapper(), new MockConfiguration(),
-                        DatastoreContext.newBuilder().persistent(false).dataStoreType(shardMrgIDSuffix).build());
+                final Props nonPersistentProps = ShardManager.props(
+                        new MockClusterWrapper(),
+                        new MockConfiguration(),
+                        DatastoreContext.newBuilder().persistent(false).build(), ready);
                 final TestActorRef<ShardManager> nonPersistentShardManager =
                         TestActorRef.create(getSystem(), nonPersistentProps);
 
@@ -382,8 +400,7 @@ public class ShardManagerTest extends AbstractActorTest {
             private static final long serialVersionUID = 1L;
             @Override
             public ShardManager create() throws Exception {
-                return new ShardManager(new MockClusterWrapper(), new MockConfiguration(),
-                        DatastoreContext.newBuilder().dataStoreType(shardMrgIDSuffix).build()) {
+                return new ShardManager(new MockClusterWrapper(), new MockConfiguration(), DatastoreContext.newBuilder().build(), ready) {
                     @Override
                     protected DataPersistenceProvider createDataPersistenceProvider(boolean persistent) {
                         DataPersistenceProviderMonitor dataPersistenceProviderMonitor
@@ -417,6 +434,62 @@ public class ShardManagerTest extends AbstractActorTest {
         }};
     }
 
+    @Test
+    public void testRoleChangeNotificationReleaseReady() throws Exception {
+        new JavaTestKit(getSystem()) {
+            {
+                final Props persistentProps = ShardManager.props(
+                        new MockClusterWrapper(),
+                        new MockConfiguration(),
+                        DatastoreContext.newBuilder().persistent(true).build(), ready);
+                final TestActorRef<ShardManager> shardManager =
+                        TestActorRef.create(getSystem(), persistentProps);
+
+                shardManager.underlyingActor().onReceiveCommand(new RoleChangeNotification("member-1-shard-default-unknown", RaftState.Candidate.name(), RaftState.Leader.name()));
+
+                verify(ready, times(1)).release();
+
+            }};
+    }
+
+    @Test
+    public void testRoleChangeNotificationReleaseNotCalledWhenAvailablePermitsNotZero() throws Exception {
+        new JavaTestKit(getSystem()) {
+            {
+                final Props persistentProps = ShardManager.props(
+                        new MockClusterWrapper(),
+                        new MockConfiguration(),
+                        DatastoreContext.newBuilder().persistent(true).build(), ready);
+                final TestActorRef<ShardManager> shardManager =
+                        TestActorRef.create(getSystem(), persistentProps);
+
+                doReturn(1).when(ready).availablePermits();
+
+                shardManager.underlyingActor().onReceiveCommand(new RoleChangeNotification("member-1-shard-default-unknown", RaftState.Candidate.name(), RaftState.Leader.name()));
+
+                verify(ready, never()).release();
+
+            }};
+    }
+
+    @Test
+    public void testRoleChangeNotificationDoNothingForUnknownShard() throws Exception {
+        new JavaTestKit(getSystem()) {
+            {
+                final Props persistentProps = ShardManager.props(
+                        new MockClusterWrapper(),
+                        new MockConfiguration(),
+                        DatastoreContext.newBuilder().persistent(true).build(), ready);
+                final TestActorRef<ShardManager> shardManager =
+                        TestActorRef.create(getSystem(), persistentProps);
+
+                shardManager.underlyingActor().onReceiveCommand(new RoleChangeNotification("unknown", RaftState.Candidate.name(), RaftState.Leader.name()));
+
+                verify(ready, never()).release();
+
+            }};
+    }
+
 
 
     private static class TestShardManager extends ShardManager {
@@ -424,7 +497,7 @@ public class ShardManagerTest extends AbstractActorTest {
 
         TestShardManager(String shardMrgIDSuffix) {
             super(new MockClusterWrapper(), new MockConfiguration(),
-                    DatastoreContext.newBuilder().dataStoreType(shardMrgIDSuffix).build());
+                    DatastoreContext.newBuilder().dataStoreType(shardMrgIDSuffix).build(), ready);
         }
 
         @Override
