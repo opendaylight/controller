@@ -31,6 +31,7 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +66,7 @@ public final class NetconfDeviceSalFacade implements AutoCloseable, RemoteDevice
                                                final NetconfSessionCapabilities netconfSessionPreferences, final RpcImplementation deviceRpc) {
 
         // TODO move SchemaAwareRpcBroker from sal-broker-impl, now we have depend on the whole sal-broker-impl
-        final RpcProvisionRegistry rpcRegistry = new SchemaAwareRpcBroker(id.getPath().toString(), new org.opendaylight.controller.sal.dom.broker.impl.SchemaContextProvider() {
+        final RpcProvisionRegistry rpcRegistry = new SchemaAwareRpcBroker(id.getPath().toString(), new SchemaContextProvider() {
             @Override
             public SchemaContext getSchemaContext() {
                 return schemaContext;
