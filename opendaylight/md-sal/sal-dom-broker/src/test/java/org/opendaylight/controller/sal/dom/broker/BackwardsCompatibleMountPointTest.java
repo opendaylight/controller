@@ -16,6 +16,9 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
+import org.opendaylight.controller.md.sal.dom.broker.compat.hydrogen.BackwardsCompatibleMountPoint;
+
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.AbstractMap;

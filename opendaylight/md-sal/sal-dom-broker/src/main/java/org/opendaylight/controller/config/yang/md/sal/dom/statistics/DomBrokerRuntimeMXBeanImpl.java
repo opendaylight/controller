@@ -7,10 +7,11 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.dom.statistics;
 
+import org.opendaylight.controller.md.sal.dom.broker.compat.hydrogen.DataBrokerImpl;
+
 import org.opendaylight.controller.config.yang.md.sal.dom.impl.Data;
 import org.opendaylight.controller.config.yang.md.sal.dom.impl.DomBrokerImplRuntimeMXBean;
 import org.opendaylight.controller.config.yang.md.sal.dom.impl.Transactions;
-import org.opendaylight.controller.sal.dom.broker.DataBrokerImpl;
 
 @Deprecated
 public class DomBrokerRuntimeMXBeanImpl implements

@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html.
  */
 
-package org.opendaylight.controller.sal.dom.broker.util;
+package org.opendaylight.controller.md.sal.dom.broker.compat.hydrogen;
 
 import java.net.URI;
 import java.util.Collection;

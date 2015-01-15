@@ -8,6 +8,9 @@
 package org.opendaylight.controller.sal.binding.test.util;
 
 import static com.google.common.base.Preconditions.checkState;
+
+import org.opendaylight.controller.md.sal.dom.broker.compat.hydrogen.BackwardsCompatibleDataBroker;
+
 import com.google.common.annotations.Beta;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ImmutableClassToInstanceMap;
@@ -26,7 +29,6 @@ import org.opendaylight.controller.md.sal.binding.impl.ForwardedBindingDataBroke
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.broker.impl.SerializedDOMDataBroker;
-import org.opendaylight.controller.md.sal.dom.broker.impl.compat.BackwardsCompatibleDataBroker;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
@@ -83,7 +85,7 @@ public class BindingTestContext implements AutoCloseable {
     private NotificationBrokerImpl baNotifyImpl;
     private BindingIndependentConnector baConnectImpl;
 
-    private org.opendaylight.controller.sal.dom.broker.DataBrokerImpl biDataImpl;
+    private org.opendaylight.controller.md.sal.dom.broker.compat.hydrogen.DataBrokerImpl biDataImpl;
     @SuppressWarnings("deprecation")
     private org.opendaylight.controller.sal.core.api.data.DataProviderService biDataLegacyBroker;
     private BrokerImpl biBrokerImpl;
@@ -124,7 +126,7 @@ public class BindingTestContext implements AutoCloseable {
 
     public void startDomDataBroker() {
         checkState(executor != null, "Executor needs to be set");
-        biDataImpl = new org.opendaylight.controller.sal.dom.broker.DataBrokerImpl();
+        biDataImpl = new org.opendaylight.controller.md.sal.dom.broker.compat.hydrogen.DataBrokerImpl();
         biDataImpl.setExecutor(executor);
         biDataLegacyBroker = biDataImpl;
     }
