@@ -11,6 +11,8 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorSystem;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.DatastoreConfigurationMXBeanImpl;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
@@ -37,13 +39,16 @@ import org.slf4j.LoggerFactory;
 public class DistributedDataStore implements DOMStore, SchemaContextListener, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributedDataStore.class);
-    public static final int REGISTER_DATA_CHANGE_LISTENER_TIMEOUT_FACTOR = 24; // 24 times the usual operation timeout
+    private static final String UNKNOWN_TYPE = "unknown";
 
     private final ActorContext actorContext;
 
     private AutoCloseable closeable;
 
     private DatastoreConfigurationMXBeanImpl datastoreConfigMXBean;
+    private final Semaphore ready = new Semaphore(0);
+
+    private final String type;
 
     public DistributedDataStore(ActorSystem actorSystem, ClusterWrapper cluster,
             Configuration configuration, DatastoreContext datastoreContext) {
@@ -52,7 +57,7 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
         Preconditions.checkNotNull(configuration, "configuration should not be null");
         Preconditions.checkNotNull(datastoreContext, "datastoreContext should not be null");
 
-        String type = datastoreContext.getDataStoreType();
+        this.type = datastoreContext.getDataStoreType();
 
         String shardManagerId = ShardManagerIdentifier.builder().type(type).build().toString();
 
@@ -62,7 +67,7 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
                 new Dispatchers(actorSystem.dispatchers()).getDispatcherPath(Dispatchers.DispatcherType.Shard);
 
         actorContext = new ActorContext(actorSystem, actorSystem.actorOf(
-                ShardManager.props(cluster, configuration, datastoreContext)
+                ShardManager.props(cluster, configuration, datastoreContext, ready)
                         .withDispatcher(shardDispatcher).withMailbox(ActorContext.MAILBOX), shardManagerId ),
                 cluster, configuration, datastoreContext);
 
@@ -73,6 +78,7 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
 
     public DistributedDataStore(ActorContext actorContext) {
         this.actorContext = Preconditions.checkNotNull(actorContext, "actorContext should not be null");
+        this.type = UNKNOWN_TYPE;
     }
 
     public void setCloseable(AutoCloseable closeable) {
@@ -146,4 +152,24 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
     ActorContext getActorContext() {
         return actorContext;
     }
+
+    public void waitTillReady(){
+        LOG.info("Beginning to wait for data store to become ready : {}", type);
+
+        try {
+            boolean acquire = ready.tryAcquire(1, actorContext.getDatastoreContext().getShardLeaderElectionTimeout().duration().toMillis(), TimeUnit.MILLISECONDS);
+            if(!acquire){
+                LOG.error("Data store {} did not startup - all shard leaders were not elected", type);
+            }
+            LOG.debug("Data store {} is now ready", type);
+        } catch (InterruptedException e) {
+            LOG.error("Interrupted when trying to wait for shards to become leader in a reasonable amount of time - giving up");
+        }
+    }
+
+    @VisibleForTesting
+    Semaphore getReady() {
+        return ready;
+    }
+
 }
