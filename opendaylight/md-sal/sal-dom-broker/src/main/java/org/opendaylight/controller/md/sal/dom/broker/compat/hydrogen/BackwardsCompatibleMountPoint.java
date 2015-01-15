@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html.
  */
-package org.opendaylight.controller.sal.dom.broker;
+package org.opendaylight.controller.md.sal.dom.broker.compat.hydrogen;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
@@ -42,7 +42,6 @@ import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.md.sal.dom.api.DOMService;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
-import org.opendaylight.controller.md.sal.dom.broker.impl.compat.BackwardsCompatibleDataBroker;
 import org.opendaylight.controller.sal.common.DataStoreIdentifier;
 import org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration;
 import org.opendaylight.controller.sal.core.api.Broker.RpcRegistration;
@@ -62,7 +61,6 @@ import org.opendaylight.controller.sal.core.api.notify.NotificationPublishServic
 import org.opendaylight.controller.sal.dom.broker.impl.NotificationRouterImpl;
 import org.opendaylight.controller.sal.dom.broker.impl.SchemaAwareRpcBroker;
 import org.opendaylight.controller.sal.dom.broker.spi.NotificationRouter;
-import org.opendaylight.controller.sal.dom.broker.util.ProxySchemaContext;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.common.QName;

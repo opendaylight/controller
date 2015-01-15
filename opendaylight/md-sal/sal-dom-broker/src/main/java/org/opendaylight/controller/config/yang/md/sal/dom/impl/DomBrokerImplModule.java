@@ -7,11 +7,13 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.dom.impl;
 
+import org.opendaylight.controller.md.sal.dom.broker.compat.hydrogen.BackwardsCompatibleMountPointManager;
+
+import org.opendaylight.controller.md.sal.dom.broker.compat.hydrogen.BackwardsCompatibleDataBroker;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.MutableClassToInstanceMap;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
-import org.opendaylight.controller.md.sal.dom.broker.impl.compat.BackwardsCompatibleDataBroker;
 import org.opendaylight.controller.md.sal.dom.broker.impl.mount.DOMMountPointServiceImpl;
 import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
@@ -20,7 +22,6 @@ import org.opendaylight.controller.sal.core.api.data.DataProviderService;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
 import org.opendaylight.controller.sal.core.api.mount.MountService;
-import org.opendaylight.controller.sal.dom.broker.BackwardsCompatibleMountPointManager;
 import org.opendaylight.controller.sal.dom.broker.BrokerImpl;
 import org.opendaylight.controller.sal.dom.broker.GlobalBundleScanningSchemaServiceImpl;
 import org.opendaylight.controller.sal.dom.broker.impl.SchemaAwareRpcBroker;
