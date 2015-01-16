@@ -77,7 +77,7 @@ class ListEntryReader extends AbstractReader<ListSchemaNode> implements GenericL
 
         if (!nodes.isEmpty()) {
             compositeNodeBuilder.addAll(nodes);
-            return Collections.<Node<?>> singletonList(compositeNodeBuilder.toInstance());
+            return Collections.<Node<?>> singletonList(compositeNodeBuilder.build());
         } else {
             return Collections.emptyList();
         }

@@ -64,14 +64,14 @@ public class FlagsSerializationTest extends AbstractDataServiceTest {
     private static final TableKey TABLE_KEY = new TableKey(TABLE_ID);
 
     private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA = InstanceIdentifier.builder(Nodes.class) //
-            .child(Node.class, NODE_KEY).toInstance();
+            .child(Node.class, NODE_KEY).build();
 
     private static final InstanceIdentifier<? extends DataObject> FLOW_INSTANCE_ID_BA = //
             NODE_INSTANCE_ID_BA.builder() //
             .augmentation(FlowCapableNode.class)
             .child(Table.class,TABLE_KEY)
             .child(Flow.class, FLOW_KEY) //
-            .toInstance();
+            .build();
     private static final QName FLOW_FLAGS_QNAME = QName.create(Flow.QNAME, "flags");
 
     @Test

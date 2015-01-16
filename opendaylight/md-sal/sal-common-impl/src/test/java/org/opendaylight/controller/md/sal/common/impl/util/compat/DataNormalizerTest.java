@@ -545,28 +545,28 @@ public class DataNormalizerTest {
             innerListBuilder.setQName(INNER_LIST_QNAME);
             innerListBuilder.addLeaf(NAME_QNAME, "inner-name" + i);
             innerListBuilder.addLeaf(VALUE_QNAME, "inner-value" + i);
-            outerListBuilder.add(innerListBuilder.toInstance());
+            outerListBuilder.add(innerListBuilder.build());
         }
 
-        testBuilder.add(outerListBuilder.toInstance());
+        testBuilder.add(outerListBuilder.build());
 
         outerListBuilder = ImmutableCompositeNode.builder();
         outerListBuilder.setQName(OUTER_LIST_QNAME);
         outerListBuilder.addLeaf(ID_QNAME, 20);
         outerListBuilder.addLeaf(TWO_QNAME, "two");
         outerListBuilder.addLeaf(THREE_QNAME, "three");
-        testBuilder.add(outerListBuilder.toInstance());
+        testBuilder.add(outerListBuilder.build());
 
         for (int i = 1; i <= 2; i++) {
             CompositeNodeBuilder<ImmutableCompositeNode> unkeyedListBuilder = ImmutableCompositeNode.builder();
             unkeyedListBuilder.setQName(UNKEYED_LIST_QNAME);
             unkeyedListBuilder.addLeaf(NAME_QNAME, "unkeyed-name" + i);
-            testBuilder.add(unkeyedListBuilder.toInstance());
+            testBuilder.add(unkeyedListBuilder.build());
         }
 
         Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> normalizedNodeEntry = normalizer
                 .toNormalized(new AbstractMap.SimpleEntry<YangInstanceIdentifier, CompositeNode>(YangInstanceIdentifier.create(
-                        ImmutableList.<PathArgument> of(new NodeIdentifier(TEST_QNAME))), testBuilder.toInstance()));
+                        ImmutableList.<PathArgument> of(new NodeIdentifier(TEST_QNAME))), testBuilder.build()));
 
         verifyNormalizedInstanceIdentifier(normalizedNodeEntry.getKey(), TEST_QNAME);
 
@@ -624,13 +624,13 @@ public class DataNormalizerTest {
         innerBuilder.setQName(ANY_XML_INNER_QNAME);
         innerBuilder.addLeaf(ANY_XML_INNER_LEAF_QNAME, "inner-leaf-value");
 
-        anyXmlBuilder.add(innerBuilder.toInstance());
-        CompositeNode anyXmlLegacy = anyXmlBuilder.toInstance();
+        anyXmlBuilder.add(innerBuilder.build());
+        CompositeNode anyXmlLegacy = anyXmlBuilder.build();
         testBuilder.add(anyXmlLegacy);
 
         Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> normalizedNodeEntry = normalizer
                 .toNormalized(new AbstractMap.SimpleEntry<YangInstanceIdentifier, CompositeNode>(YangInstanceIdentifier.create(
-                        ImmutableList.<PathArgument> of(new NodeIdentifier(TEST_QNAME))), testBuilder.toInstance()));
+                        ImmutableList.<PathArgument> of(new NodeIdentifier(TEST_QNAME))), testBuilder.build()));
 
         verifyNormalizedInstanceIdentifier(normalizedNodeEntry.getKey(), TEST_QNAME);
 
@@ -650,11 +650,11 @@ public class DataNormalizerTest {
         outerContBuilder.setQName(OUTER_CONTAINER_QNAME);
         outerContBuilder.addLeaf(AUGMENTED_LEAF_QNAME, "augmented-value");
 
-        testBuilder.add(outerContBuilder.toInstance());
+        testBuilder.add(outerContBuilder.build());
 
         Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> normalizedNodeEntry = normalizer
                 .toNormalized(new AbstractMap.SimpleEntry<YangInstanceIdentifier, CompositeNode>(YangInstanceIdentifier.create(
-                        ImmutableList.<PathArgument> of(new NodeIdentifier(TEST_QNAME))), testBuilder.toInstance()));
+                        ImmutableList.<PathArgument> of(new NodeIdentifier(TEST_QNAME))), testBuilder.build()));
 
         verifyNormalizedInstanceIdentifier(normalizedNodeEntry.getKey(), TEST_QNAME);
 
@@ -666,7 +666,7 @@ public class DataNormalizerTest {
 
         normalizedNodeEntry = normalizer.toNormalized(new AbstractMap.SimpleEntry<YangInstanceIdentifier, CompositeNode>(
                 YangInstanceIdentifier.create(Lists.newArrayList(new NodeIdentifier(TEST_QNAME), new NodeIdentifier(
-                        OUTER_CONTAINER_QNAME))), outerContBuilder.toInstance()));
+                        OUTER_CONTAINER_QNAME))), outerContBuilder.build()));
 
         verifyNormalizedInstanceIdentifier(normalizedNodeEntry.getKey(), TEST_QNAME, OUTER_CONTAINER_QNAME,
                 Sets.newHashSet(AUGMENTED_LEAF_QNAME));
@@ -692,7 +692,7 @@ public class DataNormalizerTest {
 
         Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> normalizedNodeEntry = normalizer
                 .toNormalized(new AbstractMap.SimpleEntry<YangInstanceIdentifier, CompositeNode>(YangInstanceIdentifier.create(
-                        ImmutableList.<PathArgument> of(new NodeIdentifier(TEST_QNAME))), testBuilder.toInstance()));
+                        ImmutableList.<PathArgument> of(new NodeIdentifier(TEST_QNAME))), testBuilder.build()));
 
         verifyNormalizedInstanceIdentifier(normalizedNodeEntry.getKey(), TEST_QNAME);
 

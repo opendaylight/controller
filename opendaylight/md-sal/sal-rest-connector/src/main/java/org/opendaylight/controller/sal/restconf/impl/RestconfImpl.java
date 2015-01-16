@@ -645,7 +645,7 @@ public class RestconfImpl implements RestconfService {
 
     @Override
     public NormalizedNodeContext readConfigurationData(final String identifier, final UriInfo uriInfo) {
-        final InstanceIdentifierContext iiWithData = controllerContext.toInstanceIdentifier(identifier);
+        final InstanceIdentifierContext iiWithData = controllerContext.buildIdentifier(identifier);
         DOMMountPoint mountPoint = iiWithData.getMountPoint();
         NormalizedNode<?, ?> data = null;
         YangInstanceIdentifier normalizedII;
@@ -704,7 +704,7 @@ public class RestconfImpl implements RestconfService {
 
     @Override
     public NormalizedNodeContext readOperationalData(final String identifier, final UriInfo info) {
-        final InstanceIdentifierContext iiWithData = controllerContext.toInstanceIdentifier(identifier);
+        final InstanceIdentifierContext iiWithData = controllerContext.buildIdentifier(identifier);
         DOMMountPoint mountPoint = iiWithData.getMountPoint();
         NormalizedNode<?, ?> data = null;
         YangInstanceIdentifier normalizedII;
@@ -727,7 +727,7 @@ public class RestconfImpl implements RestconfService {
 
     @Override
     public Response updateConfigurationData(final String identifier, final Node<?> payload) {
-        final InstanceIdentifierContext iiWithData = this.controllerContext.toInstanceIdentifier(identifier);
+        final InstanceIdentifierContext iiWithData = this.controllerContext.buildIdentifier(identifier);
 
         validateInput(iiWithData.getSchemaNode(), payload);
 
@@ -882,12 +882,12 @@ public class RestconfImpl implements RestconfService {
             }
 
             final String completeIdentifier = this.addMountPointIdentifier(identifier);
-            iiWithData = this.controllerContext.toInstanceIdentifier(completeIdentifier);
+            iiWithData = this.controllerContext.buildIdentifier(completeIdentifier);
 
             value = this.normalizeNode(payload, iiWithData.getSchemaNode(), iiWithData.getMountPoint());
         } else {
             final InstanceIdentifierContext incompleteInstIdWithData = this.controllerContext
-                    .toInstanceIdentifier(identifier);
+                    .buildIdentifier(identifier);
             final DataNodeContainer parentSchema = (DataNodeContainer) incompleteInstIdWithData.getSchemaNode();
             DOMMountPoint mountPoint = incompleteInstIdWithData.getMountPoint();
             final Module module = findModule(mountPoint, payload);
@@ -977,7 +977,7 @@ public class RestconfImpl implements RestconfService {
 
     @Override
     public Response deleteConfigurationData(final String identifier) {
-        final InstanceIdentifierContext iiWithData = controllerContext.toInstanceIdentifier(identifier);
+        final InstanceIdentifierContext iiWithData = controllerContext.buildIdentifier(identifier);
         DOMMountPoint mountPoint = iiWithData.getMountPoint();
         YangInstanceIdentifier normalizedII;
 
@@ -1169,7 +1169,7 @@ public class RestconfImpl implements RestconfService {
             iiBuilder.node(schemaOfData.getQName());
         }
 
-        YangInstanceIdentifier instance = iiBuilder.toInstance();
+        YangInstanceIdentifier instance = iiBuilder.build();
         DOMMountPoint mountPoint = null;
         SchemaContext schemaCtx = null;
         if (identifierWithSchemaNode != null) {

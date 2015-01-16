@@ -150,7 +150,7 @@ class DomToBindingRpcForwarder implements RpcImplementation, InvocationHandler {
             } catch (Exception e) {
                 LOG.error("Could not forward Rpcs of type {}", rpcServiceType.get(), e);
             }
-            this.forwarderRegistration = builder.toInstance();
+            this.forwarderRegistration = builder.build();
             registrationInProgress = false;
         }
     }

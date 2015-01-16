@@ -52,7 +52,7 @@ public class CrossBrokerMountPointTest {
             NODE_ID);
 
     private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA = InstanceIdentifier.builder(Nodes.class) //
-            .child(Node.class, NODE_KEY).toInstance();
+            .child(Node.class, NODE_KEY).build();
     private static GroupKey GROUP_KEY = new GroupKey(new GroupId(0L));
 
     private static final InstanceIdentifier<GroupStatistics> GROUP_STATISTICS_ID_BA = NODE_INSTANCE_ID_BA
@@ -60,7 +60,7 @@ public class CrossBrokerMountPointTest {
             .child(Group.class, GROUP_KEY) //
             .augmentation(NodeGroupStatistics.class) //
             .child(GroupStatistics.class) //
-            .toInstance();
+            .build();
 
     private static final QName AUGMENTED_GROUP_STATISTICS = QName.create(NodeGroupStatistics.QNAME,
             GroupStatistics.QNAME.getLocalName());
@@ -69,13 +69,13 @@ public class CrossBrokerMountPointTest {
     org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.builder() //
             .node(Nodes.QNAME) //
             .nodeWithKey(Node.QNAME, NODE_KEY_BI) //
-            .toInstance();
+            .build();
 
     private static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier GROUP_STATISTICS_ID_BI = org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier
             //
             .builder(NODE_INSTANCE_ID_BI)
             .nodeWithKey(QName.create(FlowCapableNode.QNAME, "group"), QName.create(FlowCapableNode.QNAME, "group-id"),
-                    0L).node(AUGMENTED_GROUP_STATISTICS).toInstance();
+                    0L).node(AUGMENTED_GROUP_STATISTICS).build();
 
     private BindingTestContext testContext;
     private MountProviderService bindingMountPointService;
@@ -127,7 +127,7 @@ public class CrossBrokerMountPointTest {
                             .builder()
                             .setQName(AUGMENTED_GROUP_STATISTICS)
                             .addLeaf(QName.create(AUGMENTED_GROUP_STATISTICS, "packet-count"), packetCount) //
-                            .toInstance();
+                            .build();
 
                     return data;
                 }

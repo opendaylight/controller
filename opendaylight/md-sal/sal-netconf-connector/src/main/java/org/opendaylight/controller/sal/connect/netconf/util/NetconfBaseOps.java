@@ -248,7 +248,7 @@ public final class NetconfBaseOps {
         ret.setQName(NETCONF_EDIT_CONFIG_QNAME);
         // Edit content
         ret.add(editStructure);
-        return ret.toInstance();
+        return ret.build();
     }
 
     private static CompositeNode getSourceNode(final QName datastore) {

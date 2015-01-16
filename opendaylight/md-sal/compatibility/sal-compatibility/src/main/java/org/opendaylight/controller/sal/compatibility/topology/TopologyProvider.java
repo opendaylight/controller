@@ -27,7 +27,7 @@ public class TopologyProvider implements AutoCloseable{
     private static final InstanceIdentifier<Link> PATH = InstanceIdentifier.builder(NetworkTopology.class)
             .child(Topology.class ,new TopologyKey(new TopologyId("flow:1")))
             .child(Link.class)
-            .toInstance();
+            .build();
     private TopologyCommitHandler commitHandler;
 
     private ListenerRegistration<DataChangeListener> listenerRegistration;

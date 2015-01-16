@@ -229,7 +229,7 @@ public class FlowProgrammerAdapter implements IPluginInFlowProgrammerService, Sa
                 .augmentation(FlowCapableNode.class)
                 .child(Table.class, new TableKey(flow.getTableId()))
                 .child(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow.class, new FlowKey(flow.getId()))
-                .toInstance();
+                .build();
     }
 
     private Future<RpcResult<TransactionStatus>> writeFlowAsync(final org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow flow, final NodeKey nodeKey) {

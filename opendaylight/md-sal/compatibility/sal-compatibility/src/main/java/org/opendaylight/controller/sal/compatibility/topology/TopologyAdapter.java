@@ -21,7 +21,7 @@ import com.google.common.base.Preconditions;
 
 public class TopologyAdapter implements IPluginInTopologyService {
     private final InstanceIdentifier<Topology> topology = InstanceIdentifier.builder(NetworkTopology.class)
-            .child(Topology.class, new TopologyKey(new TopologyId("flow:1"))).toInstance();
+            .child(Topology.class, new TopologyKey(new TopologyId("flow:1"))).build();
 
     // Injected via Apache DM
     private IPluginOutTopologyService topologyPublisher;

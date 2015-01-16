@@ -67,7 +67,7 @@ public class LLDPDiscoveryUtils {
                     InstanceIdentifier<NodeConnector> srcInstanceId = InstanceIdentifier.builder(Nodes.class)
                             .child(Node.class,new NodeKey(srcNodeId))
                             .child(NodeConnector.class, new NodeConnectorKey(srcNodeConnectorId))
-                            .toInstance();
+                            .build();
                     return new NodeConnectorRef(srcInstanceId);
                 }
             } catch (Exception e) {

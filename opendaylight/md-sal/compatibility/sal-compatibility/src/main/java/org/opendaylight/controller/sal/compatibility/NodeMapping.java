@@ -243,7 +243,7 @@ public final class NodeMapping {
         Preconditions.checkArgument(NodeIDType.OPENFLOW.equals(node.getType()));
         final Long nodeId = Arguments.<Long>checkInstanceOf(node.getID(), Long.class);
         final NodeKey nodeKey = new NodeKey(new NodeId(OPENFLOW_ID_PREFIX + nodeId));
-        final InstanceIdentifier<Node> nodePath = InstanceIdentifier.builder(Nodes.class).child(NODE_CLASS, nodeKey).toInstance();
+        final InstanceIdentifier<Node> nodePath = InstanceIdentifier.builder(Nodes.class).child(NODE_CLASS, nodeKey).build();
         return new NodeRef(nodePath);
     }
 

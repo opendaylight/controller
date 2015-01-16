@@ -52,7 +52,7 @@ public class WriteParentReadChildTest extends AbstractDataServiceTest {
     private static final TableKey TABLE_KEY = new TableKey(TABLE_ID);
 
     private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA = InstanceIdentifier.builder(Nodes.class) //
-            .child(Node.class, NODE_KEY).toInstance();
+            .child(Node.class, NODE_KEY).build();
 
     private static final InstanceIdentifier<Table> TABLE_INSTANCE_ID_BA = //
             NODE_INSTANCE_ID_BA.builder() //

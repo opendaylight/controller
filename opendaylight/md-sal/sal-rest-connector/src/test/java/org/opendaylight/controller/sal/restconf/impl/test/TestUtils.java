@@ -399,7 +399,7 @@ public final class TestUtils {
         interfaceBuilder.addLeaf(buildQName("type", "dummy", "2014-07-29"), "ethernetCsmacd");
         interfaceBuilder.addLeaf(buildQName("enabled", "dummy", "2014-07-29"), "false");
         interfaceBuilder.addLeaf(buildQName("description", "dummy", "2014-07-29"), "some interface");
-        return interfaceBuilder.toInstance();
+        return interfaceBuilder.build();
     }
 
     static NormalizedNode<?,?> prepareNormalizedNodeWithIetfInterfacesInterfacesData() throws ParseException {

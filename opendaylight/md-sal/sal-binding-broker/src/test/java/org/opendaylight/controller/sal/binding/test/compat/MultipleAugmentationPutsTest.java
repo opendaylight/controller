@@ -59,7 +59,7 @@ public class MultipleAugmentationPutsTest extends AbstractDataServiceTest implem
             NODE_ID);
 
     private static final InstanceIdentifier<Nodes> NODES_INSTANCE_ID_BA = InstanceIdentifier.builder(Nodes.class) //
-            .toInstance();
+            .build();
 
     private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA =
             NODES_INSTANCE_ID_BA.child(Node.class, NODE_KEY);
@@ -68,7 +68,7 @@ public class MultipleAugmentationPutsTest extends AbstractDataServiceTest implem
     org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.builder() //
             .node(Nodes.QNAME) //
             .nodeWithKey(Node.QNAME, NODE_KEY_BI) //
-            .toInstance();
+            .build();
     private DataChangeEvent<InstanceIdentifier<?>, DataObject> receivedChangeEvent;
 
     /**

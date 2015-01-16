@@ -109,13 +109,13 @@ public class DOMRpcServiceTestBugfix560 {
         return org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier
                 .builder().node(Nodes.QNAME)
                 .nodeWithKey(Node.QNAME, NODE_ID_QNAME, mountNode.getValue())
-                .toInstance();
+                .build();
     }
 
     private static InstanceIdentifier<Node> createBANodeIdentifier(
             final NodeId mountNode) {
         return InstanceIdentifier.builder(Nodes.class)
-                .child(Node.class, new NodeKey(mountNode)).toInstance();
+                .child(Node.class, new NodeKey(mountNode)).build();
     }
 
     @SuppressWarnings("deprecation")

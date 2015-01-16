@@ -132,14 +132,14 @@ public class AbstractRpcTest {
         CompositeNodeBuilder<ImmutableCompositeNode> builder = ImmutableCompositeNode.builder()
                 .setQName(TEST_RPC_INPUT).addLeaf(TEST_RPC_INPUT_DATA, data);
         return ImmutableCompositeNode.create(
-                TEST_RPC, ImmutableList.<Node<?>>of(builder.toInstance()));
+                TEST_RPC, ImmutableList.<Node<?>>of(builder.build()));
     }
 
     static CompositeNode makeRPCOutput(String data) {
         CompositeNodeBuilder<ImmutableCompositeNode> builder = ImmutableCompositeNode.builder()
                 .setQName(TEST_RPC_OUTPUT).addLeaf(TEST_RPC_OUTPUT_DATA, data);
         return ImmutableCompositeNode.create(
-                TEST_RPC, ImmutableList.<Node<?>>of(builder.toInstance()));
+                TEST_RPC, ImmutableList.<Node<?>>of(builder.build()));
     }
 
     static void assertFailedRpcResult(RpcResult<CompositeNode> rpcResult, ErrorSeverity severity,

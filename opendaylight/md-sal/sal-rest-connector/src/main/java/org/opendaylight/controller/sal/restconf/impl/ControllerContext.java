@@ -118,7 +118,7 @@ public class ControllerContext implements SchemaContextListener {
         this.onGlobalContextUpdated(schemas);
     }
 
-    public InstanceIdentifierContext toInstanceIdentifier(final String restconfInstance) {
+    public InstanceIdentifierContext buildIdentifier(final String restconfInstance) {
         return this.toIdentifier(restconfInstance, false);
     }
 
@@ -476,7 +476,7 @@ public class ControllerContext implements SchemaContextListener {
         }
 
         if (strings.isEmpty()) {
-            return new InstanceIdentifierContext(builder.toInstance(), ((DataSchemaNode) parentNode), mountPoint,mountPoint != null ? mountPoint.getSchemaContext() : globalSchema);
+            return new InstanceIdentifierContext(builder.build(), ((DataSchemaNode) parentNode), mountPoint,mountPoint != null ? mountPoint.getSchemaContext() : globalSchema);
         }
 
         String head = strings.iterator().next();
@@ -498,7 +498,7 @@ public class ControllerContext implements SchemaContextListener {
                             ErrorType.APPLICATION, ErrorTag.OPERATION_NOT_SUPPORTED);
                 }
 
-                final YangInstanceIdentifier partialPath = builder.toInstance();
+                final YangInstanceIdentifier partialPath = builder.build();
                 final Optional<DOMMountPoint> mountOpt = mountService.getMountPoint(partialPath);
                 if (!mountOpt.isPresent()) {
                     LOG.debug("Instance identifier to missing mount point: {}", partialPath);
@@ -514,12 +514,12 @@ public class ControllerContext implements SchemaContextListener {
                 }
 
                 if (returnJustMountPoint) {
-                    YangInstanceIdentifier instance = YangInstanceIdentifier.builder().toInstance();
+                    YangInstanceIdentifier instance = YangInstanceIdentifier.builder().build();
                     return new InstanceIdentifierContext(instance, mountPointSchema, mount,mountPointSchema);
                 }
 
                 if (strings.size() == 1) {
-                    YangInstanceIdentifier instance = YangInstanceIdentifier.builder().toInstance();
+                    YangInstanceIdentifier instance = YangInstanceIdentifier.builder().build();
                     return new InstanceIdentifierContext(instance, mountPointSchema, mount,mountPointSchema);
                 }
 
@@ -636,7 +636,7 @@ public class ControllerContext implements SchemaContextListener {
                     returnJustMountPoint);
         }
 
-        return new InstanceIdentifierContext(builder.toInstance(), targetNode, mountPoint,mountPoint != null ? mountPoint.getSchemaContext() : globalSchema);
+        return new InstanceIdentifierContext(builder.build(), targetNode, mountPoint,mountPoint != null ? mountPoint.getSchemaContext() : globalSchema);
     }
 
     public static DataSchemaNode findInstanceDataChildByNameAndNamespace(final DataNodeContainer container, final String name,

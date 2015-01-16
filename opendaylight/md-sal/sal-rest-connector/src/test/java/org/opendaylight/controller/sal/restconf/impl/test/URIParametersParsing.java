@@ -96,6 +96,6 @@ public class URIParametersParsing {
                 YangInstanceIdentifier.builder().node(QName.create("urn:opendaylight:inventory", "2013-08-19", "nodes")).build());
         inputBuilder.addLeaf(QName.create("urn:sal:restconf:event:subscription", "2014-7-8", "datastore"), datastore);
         inputBuilder.addLeaf(QName.create("urn:sal:restconf:event:subscription", "2014-7-8", "scope"), scope);
-        return inputBuilder.toInstance();
+        return inputBuilder.build();
     }
 }

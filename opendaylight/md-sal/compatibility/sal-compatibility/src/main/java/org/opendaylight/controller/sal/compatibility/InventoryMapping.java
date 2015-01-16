@@ -45,7 +45,7 @@ public final class InventoryMapping {
     public static NodeRef toNodeRef(final org.opendaylight.controller.sal.core.Node node) {
         final NodeKey nodeKey = new NodeKey(new NodeId(InventoryMapping.toNodeId(node)));
         final InstanceIdentifier<Node> path = InstanceIdentifier.builder(Nodes.class)
-                .child(Node.class, nodeKey).toInstance();
+                .child(Node.class, nodeKey).build();
         return new NodeRef(path);
     }
 

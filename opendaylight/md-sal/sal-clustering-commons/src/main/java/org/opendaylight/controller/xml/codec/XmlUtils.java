@@ -243,7 +243,7 @@ public class XmlUtils {
           final CompositeNodeBuilder<ImmutableCompositeNode> it = ImmutableCompositeNode.builder();
           it.setQName(rpc);
           it.add(ImmutableCompositeNode.create(input, dataNodes));
-          compositeNode = it.toInstance();
+          compositeNode = it.build();
           break;
         }
       }

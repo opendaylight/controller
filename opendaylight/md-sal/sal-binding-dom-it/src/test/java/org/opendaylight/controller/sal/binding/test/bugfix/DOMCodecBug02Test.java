@@ -34,7 +34,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 public class DOMCodecBug02Test extends AbstractDataServiceTest {
 
     private static final InstanceIdentifier<Nodes> NODES_INSTANCE_ID_BA = InstanceIdentifier.builder(Nodes.class) //
-            .toInstance();
+            .build();
 
     /**
      * This test is ignored, till found out better way to test generation of

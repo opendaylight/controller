@@ -71,7 +71,7 @@ import org.slf4j.LoggerFactory;
 public class BindingTestContext implements AutoCloseable {
 
     public static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier TREE_ROOT = org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier
-            .builder().toInstance();
+            .builder().build();
 
     private static final Logger LOG = LoggerFactory.getLogger(BindingTestContext.class);
 

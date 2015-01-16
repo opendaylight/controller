@@ -155,12 +155,12 @@ public class CrossBrokerRpcTest {
     }
 
     private static InstanceIdentifier<Node> createBANodeIdentifier(NodeId node) {
-        return InstanceIdentifier.builder(Nodes.class).child(Node.class, new NodeKey(node)).toInstance();
+        return InstanceIdentifier.builder(Nodes.class).child(Node.class, new NodeKey(node)).build();
     }
 
     private static org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier createBINodeIdentifier(NodeId node) {
         return org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.builder().node(Nodes.QNAME)
-                .nodeWithKey(Node.QNAME, NODE_ID_QNAME, node.getValue()).toInstance();
+                .nodeWithKey(Node.QNAME, NODE_ID_QNAME, node.getValue()).build();
     }
 
     private Future<RpcResult<AddFlowOutput>> addFlowResult(boolean success, long xid) {

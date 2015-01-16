@@ -117,7 +117,7 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
             final CompositeNodeBuilder<ImmutableCompositeNode> it = ImmutableCompositeNode.builder();
             it.setQName(NetconfMessageTransformUtil.NETCONF_RPC_REPLY_QNAME);
             it.add(ImmutableCompositeNode.create(NetconfMessageTransformUtil.NETCONF_DATA_QNAME, dataNodes));
-            compositeNode = it.toInstance();
+            compositeNode = it.build();
         } else {
             final CompositeNode rpcReply = XmlDocumentUtils.rpcReplyToDomNodes(message.getDocument(), rpc, context);
             if (rpcReply != null) {

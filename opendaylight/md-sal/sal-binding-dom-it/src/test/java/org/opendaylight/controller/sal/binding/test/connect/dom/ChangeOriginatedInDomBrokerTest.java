@@ -85,7 +85,7 @@ public class ChangeOriginatedInDomBrokerTest extends AbstractDataServiceTest {
             NODE_ID);
 
     private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA = InstanceIdentifier.builder(Nodes.class) //
-            .child(Node.class, NODE_KEY).toInstance();
+            .child(Node.class, NODE_KEY).build();
 
     private static final Map<QName, Object> FLOW_KEY_BI = //
     ImmutableMap.<QName, Object> of(FLOW_ID_QNAME, FLOW_ID.getValue());
@@ -99,7 +99,7 @@ public class ChangeOriginatedInDomBrokerTest extends AbstractDataServiceTest {
             .nodeWithKey(Node.QNAME, NODE_KEY_BI) //
             .nodeWithKey(Table.QNAME, TABLE_KEY_BI) //
             .nodeWithKey(Flow.QNAME, FLOW_KEY_BI) //
-            .toInstance();
+            .build();
     private static final TableKey TABLE_KEY_BA = new TableKey((short) 0);
 
     private static final InstanceIdentifier<Flow> FLOWS_PATH_BA = //
@@ -107,7 +107,7 @@ public class ChangeOriginatedInDomBrokerTest extends AbstractDataServiceTest {
             .augmentation(FlowCapableNode.class) //
             .child(Table.class, TABLE_KEY_BA) //
             .child(Flow.class) //
-            .toInstance();
+            .build();
 
     private static final InstanceIdentifier<Flow> FLOW_INSTANCE_ID_BA = //
     FLOWS_PATH_BA.firstIdentifierOf(Table.class).child(Flow.class, FLOW_KEY);

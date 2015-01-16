@@ -73,7 +73,7 @@ public class ContainerReader extends AbstractReader<ContainerSchemaNode> {
             compositeNodeBuilder.addAll(argumentHandlerRegistry.getGenericReader(getSchemaContext(),
                     getReadConfigNode()).read(childNode));
         }
-        return Collections.<Node<?>> singletonList(compositeNodeBuilder.toInstance());
+        return Collections.<Node<?>> singletonList(compositeNodeBuilder.build());
     }
 
     private List<DataSchemaNode> sortChildren(final Set<DataSchemaNode> unsortedNodes) {

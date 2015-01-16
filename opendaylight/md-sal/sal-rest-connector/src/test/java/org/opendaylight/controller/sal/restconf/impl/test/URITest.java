@@ -52,16 +52,16 @@ public class URITest {
     @Test
     public void testToInstanceIdentifierList() throws FileNotFoundException {
         InstanceIdentifierContext instanceIdentifier = controllerContext
-                .toInstanceIdentifier("simple-nodes:userWithoutClass/foo");
+                .buildIdentifier("simple-nodes:userWithoutClass/foo");
         assertEquals(instanceIdentifier.getSchemaNode().getQName().getLocalName(), "userWithoutClass");
 
-        instanceIdentifier = controllerContext.toInstanceIdentifier("simple-nodes:userWithoutClass/foo");
+        instanceIdentifier = controllerContext.buildIdentifier("simple-nodes:userWithoutClass/foo");
         assertEquals(instanceIdentifier.getSchemaNode().getQName().getLocalName(), "userWithoutClass");
 
-        instanceIdentifier = controllerContext.toInstanceIdentifier("simple-nodes:user/foo/boo");
+        instanceIdentifier = controllerContext.buildIdentifier("simple-nodes:user/foo/boo");
         assertEquals(instanceIdentifier.getSchemaNode().getQName().getLocalName(), "user");
 
-        instanceIdentifier = controllerContext.toInstanceIdentifier("simple-nodes:user//boo");
+        instanceIdentifier = controllerContext.buildIdentifier("simple-nodes:user//boo");
         assertEquals(instanceIdentifier.getSchemaNode().getQName().getLocalName(), "user");
 
     }
@@ -69,18 +69,18 @@ public class URITest {
     @Test
     public void testToInstanceIdentifierListWithNullKey() {
         exception.expect(RestconfDocumentedException.class);
-        controllerContext.toInstanceIdentifier("simple-nodes:user/null/boo");
+        controllerContext.buildIdentifier("simple-nodes:user/null/boo");
     }
 
     @Test
     public void testToInstanceIdentifierListWithMissingKey() {
         exception.expect(RestconfDocumentedException.class);
-        controllerContext.toInstanceIdentifier("simple-nodes:user/foo");
+        controllerContext.buildIdentifier("simple-nodes:user/foo");
     }
 
     @Test
     public void testToInstanceIdentifierContainer() throws FileNotFoundException {
-        InstanceIdentifierContext instanceIdentifier = controllerContext.toInstanceIdentifier("simple-nodes:users");
+        InstanceIdentifierContext instanceIdentifier = controllerContext.buildIdentifier("simple-nodes:users");
         assertEquals(instanceIdentifier.getSchemaNode().getQName().getLocalName(), "users");
         assertTrue(instanceIdentifier.getSchemaNode() instanceof ContainerSchemaNode);
         assertEquals(2, ((ContainerSchemaNode) instanceIdentifier.getSchemaNode()).getChildNodes().size());
@@ -89,39 +89,39 @@ public class URITest {
     @Test
     public void testToInstanceIdentifierChoice() throws FileNotFoundException {
         InstanceIdentifierContext instanceIdentifier = controllerContext
-                .toInstanceIdentifier("simple-nodes:food/nonalcoholic");
+                .buildIdentifier("simple-nodes:food/nonalcoholic");
         assertEquals(instanceIdentifier.getSchemaNode().getQName().getLocalName(), "nonalcoholic");
     }
 
     @Test
     public void testToInstanceIdentifierChoiceException() {
         exception.expect(RestconfDocumentedException.class);
-        controllerContext.toInstanceIdentifier("simple-nodes:food/snack");
+        controllerContext.buildIdentifier("simple-nodes:food/snack");
     }
 
     @Test
     public void testToInstanceIdentifierCaseException() {
         exception.expect(RestconfDocumentedException.class);
-        controllerContext.toInstanceIdentifier("simple-nodes:food/sports-arena");
+        controllerContext.buildIdentifier("simple-nodes:food/sports-arena");
     }
 
     @Test
     public void testToInstanceIdentifierChoiceCaseException() {
         exception.expect(RestconfDocumentedException.class);
-        controllerContext.toInstanceIdentifier("simple-nodes:food/snack/sports-arena");
+        controllerContext.buildIdentifier("simple-nodes:food/snack/sports-arena");
     }
 
     @Test
     public void testToInstanceIdentifierWithoutNode() {
         exception.expect(RestconfDocumentedException.class);
-        controllerContext.toInstanceIdentifier("simple-nodes");
+        controllerContext.buildIdentifier("simple-nodes");
     }
 
     @Test
     public void testMountPointWithExternModul() throws FileNotFoundException {
         initMountService(true);
         InstanceIdentifierContext instanceIdentifier = controllerContext
-                .toInstanceIdentifier("simple-nodes:users/yang-ext:mount/test-interface2:class/student/name");
+                .buildIdentifier("simple-nodes:users/yang-ext:mount/test-interface2:class/student/name");
         assertEquals(
                 "[(urn:ietf:params:xml:ns:yang:test-interface2?revision=2014-08-01)class, (urn:ietf:params:xml:ns:yang:test-interface2?revision=2014-08-01)student[{(urn:ietf:params:xml:ns:yang:test-interface2?revision=2014-08-01)name=name}]]",
                 ImmutableList.copyOf(instanceIdentifier.getInstanceIdentifier().getPathArguments()).toString());
@@ -131,7 +131,7 @@ public class URITest {
     public void testMountPointWithoutExternModul() throws FileNotFoundException {
         initMountService(true);
         InstanceIdentifierContext instanceIdentifier = controllerContext
-                .toInstanceIdentifier("simple-nodes:users/yang-ext:mount/");
+                .buildIdentifier("simple-nodes:users/yang-ext:mount/");
         assertTrue(Iterables.isEmpty(instanceIdentifier.getInstanceIdentifier().getPathArguments()));
     }
 
@@ -140,7 +140,7 @@ public class URITest {
         exception.expect(RestconfDocumentedException.class);
 
         controllerContext.setMountService(null);
-        controllerContext.toInstanceIdentifier("simple-nodes:users/yang-ext:mount/test-interface2:class/student/name");
+        controllerContext.buildIdentifier("simple-nodes:users/yang-ext:mount/test-interface2:class/student/name");
     }
 
     @Test
@@ -148,7 +148,7 @@ public class URITest {
         initMountService(false);
         exception.expect(RestconfDocumentedException.class);
 
-        controllerContext.toInstanceIdentifier("simple-nodes:users/yang-ext:mount/test-interface2:class");
+        controllerContext.buildIdentifier("simple-nodes:users/yang-ext:mount/test-interface2:class");
     }
 
     public void initMountService(final boolean withSchema) {

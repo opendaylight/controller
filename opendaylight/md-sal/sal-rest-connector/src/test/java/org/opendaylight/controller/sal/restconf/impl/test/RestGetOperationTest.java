@@ -1026,7 +1026,7 @@ public class RestGetOperationTest extends JerseyTest {
             }
         }
 
-        return builder.toInstance();
+        return builder.build();
     }
 
     private NodeData toCompositeNodeData(final QName key, final NodeData... childData) {

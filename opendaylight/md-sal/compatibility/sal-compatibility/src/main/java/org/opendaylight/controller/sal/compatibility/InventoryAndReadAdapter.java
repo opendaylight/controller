@@ -242,7 +242,7 @@ public class InventoryAndReadAdapter implements IPluginInReadService, IPluginInI
                 InstanceIdentifier.builder(Nodes.class)
                 .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node.class, InventoryMapping.toNodeKey(connector.getNode()))
                 .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector.class, InventoryMapping.toNodeConnectorKey(connector))
-                .toInstance();
+                .build();
 
         return((org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector) startChange().readConfigurationData(nodeConnectorRef));
     }
@@ -545,7 +545,7 @@ public class InventoryAndReadAdapter implements IPluginInReadService, IPluginInI
                 final InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node> nodeRef =
                         InstanceIdentifier.builder(Nodes.class)
                         .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node.class, new NodeKey(notification.getId()))
-                        .toInstance();
+                        .build();
                 try {
                     statsPublisher.descriptionStatisticsUpdated(NodeMapping.toADNode(nodeRef), description);
                 } catch (ConstructionException e) {

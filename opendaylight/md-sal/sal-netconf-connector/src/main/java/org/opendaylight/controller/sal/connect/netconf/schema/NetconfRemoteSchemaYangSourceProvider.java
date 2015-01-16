@@ -64,7 +64,7 @@ public final class NetconfRemoteSchemaYangSourceProvider implements SchemaSource
             request.addLeaf("version", revision.get());
         }
         request.addLeaf("format", "yang");
-        return request.toInstance();
+        return request.build();
     }
 
     private static Optional<String> getSchemaFromRpc(final RemoteDeviceId id, final CompositeNode result) {

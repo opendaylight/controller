@@ -47,7 +47,7 @@ public class BindingIndependentConnector implements //
 
     private static final Logger LOG = LoggerFactory.getLogger(BindingIndependentConnector.class);
     private static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier ROOT_BI = org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier
-            .builder().toInstance();
+            .builder().build();
 
     private BindingIndependentMappingService mappingService;
     private org.opendaylight.controller.sal.core.api.data.DataProviderService biDataService;

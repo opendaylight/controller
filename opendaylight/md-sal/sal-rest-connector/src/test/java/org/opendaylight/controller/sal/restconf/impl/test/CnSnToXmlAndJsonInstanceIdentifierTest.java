@@ -202,9 +202,9 @@ public class CnSnToXmlAndJsonInstanceIdentifierTest extends YangAndXmlAndDataSch
         SimpleNode<?> lf111 = NodeFactory.createImmutableSimpleNode(
                 QName.create("augment:augment:module", "2014-01-17", "lf111"), null, instanceIdentifier);
         lst11.add(lf111);
-        cont1.add(lst11.toInstance());
-        cont.add(cont1.toInstance());
-        return cont.toInstance();
+        cont1.add(lst11.build());
+        cont.add(cont1.build());
+        return cont.build();
     }
 
     private YangInstanceIdentifier createInstanceIdentifier() throws URISyntaxException {

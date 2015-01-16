@@ -202,7 +202,7 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
             builder.add(errorInfoNode);
         }
 
-        return builder.toInstance();
+        return builder.build();
     }
 
     private Node<?> parseErrorInfo(final String errorInfo) {

@@ -58,7 +58,7 @@ public class DOMCodecBug03Test extends AbstractDataServiceTest implements DataCh
             NODE_ID);
 
     private static final InstanceIdentifier<Nodes> NODES_INSTANCE_ID_BA = InstanceIdentifier.builder(Nodes.class) //
-            .toInstance();
+            .build();
 
 
     private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA = NODES_INSTANCE_ID_BA.child(Node.class, NODE_KEY);
@@ -69,14 +69,14 @@ public class DOMCodecBug03Test extends AbstractDataServiceTest implements DataCh
             .child(Node.class, NODE_KEY) //
             .augmentation(FlowCapableNode.class) //
             .child(SupportedActions.class)
-            .toInstance();
+            .build();
 
 
     private static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier NODE_INSTANCE_ID_BI = //
     org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.builder() //
             .node(Nodes.QNAME) //
             .nodeWithKey(Node.QNAME, NODE_KEY_BI) //
-            .toInstance();
+            .build();
     private static final QName SUPPORTED_ACTIONS_QNAME = QName.create(FlowCapableNode.QNAME, SupportedActions.QNAME.getLocalName());
 
 
@@ -85,7 +85,7 @@ public class DOMCodecBug03Test extends AbstractDataServiceTest implements DataCh
                     .node(Nodes.QNAME) //
                     .nodeWithKey(Node.QNAME, NODE_KEY_BI) //
                     .node(SUPPORTED_ACTIONS_QNAME) //
-                    .toInstance();
+                    .build();
 
     private final SettableFuture<DataChangeEvent<InstanceIdentifier<?>, DataObject>> receivedChangeEvent = SettableFuture.create();
 

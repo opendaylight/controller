@@ -157,7 +157,7 @@ public class RestPutListDataTest {
             payloadBuilder.addLeaf(key2, payloadKey2);
         }
 
-        restconfImpl.updateConfigurationData(toUri(uriKey1, uriKey2), payloadBuilder.toInstance());
+        restconfImpl.updateConfigurationData(toUri(uriKey1, uriKey2), payloadBuilder.build());
     }
 
     public void putListDataWithWrapperTest(final String uriKey1, final String uriKey2, final String payloadKey1,

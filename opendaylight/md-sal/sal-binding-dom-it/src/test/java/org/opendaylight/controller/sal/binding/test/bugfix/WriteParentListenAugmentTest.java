@@ -38,13 +38,13 @@ public class WriteParentListenAugmentTest extends AbstractDataServiceTest {
 
     private static final NodeKey NODE_KEY = new NodeKey(new NodeId(NODE_ID));
     private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA = InstanceIdentifier.builder(Nodes.class) //
-            .child(Node.class, NODE_KEY).toInstance();
+            .child(Node.class, NODE_KEY).build();
 
     private static final InstanceIdentifier<FlowCapableNode> AUGMENT_WILDCARDED_PATH = InstanceIdentifier
-            .builder(Nodes.class).child(Node.class).augmentation(FlowCapableNode.class).toInstance();
+            .builder(Nodes.class).child(Node.class).augmentation(FlowCapableNode.class).build();
 
     private static final InstanceIdentifier<FlowCapableNode> AUGMENT_NODE_PATH = InstanceIdentifier
-            .builder(Nodes.class).child(Node.class, NODE_KEY).augmentation(FlowCapableNode.class).toInstance();
+            .builder(Nodes.class).child(Node.class, NODE_KEY).augmentation(FlowCapableNode.class).build();
 
     @Test
     public void writeNodeListenAugment() throws Exception {

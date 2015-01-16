@@ -100,14 +100,14 @@ public class NetconfToRpcRequestTest {
         anyxmlInterfBuilder.addLeaf(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "name"), "Ethernet0/0");
         anyxmlInterfBuilder.addLeaf(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "mtu"), "1500");
 
-        anyxmlTopBuilder.add(anyxmlInterfBuilder.toInstance());
-        configBuilder.add(anyxmlTopBuilder.toInstance());
+        anyxmlTopBuilder.add(anyxmlInterfBuilder.build());
+        configBuilder.add(anyxmlTopBuilder.build());
 
-        inputBuilder.add(targetBuilder.toInstance());
-        inputBuilder.add(configBuilder.toInstance());
+        inputBuilder.add(targetBuilder.build());
+        inputBuilder.add(configBuilder.build());
 
-        rootBuilder.add(inputBuilder.toInstance());
-        final ImmutableCompositeNode root = rootBuilder.toInstance();
+        rootBuilder.add(inputBuilder.build());
+        final ImmutableCompositeNode root = rootBuilder.build();
 
         final NetconfMessage message = messageTransformer.toRpcRequest(EDIT_CONFIG_QNAME, root);
         assertNotNull(message);
@@ -151,8 +151,8 @@ public class NetconfToRpcRequestTest {
         final CompositeNodeBuilder<ImmutableCompositeNode> inputBuilder = ImmutableCompositeNode.builder();
         inputBuilder.setQName(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "input"));
 
-        rootBuilder.add(inputBuilder.toInstance());
-        final ImmutableCompositeNode root = rootBuilder.toInstance();
+        rootBuilder.add(inputBuilder.build());
+        final ImmutableCompositeNode root = rootBuilder.build();
 
         final NetconfMessage message = messageTransformer.toRpcRequest(GET_QNAME, root);
         assertNotNull(message);
@@ -186,12 +186,12 @@ public class NetconfToRpcRequestTest {
         anyxmlTopBuilder.setQName(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "top"));
         anyxmlTopBuilder.addLeaf(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "users"), null);
 
-        anyxmlFilterBuilder.add(anyxmlTopBuilder.toInstance());
+        anyxmlFilterBuilder.add(anyxmlTopBuilder.build());
 
-        inputBuilder.add(sourceBuilder.toInstance());
-        inputBuilder.add(anyxmlFilterBuilder.toInstance());
-        rootBuilder.add(inputBuilder.toInstance());
-        final ImmutableCompositeNode root = rootBuilder.toInstance();
+        inputBuilder.add(sourceBuilder.build());
+        inputBuilder.add(anyxmlFilterBuilder.build());
+        rootBuilder.add(inputBuilder.build());
+        final ImmutableCompositeNode root = rootBuilder.build();
 
         final NetconfMessage message = messageTransformer.toRpcRequest(GET_CONFIG_QNAME, root);
         assertNotNull(message);
@@ -230,8 +230,8 @@ public class NetconfToRpcRequestTest {
         inputBuilder.setQName(INPUT_QNAME);
         inputBuilder.addLeaf(STREAM_NAME, "NETCONF");
 
-        rootBuilder.add(inputBuilder.toInstance());
-        final ImmutableCompositeNode root = rootBuilder.toInstance();
+        rootBuilder.add(inputBuilder.build());
+        final ImmutableCompositeNode root = rootBuilder.build();
 
         final CompositeNode flattenedNode = NetconfMessageTransformUtil.flattenInput(root);
         assertNotNull(flattenedNode);

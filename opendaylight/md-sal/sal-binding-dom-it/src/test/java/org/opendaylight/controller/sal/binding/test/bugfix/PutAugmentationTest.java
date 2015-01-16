@@ -56,11 +56,11 @@ public class PutAugmentationTest extends AbstractDataServiceTest implements Data
             NODE_ID);
 
     private static final InstanceIdentifier<Nodes> NODES_INSTANCE_ID_BA = InstanceIdentifier.builder(Nodes.class) //
-            .toInstance();
+            .build();
 
     private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA = //
             NODES_INSTANCE_ID_BA.builder() //
-            .child(Node.class, NODE_KEY).toInstance();
+            .child(Node.class, NODE_KEY).build();
 
     private static final InstanceIdentifier<FlowCapableNode> ALL_FLOW_CAPABLE_NODES = //
             NODES_INSTANCE_ID_BA.builder() //
@@ -72,7 +72,7 @@ public class PutAugmentationTest extends AbstractDataServiceTest implements Data
     org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.builder() //
             .node(Nodes.QNAME) //
             .nodeWithKey(Node.QNAME, NODE_KEY_BI) //
-            .toInstance();
+            .build();
     private static final InstanceIdentifier<FlowCapableNode> FLOW_AUGMENTATION_PATH =
             NODE_INSTANCE_ID_BA.builder() //
             .augmentation(FlowCapableNode.class) //

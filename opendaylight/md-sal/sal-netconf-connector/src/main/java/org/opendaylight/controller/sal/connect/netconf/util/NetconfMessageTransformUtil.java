@@ -387,9 +387,9 @@ public class NetconfMessageTransformUtil {
         it.setQName(NETCONF_FILTER_QNAME);
         it.setAttribute(NETCONF_TYPE_QNAME, type);
         if (node != null) {
-            return it.add(node).toInstance();
+            return it.add(node).build();
         } else {
-            return it.toInstance();
+            return it.build();
         }
     }
 
@@ -446,7 +446,7 @@ public class NetconfMessageTransformUtil {
             addPredicatesToCompositeNodeBuilder(getPredicates(arg), builder);
 
             builder.add(previous);
-            previous = builder.toInstance();
+            previous = builder.build();
         }
         return ImmutableCompositeNode.create(NETCONF_CONFIG_QNAME, ImmutableList.<Node<?>>of(previous));
     }
@@ -484,6 +484,6 @@ public class NetconfMessageTransformUtil {
             }
         }
 
-        return builder.toInstance();
+        return builder.build();
     }
 }

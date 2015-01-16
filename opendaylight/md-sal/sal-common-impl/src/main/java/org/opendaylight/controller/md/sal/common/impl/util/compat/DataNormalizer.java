@@ -190,7 +190,7 @@ public class DataNormalizer {
                 addToBuilder(builder, toLegacy(child));
             }
         }
-        return builder.toInstance();
+        return builder.build();
     }
 
     private static Iterable<? extends Node<?>> toLegacyNodesFromUnkeyedList(final UnkeyedListNode mixin) {

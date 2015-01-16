@@ -153,7 +153,7 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
                 YangInstanceIdentifier instanceIdentifier = YangInstanceIdentifier
                         .builder()
                         .node(XSQLODLUtils.getPath(table.getODLNode()).get(0))
-                        .toInstance();
+                        .build();
                 DOMDataReadTransaction t = this.domDataBroker
                         .newReadOnlyTransaction();
                 Object node = t.read(type,

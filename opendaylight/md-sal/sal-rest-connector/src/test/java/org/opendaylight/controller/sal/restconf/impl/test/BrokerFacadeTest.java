@@ -80,7 +80,7 @@ public class BrokerFacadeTest {
 
     QName qname = TestUtils.buildQName("interfaces","test:module", "2014-01-09");
 
-    YangInstanceIdentifier instanceID = YangInstanceIdentifier.builder().node(qname).toInstance();
+    YangInstanceIdentifier instanceID = YangInstanceIdentifier.builder().node(qname).build();
 
     @Mock
     DOMDataReadOnlyTransaction rTransaction;
