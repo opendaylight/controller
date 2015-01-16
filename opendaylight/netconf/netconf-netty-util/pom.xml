@@ -85,13 +85,7 @@
         <artifactId>maven-bundle-plugin</artifactId>
         <configuration>
           <instructions>
-            <Import-Package>org.apache.sshd.*, com.google.common.base, com.google.common.collect, io.netty.buffer,
-              io.netty.channel, io.netty.channel.socket, io.netty.handler.codec, io.netty.handler.ssl, io.netty.util,
-              io.netty.util.concurrent, javax.xml.transform, javax.xml.transform.dom, javax.xml.transform.sax,
-              javax.xml.transform.stream, org.opendaylight.controller.netconf.api,
-              org.opendaylight.controller.netconf.util.messages, org.opendaylight.controller.netconf.util.xml,
-              org.opendaylight.protocol.framework, org.openexi.proc, org.openexi.proc.common, org.openexi.proc.grammars,
-              org.openexi.sax, org.openexi.schema, org.slf4j, org.w3c.dom, org.xml.sax</Import-Package>
+            <Import-Package>*</Import-Package>
             <Export-Package>org.opendaylight.controller.netconf.nettyutil,
               org.opendaylight.controller.netconf.nettyutil.handler,
               org.opendaylight.controller.netconf.nettyutil.handler.exi,
