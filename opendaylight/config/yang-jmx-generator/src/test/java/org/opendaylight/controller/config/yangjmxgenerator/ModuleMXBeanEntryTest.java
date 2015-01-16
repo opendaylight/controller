@@ -8,6 +8,7 @@
 package org.opendaylight.controller.config.yangjmxgenerator;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.isA;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -16,7 +17,6 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-
 import com.google.common.collect.Sets;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -113,7 +113,7 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
                 is("threadFactory"));
         assertThat(threadFactoryAttribute.getUpperCaseCammelCase(),
                 is("ThreadFactory"));
-        assertThat(threadFactoryAttribute.getOpenType(), is(SimpleType.class));
+        assertThat(threadFactoryAttribute.getOpenType(), isA(SimpleType.class));
         assertNull(threadFactoryAttribute.getNullableDefault());
         assertNull(threadFactoryAttribute.getNullableDescription());
         assertThat(threadFactoryAttribute.getType().getName(), is("ObjectName"));
@@ -261,7 +261,7 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
                 assertThat(toAttr.getAttributeYangName(), is("peer"));
                 assertThat(toAttr.getLowerCaseCammelCase(), is("peer"));
                 assertThat(toAttr.getUpperCaseCammelCase(), is("Peer"));
-                assertThat(toAttr.getOpenType(), is(CompositeType.class));
+                assertThat(toAttr.getOpenType(), isA(CompositeType.class));
                 Set<String> propsExpected = new HashSet<String>(2);
                 propsExpected.add("port");
                 propsExpected.add("core-size");
@@ -296,7 +296,7 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
                         is("innerStreamList"));
                 assertThat(innerStream.getUpperCaseCammelCase(),
                         is("InnerStreamList"));
-                assertThat(innerStream.getOpenType(), is(ArrayType.class));
+                assertThat(innerStream.getOpenType(), isA(ArrayType.class));
 
             }
 
