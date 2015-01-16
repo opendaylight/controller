@@ -249,15 +249,10 @@ final class ModuleMXBeanEntryBuilder {
         String moduleLocalNameFromXPath = matcher.group(1);
         IdentitySchemaNode moduleIdentity = moduleIdentities.get(moduleLocalNameFromXPath);
         unaugmentedModuleIdentities.remove(moduleLocalNameFromXPath);
-        checkState(moduleIdentity != null, "Cannot find identity " + moduleLocalNameFromXPath
-                + " matching augmentation " + augmentation);
+        checkState(moduleIdentity != null, "Cannot find identity %s matching augmentation %s", moduleLocalNameFromXPath, augmentation);
         Map<String, QName> providedServices = findProvidedServices(moduleIdentity, currentModule, qNamesToSIEs,
                 schemaContext);
 
-        if (moduleIdentity == null) {
-            throw new IllegalStateException("Cannot find identity specified by augmentation xpath constraint: "
-                    + moduleLocalNameFromXPath + " of " + augmentation);
-        }
         String javaNamePrefix = TypeProviderWrapper.findJavaNamePrefix(moduleIdentity);
 
         Map<String, AttributeIfc> yangToAttributes = null;
