@@ -891,10 +891,6 @@ public class RestconfImpl implements RestconfService {
             final DataNodeContainer parentSchema = (DataNodeContainer) incompleteInstIdWithData.getSchemaNode();
             DOMMountPoint mountPoint = incompleteInstIdWithData.getMountPoint();
             final Module module = findModule(mountPoint, payload);
-            if (module == null) {
-                throw new RestconfDocumentedException("Module was not found for \"" + payloadNS + "\"",
-                        ErrorType.PROTOCOL, ErrorTag.UNKNOWN_ELEMENT);
-            }
 
             String payloadName = this.getName(payload);
             final DataSchemaNode schemaNode = ControllerContext.findInstanceDataChildByNameAndNamespace(
@@ -941,11 +937,6 @@ public class RestconfImpl implements RestconfService {
         }
 
         final Module module = this.findModule(null, payload);
-        if (module == null) {
-            throw new RestconfDocumentedException(
-                    "Data has bad format. Root element node has incorrect namespace (XML format) or module name(JSON format)",
-                    ErrorType.PROTOCOL, ErrorTag.UNKNOWN_NAMESPACE);
-        }
 
         String payloadName = this.getName(payload);
         final DataSchemaNode schemaNode = ControllerContext.findInstanceDataChildByNameAndNamespace(module,
@@ -1112,19 +1103,23 @@ public class RestconfImpl implements RestconfService {
     }
 
     private Module findModule(final DOMMountPoint mountPoint, final Node<?> data) {
+        Module module = null;
         if (data instanceof NodeWrapper) {
-            return findModule(mountPoint, (NodeWrapper<?>) data);
+            module = findModule(mountPoint, (NodeWrapper<?>) data);
         } else if (data != null) {
             URI namespace = data.getNodeType().getNamespace();
             if (mountPoint != null) {
-                return this.controllerContext.findModuleByNamespace(mountPoint, namespace);
+                module = this.controllerContext.findModuleByNamespace(mountPoint, namespace);
             } else {
-                return this.controllerContext.findModuleByNamespace(namespace);
+                module = this.controllerContext.findModuleByNamespace(namespace);
             }
-        } else {
-            throw new IllegalArgumentException("Unhandled parameter types: "
-                    + Arrays.<Object> asList(mountPoint, data).toString());
         }
+        if (module != null) {
+            return module;
+        }
+        throw new RestconfDocumentedException(
+                "Data has bad format. Root element node has incorrect namespace (XML format) or module name(JSON format)",
+                ErrorType.PROTOCOL, ErrorTag.UNKNOWN_NAMESPACE);
     }
 
     private Module findModule(final DOMMountPoint mountPoint, final NodeWrapper<?> data) {
