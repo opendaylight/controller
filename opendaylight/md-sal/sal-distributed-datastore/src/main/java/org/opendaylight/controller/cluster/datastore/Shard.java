@@ -133,7 +133,7 @@ public class Shard extends RaftActor {
 
     private Cancellable txCommitTimeoutCheckSchedule;
 
-    private Optional<ActorRef> roleChangeNotifier;
+    private final Optional<ActorRef> roleChangeNotifier;
 
     /**
      * Coordinates persistence recovery on startup.
@@ -428,7 +428,7 @@ public class Shard extends RaftActor {
         doAbortTransaction(abort.getTransactionID(), getSender());
     }
 
-    private void doAbortTransaction(final String transactionID, final ActorRef sender) {
+    void doAbortTransaction(final String transactionID, final ActorRef sender) {
         final CohortEntry cohortEntry = commitCoordinator.getCohortEntryIfCurrent(transactionID);
         if(cohortEntry != null) {
             LOG.debug("Aborting transaction {}", transactionID);
