@@ -110,8 +110,6 @@ public class ShardManagerTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
             final ActorRef shardManager = getSystem().actorOf(newShardMgrProps());
 
-            shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
-
             shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, false).toSerializable(), getRef());
 
             expectMsgClass(duration("5 seconds"), ActorNotInitialized.class);
@@ -173,8 +171,6 @@ public class ShardManagerTest extends AbstractActorTest {
     public void testOnReceiveFindLocalShardForNotInitializedShard() throws Exception {
         new JavaTestKit(getSystem()) {{
             final ActorRef shardManager = getSystem().actorOf(newShardMgrProps());
-
-            shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
 
             shardManager.tell(new FindLocalShard(Shard.DEFAULT_NAME, false), getRef());
 
