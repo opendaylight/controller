@@ -321,13 +321,13 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
                 return new YangInstanceIdentifier.AugmentationIdentifier(readQNameSet());
 
             case PathArgumentTypes.NODE_IDENTIFIER :
-            return new NodeIdentifier(readQName());
+                return new NodeIdentifier(readQName());
 
             case PathArgumentTypes.NODE_IDENTIFIER_WITH_PREDICATES :
-            return new NodeIdentifierWithPredicates(readQName(), readKeyValueMap());
+                return new NodeIdentifierWithPredicates(readQName(), readKeyValueMap());
 
             case PathArgumentTypes.NODE_IDENTIFIER_WITH_VALUE :
-            return new NodeWithValue(readQName(), readObject());
+                return new NodeWithValue(readQName(), readObject());
 
             default :
                 return null;

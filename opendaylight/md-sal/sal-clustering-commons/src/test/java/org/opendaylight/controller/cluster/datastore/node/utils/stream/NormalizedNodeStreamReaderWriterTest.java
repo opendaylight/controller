@@ -63,8 +63,12 @@ public class NormalizedNodeStreamReaderWriterTest {
                 withChild(ImmutableLeafSetNodeBuilder.create().withNodeIdentifier(
                         new YangInstanceIdentifier.NodeIdentifier(TestModel.BINARY_LEAF_LIST_QNAME)).
                         withChild(entry1).withChild(entry2).build()).
-                withChild(ImmutableNodes.leafNode(TestModel.SOME_BINARY_DATE_QNAME, new byte[]{1,2,3,4})).
-                        build();
+                withChild(ImmutableNodes.leafNode(TestModel.SOME_BINARY_DATA_QNAME, new byte[]{1,2,3,4})).
+                withChild(Builders.orderedMapBuilder().
+                      withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.ORDERED_LIST_QNAME)).
+                      withChild(ImmutableNodes.mapEntry(TestModel.ORDERED_LIST_ENTRY_QNAME,
+                              TestModel.ID_QNAME, 11)).build()).
+                build();
     }
 
     private void testNormalizedNodeStreamReaderWriter(NormalizedNode<?, ?> input) throws IOException {

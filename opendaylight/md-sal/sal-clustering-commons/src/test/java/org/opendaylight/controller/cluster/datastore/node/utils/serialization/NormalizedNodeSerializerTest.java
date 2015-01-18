@@ -60,7 +60,7 @@ public class NormalizedNodeSerializerTest {
         }
 
         ContainerNode node1 = TestModel.createBaseTestContainerBuilder()
-                .withChild(ImmutableNodes.leafNode(TestModel.SOME_BINARY_DATE_QNAME, binaryData))
+                .withChild(ImmutableNodes.leafNode(TestModel.SOME_BINARY_DATA_QNAME, binaryData))
                 .build();
 
         NormalizedNodeMessages.Node serializedNode1 = NormalizedNodeSerializer
@@ -73,7 +73,7 @@ public class NormalizedNodeSerializerTest {
         // FIXME: This will not work due to BUG 2326. Once that is fixed we can uncomment this assertion
         // assertEquals(node1, node2);
 
-        Optional<DataContainerChild<? extends YangInstanceIdentifier.PathArgument, ?>> child = node2.getChild(new YangInstanceIdentifier.NodeIdentifier(TestModel.SOME_BINARY_DATE_QNAME));
+        Optional<DataContainerChild<? extends YangInstanceIdentifier.PathArgument, ?>> child = node2.getChild(new YangInstanceIdentifier.NodeIdentifier(TestModel.SOME_BINARY_DATA_QNAME));
 
         Object value = child.get().getValue();
 
