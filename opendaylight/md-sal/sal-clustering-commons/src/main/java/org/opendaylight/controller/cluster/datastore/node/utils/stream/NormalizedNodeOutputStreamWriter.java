@@ -310,7 +310,6 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
         }
     }
 
-    @SuppressWarnings("rawtypes")
     private void writeObject(Object value) throws IOException {
 
         byte type = ValueTypes.getSerializableType(value);
