@@ -15,6 +15,8 @@ import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.ma
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapNodeBuilder;
 import com.google.common.collect.ImmutableSet;
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -63,7 +65,7 @@ public class TestModel {
 
   public static final QName DESC_QNAME = QName.create(TEST_QNAME, "desc");
   public static final QName POINTER_QNAME = QName.create(TEST_QNAME, "pointer");
-  public static final QName SOME_BINARY_DATE_QNAME = QName.create(TEST_QNAME, "some-binary-data");
+  public static final QName SOME_BINARY_DATA_QNAME = QName.create(TEST_QNAME, "some-binary-data");
   public static final QName BINARY_LEAF_LIST_QNAME = QName.create(TEST_QNAME, "binary_leaf_list");
   public static final QName SOME_REF_QNAME = QName.create(TEST_QNAME,
       "some-ref");
@@ -72,8 +74,8 @@ public class TestModel {
   public static final QName SWITCH_FEATURES_QNAME = QName.create(TEST_QNAME,
       "switch-features");
 
-  public static final QName AUGMENTED_LIST_QNAME = QName.create(TEST_QNAME,
-      "augmented-list");
+  public static final QName AUGMENTED_LIST_QNAME = QName.create(TEST_QNAME, "augmented-list");
+  public static final QName AUGMENTED_LIST_ENTRY_QNAME = QName.create(TEST_QNAME, "augmented-list-entry");
 
   public static final QName OUTER_LIST_QNAME = QName.create(TEST_QNAME,
       "outer-list");
@@ -84,6 +86,16 @@ public class TestModel {
   public static final QName ID_QNAME = QName.create(TEST_QNAME, "id");
   public static final QName NAME_QNAME = QName.create(TEST_QNAME, "name");
   public static final QName VALUE_QNAME = QName.create(TEST_QNAME, "value");
+  public static final QName BOOLEAN_LEAF_QNAME = QName.create(TEST_QNAME, "boolean-leaf");
+  public static final QName SHORT_LEAF_QNAME = QName.create(TEST_QNAME, "short-leaf");
+  public static final QName BYTE_LEAF_QNAME = QName.create(TEST_QNAME, "byte-leaf");
+  public static final QName BIGINTEGER_LEAF_QNAME = QName.create(TEST_QNAME, "biginteger-leaf");
+  public static final QName BIGDECIMAL_LEAF_QNAME = QName.create(TEST_QNAME, "bigdecimal-leaf");
+  public static final QName ORDERED_LIST_QNAME = QName.create(TEST_QNAME, "ordered-list");
+  public static final QName ORDERED_LIST_ENTRY_QNAME = QName.create(TEST_QNAME, "ordered-list-entry");
+  public static final QName UNKEYED_LIST_QNAME = QName.create(TEST_QNAME, "unkeyed-list");
+  public static final QName UNKEYED_LIST_ENTRY_QNAME = QName.create(TEST_QNAME, "unkeyed-list-entry");
+  public static final QName CHOICE_QNAME = QName.create(TEST_QNAME, "choice");
   private static final String DATASTORE_TEST_YANG = "/odl-datastore-test.yang";
   private static final String DATASTORE_AUG_YANG =
       "/odl-datastore-augmentation.yang";
@@ -106,7 +118,7 @@ public class TestModel {
   private static final String TWO_TWO_NAME = "two";
   private static final String DESC = "Hello there";
   private static final Long LONG_ID = 1L;
-  private static final Boolean ENABLED = false;
+  private static final Boolean ENABLED = true;
   private static final Short SHORT_ID = 1;
   private static final Byte BYTE_ID = 1;
   // Family specific constants
@@ -147,83 +159,6 @@ public class TestModel {
   private static final String FIRST_GRAND_CHILD_NAME = "first grand child";
   private static final String SECOND_GRAND_CHILD_NAME = "second grand child";
 
-
-  // first child
-  private static final YangInstanceIdentifier CHILDREN_1_PATH =
-      YangInstanceIdentifier.builder(CHILDREN_PATH)
-          .nodeWithKey(CHILDREN_QNAME, CHILD_NUMBER_QNAME, FIRST_CHILD_ID) //
-          .build();
-  private static final YangInstanceIdentifier CHILDREN_1_NAME_PATH =
-      YangInstanceIdentifier.builder(CHILDREN_PATH)
-          .nodeWithKey(CHILDREN_QNAME, CHILD_NAME_QNAME, FIRST_CHILD_NAME) //
-          .build();
-
-  private static final YangInstanceIdentifier CHILDREN_2_PATH =
-      YangInstanceIdentifier.builder(CHILDREN_PATH)
-          .nodeWithKey(CHILDREN_QNAME, CHILD_NUMBER_QNAME, SECOND_CHILD_ID) //
-          .build();
-  private static final YangInstanceIdentifier CHILDREN_2_NAME_PATH =
-      YangInstanceIdentifier.builder(CHILDREN_PATH)
-          .nodeWithKey(CHILDREN_QNAME, CHILD_NAME_QNAME, SECOND_CHILD_NAME) //
-          .build();
-
-
-  private static final YangInstanceIdentifier GRAND_CHILD_1_PATH =
-      YangInstanceIdentifier
-          .builder(CHILDREN_1_PATH)
-          .node(GRAND_CHILDREN_QNAME)
-          //
-          .nodeWithKey(GRAND_CHILDREN_QNAME, GRAND_CHILD_NUMBER_QNAME,
-              FIRST_GRAND_CHILD_ID) //
-          .build();
-
-  private static final YangInstanceIdentifier GRAND_CHILD_1_NAME_PATH =
-      YangInstanceIdentifier
-          .builder(CHILDREN_1_PATH)
-          .node(GRAND_CHILDREN_QNAME)
-          //
-          .nodeWithKey(GRAND_CHILDREN_QNAME, GRAND_CHILD_NAME_QNAME,
-              FIRST_GRAND_CHILD_NAME) //
-          .build();
-
-  private static final YangInstanceIdentifier GRAND_CHILD_2_PATH =
-      YangInstanceIdentifier
-          .builder(CHILDREN_2_PATH)
-          .node(GRAND_CHILDREN_QNAME)
-          //
-          .nodeWithKey(GRAND_CHILDREN_QNAME, GRAND_CHILD_NUMBER_QNAME,
-              SECOND_GRAND_CHILD_ID) //
-          .build();
-
-  private static final YangInstanceIdentifier GRAND_CHILD_2_NAME_PATH =
-      YangInstanceIdentifier
-          .builder(CHILDREN_2_PATH)
-          .node(GRAND_CHILDREN_QNAME)
-          //
-          .nodeWithKey(GRAND_CHILDREN_QNAME, GRAND_CHILD_NAME_QNAME,
-              SECOND_GRAND_CHILD_NAME) //
-          .build();
-
-  private static final YangInstanceIdentifier DESC_PATH_ID =
-      YangInstanceIdentifier.builder(DESC_PATH).build();
-  private static final YangInstanceIdentifier OUTER_LIST_1_PATH =
-      YangInstanceIdentifier.builder(OUTER_LIST_PATH)
-          .nodeWithKey(OUTER_LIST_QNAME, ID_QNAME, ONE_ID) //
-          .build();
-
-  private static final YangInstanceIdentifier OUTER_LIST_2_PATH =
-      YangInstanceIdentifier.builder(OUTER_LIST_PATH)
-          .nodeWithKey(OUTER_LIST_QNAME, ID_QNAME, TWO_ID) //
-          .build();
-
-  private static final YangInstanceIdentifier TWO_TWO_PATH =
-      YangInstanceIdentifier.builder(OUTER_LIST_2_PATH).node(INNER_LIST_QNAME) //
-          .nodeWithKey(INNER_LIST_QNAME, NAME_QNAME, TWO_TWO_NAME) //
-          .build();
-
-  private static final YangInstanceIdentifier TWO_TWO_VALUE_PATH =
-      YangInstanceIdentifier.builder(TWO_TWO_PATH).node(VALUE_QNAME) //
-          .build();
 
   private static final MapEntryNode BAR_NODE = mapEntryBuilder(
       OUTER_LIST_QNAME, ID_QNAME, TWO_ID) //
@@ -361,7 +296,7 @@ public class TestModel {
 
 
       // Create augmentations
-      MapEntryNode mapEntry = createAugmentedListEntry(1, "First Test");
+      MapEntryNode augMapEntry = createAugmentedListEntry(1, "First Test");
 
       // Create a bits leaf
       NormalizedNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, Object, LeafNode<Object>>
@@ -370,10 +305,19 @@ public class TestModel {
                       QName.create(TEST_QNAME, "my-bits"))).withValue(
               ImmutableSet.of("foo", "bar"));
 
-      // Create unkey list entry
-      UnkeyedListEntryNode binaryDataKey =
-          Builders.unkeyedListEntryBuilder().withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME)).
-              withChild(ImmutableNodes.leafNode(SOME_BINARY_DATE_QNAME, DESC)).build();
+      // Create unkeyed list entry
+      UnkeyedListEntryNode unkeyedListEntry =
+          Builders.unkeyedListEntryBuilder().withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(UNKEYED_LIST_ENTRY_QNAME)).
+              withChild(ImmutableNodes.leafNode(NAME_QNAME, "unkeyed-entry-name")).build();
+
+      // Create YangInstanceIdentifier with all path arg types.
+      YangInstanceIdentifier instanceID = YangInstanceIdentifier.create(
+              new YangInstanceIdentifier.NodeIdentifier(QName.create(TEST_QNAME, "qname")),
+              new YangInstanceIdentifier.NodeIdentifierWithPredicates(QName.create(TEST_QNAME, "list-entry"),
+                      QName.create(TEST_QNAME, "key"), 10),
+              new YangInstanceIdentifier.AugmentationIdentifier(ImmutableSet.of(
+                      QName.create(TEST_QNAME, "aug1"), QName.create(TEST_QNAME, "aug2"))),
+              new YangInstanceIdentifier.NodeWithValue(QName.create(TEST_QNAME, "leaf-list-entry"), "foo"));
 
       Map<QName, Object> keyValues = new HashMap<>();
       keyValues.put(CHILDREN_QNAME, FIRST_CHILD_NAME);
@@ -382,32 +326,30 @@ public class TestModel {
       // Create the document
       return ImmutableContainerNodeBuilder
               .create()
-              .withNodeIdentifier(
-                  new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME))
+              .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME))
               .withChild(myBits.build())
               .withChild(ImmutableNodes.leafNode(DESC_QNAME, DESC))
-              .withChild(ImmutableNodes.leafNode(POINTER_QNAME, ENABLED))
-              .withChild(ImmutableNodes.leafNode(POINTER_QNAME, SHORT_ID))
-              .withChild(ImmutableNodes.leafNode(POINTER_QNAME, BYTE_ID))
-              .withChild(
-                  ImmutableNodes.leafNode(SOME_REF_QNAME, GRAND_CHILD_1_PATH))
+              .withChild(ImmutableNodes.leafNode(BOOLEAN_LEAF_QNAME, ENABLED))
+              .withChild(ImmutableNodes.leafNode(SHORT_LEAF_QNAME, SHORT_ID))
+              .withChild(ImmutableNodes.leafNode(BYTE_LEAF_QNAME, BYTE_ID))
+              .withChild(ImmutableNodes.leafNode(TestModel.BIGINTEGER_LEAF_QNAME, BigInteger.valueOf(100)))
+              .withChild(ImmutableNodes.leafNode(TestModel.BIGDECIMAL_LEAF_QNAME, BigDecimal.valueOf(1.2)))
+              .withChild(ImmutableNodes.leafNode(SOME_REF_QNAME, instanceID))
               .withChild(ImmutableNodes.leafNode(MYIDENTITY_QNAME, DESC_QNAME))
-               .withChild(Builders.unkeyedListBuilder().withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(OUTER_LIST_QNAME))
-                   .withChild(binaryDataKey).build())
-               .withChild(Builders.orderedMapBuilder()
-                   .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME)).withChild(mapEntry).build())
-               .withChild(Builders.choiceBuilder().withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME))
+              .withChild(Builders.unkeyedListBuilder()
+                   .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(UNKEYED_LIST_QNAME))
+                   .withChild(unkeyedListEntry).build())
+              .withChild(Builders.choiceBuilder()
+                   .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(CHOICE_QNAME))
                    .withChild(ImmutableNodes.leafNode(DESC_QNAME, LONG_ID)).build())
                       // .withChild(augmentationNode)
               .withChild(shoes)
               .withChild(numbers)
               .withChild(switchFeatures)
-              .withChild(
-                  mapNodeBuilder(AUGMENTED_LIST_QNAME).withChild(mapEntry).build())
-              .withChild(
-                  mapNodeBuilder(OUTER_LIST_QNAME)
-                      .withChild(mapEntry(OUTER_LIST_QNAME, ID_QNAME, ONE_ID))
-                      .withChild(BAR_NODE).build()
+              .withChild(mapNodeBuilder(AUGMENTED_LIST_QNAME).withChild(augMapEntry).build())
+              .withChild(mapNodeBuilder(OUTER_LIST_QNAME)
+                   .withChild(mapEntry(OUTER_LIST_QNAME, ID_QNAME, ONE_ID))
+                   .withChild(BAR_NODE).build()
               );
   }
 
@@ -440,7 +382,7 @@ public class TestModel {
         .create()
         .withNodeIdentifier(
             new YangInstanceIdentifier.NodeIdentifierWithPredicates(
-                AUGMENTED_LIST_QNAME, ID_QNAME, id))
+                    AUGMENTED_LIST_ENTRY_QNAME, ID_QNAME, id))
         .withChild(ImmutableNodes.leafNode(ID_QNAME, id))
         .withChild(augmentationNode).build();
   }
