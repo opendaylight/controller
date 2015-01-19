@@ -11,9 +11,6 @@
   <artifactId>config-plugin-parent</artifactId>
   <packaging>pom</packaging>
   <name>${project.artifactId}</name>
-  <prerequisites>
-    <maven>3.0.4</maven>
-  </prerequisites>
 
   <build>
     <pluginManagement>
