@@ -13,9 +13,6 @@
   <version>0.3.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>${project.artifactId}</name>
-  <prerequisites>
-    <maven>3.0.4</maven>
-  </prerequisites>
 
   <modules>
     <module>netconf-api</module>
