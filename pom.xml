@@ -13,10 +13,6 @@
   <packaging>pom</packaging>
   <name>controller</name> <!-- Used by Sonar to set project name -->
 
-  <prerequisites>
-    <maven>3.0</maven>
-  </prerequisites>
-
   <modules>
 
     <!-- md-sal -->
