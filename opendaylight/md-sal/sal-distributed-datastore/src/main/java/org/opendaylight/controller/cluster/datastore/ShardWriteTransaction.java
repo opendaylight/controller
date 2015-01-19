@@ -43,8 +43,8 @@ public class ShardWriteTransaction extends ShardTransaction {
 
     public ShardWriteTransaction(DOMStoreWriteTransaction transaction, ActorRef shardActor,
             SchemaContext schemaContext, ShardStats shardStats, String transactionID,
-            int txnClientVersion) {
-        super(shardActor, schemaContext, shardStats, transactionID, txnClientVersion);
+            short clientTxVersion) {
+        super(shardActor, schemaContext, shardStats, transactionID, clientTxVersion);
         this.transaction = transaction;
     }
 
@@ -66,19 +66,19 @@ public class ShardWriteTransaction extends ShardTransaction {
             deleteData(transaction, (DeleteData) message, !SERIALIZED_REPLY);
 
         } else if (message instanceof ReadyTransaction) {
-            readyTransaction(transaction, new ReadyTransaction(), !SERIALIZED_REPLY);
+            readyTransaction(transaction, !SERIALIZED_REPLY);
 
-        } else if(WriteData.SERIALIZABLE_CLASS.equals(message.getClass())) {
-            writeData(transaction, WriteData.fromSerializable(message, getSchemaContext()), SERIALIZED_REPLY);
+        } else if(WriteData.isSerializedType(message)) {
+            writeData(transaction, WriteData.fromSerializable(message), SERIALIZED_REPLY);
 
-        } else if(MergeData.SERIALIZABLE_CLASS.equals(message.getClass())) {
-            mergeData(transaction, MergeData.fromSerializable(message, getSchemaContext()), SERIALIZED_REPLY);
+        } else if(MergeData.isSerializedType(message)) {
+            mergeData(transaction, MergeData.fromSerializable(message), SERIALIZED_REPLY);
 
         } else if(DeleteData.SERIALIZABLE_CLASS.equals(message.getClass())) {
             deleteData(transaction, DeleteData.fromSerializable(message), SERIALIZED_REPLY);
 
         } else if(ReadyTransaction.SERIALIZABLE_CLASS.equals(message.getClass())) {
-            readyTransaction(transaction, new ReadyTransaction(), SERIALIZED_REPLY);
+            readyTransaction(transaction, SERIALIZED_REPLY);
 
         } else if (message instanceof GetCompositedModification) {
             // This is here for testing only
@@ -97,7 +97,7 @@ public class ShardWriteTransaction extends ShardTransaction {
                 new WriteModification(message.getPath(), message.getData(), getSchemaContext()));
         try {
             transaction.write(message.getPath(), message.getData());
-            WriteDataReply writeDataReply = new WriteDataReply();
+            WriteDataReply writeDataReply = WriteDataReply.INSTANCE;
             getSender().tell(returnSerialized ? writeDataReply.toSerializable() : writeDataReply,
                 getSelf());
         }catch(Exception e){
@@ -114,8 +114,8 @@ public class ShardWriteTransaction extends ShardTransaction {
 
         try {
             transaction.merge(message.getPath(), message.getData());
-            MergeDataReply mergeDataReply = new MergeDataReply();
-            getSender().tell(returnSerialized ? mergeDataReply.toSerializable() : mergeDataReply ,
+            MergeDataReply mergeDataReply = MergeDataReply.INSTANCE;
+            getSender().tell(returnSerialized ? mergeDataReply.toSerializable() : mergeDataReply,
                 getSelf());
         }catch(Exception e){
             getSender().tell(new akka.actor.Status.Failure(e), getSelf());
@@ -137,15 +137,14 @@ public class ShardWriteTransaction extends ShardTransaction {
         }
     }
 
-    private void readyTransaction(DOMStoreWriteTransaction transaction, ReadyTransaction message,
-            boolean returnSerialized) {
+    private void readyTransaction(DOMStoreWriteTransaction transaction, boolean returnSerialized) {
         String transactionID = getTransactionID();
 
         LOG.debug("readyTransaction : {}", transactionID);
 
         DOMStoreThreePhaseCommitCohort cohort =  transaction.ready();
 
-        getShardActor().forward(new ForwardedReadyTransaction(transactionID, getTxnClientVersion(),
+        getShardActor().forward(new ForwardedReadyTransaction(transactionID, getClientTxVersion(),
                 cohort, modification, returnSerialized), getContext());
 
         // The shard will handle the commit from here so we're no longer needed - self-destruct.

@@ -71,7 +71,7 @@ public class DataChangeListener extends AbstractUntypedActor {
         // It seems the sender is never null but it doesn't hurt to check. If the caller passes in
         // a null sender (ActorRef.noSender()), akka translates that to the deadLetters actor.
         if(getSender() != null && !getContext().system().deadLetters().equals(getSender())) {
-            getSender().tell(new DataChangedReply(), getSelf());
+            getSender().tell(DataChangedReply.INSTANCE, getSelf());
         }
     }
 

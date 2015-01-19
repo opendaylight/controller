@@ -7,15 +7,14 @@
  */
 package org.opendaylight.controller.md.cluster.datastore.model;
 
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.Set;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
-
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.Set;
 
 public class TestModel {
 
@@ -26,6 +25,7 @@ public class TestModel {
   public static final QName OUTER_CHOICE_QNAME = QName.create(TEST_QNAME, "outer-choice");
   public static final QName ID_QNAME = QName.create(TEST_QNAME, "id");
   public static final QName NAME_QNAME = QName.create(TEST_QNAME, "name");
+  public static final QName DESC_QNAME = QName.create(TEST_QNAME, "desc");
   public static final QName VALUE_QNAME = QName.create(TEST_QNAME, "value");
   private static final String DATASTORE_TEST_YANG = "/odl-datastore-test.yang";
 

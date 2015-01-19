@@ -1,11 +1,21 @@
 package org.opendaylight.controller.cluster.datastore;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import akka.actor.ActorPath;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
 import akka.dispatch.Futures;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -23,18 +33,6 @@ import org.opendaylight.controller.cluster.datastore.messages.SerializableMessag
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.DoNothingActor;
 import scala.concurrent.Future;
-
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.isA;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
 
@@ -112,14 +110,14 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
         ThreePhaseCommitCohortProxy proxy = setupProxy(1);
 
         setupMockActorContext(CanCommitTransaction.SERIALIZABLE_CLASS,
-                new CanCommitTransactionReply(true));
+                CanCommitTransactionReply.YES);
 
         ListenableFuture<Boolean> future = proxy.canCommit();
 
         assertEquals("canCommit", true, future.get(5, TimeUnit.SECONDS));
 
         setupMockActorContext(CanCommitTransaction.SERIALIZABLE_CLASS,
-                new CanCommitTransactionReply(false));
+                CanCommitTransactionReply.NO);
 
         future = proxy.canCommit();
 
@@ -134,7 +132,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
         ThreePhaseCommitCohortProxy proxy = setupProxy(2);
 
         setupMockActorContext(CanCommitTransaction.SERIALIZABLE_CLASS,
-                new CanCommitTransactionReply(true), new CanCommitTransactionReply(true));
+                CanCommitTransactionReply.YES, CanCommitTransactionReply.YES);
 
         ListenableFuture<Boolean> future = proxy.canCommit();
 
@@ -149,8 +147,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
         ThreePhaseCommitCohortProxy proxy = setupProxy(3);
 
         setupMockActorContext(CanCommitTransaction.SERIALIZABLE_CLASS,
-                new CanCommitTransactionReply(true), new CanCommitTransactionReply(false),
-                new CanCommitTransactionReply(true));
+                CanCommitTransactionReply.YES, CanCommitTransactionReply.NO, CanCommitTransactionReply.YES);
 
         ListenableFuture<Boolean> future = proxy.canCommit();
 
@@ -289,7 +286,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
         ThreePhaseCommitCohortProxy proxy = setupProxy(2);
 
         setupMockActorContext(CanCommitTransaction.SERIALIZABLE_CLASS,
-                new CanCommitTransactionReply(true), new CanCommitTransactionReply(true));
+                CanCommitTransactionReply.YES, CanCommitTransactionReply.YES);
 
         setupMockActorContext(PreCommitTransaction.SERIALIZABLE_CLASS,
                 new PreCommitTransactionReply(), new PreCommitTransactionReply());

@@ -14,8 +14,12 @@ public class MergeDataReply implements SerializableMessage{
   public static final Class<ShardTransactionMessages.MergeDataReply> SERIALIZABLE_CLASS =
           ShardTransactionMessages.MergeDataReply.class;
 
+  private static final Object SERIALIZED_INSTANCE = ShardTransactionMessages.MergeDataReply.newBuilder().build();
+
+  public static final MergeDataReply INSTANCE = new MergeDataReply();
+
   @Override
   public Object toSerializable() {
-    return ShardTransactionMessages.MergeDataReply.newBuilder().build();
+    return SERIALIZED_INSTANCE;
   }
 }
