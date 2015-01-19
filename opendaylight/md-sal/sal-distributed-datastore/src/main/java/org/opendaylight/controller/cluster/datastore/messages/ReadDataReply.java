@@ -9,23 +9,20 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import com.google.protobuf.ByteString;
+import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
-public class ReadDataReply implements SerializableMessage {
-    public static final Class<ShardTransactionMessages.ReadDataReply> SERIALIZABLE_CLASS =
-            ShardTransactionMessages.ReadDataReply.class;
+public class ReadDataReply implements VersionedSerializableMessage {
+    public static final Class<ExternalizableReadDataReply> SERIALIZABLE_CLASS =
+            ExternalizableReadDataReply.class;
 
     private final NormalizedNode<?, ?> normalizedNode;
-    private final SchemaContext schemaContext;
 
-    public ReadDataReply(SchemaContext context,NormalizedNode<?, ?> normalizedNode){
+    public ReadDataReply(NormalizedNode<?, ?> normalizedNode){
 
         this.normalizedNode = normalizedNode;
-        this.schemaContext = context;
     }
 
     public NormalizedNode<?, ?> getNormalizedNode() {
@@ -33,26 +30,51 @@ public class ReadDataReply implements SerializableMessage {
     }
 
     @Override
-    public Object toSerializable(){
+    public Object toSerializable(short toVersion) {
+        if(toVersion >= DataStoreVersions.HELIUM_2_VERSION) {
+            return new ExternalizableReadDataReply(normalizedNode, toVersion);
+        } else {
+            return toSerializableReadDataReply(normalizedNode);
+        }
+    }
+
+    private static ShardTransactionMessages.ReadDataReply toSerializableReadDataReply(
+            NormalizedNode<?, ?> normalizedNode) {
         if(normalizedNode != null) {
             return ShardTransactionMessages.ReadDataReply.newBuilder()
-                    .setNormalizedNode(new NormalizedNodeToNodeCodec(schemaContext)
-                        .encode(normalizedNode).getNormalizedNode()).build();
+                    .setNormalizedNode(new NormalizedNodeToNodeCodec(null)
+                    .encode(normalizedNode).getNormalizedNode()).build();
         } else {
             return ShardTransactionMessages.ReadDataReply.newBuilder().build();
 
         }
     }
 
-    public static ReadDataReply fromSerializable(SchemaContext schemaContext,
-            YangInstanceIdentifier id, Object serializable) {
-        ShardTransactionMessages.ReadDataReply o = (ShardTransactionMessages.ReadDataReply) serializable;
-        return new ReadDataReply(schemaContext, new NormalizedNodeToNodeCodec(schemaContext).decode(
-                o.getNormalizedNode()));
+    public static ReadDataReply fromSerializable(Object serializable) {
+        if(serializable instanceof ExternalizableReadDataReply) {
+            ExternalizableReadDataReply ext = (ExternalizableReadDataReply)serializable;
+            return new ReadDataReply(ext.getNormalizedNode());
+        } else {
+            ShardTransactionMessages.ReadDataReply o =
+                    (ShardTransactionMessages.ReadDataReply) serializable;
+            return new ReadDataReply(new NormalizedNodeToNodeCodec(null).decode(
+                    o.getNormalizedNode()));
+        }
     }
 
-    public static ByteString getNormalizedNodeByteString(Object serializable){
-        ShardTransactionMessages.ReadDataReply o = (ShardTransactionMessages.ReadDataReply) serializable;
-        return ((ShardTransactionMessages.ReadDataReply) serializable).getNormalizedNode().toByteString();
+    public static ByteString fromSerializableAsByteString(Object serializable) {
+        if(serializable instanceof ExternalizableReadDataReply) {
+            ExternalizableReadDataReply ext = (ExternalizableReadDataReply)serializable;
+            return toSerializableReadDataReply(ext.getNormalizedNode()).toByteString();
+        } else {
+            ShardTransactionMessages.ReadDataReply o =
+                    (ShardTransactionMessages.ReadDataReply) serializable;
+            return o.getNormalizedNode().toByteString();
+        }
+    }
+
+    public static boolean isSerializedType(Object message) {
+        return message instanceof ExternalizableReadDataReply ||
+               message instanceof ShardTransactionMessages.ReadDataReply;
     }
 }
