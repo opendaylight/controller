@@ -9,9 +9,7 @@
   </parent>
   <artifactId>features-controller</artifactId>
   <packaging>pom</packaging>
-  <prerequisites>
-    <maven>3.0</maven>
-  </prerequisites>
+
   <modules>
     <module>config</module>
     <module>config-persister</module>
