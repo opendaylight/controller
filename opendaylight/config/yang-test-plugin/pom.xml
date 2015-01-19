@@ -12,9 +12,6 @@
   <name>${project.artifactId}</name>
 
   <description>Remove generated source files, after new files generation, implementation is inserted.</description>
-  <prerequisites>
-    <maven>3.0.4</maven>
-  </prerequisites>
 
   <dependencies>
     <dependency>
