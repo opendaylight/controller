@@ -9,9 +9,7 @@
   </parent>
   <artifactId>itests-controller</artifactId>
   <packaging>pom</packaging>
-  <prerequisites>
-    <maven>3.0</maven>
-  </prerequisites>
+
   <modules>
     <module>base-features-it</module>
   </modules>
