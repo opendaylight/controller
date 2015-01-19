@@ -9,9 +9,6 @@
   </parent>
   <artifactId>distribution.opendaylight-karaf</artifactId>
   <packaging>pom</packaging>
-  <prerequisites>
-    <maven>3.0</maven>
-  </prerequisites>
 
   <dependencies>
     <dependency>
