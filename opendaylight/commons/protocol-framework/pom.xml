@@ -15,9 +15,6 @@
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
   <description>Common protocol framework</description>
-  <prerequisites>
-    <maven>3.0.4</maven>
-  </prerequisites>
 
   <dependencies>
     <dependency>
