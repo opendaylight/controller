@@ -14,23 +14,30 @@ public class CanCommitTransactionReply implements SerializableMessage {
     public static final Class<ThreePhaseCommitCohortMessages.CanCommitTransactionReply> SERIALIZABLE_CLASS =
             ThreePhaseCommitCohortMessages.CanCommitTransactionReply.class;
 
-    private final Boolean canCommit;
+    public static final CanCommitTransactionReply YES = new CanCommitTransactionReply(true);
+    public static final CanCommitTransactionReply NO = new CanCommitTransactionReply(false);
 
-    public CanCommitTransactionReply(final Boolean canCommit) {
+    private final boolean canCommit;
+    private final Object serializedMessage;
+
+    private CanCommitTransactionReply(final boolean canCommit) {
         this.canCommit = canCommit;
+        this.serializedMessage = ThreePhaseCommitCohortMessages.CanCommitTransactionReply.newBuilder().
+                setCanCommit(canCommit).build();
     }
 
-    public Boolean getCanCommit() {
+    public boolean getCanCommit() {
         return canCommit;
     }
 
     @Override
     public Object toSerializable() {
-        return ThreePhaseCommitCohortMessages.CanCommitTransactionReply.newBuilder().setCanCommit(canCommit).build();
+        return serializedMessage;
     }
 
     public static CanCommitTransactionReply fromSerializable(final Object message) {
-        return new CanCommitTransactionReply(
-                ((ThreePhaseCommitCohortMessages.CanCommitTransactionReply) message).getCanCommit());
+        ThreePhaseCommitCohortMessages.CanCommitTransactionReply serialized =
+                (ThreePhaseCommitCohortMessages.CanCommitTransactionReply) message;
+        return serialized.getCanCommit() ? YES : NO;
     }
 }

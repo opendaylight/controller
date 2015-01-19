@@ -8,23 +8,22 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 
 public class CreateTransactionReply implements SerializableMessage {
 
-    public static final Class<ShardTransactionMessages.CreateTransactionReply> SERIALIZABLE_CLASS =
-            ShardTransactionMessages.CreateTransactionReply.class;
+    public static final Class SERIALIZABLE_CLASS = ShardTransactionMessages.CreateTransactionReply.class;
     private final String transactionPath;
     private final String transactionId;
-    private final int version;
+    private final short version;
 
-    public CreateTransactionReply(final String transactionPath,
-        final String transactionId) {
-        this(transactionPath, transactionId, CreateTransaction.CURRENT_VERSION);
+    public CreateTransactionReply(String transactionPath, String transactionId) {
+        this(transactionPath, transactionId, DataStoreVersions.CURRENT_VERSION);
     }
 
     public CreateTransactionReply(final String transactionPath,
-                                  final String transactionId, final int version) {
+                                  final String transactionId, final short version) {
         this.transactionPath = transactionPath;
         this.transactionId = transactionId;
         this.version = version;
@@ -39,7 +38,7 @@ public class CreateTransactionReply implements SerializableMessage {
         return transactionId;
     }
 
-    public int getVersion() {
+    public short getVersion() {
         return version;
     }
 
@@ -52,9 +51,10 @@ public class CreateTransactionReply implements SerializableMessage {
             .build();
     }
 
-    public static CreateTransactionReply fromSerializable(final Object serializable){
+    public static CreateTransactionReply fromSerializable(Object serializable){
         ShardTransactionMessages.CreateTransactionReply o = (ShardTransactionMessages.CreateTransactionReply) serializable;
-        return new CreateTransactionReply(o.getTransactionActorPath(), o.getTransactionId(), o.getMessageVersion());
+        return new CreateTransactionReply(o.getTransactionActorPath(), o.getTransactionId(),
+                (short)o.getMessageVersion());
     }
 
 }

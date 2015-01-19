@@ -63,21 +63,21 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
     private final SchemaContext schemaContext;
     private final ShardStats shardStats;
     private final String transactionID;
-    private final int txnClientVersion;
+    private final short clientTxVersion;
 
     protected ShardTransaction(ActorRef shardActor, SchemaContext schemaContext,
-            ShardStats shardStats, String transactionID, int txnClientVersion) {
+            ShardStats shardStats, String transactionID, short clientTxVersion) {
         super("shard-tx"); //actor name override used for metering. This does not change the "real" actor name
         this.shardActor = shardActor;
         this.schemaContext = schemaContext;
         this.shardStats = shardStats;
         this.transactionID = transactionID;
-        this.txnClientVersion = txnClientVersion;
+        this.clientTxVersion = clientTxVersion;
     }
 
     public static Props props(DOMStoreTransaction transaction, ActorRef shardActor,
             SchemaContext schemaContext,DatastoreContext datastoreContext, ShardStats shardStats,
-            String transactionID, int txnClientVersion) {
+            String transactionID, short txnClientVersion) {
         return Props.create(new ShardTransactionCreator(transaction, shardActor, schemaContext,
            datastoreContext, shardStats, transactionID, txnClientVersion));
     }
@@ -96,8 +96,8 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         return schemaContext;
     }
 
-    protected int getTxnClientVersion() {
-        return txnClientVersion;
+    protected short getClientTxVersion() {
+        return clientTxVersion;
     }
 
     @Override
@@ -118,28 +118,28 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         getDOMStoreTransaction().close();
 
         if(sendReply) {
-            getSender().tell(new CloseTransactionReply().toSerializable(), getSelf());
+            getSender().tell(CloseTransactionReply.INSTANCE.toSerializable(), getSelf());
         }
 
         getSelf().tell(PoisonPill.getInstance(), getSelf());
     }
 
-    protected void readData(DOMStoreReadTransaction transaction, ReadData message, final boolean returnSerialized) {
+    protected void readData(DOMStoreReadTransaction transaction, ReadData message,
+            final boolean returnSerialized) {
         final ActorRef sender = getSender();
         final ActorRef self = getSelf();
         final YangInstanceIdentifier path = message.getPath();
         final CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> future =
                 transaction.read(path);
 
-
         future.addListener(new Runnable() {
             @Override
             public void run() {
                 try {
                     Optional<NormalizedNode<?, ?>> optional = future.checkedGet();
-                    ReadDataReply readDataReply = new ReadDataReply(schemaContext, optional.orNull());
+                    ReadDataReply readDataReply = new ReadDataReply(optional.orNull());
 
-                    sender.tell((returnSerialized ? readDataReply.toSerializable():
+                    sender.tell((returnSerialized ? readDataReply.toSerializable(clientTxVersion):
                         readDataReply), self);
 
                 } catch (Exception e) {
@@ -176,11 +176,11 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         final DatastoreContext datastoreContext;
         final ShardStats shardStats;
         final String transactionID;
-        final int txnClientVersion;
+        final short txnClientVersion;
 
         ShardTransactionCreator(DOMStoreTransaction transaction, ActorRef shardActor,
                 SchemaContext schemaContext, DatastoreContext datastoreContext,
-                ShardStats shardStats, String transactionID, int txnClientVersion) {
+                ShardStats shardStats, String transactionID, short txnClientVersion) {
             this.transaction = transaction;
             this.shardActor = shardActor;
             this.shardStats = shardStats;

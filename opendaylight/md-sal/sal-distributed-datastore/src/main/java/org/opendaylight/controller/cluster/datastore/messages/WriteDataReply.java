@@ -10,11 +10,15 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 
-public class WriteDataReply implements SerializableMessage{
-  public static final Class<ShardTransactionMessages.WriteDataReply> SERIALIZABLE_CLASS =
-          ShardTransactionMessages.WriteDataReply.class;
-  @Override
-  public Object toSerializable() {
-    return ShardTransactionMessages.WriteDataReply.newBuilder().build();
-  }
+public class WriteDataReply extends EmptyReply {
+    private static final long serialVersionUID = 1L;
+
+    private static final Object LEGACY_SERIALIZED_INSTANCE =
+            ShardTransactionMessages.WriteDataReply.newBuilder().build();
+
+    public static final WriteDataReply INSTANCE = new WriteDataReply();
+
+    public WriteDataReply() {
+        super(LEGACY_SERIALIZED_INSTANCE);
+    }
 }

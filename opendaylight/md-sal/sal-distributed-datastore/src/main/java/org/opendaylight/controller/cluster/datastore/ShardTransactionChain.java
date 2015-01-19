@@ -12,7 +12,6 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.japi.Creator;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
-
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChain;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChainReply;
@@ -46,7 +45,7 @@ public class ShardTransactionChain extends AbstractUntypedActor {
             createTransaction(createTransaction);
         } else if (message.getClass().equals(CloseTransactionChain.SERIALIZABLE_CLASS)) {
             chain.close();
-            getSender().tell(new CloseTransactionChainReply().toSerializable(), getSelf());
+            getSender().tell(CloseTransactionChainReply.INSTANCE.toSerializable(), getSelf());
         }else{
             unknownMessage(message);
         }

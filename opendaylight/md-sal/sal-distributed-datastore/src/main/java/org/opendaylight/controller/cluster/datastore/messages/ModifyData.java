@@ -8,25 +8,28 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import com.google.common.base.Preconditions;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
+import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils.Applier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
-public abstract class ModifyData implements SerializableMessage {
-    protected final YangInstanceIdentifier path;
-    protected final NormalizedNode<?, ?> data;
-    protected final SchemaContext schemaContext;
+public abstract class ModifyData implements Externalizable {
+    private static final long serialVersionUID = 1L;
 
-    public ModifyData(YangInstanceIdentifier path, NormalizedNode<?, ?> data,
-        SchemaContext context) {
-        Preconditions.checkNotNull(context,
-            "Cannot serialize an object which does not have a schema schemaContext");
+    private YangInstanceIdentifier path;
+    private NormalizedNode<?, ?> data;
+    private short version;
 
+    protected ModifyData() {
+    }
 
+    protected ModifyData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
         this.path = path;
         this.data = data;
-        this.schemaContext = context;
     }
 
     public YangInstanceIdentifier getPath() {
@@ -37,4 +40,31 @@ public abstract class ModifyData implements SerializableMessage {
         return data;
     }
 
+    public short getVersion() {
+        return version;
+    }
+
+    protected void setVersion(short version) {
+        this.version = version;
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        version = in.readShort();
+        SerializationUtils.deserializePathAndNode(in, this, APPLIER);
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeShort(version);
+        SerializationUtils.serializePathAndNode(path, data, out);
+    }
+
+    private static final Applier<ModifyData> APPLIER = new Applier<ModifyData>() {
+        @Override
+        public void apply(ModifyData instance, YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
+            instance.path = path;
+            instance.data = data;
+        }
+    };
 }
