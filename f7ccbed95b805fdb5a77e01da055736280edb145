@@ -1,0 +1,259 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_9db8dce6",
+        "filename": "opendaylight/md-sal/sal-persisted-dom/src/main/java/org/opendaylight/persisted/Criteria.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-01-19T09:38:40Z",
+      "side": 1,
+      "message": "can this be remodeled in a more object-oriented way? e.g. have Operation actually have methods like .apply() and invoke that?",
+      "revId": "f7ccbed95b805fdb5a77e01da055736280edb145",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_7db5d0ec",
+        "filename": "opendaylight/md-sal/sal-persisted-dom/src/main/java/org/opendaylight/persisted/DataLocation.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-01-19T09:38:40Z",
+      "side": 1,
+      "message": "is this a generated class? codestyle indicates this, but there are no comments..",
+      "revId": "f7ccbed95b805fdb5a77e01da055736280edb145",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5dca546f",
+        "filename": "opendaylight/md-sal/sal-persisted-dom/src/main/java/org/opendaylight/persisted/MD5Identifier.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-01-19T09:38:40Z",
+      "side": 1,
+      "message": "this can be easily superseded by locking on MD5Identifier.class, making things clearer",
+      "revId": "f7ccbed95b805fdb5a77e01da055736280edb145",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_fdc80076",
+        "filename": "opendaylight/md-sal/sal-persisted-dom/src/main/java/org/opendaylight/persisted/MD5Identifier.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-01-19T09:38:40Z",
+      "side": 1,
+      "message": "not proper logging. This initialization should be moved into a static block. An exception should be propagated to InitializationError -- there is no way the system can recover.",
+      "revId": "f7ccbed95b805fdb5a77e01da055736280edb145",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_1d9b6c73",
+        "filename": "opendaylight/md-sal/sal-persisted-dom/src/main/java/org/opendaylight/persisted/ObjectDataStore.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-01-19T09:38:40Z",
+      "side": 1,
+      "message": "looks like a constant, but it\u0027s not final.  Is it a constant, or variable?",
+      "revId": "f7ccbed95b805fdb5a77e01da055736280edb145",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_bd891828",
+        "filename": "opendaylight/md-sal/sal-persisted-dom/src/main/java/org/opendaylight/persisted/ObjectDataStore.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-01-19T09:38:40Z",
+      "side": 1,
+      "message": "\"Default\" looks like a magic string. It should be a constant somewhere.",
+      "revId": "f7ccbed95b805fdb5a77e01da055736280edb145",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_dd8c2438",
+        "filename": "opendaylight/md-sal/sal-persisted-dom/src/main/java/org/opendaylight/persisted/ObjectDataStore.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-01-19T09:38:40Z",
+      "side": 1,
+      "message": "this needs an explanation, as the logic here seems to be making assumptions on filesystem layout -- but there is nothing indicating what those are.",
+      "revId": "f7ccbed95b805fdb5a77e01da055736280edb145",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_dda504b6",
+        "filename": "opendaylight/md-sal/sal-persisted-dom/src/main/java/org/opendaylight/persisted/ThreadPool.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-01-19T09:38:40Z",
+      "side": 1,
+      "message": "how is this different from java.util.concurrent.ThreadPoolExecutor?",
+      "revId": "f7ccbed95b805fdb5a77e01da055736280edb145",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_7d839004",
+        "filename": "opendaylight/md-sal/sal-persisted-dom/src/main/java/org/opendaylight/persisted/codec/AttributeDescriptor.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-01-19T09:38:40Z",
+      "side": 1,
+      "message": "public, static non-final ... how does this work with multiple instances in the same VM?",
+      "revId": "f7ccbed95b805fdb5a77e01da055736280edb145",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_9d869c12",
+        "filename": "opendaylight/md-sal/sal-persisted-dom/src/main/java/org/opendaylight/persisted/codec/AttributeDescriptor.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-01-19T09:38:40Z",
+      "side": 1,
+      "message": "this should log an error via Logger",
+      "revId": "f7ccbed95b805fdb5a77e01da055736280edb145",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3d96684d",
+        "filename": "opendaylight/md-sal/sal-persisted-dom/src/main/java/org/opendaylight/persisted/codec/ISerializer.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-01-19T09:38:40Z",
+      "side": 1,
+      "message": "public interface without documentation. Also, coding style guidelines state that the \"I\" prefix should not be used.",
+      "revId": "f7ccbed95b805fdb5a77e01da055736280edb145",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5d91f450",
+        "filename": "opendaylight/md-sal/sal-persisted-dom/src/main/java/org/opendaylight/persisted/mdsal/MDSALClassExtractor.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-01-19T09:38:40Z",
+      "side": 1,
+      "message": "this requires a weak Cache, as it will be dead slow due to .loadClass() overhead.",
+      "revId": "f7ccbed95b805fdb5a77e01da055736280edb145",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_fd9fa05d",
+        "filename": "opendaylight/md-sal/sal-persisted-dom/src/main/java/org/opendaylight/persisted/mdsal/MDSALClassExtractor.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-01-19T09:38:40Z",
+      "side": 1,
+      "message": "exception silently ignored.",
+      "revId": "f7ccbed95b805fdb5a77e01da055736280edb145",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_9daf7c94",
+        "filename": "opendaylight/md-sal/sal-persisted-dom/src/main/java/org/opendaylight/persisted/net/NetworkID.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-01-19T09:38:40Z",
+      "side": 1,
+      "message": "looks like this should be final",
+      "revId": "f7ccbed95b805fdb5a77e01da055736280edb145",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_7dacf0a0",
+        "filename": "opendaylight/md-sal/sal-persisted-dom/src/main/yang/sal-persisted-dom-test.yang",
+        "patchSetId": 40
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-01-19T09:38:40Z",
+      "side": 1,
+      "message": "looks like a test resource, should not be in src/main",
+      "revId": "f7ccbed95b805fdb5a77e01da055736280edb145",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
