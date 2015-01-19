@@ -11,9 +11,6 @@
   <artifactId>logback-config</artifactId>
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
-  <prerequisites>
-    <maven>3.0.4</maven>
-  </prerequisites>
 
   <dependencies>
     <dependency>
