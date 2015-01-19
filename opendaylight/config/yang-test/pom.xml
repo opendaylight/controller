@@ -14,9 +14,6 @@
   <name>${project.artifactId}</name>
 
   <description>Artifact that contains only generated code from yang files. Suitable for testing.</description>
-  <prerequisites>
-    <maven>3.0.4</maven>
-  </prerequisites>
 
   <dependencies>
     <dependency>
