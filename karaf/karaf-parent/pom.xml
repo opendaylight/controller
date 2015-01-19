@@ -19,9 +19,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <artifactId>karaf-parent</artifactId>
   <name>${project.artifactId}</name>
   <packaging>pom</packaging>
-  <prerequisites>
-    <maven>3.1.1</maven>
-  </prerequisites>
+
   <properties>
     <branding.version>1.1.0-SNAPSHOT</branding.version>
     <karaf.resources.version>1.5.0-SNAPSHOT</karaf.resources.version>
@@ -320,6 +318,26 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       </plugins>
     </pluginManagement>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>${enforcer.version}</version>
+        <executions>
+          <execution>
+            <id>enforce-maven</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireMavenVersion>
+                  <version>3.1.1</version>
+                </requireMavenVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>
       </plugin>
