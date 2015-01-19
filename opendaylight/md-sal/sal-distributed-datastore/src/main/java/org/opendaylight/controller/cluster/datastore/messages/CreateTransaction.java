@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 
+import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 
 
@@ -16,24 +17,21 @@ public class CreateTransaction implements SerializableMessage {
     public static final Class<ShardTransactionMessages.CreateTransaction> SERIALIZABLE_CLASS =
             ShardTransactionMessages.CreateTransaction.class;
 
-    public static final int HELIUM_1_VERSION = 1;
-    public static final int CURRENT_VERSION = HELIUM_1_VERSION;
-
     private final String transactionId;
     private final int transactionType;
     private final String transactionChainId;
-    private final int version;
+    private final short version;
 
     public CreateTransaction(String transactionId, int transactionType) {
         this(transactionId, transactionType, "");
     }
 
     public CreateTransaction(String transactionId, int transactionType, String transactionChainId) {
-        this(transactionId, transactionType, transactionChainId, CURRENT_VERSION);
+        this(transactionId, transactionType, transactionChainId, DataStoreVersions.CURRENT_VERSION);
     }
 
     private CreateTransaction(String transactionId, int transactionType, String transactionChainId,
-            int version) {
+            short version) {
         this.transactionId = transactionId;
         this.transactionType = transactionType;
         this.transactionChainId = transactionChainId;
@@ -48,7 +46,7 @@ public class CreateTransaction implements SerializableMessage {
         return transactionType;
     }
 
-    public int getVersion() {
+    public short getVersion() {
         return version;
     }
 
@@ -66,7 +64,7 @@ public class CreateTransaction implements SerializableMessage {
             (ShardTransactionMessages.CreateTransaction) message;
         return new CreateTransaction(createTransaction.getTransactionId(),
             createTransaction.getTransactionType(), createTransaction.getTransactionChainId(),
-            createTransaction.getMessageVersion());
+            (short)createTransaction.getMessageVersion());
     }
 
     public String getTransactionChainId() {

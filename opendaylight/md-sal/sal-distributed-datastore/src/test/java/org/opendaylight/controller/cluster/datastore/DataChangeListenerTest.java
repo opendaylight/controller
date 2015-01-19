@@ -29,7 +29,7 @@ public class DataChangeListenerTest extends AbstractActorTest {
             // Let the DataChangeListener know that notifications should be enabled
             subject.tell(new EnableNotification(true), getRef());
 
-            subject.tell(new DataChanged(CompositeModel.createTestContext(), mockChangeEvent),
+            subject.tell(new DataChanged(mockChangeEvent),
                     getRef());
 
             expectMsgClass(DataChangedReply.class);
@@ -48,7 +48,7 @@ public class DataChangeListenerTest extends AbstractActorTest {
             final ActorRef subject =
                 getSystem().actorOf(props, "testDataChangedNotificationsDisabled");
 
-            subject.tell(new DataChanged(CompositeModel.createTestContext(), mockChangeEvent),
+            subject.tell(new DataChanged(mockChangeEvent),
                     getRef());
 
             new Within(duration("1 seconds")) {
@@ -74,8 +74,7 @@ public class DataChangeListenerTest extends AbstractActorTest {
 
             getSystem().eventStream().subscribe(getRef(), DeadLetter.class);
 
-            subject.tell(new DataChanged(CompositeModel.createTestContext(), mockChangeEvent),
-                    ActorRef.noSender());
+            subject.tell(new DataChanged(mockChangeEvent), ActorRef.noSender());
 
             // Make sure no DataChangedReply is sent to DeadLetters.
             while(true) {
@@ -113,13 +112,13 @@ public class DataChangeListenerTest extends AbstractActorTest {
 
             SchemaContext schemaContext = CompositeModel.createTestContext();
 
-            subject.tell(new DataChanged(schemaContext, mockChangeEvent1),getRef());
+            subject.tell(new DataChanged(mockChangeEvent1),getRef());
             expectMsgClass(DataChangedReply.class);
 
-            subject.tell(new DataChanged(schemaContext, mockChangeEvent2),getRef());
+            subject.tell(new DataChanged(mockChangeEvent2),getRef());
             expectMsgClass(DataChangedReply.class);
 
-            subject.tell(new DataChanged(schemaContext, mockChangeEvent3),getRef());
+            subject.tell(new DataChanged(mockChangeEvent3),getRef());
             expectMsgClass(DataChangedReply.class);
 
             Mockito.verify(mockListener).onDataChanged(mockChangeEvent1);
