@@ -65,6 +65,11 @@
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-parser-impl</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-netconf-connector</artifactId>
+      <version>1.2.0-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 
   <build>

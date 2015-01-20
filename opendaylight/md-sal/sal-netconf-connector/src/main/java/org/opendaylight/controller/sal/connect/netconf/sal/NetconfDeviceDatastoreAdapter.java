@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
  *
  * All data changes are submitted to an ExecutorService to avoid Thread blocking while sal is waiting for schema.
  */
+@Deprecated
 final class NetconfDeviceDatastoreAdapter implements AutoCloseable {
 
     private static final Logger logger  = LoggerFactory.getLogger(NetconfDeviceDatastoreAdapter.class);

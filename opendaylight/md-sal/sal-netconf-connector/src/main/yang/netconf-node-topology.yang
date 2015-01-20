@@ -1,0 +1,75 @@
+module netconf-node-topology {
+    namespace "urn:opendaylight:netconf-node-topology";
+    prefix "nettop";
+
+    import network-topology { prefix nt; revision-date 2013-10-21; }
+    import yang-ext { prefix ext; revision-date "2013-07-09";}
+    import ietf-inet-types { prefix inet; revision-date "2010-09-24"; }
+
+    revision "2015-01-14" {
+        description "Initial revision of Topology model";
+    }
+
+    augment "/nt:network-topology/nt:topology/nt:topology-types" {
+        container topology-netconf {
+        }
+    }
+
+    grouping netconf-node-fields {
+        leaf connection-status {
+            type enumeration {
+                enum connecting;
+                enum connected;
+                enum unable-to-connect;
+            }
+        }
+
+        leaf host {
+            type inet:host;
+        }
+
+        leaf port {
+            type inet:port-number;
+        }
+
+        leaf connected-message {
+            type string;
+        }
+
+        container available-capabilities {
+            leaf-list available-capability {
+                type string;
+            }
+        }
+
+        container unavailable-capabilities {
+            list unavailable-capability {
+                leaf capability {
+                    type string;
+                }
+
+                leaf failure-reason {
+                    type enumeration {
+                        enum missing-source;
+                        enum unable-to-resolve;
+                    }
+                }
+            }
+        }
+
+        container pass-through {
+            when "../connected = connected";
+            description
+                "When the underlying node is connected, its NETCONF context
+                is available verbatim under this container through the
+                mount extension.";
+        }
+    }
+
+    augment "/nt:network-topology/nt:topology/nt:node" {
+        when "../../nt:topology-types/topology-netconf";
+        ext:augment-identifier "netconf-node";
+
+        uses netconf-node-fields;
+    }
+}

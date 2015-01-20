@@ -37,6 +37,8 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
     private volatile NetconfDeviceDatastoreAdapter datastoreAdapter;
     private MountInstance mountInstance;
 
+    private volatile NetconfDeviceTopologyAdapter topologyDatastoreAdapter;
+
     public NetconfDeviceSalProvider(final RemoteDeviceId deviceId, final ExecutorService executor) {
         this.id = deviceId;
         this.executor = executor;
@@ -52,6 +54,12 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
         Preconditions.checkState(datastoreAdapter != null,
                 "%s: Sal provider %s was not initialized by sal. Cannot get datastore adapter", id);
         return datastoreAdapter;
+    }
+
+    public NetconfDeviceTopologyAdapter getTopologyDatastoreAdapter() {
+        Preconditions.checkState(topologyDatastoreAdapter != null,
+                "%s: Sal provider %s was not initialized by sal. Cannot get topology datastore adapter", id);
+        return topologyDatastoreAdapter;
     }
 
     @Override
@@ -75,6 +83,8 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
 
         final DataBroker dataBroker = session.getSALService(DataBroker.class);
         datastoreAdapter = new NetconfDeviceDatastoreAdapter(id, dataBroker);
+
+        topologyDatastoreAdapter = new NetconfDeviceTopologyAdapter(id, dataBroker);
     }
 
     public void close() throws Exception {

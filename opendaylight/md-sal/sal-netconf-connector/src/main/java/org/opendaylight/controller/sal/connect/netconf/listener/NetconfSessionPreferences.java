@@ -18,7 +18,7 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class NetconfSessionCapabilities {
+public final class NetconfSessionPreferences {
 
     private static final class ParameterMatcher {
         private final Predicate<String> predicate;
@@ -45,7 +45,7 @@ public final class NetconfSessionCapabilities {
         }
     }
 
-    private static final Logger LOG = LoggerFactory.getLogger(NetconfSessionCapabilities.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NetconfSessionPreferences.class);
     private static final ParameterMatcher MODULE_PARAM = new ParameterMatcher("module=");
     private static final ParameterMatcher REVISION_PARAM = new ParameterMatcher("revision=");
     private static final ParameterMatcher BROKEN_REVISON_PARAM = new ParameterMatcher("amp;revision=");
@@ -60,7 +60,7 @@ public final class NetconfSessionCapabilities {
     private final Set<QName> moduleBasedCaps;
     private final Set<String> nonModuleCaps;
 
-    private NetconfSessionCapabilities(final Set<String> nonModuleCaps, final Set<QName> moduleBasedCaps) {
+    private NetconfSessionPreferences(final Set<String> nonModuleCaps, final Set<QName> moduleBasedCaps) {
         this.nonModuleCaps = Preconditions.checkNotNull(nonModuleCaps);
         this.moduleBasedCaps = Preconditions.checkNotNull(moduleBasedCaps);
     }
@@ -110,17 +110,17 @@ public final class NetconfSessionCapabilities {
                 || containsNonModuleCapability(NetconfMessageTransformUtil.IETF_NETCONF_MONITORING.getNamespace().toString());
     }
 
-    public NetconfSessionCapabilities replaceModuleCaps(final NetconfSessionCapabilities netconfSessionModuleCapabilities) {
+    public NetconfSessionPreferences replaceModuleCaps(final NetconfSessionPreferences netconfSessionModuleCapabilities) {
         final Set<QName> moduleBasedCaps = Sets.newHashSet(netconfSessionModuleCapabilities.getModuleBasedCaps());
 
         // Preserve monitoring module, since it indicates support for ietf-netconf-monitoring
         if(containsModuleCapability(NetconfMessageTransformUtil.IETF_NETCONF_MONITORING)) {
             moduleBasedCaps.add(NetconfMessageTransformUtil.IETF_NETCONF_MONITORING);
         }
-        return new NetconfSessionCapabilities(getNonModuleCaps(), moduleBasedCaps);
+        return new NetconfSessionPreferences(getNonModuleCaps(), moduleBasedCaps);
     }
 
-    public static NetconfSessionCapabilities fromNetconfSession(final NetconfClientSession session) {
+    public static NetconfSessionPreferences fromNetconfSession(final NetconfClientSession session) {
         return fromStrings(session.getServerCapabilities());
     }
 
@@ -132,7 +132,7 @@ public final class NetconfSessionCapabilities {
         return QName.cachedReference(QName.create(URI.create(namespace), null, moduleName).withoutRevision());
     }
 
-    public static NetconfSessionCapabilities fromStrings(final Collection<String> capabilities) {
+    public static NetconfSessionPreferences fromStrings(final Collection<String> capabilities) {
         final Set<QName> moduleBasedCaps = new HashSet<>();
         final Set<String> nonModuleCaps = Sets.newHashSet(capabilities);
 
@@ -176,7 +176,7 @@ public final class NetconfSessionCapabilities {
             addModuleQName(moduleBasedCaps, nonModuleCaps, capability, cachedQName(namespace, moduleName));
         }
 
-        return new NetconfSessionCapabilities(ImmutableSet.copyOf(nonModuleCaps), ImmutableSet.copyOf(moduleBasedCaps));
+        return new NetconfSessionPreferences(ImmutableSet.copyOf(nonModuleCaps), ImmutableSet.copyOf(moduleBasedCaps));
     }
 
 
@@ -184,4 +184,12 @@ public final class NetconfSessionCapabilities {
         moduleBasedCaps.add(qName);
         nonModuleCaps.remove(capability);
     }
+
+    private NetconfDeviceCapabilities capabilities = new NetconfDeviceCapabilities();
+
+    public NetconfDeviceCapabilities getNetconfDeviceCapabilities() {
+        return capabilities;
+    }
+
+
 }
