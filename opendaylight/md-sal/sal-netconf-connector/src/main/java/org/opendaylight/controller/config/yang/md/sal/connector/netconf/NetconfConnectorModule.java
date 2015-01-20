@@ -26,7 +26,7 @@ import org.opendaylight.controller.sal.connect.api.RemoteDeviceHandler;
 import org.opendaylight.controller.sal.connect.netconf.NetconfDevice;
 import org.opendaylight.controller.sal.connect.netconf.NetconfStateSchemas;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfDeviceCommunicator;
-import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionCapabilities;
+import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionPreferences;
 import org.opendaylight.controller.sal.connect.netconf.sal.NetconfDeviceSalFacade;
 import org.opendaylight.controller.sal.connect.netconf.schema.mapping.NetconfMessageTransformer;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
@@ -50,7 +50,7 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
     private static final Logger logger = LoggerFactory.getLogger(NetconfConnectorModule.class);
 
     private BundleContext bundleContext;
-    private Optional<NetconfSessionCapabilities> userCapabilities;
+    private Optional<NetconfSessionPreferences> userCapabilities;
     private SchemaSourceRegistry schemaRegistry;
     private SchemaContextFactory schemaContextFactory;
 
@@ -97,14 +97,14 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        final RemoteDeviceId id = new RemoteDeviceId(getIdentifier());
+        final RemoteDeviceId id = new RemoteDeviceId(getIdentifier(), getSocketAddress());
 
         final ExecutorService globalProcessingExecutor = getProcessingExecutorDependency().getExecutor();
 
         final Broker domBroker = getDomRegistryDependency();
         final BindingAwareBroker bindingBroker = getBindingRegistryDependency();
 
-        final RemoteDeviceHandler<NetconfSessionCapabilities> salFacade
+        final RemoteDeviceHandler<NetconfSessionPreferences> salFacade
                 = new NetconfDeviceSalFacade(id, domBroker, bindingBroker, bundleContext, globalProcessingExecutor);
 
         final NetconfDevice.SchemaResourcesDTO schemaResourcesDTO =
@@ -124,7 +124,7 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         return new MyAutoCloseable(listener, salFacade);
     }
 
-    private Optional<NetconfSessionCapabilities> getUserCapabilities() {
+    private Optional<NetconfSessionPreferences> getUserCapabilities() {
         if(getYangModuleCapabilities() == null) {
             return Optional.absent();
         }
@@ -134,7 +134,7 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
             return Optional.absent();
         }
 
-        final NetconfSessionCapabilities parsedOverrideCapabilities = NetconfSessionCapabilities.fromStrings(capabilities);
+        final NetconfSessionPreferences parsedOverrideCapabilities = NetconfSessionPreferences.fromStrings(capabilities);
         JmxAttributeValidationException.checkCondition(
                 parsedOverrideCapabilities.getNonModuleCaps().isEmpty(),
                 "Capabilities to override can only contain module based capabilities, non-module capabilities will be retrieved from the device," +
@@ -170,11 +170,11 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
     }
 
     private static final class MyAutoCloseable implements AutoCloseable {
-        private final RemoteDeviceHandler<NetconfSessionCapabilities> salFacade;
+        private final RemoteDeviceHandler<NetconfSessionPreferences> salFacade;
         private final NetconfDeviceCommunicator listener;
 
         public MyAutoCloseable(final NetconfDeviceCommunicator listener,
-                final RemoteDeviceHandler<NetconfSessionCapabilities> salFacade) {
+                final RemoteDeviceHandler<NetconfSessionPreferences> salFacade) {
             this.listener = listener;
             this.salFacade = salFacade;
         }

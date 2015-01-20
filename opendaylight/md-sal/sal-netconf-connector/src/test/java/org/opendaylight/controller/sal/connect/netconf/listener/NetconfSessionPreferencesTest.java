@@ -10,7 +10,7 @@ import org.junit.Test;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil;
 import org.opendaylight.yangtools.yang.common.QName;
 
-public class NetconfSessionCapabilitiesTest {
+public class NetconfSessionPreferencesTest {
 
     @Test
     public void testMerge() throws Exception {
@@ -21,7 +21,7 @@ public class NetconfSessionCapabilitiesTest {
                 "urn:ietf:params:netconf:base:1.0",
                 "urn:ietf:params:netconf:capability:rollback-on-error:1.0"
         );
-        final NetconfSessionCapabilities sessionCaps1 = NetconfSessionCapabilities.fromStrings(caps1);
+        final NetconfSessionPreferences sessionCaps1 = NetconfSessionPreferences.fromStrings(caps1);
         assertCaps(sessionCaps1, 2, 3);
 
         final List<String> caps2 = Lists.newArrayList(
@@ -29,10 +29,10 @@ public class NetconfSessionCapabilitiesTest {
                 "namespace:4?module=module4&revision=2012-12-12",
                 "randomNonModuleCap"
         );
-        final NetconfSessionCapabilities sessionCaps2 = NetconfSessionCapabilities.fromStrings(caps2);
+        final NetconfSessionPreferences sessionCaps2 = NetconfSessionPreferences.fromStrings(caps2);
         assertCaps(sessionCaps2, 1, 2);
 
-        final NetconfSessionCapabilities merged = sessionCaps1.replaceModuleCaps(sessionCaps2);
+        final NetconfSessionPreferences merged = sessionCaps1.replaceModuleCaps(sessionCaps2);
         assertCaps(merged, 2, 2 + 1 /*Preserved monitoring*/);
         for (final QName qName : sessionCaps2.getModuleBasedCaps()) {
             assertThat(merged.getModuleBasedCaps(), hasItem(qName));
@@ -52,11 +52,11 @@ public class NetconfSessionCapabilitiesTest {
                 "namespace:2?module=module2&amp;RANDOMSTRING;revision=2013-12-12" // This one should be ignored(same as first), since revision is in wrong format
         );
 
-        final NetconfSessionCapabilities sessionCaps1 = NetconfSessionCapabilities.fromStrings(caps1);
+        final NetconfSessionPreferences sessionCaps1 = NetconfSessionPreferences.fromStrings(caps1);
         assertCaps(sessionCaps1, 0, 3);
     }
 
-    private void assertCaps(final NetconfSessionCapabilities sessionCaps1, final int nonModuleCaps, final int moduleCaps) {
+    private void assertCaps(final NetconfSessionPreferences sessionCaps1, final int nonModuleCaps, final int moduleCaps) {
         assertEquals(nonModuleCaps, sessionCaps1.getNonModuleCaps().size());
         assertEquals(moduleCaps, sessionCaps1.getModuleBasedCaps().size());
     }

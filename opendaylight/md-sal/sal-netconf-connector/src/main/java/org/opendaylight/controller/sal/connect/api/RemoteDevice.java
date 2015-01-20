@@ -16,5 +16,7 @@ public interface RemoteDevice<PREF, M> {
 
     void onRemoteSessionDown();
 
+    void onRemoteSessionFailed(Throwable throwable);
+
     void onNotification(M notification);
 }

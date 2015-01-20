@@ -14,6 +14,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.FutureListener;
+import io.netty.util.concurrent.GenericFutureListener;
 import java.util.ArrayDeque;
 import java.util.Iterator;
 import java.util.List;
@@ -46,8 +47,8 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
 
     private static final Logger logger = LoggerFactory.getLogger(NetconfDeviceCommunicator.class);
 
-    private final RemoteDevice<NetconfSessionCapabilities, NetconfMessage> remoteDevice;
-    private final Optional<NetconfSessionCapabilities> overrideNetconfCapabilities;
+    private final RemoteDevice<NetconfSessionPreferences, NetconfMessage> remoteDevice;
+    private final Optional<NetconfSessionPreferences> overrideNetconfCapabilities;
     private final RemoteDeviceId id;
     private final Lock sessionLock = new ReentrantLock();
 
@@ -56,18 +57,18 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
     private NetconfClientSession session;
     private Future<?> initFuture;
 
-    public NetconfDeviceCommunicator(final RemoteDeviceId id, final RemoteDevice<NetconfSessionCapabilities, NetconfMessage> remoteDevice,
-            final NetconfSessionCapabilities netconfSessionCapabilities) {
-        this(id, remoteDevice, Optional.of(netconfSessionCapabilities));
+    public NetconfDeviceCommunicator(final RemoteDeviceId id, final RemoteDevice<NetconfSessionPreferences, NetconfMessage> remoteDevice,
+            final NetconfSessionPreferences netconfSessionPreferences) {
+        this(id, remoteDevice, Optional.of(netconfSessionPreferences));
     }
 
     public NetconfDeviceCommunicator(final RemoteDeviceId id,
-                                     final RemoteDevice<NetconfSessionCapabilities, NetconfMessage> remoteDevice) {
-        this(id, remoteDevice, Optional.<NetconfSessionCapabilities>absent());
+                                     final RemoteDevice<NetconfSessionPreferences, NetconfMessage> remoteDevice) {
+        this(id, remoteDevice, Optional.<NetconfSessionPreferences>absent());
     }
 
-    private NetconfDeviceCommunicator(final RemoteDeviceId id, final RemoteDevice<NetconfSessionCapabilities, NetconfMessage> remoteDevice,
-            final Optional<NetconfSessionCapabilities> overrideNetconfCapabilities) {
+    private NetconfDeviceCommunicator(final RemoteDeviceId id, final RemoteDevice<NetconfSessionPreferences, NetconfMessage> remoteDevice,
+            final Optional<NetconfSessionPreferences> overrideNetconfCapabilities) {
         this.id = id;
         this.remoteDevice = remoteDevice;
         this.overrideNetconfCapabilities = overrideNetconfCapabilities;
@@ -80,16 +81,16 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
             logger.debug("{}: Session established", id);
             this.session = session;
 
-            NetconfSessionCapabilities netconfSessionCapabilities =
-                                             NetconfSessionCapabilities.fromNetconfSession(session);
-            logger.trace("{}: Session advertised capabilities: {}", id, netconfSessionCapabilities);
+            NetconfSessionPreferences netconfSessionPreferences =
+                                             NetconfSessionPreferences.fromNetconfSession(session);
+            logger.trace("{}: Session advertised capabilities: {}", id, netconfSessionPreferences);
 
             if(overrideNetconfCapabilities.isPresent()) {
-                netconfSessionCapabilities = netconfSessionCapabilities.replaceModuleCaps(overrideNetconfCapabilities.get());
-                logger.debug("{}: Session capabilities overridden, capabilities that will be used: {}", id, netconfSessionCapabilities);
+                netconfSessionPreferences = netconfSessionPreferences.replaceModuleCaps(overrideNetconfCapabilities.get());
+                logger.debug("{}: Session capabilities overridden, capabilities that will be used: {}", id, netconfSessionPreferences);
             }
 
-            remoteDevice.onRemoteSessionUp(netconfSessionCapabilities, this);
+            remoteDevice.onRemoteSessionUp(netconfSessionPreferences, this);
         }
         finally {
             sessionLock.unlock();
@@ -103,6 +104,21 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
         } else {
             initFuture = dispatch.createClient(config);
         }
+
+        initFuture.addListener(new GenericFutureListener<Future<Object>>(){
+
+            @Override
+            public void operationComplete(Future<Object> future) throws Exception {
+                if (!future.isSuccess()) {
+                    if (future.cause() != null && future.cause().getMessage() != null) {
+                        logger.debug("Reconnect failed: " + future.cause().getMessage());
+                    } else {
+                        logger.debug("Unknown cause of failure in reconnection");
+                    }
+                    NetconfDeviceCommunicator.this.remoteDevice.onRemoteSessionFailed(future.cause());
+                }
+            }
+        });
     }
 
     private void tearDown( String reason ) {

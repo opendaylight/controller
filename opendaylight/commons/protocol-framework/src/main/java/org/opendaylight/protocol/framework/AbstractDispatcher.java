@@ -238,7 +238,7 @@ public abstract class AbstractDispatcher<S extends ProtocolSession<?>, L extends
      * @param connectStrategyFactory Factory for creating reconnection strategy for every reconnect attempt
      *
      * @return Future representing the reconnection task. It will report completion based on reestablishStrategy, e.g.
-     *         success if it indicates no further attempts should be made and failure if it reports an error
+     *         success is never reported, only failure when it runs out of reconnection attempts.
      */
     protected Future<Void> createReconnectingClient(final InetSocketAddress address, final ReconnectStrategyFactory connectStrategyFactory,
             final PipelineInitializer<S> initializer) {

@@ -77,7 +77,7 @@ public class NetconfDeviceCommunicatorTest {
     NetconfClientSession mockSession;
 
     @Mock
-    RemoteDevice<NetconfSessionCapabilities, NetconfMessage> mockDevice;
+    RemoteDevice<NetconfSessionPreferences, NetconfMessage> mockDevice;
 
     NetconfDeviceCommunicator communicator;
 
@@ -92,7 +92,7 @@ public class NetconfDeviceCommunicatorTest {
     void setupSession()
     {
         doReturn( Collections.<String>emptySet() ).when( mockSession ).getServerCapabilities();
-        doNothing().when( mockDevice ).onRemoteSessionUp( any( NetconfSessionCapabilities.class ),
+        doNothing().when( mockDevice ).onRemoteSessionUp( any( NetconfSessionPreferences.class ),
                                                           any( RemoteDeviceCommunicator.class ) );
         communicator.onSessionUp( mockSession );
     }
@@ -130,8 +130,8 @@ public class NetconfDeviceCommunicatorTest {
                                  testCapability );
         doReturn( serverCapabilities ).when( mockSession ).getServerCapabilities();
 
-        ArgumentCaptor<NetconfSessionCapabilities> netconfSessionCapabilities =
-                                              ArgumentCaptor.forClass( NetconfSessionCapabilities.class );
+        ArgumentCaptor<NetconfSessionPreferences> netconfSessionCapabilities =
+                                              ArgumentCaptor.forClass( NetconfSessionPreferences.class );
         doNothing().when( mockDevice ).onRemoteSessionUp( netconfSessionCapabilities.capture(), eq( communicator ) );
 
         communicator.onSessionUp( mockSession );
@@ -139,7 +139,7 @@ public class NetconfDeviceCommunicatorTest {
         verify( mockSession ).getServerCapabilities();
         verify( mockDevice ).onRemoteSessionUp( netconfSessionCapabilities.capture(), eq( communicator ) );
 
-        NetconfSessionCapabilities actualCapabilites = netconfSessionCapabilities.getValue();
+        NetconfSessionPreferences actualCapabilites = netconfSessionCapabilities.getValue();
         assertEquals( "containsModuleCapability", true, actualCapabilites.containsNonModuleCapability(
                 NetconfMessageTransformUtil.NETCONF_ROLLBACK_ON_ERROR_URI.toString()) );
         assertEquals( "containsModuleCapability", false, actualCapabilites.containsNonModuleCapability(testCapability) );
@@ -340,7 +340,7 @@ public class NetconfDeviceCommunicatorTest {
      */
     @Test
     public void testNetconfDeviceReconnectInCommunicator() throws Exception {
-        final RemoteDevice<NetconfSessionCapabilities, NetconfMessage> device = mock(RemoteDevice.class);
+        final RemoteDevice<NetconfSessionPreferences, NetconfMessage> device = mock(RemoteDevice.class);
 
         final TimedReconnectStrategy timedReconnectStrategy = new TimedReconnectStrategy(GlobalEventExecutor.INSTANCE, 10000, 0, 1.0, null, 100L, null);
         final ReconnectStrategy reconnectStrategy = spy(new ReconnectStrategy() {

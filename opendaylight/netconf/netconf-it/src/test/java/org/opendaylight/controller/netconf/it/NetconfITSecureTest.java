@@ -60,7 +60,7 @@ import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.controller.sal.connect.api.RemoteDevice;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceCommunicator;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfDeviceCommunicator;
-import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionCapabilities;
+import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionPreferences;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.protocol.framework.NeverReconnectStrategy;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -199,8 +199,8 @@ public class NetconfITSecureTest extends AbstractNetconfConfigTest {
     }
 
     static NetconfDeviceCommunicator getSessionListener() {
-        RemoteDevice<NetconfSessionCapabilities, NetconfMessage> mockedRemoteDevice = mock(RemoteDevice.class);
-        doNothing().when(mockedRemoteDevice).onRemoteSessionUp(any(NetconfSessionCapabilities.class), any(RemoteDeviceCommunicator.class));
+        RemoteDevice<NetconfSessionPreferences, NetconfMessage> mockedRemoteDevice = mock(RemoteDevice.class);
+        doNothing().when(mockedRemoteDevice).onRemoteSessionUp(any(NetconfSessionPreferences.class), any(RemoteDeviceCommunicator.class));
         doNothing().when(mockedRemoteDevice).onRemoteSessionDown();
         return new NetconfDeviceCommunicator(new RemoteDeviceId("secure-test"), mockedRemoteDevice);
     }
