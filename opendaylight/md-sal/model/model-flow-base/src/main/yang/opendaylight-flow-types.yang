@@ -2,7 +2,7 @@ module opendaylight-flow-types {
     namespace "urn:opendaylight:flow:types";
     prefix flow;
 
-    import ietf-yang-types {prefix yang; revision-date "2010-09-24";}    
+    import ietf-yang-types {prefix yang; revision-date "2010-09-24";}
     import opendaylight-match-types {prefix match; revision-date "2013-10-26";}
     import opendaylight-action-types {prefix action;}
     import opendaylight-meter-types {prefix meter; revision-date "2013-09-18";}
@@ -10,16 +10,16 @@ module opendaylight-flow-types {
     revision "2013-10-26" {
         description "Initial revision of flow service";
     }
-    
+
     typedef flow-ref {
         type instance-identifier;
     }
-    
+
     typedef flow-cookie {
         description "openflow specific type - flow cookie / flow cookie mask";
         type uint64;
     }
-    
+
     typedef output-port-values {
         type enumeration {
             enum MAX {
@@ -72,47 +72,47 @@ module opendaylight-flow-types {
                  }
              }
             }
-             
+
             case write-metadata-case {
                 container write-metadata {
                  leaf metadata {
                      type uint64;
                  }
-                 
+
                  leaf metadata-mask {
                      type uint64;
                  }
              }
             }
-             
+
             case write-actions-case {
                 container write-actions {
                  uses action:action-list;
              }
             }
-             
+
             case apply-actions-case {
                 container apply-actions {
                  uses action:action-list;
              }
             }
-             
+
             case clear-actions-case {
                 container clear-actions {
                  uses action:action-list;
              }
             }
-             
+
             case meter-case {
                 container meter {
                      leaf meter-id {
                         type meter:meter-id;
-                     } 
+                     }
                  }
              }
          }
     }
-    
+
     typedef flow-mod-flags {
         type bits {
             bit CHECK_OVERLAP;
@@ -131,68 +131,69 @@ module opendaylight-flow-types {
             bit GROUP_DELETE;
         }
     }
-    
+
     grouping generic_flow_attributes {
         leaf priority {
             type uint16;
         }
-        
+
         leaf idle-timeout {
             type uint16;
         }
-        
+
         leaf hard-timeout {
             type uint16;
         }
-        
+
         leaf cookie {
             type flow-cookie;
         }
-        
+
         leaf table_id {
+            config false;
             type uint8;
         }
     }
-    
+
     grouping flow {
         container match {
             uses match:match;
         }
-        
+
         container instructions {
             uses instruction-list;
-        }          
-         
-        uses generic_flow_attributes;
-        
-        leaf container-name {
-            type string; 
         }
-        
+
+        uses generic_flow_attributes;
+
+        leaf container-name {
+            type string;
+        }
+
         leaf cookie_mask {
             type flow-cookie;
         }
-        
+
         leaf buffer_id {
             type uint32;
         }
-        
+
         leaf out_port {
             type uint64;
         }
-        
+
         leaf out_group {
             type uint32;
         }
-        
+
         leaf flags {
             type flow-mod-flags;
         }
-        
+
         leaf flow-name {
             type string;
         }
-        
+
         leaf installHw {
             type boolean;
         }
@@ -230,20 +231,20 @@ module opendaylight-flow-types {
     grouping flow-table-statistics {
         leaf active {
             type yang:counter64;
-        } 
+        }
 
         leaf lookup {
             type yang:counter64;
         }
 
         leaf matched {
-            type yang:counter64;   
+            type yang:counter64;
         }
     }
-    
+
     grouping flow-mod-removed {
         uses generic_flow_attributes;
-        
+
         leaf removed_reason {
             type removed_reason_flags;
         }
@@ -251,7 +252,7 @@ module opendaylight-flow-types {
         leaf duration_nsec {
             type uint32;
         }
-        
+
         leaf duration_sec {
             type uint32;
         }
@@ -263,7 +264,7 @@ module opendaylight-flow-types {
         leaf byte_count {
             type uint64;
         }
-		
+
         container match {
             uses match:match;
         }
