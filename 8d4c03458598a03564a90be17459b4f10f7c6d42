@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_16e1099a",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 2106
+      },
+      "writtenOn": "2015-01-20T17:31:34Z",
+      "side": 1,
+      "message": "I like the fact that this is one model for all of neutron (port, net, subnet), but at the same time I am concerned that this will not work very well in a cluster, where effectively all the data will be stored on just one node (which owns this model shard). Splitting up into multiple models would make things better from that angle, as well as provide some modularity (next comment)",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_b6eff586",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 2106
+      },
+      "writtenOn": "2015-01-20T17:31:34Z",
+      "side": 1,
+      "message": "Any additions to this model, or fixes will drive the revision up and effectively break anyone\u0027s code written against this model rev. This is not modular, as in effect, the model as it stands today is probably good for use as a L2 model (for L2 apps), and it would be not sensible to see these apps broken because of, say, the addition of Neutron Firewall rules .\nAnother reason why it may be better to split up the model into port, net and subnet, etc models.",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_36552550",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 2106
+      },
+      "writtenOn": "2015-01-20T17:31:34Z",
+      "side": 1,
+      "message": "While a single id leaf for all the items is nice from a modelling perspective, in practice with the auto-generated code it will be incredibly confusing thinking (and reading) code as well as restconf returns, about \"which id am I dealing with now\", eg port-id, netw-id, subnet-id, etc. I would advocate that each id should be clearly named, eg portUUID, netUUID, subnetUUID.",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_76e96d7f",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 2106
+      },
+      "writtenOn": "2015-01-20T17:31:34Z",
+      "side": 1,
+      "message": "Missing bindinghostID + some others from the Neutron v2 API extensions",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_d6f2c16e",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 2106
+      },
+      "writtenOn": "2015-01-20T17:31:34Z",
+      "side": 1,
+      "message": "These should be of type inet:ip-address",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3603e543",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 2106
+      },
+      "writtenOn": "2015-01-20T17:31:34Z",
+      "side": 1,
+      "message": "A portsOnNetwork leaf-list would be useful here. It\u0027s otherwise currently difficult to get a snapshot of which ports are on a given network. This is not part of the official neutron API, but it is part of the existing Neutron ODL implementation",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
