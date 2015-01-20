@@ -1,6 +1,6 @@
 module ${artifactId} {
     yang-version 1;
-    namespace "urn:opendaylight:params:xml:ns:yang:example";
+    namespace "urn:opendaylight:params:xml:ns:yang:${artifactId}";
     prefix "${artifactId}";
 
     revision "2015-01-05" {
