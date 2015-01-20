@@ -172,9 +172,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
                 onRecoveryComplete();
 
-                RaftActorBehavior oldBehavior = currentBehavior;
-                currentBehavior = new Follower(context);
-                handleBehaviorChange(oldBehavior, currentBehavior);
+                initializeBehavior();
             }
         }
     }
@@ -273,8 +271,16 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             replicatedLog.lastIndex(), replicatedLog.snapshotIndex,
             replicatedLog.snapshotTerm, replicatedLog.size());
 
+        initializeBehavior();
+    }
+
+    protected void initializeBehavior(){
+        changeCurrentBehavior(new Follower(context));
+    }
+
+    protected void changeCurrentBehavior(RaftActorBehavior newBehavior){
         RaftActorBehavior oldBehavior = currentBehavior;
-        currentBehavior = new Follower(context);
+        currentBehavior = newBehavior;
         handleBehaviorChange(oldBehavior, currentBehavior);
     }
 

@@ -66,6 +66,7 @@ public class DistributedOperationalDataStoreProviderModule extends
                 .persistent(props.getPersistent().booleanValue())
                 .shardIsolatedLeaderCheckIntervalInMillis(
                     props.getShardIsolatedLeaderCheckIntervalInMillis().getValue())
+                .shardElectionTimeoutFactor(props.getShardElectionTimeoutFactor().getValue())
                 .build();
 
         return DistributedDataStoreFactory.createInstance("operational",

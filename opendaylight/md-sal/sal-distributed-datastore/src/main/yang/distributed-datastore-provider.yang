@@ -110,6 +110,13 @@ module distributed-datastore-provider {
             description "The interval at which a shard will send a heart beat message to its remote shard.";
          }
 
+         leaf shard-election-timeout-factor {
+            default 2;
+            type non-zero-uint32-type;
+            description "The multiplication factor to be used to determine shard election timeout. The shard election timeout
+                         is determined by multiplying shard-heartbeat-interval-in-millis with the shard-election-timeout-factor";
+         }
+
          leaf operation-timeout-in-seconds {
             default 5;
             type operation-timeout-type;
