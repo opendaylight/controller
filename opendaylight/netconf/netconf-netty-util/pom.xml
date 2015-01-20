@@ -85,7 +85,6 @@
         <artifactId>maven-bundle-plugin</artifactId>
         <configuration>
           <instructions>
-            <Import-Package>*</Import-Package>
             <Export-Package>org.opendaylight.controller.netconf.nettyutil,
               org.opendaylight.controller.netconf.nettyutil.handler,
               org.opendaylight.controller.netconf.nettyutil.handler.exi,
