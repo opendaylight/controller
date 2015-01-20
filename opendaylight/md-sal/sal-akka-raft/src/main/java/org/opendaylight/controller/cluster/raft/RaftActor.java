@@ -379,15 +379,18 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         if (oldBehavior != currentBehavior){
             onStateChanged();
         }
-        if (oldBehavior != null) {
-            // it can happen that the state has not changed but the leader has changed.
-            onLeaderChanged(oldBehavior.getLeaderId(), currentBehavior.getLeaderId());
 
-            if (getRoleChangeNotifier().isPresent() && oldBehavior.state() != currentBehavior.state()) {
-                // we do not want to notify when the behavior/role is set for the first time (i.e follower)
-                getRoleChangeNotifier().get().tell(new RoleChanged(getId(), oldBehavior.state().name(),
-                    currentBehavior.state().name()), getSelf());
-            }
+        String oldBehaviorLeaderId = oldBehavior == null? null : oldBehavior.getLeaderId();
+        String oldBehaviorState = oldBehavior == null? null : oldBehavior.state().name();
+
+        // it can happen that the state has not changed but the leader has changed.
+        onLeaderChanged(oldBehaviorLeaderId, currentBehavior.getLeaderId());
+
+        if (getRoleChangeNotifier().isPresent() &&
+                (oldBehavior == null || (oldBehavior.state() != currentBehavior.state()))) {
+            getRoleChangeNotifier().get().tell(
+                    new RoleChanged(getId(), oldBehaviorState , currentBehavior.state().name()),
+                    getSelf());
         }
     }
 
