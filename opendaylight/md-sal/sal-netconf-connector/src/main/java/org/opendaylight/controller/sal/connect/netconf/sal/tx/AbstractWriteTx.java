@@ -14,7 +14,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizer;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionCapabilities;
+import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionPreferences;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfBaseOps;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -27,11 +27,11 @@ public abstract class AbstractWriteTx implements DOMDataWriteTransaction {
     protected final RemoteDeviceId id;
     protected final NetconfBaseOps netOps;
     protected final DataNormalizer normalizer;
-    protected final NetconfSessionCapabilities netconfSessionPreferences;
+    protected final NetconfSessionPreferences netconfSessionPreferences;
     // Allow commit to be called only once
     protected boolean finished = false;
 
-    public AbstractWriteTx(final NetconfBaseOps netOps, final RemoteDeviceId id, final DataNormalizer normalizer, final NetconfSessionCapabilities netconfSessionPreferences) {
+    public AbstractWriteTx(final NetconfBaseOps netOps, final RemoteDeviceId id, final DataNormalizer normalizer, final NetconfSessionPreferences netconfSessionPreferences) {
         this.netOps = netOps;
         this.id = id;
         this.normalizer = normalizer;

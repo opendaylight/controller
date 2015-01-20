@@ -11,7 +11,7 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionCapabilities;
+import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionPreferences;
 import org.opendaylight.controller.sal.connect.netconf.sal.NetconfDeviceRpc;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
@@ -40,7 +40,7 @@ public final class NetconfStateSchemas {
      * Factory for NetconfStateSchemas
      */
     public interface NetconfStateSchemasResolver {
-        NetconfStateSchemas resolve(final NetconfDeviceRpc deviceRpc, final NetconfSessionCapabilities remoteSessionCapabilities, final RemoteDeviceId id);
+        NetconfStateSchemas resolve(final NetconfDeviceRpc deviceRpc, final NetconfSessionPreferences remoteSessionCapabilities, final RemoteDeviceId id);
     }
 
     /**
@@ -49,7 +49,7 @@ public final class NetconfStateSchemas {
     public static final class NetconfStateSchemasResolverImpl implements NetconfStateSchemasResolver {
 
         @Override
-        public NetconfStateSchemas resolve(final NetconfDeviceRpc deviceRpc, final NetconfSessionCapabilities remoteSessionCapabilities, final RemoteDeviceId id) {
+        public NetconfStateSchemas resolve(final NetconfDeviceRpc deviceRpc, final NetconfSessionPreferences remoteSessionCapabilities, final RemoteDeviceId id) {
             return NetconfStateSchemas.create(deviceRpc, remoteSessionCapabilities, id);
         }
     }
@@ -91,7 +91,7 @@ public final class NetconfStateSchemas {
     /**
      * Issue get request to remote device and parse response to find all schemas under netconf-state/schemas
      */
-    private static NetconfStateSchemas create(final NetconfDeviceRpc deviceRpc, final NetconfSessionCapabilities remoteSessionCapabilities, final RemoteDeviceId id) {
+    private static NetconfStateSchemas create(final NetconfDeviceRpc deviceRpc, final NetconfSessionPreferences remoteSessionCapabilities, final RemoteDeviceId id) {
         if(remoteSessionCapabilities.isMonitoringSupported() == false) {
             logger.warn("{}: Netconf monitoring not supported on device, cannot detect provided schemas");
             return EMPTY;

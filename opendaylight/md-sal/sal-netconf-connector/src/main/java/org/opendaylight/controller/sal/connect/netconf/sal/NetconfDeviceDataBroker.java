@@ -17,7 +17,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
-import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionCapabilities;
+import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionPreferences;
 import org.opendaylight.controller.sal.connect.netconf.sal.tx.ReadOnlyTx;
 import org.opendaylight.controller.sal.connect.netconf.sal.tx.ReadWriteTx;
 import org.opendaylight.controller.sal.connect.netconf.sal.tx.WriteCandidateTx;
@@ -33,10 +33,10 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 final class NetconfDeviceDataBroker implements DOMDataBroker {
     private final RemoteDeviceId id;
     private final NetconfBaseOps netconfOps;
-    private final NetconfSessionCapabilities netconfSessionPreferences;
+    private final NetconfSessionPreferences netconfSessionPreferences;
     private final DataNormalizer normalizer;
 
-    public NetconfDeviceDataBroker(final RemoteDeviceId id, final RpcImplementation rpc, final SchemaContext schemaContext, final NetconfSessionCapabilities netconfSessionPreferences) {
+    public NetconfDeviceDataBroker(final RemoteDeviceId id, final RpcImplementation rpc, final SchemaContext schemaContext, final NetconfSessionPreferences netconfSessionPreferences) {
         this.id = id;
         this.netconfOps = new NetconfBaseOps(rpc);
         this.netconfSessionPreferences = netconfSessionPreferences;
