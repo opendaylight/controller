@@ -86,6 +86,24 @@
       "revId": "009644b14687d3eeb375affa0a94e32564e3cd59",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_b3bb87e4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-01-20T02:54:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_eb2039f9",
+      "revId": "009644b14687d3eeb375affa0a94e32564e3cd59",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
