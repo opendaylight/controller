@@ -14,6 +14,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetSocketAddress;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -73,11 +74,11 @@ public class NetconfDeviceConnectionManager implements Closeable {
 
     // TODO we receive configBuilder in order to add SessionListener, Session
     // Listener should not be part of config
-    public synchronized void connect(final String name, final NetconfClientConfigurationBuilder configBuilder) {
+    public synchronized void connect(final String name, final InetSocketAddress address, final NetconfClientConfigurationBuilder configBuilder) {
         // TODO change IllegalState exceptions to custom ConnectionException
         Preconditions.checkState(listener == null, "Already connected");
 
-        final RemoteDeviceId deviceId = new RemoteDeviceId(name);
+        final RemoteDeviceId deviceId = new RemoteDeviceId(name, address);
 
         handler = new NetconfDeviceConnectionHandler(commandDispatcher, schemaContextRegistry,
                 console, name);
@@ -98,8 +99,8 @@ public class NetconfDeviceConnectionManager implements Closeable {
     /**
      * Blocks thread until connection is fully established
      */
-    public synchronized Set<String> connectBlocking(final String name, final NetconfClientConfigurationBuilder configBuilder) {
-        this.connect(name, configBuilder);
+    public synchronized Set<String> connectBlocking(final String name, final InetSocketAddress address, final NetconfClientConfigurationBuilder configBuilder) {
+        this.connect(name, address, configBuilder);
         synchronized (handler) {
             while (handler.isUp() == false) {
                 try {

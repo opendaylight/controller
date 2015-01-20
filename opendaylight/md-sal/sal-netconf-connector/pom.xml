@@ -62,6 +62,10 @@
       <artifactId>model-inventory</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.opendaylight.yangtools.model</groupId>
+      <artifactId>ietf-topology</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-broker-impl</artifactId>
     </dependency>

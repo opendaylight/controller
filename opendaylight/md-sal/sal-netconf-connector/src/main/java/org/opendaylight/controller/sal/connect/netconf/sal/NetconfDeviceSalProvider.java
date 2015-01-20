@@ -37,6 +37,8 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
     private volatile NetconfDeviceDatastoreAdapter datastoreAdapter;
     private MountInstance mountInstance;
 
+    private volatile NetconfDeviceTopologyAdapter topologyDatastoreAdapter;
+
     public NetconfDeviceSalProvider(final RemoteDeviceId deviceId, final ExecutorService executor) {
         this.id = deviceId;
         this.executor = executor;
@@ -52,6 +54,12 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
         Preconditions.checkState(datastoreAdapter != null,
                 "%s: Sal provider %s was not initialized by sal. Cannot get datastore adapter", id);
         return datastoreAdapter;
+    }
+
+    public NetconfDeviceTopologyAdapter getTopologyDatastoreAdapter() {
+        Preconditions.checkState(topologyDatastoreAdapter != null,
+                "%s: Sal provider %s was not initialized by sal. Cannot get topology datastore adapter", id);
+        return topologyDatastoreAdapter;
     }
 
     @Override
@@ -75,6 +83,8 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
 
         final DataBroker dataBroker = session.getSALService(DataBroker.class);
         datastoreAdapter = new NetconfDeviceDatastoreAdapter(id, dataBroker);
+
+        topologyDatastoreAdapter = new NetconfDeviceTopologyAdapter(id, dataBroker);
     }
 
     public void close() throws Exception {
@@ -90,11 +100,14 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
         private ObjectRegistration<DOMMountPoint> registration;
         private NotificationPublishService notificationSerivce;
 
+        private ObjectRegistration<DOMMountPoint> topologyRegistration;
+
         MountInstance(final DOMMountPointService mountService, final RemoteDeviceId id) {
             this.mountService = Preconditions.checkNotNull(mountService);
             this.id = Preconditions.checkNotNull(id);
         }
 
+        @Deprecated
         synchronized void onDeviceConnected(final SchemaContext initialCtx,
                 final DOMDataBroker broker, final RpcProvisionRegistry rpc,
                 final NotificationPublishService notificationSerivce) {
@@ -113,6 +126,7 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
             registration = mountBuilder.register();
         }
 
+        @Deprecated
         synchronized void onDeviceDisconnected() {
             if(registration == null) {
                 return;
@@ -128,10 +142,44 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
             }
         }
 
+        synchronized void onTopologyDeviceConnected(final SchemaContext initialCtx,
+                final DOMDataBroker broker, final RpcProvisionRegistry rpc,
+                final NotificationPublishService notificationSerivce) {
+
+            Preconditions.checkNotNull(mountService, "Closed");
+            Preconditions.checkState(topologyRegistration == null, "Already initialized");
+
+            final DOMMountPointService.DOMMountPointBuilder mountBuilder = mountService.createMountPoint(id.getTopologyPath());
+            mountBuilder.addInitialSchemaContext(initialCtx);
+
+            mountBuilder.addService(DOMDataBroker.class, broker);
+            mountBuilder.addService(RpcProvisionRegistry.class, rpc);
+            this.notificationSerivce = notificationSerivce;
+            mountBuilder.addService(NotificationPublishService.class, notificationSerivce);
+
+            topologyRegistration = mountBuilder.register();
+        }
+
+        synchronized void onTopologyDeviceDisconnected() {
+            if(topologyRegistration == null) {
+                return;
+            }
+
+            try {
+                topologyRegistration.close();
+            } catch (final Exception e) {
+                // Only log and ignore
+                logger.warn("Unable to unregister mount instance for {}. Ignoring exception", id.getTopologyPath(), e);
+            } finally {
+                topologyRegistration = null;
+            }
+        }
+
         @Override
         synchronized public void close() throws Exception {
             if(registration != null) {
                 onDeviceDisconnected();
+                onTopologyDeviceDisconnected();
             }
             mountService = null;
         }

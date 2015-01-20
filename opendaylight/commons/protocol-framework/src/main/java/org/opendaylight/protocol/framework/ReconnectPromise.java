@@ -15,6 +15,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.concurrent.Promise;
 import java.net.InetSocketAddress;
 import org.slf4j.Logger;
@@ -53,6 +54,15 @@ final class ReconnectPromise<S extends ProtocolSession<?>, L extends SessionList
                 // Handlers in front of it can react to channelInactive event, but have to forward the event or the reconnect will not work
                 // This handler is last so all handlers in front of it can handle channel inactive (to e.g. resource cleanup) before a new connection is started
                 channel.pipeline().addLast(new ClosedChannelHandler(ReconnectPromise.this));
+            }
+        });
+
+        pending.addListener(new GenericFutureListener<Future<Object>>() {
+            @Override
+            public void operationComplete(Future<Object> future) throws Exception {
+                if (!future.isSuccess()) {
+                    ReconnectPromise.this.setFailure(future.cause());
+                }
             }
         });
     }

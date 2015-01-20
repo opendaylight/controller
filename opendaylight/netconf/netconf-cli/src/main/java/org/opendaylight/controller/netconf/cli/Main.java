@@ -70,7 +70,7 @@ public class Main {
         }
         case SSH: {
             writeStatus(consoleIO, "Connecting to %s via SSH. Please wait.", cliArgs.getAddress());
-            connectionManager.connectBlocking(cliArgs.getAddress(), getClientSshConfig(cliArgs));
+            connectionManager.connectBlocking(cliArgs.getAddress(), cliArgs.getServerAddress(), getClientSshConfig(cliArgs));
             break;
         }
         case NONE: {/* Do not connect initially */

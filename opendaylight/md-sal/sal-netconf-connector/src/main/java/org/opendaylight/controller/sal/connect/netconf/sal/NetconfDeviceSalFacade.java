@@ -16,7 +16,8 @@ import java.util.concurrent.ExecutorService;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceHandler;
-import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionCapabilities;
+import org.opendaylight.controller.sal.connect.netconf.listener.NetconfDeviceCapabilities;
+import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionPreferences;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
@@ -36,7 +37,7 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class NetconfDeviceSalFacade implements AutoCloseable, RemoteDeviceHandler<NetconfSessionCapabilities> {
+public final class NetconfDeviceSalFacade implements AutoCloseable, RemoteDeviceHandler<NetconfSessionPreferences> {
 
     private static final Logger logger= LoggerFactory.getLogger(NetconfDeviceSalFacade.class);
 
@@ -63,7 +64,7 @@ public final class NetconfDeviceSalFacade implements AutoCloseable, RemoteDevice
 
     @Override
     public synchronized void onDeviceConnected(final SchemaContext schemaContext,
-                                               final NetconfSessionCapabilities netconfSessionPreferences, final RpcImplementation deviceRpc) {
+                                               final NetconfSessionPreferences netconfSessionPreferences, final RpcImplementation deviceRpc) {
 
         // TODO move SchemaAwareRpcBroker from sal-broker-impl, now we have depend on the whole sal-broker-impl
         final RpcProvisionRegistry rpcRegistry = new SchemaAwareRpcBroker(id.getPath().toString(), new SchemaContextProvider() {
@@ -93,12 +94,23 @@ public final class NetconfDeviceSalFacade implements AutoCloseable, RemoteDevice
 
         salProvider.getMountInstance().onDeviceConnected(schemaContext, domBroker, rpcRegistry, notificationService);
         salProvider.getDatastoreAdapter().updateDeviceState(true, netconfSessionPreferences.getModuleBasedCaps());
+        salProvider.getMountInstance().onTopologyDeviceConnected(schemaContext, domBroker, rpcRegistry, notificationService);
+        salProvider.getTopologyDatastoreAdapter().updateDeviceData(true, netconfSessionPreferences.getNetconfDeviceCapabilities());
     }
 
     @Override
     public synchronized void onDeviceDisconnected() {
         salProvider.getDatastoreAdapter().updateDeviceState(false, Collections.<QName>emptySet());
+        salProvider.getTopologyDatastoreAdapter().updateDeviceData(false, new NetconfDeviceCapabilities());
         salProvider.getMountInstance().onDeviceDisconnected();
+        salProvider.getMountInstance().onTopologyDeviceDisconnected();
+    }
+
+    @Override
+    public void onDeviceFailed(Throwable throwable) {
+        salProvider.getTopologyDatastoreAdapter().setDeviceAsFailed(throwable);
+        salProvider.getMountInstance().onDeviceDisconnected();
+        salProvider.getMountInstance().onTopologyDeviceDisconnected();
     }
 
     private void registerRpcsToSal(final SchemaContext schemaContext, final RpcProvisionRegistry rpcRegistry, final RpcImplementation deviceRpc) {
