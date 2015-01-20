@@ -14,7 +14,7 @@ import org.opendaylight.controller.netconf.cli.commands.CommandDispatcher;
 import org.opendaylight.controller.netconf.cli.io.ConsoleContext;
 import org.opendaylight.controller.netconf.cli.io.ConsoleIO;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceHandler;
-import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionCapabilities;
+import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionPreferences;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
  * Implementation of RemoteDeviceHandler. Integrates cli with
  * sal-netconf-connector.
  */
-public class NetconfDeviceConnectionHandler implements RemoteDeviceHandler<NetconfSessionCapabilities> {
+public class NetconfDeviceConnectionHandler implements RemoteDeviceHandler<NetconfSessionPreferences> {
 
     private final CommandDispatcher commandDispatcher;
     private final SchemaContextRegistry schemaContextRegistry;
@@ -42,7 +42,7 @@ public class NetconfDeviceConnectionHandler implements RemoteDeviceHandler<Netco
 
     @Override
     public synchronized void onDeviceConnected(final SchemaContext context,
-            final NetconfSessionCapabilities capabilities, final RpcImplementation rpcImplementation) {
+            final NetconfSessionPreferences preferences, final RpcImplementation rpcImplementation) {
         console.enterRootContext(new ConsoleContext() {
 
             @Override
@@ -79,6 +79,11 @@ public class NetconfDeviceConnectionHandler implements RemoteDeviceHandler<Netco
         commandDispatcher.removeRemoteCommands();
         schemaContextRegistry.setRemoteSchemaContext(null);
         up = false;
+    }
+
+    @Override
+    public void onDeviceFailed() {
+        // FIXME
     }
 
     @Override

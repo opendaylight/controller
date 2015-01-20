@@ -77,7 +77,7 @@ public class NetconfDeviceConnectionManager implements Closeable {
         // TODO change IllegalState exceptions to custom ConnectionException
         Preconditions.checkState(listener == null, "Already connected");
 
-        final RemoteDeviceId deviceId = new RemoteDeviceId(name);
+        final RemoteDeviceId deviceId = new RemoteDeviceId(name, configBuilder.getAddress());
 
         handler = new NetconfDeviceConnectionHandler(commandDispatcher, schemaContextRegistry,
                 console, name);

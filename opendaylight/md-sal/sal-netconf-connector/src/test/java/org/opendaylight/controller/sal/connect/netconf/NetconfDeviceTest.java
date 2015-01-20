@@ -17,6 +17,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
@@ -39,7 +40,7 @@ import org.opendaylight.controller.sal.connect.api.MessageTransformer;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceCommunicator;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceHandler;
 import org.opendaylight.controller.sal.connect.api.SchemaSourceProviderFactory;
-import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionCapabilities;
+import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionPreferences;
 import org.opendaylight.controller.sal.connect.netconf.sal.NetconfDeviceRpc;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
@@ -90,7 +91,7 @@ public class NetconfDeviceTest {
     private static final NetconfStateSchemas.NetconfStateSchemasResolver stateSchemasResolver = new NetconfStateSchemas.NetconfStateSchemasResolver() {
 
         @Override
-        public NetconfStateSchemas resolve(final NetconfDeviceRpc deviceRpc, final NetconfSessionCapabilities remoteSessionCapabilities, final RemoteDeviceId id) {
+        public NetconfStateSchemas resolve(final NetconfDeviceRpc deviceRpc, final NetconfSessionPreferences remoteSessionCapabilities, final RemoteDeviceId id) {
             return NetconfStateSchemas.EMPTY;
         }
     };
@@ -99,7 +100,7 @@ public class NetconfDeviceTest {
     public void testNetconfDeviceFailFirstSchemaFailSecondEmpty() throws Exception {
         final ArrayList<String> capList = Lists.newArrayList(TEST_CAPABILITY);
 
-        final RemoteDeviceHandler<NetconfSessionCapabilities> facade = getFacade();
+        final RemoteDeviceHandler<NetconfSessionPreferences> facade = getFacade();
         final RemoteDeviceCommunicator<NetconfMessage> listener = getListener();
 
         final SchemaContextFactory schemaFactory = getSchemaFactory();
@@ -116,7 +117,7 @@ public class NetconfDeviceTest {
                 = new NetconfDevice.SchemaResourcesDTO(getSchemaRegistry(), schemaFactory, stateSchemasResolver);
         final NetconfDevice device = new NetconfDevice(schemaResourcesDTO, getId(), facade, getExecutor(), getMessageTransformer());
         // Monitoring not supported
-        final NetconfSessionCapabilities sessionCaps = getSessionCaps(false, capList);
+        final NetconfSessionPreferences sessionCaps = getSessionCaps(false, capList);
         device.onRemoteSessionUp(sessionCaps, listener);
 
         Mockito.verify(facade, Mockito.timeout(5000)).onDeviceDisconnected();
@@ -126,7 +127,7 @@ public class NetconfDeviceTest {
 
     @Test
     public void testNetconfDeviceMissingSource() throws Exception {
-        final RemoteDeviceHandler<NetconfSessionCapabilities> facade = getFacade();
+        final RemoteDeviceHandler<NetconfSessionPreferences> facade = getFacade();
         final RemoteDeviceCommunicator<NetconfMessage> listener = getListener();
 
         final SchemaContextFactory schemaFactory = getSchemaFactory();
@@ -148,10 +149,10 @@ public class NetconfDeviceTest {
                 = new NetconfDevice.SchemaResourcesDTO(getSchemaRegistry(), schemaFactory, stateSchemasResolver);
         final NetconfDevice device = new NetconfDevice(schemaResourcesDTO, getId(), facade, getExecutor(), getMessageTransformer());
         // Monitoring supported
-        final NetconfSessionCapabilities sessionCaps = getSessionCaps(true, Lists.newArrayList(TEST_CAPABILITY, TEST_CAPABILITY2));
+        final NetconfSessionPreferences sessionCaps = getSessionCaps(true, Lists.newArrayList(TEST_CAPABILITY, TEST_CAPABILITY2));
         device.onRemoteSessionUp(sessionCaps, listener);
 
-        Mockito.verify(facade, Mockito.timeout(5000)).onDeviceConnected(any(SchemaContext.class), any(NetconfSessionCapabilities.class), any(RpcImplementation.class));
+        Mockito.verify(facade, Mockito.timeout(5000)).onDeviceConnected(any(SchemaContext.class), any(NetconfSessionPreferences.class), any(RpcImplementation.class));
         Mockito.verify(schemaFactory, times(2)).createSchemaContext(anyCollectionOf(SourceIdentifier.class));
     }
 
@@ -165,7 +166,7 @@ public class NetconfDeviceTest {
 
     @Test
     public void testNotificationBeforeSchema() throws Exception {
-        final RemoteDeviceHandler<NetconfSessionCapabilities> facade = getFacade();
+        final RemoteDeviceHandler<NetconfSessionPreferences> facade = getFacade();
         final RemoteDeviceCommunicator<NetconfMessage> listener = getListener();
 
         final MessageTransformer<NetconfMessage> messageTransformer = getMessageTransformer();
@@ -179,7 +180,7 @@ public class NetconfDeviceTest {
 
         verify(facade, times(0)).onNotification(any(CompositeNode.class));
 
-        final NetconfSessionCapabilities sessionCaps = getSessionCaps(true,
+        final NetconfSessionPreferences sessionCaps = getSessionCaps(true,
                 Lists.newArrayList(TEST_CAPABILITY));
 
         device.onRemoteSessionUp(sessionCaps, listener);
@@ -194,7 +195,7 @@ public class NetconfDeviceTest {
 
     @Test
     public void testNetconfDeviceReconnect() throws Exception {
-        final RemoteDeviceHandler<NetconfSessionCapabilities> facade = getFacade();
+        final RemoteDeviceHandler<NetconfSessionPreferences> facade = getFacade();
         final RemoteDeviceCommunicator<NetconfMessage> listener = getListener();
 
         final SchemaContextFactory schemaContextProviderFactory = getSchemaFactory();
@@ -203,13 +204,13 @@ public class NetconfDeviceTest {
         final NetconfDevice.SchemaResourcesDTO schemaResourcesDTO
                 = new NetconfDevice.SchemaResourcesDTO(getSchemaRegistry(), schemaContextProviderFactory, stateSchemasResolver);
         final NetconfDevice device = new NetconfDevice(schemaResourcesDTO, getId(), facade, getExecutor(), messageTransformer);
-        final NetconfSessionCapabilities sessionCaps = getSessionCaps(true,
+        final NetconfSessionPreferences sessionCaps = getSessionCaps(true,
                 Lists.newArrayList(TEST_NAMESPACE + "?module=" + TEST_MODULE + "&amp;revision=" + TEST_REVISION));
         device.onRemoteSessionUp(sessionCaps, listener);
 
         verify(schemaContextProviderFactory, timeout(5000)).createSchemaContext(any(Collection.class));
         verify(messageTransformer, timeout(5000)).onGlobalContextUpdated(any(SchemaContext.class));
-        verify(facade, timeout(5000)).onDeviceConnected(any(SchemaContext.class), any(NetconfSessionCapabilities.class), any(RpcImplementation.class));
+        verify(facade, timeout(5000)).onDeviceConnected(any(SchemaContext.class), any(NetconfSessionPreferences.class), any(RpcImplementation.class));
 
         device.onRemoteSessionDown();
         verify(facade, timeout(5000)).onDeviceDisconnected();
@@ -218,7 +219,7 @@ public class NetconfDeviceTest {
 
         verify(schemaContextProviderFactory, timeout(5000).times(2)).createSchemaContext(any(Collection.class));
         verify(messageTransformer, timeout(5000).times(3)).onGlobalContextUpdated(any(SchemaContext.class));
-        verify(facade, timeout(5000).times(2)).onDeviceConnected(any(SchemaContext.class), any(NetconfSessionCapabilities.class), any(RpcImplementation.class));
+        verify(facade, timeout(5000).times(2)).onDeviceConnected(any(SchemaContext.class), any(NetconfSessionPreferences.class), any(RpcImplementation.class));
     }
 
     private SchemaContextFactory getSchemaFactory() {
@@ -236,9 +237,9 @@ public class NetconfDeviceTest {
         return parser.resolveSchemaContext(models);
     }
 
-    private RemoteDeviceHandler<NetconfSessionCapabilities> getFacade() throws Exception {
-        final RemoteDeviceHandler<NetconfSessionCapabilities> remoteDeviceHandler = mockCloseableClass(RemoteDeviceHandler.class);
-        doNothing().when(remoteDeviceHandler).onDeviceConnected(any(SchemaContext.class), any(NetconfSessionCapabilities.class), any(RpcImplementation.class));
+    private RemoteDeviceHandler<NetconfSessionPreferences> getFacade() throws Exception {
+        final RemoteDeviceHandler<NetconfSessionPreferences> remoteDeviceHandler = mockCloseableClass(RemoteDeviceHandler.class);
+        doNothing().when(remoteDeviceHandler).onDeviceConnected(any(SchemaContext.class), any(NetconfSessionPreferences.class), any(RpcImplementation.class));
         doNothing().when(remoteDeviceHandler).onDeviceDisconnected();
         doNothing().when(remoteDeviceHandler).onNotification(any(CompositeNode.class));
         return remoteDeviceHandler;
@@ -283,7 +284,7 @@ public class NetconfDeviceTest {
         return messageTransformer;
     }
 
-    public NetconfSessionCapabilities getSessionCaps(final boolean addMonitor, final Collection<String> additionalCapabilities) {
+    public NetconfSessionPreferences getSessionCaps(final boolean addMonitor, final Collection<String> additionalCapabilities) {
         final ArrayList<String> capabilities = Lists.newArrayList(
                 XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_BASE_1_0,
                 XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_BASE_1_1);
@@ -294,7 +295,7 @@ public class NetconfDeviceTest {
 
         capabilities.addAll(additionalCapabilities);
 
-        return NetconfSessionCapabilities.fromStrings(
+        return NetconfSessionPreferences.fromStrings(
                 capabilities);
     }
 

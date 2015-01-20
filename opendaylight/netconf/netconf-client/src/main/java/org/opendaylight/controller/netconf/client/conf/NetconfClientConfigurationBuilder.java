@@ -68,7 +68,7 @@ public class NetconfClientConfigurationBuilder {
         return this;
     }
 
-    final InetSocketAddress getAddress() {
+    public final InetSocketAddress getAddress() {
         return address;
     }
 
