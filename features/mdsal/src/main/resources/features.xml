@@ -9,8 +9,8 @@
     <repository>mvn:org.opendaylight.controller/features-config-netty/${config.version}/xml/features</repository>
     <repository>mvn:org.opendaylight.controller/features-akka/${commons.opendaylight.version}/xml/features</repository>
     <feature name='odl-mdsal-all' version='${project.version}' description="OpenDaylight :: MDSAL :: All">
+        <feature version='${project.version}'>odl-mdsal-broker-local</feature>
         <feature version='${project.version}'>odl-mdsal-broker</feature>
-        <feature version='${project.version}'>odl-mdsal-clustering</feature>
         <feature version='${project.version}'>odl-mdsal-xsql</feature>
         <feature version='${project.version}'>odl-toaster</feature>
     </feature>
@@ -21,7 +21,7 @@
       <bundle>mvn:org.opendaylight.controller/sal-common-impl/${mdsal.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/sal-common-util/${mdsal.version}</bundle>
     </feature>
-    <feature name='odl-mdsal-broker' version='${project.version}' description="OpenDaylight :: MDSAL :: Broker">
+    <feature name='odl-mdsal-broker-local' version='${project.version}' description="OpenDaylight :: MDSAL :: Broker">
         <feature version='${yangtools.version}'>odl-yangtools-common</feature>
         <feature version='${yangtools.version}'>odl-yangtools-binding</feature>
         <feature version='${yangtools.version}'>odl-yangtools-models</feature>
@@ -55,7 +55,7 @@
         <configfile finalname="${config.configfile.directory}/${config.xsql.configfile}">mvn:org.opendaylight.controller/sal-dom-xsql-config/${project.version}/xml/config</configfile>
     </feature>
     <feature name ='odl-mdsal-clustering-commons' version='${project.version}'>
-        <feature version='${project.version}'>odl-mdsal-broker</feature>
+        <feature version='${project.version}'>odl-mdsal-broker-local</feature>
         <feature version='${akka.version}'>odl-akka-system</feature>
         <feature version='${akka.version}'>odl-akka-persistence</feature>
         <bundle>mvn:org.opendaylight.controller/sal-clustering-commons/${project.version}</bundle>
@@ -63,19 +63,19 @@
         <bundle>mvn:com.codahale.metrics/metrics-core/3.0.1</bundle>
     </feature>
     <feature name ='odl-mdsal-distributed-datastore' version='${project.version}'>
-        <feature version='${project.version}'>odl-mdsal-broker</feature>
+        <feature version='${project.version}'>odl-mdsal-broker-local</feature>
         <feature version='${project.version}'>odl-mdsal-clustering-commons</feature>
         <feature version='${akka.version}'>odl-akka-clustering</feature>
         <bundle>mvn:org.opendaylight.controller/sal-distributed-datastore/${project.version}</bundle>
     </feature>
     <feature name ='odl-mdsal-remoterpc-connector' version='${project.version}'>
-        <feature version='${project.version}'>odl-mdsal-broker</feature>
+        <feature version='${project.version}'>odl-mdsal-broker-local</feature>
         <feature version='${project.version}'>odl-mdsal-clustering-commons</feature>
         <feature version='${akka.version}'>odl-akka-clustering</feature>
         <feature version='0.7'>odl-akka-leveldb</feature>
         <bundle>mvn:org.opendaylight.controller/sal-remoterpc-connector/${project.version}</bundle>
     </feature>
-    <feature name ='odl-mdsal-clustering' version='${project.version}'>
+    <feature name ='odl-mdsal-broker' version='${project.version}'>
         <feature version='${project.version}'>odl-mdsal-remoterpc-connector</feature>
         <feature version='${project.version}'>odl-mdsal-distributed-datastore</feature>
         <configfile finalname="${config.configfile.directory}/${config.clustering.configfile}">mvn:org.opendaylight.controller/sal-clustering-config/${project.version}/xml/config</configfile>
@@ -83,10 +83,13 @@
         <configfile finalname="configuration/initial/module-shards.conf">mvn:org.opendaylight.controller/sal-clustering-config/${project.version}/xml/moduleshardconf</configfile>
         <configfile finalname="configuration/initial/modules.conf">mvn:org.opendaylight.controller/sal-clustering-config/${project.version}/xml/moduleconf</configfile>
     </feature>
+    <feature name ='odl-mdsal-clustering' version='${project.version}'>
+      <feature version='${project.version}'>odl-mdsal-broker</feature>
+    </feature>
 
     <feature name='odl-clustering-test-app' version='${project.version}'>
         <feature version='${yangtools.version}'>odl-yangtools-models</feature>
-        <feature version='${project.version}'>odl-mdsal-broker</feature>
+        <feature version='${project.version}'>odl-mdsal-broker-local</feature>
         <bundle>mvn:org.opendaylight.controller.samples/clustering-it-model/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller.samples/clustering-it-provider/${project.version}</bundle>
         <configfile finalname="${config.configfile.directory}/20-clustering-test-app.xml">mvn:org.opendaylight.controller.samples/clustering-it-config/${project.version}/xml/config</configfile>
