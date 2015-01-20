@@ -39,11 +39,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
@@ -112,12 +112,13 @@ public class ShardTest extends AbstractActorTest {
     private final ShardIdentifier shardID = ShardIdentifier.builder().memberName("member-1")
             .shardName("inventory").type("config" + NEXT_SHARD_NUM.getAndIncrement()).build();
 
-    private DatastoreContext dataStoreContext = DatastoreContext.newBuilder().
+    private final Builder dataStoreContextBuilder = DatastoreContext.newBuilder().
             shardJournalRecoveryLogBatchSize(3).shardSnapshotBatchCount(5000).
-            shardHeartbeatIntervalInMillis(100).build();
+            shardHeartbeatIntervalInMillis(100);
 
     @Before
     public void setUp() {
+        Builder newBuilder = DatastoreContext.newBuilder();
         InMemorySnapshotStore.clear();
         InMemoryJournal.clear();
     }
@@ -128,9 +129,13 @@ public class ShardTest extends AbstractActorTest {
         InMemoryJournal.clear();
     }
 
+    private DatastoreContext newDatastoreContext() {
+        return dataStoreContextBuilder.build();
+    }
+
     private Props newShardProps() {
         return Shard.props(shardID, Collections.<ShardIdentifier,String>emptyMap(),
-                dataStoreContext, SCHEMA_CONTEXT);
+                newDatastoreContext(), SCHEMA_CONTEXT);
     }
 
     @Test
@@ -187,7 +192,7 @@ public class ShardTest extends AbstractActorTest {
                 @Override
                 public Shard create() throws Exception {
                     return new Shard(shardID, Collections.<ShardIdentifier,String>emptyMap(),
-                            dataStoreContext, SCHEMA_CONTEXT) {
+                            newDatastoreContext(), SCHEMA_CONTEXT) {
                         @Override
                         public void onReceiveCommand(final Object message) throws Exception {
                             if(message instanceof ElectionTimeout && firstElectionTimeout) {
@@ -315,7 +320,7 @@ public class ShardTest extends AbstractActorTest {
             class TestShard extends Shard {
                 TestShard() {
                     super(shardID, Collections.<ShardIdentifier, String>singletonMap(shardID, null),
-                            dataStoreContext, SCHEMA_CONTEXT);
+                            newDatastoreContext(), SCHEMA_CONTEXT);
                 }
 
                 Map<String, String> getPeerAddresses() {
@@ -471,7 +476,7 @@ public class ShardTest extends AbstractActorTest {
             @Override
             public Shard create() throws Exception {
                 return new Shard(shardID, Collections.<ShardIdentifier,String>emptyMap(),
-                        dataStoreContext, SCHEMA_CONTEXT) {
+                        newDatastoreContext(), SCHEMA_CONTEXT) {
                     @Override
                     protected void onRecoveryComplete() {
                         try {
@@ -775,15 +780,72 @@ public class ShardTest extends AbstractActorTest {
             assertTrue("Missing leaf " + TestModel.ID_QNAME.getLocalName(), idLeaf.isPresent());
             assertEquals(TestModel.ID_QNAME.getLocalName() + " value", 1, idLeaf.get().getValue());
 
-            for(int i = 0; i < 20 * 5; i++) {
-                long lastLogIndex = shard.underlyingActor().getShardMBean().getLastLogIndex();
-                if(lastLogIndex == 2) {
-                    break;
-                }
-                Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
-            }
+            verifyLastLogIndex(shard, 2);
 
-            assertEquals("Last log index", 2, shard.underlyingActor().getShardMBean().getLastLogIndex());
+            shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
+        }};
+    }
+
+    private void verifyLastLogIndex(TestActorRef<Shard> shard, long expectedValue) {
+        for(int i = 0; i < 20 * 5; i++) {
+            long lastLogIndex = shard.underlyingActor().getShardMBean().getLastLogIndex();
+            if(lastLogIndex == expectedValue) {
+                break;
+            }
+            Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
+        }
+
+        assertEquals("Last log index", expectedValue, shard.underlyingActor().getShardMBean().getLastLogIndex());
+    }
+
+    @Test
+    public void testCommitWithPersistenceDisabled() throws Throwable {
+        dataStoreContextBuilder.persistent(false);
+        new ShardTestKit(getSystem()) {{
+            final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
+                    newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                    "testCommitPhaseFailure");
+
+            waitUntilLeader(shard);
+
+            InMemoryDOMDataStore dataStore = shard.underlyingActor().getDataStore();
+
+            // Setup a simulated transactions with a mock cohort.
+
+            String transactionID = "tx";
+            MutableCompositeModification modification = new MutableCompositeModification();
+            NormalizedNode<?, ?> containerNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            DOMStoreThreePhaseCommitCohort cohort = setupMockWriteTransaction("cohort", dataStore,
+                    TestModel.TEST_PATH, containerNode, modification);
+
+            FiniteDuration duration = duration("5 seconds");
+
+            // Simulate the ForwardedReadyTransaction messages that would be sent
+            // by the ShardTransaction.
+
+            shard.tell(new ForwardedReadyTransaction(transactionID, CURRENT_VERSION,
+                    cohort, modification, true), getRef());
+            expectMsgClass(duration, ReadyTransactionReply.SERIALIZABLE_CLASS);
+
+            // Send the CanCommitTransaction message.
+
+            shard.tell(new CanCommitTransaction(transactionID).toSerializable(), getRef());
+            CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
+                    expectMsgClass(duration, CanCommitTransactionReply.SERIALIZABLE_CLASS));
+            assertEquals("Can commit", true, canCommitReply.getCanCommit());
+
+            // Send the CanCommitTransaction message.
+
+            shard.tell(new CommitTransaction(transactionID).toSerializable(), getRef());
+            expectMsgClass(duration, CommitTransactionReply.SERIALIZABLE_CLASS);
+
+            InOrder inOrder = inOrder(cohort);
+            inOrder.verify(cohort).canCommit();
+            inOrder.verify(cohort).preCommit();
+            inOrder.verify(cohort).commit();
+
+            NormalizedNode<?, ?> actualNode = readStore(shard, TestModel.TEST_PATH);
+            assertEquals(TestModel.TEST_QNAME.getLocalName(), containerNode, actualNode);
 
             shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
         }};
@@ -946,7 +1008,6 @@ public class ShardTest extends AbstractActorTest {
     }
 
     @Test
-    @Ignore("This test will work only if replication is turned on. Needs modification due to optimizations added to Shard/RaftActor.")
     public void testAbortBeforeFinishCommit() throws Throwable {
         new ShardTestKit(getSystem()) {{
             final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
@@ -956,26 +1017,24 @@ public class ShardTest extends AbstractActorTest {
             waitUntilLeader(shard);
 
             final FiniteDuration duration = duration("5 seconds");
-            final Timeout timeout = new Timeout(duration);
-
             InMemoryDOMDataStore dataStore = shard.underlyingActor().getDataStore();
 
             final String transactionID = "tx1";
-            final CountDownLatch abortComplete = new CountDownLatch(1);
             Function<DOMStoreThreePhaseCommitCohort,ListenableFuture<Void>> preCommit =
                           new Function<DOMStoreThreePhaseCommitCohort,ListenableFuture<Void>>() {
                 @Override
                 public ListenableFuture<Void> apply(final DOMStoreThreePhaseCommitCohort cohort) {
                     ListenableFuture<Void> preCommitFuture = cohort.preCommit();
 
-                    Future<Object> abortFuture = Patterns.ask(shard,
-                            new AbortTransaction(transactionID).toSerializable(), timeout);
-                    abortFuture.onComplete(new OnComplete<Object>() {
-                        @Override
-                        public void onComplete(final Throwable e, final Object resp) {
-                            abortComplete.countDown();
-                        }
-                    }, getSystem().dispatcher());
+                    // Simulate an AbortTransaction message occurring during replication, after
+                    // persisting and before finishing the commit to the in-memory store.
+                    // We have no followers so due to optimizations in the RaftActor, it does not
+                    // attempt replication and thus we can't send an AbortTransaction message b/c
+                    // it would be processed too late after CommitTransaction completes. So we'll
+                    // simulate an AbortTransaction message occurring during replication by calling
+                    // the shard directly.
+                    //
+                    shard.underlyingActor().doAbortTransaction(transactionID, null);
 
                     return preCommitFuture;
                 }
@@ -995,14 +1054,14 @@ public class ShardTest extends AbstractActorTest {
                     expectMsgClass(duration, CanCommitTransactionReply.SERIALIZABLE_CLASS));
             assertEquals("Can commit", true, canCommitReply.getCanCommit());
 
-            Future<Object> commitFuture = Patterns.ask(shard,
-                    new CommitTransaction(transactionID).toSerializable(), timeout);
-
-            assertEquals("Abort complete", true, abortComplete.await(5, TimeUnit.SECONDS));
-
-            Await.result(commitFuture, duration);
+            shard.tell(new CommitTransaction(transactionID).toSerializable(), getRef());
+            expectMsgClass(duration, CommitTransactionReply.SERIALIZABLE_CLASS);
 
             NormalizedNode<?, ?> node = readStore(shard, TestModel.TEST_PATH);
+
+            // Since we're simulating an abort occurring during replication and before finish commit,
+            // the data should still get written to the in-memory store since we've gotten past
+            // canCommit and preCommit and persisted the data.
             assertNotNull(TestModel.TEST_QNAME.getLocalName() + " not found", node);
 
             shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
@@ -1011,7 +1070,7 @@ public class ShardTest extends AbstractActorTest {
 
     @Test
     public void testTransactionCommitTimeout() throws Throwable {
-        dataStoreContext = DatastoreContext.newBuilder().shardTransactionCommitTimeoutInSeconds(1).build();
+        dataStoreContextBuilder.shardTransactionCommitTimeoutInSeconds(1);
 
         new ShardTestKit(getSystem()) {{
             final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
@@ -1083,7 +1142,7 @@ public class ShardTest extends AbstractActorTest {
 
     @Test
     public void testTransactionCommitQueueCapacityExceeded() throws Throwable {
-        dataStoreContext = DatastoreContext.newBuilder().shardTransactionCommitQueueCapacity(1).build();
+        dataStoreContextBuilder.shardTransactionCommitQueueCapacity(1);
 
         new ShardTestKit(getSystem()) {{
             final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
@@ -1216,15 +1275,7 @@ public class ShardTest extends AbstractActorTest {
 
             // Wait for the 2nd Tx to complete the canCommit phase.
 
-            final CountDownLatch latch = new CountDownLatch(1);
-            canCommitFuture.onComplete(new OnComplete<Object>() {
-                @Override
-                public void onComplete(final Throwable t, final Object resp) {
-                    latch.countDown();
-                }
-            }, getSystem().dispatcher());
-
-            assertEquals("2nd CanCommit complete", true, latch.await(5, TimeUnit.SECONDS));
+            Await.ready(canCommitFuture, duration);
 
             InOrder inOrder = inOrder(cohort1, cohort2);
             inOrder.verify(cohort1).canCommit();
@@ -1255,7 +1306,7 @@ public class ShardTest extends AbstractActorTest {
                 @Override
                 public Shard create() throws Exception {
                     return new Shard(shardID, Collections.<ShardIdentifier,String>emptyMap(),
-                            dataStoreContext, SCHEMA_CONTEXT) {
+                            newDatastoreContext(), SCHEMA_CONTEXT) {
                         @Override
                         protected void commitSnapshot(final long sequenceNumber) {
                             super.commitSnapshot(sequenceNumber);
