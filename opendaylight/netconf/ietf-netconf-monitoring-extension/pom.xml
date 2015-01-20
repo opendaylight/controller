@@ -33,10 +33,6 @@
         <artifactId>maven-bundle-plugin</artifactId>
         <configuration>
           <instructions>
-            <Import-Package>com.google.common.collect,
-                            org.opendaylight.yangtools.yang.binding,
-                            org.opendaylight.yangtools.yang.common,
-                            org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004,</Import-Package>
             <Export-Package>org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.extension.rev131210,</Export-Package>
           </instructions>
         </configuration>

@@ -56,26 +56,6 @@
         <configuration>
           <instructions>
             <Export-Package>org.opendaylight.controller.netconf.client.*,</Export-Package>
-            <Import-Package>com.google.common.base,
-                            com.google.common.collect,
-                            io.netty.channel,
-                            io.netty.channel.socket,
-                            io.netty.util,
-                            io.netty.util.concurrent,
-                            javax.annotation,
-                            javax.net.ssl,
-                            javax.xml.namespace,
-                            javax.xml.parsers,
-                            javax.xml.xpath,
-                            org.opendaylight.controller.netconf.api,
-                            org.opendaylight.controller.netconf.util.*,
-                            org.opendaylight.controller.netconf.nettyutil.*,
-                            org.opendaylight.protocol.framework,
-                            org.openexi.*,
-                            org.slf4j,
-                            org.w3c.dom,
-                            org.xml.sax,
-                            io.netty.handler.codec</Import-Package>
           </instructions>
         </configuration>
       </plugin>

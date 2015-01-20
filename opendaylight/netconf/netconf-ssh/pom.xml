@@ -72,7 +72,6 @@
         <configuration>
           <instructions>
             <Bundle-Activator>org.opendaylight.controller.netconf.ssh.osgi.NetconfSSHActivator</Bundle-Activator>
-            <Import-Package>*</Import-Package>
           </instructions>
         </configuration>
       </plugin>

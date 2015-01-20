@@ -110,43 +110,6 @@
         <configuration>
           <instructions>
             <Bundle-Activator>org.opendaylight.controller.netconf.impl.osgi.NetconfImplActivator</Bundle-Activator>
-            <Import-Package>com.google.common.base,
-                            com.google.common.collect,
-                            io.netty.channel,
-                            io.netty.channel.socket,
-                            io.netty.util,
-                            io.netty.util.concurrent,
-                            io.netty.buffer,
-                            io.netty.handler.codec,
-                            io.netty.channel.nio,
-                            io.netty.channel.local,
-                            javax.annotation,
-                            javax.management,
-                            javax.net.ssl,
-                            javax.xml.namespace,
-                            javax.xml.xpath,
-                            org.opendaylight.controller.netconf.api,
-                            org.opendaylight.controller.netconf.api.jmx,
-                            org.opendaylight.controller.netconf.mapping.api,
-                            org.opendaylight.controller.netconf.util.*,
-                            org.opendaylight.protocol.framework,
-                            org.osgi.framework,
-                            org.osgi.util.tracker,
-                            org.slf4j,
-                            org.w3c.dom,
-                            org.xml.sax,
-                            io.netty.util.internal,
-                            org.opendaylight.controller.netconf.api.monitoring,
-                            org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924,
-                            org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924,
-                            org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004,
-                            org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state,
-                            org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.sessions,
-                            org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.schemas,
-                            org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.extension.rev131210,
-                            org.opendaylight.yangtools.yang.binding,
-                            org.openexi.*,
-                            org.opendaylight.controller.netconf.nettyutil.*</Import-Package>
           </instructions>
         </configuration>
       </plugin>

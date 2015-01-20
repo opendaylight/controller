@@ -50,9 +50,6 @@
         <configuration>
           <instructions>
             <Bundle-Activator>org.opendaylight.controller.netconf.tcp.osgi.NetconfTCPActivator</Bundle-Activator>
-            <Import-Package>com.google.common.base, io.netty.bootstrap, io.netty.channel, io.netty.channel.local,
-              io.netty.channel.nio, io.netty.channel.socket, io.netty.channel.socket.nio, io.netty.handler.logging,
-              io.netty.util.concurrent, org.opendaylight.controller.netconf.util.osgi, org.osgi.framework, org.slf4j</Import-Package>
           </instructions>
         </configuration>
       </plugin>
