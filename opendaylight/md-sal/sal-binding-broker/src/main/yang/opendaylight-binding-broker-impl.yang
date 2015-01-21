@@ -135,32 +135,7 @@ module opendaylight-sal-binding-broker-impl {
         case binding-forwarded-data-broker {
             when "/config:modules/config:module/config:type = 'binding-forwarded-data-broker'";
             container binding-forwarded-data-broker {
-                container dom-async-broker {
-                    uses config:service-ref {
-                        refine type {
-                            mandatory true;
-                            config:required-identity dom:dom-async-data-broker;
-                        }
-                    }
-                }
-
-                container binding-mapping-service {
-                    uses config:service-ref {
-                        refine type {
-                            mandatory true;
-                            config:required-identity binding-dom-mapping-service;
-                        }
-                    }
-                }
-
-                container schema-service {
-                    uses config:service-ref {
-                        refine type {
-                            mandatory false;
-                            config:required-identity dom:schema-service;
-                        }
-                    }
-                }
+                uses dom-forwarding-component;
             }
         }
     }
