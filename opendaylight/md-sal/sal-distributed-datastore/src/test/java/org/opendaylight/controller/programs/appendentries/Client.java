@@ -20,6 +20,7 @@ import org.opendaylight.controller.cluster.datastore.modification.WriteModificat
 import org.opendaylight.controller.cluster.example.messages.KeyValue;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationByteStringPayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationPayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
@@ -72,16 +73,14 @@ public class Client {
             @Override public Payload getData() {
                 WriteModification writeModification =
                     new WriteModification(TestModel.TEST_PATH, ImmutableNodes
-                        .containerNode(TestModel.TEST_QNAME),
-                        TestModel.createTestContext()
-                    );
+                        .containerNode(TestModel.TEST_QNAME));
 
                 MutableCompositeModification compositeModification =
                     new MutableCompositeModification();
 
                 compositeModification.addModification(writeModification);
 
-                return new CompositeModificationPayload(
+                return new CompositeModificationByteStringPayload(
                     compositeModification.toSerializable());
             }
 
