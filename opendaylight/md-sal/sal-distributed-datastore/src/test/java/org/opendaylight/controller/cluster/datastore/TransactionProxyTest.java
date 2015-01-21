@@ -362,8 +362,12 @@ public class TransactionProxyTest {
         return Futures.successful(new MergeDataReply());
     }
 
+    private Future<Object> deleteSerializedDataReply(short version) {
+        return Futures.successful(new DeleteDataReply().toSerializable(version));
+    }
+
     private Future<Object> deleteSerializedDataReply() {
-        return Futures.successful(new DeleteDataReply().toSerializable());
+        return deleteSerializedDataReply(DataStoreVersions.CURRENT_VERSION);
     }
 
     private Future<DeleteDataReply> deleteDataReply() {
@@ -814,7 +818,7 @@ public class TransactionProxyTest {
                 eq(actorSelection(actorRef)), eqSerializedDeleteData());
 
         verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
-                DeleteDataReply.SERIALIZABLE_CLASS);
+                DeleteDataReply.class);
     }
 
     private void verifyCohortFutures(ThreePhaseCommitCohortProxy proxy,

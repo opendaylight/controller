@@ -23,6 +23,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWrit
  * @author Thomas Pantelis
  */
 public final class SerializationUtils {
+
     public static interface Applier<T> {
         void apply(T instance, YangInstanceIdentifier path, NormalizedNode<?, ?> node);
     }
@@ -77,5 +78,24 @@ public final class SerializationUtils {
             }
 
         return null;
+    }
+
+    public static void serializePath(YangInstanceIdentifier path, DataOutput out) {
+        Preconditions.checkNotNull(path);
+        try {
+            NormalizedNodeOutputStreamWriter streamWriter = new NormalizedNodeOutputStreamWriter(out);
+            streamWriter.writeYangInstanceIdentifier(path);
+        } catch (IOException e) {
+            throw new IllegalArgumentException(String.format("Error serializing path {}", path), e);
+        }
+    }
+
+    public static YangInstanceIdentifier deserializePath(DataInput in) {
+        try {
+            NormalizedNodeInputStreamReader streamReader = new NormalizedNodeInputStreamReader(in);
+            return streamReader.readYangInstanceIdentifier();
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Error deserializing path", e);
+        }
     }
 }
