@@ -20,6 +20,7 @@ import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 
+@Deprecated
 public class CompositeModificationPayloadTest {
 
 

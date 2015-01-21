@@ -51,14 +51,9 @@ import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntries
  *
  */
 public abstract class Payload {
-    private String clientPayloadClassName;
 
     public String getClientPayloadClassName() {
         return this.getClass().getName();
-    }
-
-    public void setClientPayloadClassName(String clientPayloadClassName) {
-        this.clientPayloadClassName = clientPayloadClassName;
     }
 
     /**
@@ -68,6 +63,7 @@ public abstract class Payload {
      * @param <T>
      * @return Map of <GeneratedMessage.GeneratedExtension, T>
      */
+    @Deprecated
     public abstract <T extends Object> Map<GeneratedMessage.GeneratedExtension, T> encode();
 
     /**
@@ -77,11 +73,9 @@ public abstract class Payload {
      * @param payload The payload in protocol buffer format
      * @return
      */
+    @Deprecated
     public abstract Payload decode(
         AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Payload payload);
 
     public abstract int size();
-
-
-
 }

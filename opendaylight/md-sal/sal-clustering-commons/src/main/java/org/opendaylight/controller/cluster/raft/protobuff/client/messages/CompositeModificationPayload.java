@@ -18,9 +18,9 @@ import java.util.Map;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
 import org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages;
 
+@Deprecated
 public class CompositeModificationPayload extends Payload implements
     Serializable {
-    private static final long serialVersionUID = 1L;
 
     private final PersistentMessages.CompositeModification modification;
 
@@ -73,6 +73,7 @@ public class CompositeModificationPayload extends Payload implements
         return this.modification;
     }
 
+    @Override
     public int size(){
         return this.modification.getSerializedSize();
     }
