@@ -10,16 +10,14 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 
-public class DeleteDataReply implements SerializableMessage{
-    public static final Class<ShardTransactionMessages.DeleteDataReply> SERIALIZABLE_CLASS =
-            ShardTransactionMessages.DeleteDataReply.class;
+public class DeleteDataReply extends EmptyReply {
 
-    private static final Object SERIALIZED_INSTANCE = ShardTransactionMessages.DeleteDataReply.newBuilder().build();
+    private static final Object LEGACY_SERIALIZED_INSTANCE =
+            ShardTransactionMessages.DeleteDataReply.newBuilder().build();
 
     public static final DeleteDataReply INSTANCE = new DeleteDataReply();
 
-    @Override
-    public Object toSerializable() {
-        return SERIALIZED_INSTANCE;
+    public DeleteDataReply() {
+        super(LEGACY_SERIALIZED_INSTANCE);
     }
 }
