@@ -130,6 +130,13 @@ module flow-node-inventory {
         }
     }
 
+    grouping port-number-grouping {
+        leaf port-number {
+            description "Port number of a flow capable node.";
+            type inet:port-number;
+        }
+    }
+
     grouping flow-node {
         leaf manufacturer {
             type string;
@@ -151,7 +158,8 @@ module flow-node-inventory {
         uses group:groups;
         uses meters;
         uses ip-address-grouping;
-        // TODO: ports
+        uses port-number-grouping;
+
         
         container supported-match-types {
             list match-type {
