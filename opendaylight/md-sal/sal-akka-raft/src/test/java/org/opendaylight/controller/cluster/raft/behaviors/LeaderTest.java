@@ -43,15 +43,14 @@ import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
-import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages;
 import scala.concurrent.duration.FiniteDuration;
 
 public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
-    private ActorRef leaderActor =
+    private final ActorRef leaderActor =
         getSystem().actorOf(Props.create(DoNothingActor.class));
-    private ActorRef senderActor =
+    private final ActorRef senderActor =
         getSystem().actorOf(Props.create(DoNothingActor.class));
 
     @Test
@@ -73,6 +72,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
         new JavaTestKit(getSystem()) {{
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     ActorRef followerActor = getTestActor();
@@ -92,6 +92,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
                     final String out =
                         new ExpectMsg<String>(duration("1 seconds"), "match hint") {
                             // do not put code outside this method, will run afterwards
+                            @Override
                             protected String match(Object in) {
                                 Object msg = fromSerializableMessage(in);
                                 if (msg instanceof AppendEntries) {
@@ -117,6 +118,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
         new JavaTestKit(getSystem()) {{
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     ActorRef followerActor = getTestActor();
@@ -145,6 +147,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
                     final String out =
                         new ExpectMsg<String>(duration("1 seconds"), "match hint") {
                             // do not put code outside this method, will run afterwards
+                            @Override
                             protected String match(Object in) {
                                 Object msg = fromSerializableMessage(in);
                                 if (msg instanceof AppendEntries) {
@@ -169,6 +172,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
         new JavaTestKit(getSystem()) {{
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     ActorRef raftActor = getTestActor();
@@ -195,6 +199,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
                         new ExpectMsg<String>(duration("1 seconds"),
                             "match hint") {
                             // do not put code outside this method, will run afterwards
+                            @Override
                             protected String match(Object in) {
                                 if (in instanceof ApplyState) {
                                     if (((ApplyState) in).getIdentifier().equals("state-id")) {
@@ -268,8 +273,8 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
             leader.handleMessage(leaderActor, new SendHeartBeat());
 
-            AppendEntriesMessages.AppendEntries aeproto = (AppendEntriesMessages.AppendEntries)MessageCollectorActor.getFirstMatching(
-                followerActor, AppendEntries.SERIALIZABLE_CLASS);
+            AppendEntries aeproto = (AppendEntries)MessageCollectorActor.getFirstMatching(
+                followerActor, AppendEntries.class);
 
             assertNotNull("AppendEntries should be sent even if InstallSnapshotReply is not " +
                 "received", aeproto);
@@ -482,6 +487,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
             final String out =
                 new ExpectMsg<String>(duration("1 seconds"), "match hint") {
                     // do not put code outside this method, will run afterwards
+                    @Override
                     protected String match(Object in) {
                         if (in instanceof InstallSnapshotMessages.InstallSnapshot) {
                             InstallSnapshot is = (InstallSnapshot)
@@ -779,6 +785,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
         return createActorContext(leaderActor);
     }
 
+    @Override
     protected RaftActorContext createActorContext(ActorRef actorRef) {
         return new MockRaftActorContext("test", getSystem(), actorRef);
     }
@@ -870,14 +877,13 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
             leader.handleMessage(leaderActor, new SendHeartBeat());
 
-            AppendEntriesMessages.AppendEntries appendEntries =
-                (AppendEntriesMessages.AppendEntries) MessageCollectorActor
-                    .getFirstMatching(followerActor, AppendEntriesMessages.AppendEntries.class);
+            AppendEntries appendEntries = (AppendEntries) MessageCollectorActor
+                    .getFirstMatching(followerActor, AppendEntries.class);
 
             assertNotNull(appendEntries);
 
             assertEquals(1, appendEntries.getLeaderCommit());
-            assertEquals(1, appendEntries.getLogEntries(0).getIndex());
+            assertEquals(1, appendEntries.getEntries().get(0).getIndex());
             assertEquals(0, appendEntries.getPrevLogIndex());
 
             AppendEntriesReply appendEntriesReply =
@@ -939,14 +945,13 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
             leader.handleMessage(leaderActor, new SendHeartBeat());
 
-            AppendEntriesMessages.AppendEntries appendEntries =
-                (AppendEntriesMessages.AppendEntries) MessageCollectorActor
-                    .getFirstMatching(followerActor, AppendEntriesMessages.AppendEntries.class);
+            AppendEntries appendEntries = (AppendEntries) MessageCollectorActor
+                    .getFirstMatching(followerActor, AppendEntries.class);
 
             assertNotNull(appendEntries);
 
             assertEquals(1, appendEntries.getLeaderCommit());
-            assertEquals(1, appendEntries.getLogEntries(0).getIndex());
+            assertEquals(1, appendEntries.getEntries().get(0).getIndex());
             assertEquals(0, appendEntries.getPrevLogIndex());
 
             AppendEntriesReply appendEntriesReply =
@@ -1187,8 +1192,8 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
     private class MockConfigParamsImpl extends DefaultConfigParamsImpl {
 
-        private long electionTimeOutIntervalMillis;
-        private int snapshotChunkSize;
+        private final long electionTimeOutIntervalMillis;
+        private final int snapshotChunkSize;
 
         public MockConfigParamsImpl(long electionTimeOutIntervalMillis, int snapshotChunkSize) {
             super();

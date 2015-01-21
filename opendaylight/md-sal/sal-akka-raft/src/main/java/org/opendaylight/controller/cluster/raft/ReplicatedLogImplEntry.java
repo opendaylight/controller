@@ -11,9 +11,8 @@ package org.opendaylight.controller.cluster.raft;
 import java.io.Serializable;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 
-public class ReplicatedLogImplEntry implements ReplicatedLogEntry,
-    Serializable {
-    private static final long serialVersionUID = 1L;
+public class ReplicatedLogImplEntry implements ReplicatedLogEntry, Serializable {
+    private static final long serialVersionUID = -9085798014576489130L;
 
     private final long index;
     private final long term;
@@ -26,15 +25,18 @@ public class ReplicatedLogImplEntry implements ReplicatedLogEntry,
         this.payload = payload;
     }
 
-    @Override public Payload getData() {
+    @Override
+    public Payload getData() {
         return payload;
     }
 
-    @Override public long getTerm() {
+    @Override
+    public long getTerm() {
         return term;
     }
 
-    @Override public long getIndex() {
+    @Override
+    public long getIndex() {
         return index;
     }
 
@@ -43,7 +45,8 @@ public class ReplicatedLogImplEntry implements ReplicatedLogEntry,
         return getData().size();
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return "Entry{" +
             "index=" + index +
             ", term=" + term +

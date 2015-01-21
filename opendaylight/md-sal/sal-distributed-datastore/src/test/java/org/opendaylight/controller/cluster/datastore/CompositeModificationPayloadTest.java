@@ -11,6 +11,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
+import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationPayload;
@@ -69,7 +70,8 @@ public class CompositeModificationPayloadTest {
         AppendEntries appendEntries =
             new AppendEntries(1, "member-1", 0, 100, entries, 1);
 
-        AppendEntriesMessages.AppendEntries o = (AppendEntriesMessages.AppendEntries) appendEntries.toSerializable();
+        AppendEntriesMessages.AppendEntries o = (AppendEntriesMessages.AppendEntries)
+                appendEntries.toSerializable(RaftVersions.HELIUM_VERSION);
 
         o.writeDelimitedTo(new FileOutputStream(SERIALIZE_OUT));
 
