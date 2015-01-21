@@ -14,7 +14,7 @@ import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 public class SerializationUtils {
 
     public static Object fromSerializable(Object serializable){
-        if(serializable.getClass().equals(AppendEntries.SERIALIZABLE_CLASS)){
+        if(AppendEntries.isSerializedType(serializable)){
             return AppendEntries.fromSerializable(serializable);
 
         } else if (serializable.getClass().equals(InstallSnapshot.SERIALIZABLE_CLASS)) {
