@@ -23,7 +23,6 @@ import org.opendaylight.controller.cluster.datastore.messages.WriteData;
 import org.opendaylight.controller.cluster.datastore.messages.WriteDataReply;
 import org.opendaylight.controller.cluster.datastore.modification.CompositeModification;
 import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
-import org.opendaylight.controller.cluster.datastore.modification.ImmutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
@@ -82,8 +81,7 @@ public class ShardWriteTransaction extends ShardTransaction {
 
         } else if (message instanceof GetCompositedModification) {
             // This is here for testing only
-            getSender().tell(new GetCompositeModificationReply(
-                    new ImmutableCompositeModification(modification)), getSelf());
+            getSender().tell(new GetCompositeModificationReply(modification), getSelf());
         } else {
             super.handleReceive(message);
         }
@@ -94,7 +92,7 @@ public class ShardWriteTransaction extends ShardTransaction {
         LOG.debug("writeData at path : {}", message.getPath());
 
         modification.addModification(
-                new WriteModification(message.getPath(), message.getData(), getSchemaContext()));
+                new WriteModification(message.getPath(), message.getData()));
         try {
             transaction.write(message.getPath(), message.getData());
             WriteDataReply writeDataReply = WriteDataReply.INSTANCE;
@@ -110,7 +108,7 @@ public class ShardWriteTransaction extends ShardTransaction {
         LOG.debug("mergeData at path : {}", message.getPath());
 
         modification.addModification(
-                new MergeModification(message.getPath(), message.getData(), getSchemaContext()));
+                new MergeModification(message.getPath(), message.getData()));
 
         try {
             transaction.merge(message.getPath(), message.getData());
