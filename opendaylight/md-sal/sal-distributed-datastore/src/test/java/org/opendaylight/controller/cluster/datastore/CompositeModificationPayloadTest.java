@@ -1,12 +1,10 @@
 package org.opendaylight.controller.cluster.datastore;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
@@ -22,17 +20,6 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 
 public class CompositeModificationPayloadTest {
 
-
-    private static final String SERIALIZE_OUT = "serialize.out";
-
-    @After
-    public void shutDown(){
-        File f = new File(SERIALIZE_OUT);
-        if(f.exists()){
-            f.delete();
-        }
-    }
-
     @Test
     public void testBasic() throws IOException {
 
@@ -42,8 +29,7 @@ public class CompositeModificationPayloadTest {
             @Override public Payload getData() {
                 WriteModification writeModification =
                     new WriteModification(TestModel.TEST_PATH, ImmutableNodes
-                        .containerNode(TestModel.TEST_QNAME),
-                        TestModel.createTestContext());
+                        .containerNode(TestModel.TEST_QNAME));
 
                 MutableCompositeModification compositeModification =
                     new MutableCompositeModification();
@@ -73,11 +59,12 @@ public class CompositeModificationPayloadTest {
         AppendEntriesMessages.AppendEntries o = (AppendEntriesMessages.AppendEntries)
                 appendEntries.toSerializable(RaftVersions.HELIUM_VERSION);
 
-        o.writeDelimitedTo(new FileOutputStream(SERIALIZE_OUT));
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        o.writeDelimitedTo(bos);
 
         AppendEntriesMessages.AppendEntries appendEntries2 =
             AppendEntriesMessages.AppendEntries
-                .parseDelimitedFrom(new FileInputStream(SERIALIZE_OUT));
+                .parseDelimitedFrom(new ByteArrayInputStream(bos.toByteArray()));
 
         AppendEntries appendEntries1 = AppendEntries.fromSerializable(appendEntries2);
 
@@ -85,7 +72,5 @@ public class CompositeModificationPayloadTest {
 
 
         Assert.assertTrue(((CompositeModificationPayload) data).getModification().toString().contains(TestModel.TEST_QNAME.getNamespace().toString()));
-
     }
-
 }

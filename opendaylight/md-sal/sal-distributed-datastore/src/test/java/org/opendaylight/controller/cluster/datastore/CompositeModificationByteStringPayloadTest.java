@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
@@ -33,8 +32,7 @@ public class CompositeModificationByteStringPayloadTest {
     public void testSerialization(){
         WriteModification writeModification =
                 new WriteModification(TestModel.TEST_PATH, ImmutableNodes
-                        .containerNode(TestModel.TEST_QNAME),
-                        TestModel.createTestContext());
+                        .containerNode(TestModel.TEST_QNAME));
 
         MutableCompositeModification compositeModification =
                 new MutableCompositeModification();
@@ -56,28 +54,20 @@ public class CompositeModificationByteStringPayloadTest {
     public void testAppendEntries(){
         List<ReplicatedLogEntry> entries = new ArrayList<>();
 
-        CompositeModificationByteStringPayload payload = newByteStringPayload(
-                new WriteModification(TestModel.OUTER_LIST_PATH,
-                        ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build(),
-                        SCHEMA_CONTEXT));
+        WriteModification writeModification = new WriteModification(TestModel.OUTER_LIST_PATH,
+                ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
+
+        MutableCompositeModification compositeModification = new MutableCompositeModification();
+
+        compositeModification.addModification(writeModification);
+
+        CompositeModificationByteStringPayload payload =
+                new CompositeModificationByteStringPayload(compositeModification.toSerializable());
 
         payload.clearModificationReference();
 
         entries.add(new ReplicatedLogImplEntry(0, 1, payload));
 
-
         assertNotNull(new AppendEntries(10, "foobar", 10, 10, entries, 10).toSerializable());
     }
-
-
-
-    private CompositeModificationByteStringPayload newByteStringPayload(final Modification... mods) {
-        MutableCompositeModification compMod = new MutableCompositeModification();
-        for(Modification mod: mods) {
-            compMod.addModification(mod);
-        }
-
-        return new CompositeModificationByteStringPayload(compMod.toSerializable());
-    }
-
 }
