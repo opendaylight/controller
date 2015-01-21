@@ -1,5 +1,6 @@
 package org.opendaylight.controller.md.sal.dom.xsql.jdbc;
 
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.SQLException;
@@ -14,8 +15,11 @@ import org.opendaylight.controller.md.sal.dom.xsql.XSQLBluePrint;
 import org.opendaylight.controller.md.sal.dom.xsql.XSQLBluePrintNode;
 import org.opendaylight.controller.md.sal.dom.xsql.XSQLColumn;
 import org.opendaylight.controller.md.sal.dom.xsql.XSQLCriteria;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class JDBCServer extends Thread {
+public class JDBCServer extends Thread implements AutoCloseable {
+    private static final Logger LOG = LoggerFactory.getLogger(JDBCServer.class);
     private ServerSocket socket = null;
     private XSQLAdapter adapter = null;
 
@@ -353,6 +357,17 @@ public class JDBCServer extends Thread {
                 if (colCriteria != null && !colCriteria.trim().equals("")) {
                     addCriteria(col, new XSQLCriteria(colCriteria, -1), rs);
                 }
+            }
+        }
+    }
+
+    @Override
+    public void close() throws Exception {
+        if (socket != null) {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                LOG.warn("Exception while trying to close socket: {}", e);
             }
         }
     }
