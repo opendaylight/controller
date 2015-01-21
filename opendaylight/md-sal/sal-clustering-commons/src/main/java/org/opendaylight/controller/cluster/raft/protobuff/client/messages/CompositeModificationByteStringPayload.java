@@ -24,6 +24,7 @@ import org.opendaylight.controller.protobuff.messages.persistent.PersistentMessa
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Deprecated
 public class CompositeModificationByteStringPayload extends Payload implements
         Serializable {
     private static final long serialVersionUID = 1L;
@@ -96,6 +97,7 @@ public class CompositeModificationByteStringPayload extends Payload implements
         return null;
     }
 
+    @Override
     public int size(){
         return byteString.size();
     }
