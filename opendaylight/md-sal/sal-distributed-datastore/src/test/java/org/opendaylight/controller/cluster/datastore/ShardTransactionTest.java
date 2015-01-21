@@ -353,13 +353,14 @@ public class ShardTransactionTest extends AbstractActorTest {
                     DataStoreVersions.CURRENT_VERSION);
             final ActorRef transaction = getSystem().actorOf(props, "testDeleteData");
 
-            transaction.tell(new DeleteData(TestModel.TEST_PATH).toSerializable(), getRef());
+            transaction.tell(new DeleteData(TestModel.TEST_PATH).toSerializable(
+                    DataStoreVersions.HELIUM_2_VERSION), getRef());
 
             expectMsgClass(duration("5 seconds"), ShardTransactionMessages.DeleteDataReply.class);
 
             assertModification(transaction, DeleteModification.class);
 
-            //unserialized merge
+            //unserialized
             transaction.tell(new DeleteData(TestModel.TEST_PATH), getRef());
 
             expectMsgClass(duration("5 seconds"), DeleteDataReply.class);
@@ -433,7 +434,8 @@ public class ShardTransactionTest extends AbstractActorTest {
                 DataStoreVersions.CURRENT_VERSION);
         final TestActorRef<ShardTransaction> transaction = TestActorRef.apply(props,getSystem());
 
-        transaction.receive(new DeleteData(TestModel.TEST_PATH).toSerializable(), ActorRef.noSender());
+        transaction.receive(new DeleteData(TestModel.TEST_PATH).toSerializable(
+                DataStoreVersions.CURRENT_VERSION), ActorRef.noSender());
     }
 
     @Test
