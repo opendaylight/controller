@@ -63,35 +63,6 @@
                         </schema-service>
                     </inmemory-operational-datastore-provider>
                 </module>
-
-                <!-- PingPong broker -->
-                <module>
-                    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:pingpong">prefix:pingpong-data-broker</type>
-                    <name>pingpong-data-broker</name>
-                    <data-broker>
-                        <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:dom-async-data-broker</type>
-                        <name>inmemory-data-broker</name>
-                    </data-broker>
-                </module>
-                <module>
-                    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:binding-forwarded-data-broker</type>
-                    <name>pingpong-binding-data-broker</name>
-                    <binding-forwarded-data-broker xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">
-                        <dom-async-broker>
-                            <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:dom-async-data-broker</type>
-                            <name>pingpong-broker</name>
-                        </dom-async-broker>
-                        <schema-service>
-                            <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:schema-service</type>
-                            <name>yang-schema-service</name>
-                        </schema-service>
-                        <binding-mapping-service>
-                            <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">binding:binding-dom-mapping-service</type>
-                            <name>runtime-mapping-singleton</name>
-                        </binding-mapping-service>
-                    </binding-forwarded-data-broker>
-                </module>
-
                 <!--
                      Tree-based in-memory data store. This is the data store which is currently
                      recommended for single-node deployments.
@@ -224,10 +195,6 @@
                             <name>binding-data-broker</name>
                             <provider>/modules/module[type='binding-forwarded-data-broker'][name='binding-async-data-broker']</provider>
                         </instance>
-                        <instance>
-                            <name>pingpong-binding-data-broker</name>
-                            <provider>/modules/module[type='binding-forwarded-data-broker'][name='pingpong-binding-data-broker']</provider>
-                        </instance>
                     </service>
 
                     <service>
@@ -235,10 +202,6 @@
                         <instance>
                             <name>inmemory-data-broker</name>
                             <provider>/modules/module[type='dom-inmemory-data-broker'][name='inmemory-data-broker']</provider>
-                        </instance>
-                        <instance>
-                            <name>pingpong-broker</name>
-                            <provider>/modules/module[type='pingpong-data-broker'][name='pingpong-data-broker']</provider>
                         </instance>
                     </service>
             </services>
@@ -250,7 +213,6 @@
         <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding?module=opendaylight-md-sal-binding&amp;revision=2013-10-28</capability>
         <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom?module=opendaylight-md-sal-dom&amp;revision=2013-10-28</capability>
         <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl?module=opendaylight-sal-binding-broker-impl&amp;revision=2013-10-28</capability>
-        <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:pingpong?module=opendaylight-pingpong-broker&amp;revision=2014-11-07</capability>
         <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl?module=opendaylight-sal-dom-broker-impl&amp;revision=2013-10-28</capability>
         <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:common?module=opendaylight-md-sal-common&amp;revision=2013-10-28</capability>
         <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:core:spi:config-dom-store?module=opendaylight-config-dom-datastore&amp;revision=2014-06-17</capability>
