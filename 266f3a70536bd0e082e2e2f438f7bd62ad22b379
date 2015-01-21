@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_a25b2b2d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 814,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-01-21T21:05:08Z",
+      "side": 1,
+      "message": "Given the amount of operations flying back and forth, it would seem reasonable to reuse a single OnComplete instance for the TransactionProxy instance. Less garbage generated that way.",
+      "revId": "266f3a70536bd0e082e2e2f438f7bd62ad22b379",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_4242673f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 816,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-01-21T21:05:08Z",
+      "side": 1,
+      "message": "\u0027throws Throwable\u0027 emits a sonar warning. Since operationLimiter.release() does not declare anything thrown, the entire declaration can be removed.",
+      "revId": "266f3a70536bd0e082e2e2f438f7bd62ad22b379",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
