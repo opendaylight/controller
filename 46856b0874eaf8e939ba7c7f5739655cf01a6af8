@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_6c643ce5",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 1730,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-01-21T09:04:32Z",
+      "side": 1,
+      "message": "Controller build uses yang-maven-plugin 0.7.0 from Yangtools, which requires Maven 3.1.1 or newer, so I suggest updating it to this value.",
+      "range": {
+        "startLine": 1730,
+        "startChar": 18,
+        "endLine": 1730,
+        "endChar": 42
+      },
+      "revId": "46856b0874eaf8e939ba7c7f5739655cf01a6af8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
