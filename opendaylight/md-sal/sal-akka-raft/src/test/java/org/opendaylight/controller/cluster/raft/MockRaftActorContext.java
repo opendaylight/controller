@@ -55,14 +55,17 @@ public class MockRaftActorContext implements RaftActorContext {
             private long currentTerm = 0;
             private String votedFor = "";
 
+            @Override
             public long getCurrentTerm() {
                 return currentTerm;
             }
 
+            @Override
             public String getVotedFor() {
                 return votedFor;
             }
 
+            @Override
             public void update(long currentTerm, String votedFor){
                 this.currentTerm = currentTerm;
                 this.votedFor = votedFor;
@@ -127,6 +130,7 @@ public class MockRaftActorContext implements RaftActorContext {
         return lastApplied;
     }
 
+    @Override
     public void setReplicatedLog(ReplicatedLog replicatedLog) {
         this.replicatedLog = replicatedLog;
     }
@@ -202,7 +206,7 @@ public class MockRaftActorContext implements RaftActorContext {
     }
 
     public static class MockPayload extends Payload implements Serializable {
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 3121380393130864247L;
         private String value = "";
 
         public MockPayload(){
@@ -235,6 +239,7 @@ public class MockRaftActorContext implements RaftActorContext {
             return MockPayload.class.getName();
         }
 
+        @Override
         public String toString() {
             return value;
         }
@@ -273,7 +278,7 @@ public class MockRaftActorContext implements RaftActorContext {
     }
 
     public static class MockReplicatedLogBuilder {
-        private ReplicatedLog mockLog = new SimpleReplicatedLog();
+        private final ReplicatedLog mockLog = new SimpleReplicatedLog();
 
         public  MockReplicatedLogBuilder createEntries(int start, int end, int term) {
             for (int i=start; i<end; i++) {
