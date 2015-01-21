@@ -121,7 +121,7 @@ class ShardRecoveryCoordinator {
         public void run() {
             for(int i = 0; i < logEntries.size(); i++) {
                 MutableCompositeModification.fromSerializable(
-                        logEntries.get(i), schemaContext).apply(resultingTx);
+                        logEntries.get(i)).apply(resultingTx);
                 // Null out to GC quicker.
                 logEntries.set(i, null);
             }
