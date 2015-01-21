@@ -1,11 +1,6 @@
 package org.opendaylight.controller.md.sal.dom.xsql.jdbc;
 
-import org.opendaylight.controller.md.sal.dom.xsql.XSQLAdapter;
-import org.opendaylight.controller.md.sal.dom.xsql.XSQLBluePrint;
-import org.opendaylight.controller.md.sal.dom.xsql.XSQLBluePrintNode;
-import org.opendaylight.controller.md.sal.dom.xsql.XSQLColumn;
-import org.opendaylight.controller.md.sal.dom.xsql.XSQLCriteria;
-
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.SQLException;
@@ -14,8 +9,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
+import org.opendaylight.controller.md.sal.dom.xsql.XSQLAdapter;
+import org.opendaylight.controller.md.sal.dom.xsql.XSQLBluePrint;
+import org.opendaylight.controller.md.sal.dom.xsql.XSQLBluePrintNode;
+import org.opendaylight.controller.md.sal.dom.xsql.XSQLColumn;
+import org.opendaylight.controller.md.sal.dom.xsql.XSQLCriteria;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class JDBCServer extends Thread {
+public class JDBCServer extends Thread implements AutoCloseable {
+    private static final Logger LOG = LoggerFactory.getLogger(XSQLAdapter.class);
+
     private ServerSocket socket = null;
     private XSQLAdapter adapter = null;
 
@@ -59,7 +63,7 @@ public class JDBCServer extends Thread {
     }
 
     public static void parseTables(JDBCResultSet rs, XSQLBluePrint bp)
-        throws SQLException {
+    throws SQLException {
         String lowSQL = rs.getSQL().toLowerCase();
         int from = lowSQL.indexOf("from");
         int where = lowSQL.indexOf("where");
@@ -200,6 +204,17 @@ public class JDBCServer extends Thread {
                 if (colCriteria != null && !colCriteria.trim().equals("")) {
                     addCriteria(col, new XSQLCriteria(colCriteria, -1), rs);
                 }
+            }
+        }
+    }
+
+    @Override
+    public void close() {
+        if (socket != null) {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                LOG.warn("Exception while trying to close socket: {}", e);
             }
         }
     }
