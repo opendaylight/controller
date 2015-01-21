@@ -2,6 +2,7 @@ package org.opendaylight.controller.md.sal.dom.xsql;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.ServerSocket;
@@ -14,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadTransaction;
@@ -24,8 +24,11 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class XSQLAdapter extends Thread implements SchemaContextListener {
+public class XSQLAdapter extends Thread implements SchemaContextListener, AutoCloseable {
+    private static final Logger LOG = LoggerFactory.getLogger(XSQLAdapter.class);
 
     private static final int SLEEP = 10000;
     private static XSQLAdapter a = new XSQLAdapter();
@@ -428,6 +431,20 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
         } catch (Exception err) {
             err.printStackTrace(out);
         }
+    }
+
+    @Override
+    public void close() throws Exception {
+        stopped = true;
+        if (serverSocket != null) {
+            try {
+                serverSocket.close();
+            } catch (IOException e) {
+                LOG.warn("Exception while trying to close socket: {}", e);
+                throw e;
+            }
+        }
+        jdbcServer.close();
     }
 
     public static class NETask implements Runnable {
