@@ -21,7 +21,9 @@ import java.util.Map;
 import java.util.Set;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
+import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +54,8 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
 
     private final Map<String, Integer> stringCodeMap = new HashMap<>();
 
+    private NormalizedNodeWriter normalizedNodeWriter;
+
     public NormalizedNodeOutputStreamWriter(OutputStream stream) throws IOException {
         Preconditions.checkNotNull(stream);
         output = new DataOutputStream(stream);
@@ -59,6 +63,18 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
 
     public NormalizedNodeOutputStreamWriter(DataOutput output) throws IOException {
         this.output = Preconditions.checkNotNull(output);
+    }
+
+    private NormalizedNodeWriter normalizedNodeWriter() {
+        if(normalizedNodeWriter == null) {
+            normalizedNodeWriter = NormalizedNodeWriter.forStreamWriter(this);
+        }
+
+        return normalizedNodeWriter;
+    }
+
+    public void writeNormalizedNode(NormalizedNode<?, ?> node) throws IOException {
+        normalizedNodeWriter().write(node);
     }
 
     @Override
