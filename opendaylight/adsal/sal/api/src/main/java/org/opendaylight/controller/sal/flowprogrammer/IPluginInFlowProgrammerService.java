@@ -15,6 +15,7 @@ import org.opendaylight.controller.sal.utils.Status;
  * This interface defines the flow programmer methods to be implemented by
  * protocol plugins
  */
+@Deprecated
 public interface IPluginInFlowProgrammerService {
     /**
      * Synchronously add a flow to the network node

@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
+@Deprecated
 public abstract class Action implements Serializable {
     private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(Action.class);

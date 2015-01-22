@@ -18,6 +18,7 @@ import org.opendaylight.controller.sal.core.UpdateType;
  * The class represents an Edge, the Edge's Property Set and its UpdateType.
  * If update is on new properties added to an existing edge, appropriate type is CHANGED.
  */
+@Deprecated
 public class TopoEdgeUpdate {
     private Edge edge;
     private Set<Property> props;

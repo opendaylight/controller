@@ -17,6 +17,7 @@ import java.io.Serializable;
  *
  *
  */
+@Deprecated
 public enum Direction implements Serializable {
     FORWARD("forward"), REVERSE("reverse");
     private Direction(String name) {

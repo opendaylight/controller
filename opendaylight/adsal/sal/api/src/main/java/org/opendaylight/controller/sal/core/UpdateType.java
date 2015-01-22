@@ -16,6 +16,7 @@ package org.opendaylight.controller.sal.core;
  * @brief  Describes update types
  *
  */
+@Deprecated
 public enum UpdateType {
     ADDED("added"), REMOVED("removed"), CHANGED("changed");
 

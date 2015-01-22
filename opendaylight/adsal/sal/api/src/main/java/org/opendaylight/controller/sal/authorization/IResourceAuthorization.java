@@ -20,6 +20,7 @@ import org.opendaylight.controller.sal.utils.Status;
  * and User Manager make use of this interface to retrieve
  * authorization information at user or and role level.
  */
+@Deprecated
 public interface IResourceAuthorization {
 
     /**

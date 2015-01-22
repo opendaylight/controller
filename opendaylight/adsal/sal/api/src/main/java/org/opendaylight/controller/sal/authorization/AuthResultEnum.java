@@ -16,6 +16,7 @@ package org.opendaylight.controller.sal.authorization;
 
 import java.io.Serializable;
 
+@Deprecated
 public enum AuthResultEnum implements Serializable {
     AUTH_NONE("AUTH_NOT_ATTEMPTED"), AUTH_ACCEPT("AUTHENTICATION_ACCEPTED"), // request accepted
     AUTH_REJECT("AUTHENTICATION_REJECTED"), // request rejected

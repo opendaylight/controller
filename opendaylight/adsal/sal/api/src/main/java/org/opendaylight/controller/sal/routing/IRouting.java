@@ -19,6 +19,7 @@ import org.opendaylight.controller.sal.core.Path;
  * This interface provides APIs to manage and query the routing information
  *
  */
+@Deprecated
 public interface IRouting {
 
     /**

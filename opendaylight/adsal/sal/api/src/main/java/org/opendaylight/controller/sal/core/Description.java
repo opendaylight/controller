@@ -18,6 +18,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @SuppressWarnings("serial")
 @XmlAccessorType(XmlAccessType.NONE)
+@Deprecated
 public class Description extends Property {
     @XmlElement(name="value")
     private String descriptionValue;

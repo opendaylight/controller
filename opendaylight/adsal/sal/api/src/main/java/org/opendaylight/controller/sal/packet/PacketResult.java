@@ -18,6 +18,7 @@ package org.opendaylight.controller.sal.packet;
  * Possible results for Data packet processing handler
  *
  */
+@Deprecated
 public enum PacketResult {
     /**
      * Packet has been processed and noone in the chain after us is

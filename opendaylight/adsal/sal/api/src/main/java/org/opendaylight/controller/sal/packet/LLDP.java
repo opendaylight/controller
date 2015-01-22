@@ -19,7 +19,7 @@ import org.opendaylight.controller.sal.utils.NetUtils;
 /**
  * Class that represents the LLDP frame objects
  */
-
+@Deprecated
 public class LLDP extends Packet {
     private static final String CHASSISID = "ChassisId";
     private static final String SYSTEMNAMEID = "SystemNameID";

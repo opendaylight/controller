@@ -29,6 +29,7 @@ import org.apache.felix.dm.DependencyService;
  * Class representing a ServiceDependency on a container
  *
  */
+@Deprecated
 public class ContainerServiceDependency implements ServiceDependency,
         DependencyActivation {
     private ServiceDependency m_dep;

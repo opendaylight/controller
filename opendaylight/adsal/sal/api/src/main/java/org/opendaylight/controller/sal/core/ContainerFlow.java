@@ -28,6 +28,7 @@ import org.opendaylight.controller.sal.match.MatchType;
  *
  *
  */
+@Deprecated
 public class ContainerFlow implements Serializable {
     private static final long serialVersionUID = 1L;
     private Match match;

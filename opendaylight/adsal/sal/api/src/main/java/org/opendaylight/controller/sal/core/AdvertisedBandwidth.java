@@ -25,6 +25,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 @SuppressWarnings("serial")
+@Deprecated
 public class AdvertisedBandwidth extends Bandwidth {
         public static final String AdvertisedBandwidthPropName = "advertisedBandwidth";
 

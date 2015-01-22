@@ -17,6 +17,7 @@ import java.io.Serializable;
  * In the controller space such a role will be seen as <code>APPUSER<code>
  * as specified in {@link UserLevel}
  */
+@Deprecated
 public enum AppRoleLevel implements Serializable {
     APPADMIN(0, "App-Admin", "Application Administrator"), APPUSER(1,
             "App-User", "Application User"), APPOPERATOR(2, "App-Operator",

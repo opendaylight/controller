@@ -22,6 +22,7 @@ import org.opendaylight.controller.sal.utils.HexEncode;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
+@Deprecated
 public class SetDlDst extends Action {
     private static final long serialVersionUID = 1L;
     private byte[] address;

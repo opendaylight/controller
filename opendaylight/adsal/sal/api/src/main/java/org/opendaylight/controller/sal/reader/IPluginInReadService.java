@@ -19,6 +19,7 @@ import org.opendaylight.controller.sal.flowprogrammer.Flow;
 /**
  * The interface defines hardware view read methods to be implemented by protocol plugins
  */
+@Deprecated
 public interface IPluginInReadService {
 
     /**

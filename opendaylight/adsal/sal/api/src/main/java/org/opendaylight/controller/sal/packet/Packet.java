@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  * the basic methods which are common for all the packets, like serialize and
  * deserialize
  */
-
+@Deprecated
 public abstract class Packet {
     protected static final Logger logger = LoggerFactory
             .getLogger(Packet.class);

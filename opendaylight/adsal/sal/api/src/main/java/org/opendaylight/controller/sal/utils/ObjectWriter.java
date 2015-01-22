@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
  * Write object to write to file stream
  *
  */
+@Deprecated
 public class ObjectWriter {
     private static Logger logger = LoggerFactory.getLogger(ObjectWriter.class);
     private FileOutputStream fos;

@@ -19,6 +19,7 @@ import org.opendaylight.controller.sal.core.UpdateType;
  * The interface provides the methods to notify the listener when an edge is
  * added/deleted/changed.
  */
+@Deprecated
 public interface IDiscoveryService {
     /**
      * The methods is called when an edge is added/deleted/changed

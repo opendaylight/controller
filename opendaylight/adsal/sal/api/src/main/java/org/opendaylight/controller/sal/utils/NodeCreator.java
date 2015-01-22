@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
  *
  *
  */
+@Deprecated
 public abstract class NodeCreator {
     protected static final Logger logger = LoggerFactory.getLogger(NodeCreator.class);
 

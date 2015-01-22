@@ -19,6 +19,7 @@ package org.opendaylight.controller.sal.packet;
 /**
  * Describe a packet data link format
  */
+@Deprecated
 public enum LinkEncap {
     ETHERNET
 }

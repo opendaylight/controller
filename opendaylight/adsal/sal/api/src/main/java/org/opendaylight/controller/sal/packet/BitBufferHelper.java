@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
  * - store bits in specified location in stream of bits
  * - convert primitive data types to stream of bits
  */
+@Deprecated
 public abstract class BitBufferHelper {
     protected static final Logger logger = LoggerFactory
     .getLogger(BitBufferHelper.class);

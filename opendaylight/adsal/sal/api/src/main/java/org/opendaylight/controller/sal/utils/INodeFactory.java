@@ -15,7 +15,7 @@ import org.opendaylight.controller.sal.core.Node;
  * This interface defines the methods to be called when looking up custom node types
  *
  */
-
+@Deprecated
 public interface INodeFactory {
     /**
      * Method to get custom node types from protocol plugins

@@ -25,6 +25,7 @@ import org.opendaylight.controller.sal.flowprogrammer.Flow;
 
 @XmlRootElement (name="FlowStat")
 @XmlAccessorType(XmlAccessType.NONE)
+@Deprecated
 public class FlowOnNode implements Serializable{
     private static final long serialVersionUID = 1L;
 

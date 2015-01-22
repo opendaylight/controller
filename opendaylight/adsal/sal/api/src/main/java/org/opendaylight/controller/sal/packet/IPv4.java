@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Class that represents the IPv4  packet objects
  */
-
+@Deprecated
 public class IPv4 extends Packet {
     protected static final Logger logger = LoggerFactory
             .getLogger(IPv4.class);
