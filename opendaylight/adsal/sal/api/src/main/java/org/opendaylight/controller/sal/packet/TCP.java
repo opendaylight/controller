@@ -21,6 +21,7 @@ import org.opendaylight.controller.sal.match.MatchType;
 /**
  * Class that represents the TCP segment objects
  */
+@Deprecated
 public class TCP extends Packet {
 
     public static final String SRCPORT = "SourcePort";

@@ -20,6 +20,7 @@ import org.opendaylight.controller.sal.utils.HexEncode;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
+@Deprecated
 public class MacAddress extends Property implements Cloneable {
     private static final long serialVersionUID = 1L;
     @XmlElement(name="value")

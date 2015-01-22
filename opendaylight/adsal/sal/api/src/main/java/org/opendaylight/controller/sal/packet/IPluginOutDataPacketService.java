@@ -23,6 +23,7 @@ package org.opendaylight.controller.sal.packet;
  * Interface used by SAL to intercept any Data Packet coming from the
  * southbound protocol plugins
  */
+@Deprecated
 public interface IPluginOutDataPacketService {
     /**
      * Handler for receiving the packet. The SAL layer can signal back

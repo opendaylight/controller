@@ -24,6 +24,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
+@Deprecated
 public class SupportedBandwidth extends Bandwidth {
         private static final long serialVersionUID = 1L;
         public static final String SupportedBandwidthPropName = "supportedBandwidth";

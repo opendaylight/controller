@@ -46,6 +46,7 @@ import org.slf4j.LoggerFactory;
  * @author readams
  *
  */
+@Deprecated
 public class ListenerDispatcher<U, T extends IListener<U>> {
     protected static Logger logger = LoggerFactory
             .getLogger(ListenerDispatcher.class);

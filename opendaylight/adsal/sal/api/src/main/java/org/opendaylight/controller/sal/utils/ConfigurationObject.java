@@ -13,6 +13,7 @@ package org.opendaylight.controller.sal.utils;
  * This interface defines the methods for configuration object
  *
  */
+@Deprecated
 public interface ConfigurationObject {
 
 }

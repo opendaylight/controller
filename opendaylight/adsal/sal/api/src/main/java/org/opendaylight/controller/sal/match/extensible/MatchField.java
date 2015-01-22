@@ -20,6 +20,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
+@Deprecated
 public abstract class MatchField<T> implements Cloneable, Serializable {
     private static final long serialVersionUID = 1L;
     private String type;

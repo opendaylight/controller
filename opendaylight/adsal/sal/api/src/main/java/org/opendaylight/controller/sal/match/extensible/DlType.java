@@ -10,6 +10,7 @@ import org.opendaylight.controller.sal.utils.NetUtils;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
+@Deprecated
 public class DlType extends MatchField<Short> {
     private static final long serialVersionUID = 1L;
     public static final String TYPE = "DL_TYPE";

@@ -14,6 +14,7 @@ import java.io.Serializable;
 /**
  * It represents the group/resource access privilege
  */
+@Deprecated
 public enum Privilege implements Serializable {
     NONE(""), // no privilege
     READ("r"), // read only

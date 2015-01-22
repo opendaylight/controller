@@ -12,6 +12,7 @@ import org.opendaylight.controller.sal.utils.NetUtils;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
+@Deprecated
 public class DlDst extends MatchField<byte[]> {
     private static final long serialVersionUID = 1L;
     public static final String TYPE = "DL_DST";

@@ -14,6 +14,7 @@ import java.io.Serializable;
 /**
  * Describes the user role level in the controller space
  */
+@Deprecated
 public enum UserLevel implements Serializable {
     SYSTEMADMIN(0, "System-Admin", "System Administrator"),     // can do everything
     NETWORKADMIN(1, "Network-Admin", "Network Administrator"),  // can do everything but setting a system admin user profile

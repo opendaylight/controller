@@ -19,6 +19,7 @@ package org.opendaylight.controller.sal.core;
  * The interface describes methods used to publish the changes to a given
  * Container configuration to listeners on the local cluster node only.
  */
+@Deprecated
 public interface IContainerLocalListener extends IContainerListener {
 
 }

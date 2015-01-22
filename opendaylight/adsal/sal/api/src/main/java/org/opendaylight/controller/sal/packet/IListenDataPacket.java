@@ -51,6 +51,7 @@ package org.opendaylight.controller.sal.packet;
  * incoming DataPacket match the filter. If no filter is provided, the
  * handler is called for EVERY packet i.e. match All is implied!
  */
+@Deprecated
 public interface IListenDataPacket {
     /**
      * Handler for receiving the packet. The application can signal

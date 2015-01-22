@@ -42,6 +42,7 @@ import java.util.NoSuchElementException;
  * @param <T>
  *            the type of elements returned by this iterator
  */
+@Deprecated
 public class MultiIterator<T> implements Iterator<T> {
     Iterator<Iterator<T>> subIterator;
     Iterator<T> current = null;

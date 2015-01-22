@@ -21,6 +21,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @SuppressWarnings("serial")
 @XmlAccessorType(XmlAccessType.NONE)
+@Deprecated
 public class Config extends Property {
     @XmlElement(name="value")
     private short configValue;
