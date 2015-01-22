@@ -41,6 +41,7 @@ import org.opendaylight.controller.sal.utils.NetUtils;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
+@Deprecated
 public class Match implements Cloneable, Serializable {
         private static final long serialVersionUID = 1L;
         private static final Map<MatchType, MatchType> reversableMatches;

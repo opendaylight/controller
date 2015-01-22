@@ -15,6 +15,7 @@ package org.opendaylight.controller.sal.utils;
  *
  *
  */
+@Deprecated
 public enum GUIField {
     USER("User"), PASSWORD("Password"), ROLE("Role"), SERVERIP("Server address"), SERVERSECRET(
             "Server secret"), SERVERPROTOCOL("Server protocol"), NAME("Name"), CONTAINER(

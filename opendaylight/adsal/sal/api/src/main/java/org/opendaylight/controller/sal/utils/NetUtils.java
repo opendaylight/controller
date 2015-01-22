@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
  * Utility class containing the common utility functions needed for operating on
  * networking data structures
  */
+@Deprecated
 public abstract class NetUtils {
     protected static final Logger logger = LoggerFactory.getLogger(NetUtils.class);
     /**

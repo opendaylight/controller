@@ -42,6 +42,7 @@ import org.opendaylight.controller.sal.utils.ServiceHelper;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
+@Deprecated
 public class NodeConnector implements Serializable {
     private static final long serialVersionUID = 1L;
     public static final Short SPECIALNODECONNECTORID = (short) 0;

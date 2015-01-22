@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
  *
  *
  */
+@Deprecated
 public class WriteToFile {
     protected static final Logger logger = LoggerFactory
     .getLogger(WriteToFile.class);

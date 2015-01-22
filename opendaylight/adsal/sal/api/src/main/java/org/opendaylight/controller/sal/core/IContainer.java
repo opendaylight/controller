@@ -24,6 +24,7 @@ import java.util.Set;
  *
  * Interface used to retrieve the status of a given Container
  */
+@Deprecated
 public interface IContainer {
     /**
      * Returns the Name of the container described

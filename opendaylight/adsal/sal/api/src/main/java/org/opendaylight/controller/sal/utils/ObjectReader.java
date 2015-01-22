@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
  *
  *
  */
+@Deprecated
 public class ObjectReader {
     private static Logger logger = LoggerFactory.getLogger(ObjectReader.class);
     private FileInputStream fis;

@@ -13,6 +13,7 @@ package org.opendaylight.controller.sal.packet;
  * packet/stream is malformed.
  *
  */
+@Deprecated
 public class PacketException extends Exception {
     private static final long serialVersionUID = 1L;
 

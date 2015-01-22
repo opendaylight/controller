@@ -22,6 +22,7 @@ package org.opendaylight.controller.sal.topology;
 /**
  * Topology methods provided by SAL toward the applications
  */
+@Deprecated
 public interface ITopologyService {
     /**
      * Tell to SAL that is time to send the updates of the

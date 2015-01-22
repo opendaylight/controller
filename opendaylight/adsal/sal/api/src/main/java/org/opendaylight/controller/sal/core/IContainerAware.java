@@ -14,6 +14,7 @@ package org.opendaylight.controller.sal.core;
  * created/destroyed
  */
 
+@Deprecated
 public interface IContainerAware {
     /**
      * Method invoked to signal that a container is being created

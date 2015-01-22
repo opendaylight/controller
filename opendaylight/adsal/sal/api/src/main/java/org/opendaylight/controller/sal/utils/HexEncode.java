@@ -16,6 +16,7 @@ import java.math.BigInteger;
  *
  *
  */
+@Deprecated
 public class HexEncode {
     /**
      * This method converts byte array into String format without ":" inserted.

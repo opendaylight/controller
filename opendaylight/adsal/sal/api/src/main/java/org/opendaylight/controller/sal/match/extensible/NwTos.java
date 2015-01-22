@@ -9,6 +9,7 @@ import org.opendaylight.controller.sal.utils.NetUtils;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
+@Deprecated
 public class NwTos extends MatchField<Byte> {
     private static final long serialVersionUID = 1L;
     public static final String TYPE = "NW_TOS";

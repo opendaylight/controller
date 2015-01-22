@@ -15,6 +15,7 @@ import java.io.Serializable;
  * It represents the elementary resource along with
  * the access privilege associated to it
  */
+@Deprecated
 public class Resource implements Serializable {
     private static final long serialVersionUID = 1L;
     Object resource; // the generic resource

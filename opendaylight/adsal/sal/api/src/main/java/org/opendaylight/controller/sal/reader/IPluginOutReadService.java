@@ -17,6 +17,7 @@ import org.opendaylight.controller.sal.core.Node;
  * The interface defines hardware statistics updates service to be offered by
  * protocol plugins
  */
+@Deprecated
 public interface IPluginOutReadService {
 
     /**

@@ -23,6 +23,7 @@ import java.io.ObjectInputStream;
  *
  *
  */
+@Deprecated
 public interface IObjectReader {
     public Object readObject(ObjectInputStream ois)
             throws FileNotFoundException, IOException, ClassNotFoundException;

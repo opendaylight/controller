@@ -21,6 +21,7 @@ import org.opendaylight.controller.sal.utils.EtherTypes;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
+@Deprecated
 public class SetDlType extends Action {
     private static final long serialVersionUID = 1L;
     @XmlElement

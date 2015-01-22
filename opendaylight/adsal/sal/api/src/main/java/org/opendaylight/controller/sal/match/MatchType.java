@@ -21,6 +21,7 @@ import org.opendaylight.controller.sal.utils.NetUtils;
  * values of the elements type that can be matched on the network
  * frame/packet/message
  */
+@Deprecated
 public enum MatchType {
     IN_PORT("inPort", 1 << 0, NodeConnector.class, 1, 0),
     DL_SRC("dlSrc", 1 << 1, Byte[].class, 0, 0xffffffffffffL),

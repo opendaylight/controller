@@ -18,6 +18,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 @SuppressWarnings("serial")
+@Deprecated
 public class ForwardingMode extends Property {
     @XmlElement(name="value")
     private final int modeValue;

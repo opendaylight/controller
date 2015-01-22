@@ -15,6 +15,7 @@ import org.opendaylight.controller.sal.core.Node;
  * inform the SAL layer about the asynchronous messages related to flow
  * programming coming from the network nodes.
  */
+@Deprecated
 public interface IPluginOutFlowProgrammerService {
     /**
      * Inform SAL that the flow on the specified node has been removed Consumer

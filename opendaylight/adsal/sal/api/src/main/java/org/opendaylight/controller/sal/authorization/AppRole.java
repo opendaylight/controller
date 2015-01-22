@@ -16,6 +16,7 @@ import java.io.Serializable;
  * It contains the role name and the role level in the
  * application context as specified by {@link AppRoleLevel}
  */
+@Deprecated
 public class AppRole implements Serializable {
     private static final long serialVersionUID = 1L;
     String name;

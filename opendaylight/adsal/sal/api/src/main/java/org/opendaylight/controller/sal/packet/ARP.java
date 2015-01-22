@@ -21,7 +21,7 @@ import org.apache.commons.lang3.tuple.Pair;
  *
  *
  */
-
+@Deprecated
 public class ARP extends Packet {
     private static final String HWTYPE = "HardwareType";
     private static final String PTYPE = "ProtocolType";

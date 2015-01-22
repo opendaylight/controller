@@ -9,6 +9,7 @@ import org.opendaylight.controller.sal.core.NodeConnector;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
+@Deprecated
 public class InPort extends MatchField<NodeConnector> {
     private static final long serialVersionUID = 1L;
     public static final String TYPE = "IN_PORT";

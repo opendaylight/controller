@@ -13,6 +13,7 @@ package org.opendaylight.controller.sal.utils;
  * Each enum value is associated with a minimal description string.
  *
  */
+@Deprecated
 public enum StatusCode {
         SUCCESS("Success"),
         CREATED("Created"),
