@@ -13,7 +13,6 @@ import io.netty.util.HashedWheelTimer;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -31,10 +30,6 @@ import org.opendaylight.yangtools.yang.model.repo.api.SchemaContextFactory;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceFilter;
 import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 import org.opendaylight.yangtools.yang.model.repo.util.FilesystemSchemaSourceCache;
-import org.opendaylight.yangtools.yang.model.util.repo.AbstractCachingSchemaSourceProvider;
-import org.opendaylight.yangtools.yang.model.util.repo.FilesystemSchemaCachingProvider;
-import org.opendaylight.yangtools.yang.model.util.repo.SchemaSourceProvider;
-import org.opendaylight.yangtools.yang.model.util.repo.SchemaSourceProviders;
 import org.opendaylight.yangtools.yang.parser.repo.SharedSchemaRepository;
 import org.opendaylight.yangtools.yang.parser.util.TextToASTTransformer;
 
@@ -123,14 +118,6 @@ public class NetconfDeviceConnectionManager implements Closeable {
         device = null;
         handler.close();
         handler = null;
-    }
-
-    private static AbstractCachingSchemaSourceProvider<String, InputStream> getGlobalNetconfSchemaProvider() {
-        // FIXME move to args
-        final String storageFile = "cache/schema";
-        final File directory = new File(storageFile);
-        final SchemaSourceProvider<String> defaultProvider = SchemaSourceProviders.noopProvider();
-        return FilesystemSchemaCachingProvider.createFromStringSourceProvider(defaultProvider, directory);
     }
 
     @Override
