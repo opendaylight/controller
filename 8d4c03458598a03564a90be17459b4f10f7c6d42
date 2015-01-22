@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_c4b9a416",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1569
+      },
+      "writtenOn": "2015-01-22T13:56:03Z",
+      "side": 1,
+      "message": "Breaking up into multiple modules has benefits, and I can see us updating mechanism_odl.py to handle this easily.  Though it might seem to help clustering distribution today, that\u0027s by accident.  Last I knew was that clustering was going to introduce a yang path defined hash point for finer grained sharding, and thus distribution would be achieved within a single module.",
+      "parentUuid": "7a96c907_16e1099a",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_b6eff586",
         "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-01-20T17:31:34Z",
       "side": 1,
       "message": "Any additions to this model, or fixes will drive the revision up and effectively break anyone\u0027s code written against this model rev. This is not modular, as in effect, the model as it stands today is probably good for use as a L2 model (for L2 apps), and it would be not sensible to see these apps broken because of, say, the addition of Neutron Firewall rules .\nAnother reason why it may be better to split up the model into port, net and subnet, etc models.",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_843b9c9b",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1569
+      },
+      "writtenOn": "2015-01-22T13:56:03Z",
+      "side": 1,
+      "message": "Extensions seem to occur still on existing modules, so then what?  we use an augmentation .yang to avoid modifying the original base yang.  ( I\u0027m new to yang by the way if that wasn\u0027t clear :-) )",
+      "parentUuid": "7a96c907_b6eff586",
       "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_2442c810",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1569
+      },
+      "writtenOn": "2015-01-22T13:56:03Z",
+      "side": 1,
+      "message": "I\u0027ll buy that.  Again it\u0027s fairly simple to translate to Neutron REST.",
+      "parentUuid": "7a96c907_36552550",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_76e96d7f",
         "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2015-01-20T17:31:34Z",
       "side": 1,
       "message": "Missing bindinghostID + some others from the Neutron v2 API extensions",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_c450c4d6",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1569
+      },
+      "writtenOn": "2015-01-22T13:56:03Z",
+      "side": 1,
+      "message": "\"binding:host_id\": \"devstack\"\n\nleaf binding_._host_id {\n    type string;\n    description \"In some cases different implementations may be run on different hosts. The host on which the port will be allocated.\";\n}",
+      "parentUuid": "7a96c907_76e96d7f",
       "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_645f70e6",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1569
+      },
+      "writtenOn": "2015-01-22T13:56:03Z",
+      "side": 1,
+      "message": "agreed",
+      "parentUuid": "7a96c907_d6f2c16e",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_3603e543",
         "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
         "patchSetId": 1
@@ -98,6 +188,24 @@
       "writtenOn": "2015-01-20T17:31:34Z",
       "side": 1,
       "message": "A portsOnNetwork leaf-list would be useful here. It\u0027s otherwise currently difficult to get a snapshot of which ports are on a given network. This is not part of the official neutron API, but it is part of the existing Neutron ODL implementation",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_245968fe",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1569
+      },
+      "writtenOn": "2015-01-22T13:56:03Z",
+      "side": 1,
+      "message": "I couldn\u0027t find any neutron doc on this, can you?",
+      "parentUuid": "7a96c907_3603e543",
       "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
