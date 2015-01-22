@@ -13,7 +13,7 @@ import org.opendaylight.controller.sal.core.NodeTable;
 import org.opendaylight.controller.sal.core.NodeTable.NodeTableIDType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+@Deprecated
 public class NodeTableCreator {
     protected static final Logger logger = LoggerFactory
             .getLogger(NodeTableCreator.class);

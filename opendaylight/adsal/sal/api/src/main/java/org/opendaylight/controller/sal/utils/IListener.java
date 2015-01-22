@@ -37,7 +37,7 @@ package org.opendaylight.controller.sal.utils;
  * This interface defines the methods for callback ordering
  *
  */
-
+@Deprecated
 public interface IListener<T> {
     public enum Command {
         CONTINUE, STOP

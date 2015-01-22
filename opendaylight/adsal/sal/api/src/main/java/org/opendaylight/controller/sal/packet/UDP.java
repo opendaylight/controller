@@ -21,7 +21,7 @@ import org.opendaylight.controller.sal.match.MatchType;
 /**
  * Class that represents the UDP datagram objects
  */
-
+@Deprecated
 public class UDP extends Packet {
 
     private static final String SRCPORT = "SourcePort";

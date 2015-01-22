@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
  * register dependencies per-container
  *
  */
+@Deprecated
 abstract public class ComponentActivatorAbstractBase implements
         BundleActivator, IContainerAware {
     Logger logger = LoggerFactory

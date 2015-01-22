@@ -26,6 +26,7 @@ package org.opendaylight.controller.sal.topology;
  * plugin to sollicit Topoloy updates
  *
  */
+@Deprecated
 public interface IPluginInTopologyService {
     /**
      * Tell to protocol plugin that is time to send the updates of the

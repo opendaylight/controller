@@ -20,6 +20,7 @@ import org.opendaylight.controller.sal.match.MatchType;
 /**
  * Class that represents the IEEE 802.1Q objects
  */
+@Deprecated
 public class IEEE8021Q extends Packet {
     private static final String PCP = "PriorityCodePoint";
     private static final String CFI = "CanonicalFormatIndicator";

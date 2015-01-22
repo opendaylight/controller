@@ -19,6 +19,7 @@ package org.opendaylight.controller.sal.packet;
 /**
  * Data Packet Services SAL provides to the components
  */
+@Deprecated
 public interface IDataPacketService {
     /**
      * Transmit a data Packet. Transmission will ONLY happen if the

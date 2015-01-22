@@ -20,6 +20,7 @@ import org.opendaylight.controller.sal.flowprogrammer.Flow;
  * This interface defines methods for retrieving the network node's
  * flow/port/queue hardware view
  */
+@Deprecated
 public interface IReadService {
     /**
      * Get the hardware view for the specified flow on the specified network

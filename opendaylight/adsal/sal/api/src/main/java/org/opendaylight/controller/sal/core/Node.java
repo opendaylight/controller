@@ -41,6 +41,7 @@ import org.opendaylight.controller.sal.utils.ServiceHelper;
  */
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement
+@Deprecated
 public class Node implements Serializable {
     private static final long serialVersionUID = 1L;
 

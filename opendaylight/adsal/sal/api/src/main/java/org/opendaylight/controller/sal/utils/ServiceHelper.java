@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
  *
  *
  */
+@Deprecated
 public class ServiceHelper {
     private static final Logger logger = LoggerFactory
             .getLogger(ServiceHelper.class);

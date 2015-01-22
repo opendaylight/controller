@@ -17,6 +17,7 @@ import org.opendaylight.controller.sal.core.Edge;
  * this service provided by SAL so the update can migrate upward toward the
  * applications.
  */
+@Deprecated
 public interface IPluginOutTopologyService {
 
     /**

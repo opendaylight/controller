@@ -15,6 +15,7 @@ import java.io.Serializable;
 /**
  * Represents the network node description information
  */
+@Deprecated
 public class NodeDescription implements Serializable, Cloneable{
     private static final long serialVersionUID = 1L;
 

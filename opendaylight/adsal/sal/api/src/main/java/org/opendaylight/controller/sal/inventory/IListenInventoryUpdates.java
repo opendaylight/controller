@@ -20,6 +20,7 @@ import org.opendaylight.controller.sal.core.UpdateType;
  * The interface provides the methods to notify the upper applications in
  * regards to any inventory changes.
  */
+@Deprecated
 public interface IListenInventoryUpdates {
     /**
      * This method is called when some properties of a node are added/deleted/changed.

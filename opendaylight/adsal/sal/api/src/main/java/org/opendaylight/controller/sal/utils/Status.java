@@ -15,6 +15,7 @@ import java.io.Serializable;
  * It contains a code {@code StatusCode} representing the result of the call and
  * a string which describes a failure reason (if any) in human readable form.
  */
+@Deprecated
 public class Status implements Serializable {
     private static final long serialVersionUID = 0L;
     private StatusCode code;

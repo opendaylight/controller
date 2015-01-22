@@ -13,6 +13,7 @@ import org.opendaylight.controller.sal.utils.NetUtils;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
+@Deprecated
 public class NwSrc extends MatchField<InetAddress> {
     private static final long serialVersionUID = 1L;
     public static final String TYPE = "NW_SRC";

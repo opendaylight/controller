@@ -15,6 +15,7 @@ import org.opendaylight.controller.sal.utils.Status;
  * Interface that defines the methods available to the functional modules above
  * SAL for installing/modifying/removing flows on a network node
  */
+@Deprecated
 public interface IFlowProgrammerService {
     /**
      * Synchronously add a flow to the network node

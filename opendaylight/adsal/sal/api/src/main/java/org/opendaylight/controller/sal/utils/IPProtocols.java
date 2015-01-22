@@ -22,6 +22,7 @@ import java.util.List;
  * references:
  * http://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
  */
+@Deprecated
 public enum IPProtocols {
      ANY("any", -1),
      HOPOPT("HOPOPT",0),
