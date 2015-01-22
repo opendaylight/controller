@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_e21cd379",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/src/main/java/org/opendaylight/controller/md/sal/dom/xsql/XSQLAdapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 443,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-01-22T10:08:30Z",
+      "side": 1,
+      "message": "Please rethrow this exception.",
+      "range": {
+        "startLine": 443,
+        "startChar": 16,
+        "endLine": 443,
+        "endChar": 74
+      },
+      "revId": "aa2276b33e163cb9f5cddfa96b020fe50c076314",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_82138f65",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/src/main/java/org/opendaylight/controller/md/sal/dom/xsql/jdbc/JDBCServer.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-01-22T10:08:30Z",
+      "side": 1,
+      "message": "Please rethrow this exception.",
+      "range": {
+        "startLine": 217,
+        "startChar": 16,
+        "endLine": 217,
+        "endChar": 74
+      },
+      "revId": "aa2276b33e163cb9f5cddfa96b020fe50c076314",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
