@@ -107,23 +107,6 @@ public class DataNormalizer {
             }
         }
 
-        // Write Augmentation data resolution
-        if (legacyData.getValue().size() == 1) {
-            final DataNormalizationOperation<?> potentialOp;
-
-            try {
-                final QName childType = legacyData.getValue().get(0).getNodeType();
-                potentialOp = currentOp.getChild(childType);
-            } catch (DataNormalizationException e) {
-                throw new IllegalArgumentException(String.format("Failed to get child operation for %s", legacyData), e);
-            }
-
-            if (potentialOp.getIdentifier() instanceof AugmentationIdentifier) {
-                currentOp = potentialOp;
-                normalizedPath = normalizedPath.node(potentialOp.getIdentifier());
-            }
-        }
-
         Preconditions.checkArgument(currentOp != null,
                 "Instance Identifier %s does not reference correct schema Node.", normalizedPath);
         return new AbstractMap.SimpleEntry<YangInstanceIdentifier, NormalizedNode<?, ?>>(normalizedPath,
