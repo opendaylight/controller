@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_07478e1e",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataCommitCohort.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-01-22T19:18:36Z",
+      "side": 1,
+      "message": "create a static constant future, as that prevents unneeded garbage.",
+      "revId": "04f7c06b70210a61fee03f84dfdce6df4be90acb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_e7f942c9",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataCommitCoordinator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-01-22T19:18:36Z",
+      "side": 1,
+      "message": "create a dedicated registration type. note that ObjectRegistration.close() is normally allowed to fail, which is probably not something we want to have.\n\nWould it be fair to return a Future, which completes once the initial callback has run? I am not sure in what context this is useful, but it would seem to be fair to allow the initial validation to run asynchronously and fail (which means the validator is not installed).",
+      "revId": "04f7c06b70210a61fee03f84dfdce6df4be90acb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_672d3246",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataObjectModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-01-22T19:18:36Z",
+      "side": 1,
+      "message": "getType vs. getModificationType is confusing, rename this one.",
+      "revId": "04f7c06b70210a61fee03f84dfdce6df4be90acb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_87307e9f",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataObjectModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-01-22T19:18:36Z",
+      "side": 1,
+      "message": "missing javadoc",
+      "revId": "04f7c06b70210a61fee03f84dfdce6df4be90acb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_e720624b",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataObjectModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-01-22T19:18:36Z",
+      "side": 1,
+      "message": "Do we need to expose before-state?",
+      "revId": "04f7c06b70210a61fee03f84dfdce6df4be90acb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_071c6e12",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataObjectModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-01-22T19:18:36Z",
+      "side": 1,
+      "message": "? extends DataObject?",
+      "revId": "04f7c06b70210a61fee03f84dfdce6df4be90acb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_a71a5a15",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataRootModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-01-22T19:18:36Z",
+      "side": 1,
+      "message": "same thing here -- what is the use case for beforestate?",
+      "revId": "04f7c06b70210a61fee03f84dfdce6df4be90acb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
