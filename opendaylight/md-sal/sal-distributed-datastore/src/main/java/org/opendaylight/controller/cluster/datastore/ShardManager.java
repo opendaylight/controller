@@ -25,6 +25,7 @@ import akka.persistence.RecoveryFailure;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActorWithMetering;
@@ -45,10 +46,10 @@ import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContex
 import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.duration.Duration;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -91,7 +92,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private final DatastoreContext datastoreContext;
 
-    private final Collection<String> knownModules = new HashSet<>(128);
+    private Collection<String> knownModules = Collections.emptySet();
 
     private final DataPersistenceProvider dataPersistenceProvider;
 
@@ -182,8 +183,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         if(dataPersistenceProvider.isRecoveryApplicable()) {
             if (message instanceof SchemaContextModules) {
                 SchemaContextModules msg = (SchemaContextModules) message;
-                knownModules.clear();
-                knownModules.addAll(msg.getModules());
+                knownModules = ImmutableSet.copyOf(msg.getModules());
             } else if (message instanceof RecoveryFailure) {
                 RecoveryFailure failure = (RecoveryFailure) message;
                 LOG.error(failure.cause(), "Recovery failed");
@@ -277,8 +277,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
             LOG.info("New SchemaContext has a super set of current knownModules - persisting info");
 
-            knownModules.clear();
-            knownModules.addAll(newModules);
+            knownModules = ImmutableSet.copyOf(newModules);
 
             dataPersistenceProvider.persist(new SchemaContextModules(newModules), new Procedure<SchemaContextModules>() {
 
