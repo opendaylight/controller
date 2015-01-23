@@ -10,12 +10,10 @@ package org.opendaylight.controller.test.sal.binding.it;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
@@ -23,39 +21,47 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.api.NotificationService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowAdded;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowAddedBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowRemoved;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowUpdated;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.NodeErrorNotification;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.NodeExperimenterErrorNotification;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowListener;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SwitchFlowRemoved;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.FlowCookie;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorRemoved;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorUpdated;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRemoved;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeUpdated;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeUpdatedBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.OpendaylightInventoryListener;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
 
-@Ignore
+/**
+ * testing nitification delivery
+ */
 public class NotificationTest extends AbstractTest {
 
-    private final FlowListener listener1 = new FlowListener();
-    private final FlowListener listener2 = new FlowListener();
+    private InventoryListener listener1;
+    private InventoryListener listener2;
 
     private ListenerRegistration<NotificationListener> listener1Reg;
     private ListenerRegistration<NotificationListener> listener2Reg;
 
     private NotificationProviderService notifyProviderService;
 
+    /**
+     * prepare notification listeners
+     */
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
+        listener1 = new InventoryListener();
+        listener2 = new InventoryListener();
     }
 
+    /**
+     * Test notification publish mechanism
+     *
+     * @throws Exception
+     */
     @Test
     public void notificationTest() throws Exception {
         /**
-         *
          * The registration of the Provider 1.
-         *
          */
         AbstractTestProvider provider1 = new AbstractTestProvider() {
             @Override
@@ -92,15 +98,15 @@ public class NotificationTest extends AbstractTest {
          * delay 100ms to make sure that the notification was delivered to
          * listener.
          */
-        notifyProviderService.publish(flowAdded(0));
+        notifyProviderService.publish(createNodeUpdatedNotification(0));
         Thread.sleep(100);
 
         /**
          * Check that one notification was delivered and has correct cookie.
          *
          */
-        assertEquals(1, listener1.addedFlows.size());
-        assertEquals(0, listener1.addedFlows.get(0).getCookie().getValue().intValue());
+        assertEquals(1, listener1.updatedNodes.size());
+        assertEquals("0", listener1.updatedNodes.get(0).getId().getValue());
 
         /**
          * The registration of the Consumer 2. SalFlowListener is registered
@@ -121,9 +127,9 @@ public class NotificationTest extends AbstractTest {
         /**
          * 3 notifications are published
          */
-        notifyProviderService.publish(flowAdded(5));
-        notifyProviderService.publish(flowAdded(10));
-        notifyProviderService.publish(flowAdded(2));
+        notifyProviderService.publish(createNodeUpdatedNotification(5));
+        notifyProviderService.publish(createNodeUpdatedNotification(10));
+        notifyProviderService.publish(createNodeUpdatedNotification(2));
 
         /**
          * The delay 100ms to make sure that the notifications were delivered to
@@ -136,8 +142,8 @@ public class NotificationTest extends AbstractTest {
          * received 4 in total, second 3 in total).
          *
          */
-        assertEquals(4, listener1.addedFlows.size());
-        assertEquals(3, listener2.addedFlows.size());
+        assertEquals(4, listener1.updatedNodes.size());
+        assertEquals(3, listener2.updatedNodes.size());
 
         /**
          * The second listener is closed (unregistered)
@@ -149,7 +155,7 @@ public class NotificationTest extends AbstractTest {
          *
          * The notification 5 is published
          */
-        notifyProviderService.publish(flowAdded(10));
+        notifyProviderService.publish(createNodeUpdatedNotification(10));
 
         /**
          * The delay 100ms to make sure that the notification was delivered to
@@ -163,8 +169,8 @@ public class NotificationTest extends AbstractTest {
          * second consumer because its listener was unregistered.
          *
          */
-        assertEquals(5, listener1.addedFlows.size());
-        assertEquals(3, listener2.addedFlows.size());
+        assertEquals(5, listener1.updatedNodes.size());
+        assertEquals(3, listener2.updatedNodes.size());
 
     }
 
@@ -176,61 +182,40 @@ public class NotificationTest extends AbstractTest {
      *            cookie value
      * @return instance of the type FlowAdded
      */
-    public static FlowAdded flowAdded(int i) {
-        FlowAddedBuilder ret = new FlowAddedBuilder();
-        ret.setCookie(new FlowCookie(BigInteger.valueOf(i)));
-        return ret.build();
+    public static NodeUpdated createNodeUpdatedNotification(int i) {
+        NodeUpdatedBuilder nodeUpdatedBld = new NodeUpdatedBuilder();
+        nodeUpdatedBld.setId(new NodeId(String.valueOf(i)));
+        return nodeUpdatedBld.build();
     }
 
     /**
-     *
      * Implements
-     * {@link org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowListener
-     * SalFlowListener} and contains attributes which keep lists of objects of
-     * the type
-     * {@link org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819. NodeFlow
-     * NodeFlow}. The lists are defined for flows which were added, removed or
-     * updated.
+     * {@link OpendaylightInventoryListener} and contains attributes which keep lists of objects of
+     * the type {@link NodeUpdated} and {@link NodeRemoved}.
+     * The lists are defined for nodes which were added or removed.
      */
-    private static class FlowListener implements SalFlowListener {
+    protected static class InventoryListener implements OpendaylightInventoryListener {
 
-        List<FlowAdded> addedFlows = new ArrayList<>();
-        List<FlowRemoved> removedFlows = new ArrayList<>();
-        List<FlowUpdated> updatedFlows = new ArrayList<>();
+        List<NodeUpdated> updatedNodes = new ArrayList<>();
 
         @Override
-        public void onFlowAdded(FlowAdded notification) {
-            addedFlows.add(notification);
+        public void onNodeConnectorRemoved(NodeConnectorRemoved arg0) {
+            // NOOP
         }
 
         @Override
-        public void onFlowRemoved(FlowRemoved notification) {
-            removedFlows.add(notification);
-        };
-
-        @Override
-        public void onFlowUpdated(FlowUpdated notification) {
-            updatedFlows.add(notification);
+        public void onNodeConnectorUpdated(NodeConnectorUpdated arg0) {
+            // NOOP
         }
 
         @Override
-        public void onSwitchFlowRemoved(SwitchFlowRemoved notification) {
-            // TODO Auto-generated method stub
-
+        public void onNodeRemoved(NodeRemoved arg0) {
+            // NOOP
         }
 
         @Override
-        public void onNodeErrorNotification(NodeErrorNotification notification) {
-            // TODO Auto-generated method stub
-
+        public void onNodeUpdated(NodeUpdated arg0) {
+            updatedNodes.add(arg0);
         }
-
-        @Override
-        public void onNodeExperimenterErrorNotification(
-                NodeExperimenterErrorNotification notification) {
-            // TODO Auto-generated method stub
-
-        }
-
     }
 }

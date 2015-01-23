@@ -120,7 +120,7 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller.model</groupId>
-      <artifactId>model-flow-service</artifactId>
+      <artifactId>model-inventory</artifactId>
       <scope>provided</scope>
     </dependency>
   </dependencies>
