@@ -14,9 +14,6 @@
 
   <modules>
     <module>model-inventory</module>
-    <module>model-flow-base</module>
-    <module>model-flow-service</module>
-    <module>model-flow-statistics</module>
     <module>model-topology</module>
   </modules>
 
