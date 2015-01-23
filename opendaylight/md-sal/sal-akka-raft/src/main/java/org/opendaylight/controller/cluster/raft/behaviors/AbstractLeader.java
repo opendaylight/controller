@@ -14,6 +14,8 @@ import akka.actor.Cancellable;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import com.google.protobuf.ByteString;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -76,8 +78,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     // This would be passed as the hash code of the last chunk when sending the first chunk
     public static final int INITIAL_LAST_CHUNK_HASH_CODE = -1;
 
-    protected final Map<String, FollowerLogInformation> followerToLog = new HashMap<>();
-    protected final Map<String, FollowerToSnapshot> mapFollowerToSnapshot = new HashMap<>();
+    private final Map<String, FollowerLogInformation> followerToLog;
+    private final Map<String, FollowerToSnapshot> mapFollowerToSnapshot = new HashMap<>();
 
     protected final Set<String> followers;
 
@@ -96,14 +98,16 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
         followers = context.getPeerAddresses().keySet();
 
+        final Builder<String, FollowerLogInformation> ftlBuilder = ImmutableMap.builder();
         for (String followerId : followers) {
             FollowerLogInformation followerLogInformation =
                 new FollowerLogInformationImpl(followerId,
                     context.getCommitIndex(), -1,
                     context.getConfigParams().getElectionTimeOutInterval());
 
-            followerToLog.put(followerId, followerLogInformation);
+            ftlBuilder.put(followerId, followerLogInformation);
         }
+        followerToLog = ftlBuilder.build();
 
         leaderId = context.getId();
 
@@ -773,7 +777,22 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     }
 
     @VisibleForTesting
-    void markFollowerActive(String followerId) {
-        followerToLog.get(followerId).markFollowerActive();
+    public FollowerLogInformation getFollower(String followerId) {
+        return followerToLog.get(followerId);
+    }
+
+    @VisibleForTesting
+    protected void setFollowerSnapshot(String followerId, FollowerToSnapshot snapshot) {
+        mapFollowerToSnapshot.put(followerId, snapshot);
+    }
+
+    @VisibleForTesting
+    public int followerSnapshotSize() {
+        return mapFollowerToSnapshot.size();
+    }
+
+    @VisibleForTesting
+    public int followerLogSize() {
+        return followerToLog.size();
     }
 }
