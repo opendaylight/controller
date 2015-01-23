@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import java.util.LinkedList;
+import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -49,11 +49,10 @@ public class ShardCommitCoordinator {
         cohortCache = CacheBuilder.newBuilder().expireAfterAccess(
                 cacheExpiryTimeoutInSec, TimeUnit.SECONDS).build();
 
-        this.queueCapacity = queueCapacity;
-
         // We use a LinkedList here to avoid synchronization overhead with concurrent queue impls
         // since this should only be accessed on the shard's dispatcher.
-        queuedCohortEntries = new LinkedList<>();
+        queuedCohortEntries = new ArrayDeque<>(queueCapacity);
+        this.queueCapacity = queueCapacity;
     }
 
     /**
@@ -107,9 +106,7 @@ public class ShardCommitCoordinator {
             LOG.debug("Transaction {} is already in progress - queueing transaction {}",
                     currentCohortEntry.getTransactionID(), transactionID);
 
-            if(queuedCohortEntries.size() < queueCapacity) {
-                queuedCohortEntries.offer(cohortEntry);
-            } else {
+            if (!queuedCohortEntries.offer(cohortEntry)) {
                 removeCohortEntry(transactionID);
 
                 RuntimeException ex = new RuntimeException(
