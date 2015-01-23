@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSystem;
@@ -17,15 +16,11 @@ import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.osgi.framework.BundleContext;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 public class DistributedDataStoreFactory {
+    private static final String ACTOR_SYSTEM_NAME = "opendaylight-cluster-data";
+    private static final String CONFIGURATION_NAME = "odl-cluster-data";
 
-    public static final String ACTOR_SYSTEM_NAME = "opendaylight-cluster-data";
-
-    public static final String CONFIGURATION_NAME = "odl-cluster-data";
-
-    private static AtomicReference<ActorSystem> persistentActorSystem = new AtomicReference<>();
+    private static volatile ActorSystem persistentActorSystem = null;
 
     public static DistributedDataStore createInstance(String name, SchemaService schemaService,
                                                       DatastoreContext datastoreContext, BundleContext bundleContext) {
@@ -41,26 +36,25 @@ public class DistributedDataStoreFactory {
         return dataStore;
     }
 
-    synchronized private static final ActorSystem getOrCreateInstance(final BundleContext bundleContext, ConfigurationReader configurationReader) {
+    private static final ActorSystem getOrCreateInstance(final BundleContext bundleContext, ConfigurationReader configurationReader) {
+        ActorSystem ret = persistentActorSystem;
+        if (ret == null) {
+            synchronized (DistributedDataStoreFactory.class) {
+                ret = persistentActorSystem;
+                if (ret == null) {
+                    // Create an OSGi bundle classloader for actor system
+                    BundleDelegatingClassLoader classLoader = new BundleDelegatingClassLoader(bundleContext.getBundle(),
+                        Thread.currentThread().getContextClassLoader());
 
-        AtomicReference<ActorSystem> actorSystemReference = persistentActorSystem;
-        String configurationName = CONFIGURATION_NAME;
-        String actorSystemName = ACTOR_SYSTEM_NAME;
+                    ret = ActorSystem.create(ACTOR_SYSTEM_NAME,
+                        ConfigFactory.load(configurationReader.read()).getConfig(CONFIGURATION_NAME), classLoader);
+                    ret.actorOf(Props.create(TerminationMonitor.class), "termination-monitor");
 
-        if (actorSystemReference.get() != null){
-            return actorSystemReference.get();
+                    persistentActorSystem = ret;
+                }
+            }
         }
 
-        // Create an OSGi bundle classloader for actor system
-        BundleDelegatingClassLoader classLoader = new BundleDelegatingClassLoader(bundleContext.getBundle(),
-                Thread.currentThread().getContextClassLoader());
-
-        ActorSystem system = ActorSystem.create(actorSystemName,
-                ConfigFactory.load(configurationReader.read()).getConfig(configurationName), classLoader);
-        system.actorOf(Props.create(TerminationMonitor.class), "termination-monitor");
-
-        actorSystemReference.set(system);
-        return system;
+        return ret;
     }
-
 }
