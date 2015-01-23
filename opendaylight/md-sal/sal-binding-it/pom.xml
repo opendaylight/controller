@@ -118,11 +118,11 @@
       <groupId>org.slf4j</groupId>
       <artifactId>log4j-over-slf4j</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller.model</groupId>
-      <artifactId>model-flow-service</artifactId>
-      <scope>provided</scope>
-    </dependency>
+<!--     <dependency> -->
+<!--       <groupId>org.opendaylight.controller.model</groupId> -->
+<!--       <artifactId>model-flow-service</artifactId> -->
+<!--       <scope>provided</scope> -->
+<!--     </dependency> -->
   </dependencies>
 
   <build>
