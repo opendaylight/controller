@@ -279,7 +279,7 @@ public class ActorContext {
         Preconditions.checkArgument(actor != null, "actor must not be null");
         Preconditions.checkArgument(message != null, "message must not be null");
 
-        LOG.debug("Sending message {} to {}", message.getClass().toString(), actor.toString());
+        LOG.debug("Sending message {} to {}", message.getClass(), actor);
         return ask(actor, message, timeout);
     }
 
@@ -314,7 +314,7 @@ public class ActorContext {
         Preconditions.checkArgument(actor != null, "actor must not be null");
         Preconditions.checkArgument(message != null, "message must not be null");
 
-        LOG.debug("Sending message {} to {}", message.getClass().toString(), actor.toString());
+        LOG.debug("Sending message {} to {}", message.getClass(), actor);
 
         return ask(actor, message, timeout);
     }
@@ -341,7 +341,7 @@ public class ActorContext {
         Preconditions.checkArgument(actor != null, "actor must not be null");
         Preconditions.checkArgument(message != null, "message must not be null");
 
-        LOG.debug("Sending message {} to {}", message.getClass().toString(), actor.toString());
+        LOG.debug("Sending message {} to {}", message.getClass(), actor);
 
         actor.tell(message, ActorRef.noSender());
     }
@@ -386,14 +386,14 @@ public class ActorContext {
             return false;
         }
 
-        int pathAtIndex = path.indexOf("@");
+        int pathAtIndex = path.indexOf('@');
         if (pathAtIndex == -1) {
             //if the path is of local format, then its local and is co-located
             return true;
 
         } else if (selfAddressHostPort != null) {
             // self-address and tx actor path, both are of remote path format
-            int slashIndex = path.indexOf("/", pathAtIndex);
+            int slashIndex = path.indexOf('/', pathAtIndex);
 
             if (slashIndex == -1) {
                 return false;
