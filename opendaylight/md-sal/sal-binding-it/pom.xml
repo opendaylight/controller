@@ -120,8 +120,12 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller.model</groupId>
-      <artifactId>model-flow-service</artifactId>
+      <artifactId>model-inventory</artifactId>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools.model</groupId>
+      <artifactId>opendaylight-l2-types</artifactId>
     </dependency>
   </dependencies>
 
