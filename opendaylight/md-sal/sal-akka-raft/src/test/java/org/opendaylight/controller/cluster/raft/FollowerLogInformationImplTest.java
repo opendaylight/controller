@@ -7,14 +7,12 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
 import org.junit.Test;
 import scala.concurrent.duration.FiniteDuration;
 
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -29,7 +27,7 @@ public class FollowerLogInformationImplTest {
 
         FollowerLogInformation followerLogInformation =
             new FollowerLogInformationImpl(
-                "follower1", new AtomicLong(10), new AtomicLong(9), timeoutDuration);
+                "follower1", 10, 9, timeoutDuration);
 
 
 
