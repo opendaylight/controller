@@ -15,7 +15,6 @@
     <module>config-persister</module>
     <module>config-netty</module>
     <module>mdsal</module>
-    <module>flow</module>
     <module>netconf</module>
     <module>protocol-framework</module>
     <module>akka</module>
