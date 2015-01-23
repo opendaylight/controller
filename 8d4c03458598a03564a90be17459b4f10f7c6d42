@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_7993954f",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 2106
+      },
+      "writtenOn": "2015-01-23T12:13:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_c4b9a416",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_b6eff586",
         "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
         "patchSetId": 1
@@ -66,6 +84,24 @@
       "side": 1,
       "message": "Extensions seem to occur still on existing modules, so then what?  we use an augmentation .yang to avoid modifying the original base yang.  ( I\u0027m new to yang by the way if that wasn\u0027t clear :-) )",
       "parentUuid": "7a96c907_b6eff586",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_59901943",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 2106
+      },
+      "writtenOn": "2015-01-23T12:13:42Z",
+      "side": 1,
+      "message": "Well, having one base model + a mass of augmentations, and then further augmentations of the added nodes, is certainly one way. Personally, I find that it gets quite complex quite quickly. What more, in this case where the vast bulk of the v2 API is already firmly defined and is modular, having a similar modular set f models would be advantageous.",
+      "parentUuid": "7a96c907_843b9c9b",
       "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -107,6 +143,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_399d0d5a",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 2106
+      },
+      "writtenOn": "2015-01-23T12:13:42Z",
+      "side": 1,
+      "message": "Cool.",
+      "parentUuid": "7a96c907_2442c810",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_76e96d7f",
         "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
         "patchSetId": 1
@@ -136,6 +190,24 @@
       "side": 1,
       "message": "\"binding:host_id\": \"devstack\"\n\nleaf binding_._host_id {\n    type string;\n    description \"In some cases different implementations may be run on different hosts. The host on which the port will be allocated.\";\n}",
       "parentUuid": "7a96c907_76e96d7f",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_39af4d96",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 2106
+      },
+      "writtenOn": "2015-01-23T12:13:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_c450c4d6",
       "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -177,6 +249,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_d9950941",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 2106
+      },
+      "writtenOn": "2015-01-23T12:13:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_645f70e6",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_3603e543",
         "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
         "patchSetId": 1
@@ -206,6 +296,24 @@
       "side": 1,
       "message": "I couldn\u0027t find any neutron doc on this, can you?",
       "parentUuid": "7a96c907_3603e543",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_39866d14",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 2106
+      },
+      "writtenOn": "2015-01-23T12:13:42Z",
+      "side": 1,
+      "message": "It\u0027s not in the API, but if you look at the legacy ODL implementation it\u0027s there. And frankly, it comes in useful. Can be in the \"operational\" data store.",
+      "parentUuid": "7a96c907_245968fe",
       "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
