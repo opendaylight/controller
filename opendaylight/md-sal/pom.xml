@@ -51,16 +51,6 @@
     <module>sal-rest-connector-config</module>
     <module>sal-netconf-connector</module>
 
-    <module>inventory-manager</module>
-    <module>statistics-manager</module>
-    <module>statistics-manager-config</module>
-    <module>topology-manager</module>
-    <module>forwardingrules-manager</module>
-    <module>topology-lldp-discovery</module>
-
-    <!-- Compability Packages -->
-    <module>compatibility</module>
-
     <!-- Documentation -->
     <module>sal-rest-docgen</module>
     <module>sal-rest-docgen-maven</module>
