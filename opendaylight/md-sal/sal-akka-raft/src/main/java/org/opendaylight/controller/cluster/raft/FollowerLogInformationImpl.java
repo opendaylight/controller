@@ -9,10 +9,9 @@
 package org.opendaylight.controller.cluster.raft;
 
 import com.google.common.base.Stopwatch;
-import scala.concurrent.duration.FiniteDuration;
-
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import scala.concurrent.duration.FiniteDuration;
 
 public class FollowerLogInformationImpl implements FollowerLogInformation {
 
@@ -35,6 +34,7 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
         this.followerTimeoutMillis = followerTimeoutDuration.toMillis();
     }
 
+    @Override
     public long incrNextIndex(){
         return nextIndex.incrementAndGet();
     }
@@ -49,6 +49,7 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
         this.nextIndex.set(nextIndex);
     }
 
+    @Override
     public long incrMatchIndex(){
         return matchIndex.incrementAndGet();
     }
@@ -58,16 +59,19 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
         this.matchIndex.set(matchIndex);
     }
 
+    @Override
     public String getId() {
         return id;
     }
 
-    public AtomicLong getNextIndex() {
-        return nextIndex;
+    @Override
+    public long getNextIndex() {
+        return nextIndex.get();
     }
 
-    public AtomicLong getMatchIndex() {
-        return matchIndex;
+    @Override
+    public long getMatchIndex() {
+        return matchIndex.get();
     }
 
     @Override
