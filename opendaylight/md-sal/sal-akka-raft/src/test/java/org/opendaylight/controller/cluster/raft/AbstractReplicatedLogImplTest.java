@@ -155,16 +155,6 @@ public class AbstractReplicatedLogImplTest {
         }
 
         @Override
-        public void setSnapshotIndex(final long snapshotIndex) {
-            this.snapshotIndex = snapshotIndex;
-        }
-
-        @Override
-        public void setSnapshotTerm(final long snapshotTerm) {
-            this.snapshotTerm = snapshotTerm;
-        }
-
-        @Override
         public int dataSize() {
             return -1;
         }
