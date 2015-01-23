@@ -117,18 +117,17 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     public List<ReplicatedLogEntry> getFrom(long logEntryIndex, int max) {
         int adjustedIndex = adjustedIndex(logEntryIndex);
         int size = journal.size();
-        List<ReplicatedLogEntry> entries = new ArrayList<>(100);
         if (adjustedIndex >= 0 && adjustedIndex < size) {
             // physical index should be less than list size and >= 0
             int maxIndex = adjustedIndex + max;
             if(maxIndex > size){
                 maxIndex = size;
             }
-            entries.addAll(journal.subList(adjustedIndex, maxIndex));
+            return new ArrayList<>(journal.subList(adjustedIndex, maxIndex));
+        } else {
+            return Collections.emptyList();
         }
-        return entries;
     }
-
 
     @Override
     public long size() {
