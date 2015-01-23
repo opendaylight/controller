@@ -152,8 +152,8 @@ public class TestHelper {
 
     public static Option flowCapableModelBundles() {
         return new DefaultCompositeOption( //
-                mavenBundle(CONTROLLER_MODELS, "model-flow-base").versionAsInProject(), // //
-                mavenBundle(CONTROLLER_MODELS, "model-flow-service").versionAsInProject(), // //
+                //mavenBundle(CONTROLLER_MODELS, "model-flow-base").versionAsInProject(), // //
+                //mavenBundle(CONTROLLER_MODELS, "model-flow-service").versionAsInProject(), // //
                 mavenBundle(CONTROLLER_MODELS, "model-inventory").versionAsInProject() //
         );
 

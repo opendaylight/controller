@@ -6,22 +6,7 @@
     <repository>mvn:org.opendaylight.controller/features-mdsal/${mdsal.version}/xml/features</repository>
     <feature name='odl-flow-model' version='${project.version}' description="OpenDaylight :: Flow :: Model">
         <feature version='${yangtools.version}'>odl-yangtools-models</feature>
-        <bundle>mvn:org.opendaylight.controller.model/model-flow-base/${project.version}</bundle>
-        <bundle>mvn:org.opendaylight.controller.model/model-flow-service/${project.version}</bundle>
-        <bundle>mvn:org.opendaylight.controller.model/model-flow-statistics/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller.model/model-inventory/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller.model/model-topology/${project.version}</bundle>
     </feature>
-    <feature name='odl-flow-services' version='${project.version}' description="OpenDaylight :: Flow :: Services">
-        <feature version='${project.version}'>odl-mdsal-broker</feature>
-        <feature version='${project.version}'>odl-flow-model</feature>
-        <bundle>mvn:org.opendaylight.controller.md/topology-manager/${project.version}</bundle>
-        <bundle>mvn:org.opendaylight.controller.md/topology-lldp-discovery/${project.version}</bundle>
-        <bundle>mvn:org.opendaylight.controller.md/statistics-manager/${project.version}</bundle>
-        <bundle>mvn:org.opendaylight.controller.md/inventory-manager/${project.version}</bundle>
-        <bundle>mvn:org.opendaylight.controller.md/forwardingrules-manager/${project.version}</bundle>
-        <bundle>mvn:org.opendaylight.controller/liblldp/${sal.version}</bundle>
-        <configfile finalname="${config.configfile.directory}/${config.statistics.manager.configfile}">mvn:org.opendaylight.controller.md/statistics-manager-config/${mdsal.version}/xml/config</configfile>
-    </feature>
-
 </features>
