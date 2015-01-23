@@ -8,11 +8,16 @@
 
 package org.opendaylight.controller.sal.binding.impl.connect.dom;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.concurrent.Future;
-
 import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
 import org.opendaylight.yangtools.yang.binding.DataContainer;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -26,12 +31,6 @@ import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-
 /*
  * RPC's can have both input, output, one or the other, or neither.
  *
@@ -44,6 +43,20 @@ import com.google.common.util.concurrent.ListenableFuture;
  *
  */
 public class RpcInvocationStrategy {
+    private final Function<RpcResult<CompositeNode>, RpcResult<?>> transformationFunction = new Function<RpcResult<CompositeNode>, RpcResult<?>>() {
+        @SuppressWarnings("rawtypes")
+        @Override
+        public RpcResult<?> apply(final RpcResult<CompositeNode> result) {
+            final Object output;
+            if (getOutputClass() != null && result.getResult() != null) {
+                output = mappingService.dataObjectFromDataDom(getOutputClass().get(), result.getResult());
+            } else {
+                output = null;
+            }
+
+            return RpcResultBuilder.from( (RpcResult)result ).withResult( output ).build();
+        }
+    };
 
     private final BindingIndependentMappingService mappingService;
     private final RpcProvisionRegistry biRpcRegistry;
@@ -61,26 +74,24 @@ public class RpcInvocationStrategy {
                                  final Method targetMethod,
                                  final BindingIndependentMappingService mappingService,
                                  final RpcProvisionRegistry biRpcRegistry ) {
-
+        this.mappingService = mappingService;
+        this.biRpcRegistry = biRpcRegistry;
         this.targetMethod = targetMethod;
         this.rpc = rpc;
 
-        Optional<Class<?>> outputClassOption = BindingReflections.resolveRpcOutputClass(targetMethod);
-        Optional<Class<? extends DataContainer>> inputClassOption = BindingReflections.resolveRpcInputClass(targetMethod);
-
-        if ( outputClassOption != null && outputClassOption.isPresent() ) {
-            this.outputClass = new WeakReference(outputClassOption.get() ) ;
+        final Optional<Class<?>> outputClassOption = BindingReflections.resolveRpcOutputClass(targetMethod);
+        if (outputClassOption.isPresent()) {
+            this.outputClass = new WeakReference(outputClassOption.get());
         } else {
-            this.outputClass = null ;
-        }
-        if ( inputClassOption != null && inputClassOption.isPresent() ) {
-            this.inputClass = new WeakReference(inputClassOption.get() ) ;
-        } else {
-            this.inputClass = null ;
+            this.outputClass = null;
         }
 
-        this.mappingService = mappingService;
-        this.biRpcRegistry = biRpcRegistry;
+        final Optional<Class<? extends DataContainer>> inputClassOption = BindingReflections.resolveRpcInputClass(targetMethod);
+        if (inputClassOption.isPresent() ) {
+            this.inputClass = new WeakReference(inputClassOption.get());
+        } else {
+            this.inputClass = null;
+        }
     }
 
     @SuppressWarnings({ "unchecked" })
@@ -97,25 +108,6 @@ public class RpcInvocationStrategy {
         } else {
             inputXml = ImmutableCompositeNode.create( rpc, Collections.<Node<?>>emptyList() );
         }
-
-        Function<RpcResult<CompositeNode>, RpcResult<?>> transformationFunction =
-                                       new Function<RpcResult<CompositeNode>, RpcResult<?>>() {
-            @SuppressWarnings("rawtypes")
-            @Override
-            public RpcResult<?> apply(RpcResult<CompositeNode> result) {
-
-                Object output = null;
-
-                if( getOutputClass() != null ) {
-                    if (result.getResult() != null) {
-                        output = mappingService.dataObjectFromDataDom(getOutputClass().get(),
-                                                                    result.getResult());
-                    }
-                }
-
-                return RpcResultBuilder.from( (RpcResult)result ).withResult( output ).build();
-            }
-        };
 
         return Futures.transform(biRpcRegistry.invokeRpc(rpc, inputXml), transformationFunction);
     }
@@ -153,7 +145,8 @@ public class RpcInvocationStrategy {
     }
 
     @SuppressWarnings("rawtypes")
-    public WeakReference<Class> getOutputClass() {
+    @VisibleForTesting
+    WeakReference<Class> getOutputClass() {
         return outputClass;
     }
 }
