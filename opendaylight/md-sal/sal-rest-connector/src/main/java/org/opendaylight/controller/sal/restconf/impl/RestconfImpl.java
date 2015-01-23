@@ -486,7 +486,7 @@ public class RestconfImpl implements RestconfService {
                     ErrorType.APPLICATION, ErrorTag.OPERATION_FAILED);
         }
 
-        final YangInstanceIdentifier pathIdentifier = ((YangInstanceIdentifier) pathValue);
+        final YangInstanceIdentifier pathIdentifier = controllerContext.toNormalized(((YangInstanceIdentifier) pathValue));
         String streamName = null;
         if (!Iterables.isEmpty(pathIdentifier.getPathArguments())) {
             String fullRestconfIdentifier = this.controllerContext.toFullRestconfIdentifier(pathIdentifier);
