@@ -25,11 +25,15 @@ import akka.testkit.JavaTestKit;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -72,6 +76,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
+import scala.concurrent.Promise;
 import scala.concurrent.duration.Duration;
 
 @SuppressWarnings("resource")
@@ -394,8 +399,7 @@ public class TransactionProxyTest {
             .build();
     }
 
-    private ActorRef setupActorContextWithInitialCreateTransaction(ActorSystem actorSystem,
-            TransactionType type, int transactionVersion) {
+    private ActorRef setupActorContextWithoutInitialCreateTransaction(ActorSystem actorSystem) {
         ActorRef actorRef = actorSystem.actorOf(Props.create(DoNothingActor.class));
         doReturn(actorSystem.actorSelection(actorRef.path())).
                 when(mockActorContext).actorSelection(actorRef.path().toString());
@@ -403,13 +407,20 @@ public class TransactionProxyTest {
         doReturn(Futures.successful(actorSystem.actorSelection(actorRef.path()))).
                 when(mockActorContext).findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
 
-        doReturn(Futures.successful(createTransactionReply(actorRef, transactionVersion))).when(mockActorContext).
-                executeOperationAsync(eq(actorSystem.actorSelection(actorRef.path())),
-                        eqCreateTransaction(memberName, type));
-
         doReturn(false).when(mockActorContext).isPathLocal(actorRef.path().toString());
 
         doReturn(10).when(mockActorContext).getTransactionOutstandingOperationLimit();
+
+        return actorRef;
+    }
+
+    private ActorRef setupActorContextWithInitialCreateTransaction(ActorSystem actorSystem,
+            TransactionType type, int transactionVersion) {
+        ActorRef actorRef = setupActorContextWithoutInitialCreateTransaction(actorSystem);
+
+        doReturn(Futures.successful(createTransactionReply(actorRef, transactionVersion))).when(mockActorContext).
+                executeOperationAsync(eq(actorSystem.actorSelection(actorRef.path())),
+                        eqCreateTransaction(memberName, type));
 
         return actorRef;
     }
@@ -764,6 +775,62 @@ public class TransactionProxyTest {
                 WRITE_ONLY);
 
         transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
+
+        verify(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), eqSerializedWriteData(nodeToWrite));
+
+        verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
+                WriteDataReply.class);
+    }
+
+    @Test
+    public void testWriteAfterAsyncRead() throws Throwable {
+        ActorRef actorRef = setupActorContextWithoutInitialCreateTransaction(getSystem());
+
+        Promise<Object> createTxPromise = akka.dispatch.Futures.promise();
+        doReturn(createTxPromise).when(mockActorContext).executeOperationAsync(
+                eq(getSystem().actorSelection(actorRef.path())),
+                eqCreateTransaction(memberName, READ_WRITE));
+
+        doReturn(readSerializedDataReply(null)).when(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), eqSerializedReadData());
+
+        final NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+
+        doReturn(writeSerializedDataReply()).when(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), eqSerializedWriteData(nodeToWrite));
+
+        final TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, READ_WRITE);
+
+        final CountDownLatch readComplete = new CountDownLatch(1);
+        final AtomicReference<Throwable> caughtEx = new AtomicReference<>();
+        com.google.common.util.concurrent.Futures.addCallback(transactionProxy.read(TestModel.TEST_PATH),
+                new  FutureCallback<Optional<NormalizedNode<?, ?>>>() {
+                    @Override
+                    public void onSuccess(Optional<NormalizedNode<?, ?>> result) {
+                        try {
+                            transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
+                        } catch (Exception e) {
+                            caughtEx.set(e);
+                        } finally {
+                            readComplete.countDown();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable t) {
+                        caughtEx.set(t);
+                        readComplete.countDown();
+                    }
+                });
+
+        createTxPromise.success(createTransactionReply(actorRef, DataStoreVersions.CURRENT_VERSION));
+
+        Uninterruptibles.awaitUninterruptibly(readComplete, 5, TimeUnit.SECONDS);
+
+        if(caughtEx.get() != null) {
+            throw caughtEx.get();
+        }
 
         verify(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqSerializedWriteData(nodeToWrite));
