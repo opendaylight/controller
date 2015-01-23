@@ -75,9 +75,8 @@ public class ExampleActor extends RaftActor {
 
         } else if (message instanceof PrintRole) {
             if(LOG.isDebugEnabled()) {
-                String followers = "";
                 if (getRaftState() == RaftState.Leader || getRaftState() == RaftState.IsolatedLeader) {
-                    followers = ((Leader)this.getCurrentBehavior()).printFollowerStates();
+                    final String followers = ((Leader)this.getCurrentBehavior()).printFollowerStates();
                     LOG.debug("{} = {}, Peers={}, followers={}", getId(), getRaftState(),
                         getRaftActorContext().getPeerAddresses().keySet(), followers);
                 } else {
