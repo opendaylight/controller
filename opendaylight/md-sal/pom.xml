@@ -78,6 +78,7 @@
 
     <!-- sal-distributed-datastore -->
     <module>sal-distributed-datastore</module>
+    <module>sal-dummy-distributed-datastore</module>
 
     <!-- XSQL -->
     <module>sal-dom-xsql</module>
