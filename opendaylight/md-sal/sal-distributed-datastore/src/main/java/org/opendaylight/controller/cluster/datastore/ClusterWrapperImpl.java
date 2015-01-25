@@ -32,9 +32,8 @@ public class ClusterWrapperImpl implements ClusterWrapper {
                 "member-3 here would be the name of the member"
         );
 
-        currentMemberName = (String) cluster.getSelfRoles().toArray()[0];
+        currentMemberName = cluster.getSelfRoles().iterator().next();
         selfAddress = cluster.selfAddress();
-
     }
 
     public void subscribeToMemberEvents(ActorRef actorRef){
