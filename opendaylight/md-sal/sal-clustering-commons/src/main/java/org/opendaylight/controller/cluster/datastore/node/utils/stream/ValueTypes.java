@@ -9,15 +9,16 @@
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
-public class ValueTypes {
+final class ValueTypes {
     public static final byte SHORT_TYPE = 1;
     public static final byte BYTE_TYPE = 2;
     public static final byte INT_TYPE = 3;
@@ -31,30 +32,38 @@ public class ValueTypes {
     public static final byte BIG_DECIMAL_TYPE = 11;
     public static final byte BINARY_TYPE = 12;
 
-    private static Map<Class<?>, Byte> types = new HashMap<>();
+    private static final Map<Class<?>, Byte> TYPES;
 
     static {
-        types.put(String.class, Byte.valueOf(STRING_TYPE));
-        types.put(Byte.class, Byte.valueOf(BYTE_TYPE));
-        types.put(Integer.class, Byte.valueOf(INT_TYPE));
-        types.put(Long.class, Byte.valueOf(LONG_TYPE));
-        types.put(Boolean.class, Byte.valueOf(BOOL_TYPE));
-        types.put(QName.class, Byte.valueOf(QNAME_TYPE));
-        types.put(Set.class, Byte.valueOf(BITS_TYPE));
-        types.put(YangInstanceIdentifier.class, Byte.valueOf(YANG_IDENTIFIER_TYPE));
-        types.put(Short.class, Byte.valueOf(SHORT_TYPE));
-        types.put(BigInteger.class, Byte.valueOf(BIG_INTEGER_TYPE));
-        types.put(BigDecimal.class, Byte.valueOf(BIG_DECIMAL_TYPE));
-        types.put(byte[].class, Byte.valueOf(BINARY_TYPE));
+        final Builder<Class<?>, Byte> b = ImmutableMap.builder();
+
+        b.put(String.class, Byte.valueOf(STRING_TYPE));
+        b.put(Byte.class, Byte.valueOf(BYTE_TYPE));
+        b.put(Integer.class, Byte.valueOf(INT_TYPE));
+        b.put(Long.class, Byte.valueOf(LONG_TYPE));
+        b.put(Boolean.class, Byte.valueOf(BOOL_TYPE));
+        b.put(QName.class, Byte.valueOf(QNAME_TYPE));
+        b.put(YangInstanceIdentifier.class, Byte.valueOf(YANG_IDENTIFIER_TYPE));
+        b.put(Short.class, Byte.valueOf(SHORT_TYPE));
+        b.put(BigInteger.class, Byte.valueOf(BIG_INTEGER_TYPE));
+        b.put(BigDecimal.class, Byte.valueOf(BIG_DECIMAL_TYPE));
+        b.put(byte[].class, Byte.valueOf(BINARY_TYPE));
+
+        TYPES = b.build();
     }
 
-    public static final byte getSerializableType(Object node){
+    private ValueTypes() {
+        throw new UnsupportedOperationException("Utility class");
+    }
+
+    public static final byte getSerializableType(Object node) {
         Preconditions.checkNotNull(node, "node should not be null");
 
-        Byte type = types.get(node.getClass());
-        if(type != null) {
+        final Byte type = TYPES.get(node.getClass());
+        if (type != null) {
             return type;
-        } else if(node instanceof Set){
+        }
+        if (node instanceof Set) {
             return BITS_TYPE;
         }
 
