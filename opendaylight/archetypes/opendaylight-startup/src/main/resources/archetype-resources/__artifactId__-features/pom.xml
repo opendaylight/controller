@@ -40,6 +40,30 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   </dependencyManagement>
   <dependencies>
     <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>features-yangtools</artifactId>
+      <classifier>features</classifier>
+      <version>${yangtools.version}</version>
+      <type>xml</type>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>features-mdsal</artifactId>
+      <classifier>features</classifier>
+      <version>${mdsal.version}</version>
+      <type>xml</type>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>features-restconf</artifactId>
+      <classifier>features</classifier>
+      <version>${mdsal.version}</version>
+      <type>xml</type>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
       <groupId>${symbol_dollar}{groupId}</groupId>
       <artifactId>${artifactId}-impl</artifactId>
       <version>${symbol_dollar}{project.version}</version>
