@@ -9,18 +9,17 @@
 package org.opendaylight.controller.cluster.datastore.identifiers;
 
 import com.google.common.base.Preconditions;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ShardIdentifier {
+    // This pattern needs to remain in sync with toString(), which produces
+    // strings with corresponding to "%s-shard-%s-%s"
+    private static final Pattern PATTERN = Pattern.compile("(\\S+)-shard-(\\S+)-(\\S+)");
+
     private final String shardName;
     private final String memberName;
     private final String type;
-
-    //format and pattern should be in sync
-    private final String format = "%s-shard-%s-%s";
-    private static final Pattern pattern = Pattern.compile("(\\S+)-shard-(\\S+)-(\\S+)");
 
     public ShardIdentifier(String shardName, String memberName, String type) {
 
@@ -116,7 +115,7 @@ public class ShardIdentifier {
         }
 
         public Builder fromShardIdString(String shardId){
-            Matcher matcher = pattern.matcher(shardId);
+            Matcher matcher = PATTERN.matcher(shardId);
 
             if (matcher.matches()) {
                 memberName = matcher.group(1);
