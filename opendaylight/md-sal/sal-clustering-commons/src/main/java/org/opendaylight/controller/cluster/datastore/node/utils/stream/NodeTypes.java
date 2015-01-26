@@ -7,11 +7,9 @@
  *  and is available at http://www.eclipse.org/legal/epl-v10.html
  *
  */
-
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
-public class NodeTypes {
-
+final class NodeTypes {
     public static final byte LEAF_NODE = 1;
     public static final byte LEAF_SET = 2;
     public static final byte LEAF_SET_ENTRY_NODE = 3;
@@ -26,4 +24,7 @@ public class NodeTypes {
     public static final byte ANY_XML_NODE = 12;
     public static final byte END_NODE = 13;
 
+    private NodeTypes() {
+        throw new UnsupportedOperationException("utility class");
+    }
 }
