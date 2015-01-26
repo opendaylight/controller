@@ -9,11 +9,8 @@
 package org.opendaylight.controller.cluster.datastore.node.utils.serialization;
 
 import com.google.protobuf.ByteString;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.Set;
-import org.opendaylight.controller.cluster.datastore.node.utils.QNameFactory;
 import org.opendaylight.controller.cluster.datastore.util.InstanceIdentifierUtils;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -101,35 +98,7 @@ public class ValueSerializer {
 
 
     private static Object deSerializeBasicTypes(int valueType, String value) {
-        switch(ValueType.values()[valueType]){
-           case SHORT_TYPE: {
-               return Short.valueOf(value);
-           }
-           case BOOL_TYPE: {
-               return Boolean.valueOf(value);
-           }
-           case BYTE_TYPE: {
-               return Byte.valueOf(value);
-           }
-           case INT_TYPE : {
-                return Integer.valueOf(value);
-           }
-           case LONG_TYPE: {
-               return Long.valueOf(value);
-           }
-           case QNAME_TYPE: {
-               return QNameFactory.create(value);
-           }
-           case BIG_INTEGER_TYPE: {
-               return new BigInteger(value);
-           }
-           case BIG_DECIMAL_TYPE: {
-               return new BigDecimal(value);
-           }
-           default: {
-               return value;
-           }
-        }
+        return ValueType.values()[valueType].deserialize(value);
     }
 
 }
