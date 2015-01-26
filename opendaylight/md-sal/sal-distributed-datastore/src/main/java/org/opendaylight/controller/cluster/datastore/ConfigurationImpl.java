@@ -48,6 +48,7 @@ public class ConfigurationImpl implements Configuration {
     private final Map<String, List<String>> shardReplicaNames = new HashMap<>();
 
     private final Map<String, String> namespaceToModuleName;
+    private final Map<String, ShardStrategy> moduleNameToStrategy;
 
     public ConfigurationImpl(final String moduleShardsConfigPath,
 
@@ -81,7 +82,16 @@ public class ConfigurationImpl implements Configuration {
         this.moduleShards = readModuleShards(moduleShardsConfig);
         this.modules = readModules(modulesConfig);
 
-        namespaceToModuleName = createNamespaceToModuleName(modules);
+        this.moduleNameToStrategy = createModuleNameToStrategy(modules);
+        this.namespaceToModuleName = createNamespaceToModuleName(modules);
+    }
+
+    private static Map<String, ShardStrategy> createModuleNameToStrategy(Iterable<Module> modules) {
+        final com.google.common.collect.ImmutableMap.Builder<String, ShardStrategy> b = ImmutableMap.builder();
+        for (Module m : modules) {
+            b.put(m.getName(), m.getShardStrategy());
+        }
+        return b.build();
     }
 
     private static Map<String, String> createNamespaceToModuleName(Iterable<Module> modules) {
@@ -123,13 +133,9 @@ public class ConfigurationImpl implements Configuration {
         return Optional.fromNullable(namespaceToModuleName.get(nameSpace));
     }
 
-    @Override public Map<String, ShardStrategy> getModuleNameToShardStrategyMap() {
-        // FIXME: can be constant view of modules
-        Map<String, ShardStrategy> map = new HashMap<>();
-        for(Module m : modules){
-            map.put(m.getName(), m.getShardStrategy());
-        }
-        return map;
+    @Override
+    public Map<String, ShardStrategy> getModuleNameToShardStrategyMap() {
+        return moduleNameToStrategy;
     }
 
     @Override public List<String> getShardNamesFromModuleName(final String moduleName) {
