@@ -177,6 +177,9 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
 
     @Override
     public void flush() throws IOException {
+        if (output instanceof OutputStream) {
+            ((OutputStream)output).flush();
+        }
     }
 
     private void startNode(final QName qName, byte nodeType) throws IOException {
