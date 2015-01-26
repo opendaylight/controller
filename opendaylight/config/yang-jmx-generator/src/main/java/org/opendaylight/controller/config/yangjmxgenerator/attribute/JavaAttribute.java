@@ -201,7 +201,7 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
             itemTypes[i++] = innerCompositeType;
         }
 
-        String[] descriptions = Arrays.copyOf(itemNames, itemNames.length);
+        String[] descriptions = itemNames.clone();
         descriptions[0] = DESCRIPTION_OF_VALUE_ATTRIBUTE_FOR_UNION;
 
         try {
