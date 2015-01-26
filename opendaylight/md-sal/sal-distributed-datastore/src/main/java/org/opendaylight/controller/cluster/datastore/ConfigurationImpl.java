@@ -10,6 +10,8 @@ package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigObject;
@@ -29,9 +31,9 @@ import org.slf4j.LoggerFactory;
 
 public class ConfigurationImpl implements Configuration {
 
-    private final List<ModuleShard> moduleShards = new ArrayList<>();
+    private final List<ModuleShard> moduleShards;
 
-    private final List<Module> modules = new ArrayList<>();
+    private final List<Module> modules;
 
     private static final Logger
         LOG = LoggerFactory.getLogger(DistributedDataStore.class);
@@ -74,9 +76,8 @@ public class ConfigurationImpl implements Configuration {
             modulesConfig = ConfigFactory.load(modulesConfigPath);
         }
 
-        readModuleShards(moduleShardsConfig);
-
-        readModules(modulesConfig);
+        this.moduleShards = readModuleShards(moduleShardsConfig);
+        this.modules = readModules(modulesConfig);
     }
 
     @Override public List<String> getMemberShardNames(final String memberName){
@@ -174,21 +175,25 @@ public class ConfigurationImpl implements Configuration {
 
 
 
-    private void readModules(final Config modulesConfig) {
+    private List<Module> readModules(final Config modulesConfig) {
         List<? extends ConfigObject> modulesConfigObjectList =
             modulesConfig.getObjectList("modules");
 
+        final Builder<Module> b = ImmutableList.builder();
         for(ConfigObject o : modulesConfigObjectList){
             ConfigObjectWrapper w = new ConfigObjectWrapper(o);
-            modules.add(new Module(w.stringValue("name"), w.stringValue(
+            b.add(new Module(w.stringValue("name"), w.stringValue(
                 "namespace"), w.stringValue("shard-strategy")));
         }
+
+        return b.build();
     }
 
-    private void readModuleShards(final Config moduleShardsConfig) {
+    private static List<ModuleShard> readModuleShards(final Config moduleShardsConfig) {
         List<? extends ConfigObject> moduleShardsConfigObjectList =
             moduleShardsConfig.getObjectList("module-shards");
 
+        final Builder<ModuleShard> b = ImmutableList.builder();
         for(ConfigObject moduleShardConfigObject : moduleShardsConfigObjectList){
 
             String moduleName = moduleShardConfigObject.get("name").unwrapped().toString();
@@ -204,12 +209,14 @@ public class ConfigurationImpl implements Configuration {
                 shards.add(new Shard(shardName, replicas));
             }
 
-            this.moduleShards.add(new ModuleShard(moduleName, shards));
+            b.add(new ModuleShard(moduleName, shards));
         }
+
+        return b.build();
     }
 
 
-    private class ModuleShard {
+    private static class ModuleShard {
         private final String moduleName;
         private final List<Shard> shards;
 
@@ -227,7 +234,7 @@ public class ConfigurationImpl implements Configuration {
         }
     }
 
-    private class Shard {
+    private static class Shard {
         private final String name;
         private final List<String> replicas;
 
