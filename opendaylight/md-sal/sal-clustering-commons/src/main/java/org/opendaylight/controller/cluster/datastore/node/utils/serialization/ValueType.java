@@ -15,22 +15,83 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Map;
 import java.util.Set;
+import org.opendaylight.controller.cluster.datastore.node.utils.QNameFactory;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public enum ValueType {
-    SHORT_TYPE,
-    BYTE_TYPE,
-    INT_TYPE,
-    LONG_TYPE,
-    BOOL_TYPE,
-    QNAME_TYPE,
-    BITS_TYPE,
-    YANG_IDENTIFIER_TYPE,
-    STRING_TYPE,
-    BIG_INTEGER_TYPE,
-    BIG_DECIMAL_TYPE,
-    BINARY_TYPE;
+    SHORT_TYPE {
+        @Override
+        Object deserialize(final String str) {
+            return Short.valueOf(str);
+        }
+    },
+    BYTE_TYPE {
+        @Override
+        Object deserialize(final String str) {
+            return Byte.valueOf(str);
+        }
+    },
+    INT_TYPE {
+        @Override
+        Object deserialize(final String str) {
+            return Integer.valueOf(str);
+        }
+    },
+    LONG_TYPE {
+        @Override
+        Object deserialize(final String str) {
+            return Long.valueOf(str);
+        }
+    },
+    BOOL_TYPE {
+        @Override
+        Object deserialize(final String str) {
+            return Boolean.valueOf(str);
+        }
+    },
+    QNAME_TYPE {
+        @Override
+        Object deserialize(final String str) {
+            return QNameFactory.create(str);
+        }
+    },
+    BITS_TYPE {
+        @Override
+        Object deserialize(final String str) {
+            throw new UnsupportedOperationException("Should have been caught by caller");
+        }
+    },
+    YANG_IDENTIFIER_TYPE {
+        @Override
+        Object deserialize(final String str) {
+            throw new UnsupportedOperationException("Should have been caught by caller");
+        }
+    },
+    STRING_TYPE {
+        @Override
+        Object deserialize(final String str) {
+            return str;
+        }
+    },
+    BIG_INTEGER_TYPE {
+        @Override
+        Object deserialize(final String str) {
+            return new BigInteger(str);
+        }
+    },
+    BIG_DECIMAL_TYPE {
+        @Override
+        Object deserialize(final String str) {
+            return new BigDecimal(str);
+        }
+    },
+    BINARY_TYPE {
+        @Override
+        Object deserialize(final String str) {
+            throw new UnsupportedOperationException("Should have been caught by caller");
+        }
+    };
 
     private static final Map<Class<?>, ValueType> TYPES;
 
@@ -51,6 +112,8 @@ public enum ValueType {
 
         TYPES = b.build();
     }
+
+    abstract Object deserialize(String str);
 
     public static final ValueType getSerializableType(Object node) {
         Preconditions.checkNotNull(node, "node should not be null");
