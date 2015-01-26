@@ -10,40 +10,38 @@
 
 package org.opendaylight.controller.cluster.datastore.node.utils;
 
-import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-
+import com.google.common.base.Splitter;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public class AugmentationIdentifierGenerator {
+    private static final Pattern PATTERN = Pattern.compile("AugmentationIdentifier\\Q{\\EchildNames=\\Q[\\E(.*)\\Q]}\\E");
+    private static final Splitter COMMA_SPLITTER = Splitter.on(',').trimResults();
+
     private final String id;
-    private static final Pattern pattern = Pattern.compile("AugmentationIdentifier\\Q{\\EchildNames=\\Q[\\E(.*)\\Q]}\\E");
     private final Matcher matcher;
     private final boolean doesMatch;
 
-    public AugmentationIdentifierGenerator(String id){
+    public AugmentationIdentifierGenerator(String id) {
         this.id = id;
-        matcher = pattern.matcher(this.id);
+        matcher = PATTERN.matcher(this.id);
         doesMatch = matcher.matches();
     }
 
-    public boolean matches(){
+    public boolean matches() {
         return doesMatch;
     }
 
-    public YangInstanceIdentifier.AugmentationIdentifier getPathArgument(){
-        Set<QName> childNames = new HashSet<QName>();
+    public YangInstanceIdentifier.AugmentationIdentifier getPathArgument() {
         final String childQNames = matcher.group(1);
 
-        final String[] splitChildQNames = childQNames.split(",");
-
-        for(String name : splitChildQNames){
-            childNames.add(
-                org.opendaylight.controller.cluster.datastore.node.utils.QNameFactory
-                    .create(name.trim()));
+        final Set<QName> childNames = new HashSet<>();
+        for (String name : COMMA_SPLITTER.split(childQNames)) {
+            childNames.add(QNameFactory.create(name));
         }
 
         return new YangInstanceIdentifier.AugmentationIdentifier(childNames);
