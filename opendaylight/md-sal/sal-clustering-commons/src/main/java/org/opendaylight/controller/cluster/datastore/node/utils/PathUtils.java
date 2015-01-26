@@ -28,17 +28,22 @@ public class PathUtils {
      * @param path
      * @return
      */
-    public static String toString(YangInstanceIdentifier path){
-        StringBuilder sb = new StringBuilder();
-        Iterator<YangInstanceIdentifier.PathArgument> iterator =
+    public static String toString(YangInstanceIdentifier path) {
+        final Iterator<YangInstanceIdentifier.PathArgument> it =
             path.getPathArguments().iterator();
-
-        while(iterator.hasNext()){
-            sb.append(toString(iterator.next()));
-            if(iterator.hasNext()){
-                sb.append("/");
-            }
+        if (!it.hasNext()) {
+            return "";
         }
+
+        final StringBuilder sb = new StringBuilder();
+        for (;;) {
+            sb.append(toString(it.next()));
+            if (!it.hasNext()) {
+                break;
+            }
+            sb.append('/');
+        }
+
         return sb.toString();
     }
 
