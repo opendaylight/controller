@@ -24,6 +24,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <properties>
     <config.version>0.3.0-SNAPSHOT</config.version>
     <mdsal.version>1.2.0-SNAPSHOT</mdsal.version>
+    <yangtools.version>0.7.0-SNAPSHOT</yangtools.version>
     <jmxGeneratorPath>src/main/yang-gen-config</jmxGeneratorPath>
     <config.file>src/main/config/default-config.xml</config.file>
   </properties>
@@ -45,10 +46,21 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>yangtools-artifacts</artifactId>
+        <version>${yangtools.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
   <dependencies>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-common</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>config-api</artifactId>
