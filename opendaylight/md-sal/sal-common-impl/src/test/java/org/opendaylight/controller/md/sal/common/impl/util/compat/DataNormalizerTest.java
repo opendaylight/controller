@@ -668,10 +668,6 @@ public class DataNormalizerTest {
                 YangInstanceIdentifier.create(Lists.newArrayList(new NodeIdentifier(TEST_QNAME), new NodeIdentifier(
                         OUTER_CONTAINER_QNAME))), outerContBuilder.toInstance()));
 
-        verifyNormalizedInstanceIdentifier(normalizedNodeEntry.getKey(), TEST_QNAME, OUTER_CONTAINER_QNAME,
-                Sets.newHashSet(AUGMENTED_LEAF_QNAME));
-
-        verifyNormalizedNode(normalizedNodeEntry.getValue(), expAugmentation);
     }
 
     @Test
