@@ -18,6 +18,7 @@ import java.io.Serializable;
  * The Listener could be in a separate ActorSystem and hence this message needs to be Serializable
  */
 public class RoleChangeNotification implements Serializable {
+    private static final long serialVersionUID = -2873869509490117116L;
     private String memberId;
     private String oldRole;
     private String newRole;

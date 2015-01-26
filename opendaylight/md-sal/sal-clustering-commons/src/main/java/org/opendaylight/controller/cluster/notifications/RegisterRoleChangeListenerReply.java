@@ -16,4 +16,5 @@ import java.io.Serializable;
  * Can be sent to a separate actor system and hence should be made serializable.
  */
 public class RegisterRoleChangeListenerReply implements Serializable {
+    private static final long serialVersionUID = -1972061601184451430L;
 }
