@@ -1,0 +1,84 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_7f27f2b6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/CanCommitTransactionReply.java",
+        "patchSetId": 19
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-01-26T03:55:01Z",
+      "side": 1,
+      "message": "you could have used a CONSTANT here YES_SERIALIZED, NO_SERIALIZED. Or even completely eliminating the serializedMessage field.",
+      "range": {
+        "startLine": 25,
+        "startChar": 33,
+        "endLine": 25,
+        "endChar": 63
+      },
+      "revId": "cad857b425b1a0072681066b2ba37b0b0dc8c111",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_1fd90e83",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/DataChanged.java",
+        "patchSetId": 19
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-01-26T03:55:01Z",
+      "side": 1,
+      "message": "It will be interesting how we would scale with remote notifications with this much serialization for DataChange?",
+      "range": {
+        "startLine": 46,
+        "startChar": 24,
+        "endLine": 46,
+        "endChar": 26
+      },
+      "revId": "cad857b425b1a0072681066b2ba37b0b0dc8c111",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5f5c76ed",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/MergeData.java",
+        "patchSetId": 19
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-01-26T03:55:01Z",
+      "side": 1,
+      "message": "We could have use SERIALIZABLE_CLASS.isInstance(message) here and in lot of other places where we are checking the message type with equals now.",
+      "revId": "cad857b425b1a0072681066b2ba37b0b0dc8c111",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_bf033ab7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/SerializationUtils.java",
+        "patchSetId": 19
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-01-26T03:55:01Z",
+      "side": 1,
+      "message": "I like it when the message tells me which parameter is null (line number is usually good too)",
+      "revId": "cad857b425b1a0072681066b2ba37b0b0dc8c111",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
