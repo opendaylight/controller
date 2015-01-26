@@ -10,53 +10,54 @@ package org.opendaylight.controller.cluster.raft;
 
 import com.google.common.base.Stopwatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import scala.concurrent.duration.FiniteDuration;
 
 public class FollowerLogInformationImpl implements FollowerLogInformation {
+    private static final AtomicLongFieldUpdater<FollowerLogInformationImpl> NEXT_INDEX_UPDATER = AtomicLongFieldUpdater.newUpdater(FollowerLogInformationImpl.class, "nextIndex");
+    private static final AtomicLongFieldUpdater<FollowerLogInformationImpl> MATCH_INDEX_UPDATER = AtomicLongFieldUpdater.newUpdater(FollowerLogInformationImpl.class, "matchIndex");
 
     private final String id;
 
-    private final AtomicLong nextIndex;
-
-    private final AtomicLong matchIndex;
-
-    private final Stopwatch stopwatch;
+    private final Stopwatch stopwatch = new Stopwatch();
 
     private final long followerTimeoutMillis;
+
+    private volatile long nextIndex;
+
+    private volatile long matchIndex;
 
     public FollowerLogInformationImpl(String id, long nextIndex,
         long matchIndex, FiniteDuration followerTimeoutDuration) {
         this.id = id;
-        this.nextIndex = new AtomicLong(nextIndex);
-        this.matchIndex = new AtomicLong(matchIndex);
-        this.stopwatch = new Stopwatch();
+        this.nextIndex = nextIndex;
+        this.matchIndex = matchIndex;
         this.followerTimeoutMillis = followerTimeoutDuration.toMillis();
     }
 
     @Override
     public long incrNextIndex(){
-        return nextIndex.incrementAndGet();
+        return NEXT_INDEX_UPDATER.incrementAndGet(this);
     }
 
     @Override
     public long decrNextIndex() {
-        return nextIndex.decrementAndGet();
+        return NEXT_INDEX_UPDATER.decrementAndGet(this);
     }
 
     @Override
     public void setNextIndex(long nextIndex) {
-        this.nextIndex.set(nextIndex);
+        this.nextIndex = nextIndex;
     }
 
     @Override
     public long incrMatchIndex(){
-        return matchIndex.incrementAndGet();
+        return MATCH_INDEX_UPDATER.incrementAndGet(this);
     }
 
     @Override
     public void setMatchIndex(long matchIndex) {
-        this.matchIndex.set(matchIndex);
+        this.matchIndex = matchIndex;
     }
 
     @Override
@@ -66,12 +67,12 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
 
     @Override
     public long getNextIndex() {
-        return nextIndex.get();
+        return nextIndex;
     }
 
     @Override
     public long getMatchIndex() {
-        return matchIndex.get();
+        return matchIndex;
     }
 
     @Override
