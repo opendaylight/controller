@@ -12,7 +12,9 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
+import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ListMultimap;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigObject;
@@ -47,8 +49,9 @@ public class ConfigurationImpl implements Configuration {
     // key = shardName, value = list of replicaNames (replicaNames are the same as memberNames)
     private final Map<String, List<String>> shardReplicaNames = new HashMap<>();
 
-    private final Map<String, String> namespaceToModuleName;
+    private final ListMultimap<String, String> moduleNameToShardName;
     private final Map<String, ShardStrategy> moduleNameToStrategy;
+    private final Map<String, String> namespaceToModuleName;
 
     public ConfigurationImpl(final String moduleShardsConfigPath,
 
@@ -82,6 +85,7 @@ public class ConfigurationImpl implements Configuration {
         this.moduleShards = readModuleShards(moduleShardsConfig);
         this.modules = readModules(modulesConfig);
 
+        this.moduleNameToShardName = createModuleNameToShardName(moduleShards);
         this.moduleNameToStrategy = createModuleNameToStrategy(modules);
         this.namespaceToModuleName = createNamespaceToModuleName(modules);
     }
@@ -99,6 +103,18 @@ public class ConfigurationImpl implements Configuration {
         for (Module m : modules) {
             b.put(m.getNameSpace(), m.getName());
         }
+        return b.build();
+    }
+
+    private static ListMultimap<String, String> createModuleNameToShardName(Iterable<ModuleShard> moduleShards) {
+        final com.google.common.collect.ImmutableListMultimap.Builder<String, String> b = ImmutableListMultimap.builder();
+
+        for (ModuleShard m : moduleShards) {
+            for (Shard s : m.getShards()) {
+                b.put(m.getModuleName(), s.getName());
+            }
+        }
+
         return b.build();
     }
 
@@ -138,22 +154,10 @@ public class ConfigurationImpl implements Configuration {
         return moduleNameToStrategy;
     }
 
-    @Override public List<String> getShardNamesFromModuleName(final String moduleName) {
-
+    @Override
+    public List<String> getShardNamesFromModuleName(final String moduleName) {
         Preconditions.checkNotNull(moduleName, "moduleName should not be null");
-
-        // FIXME: can be constant view of moduleShards
-        for(ModuleShard m : moduleShards){
-            if(m.getModuleName().equals(moduleName)){
-                List<String> l = new ArrayList<>();
-                for(Shard s : m.getShards()){
-                    l.add(s.getName());
-                }
-                return l;
-            }
-        }
-
-        return Collections.emptyList();
+        return moduleNameToShardName.get(moduleName);
     }
 
     @Override public List<String> getMembersFromShardName(final String shardName) {
