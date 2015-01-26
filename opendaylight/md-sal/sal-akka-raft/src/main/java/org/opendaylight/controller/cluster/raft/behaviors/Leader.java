@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
@@ -74,7 +73,7 @@ public class Leader extends AbstractLeader {
     }
 
     protected void scheduleInstallSnapshotCheck(FiniteDuration interval) {
-        if(followers.size() == 0){
+        if (getFollowerIds().isEmpty()) {
             // Optimization - do not bother scheduling a heartbeat as there are
             // no followers
             return;
@@ -103,7 +102,8 @@ public class Leader extends AbstractLeader {
             context.getActorSystem().dispatcher(), context.getActor());
     }
 
-    @Override public void close() throws Exception {
+    @Override
+    public void close() throws Exception {
         stopInstallSnapshotSchedule();
         stopIsolatedLeaderCheckSchedule();
         super.close();
@@ -111,11 +111,11 @@ public class Leader extends AbstractLeader {
 
     @VisibleForTesting
     void markFollowerActive(String followerId) {
-        followerToLog.get(followerId).markFollowerActive();
+        getFollower(followerId).markFollowerActive();
     }
 
     @VisibleForTesting
     void markFollowerInActive(String followerId) {
-        followerToLog.get(followerId).markFollowerInActive();
+        getFollower(followerId).markFollowerInActive();
     }
 }

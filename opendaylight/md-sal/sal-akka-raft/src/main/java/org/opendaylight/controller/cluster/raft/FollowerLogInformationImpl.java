@@ -9,12 +9,11 @@
 package org.opendaylight.controller.cluster.raft;
 
 import com.google.common.base.Stopwatch;
-import scala.concurrent.duration.FiniteDuration;
-
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import scala.concurrent.duration.FiniteDuration;
 
-public class FollowerLogInformationImpl implements FollowerLogInformation{
+public class FollowerLogInformationImpl implements FollowerLogInformation {
 
     private final String id;
 
@@ -26,45 +25,53 @@ public class FollowerLogInformationImpl implements FollowerLogInformation{
 
     private final long followerTimeoutMillis;
 
-    public FollowerLogInformationImpl(String id, AtomicLong nextIndex,
-        AtomicLong matchIndex, FiniteDuration followerTimeoutDuration) {
+    public FollowerLogInformationImpl(String id, long nextIndex,
+        long matchIndex, FiniteDuration followerTimeoutDuration) {
         this.id = id;
-        this.nextIndex = nextIndex;
-        this.matchIndex = matchIndex;
+        this.nextIndex = new AtomicLong(nextIndex);
+        this.matchIndex = new AtomicLong(matchIndex);
         this.stopwatch = new Stopwatch();
         this.followerTimeoutMillis = followerTimeoutDuration.toMillis();
     }
 
+    @Override
     public long incrNextIndex(){
         return nextIndex.incrementAndGet();
     }
 
-    @Override public long decrNextIndex() {
+    @Override
+    public long decrNextIndex() {
         return nextIndex.decrementAndGet();
     }
 
-    @Override public void setNextIndex(long nextIndex) {
+    @Override
+    public void setNextIndex(long nextIndex) {
         this.nextIndex.set(nextIndex);
     }
 
+    @Override
     public long incrMatchIndex(){
         return matchIndex.incrementAndGet();
     }
 
-    @Override public void setMatchIndex(long matchIndex) {
+    @Override
+    public void setMatchIndex(long matchIndex) {
         this.matchIndex.set(matchIndex);
     }
 
+    @Override
     public String getId() {
         return id;
     }
 
-    public AtomicLong getNextIndex() {
-        return nextIndex;
+    @Override
+    public long getNextIndex() {
+        return nextIndex.get();
     }
 
-    public AtomicLong getMatchIndex() {
-        return matchIndex;
+    @Override
+    public long getMatchIndex() {
+        return matchIndex.get();
     }
 
     @Override
