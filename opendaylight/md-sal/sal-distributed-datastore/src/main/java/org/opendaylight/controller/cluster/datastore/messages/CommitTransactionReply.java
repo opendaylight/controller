@@ -14,8 +14,13 @@ public class CommitTransactionReply implements SerializableMessage {
     public static final Class<ThreePhaseCommitCohortMessages.CommitTransactionReply> SERIALIZABLE_CLASS =
             ThreePhaseCommitCohortMessages.CommitTransactionReply.class;
 
+    private static final Object SERIALIZED_INSTANCE =
+            ThreePhaseCommitCohortMessages.CommitTransactionReply.newBuilder().build();
+
+    public static final CommitTransactionReply INSTANCE = new CommitTransactionReply();
+
     @Override
     public Object toSerializable() {
-        return ThreePhaseCommitCohortMessages.CommitTransactionReply.newBuilder().build();
+        return SERIALIZED_INSTANCE;
     }
 }

@@ -8,36 +8,54 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
 import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec.Decoded;
 import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec.Encoded;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
-public class MergeData extends ModifyData{
+public class MergeData extends ModifyData implements VersionedSerializableMessage {
+    private static final long serialVersionUID = 1L;
 
-    public static final Class<ShardTransactionMessages.MergeData> SERIALIZABLE_CLASS =
-            ShardTransactionMessages.MergeData.class;
+    public static final Class<MergeData> SERIALIZABLE_CLASS = MergeData.class;
 
-    public MergeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data,
-        SchemaContext context) {
-        super(path, data, context);
+    public MergeData() {
+    }
+
+    public MergeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
+        super(path, data);
     }
 
     @Override
-    public Object toSerializable() {
-        Encoded encoded = new NormalizedNodeToNodeCodec(schemaContext).encode(path, data);
-        return ShardTransactionMessages.MergeData.newBuilder()
-            .setInstanceIdentifierPathArguments(encoded.getEncodedPath())
-            .setNormalizedNode(encoded.getEncodedNode().getNormalizedNode()).build();
+    public Object toSerializable(short toVersion) {
+        if(toVersion >= DataStoreVersions.LITHIUM_VERSION) {
+            setVersion(toVersion);
+            return this;
+        } else {
+            // To base or R1 Helium version
+            Encoded encoded = new NormalizedNodeToNodeCodec(null).encode(getPath(), getData());
+            return ShardTransactionMessages.MergeData.newBuilder()
+                    .setInstanceIdentifierPathArguments(encoded.getEncodedPath())
+                    .setNormalizedNode(encoded.getEncodedNode().getNormalizedNode()).build();
+        }
     }
 
-    public static MergeData fromSerializable(Object serializable, SchemaContext schemaContext){
-        ShardTransactionMessages.MergeData o = (ShardTransactionMessages.MergeData) serializable;
-        Decoded decoded = new NormalizedNodeToNodeCodec(schemaContext).decode(
-                o.getInstanceIdentifierPathArguments(), o.getNormalizedNode());
-        return new MergeData(decoded.getDecodedPath(), decoded.getDecodedNode(), schemaContext);
+    public static MergeData fromSerializable(Object serializable){
+        if(serializable instanceof MergeData) {
+            return (MergeData) serializable;
+        } else {
+            // From base or R1 Helium version
+            ShardTransactionMessages.MergeData o = (ShardTransactionMessages.MergeData) serializable;
+            Decoded decoded = new NormalizedNodeToNodeCodec(null).decode(
+                    o.getInstanceIdentifierPathArguments(), o.getNormalizedNode());
+            return new MergeData(decoded.getDecodedPath(), decoded.getDecodedNode());
+        }
+    }
+
+    public static boolean isSerializedType(Object message) {
+        return SERIALIZABLE_CLASS.isAssignableFrom(message.getClass()) ||
+               message instanceof ShardTransactionMessages.MergeData;
     }
 }

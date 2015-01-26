@@ -14,8 +14,13 @@ public class AbortTransactionReply implements SerializableMessage {
     public static final Class<ThreePhaseCommitCohortMessages.AbortTransactionReply> SERIALIZABLE_CLASS =
             ThreePhaseCommitCohortMessages.AbortTransactionReply.class;
 
+    private static final Object SERIALIZED_INSTANCE =
+            ThreePhaseCommitCohortMessages.AbortTransactionReply.newBuilder().build();
+
+    public static final AbortTransactionReply INSTANCE = new AbortTransactionReply();
+
     @Override
     public Object toSerializable() {
-        return ThreePhaseCommitCohortMessages.AbortTransactionReply.newBuilder().build();
+        return SERIALIZED_INSTANCE;
     }
 }
