@@ -18,29 +18,28 @@ import com.codahale.metrics.MetricRegistry;
  * The consumers of this class will only be interested in {@code MetricsRegistry}
  * where metrics for that consumer gets stored.
  */
-public class MetricsReporter implements AutoCloseable{
+public class MetricsReporter implements AutoCloseable {
 
-    private final MetricRegistry METRICS_REGISTRY = new MetricRegistry();
-    private final String DOMAIN = "org.opendaylight.controller.actor.metric";
+    private static final MetricRegistry METRICS_REGISTRY = new MetricRegistry();
+    private static final String DOMAIN = "org.opendaylight.controller.actor.metric";
+    private static final MetricsReporter INSTANCE = new MetricsReporter();
 
-    public final JmxReporter jmxReporter = JmxReporter.forRegistry(METRICS_REGISTRY).inDomain(DOMAIN).build();
+    private final JmxReporter jmxReporter = JmxReporter.forRegistry(METRICS_REGISTRY).inDomain(DOMAIN).build();
 
-    private static MetricsReporter inst = new MetricsReporter();
-
-    private MetricsReporter(){
+    private MetricsReporter() {
         jmxReporter.start();
     }
 
-    public static MetricsReporter getInstance(){
-        return inst;
+    public static MetricsReporter getInstance() {
+        return INSTANCE;
     }
 
-    public MetricRegistry getMetricsRegistry(){
+    public MetricRegistry getMetricsRegistry() {
         return METRICS_REGISTRY;
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         jmxReporter.close();
     }
 }
