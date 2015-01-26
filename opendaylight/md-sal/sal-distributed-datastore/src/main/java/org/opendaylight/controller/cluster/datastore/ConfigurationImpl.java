@@ -286,7 +286,7 @@ public class ConfigurationImpl implements Configuration {
             if(ModuleShardStrategy.NAME.equals(shardStrategy)){
                 this.shardStrategy = new ModuleShardStrategy(name, ConfigurationImpl.this);
             } else {
-                this.shardStrategy = new DefaultShardStrategy();
+                this.shardStrategy = DefaultShardStrategy.getInstance();
             }
         }
 
