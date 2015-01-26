@@ -12,6 +12,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
+import com.google.common.collect.ImmutableMap;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigObject;
@@ -46,6 +47,7 @@ public class ConfigurationImpl implements Configuration {
     // key = shardName, value = list of replicaNames (replicaNames are the same as memberNames)
     private final Map<String, List<String>> shardReplicaNames = new HashMap<>();
 
+    private final Map<String, String> namespaceToModuleName;
 
     public ConfigurationImpl(final String moduleShardsConfigPath,
 
@@ -78,6 +80,16 @@ public class ConfigurationImpl implements Configuration {
 
         this.moduleShards = readModuleShards(moduleShardsConfig);
         this.modules = readModules(modulesConfig);
+
+        namespaceToModuleName = createNamespaceToModuleName(modules);
+    }
+
+    private static Map<String, String> createNamespaceToModuleName(Iterable<Module> modules) {
+        final com.google.common.collect.ImmutableMap.Builder<String, String> b = ImmutableMap.builder();
+        for (Module m : modules) {
+            b.put(m.getNameSpace(), m.getName());
+        }
+        return b.build();
     }
 
     @Override public List<String> getMemberShardNames(final String memberName){
@@ -105,19 +117,14 @@ public class ConfigurationImpl implements Configuration {
 
     }
 
-    @Override public Optional<String> getModuleNameFromNameSpace(final String nameSpace) {
-
+    @Override
+    public Optional<String> getModuleNameFromNameSpace(final String nameSpace) {
         Preconditions.checkNotNull(nameSpace, "nameSpace should not be null");
-
-        for(Module m : modules){
-            if(m.getNameSpace().equals(nameSpace)){
-                return Optional.of(m.getName());
-            }
-        }
-        return Optional.absent();
+        return Optional.fromNullable(namespaceToModuleName.get(nameSpace));
     }
 
     @Override public Map<String, ShardStrategy> getModuleNameToShardStrategyMap() {
+        // FIXME: can be constant view of modules
         Map<String, ShardStrategy> map = new HashMap<>();
         for(Module m : modules){
             map.put(m.getName(), m.getShardStrategy());
@@ -129,6 +136,7 @@ public class ConfigurationImpl implements Configuration {
 
         Preconditions.checkNotNull(moduleName, "moduleName should not be null");
 
+        // FIXME: can be constant view of moduleShards
         for(ModuleShard m : moduleShards){
             if(m.getModuleName().equals(moduleName)){
                 List<String> l = new ArrayList<>();
