@@ -9,14 +9,14 @@
 package org.opendaylight.controller.cluster.datastore.node.utils.serialization;
 
 import com.google.common.base.Preconditions;
-import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public enum ValueType {
     SHORT_TYPE,
@@ -32,30 +32,34 @@ public enum ValueType {
     BIG_DECIMAL_TYPE,
     BINARY_TYPE;
 
-    private static Map<Class<?>, ValueType> types = new HashMap<>();
+    private static final Map<Class<?>, ValueType> TYPES;
 
     static {
-        types.put(String.class, STRING_TYPE);
-        types.put(Byte.class, BYTE_TYPE);
-        types.put(Integer.class, INT_TYPE);
-        types.put(Long.class, LONG_TYPE);
-        types.put(Boolean.class, BOOL_TYPE);
-        types.put(QName.class, QNAME_TYPE);
-        types.put(Set.class, BITS_TYPE);
-        types.put(YangInstanceIdentifier.class, YANG_IDENTIFIER_TYPE);
-        types.put(Short.class,SHORT_TYPE);
-        types.put(BigInteger.class, BIG_INTEGER_TYPE);
-        types.put(BigDecimal.class, BIG_DECIMAL_TYPE);
-        types.put(byte[].class, BINARY_TYPE);
+        final Builder<Class<?>, ValueType> b = ImmutableMap.builder();
+
+        b.put(String.class, STRING_TYPE);
+        b.put(Byte.class, BYTE_TYPE);
+        b.put(Integer.class, INT_TYPE);
+        b.put(Long.class, LONG_TYPE);
+        b.put(Boolean.class, BOOL_TYPE);
+        b.put(QName.class, QNAME_TYPE);
+        b.put(YangInstanceIdentifier.class, YANG_IDENTIFIER_TYPE);
+        b.put(Short.class,SHORT_TYPE);
+        b.put(BigInteger.class, BIG_INTEGER_TYPE);
+        b.put(BigDecimal.class, BIG_DECIMAL_TYPE);
+        b.put(byte[].class, BINARY_TYPE);
+
+        TYPES = b.build();
     }
 
-    public static final ValueType getSerializableType(Object node){
+    public static final ValueType getSerializableType(Object node) {
         Preconditions.checkNotNull(node, "node should not be null");
 
-        ValueType type = types.get(node.getClass());
-        if(type != null) {
+        final ValueType type = TYPES.get(node.getClass());
+        if (type != null) {
             return type;
-        } else if(node instanceof Set){
+        }
+        if (node instanceof Set) {
             return BITS_TYPE;
         }
 
