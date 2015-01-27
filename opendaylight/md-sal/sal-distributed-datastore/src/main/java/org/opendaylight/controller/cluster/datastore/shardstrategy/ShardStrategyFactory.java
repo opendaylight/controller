@@ -36,7 +36,7 @@ public class ShardStrategyFactory {
         String moduleName = getModuleName(path);
         ShardStrategy shardStrategy = moduleNameToStrategyMap.get(moduleName);
         if (shardStrategy == null) {
-            return new DefaultShardStrategy();
+            return DefaultShardStrategy.getInstance();
         }
 
         return shardStrategy;

@@ -16,13 +16,21 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
  *   The default shard stores data for all modules for which a specific set of shards has not been configured
  * </p>
  */
-public class DefaultShardStrategy implements ShardStrategy{
+public final class DefaultShardStrategy implements ShardStrategy {
+    public static final String NAME = "default";
+    public static final String DEFAULT_SHARD = "default";
+    private static final DefaultShardStrategy INSTANCE = new DefaultShardStrategy();
 
-  public static final String NAME = "default";
-  public static final String DEFAULT_SHARD = "default";
+    private DefaultShardStrategy() {
+        // Hidden to force a singleton instnace
+    }
 
-  @Override
-  public String findShard(YangInstanceIdentifier path) {
-    return DEFAULT_SHARD;
-  }
+    public static DefaultShardStrategy getInstance() {
+        return INSTANCE;
+    }
+
+    @Override
+    public String findShard(YangInstanceIdentifier path) {
+        return DEFAULT_SHARD;
+    }
 }

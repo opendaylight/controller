@@ -12,6 +12,10 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ListMultimap;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigObject;
@@ -19,7 +23,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,6 +49,10 @@ public class ConfigurationImpl implements Configuration {
     // key = shardName, value = list of replicaNames (replicaNames are the same as memberNames)
     private final Map<String, List<String>> shardReplicaNames = new HashMap<>();
 
+    private final ListMultimap<String, String> moduleNameToShardName;
+    private final Map<String, ShardStrategy> moduleNameToStrategy;
+    private final Map<String, String> namespaceToModuleName;
+    private final Set<String> allShardNames;
 
     public ConfigurationImpl(final String moduleShardsConfigPath,
 
@@ -78,6 +85,49 @@ public class ConfigurationImpl implements Configuration {
 
         this.moduleShards = readModuleShards(moduleShardsConfig);
         this.modules = readModules(modulesConfig);
+
+        this.allShardNames = createAllShardNames(moduleShards);
+        this.moduleNameToShardName = createModuleNameToShardName(moduleShards);
+        this.moduleNameToStrategy = createModuleNameToStrategy(modules);
+        this.namespaceToModuleName = createNamespaceToModuleName(modules);
+    }
+
+    private static Set<String> createAllShardNames(Iterable<ModuleShard> moduleShards) {
+        final com.google.common.collect.ImmutableSet.Builder<String> b = ImmutableSet.builder();
+        for(ModuleShard ms : moduleShards){
+            for(Shard s : ms.getShards()) {
+                b.add(s.getName());
+            }
+        }
+        return b.build();
+    }
+
+    private static Map<String, ShardStrategy> createModuleNameToStrategy(Iterable<Module> modules) {
+        final com.google.common.collect.ImmutableMap.Builder<String, ShardStrategy> b = ImmutableMap.builder();
+        for (Module m : modules) {
+            b.put(m.getName(), m.getShardStrategy());
+        }
+        return b.build();
+    }
+
+    private static Map<String, String> createNamespaceToModuleName(Iterable<Module> modules) {
+        final com.google.common.collect.ImmutableMap.Builder<String, String> b = ImmutableMap.builder();
+        for (Module m : modules) {
+            b.put(m.getNameSpace(), m.getName());
+        }
+        return b.build();
+    }
+
+    private static ListMultimap<String, String> createModuleNameToShardName(Iterable<ModuleShard> moduleShards) {
+        final com.google.common.collect.ImmutableListMultimap.Builder<String, String> b = ImmutableListMultimap.builder();
+
+        for (ModuleShard m : moduleShards) {
+            for (Shard s : m.getShards()) {
+                b.put(m.getModuleName(), s.getName());
+            }
+        }
+
+        return b.build();
     }
 
     @Override public List<String> getMemberShardNames(final String memberName){
@@ -105,41 +155,21 @@ public class ConfigurationImpl implements Configuration {
 
     }
 
-    @Override public Optional<String> getModuleNameFromNameSpace(final String nameSpace) {
-
+    @Override
+    public Optional<String> getModuleNameFromNameSpace(final String nameSpace) {
         Preconditions.checkNotNull(nameSpace, "nameSpace should not be null");
-
-        for(Module m : modules){
-            if(m.getNameSpace().equals(nameSpace)){
-                return Optional.of(m.getName());
-            }
-        }
-        return Optional.absent();
+        return Optional.fromNullable(namespaceToModuleName.get(nameSpace));
     }
 
-    @Override public Map<String, ShardStrategy> getModuleNameToShardStrategyMap() {
-        Map<String, ShardStrategy> map = new HashMap<>();
-        for(Module m : modules){
-            map.put(m.getName(), m.getShardStrategy());
-        }
-        return map;
+    @Override
+    public Map<String, ShardStrategy> getModuleNameToShardStrategyMap() {
+        return moduleNameToStrategy;
     }
 
-    @Override public List<String> getShardNamesFromModuleName(final String moduleName) {
-
+    @Override
+    public List<String> getShardNamesFromModuleName(final String moduleName) {
         Preconditions.checkNotNull(moduleName, "moduleName should not be null");
-
-        for(ModuleShard m : moduleShards){
-            if(m.getModuleName().equals(moduleName)){
-                List<String> l = new ArrayList<>();
-                for(Shard s : m.getShards()){
-                    l.add(s.getName());
-                }
-                return l;
-            }
-        }
-
-        return Collections.emptyList();
+        return moduleNameToShardName.get(moduleName);
     }
 
     @Override public List<String> getMembersFromShardName(final String shardName) {
@@ -163,17 +193,10 @@ public class ConfigurationImpl implements Configuration {
         return Collections.emptyList();
     }
 
-    @Override public Set<String> getAllShardNames() {
-        Set<String> shardNames = new LinkedHashSet<>();
-        for(ModuleShard ms : moduleShards){
-            for(Shard s : ms.getShards()) {
-                shardNames.add(s.getName());
-            }
-        }
-        return shardNames;
+    @Override
+    public Set<String> getAllShardNames() {
+        return allShardNames;
     }
-
-
 
     private List<Module> readModules(final Config modulesConfig) {
         List<? extends ConfigObject> modulesConfigObjectList =
@@ -214,7 +237,6 @@ public class ConfigurationImpl implements Configuration {
 
         return b.build();
     }
-
 
     private static class ModuleShard {
         private final String moduleName;
@@ -264,7 +286,7 @@ public class ConfigurationImpl implements Configuration {
             if(ModuleShardStrategy.NAME.equals(shardStrategy)){
                 this.shardStrategy = new ModuleShardStrategy(name, ConfigurationImpl.this);
             } else {
-                this.shardStrategy = new DefaultShardStrategy();
+                this.shardStrategy = DefaultShardStrategy.getInstance();
             }
         }
 

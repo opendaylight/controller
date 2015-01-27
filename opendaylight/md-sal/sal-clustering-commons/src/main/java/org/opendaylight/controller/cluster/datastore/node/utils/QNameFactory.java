@@ -19,11 +19,12 @@ public class QNameFactory {
 
     private static final int MAX_QNAME_CACHE_SIZE = 10000;
 
-    private static LoadingCache<String, QName> cache = CacheBuilder.newBuilder()
+    private static final LoadingCache<String, QName> CACHE = CacheBuilder.newBuilder()
         .maximumSize(MAX_QNAME_CACHE_SIZE)
         .softValues()
         .build(
             new CacheLoader<String, QName>() {
+                @Override
                 public QName load(String key) {
                     return QName.create(key);
                 }
@@ -32,6 +33,6 @@ public class QNameFactory {
 
 
     public static QName create(String name){
-        return cache.getUnchecked(name);
+        return CACHE.getUnchecked(name);
     }
 }
