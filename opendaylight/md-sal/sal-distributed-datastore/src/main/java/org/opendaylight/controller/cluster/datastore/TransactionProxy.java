@@ -901,7 +901,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
                     } else {
                         // Throwing an exception here will fail the Future.
-                        throw new IllegalArgumentException(String.format("Invalid reply type {}",
+                        throw new IllegalArgumentException(String.format("Invalid reply type %s",
                                 serializedReadyReply.getClass()));
                     }
                 }
