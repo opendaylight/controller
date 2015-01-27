@@ -60,17 +60,16 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
             final MediaType mediaType, final MultivaluedMap<String, Object> httpHeaders, final OutputStream entityStream)
                     throws IOException, WebApplicationException {
         NormalizedNode<?, ?> data = t.getData();
-        InstanceIdentifierContext context = t.getInstanceIdentifierContext();
-        DataSchemaNode schema = context.getSchemaNode();
+        final InstanceIdentifierContext context = t.getInstanceIdentifierContext();
+        final DataSchemaNode schema = context.getSchemaNode();
         SchemaPath path = context.getSchemaNode().getPath();
-        OutputStreamWriter outputWriter = new OutputStreamWriter(entityStream, Charsets.UTF_8);
+        final OutputStreamWriter outputWriter = new OutputStreamWriter(entityStream, Charsets.UTF_8);
         if (data == null) {
             throw new RestconfDocumentedException(Response.Status.NOT_FOUND);
         }
 
         boolean isDataRoot = false;
         URI initialNs = null;
-        outputWriter.write('{');
         if (SchemaPath.ROOT.equals(path)) {
             isDataRoot = true;
         } else {
@@ -80,8 +79,8 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
         if(!schema.isAugmenting() && !(schema instanceof SchemaContext)) {
             initialNs = schema.getQName().getNamespace();
         }
-        NormalizedNodeStreamWriter jsonWriter = JSONNormalizedNodeStreamWriter.create(context.getSchemaContext(),path,initialNs,outputWriter);
-        NormalizedNodeWriter nnWriter = NormalizedNodeWriter.forStreamWriter(jsonWriter);
+        final NormalizedNodeStreamWriter jsonWriter = JSONNormalizedNodeStreamWriter.create(context.getSchemaContext(),path,initialNs,outputWriter);
+        final NormalizedNodeWriter nnWriter = NormalizedNodeWriter.forStreamWriter(jsonWriter);
         if(isDataRoot) {
             writeDataRoot(outputWriter,nnWriter,(ContainerNode) data);
         } else {
@@ -91,14 +90,13 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
             nnWriter.write(data);
         }
         nnWriter.flush();
-        outputWriter.write('}');
         outputWriter.flush();
     }
 
-    private void writeDataRoot(OutputStreamWriter outputWriter, NormalizedNodeWriter nnWriter, ContainerNode data) throws IOException {
-        Iterator<DataContainerChild<? extends PathArgument, ?>> iterator = data.getValue().iterator();
+    private void writeDataRoot(final OutputStreamWriter outputWriter, final NormalizedNodeWriter nnWriter, final ContainerNode data) throws IOException {
+        final Iterator<DataContainerChild<? extends PathArgument, ?>> iterator = data.getValue().iterator();
         while(iterator.hasNext()) {
-            DataContainerChild<? extends PathArgument, ?> child = iterator.next();
+            final DataContainerChild<? extends PathArgument, ?> child = iterator.next();
             nnWriter.write(child);
             nnWriter.flush();
         }
