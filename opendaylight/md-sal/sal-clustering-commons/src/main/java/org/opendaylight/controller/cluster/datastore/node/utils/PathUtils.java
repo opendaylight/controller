@@ -10,15 +10,16 @@
 
 package org.opendaylight.controller.cluster.datastore.node.utils;
 
-import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-
+import com.google.common.base.Splitter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public class PathUtils {
+    private static final Splitter SLASH_SPLITTER = Splitter.on('/').omitEmptyStrings();
 
     /**
      * Given a YangInstanceIdentifier return a serialized version of the same
@@ -70,13 +71,9 @@ public class PathUtils {
      * @return
      */
     public static YangInstanceIdentifier toYangInstanceIdentifier(String path){
-        String[] segments = path.split("/");
-
         List<YangInstanceIdentifier.PathArgument> pathArguments = new ArrayList<>();
-        for (String segment : segments) {
-            if (!"".equals(segment)) {
-                pathArguments.add(NodeIdentifierFactory.getArgument(segment));
-            }
+        for (String segment : SLASH_SPLITTER.split(path)) {
+            pathArguments.add(NodeIdentifierFactory.getArgument(segment));
         }
         return YangInstanceIdentifier.create(pathArguments);
     }
