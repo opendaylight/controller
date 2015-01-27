@@ -36,7 +36,7 @@ public final class SerializationUtils {
             NormalizedNodeWriter.forStreamWriter(streamWriter).write(node);
             streamWriter.writeYangInstanceIdentifier(path);
         } catch (IOException e) {
-            throw new IllegalArgumentException(String.format("Error serializing path {} and Node {}",
+            throw new IllegalArgumentException(String.format("Error serializing path %s and Node %s",
                     path, node), e);
         }
     }
@@ -60,7 +60,7 @@ public final class SerializationUtils {
                 NormalizedNodeWriter.forStreamWriter(streamWriter).write(node);
             }
         } catch (IOException e) {
-            throw new IllegalArgumentException(String.format("Error serializing NormalizedNode {}",
+            throw new IllegalArgumentException(String.format("Error serializing NormalizedNode %s",
                     node), e);
         }
     }

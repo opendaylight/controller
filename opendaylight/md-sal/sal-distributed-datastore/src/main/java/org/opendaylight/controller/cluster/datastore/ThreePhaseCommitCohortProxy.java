@@ -15,6 +15,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import java.util.Collections;
+import java.util.List;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransaction;
@@ -27,8 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
 import scala.runtime.AbstractFunction1;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * ThreePhaseCommitCohortProxy represents a set of remote cohort proxies
@@ -133,7 +133,7 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
                     } else {
                         LOG.error("Unexpected response type {}", response.getClass());
                         returnFuture.setException(new IllegalArgumentException(
-                                String.format("Unexpected response type {}", response.getClass())));
+                                String.format("Unexpected response type %s", response.getClass())));
                         return;
                     }
                 }
@@ -239,7 +239,7 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
                     for(Object response: responses) {
                         if(!response.getClass().equals(expectedResponseClass)) {
                             exceptionToPropagate = new IllegalArgumentException(
-                                    String.format("Unexpected response type {}",
+                                    String.format("Unexpected response type %s",
                                             response.getClass()));
                             break;
                         }
