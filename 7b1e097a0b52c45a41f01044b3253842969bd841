@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_29edad8b",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-01-27T21:50:05Z",
+      "side": 1,
+      "message": "I am not sure how to read this. Please make sure your use of capital \"MAY\" and similar follows RFC 2119.",
+      "revId": "7b1e097a0b52c45a41f01044b3253842969bd841",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_09ea3175",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-01-27T21:50:05Z",
+      "side": 1,
+      "message": "\"A data change event may be triggered spuriously, e.g. such that data before and after compare as equal. Implementations of this interface are expected to recover from such events. Event producers are expected to exert reasonable effort to suppress such events.\"",
+      "revId": "7b1e097a0b52c45a41f01044b3253842969bd841",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_e9fee537",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStoreDataChangePublisher.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-01-27T21:50:05Z",
+      "side": 1,
+      "message": "missing class javadoc",
+      "revId": "7b1e097a0b52c45a41f01044b3253842969bd841",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_09a1d146",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStoreDataChangePublisher.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-01-27T21:50:05Z",
+      "side": 1,
+      "message": "@Nonnull annotations as appropriate",
+      "revId": "7b1e097a0b52c45a41f01044b3253842969bd841",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
