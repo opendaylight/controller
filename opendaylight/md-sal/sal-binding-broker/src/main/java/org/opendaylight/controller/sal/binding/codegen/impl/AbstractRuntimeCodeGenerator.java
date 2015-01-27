@@ -9,24 +9,23 @@ package org.opendaylight.controller.sal.binding.codegen.impl;
 
 import com.google.common.base.Supplier;
 import com.google.common.collect.Iterables;
+import java.util.Map;
+import java.util.WeakHashMap;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtMethod;
 import javassist.NotFoundException;
+import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcRouter;
 import org.opendaylight.controller.sal.binding.codegen.RpcIsNotRoutedException;
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory;
 import org.opendaylight.yangtools.sal.binding.generator.util.JavassistUtils;
+import org.opendaylight.yangtools.util.ClassLoaderUtils;
 import org.opendaylight.yangtools.yang.binding.BindingMapping;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.opendaylight.yangtools.yang.binding.annotations.RoutingContext;
-import org.opendaylight.yangtools.yang.binding.util.ClassLoaderUtils;
-
-import javax.annotation.concurrent.GuardedBy;
-import java.util.Map;
-import java.util.WeakHashMap;
 
 abstract class AbstractRuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.codegen.RuntimeCodeGenerator, NotificationInvokerFactory {
     @GuardedBy("this")
@@ -79,7 +78,7 @@ abstract class AbstractRuntimeCodeGenerator implements org.opendaylight.controll
                      */
                     Thread.currentThread().getContextClassLoader().loadClass(routingPair.getInputType().getName());
                 } else {
-                    throw new RpcIsNotRoutedException("RPC " + method.getName() + " from "+ iface.getName() +" is not routed");
+                    throw new RpcIsNotRoutedException(String.format("RPC %s from %s is not routed", method.getName(), iface.getName()));
                 }
             }
         }
@@ -164,7 +163,7 @@ abstract class AbstractRuntimeCodeGenerator implements org.opendaylight.controll
                 try {
                     return getRpcMetadata(utils.asCtClass(serviceType));
                 } catch (ClassNotFoundException | NotFoundException e) {
-                    throw new IllegalStateException(String.format("Failed to load metadata for class {}", serviceType), e);
+                    throw new IllegalStateException(String.format("Failed to load metadata for class %s", serviceType), e);
                 }
             }
         });
