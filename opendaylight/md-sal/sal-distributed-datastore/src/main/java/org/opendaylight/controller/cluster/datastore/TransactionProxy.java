@@ -21,10 +21,13 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -531,7 +534,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
          * The list of transaction operations to execute once the CreateTransaction completes.
          */
         @GuardedBy("txOperationsOnComplete")
-        private final List<TransactionOperation> txOperationsOnComplete = Lists.newArrayList();
+        private final BlockingQueue<TransactionOperation> txOperationsOnComplete = new LinkedBlockingQueue<>();
 
         /**
          * The TransactionContext resulting from the CreateTransaction reply.
@@ -717,11 +720,16 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                     localTransactionContext = new NoOpTransactionContext(exception, identifier, operationLimiter);
                 }
 
-                for(TransactionOperation oper: txOperationsOnComplete) {
-                    oper.invoke(localTransactionContext);
-                }
+                ArrayList<TransactionOperation> batch = new ArrayList<>();
+                while (txOperationsOnComplete.drainTo(batch) > 0) {
+                    for (TransactionOperation oper : batch) {
 
-                txOperationsOnComplete.clear();
+                        // invoke could potentially modify
+                        // txOperationsOnComplete
+                        oper.invoke(localTransactionContext);
+                    }
+                    batch.clear();
+                }
 
                 // We're done invoking the TransactionOperations so we can now publish the
                 // TransactionContext.
