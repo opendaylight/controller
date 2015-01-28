@@ -21,6 +21,8 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -689,44 +691,53 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                 }
             }
 
-            // Create the TransactionContext from the response or failure and execute delayed
-            // TransactionOperations. This entire section is done atomically (ie synchronized) with
-            // respect to #addTxOperationOnComplete to handle timing issues and ensure no
-            // TransactionOperation is missed and that they are processed in the order they occurred.
-            synchronized(txOperationsOnComplete) {
-                // Store the new TransactionContext locally until we've completed invoking the
-                // TransactionOperations. This avoids thread timing issues which could cause
-                // out-of-order TransactionOperations. Eg, on a modification operation, if the
-                // TransactionContext is non-null, then we directly call the TransactionContext.
-                // However, at the same time, the code may be executing the cached
-                // TransactionOperations. So to avoid thus timing, we don't publish the
-                // TransactionContext until after we've executed all cached TransactionOperations.
-                TransactionContext localTransactionContext;
-                if(failure != null) {
-                    LOG.debug("Tx {} Creating NoOpTransaction because of error: {}", identifier,
+            do {
+                final Collection<TransactionOperation> batch;
+                final TransactionContext localTransactionContext;
+
+                // Create the TransactionContext from the response or failure and execute delayed
+                // TransactionOperations. This entire section is done atomically (ie synchronized) with
+                // respect to #addTxOperationOnComplete to handle timing issues and ensure no
+                // TransactionOperation is missed and that they are processed in the order they occurred.
+                synchronized(txOperationsOnComplete) {
+                    // Store the new TransactionContext locally until we've completed invoking the
+                    // TransactionOperations. This avoids thread timing issues which could cause
+                    // out-of-order TransactionOperations. Eg, on a modification operation, if the
+                    // TransactionContext is non-null, then we directly call the TransactionContext.
+                    // However, at the same time, the code may be executing the cached
+                    // TransactionOperations. So to avoid thus timing, we don't publish the
+                    // TransactionContext until after we've executed all cached TransactionOperations.
+                    if(failure != null) {
+                        LOG.debug("Tx {} Creating NoOpTransaction because of error: {}", identifier,
                             failure.getMessage());
 
-                    localTransactionContext = new NoOpTransactionContext(failure, identifier, operationLimiter);
-                } else if (response.getClass().equals(CreateTransactionReply.SERIALIZABLE_CLASS)) {
-                    localTransactionContext = createValidTransactionContext(
+                        localTransactionContext = new NoOpTransactionContext(failure, identifier, operationLimiter);
+                    } else if (response.getClass().equals(CreateTransactionReply.SERIALIZABLE_CLASS)) {
+                        localTransactionContext = createValidTransactionContext(
                             CreateTransactionReply.fromSerializable(response));
-                } else {
-                    IllegalArgumentException exception = new IllegalArgumentException(String.format(
-                        "Invalid reply type %s for CreateTransaction", response.getClass()));
+                    } else {
+                        IllegalArgumentException exception = new IllegalArgumentException(String.format(
+                            "Invalid reply type %s for CreateTransaction", response.getClass()));
 
-                    localTransactionContext = new NoOpTransactionContext(exception, identifier, operationLimiter);
+                        localTransactionContext = new NoOpTransactionContext(exception, identifier, operationLimiter);
+                    }
+
+                    batch = new ArrayList<>(txOperationsOnComplete);
+                    txOperationsOnComplete.clear();
                 }
 
-                for(TransactionOperation oper: txOperationsOnComplete) {
+                for (TransactionOperation oper : batch) {
                     oper.invoke(localTransactionContext);
                 }
 
-                txOperationsOnComplete.clear();
-
-                // We're done invoking the TransactionOperations so we can now publish the
-                // TransactionContext.
-                transactionContext = localTransactionContext;
-            }
+                synchronized (txOperationsOnComplete) {
+                    if (txOperationsOnComplete.isEmpty()) {
+                        // We're done invoking the TransactionOperations so we can now publish the
+                        // TransactionContext.
+                        transactionContext = localTransactionContext;
+                    }
+                }
+            } while (transactionContext == null);
         }
 
         private TransactionContext createValidTransactionContext(CreateTransactionReply reply) {
