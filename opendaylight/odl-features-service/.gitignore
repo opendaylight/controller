@@ -1,0 +1,14 @@
+target
+**/target
+./target
+.DSStore
+**.class
+**/target-ide/*
+.project
+.settings
+.classpath
+MANIFEST.MF
+copy_resources.sh
+*.log
+yang-gen-sal
+yang-gen-config
