@@ -8,28 +8,20 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
-import akka.actor.ActorSelection;
-import akka.dispatch.Mapper;
-import akka.dispatch.OnComplete;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.FinalizablePhantomReference;
-import com.google.common.base.FinalizableReferenceQueue;
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.SettableFuture;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+
 import javax.annotation.concurrent.GuardedBy;
+
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
@@ -57,9 +49,24 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
 import scala.concurrent.duration.FiniteDuration;
+import akka.actor.ActorSelection;
+import akka.dispatch.Mapper;
+import akka.dispatch.OnComplete;
+
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.FinalizablePhantomReference;
+import com.google.common.base.FinalizableReferenceQueue;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.SettableFuture;
 
 /**
  * TransactionProxy acts as a proxy for one or more transactions that were created on a remote shard
@@ -531,7 +538,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
          * The list of transaction operations to execute once the CreateTransaction completes.
          */
         @GuardedBy("txOperationsOnComplete")
-        private final List<TransactionOperation> txOperationsOnComplete = Lists.newArrayList();
+        private final BlockingQueue<TransactionOperation> txOperationsOnComplete = new LinkedBlockingQueue<>();
 
         /**
          * The TransactionContext resulting from the CreateTransaction reply.
@@ -717,11 +724,16 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                     localTransactionContext = new NoOpTransactionContext(exception, identifier, operationLimiter);
                 }
 
-                for(TransactionOperation oper: txOperationsOnComplete) {
-                    oper.invoke(localTransactionContext);
-                }
+                ArrayList<TransactionOperation> batch = new ArrayList<>();
+                while (txOperationsOnComplete.drainTo(batch) > 0) {
+                    for (TransactionOperation oper : batch) {
 
-                txOperationsOnComplete.clear();
+                        // invoke could potentially modify
+                        // txOperationsOnComplete
+                        oper.invoke(localTransactionContext);
+                    }
+                    batch.clear();
+                }
 
                 // We're done invoking the TransactionOperations so we can now publish the
                 // TransactionContext.
