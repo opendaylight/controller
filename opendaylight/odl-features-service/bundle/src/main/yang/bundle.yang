@@ -1,0 +1,68 @@
+/*
+ * Copyright (c) 2014 Inocybe Technologies, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
+module bundle {
+	yang-version 1;
+
+	namespace "urn:opendaylight:controller:bundle";
+    prefix bundle;
+    
+    import bundle-groupings{prefix bundle-groupings;}
+    import bundle-common{prefix bundle-common;}
+
+    contact
+      "Gabriel Robitaille-Montpetit <grmontpetit@inocybe.com>";
+
+    revision 2015-01-11 {
+        description
+            "3rd revision: Bundles Service to add / remove bundle via RESTConf";
+    }
+
+    container bundle {
+        uses bundle-groupings:bundle-fields;
+        description "The reprensentation of a bundle.";
+        config true;
+        leaf bundleServiceStatus{
+            type enumeration{
+                enum "available"{
+                    value 1;
+                    description
+                        "The bundle service is available to install / uninstall bundle.";
+                }
+                enum "unavailable"{
+                    value 2;
+                    description
+                        "The bundle service is unavailable to install / uninstall bundle.";
+                }
+            }
+        }
+        list bundle{
+            uses bundle-groupings:bundle-fields;
+        }
+    }
+
+    rpc install-bundle {
+        description "Used to install a bundle by providing its name and optional field version.";
+        input {
+          uses bundle-groupings:bundle-fields;
+        }
+        output {
+            uses bundle-groupings:operation-result;
+        }
+      }
+
+    rpc uninstall-bundle {
+        description "Used to uninstall a bundle by providing its location and optional field version.";
+        input {
+            uses bundle-groupings:bundle-fields;
+        }
+        output {
+            uses bundle-groupings:operation-result;
+        }
+    }
+}
