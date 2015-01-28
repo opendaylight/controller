@@ -70,7 +70,7 @@ public class FeatureConfigPusher {
 
     private LinkedHashSet<FeatureConfigSnapshotHolder> pushConfig(final Feature feature) throws Exception, InterruptedException {
         LinkedHashSet<FeatureConfigSnapshotHolder> configs = new LinkedHashSet<FeatureConfigSnapshotHolder>();
-        if(isInstalled(feature)) {
+        if(feature != null && isInstalled(feature)) {
             ChildAwareFeatureWrapper wrappedFeature = new ChildAwareFeatureWrapper(feature,featuresService);
             configs = wrappedFeature.getFeatureConfigSnapshotHolders();
             if(!configs.isEmpty()) {
