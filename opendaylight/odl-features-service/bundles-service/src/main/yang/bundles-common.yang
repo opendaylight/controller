@@ -1,0 +1,60 @@
+/*
+ * Copyright (c) 2014 Inocybe Technologies, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
+module bundles-common {
+    yang-version 1;
+
+    namespace "urn:opendaylight:bundles-service:bundles-common";
+    prefix "bundles-common";
+
+    description
+        "Common bundles types and definitions for bundles-service.";
+
+    revision 2015-01-11 {
+        description
+            "3rd revision: FBundles Service to add / remove bundles via RESTConf";
+    }
+
+    typedef count {
+        description 
+            "Count the number of times the
+            bundle has been installed.";
+        type int32;
+    }
+
+    typedef description {
+        description "A human-readable description for an object.";
+        type string {
+            length "1..4096";
+        }
+    }
+    
+    typedef location {
+        description 
+            "The location of the bundle ie: mvn:org.group.id/artefact.id/version";
+        type string {
+            pattern '[a-zA-Z]([a-zA-Z0-9\-_.])*';
+            length "1..256";
+        }
+    }
+
+    typedef version {
+        description 
+            "The version of the bundle ie 1.0.0-SNAPSHOT";
+        type string {
+            pattern '[a-zA-Z]([a-zA-Z0-9\-_.])*';
+            length "1..256";
+        }
+    }
+
+    typedef isInstalled {
+        description 
+            "A boolean.";
+        type boolean;
+    }
+}
