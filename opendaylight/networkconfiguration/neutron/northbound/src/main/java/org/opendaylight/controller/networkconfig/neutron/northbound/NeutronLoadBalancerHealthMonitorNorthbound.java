@@ -77,7 +77,7 @@ public class NeutronLoadBalancerHealthMonitorNorthbound {
             @QueryParam("id") String queryLoadBalancerHealthMonitorID,
             @QueryParam("tenant_id") String queryLoadBalancerHealthMonitorTenantID,
             // TODO "type" is being a property by the JSON parser.
-            @QueryParam("type") String queryLoadBalancerHealthMonitorType,
+            @QueryParam("healthmonitor_type") String queryLoadBalancerHealthMonitorType,
             @QueryParam("delay") Integer queryLoadBalancerHealthMonitorDelay,
             @QueryParam("timeout") Integer queryLoadBalancerHealthMonitorTimeout,
             @QueryParam("max_retries") Integer queryLoadBalancerHealthMonitorMaxRetries,
