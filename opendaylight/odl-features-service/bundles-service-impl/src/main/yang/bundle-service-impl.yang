@@ -1,0 +1,70 @@
+// vi: set smarttab et sw=4 tabstop=4:
+module bundle-service-impl {
+
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:bundle-service:impl";
+    prefix "bundle-service-impl";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import rpc-context { prefix rpcx; revision-date 2013-06-17; }
+    import opendaylight-md-sal-binding { prefix mdsal; revision-date 2013-10-28; }
+
+    contact
+    "Gabriel Robitaille-Montpetit <grmontpetit@inocybe.com>";
+
+    revision 2015-01-11 {
+        description
+            "3rd revision: Bundle Service to add / remove bundles via RESTConf";
+    }
+
+    // This is the definition of the service implementation as a module identity
+    identity bundle-service-impl {
+            base config:module-type;
+
+            // Specifies the prefix for generated java classes.
+            config:java-name-prefix BundleServiceImpl;
+    }
+
+    // Augments the 'configuration' choice node under modules/module.
+    augment "/config:modules/config:module/config:configuration" {
+        case bundle-service-impl {
+            when "/config:modules/config:module/config:type = 'bundle-service-impl'";
+
+            container rpc-registry {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity mdsal:binding-rpc-registry;
+                    }
+                }
+            }
+
+            container notification-service {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity mdsal:binding-notification-service;
+                    }
+                }
+            }
+
+            // Wires the data broker
+            container data-broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity mdsal:binding-async-data-broker;
+                    }
+                }
+            }
+        }      
+        }
+    }
+
+    // Augment the 'state' choice node under modules/module
+    augment "/config:modules/config:module/config:state" {
+        case bundle-service-impl {
+            when "/config:modules/config:module/config:type = 'bundle-service-impl'";
+        }
+    }
+}
