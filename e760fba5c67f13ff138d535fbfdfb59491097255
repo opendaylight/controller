@@ -1,0 +1,208 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_6f1df572",
+        "filename": "opendaylight/commons/protocol-framework/src/main/java/org/opendaylight/protocol/framework/AbstractDispatcher.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-01-28T17:44:05Z",
+      "side": 1,
+      "message": "The return statement in Javadoc should really be updated, because with this patch, the future reports completion in a different way.",
+      "revId": "e760fba5c67f13ff138d535fbfdfb59491097255",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_0f14714c",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/NetconfDevice.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 347,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-01-28T17:44:05Z",
+      "side": 1,
+      "message": "Remove commented code if not necessary",
+      "revId": "e760fba5c67f13ff138d535fbfdfb59491097255",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_2f17ed52",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/NetconfDevice.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 399,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-01-28T17:44:05Z",
+      "side": 1,
+      "message": "Revision should also be checked. There can be multiple revisions of the same model.",
+      "revId": "e760fba5c67f13ff138d535fbfdfb59491097255",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_ef08252f",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/NetconfDevice.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 402,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-01-28T17:44:05Z",
+      "side": 1,
+      "message": "Returning null could cause issues e.g. method right above could insert null into a set. If it is not possible to come to this point, an IllegalArgument exception should be thrown right here. If it is possible, the method should return Optional\u003cQName\u003e and the method above would decide what to do.",
+      "revId": "e760fba5c67f13ff138d535fbfdfb59491097255",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_8f07211c",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/listener/NetconfDeviceCapabilities.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-01-28T17:44:05Z",
+      "side": 1,
+      "message": "make final if possible.",
+      "revId": "e760fba5c67f13ff138d535fbfdfb59491097255",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_c10f3d2d",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/listener/NetconfDeviceCommunicator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-01-28T17:44:05Z",
+      "side": 1,
+      "message": "We should at least log the exception from the future here as the cause of connection failure. Otherwise the user has no way of knowing why the connection failed. ALso the exception should be passed to Netconf device and then the MD-SAL facade to store exception message in the datastore (the exception from future can be null, so replace with some generic Exception in such case)",
+      "revId": "e760fba5c67f13ff138d535fbfdfb59491097255",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_c1365de7",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/sal/NetconfDeviceTopologyAdapter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-01-28T17:44:05Z",
+      "side": 1,
+      "message": "final if possible",
+      "revId": "e760fba5c67f13ff138d535fbfdfb59491097255",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_613509d9",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/yang/netconf-node-topology.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-01-28T17:44:05Z",
+      "side": 1,
+      "message": "Ask Tony \nUpdate when statement to ENUM.",
+      "revId": "e760fba5c67f13ff138d535fbfdfb59491097255",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_214f016d",
+        "filename": "opendaylight/netconf/netconf-cli/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-01-28T17:44:05Z",
+      "side": 1,
+      "message": "Version should not be mentioned here. It should be inherrited from parent or at least use some kind of property e.g. md.sal.version defined in parent poms.",
+      "revId": "e760fba5c67f13ff138d535fbfdfb59491097255",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_41524d14",
+        "filename": "opendaylight/netconf/netconf-cli/src/main/java/org/opendaylight/controller/netconf/cli/NetconfDeviceConnectionManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-01-28T17:44:05Z",
+      "side": 1,
+      "message": "configBuilder should not be used to retrieve the address and the getter inside of it should remain package private. Either send the address along with the builder, or send the deviceId prebuilt instead of the String name.",
+      "revId": "e760fba5c67f13ff138d535fbfdfb59491097255",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_e1583934",
+        "filename": "opendaylight/netconf/netconf-client/src/main/java/org/opendaylight/controller/netconf/client/conf/NetconfClientConfigurationBuilder.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-01-28T17:44:05Z",
+      "side": 1,
+      "message": "please remove",
+      "revId": "e760fba5c67f13ff138d535fbfdfb59491097255",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_015c4524",
+        "filename": "opendaylight/netconf/netconf-testtool/src/main/java/org/opendaylight/controller/netconf/test/tool/FakeModuleBuilderCapability.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-01-28T17:44:05Z",
+      "side": 1,
+      "message": "make final if possible and try to add at least 1 line of javadoc stating what is the purpose of this class.",
+      "revId": "e760fba5c67f13ff138d535fbfdfb59491097255",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
