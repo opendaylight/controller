@@ -1,0 +1,91 @@
+module features-service-impl {
+
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:features-service:impl";
+    prefix "features-service-impl";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import rpc-context { prefix rpcx; revision-date 2013-06-17; }
+    import opendaylight-md-sal-binding { prefix mdsal; revision-date 2013-10-28; }
+
+    contact
+    "Gabriel Robitaille-Montpetit <grmontpetit@inocybe.com>";
+
+    revision 2015-01-11 {
+        description
+            "3rd revision: Features Service to add / remove features via RESTConf";
+    }
+
+    // This is the definition of the service implementation as a module identity
+    identity features-service-impl {
+            base config:module-type;
+
+            // Specifies the prefix for generated java classes.
+            config:java-name-prefix FeaturesServiceImpl;
+    }
+
+    // Augments the 'configuration' choice node under modules/module.
+    augment "/config:modules/config:module/config:configuration" {
+        case features-service-impl {
+            when "/config:modules/config:module/config:type = 'features-service-impl'";
+
+            //wires in the data-broker service 
+            container data-broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity mdsal:binding-async-data-broker;
+                    }
+                }
+            }
+            // Wires dependent services into this class - in this case the RPC registry service
+            // This sub-section register the OpendaylightCup as the Provider for the RPC calls.
+            // This section is declaring a dependency on the MD-SAL RPC registry service
+            // similiar to the databroker
+            container rpc-registry {
+                uses config:service-ref {
+                    refine type {
+                       mandatory true;
+                       config:required-identity mdsal:binding-rpc-registry;
+                    }
+                }
+            }
+            container notification-service {
+               uses config:service-ref {
+                  refine type {
+                     mandatory true;
+                     config:required-identity mdsal:binding-notification-service;
+                  }
+               }
+            }       
+        }
+    }
+
+    // Augment the 'state' choice node under modules/module
+    augment "/config:modules/config:module/config:state" {
+        case features-service-impl {
+            when "/config:modules/config:module/config:type = 'features-service-impl'";
+            
+//            leaf cups-made {
+//                type uint32;
+//            }
+//            
+//            rpcx:rpc-context-instance "clear-cups-made-rpc";
+        }
+    }
+
+//    identity clear-cups-made-rpc;
+
+//    rpc clear-cups-made  {
+//        description
+//          "JMX call to clear the cups-made counter.";
+//          
+//        input {
+//            uses rpcx:rpc-context-ref {
+//                refine context-instance {
+//                    rpcx:rpc-context-instance clear-cups-made-rpc;
+//                }
+//            }
+//        }
+//    }
+}
