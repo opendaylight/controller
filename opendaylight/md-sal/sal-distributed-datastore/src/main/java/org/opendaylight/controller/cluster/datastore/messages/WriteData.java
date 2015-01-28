@@ -55,7 +55,7 @@ public class WriteData extends ModifyData implements VersionedSerializableMessag
     }
 
     public static boolean isSerializedType(Object message) {
-        return SERIALIZABLE_CLASS.isAssignableFrom(message.getClass()) ||
+        return SERIALIZABLE_CLASS.isInstance(message) ||
                message instanceof ShardTransactionMessages.WriteData;
     }
 }
