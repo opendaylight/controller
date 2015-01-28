@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_012be530",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-01-28T21:14:19Z",
+      "side": 1,
+      "message": "AbstractTransactionContext was added later so we technically don\u0027t need this interface.  AbstractTransactionContext can be called TransactionContext.",
+      "revId": "37f0504d391efd8b7d61403759fcc22a6dd3a093",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
