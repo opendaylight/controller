@@ -74,7 +74,7 @@ public class ShardWriteTransaction extends ShardTransaction {
         } else if(MergeData.isSerializedType(message)) {
             mergeData(transaction, MergeData.fromSerializable(message), SERIALIZED_REPLY);
 
-        } else if(DeleteData.SERIALIZABLE_CLASS.equals(message.getClass())) {
+        } else if(DeleteData.isSerializedType(message)) {
             deleteData(transaction, DeleteData.fromSerializable(message), SERIALIZED_REPLY);
 
         } else if(ReadyTransaction.SERIALIZABLE_CLASS.equals(message.getClass())) {
@@ -129,9 +129,9 @@ public class ShardWriteTransaction extends ShardTransaction {
         modification.addModification(new DeleteModification(message.getPath()));
         try {
             transaction.delete(message.getPath());
-            DeleteDataReply deleteDataReply = new DeleteDataReply();
-            getSender().tell(returnSerialized ? deleteDataReply.toSerializable() : deleteDataReply,
-                getSelf());
+            DeleteDataReply deleteDataReply = DeleteDataReply.INSTANCE;
+            getSender().tell(returnSerialized ? deleteDataReply.toSerializable(message.getVersion()) :
+                deleteDataReply, getSelf());
         }catch(Exception e){
             getSender().tell(new akka.actor.Status.Failure(e), getSelf());
         }
