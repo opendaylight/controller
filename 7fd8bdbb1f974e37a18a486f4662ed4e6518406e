@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_015d25e9",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/PathArgumentTypes.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-01-28T20:58:59Z",
+      "side": 1,
+      "message": "Shouldn\u0027t \u0027%s\u0027 be \u0027{}\u0027 or does Preconditions support both? If it doesn\u0027t this can be fixed in another commit as this patch is blocking others. This precondition *should* never fail anyway.",
+      "revId": "7fd8bdbb1f974e37a18a486f4662ed4e6518406e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
