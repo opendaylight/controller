@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_afee9db2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/SerializationUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-01-28T13:39:07Z",
+      "side": 1,
+      "message": "Braces won\u0027t work with String.format. You need to use printf style formatting here.",
+      "range": {
+        "startLine": 89,
+        "startChar": 85,
+        "endLine": 89,
+        "endChar": 89
+      },
+      "revId": "e0e940ce65e9ae8845b94da03fa559c5980a2876",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
