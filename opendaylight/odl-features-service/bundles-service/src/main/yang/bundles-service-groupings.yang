@@ -1,0 +1,57 @@
+// Contents of "bundles-service-groupings"
+module bundles-service-groupings {
+    namespace "urn:opendaylight:bundles-service-groupings";
+    prefix "bundles-service-groupings";
+
+    import bundles-common{prefix bundles-common;}
+
+    revision 2015-01-11 {
+        description
+            "3rd revision: Bundles Service to add / remove bundles via RESTConf";
+    }
+
+    grouping bundle-fields {
+        description "The fields for a bundle.";
+        leaf count {
+            type bundles-common:count;
+            mandatory false;
+            description
+                "The number of time a bundle is required.";
+        }
+        leaf location {
+            type bundles-common:location;
+            mandatory true;
+            description
+                "The bundle itself.";
+        }
+        leaf version {
+            type bundles-common:version;
+            mandatory false;
+            description
+                "The version.";
+        }
+        leaf isInstalled {
+            type bundles-common:isInstalled;
+            mandatory false;
+            description
+                "The bundle is installed or not installed.";
+        }
+    }
+
+    grouping operation-result {
+        leaf success {
+            type boolean;
+            mandatory false;
+        }
+        leaf failure {
+            type boolean;
+            mandatory false;
+        }
+    }
+
+    grouping bundle-list {
+        list bundles {
+            uses bundle-fields;
+        }
+    }
+}
