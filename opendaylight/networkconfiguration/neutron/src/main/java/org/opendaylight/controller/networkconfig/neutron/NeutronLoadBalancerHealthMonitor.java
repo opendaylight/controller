@@ -28,7 +28,7 @@ import java.util.List;
  *
  * id                 uuid-str
  * tenant_id          uuid-str
- * type               String
+ * healthmonitor_type String
  * delay              Integer
  * timeout            Integer
  * max_retries        Integer
@@ -53,7 +53,7 @@ public class NeutronLoadBalancerHealthMonitor implements Serializable {
     @XmlElement (name="tenant_id")
     String loadBalancerHealthMonitorTenantID;
 
-    @XmlElement (name="type")
+    @XmlElement (name="healthmonitor_type")
     String loadBalancerHealthMonitorType;
 
     @XmlElement (name="delay")
@@ -179,7 +179,7 @@ public class NeutronLoadBalancerHealthMonitor implements Serializable {
             if (s.equals("tenant_id")) {
                 ans.setLoadBalancerHealthMonitorTenantID(this.getLoadBalancerHealthMonitorTenantID());
             }
-            if (s.equals("type")) {
+            if (s.equals("healthmonitor_type")) {
                 ans.setLoadBalancerHealthMonitorType(this.getLoadBalancerHealthMonitorType());
             }
             if (s.equals("delay")) {
