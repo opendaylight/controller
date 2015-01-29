@@ -14,7 +14,7 @@ import com.google.common.collect.Maps;
 import java.util.Date;
 import java.util.Map;
 import javax.management.openmbean.SimpleType;
-import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
+import org.opendaylight.controller.netconf.util.NetconfUtil;
 
 public class SimpleAttributeMappingStrategy extends AbstractAttributeMappingStrategy<String, SimpleType<?>> {
 
@@ -65,7 +65,7 @@ public class SimpleAttributeMappingStrategy extends AbstractAttributeMappingStra
         @Override
         public String writeObject(Object value) {
             Preconditions.checkArgument(value instanceof Date, "Attribute must be Date");
-            return Util.writeDate((Date) value);
+            return NetconfUtil.writeDate((Date) value);
         }
     }
 
