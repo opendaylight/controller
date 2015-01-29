@@ -14,7 +14,6 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.actor.UntypedActorContext;
 import akka.event.LoggingAdapter;
-
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -40,6 +39,8 @@ public class RaftActorContextImpl implements RaftActorContext {
     private final LoggingAdapter LOG;
 
     private final ConfigParams configParams;
+
+    private boolean snapshotCaptureInitiated;
 
     public RaftActorContextImpl(ActorRef actor, UntypedActorContext context,
         String id,
@@ -128,6 +129,16 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override public ConfigParams getConfigParams() {
         return configParams;
+    }
+
+    @Override
+    public void setSnapshotCaptureInitiated(boolean snapshotCaptureInitiated) {
+        this.snapshotCaptureInitiated = snapshotCaptureInitiated;
+    }
+
+    @Override
+    public boolean isSnapshotCaptureInitiated() {
+        return snapshotCaptureInitiated;
     }
 
     @Override public void addToPeers(String name, String address) {

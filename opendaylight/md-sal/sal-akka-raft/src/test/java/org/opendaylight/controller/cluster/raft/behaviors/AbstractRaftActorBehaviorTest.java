@@ -74,7 +74,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
             context.getTermInformation().update(1000, "test");
 
             AppendEntries appendEntries =
-                new AppendEntries(100, "leader-1", 0, 0, null, 101);
+                new AppendEntries(100, "leader-1", 0, 0, null, 101, -1);
 
             RaftActorBehavior behavior = createBehavior(context);
 
@@ -131,7 +131,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
                     new MockRaftActorContext.MockReplicatedLogEntry(1, 0, new MockRaftActorContext.MockPayload("zero")));
 
                 AppendEntries appendEntries =
-                    new AppendEntries(2, "leader-1", -1, 1, entries, 0);
+                    new AppendEntries(2, "leader-1", -1, 1, entries, 0, -1);
 
                 RaftActorBehavior behavior = createBehavior(context);
 
@@ -301,6 +301,39 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
         }};
     }
 
+    @Test
+    public void testFakeSnapshots() {
+        MockRaftActorContext context = new MockRaftActorContext("test", getSystem(), behaviorActor);
+        AbstractRaftActorBehavior behavior = new Leader(context);
+        context.getTermInformation().update(1, "leader");
+
+        //entry with 1 index=0 entry with replicatedToAllIndex = 0, does not do anything, returns the
+        context.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 1, 1).build());
+        context.setLastApplied(0);
+        assertEquals(-1, behavior.fakeSnapshot(0, -1));
+        assertEquals(1, context.getReplicatedLog().size());
+
+        //2 entries, lastApplied still 0, no purging.
+        context.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0,2,1).build());
+        context.setLastApplied(0);
+        assertEquals(-1, behavior.fakeSnapshot(0, -1));
+        assertEquals(2, context.getReplicatedLog().size());
+
+        //2 entries, lastApplied still 0, no purging.
+        context.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0,2,1).build());
+        context.setLastApplied(1);
+        assertEquals(0, behavior.fakeSnapshot(0, -1));
+        assertEquals(1, context.getReplicatedLog().size());
+
+        //5 entries, lastApplied =2 and replicatedIndex = 3, but since we want to keep the lastapplied, indices 0 and 1 will only get purged
+        context.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0,5,1).build());
+        context.setLastApplied(2);
+        assertEquals(1, behavior.fakeSnapshot(3, 1));
+        assertEquals(3, context.getReplicatedLog().size());
+
+
+    }
+
     protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(
         ActorRef actorRef, RaftRPC rpc) {
 
@@ -347,7 +380,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
     }
 
     protected AppendEntries createAppendEntriesWithNewerTerm() {
-        return new AppendEntries(100, "leader-1", 0, 0, null, 1);
+        return new AppendEntries(100, "leader-1", 0, 0, null, 1, -1);
     }
 
     protected AppendEntriesReply createAppendEntriesReplyWithNewerTerm() {
