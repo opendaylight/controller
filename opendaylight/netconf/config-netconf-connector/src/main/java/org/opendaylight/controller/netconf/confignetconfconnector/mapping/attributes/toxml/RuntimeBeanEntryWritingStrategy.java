@@ -11,7 +11,7 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 import com.google.common.base.Optional;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
+import org.opendaylight.controller.netconf.util.NetconfUtil;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -32,7 +32,7 @@ public class RuntimeBeanEntryWritingStrategy extends CompositeAttributeWritingSt
      */
     @Override
     public void writeElement(Element parentElement, String namespace, Object value) {
-        Util.checkType(value, Map.class);
+        NetconfUtil.checkType(value, Map.class);
 
         Element innerNode = XmlUtil.createElement(getDocument(), getKey(), Optional.<String>absent());
 
@@ -42,7 +42,7 @@ public class RuntimeBeanEntryWritingStrategy extends CompositeAttributeWritingSt
 
             // wrap runtime attributes with number assigned to current runtime
             // bean
-            Util.checkType(runtimeBeanInstanceMappingEntry.getValue(), Map.class);
+            NetconfUtil.checkType(runtimeBeanInstanceMappingEntry.getValue(), Map.class);
             Map<?, ?> innerMap = (Map<?, ?>) runtimeBeanInstanceMappingEntry.getValue();
             Element runtimeInstanceNode = XmlUtil.createElement(getDocument(), "_"
                     + runtimeBeanInstanceMappingEntry.getKey(), Optional.<String>absent());
@@ -50,7 +50,7 @@ public class RuntimeBeanEntryWritingStrategy extends CompositeAttributeWritingSt
 
             for (Entry<?, ?> innerObjectEntry : innerMap.entrySet()) {
 
-                Util.checkType(innerObjectEntry.getKey(), String.class);
+                NetconfUtil.checkType(innerObjectEntry.getKey(), String.class);
 
                 String innerKey = (String) innerObjectEntry.getKey();
                 Object innerValue = innerObjectEntry.getValue();
