@@ -37,14 +37,14 @@ module XSQL{
         case XSQL {
             when "/config:modules/config:module/config:type = 'XSQL'";
 
-			container data-broker {
+            container data-broker {
                 uses config:service-ref {
                     refine type {
                         mandatory false;
-                        config:required-identity mdsal:binding-data-broker;
+                        config:required-identity mdsal:binding-async-data-broker;
                     }
                 }
-            }         
+            }
 
             container async-data-broker {
                 uses config:service-ref {

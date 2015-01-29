@@ -1,15 +1,19 @@
 package org.opendaylight.controller.md.sal.dom.xsql;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.model.api.AugmentationSchema;
+import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
@@ -113,7 +117,7 @@ public class XSQLODLUtils {
 
     public static boolean createOpenDaylightCache(XSQLBluePrint bluePrint,Object module) {
         XSQLBluePrintNode node = new XSQLBluePrintNode(module, 0,null);
-        bluePrint.addToBluePrintCache(node);
+        bluePrint.addToBluePrintCache(node,null);
         collectODL(bluePrint, node, ((Module) module).getChildNodes(), 1);
         return true;
     }
@@ -124,21 +128,34 @@ public class XSQLODLUtils {
             return;
         }
         for (DataSchemaNode n : nodes) {
-            if (n instanceof DataNodeContainer /*|| n instanceof LeafListSchemaNode*/
-                || n instanceof ListSchemaNode) {
+            if (n instanceof DataNodeContainer /*|| n instanceof LeafListSchemaNode*/|| n instanceof ListSchemaNode) {
                 XSQLBluePrintNode bn = new XSQLBluePrintNode(n, level,parent);
-                bluePrint.addToBluePrintCache(bn);
-                parent.AddChild(bn);
+                bn = bluePrint.addToBluePrintCache(bn,parent);
+                if (n instanceof ListSchemaNode) {
+                    level++;
+                    collectODL(bluePrint, bn,((ListSchemaNode) n).getChildNodes(), level);
+                    Set<AugmentationSchema> s = ((ListSchemaNode)n).getAvailableAugmentations();
+                    if(s!=null){
+                        for(AugmentationSchema as:s){
+                            collectODL(bluePrint, bn,as.getChildNodes(), level);
+                        }
+                    }
+                    level--;
+                }else
                 if (n instanceof DataNodeContainer) {
                     level++;
-                    collectODL(bluePrint, bn,
-                        ((DataNodeContainer) n).getChildNodes(), level);
+                    collectODL(bluePrint, bn,((DataNodeContainer) n).getChildNodes(), level);
+                    if(n instanceof ContainerSchemaNode){
+                       Set<AugmentationSchema> s = ((ContainerSchemaNode)n).getAvailableAugmentations();
+                       if(s!=null){
+                           for(AugmentationSchema as:s){
+                               collectODL(bluePrint, bn,as.getChildNodes(), level);
+                           }
+                       }
+                    }
                     level--;
-                } else if (n instanceof ListSchemaNode) {
-                    level++;
-                    collectODL(bluePrint, bn,
-                        ((ListSchemaNode) n).getChildNodes(), level);
-                    level--;
+                } else {
+                    XSQLAdapter.log("Missed the following type:"+n.getClass().getName());
                 }
             } else {
                 if (parent != null) {
@@ -189,7 +206,7 @@ public class XSQLODLUtils {
             Field f = findField(c, name);
             return f.get(o);
         } catch (Exception err) {
-            XSQLAdapter.log(err);
+            //XSQLAdapter.log(err);
         }
         return null;
     }
@@ -205,6 +222,21 @@ public class XSQLODLUtils {
 
     public static Map<?, ?> getChildren(Object o) {
         return (Map<?, ?>) get(o, "children");
+    }
+
+    public static Collection<?> getChildrenCollection(Object o) {
+        Object value = get(o, "children");
+        if(value==null)
+            return new ArrayList();
+        if(value instanceof Map)
+            return ((Map<?,?>)value).values();
+        else
+        if(value instanceof Collection){
+            return (Collection<?>)value;
+        }else{
+            XSQLAdapter.log("Unknown Child Value Type="+value.getClass().getName());
+            return new ArrayList();
+        }
     }
 
     public static Object getValue(Object o) {
