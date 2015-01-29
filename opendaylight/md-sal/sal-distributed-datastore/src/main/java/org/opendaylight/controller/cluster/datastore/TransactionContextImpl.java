@@ -12,7 +12,6 @@ import akka.dispatch.Mapper;
 import akka.dispatch.OnComplete;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.List;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
@@ -30,7 +29,6 @@ import org.opendaylight.controller.cluster.datastore.messages.VersionedSerializa
 import org.opendaylight.controller.cluster.datastore.messages.WriteData;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.yangtools.util.concurrent.MappingCheckedFuture;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -179,12 +177,10 @@ final class TransactionContextImpl extends AbstractTransactionContext {
     }
 
     @Override
-    public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readData(
-            final YangInstanceIdentifier path) {
+    public void readData(
+            final YangInstanceIdentifier path,final SettableFuture<Optional<NormalizedNode<?, ?>>> returnFuture ) {
 
         LOG.debug("Tx {} readData called path = {}", identifier, path);
-
-        final SettableFuture<Optional<NormalizedNode<?, ?>>> returnFuture = SettableFuture.create();
 
         // If there were any previous recorded put/merge/delete operation reply Futures then we
         // must wait for them to successfully complete. This is necessary to honor the read
@@ -223,7 +219,6 @@ final class TransactionContextImpl extends AbstractTransactionContext {
             combinedFutures.onComplete(onComplete, actorContext.getActorSystem().dispatcher());
         }
 
-        return MappingCheckedFuture.create(returnFuture, ReadFailedException.MAPPER);
     }
 
     private void finishReadData(final YangInstanceIdentifier path,
@@ -264,12 +259,9 @@ final class TransactionContextImpl extends AbstractTransactionContext {
     }
 
     @Override
-    public CheckedFuture<Boolean, ReadFailedException> dataExists(
-            final YangInstanceIdentifier path) {
+    public void dataExists(final YangInstanceIdentifier path, final SettableFuture<Boolean> returnFuture) {
 
         LOG.debug("Tx {} dataExists called path = {}", identifier, path);
-
-        final SettableFuture<Boolean> returnFuture = SettableFuture.create();
 
         // If there were any previous recorded put/merge/delete operation reply Futures then we
         // must wait for them to successfully complete. This is necessary to honor the read
@@ -307,8 +299,6 @@ final class TransactionContextImpl extends AbstractTransactionContext {
 
             combinedFutures.onComplete(onComplete, actorContext.getActorSystem().dispatcher());
         }
-
-        return MappingCheckedFuture.create(returnFuture, ReadFailedException.MAPPER);
     }
 
     private void finishDataExists(final YangInstanceIdentifier path,
