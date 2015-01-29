@@ -24,6 +24,7 @@ message AppendEntries {
 
     repeated ReplicatedLogEntry logEntries = 5;
     optional int64 leaderCommit = 6;
+    optional int64 replicatedToAllIndex = 7;
 
 }
 

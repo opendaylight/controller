@@ -11,7 +11,6 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 import akka.actor.ActorRef;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.ByteString;
-import java.util.ArrayList;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
@@ -24,6 +23,8 @@ import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
+
+import java.util.ArrayList;
 
 /**
  * The behavior of a RaftActor in the Follower state
@@ -254,6 +255,10 @@ public class Follower extends AbstractRaftActorBehavior {
 
         sender.tell(new AppendEntriesReply(context.getId(), currentTerm(), true,
             lastIndex(), lastTerm()), actor());
+
+        if (!context.isSnapshotCaptureInitiated()) {
+            fakeSnapshot(appendEntries.getReplicatedToAllIndex(), appendEntries.getReplicatedToAllIndex());
+        }
 
         return this;
     }

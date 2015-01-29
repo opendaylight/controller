@@ -35,11 +35,13 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private ReplicatedLog replicatedLog;
 
-    private final Map<String, String> peerAddresses;
+    private Map<String, String> peerAddresses;
 
     private final LoggingAdapter LOG;
 
-    private final ConfigParams configParams;
+    private ConfigParams configParams;
+
+    private boolean snapshotCaptureInitiated;
 
     public RaftActorContextImpl(ActorRef actor, UntypedActorContext context,
         String id,
@@ -130,6 +132,16 @@ public class RaftActorContextImpl implements RaftActorContext {
         return configParams;
     }
 
+    @Override
+    public void setSnapshotCaptureInitiated(boolean snapshotCaptureInitiated) {
+        this.snapshotCaptureInitiated = snapshotCaptureInitiated;
+    }
+
+    @Override
+    public boolean isSnapshotCaptureInitiated() {
+        return snapshotCaptureInitiated;
+    }
+
     @Override public void addToPeers(String name, String address) {
         peerAddresses.put(name, address);
     }
@@ -151,5 +163,17 @@ public class RaftActorContextImpl implements RaftActorContext {
         checkState(peerAddresses.containsKey(peerId), peerId + " is unknown");
 
         peerAddresses.put(peerId, peerAddress);
+    }
+
+    @Override
+    // for tests
+    public void setConfigParams(ConfigParams configParams) {
+        this.configParams = configParams;
+    }
+
+    @Override
+    //for tests
+    public void setPeerAddresses(Map<String, String> peerAddresses) {
+        this.peerAddresses = peerAddresses;
     }
 }

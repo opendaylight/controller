@@ -166,4 +166,12 @@ public interface RaftActorContext {
      * @return ConfigParams
      */
     public ConfigParams getConfigParams();
+
+    public void setSnapshotCaptureInitiated(boolean snapshotCaptureInitiated);
+
+    public boolean isSnapshotCaptureInitiated();
+
+    public void setConfigParams(ConfigParams configParams);
+
+    public void setPeerAddresses(Map<String, String> peerAddresses);
 }
