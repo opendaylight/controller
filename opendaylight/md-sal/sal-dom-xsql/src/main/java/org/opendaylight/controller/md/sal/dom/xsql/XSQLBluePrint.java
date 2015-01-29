@@ -203,15 +203,23 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
         return result;
     }
 
-    public void addToBluePrintCache(XSQLBluePrintNode blNode) {
-        this.tableNameToBluePrint.put(blNode.getBluePrintNodeName(), blNode);
-        Map<String, XSQLBluePrintNode> map = this.odlNameToBluePrint.get(blNode
-                .getODLTableName());
-        if (map == null) {
-            map = new HashMap<String, XSQLBluePrintNode>();
-            this.odlNameToBluePrint.put(blNode.getODLTableName(), map);
+    public XSQLBluePrintNode addToBluePrintCache(XSQLBluePrintNode blNode,XSQLBluePrintNode parent) {
+        XSQLBluePrintNode existingNode = this.tableNameToBluePrint.get(blNode.getBluePrintNodeName());
+        if(existingNode!=null){
+            existingNode.mergeAugmentation(blNode);
+            return existingNode;
+        }else{
+            this.tableNameToBluePrint.put(blNode.getBluePrintNodeName(), blNode);
+            Map<String, XSQLBluePrintNode> map = this.odlNameToBluePrint.get(blNode.getODLTableName());
+            if (map == null) {
+                map = new HashMap<String, XSQLBluePrintNode>();
+                this.odlNameToBluePrint.put(blNode.getODLTableName(), map);
+            }
+            map.put(blNode.getBluePrintNodeName(), blNode);
+            if(parent!=null)
+                parent.AddChild(blNode);
+            return blNode;
         }
-        map.put(blNode.getBluePrintNodeName(), blNode);
     }
 
     public Class<?> getGenericType(ParameterizedType type) {
