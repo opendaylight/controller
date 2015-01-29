@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.opendaylight.controller.md.sal.dom.xsql;
 
 import java.io.File;
@@ -24,7 +31,9 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
-
+/**
+ * @author Sharon Aicler(saichler@gmail.com)
+ **/
 public class XSQLAdapter extends Thread implements SchemaContextListener {
 
     private static final int SLEEP = 10000;
@@ -51,6 +60,7 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
     private String pinningFile;
     private ServerSocket serverSocket = null;
     private DOMDataBroker domDataBroker = null;
+    private static final String REFERENCE_FIELD_NAME = "reference";
 
     private XSQLAdapter() {
         XSQLAdapter.log("Starting Adapter");
@@ -152,28 +162,18 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
                 List<Object> result = new LinkedList<Object>();
                 YangInstanceIdentifier instanceIdentifier = YangInstanceIdentifier
                         .builder()
-                        .node(XSQLODLUtils.getPath(table.getODLNode()).get(0))
+                        .node(XSQLODLUtils.getPath(table.getFirstFromSchemaNodes()).get(0))
                         .toInstance();
                 DOMDataReadTransaction t = this.domDataBroker
                         .newReadOnlyTransaction();
                 Object node = t.read(type,
                         instanceIdentifier).get();
 
-                node = XSQLODLUtils.get(node, "reference");
+                node = XSQLODLUtils.get(node, REFERENCE_FIELD_NAME);
                 if (node == null) {
                     return result;
                 }
-
-                Map<?, ?> children = XSQLODLUtils.getChildren(node);
-                for (Object c : children.values()) {
-                    result.add(c);
-                    /* I don't remember why i did this... possibly to prevent different siblings queried together
-                    Map<?, ?> sons = XSQLODLUtils.getChildren(c);
-                    for (Object child : sons.values()) {
-                        result.add(child);
-                    }*/
-                }
-
+                result.add(node);
                 return result;
             } catch (Exception err) {
                 XSQLAdapter.log(err);

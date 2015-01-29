@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.opendaylight.controller.md.sal.dom.xsql.jdbc;
 
 import java.io.InputStream;
@@ -24,6 +31,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -32,12 +40,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.opendaylight.controller.md.sal.dom.xsql.XSQLAdapter;
 import org.opendaylight.controller.md.sal.dom.xsql.XSQLBluePrint;
 import org.opendaylight.controller.md.sal.dom.xsql.XSQLBluePrintNode;
 import org.opendaylight.controller.md.sal.dom.xsql.XSQLColumn;
 import org.opendaylight.controller.md.sal.dom.xsql.XSQLCriteria;
 import org.opendaylight.controller.md.sal.dom.xsql.XSQLODLUtils;
+import org.opendaylight.yangtools.yang.data.api.schema.DataContainerNode;
 
+/**
+ * @author Sharon Aicler(saichler@gmail.com)
+ **/
 public class JDBCResultSet implements Serializable, ResultSet,
         ResultSetMetaData {
     private static final long serialVersionUID = -7450200738431047057L;
@@ -55,27 +68,29 @@ public class JDBCResultSet implements Serializable, ResultSet,
     private Map<String, Map<XSQLColumn, List<XSQLCriteria>>> criteria = new ConcurrentHashMap<String, Map<XSQLColumn, List<XSQLCriteria>>>();
     private Exception err = null;
     private List<Record> EMPTY_RESULT = new LinkedList<Record>();
-    private transient Map<String,JDBCResultSet> subQueries = new HashMap<String,JDBCResultSet>();
+    private transient Map<String, JDBCResultSet> subQueries = new HashMap<String, JDBCResultSet>();
 
     public ResultSet getProxy() {
-         return (ResultSet) Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[] {ResultSet.class }, new JDBCProxy(this));
+        return (ResultSet) Proxy.newProxyInstance(this.getClass()
+                .getClassLoader(), new Class[] { ResultSet.class },
+                new JDBCProxy(this));
     }
 
     public void setSQL(String _sql) {
         this.sql = _sql;
     }
 
-    public JDBCResultSet addSubQuery(String _sql,String logicalName) {
+    public JDBCResultSet addSubQuery(String _sql, String logicalName) {
         if (subQueries == null) {
-            subQueries = new HashMap<String,JDBCResultSet>();
+            subQueries = new HashMap<String, JDBCResultSet>();
         }
         JDBCResultSet rs = new JDBCResultSet(_sql);
-        this.subQueries.put(logicalName,rs);
+        this.subQueries.put(logicalName, rs);
         return rs;
     }
 
-    public Map<String,JDBCResultSet> getSubQueries() {
-        if (this.subQueries==null) {
+    public Map<String, JDBCResultSet> getSubQueries() {
+        if (this.subQueries == null) {
             this.subQueries = new HashMap<>();
         }
         return this.subQueries;
@@ -110,7 +125,8 @@ public class JDBCResultSet implements Serializable, ResultSet,
         }
     }
 
-    public int isObjectFitCriteria(Map<String, Object> objValues, String tableName) {
+    public int isObjectFitCriteria(Map<String, Object> objValues,
+            String tableName) {
         Map<XSQLColumn, List<XSQLCriteria>> tblCriteria = criteria
                 .get(tableName);
         if (tblCriteria == null) {
@@ -287,19 +303,41 @@ public class JDBCResultSet implements Serializable, ResultSet,
     }
 
     public static class Record {
+        // The map container the Attribute 2 the attribute value
         public Map<String, Object> data = new HashMap<>();
+        // The Element Object (Possibly some kind of NormalizedNode
         public Object element = null;
+        // Does this record fit the criteria
+        // In case of a list property, we first collect the list and only then
+        // we
+        // we decide which list item should be included or not.
+        public boolean fitCriteria = true;
 
         public Map<String, Object> getRecord() {
             return this.data;
         }
     }
 
-    private Map<String, Object> collectColumnValues(Object node, XSQLBluePrintNode bpn) {
-        Map<?, ?> subChildren = XSQLODLUtils.getChildren(node);
-        Map<String, Object> result = new HashMap<>();
-        for (Object stc : subChildren.values()) {
-            if (stc.getClass().getName().endsWith("ImmutableAugmentationNode")) {
+    public static class RecordsContainer {
+        public List<Record> records = new LinkedList<Record>();
+        public List<Record> fitRecords = new LinkedList<Record>();
+        public Object currentObject = null;
+    }
+
+    private void collectColumnValues(RecordsContainer rContainer,
+            XSQLBluePrintNode bpn) {
+        Collection<?> subChildren = XSQLODLUtils
+                .getChildrenCollection(rContainer.currentObject);
+        Record r = new Record();
+        r.element = rContainer.currentObject;
+        for (Object stc : subChildren) {
+            if (stc.getClass().getName()
+                    .endsWith("ImmutableUnkeyedListEntryNode")) {
+                r.fitCriteria = false;
+                rContainer.currentObject = stc;
+                collectColumnValues(rContainer, bpn);
+            } else if (stc.getClass().getName()
+                    .endsWith("ImmutableAugmentationNode")) {
                 Map<?, ?> values = XSQLODLUtils.getChildren(stc);
                 for (Object key : values.keySet()) {
                     Object val = values.get(key);
@@ -307,7 +345,7 @@ public class JDBCResultSet implements Serializable, ResultSet,
                         Object value = XSQLODLUtils.getValue(val);
                         String k = XSQLODLUtils.getNodeName(val);
                         if (value != null) {
-                            result.put(bpn.getBluePrintNodeName() + "." + k,
+                            r.data.put(bpn.getBluePrintNodeName() + "." + k,
                                     value.toString());
                         }
                     }
@@ -316,12 +354,14 @@ public class JDBCResultSet implements Serializable, ResultSet,
                 String k = XSQLODLUtils.getNodeName(stc);
                 Object value = XSQLODLUtils.getValue(stc);
                 if (value != null) {
-                    result.put(bpn.getBluePrintNodeName() + "." + k,
+                    r.data.put(bpn.getBluePrintNodeName() + "." + k,
                             value.toString());
                 }
             }
         }
-        return result;
+        if (r.fitCriteria) {
+            rContainer.records.add(r);
+        }
     }
 
     private void addToData(Record rec, XSQLBluePrintNode bpn,
@@ -384,6 +424,11 @@ public class JDBCResultSet implements Serializable, ResultSet,
 
             String odlNodeName = XSQLODLUtils.getNodeIdentiofier(child);
             if (odlNodeName == null) {
+                if (child instanceof DataContainerNode) {
+                    List<Object> augChidlren = getChildren(child, tableName,
+                            bluePrint);
+                    result.addAll(augChidlren);
+                }
                 continue;
             }
 
@@ -405,7 +450,10 @@ public class JDBCResultSet implements Serializable, ResultSet,
                 continue;
             }
 
-            if (child.getClass().getName().endsWith("ImmutableContainerNode")) {
+            if (child.getClass().getName().endsWith("ImmutableUnkeyedListNode")) {
+                result.add(child);
+            } else if (child.getClass().getName()
+                    .endsWith("ImmutableContainerNode")) {
                 result.add(child);
             } else if (child.getClass().getName()
                     .endsWith("ImmutableAugmentationNode")) {
@@ -418,52 +466,76 @@ public class JDBCResultSet implements Serializable, ResultSet,
                 }
             } else if (child.getClass().getName().endsWith("ImmutableMapNode")) {
                 result.addAll(XSQLODLUtils.getMChildren(child));
+            } else {
+                XSQLAdapter.log("Missed Node Data OF Type="
+                        + child.getClass().getName());
             }
         }
         return result;
     }
 
-    public List<Record> addRecords(Object element, XSQLBluePrintNode node,boolean root, String tableName, XSQLBluePrint bluePrint) {
+    public List<Record> addRecords(Object element, XSQLBluePrintNode node,
+            boolean root, String tableName, XSQLBluePrint bluePrint) {
         List<Record> result = new LinkedList<Record>();
-        //In case this is a sibling to the requested table, the elenment type
-        //won't be in the path of the leaf node
-        if(node==null){
-            return result;
-        }
         String nodeID = XSQLODLUtils.getNodeIdentiofier(element);
         if (node.getODLTableName().equals(nodeID)) {
-            XSQLBluePrintNode bluePrintNode = bluePrint.getBluePrintNodeByODLTableName(nodeID)[0];
-            Record rec = new Record();
-            rec.element = element;
-            XSQLBluePrintNode bpn = this.tablesInQueryMap.get(bluePrintNode.getBluePrintNodeName());
-            if (this.criteria.containsKey(bluePrintNode.getBluePrintNodeName()) || bpn != null) {
-                Map<String, Object> allKeyValues = collectColumnValues(element, bpn);
-                if (!(isObjectFitCriteria(allKeyValues,
-                        bpn.getBluePrintNodeName()) == 1)) {
-                    return EMPTY_RESULT;
+            XSQLBluePrintNode bluePrintNode = bluePrint
+                    .getBluePrintNodeByODLTableName(nodeID)[0];
+            RecordsContainer rContainer = new RecordsContainer();
+            rContainer.currentObject = element;
+            XSQLBluePrintNode bpn = this.tablesInQueryMap.get(bluePrintNode
+                    .getBluePrintNodeName());
+            if (this.criteria.containsKey(bluePrintNode.getBluePrintNodeName())
+                    || bpn != null) {
+                collectColumnValues(rContainer, bpn);
+                for (Record r : rContainer.records) {
+                    if (!(isObjectFitCriteria(r.data,
+                            bpn.getBluePrintNodeName()) == 1)) {
+                        r.fitCriteria = false;
+                    }
+                    if (r.fitCriteria) {
+                        Record rec = new Record();
+                        rec.element = r.element;
+                        addToData(rec, bpn, bluePrint, r.data);
+                        rContainer.fitRecords.add(rec);
+                    }
                 }
-                addToData(rec, bpn, bluePrint, allKeyValues);
+                if (rContainer.fitRecords.isEmpty())
+                    return EMPTY_RESULT;
             }
-            if (root) {
-                addRecord(rec.data);
+            if (rContainer.records.isEmpty()) {
+                Record rec = new Record();
+                rec.element = rContainer.currentObject;
+                if (root) {
+                    addRecord(rec.data);
+                } else {
+                    result.add(rec);
+                }
             } else {
-                result.add(rec);
+                for (Record rec : rContainer.fitRecords) {
+                    if (root) {
+                        addRecord(rec.data);
+                    } else {
+                        result.add(rec);
+                    }
+                }
             }
             return result;
         }
 
         XSQLBluePrintNode parent = node.getParent();
-        List<Record> subRecords = addRecords(element, parent, false, tableName,bluePrint);
+        List<Record> subRecords = addRecords(element, parent, false, tableName,
+                bluePrint);
         for (Record subRec : subRecords) {
             List<Object> subO = getChildren(subRec.element, tableName,
                     bluePrint);
             if (subO != null) {
                 for (Object subData : subO) {
-                    Record rec = new Record();
-                    rec.element = subData;
-                    rec.data.putAll(subRec.data);
+                    RecordsContainer rContainer = new RecordsContainer();
+                    rContainer.currentObject = subData;
 
-                    String recID = XSQLODLUtils.getNodeIdentiofier(rec.element);
+                    String recID = XSQLODLUtils
+                            .getNodeIdentiofier(rContainer.currentObject);
                     XSQLBluePrintNode eNodes[] = bluePrint
                             .getBluePrintNodeByODLTableName(recID);
                     XSQLBluePrintNode bpn = null;
@@ -474,18 +546,22 @@ public class JDBCResultSet implements Serializable, ResultSet,
                             break;
                         }
                     }
-                    boolean isObjectInCriteria = true;
                     if (bpn != null) {
-                        Map<String, Object> allKeyValues = collectColumnValues(rec.element, bpn);
-                        if ((isObjectFitCriteria(allKeyValues,
-                                bpn.getBluePrintNodeName()) == 1)) {
-                            addToData(rec, bpn, bluePrint, allKeyValues);
-                        } else {
-                            isObjectInCriteria = false;
+                        collectColumnValues(rContainer, bpn);
+                        for (Record r : rContainer.records) {
+                            if ((isObjectFitCriteria(r.data,
+                                    bpn.getBluePrintNodeName()) == 1)) {
+                                Record rec = new Record();
+                                rec.element = r.element;
+                                addToData(rec, bpn, bluePrint, r.data);
+                            } else {
+                                r.fitCriteria = false;
+                            }
                         }
                     }
-
-                    if (isObjectInCriteria) {
+                    if (rContainer.records.isEmpty()) {
+                        Record rec = new Record();
+                        rec.element = rContainer.currentObject;
                         if (root) {
                             if (!rec.data.isEmpty()) {
                                 addRecord(rec.data);
@@ -493,11 +569,22 @@ public class JDBCResultSet implements Serializable, ResultSet,
                         } else {
                             result.add(rec);
                         }
+                    } else {
+                        for (Record r : rContainer.records) {
+                            if (r.fitCriteria) {
+                                if (root) {
+                                    if (!r.data.isEmpty()) {
+                                        addRecord(r.data);
+                                    }
+                                } else {
+                                    result.add(r);
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
-
         return result;
     }
 
