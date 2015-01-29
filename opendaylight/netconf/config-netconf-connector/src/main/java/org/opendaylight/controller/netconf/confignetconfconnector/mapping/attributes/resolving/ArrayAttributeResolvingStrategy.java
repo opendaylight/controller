@@ -16,7 +16,7 @@ import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenType;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
+import org.opendaylight.controller.netconf.util.NetconfUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +38,7 @@ final class ArrayAttributeResolvingStrategy extends AbstractAttributeResolvingSt
             return Optional.absent();
         }
 
-        Util.checkType(value, List.class);
+        NetconfUtil.checkType(value, List.class);
         List<?> valueList = (List<?>) value;
 
         Class<?> innerTypeClass = null;

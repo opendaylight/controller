@@ -10,7 +10,7 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 
 import com.google.common.base.Preconditions;
 import java.util.Map;
-import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
+import org.opendaylight.controller.netconf.util.NetconfUtil;
 import org.w3c.dom.Document;
 
 public class SimpleCompositeAttributeWritingStrategy extends SimpleAttributeWritingStrategy {
@@ -24,7 +24,7 @@ public class SimpleCompositeAttributeWritingStrategy extends SimpleAttributeWrit
     }
 
     protected Object preprocess(Object value) {
-        Util.checkType(value, Map.class);
+        NetconfUtil.checkType(value, Map.class);
         Preconditions.checkArgument(((Map<?, ?>)value).size() == 1, "Unexpected number of values in %s, expected 1", value);
         return ((Map<?, ?>)value).values().iterator().next();
     }

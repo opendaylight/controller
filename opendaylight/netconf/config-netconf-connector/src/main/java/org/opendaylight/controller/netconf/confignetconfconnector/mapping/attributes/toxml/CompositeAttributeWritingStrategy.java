@@ -11,7 +11,7 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 import com.google.common.base.Optional;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
+import org.opendaylight.controller.netconf.util.NetconfUtil;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -31,14 +31,14 @@ public class CompositeAttributeWritingStrategy implements AttributeWritingStrate
 
     @Override
     public void writeElement(Element parentElement, String namespace, Object value) {
-        Util.checkType(value, Map.class);
+        NetconfUtil.checkType(value, Map.class);
 
         Element innerNode = XmlUtil.createElement(document, key, Optional.of(namespace));
 
         Map<?, ?> map = (Map<?, ?>) value;
 
         for (Entry<?, ?> innerObjectEntry : map.entrySet()) {
-            Util.checkType(innerObjectEntry.getKey(), String.class);
+            NetconfUtil.checkType(innerObjectEntry.getKey(), String.class);
 
             String innerKey = (String) innerObjectEntry.getKey();
             Object innerValue = innerObjectEntry.getValue();

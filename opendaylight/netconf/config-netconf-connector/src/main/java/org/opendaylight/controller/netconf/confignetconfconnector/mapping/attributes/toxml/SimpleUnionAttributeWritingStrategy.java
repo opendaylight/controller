@@ -11,7 +11,7 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 import com.google.common.base.Preconditions;
 import java.util.List;
 import java.util.Map;
-import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
+import org.opendaylight.controller.netconf.util.NetconfUtil;
 import org.w3c.dom.Document;
 
 public class SimpleUnionAttributeWritingStrategy extends SimpleAttributeWritingStrategy {
@@ -25,14 +25,14 @@ public class SimpleUnionAttributeWritingStrategy extends SimpleAttributeWritingS
     }
 
     protected Object preprocess(Object value) {
-        Util.checkType(value, Map.class);
+        NetconfUtil.checkType(value, Map.class);
         Preconditions.checkArgument(((Map<?, ?>)value).size() == 1, "Unexpected number of values in %s, expected 1", value);
         Object listOfStrings = ((Map<?, ?>) value).values().iterator().next();
-        Util.checkType(listOfStrings, List.class);
+        NetconfUtil.checkType(listOfStrings, List.class);
 
         StringBuilder b = new StringBuilder();
         for (Object character: (List<?>)listOfStrings) {
-            Util.checkType(character, String.class);
+            NetconfUtil.checkType(character, String.class);
             b.append(character);
         }
 

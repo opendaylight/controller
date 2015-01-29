@@ -13,7 +13,7 @@ import javax.management.ObjectName;
 import javax.management.openmbean.SimpleType;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.mapping.ObjectNameAttributeMappingStrategy;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
-import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
+import org.opendaylight.controller.netconf.util.NetconfUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +33,7 @@ public class ObjectNameAttributeResolvingStrategy extends AbstractAttributeResol
             return Optional.absent();
         }
 
-        Util.checkType(value, ObjectNameAttributeMappingStrategy.MappedDependency.class);
+        NetconfUtil.checkType(value, ObjectNameAttributeMappingStrategy.MappedDependency.class);
 
         ObjectNameAttributeMappingStrategy.MappedDependency mappedDep = (ObjectNameAttributeMappingStrategy.MappedDependency) value;
         String serviceName = mappedDep.getServiceName();

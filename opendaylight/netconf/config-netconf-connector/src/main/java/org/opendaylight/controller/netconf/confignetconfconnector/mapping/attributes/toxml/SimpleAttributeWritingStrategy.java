@@ -9,7 +9,7 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.toxml;
 
 import com.google.common.base.Optional;
-import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
+import org.opendaylight.controller.netconf.util.NetconfUtil;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -31,7 +31,7 @@ public class SimpleAttributeWritingStrategy implements AttributeWritingStrategy 
     @Override
     public void writeElement(Element parentElement, String namespace, Object value) {
         value = preprocess(value);
-        Util.checkType(value, String.class);
+        NetconfUtil.checkType(value, String.class);
         Element innerNode = createElement(document, key, (String) value, Optional.of(namespace));
         parentElement.appendChild(innerNode);
     }

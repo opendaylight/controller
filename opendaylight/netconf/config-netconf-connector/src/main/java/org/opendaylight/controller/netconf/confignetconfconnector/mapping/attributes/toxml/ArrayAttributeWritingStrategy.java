@@ -9,7 +9,7 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.toxml;
 
 import java.util.List;
-import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
+import org.opendaylight.controller.netconf.util.NetconfUtil;
 import org.w3c.dom.Element;
 
 public class ArrayAttributeWritingStrategy implements AttributeWritingStrategy {
@@ -22,7 +22,7 @@ public class ArrayAttributeWritingStrategy implements AttributeWritingStrategy {
 
     @Override
     public void writeElement(Element parentElement, String namespace, Object value) {
-        Util.checkType(value, List.class);
+        NetconfUtil.checkType(value, List.class);
 
         for (Object innerObject : ((List<?>) value)) {
             innnerStrategy.writeElement(parentElement, namespace, innerObject);

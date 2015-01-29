@@ -21,10 +21,10 @@ import org.opendaylight.controller.config.api.LookupRegistry;
 import org.opendaylight.controller.config.util.ConfigRegistryJMXClient;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
-import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
 import org.opendaylight.controller.netconf.mapping.api.Capability;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
+import org.opendaylight.controller.netconf.util.NetconfUtil;
 import org.opendaylight.yangtools.yang.model.api.Module;
 
 /**
@@ -163,7 +163,7 @@ public class NetconfOperationServiceImpl implements NetconfOperationService {
             this.content = moduleContent;
             this.moduleName = module.getName();
             this.moduleNamespace = module.getNamespace().toString();
-            this.revision = Util.writeDate(module.getRevision());
+            this.revision = NetconfUtil.writeDate(module.getRevision());
         }
 
         @Override
@@ -173,7 +173,7 @@ public class NetconfOperationServiceImpl implements NetconfOperationService {
 
         private static String toCapabilityURI(final Module module) {
             return String.valueOf(module.getNamespace()) + "?module="
-                    + module.getName() + "&revision=" + Util.writeDate(module.getRevision());
+                    + module.getName() + "&revision=" + NetconfUtil.writeDate(module.getRevision());
         }
 
         @Override

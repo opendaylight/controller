@@ -16,7 +16,7 @@ import java.util.Set;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenType;
-import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
+import org.opendaylight.controller.netconf.util.NetconfUtil;
 
 public class CompositeAttributeMappingStrategy extends
         AbstractAttributeMappingStrategy<Map<String, Object>, CompositeType> {
@@ -38,7 +38,7 @@ public class CompositeAttributeMappingStrategy extends
             return Optional.absent();
         }
 
-        Util.checkType(value, CompositeDataSupport.class);
+        NetconfUtil.checkType(value, CompositeDataSupport.class);
 
         CompositeDataSupport compositeData = (CompositeDataSupport) value;
         CompositeType currentType = compositeData.getCompositeType();

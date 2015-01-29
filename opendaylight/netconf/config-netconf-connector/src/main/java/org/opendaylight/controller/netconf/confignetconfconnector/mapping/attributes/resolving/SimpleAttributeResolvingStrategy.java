@@ -19,7 +19,7 @@ import java.util.Date;
 import java.util.Map;
 import javax.management.openmbean.SimpleType;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
+import org.opendaylight.controller.netconf.util.NetconfUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +49,7 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
             throw new RuntimeException("Unable to locate class for " + getOpenType().getClassName(), e);
         }
 
-        Util.checkType(value, String.class);
+        NetconfUtil.checkType(value, String.class);
 
         Resolver prefferedPlugin = resolverPlugins.get(cls.getCanonicalName());
         prefferedPlugin = prefferedPlugin == null ? resolverPlugins.get(DEFAULT_RESOLVERS) : prefferedPlugin;
@@ -140,7 +140,7 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
         @Override
         protected Object parseObject(Class<?> type, String value) throws NetconfDocumentedException {
             try {
-                return Util.readDate(value);
+                return NetconfUtil.readDate(value);
             } catch (ParseException e) {
                 LOG.trace("Unable parse value {} due to ",value, e);
                 throw new NetconfDocumentedException("Unable to parse value "+value+" as date.",

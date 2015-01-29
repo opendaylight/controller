@@ -9,27 +9,35 @@
 package org.opendaylight.controller.netconf.monitoring.osgi;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.*;
 
-import com.google.common.base.Optional;
-import java.util.Collections;
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
+import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
+import org.opendaylight.controller.netconf.mapping.api.Capability;
 import org.opendaylight.controller.netconf.monitoring.MonitoringConstants;
 
+
 public class NetconfMonitoringOperationServiceTest {
+
     @Test
     public void testGetters() throws Exception {
+
         NetconfMonitoringService monitor = mock(NetconfMonitoringService.class);
         NetconfMonitoringOperationService service = new NetconfMonitoringOperationService(monitor);
 
         assertEquals(1, service.getNetconfOperations().size());
+        assertEquals(2 + 2, service.getCapabilities().size());
 
-        assertEquals(Optional.<String>absent(), service.getCapabilities().iterator().next().getCapabilitySchema());
-        assertEquals(Collections.<String>emptyList(), service.getCapabilities().iterator().next().getLocation());
-        assertEquals(Optional.of(MonitoringConstants.MODULE_REVISION), service.getCapabilities().iterator().next().getRevision());
-        assertEquals(Optional.of(MonitoringConstants.MODULE_NAME), service.getCapabilities().iterator().next().getModuleName());
-        assertEquals(Optional.of(MonitoringConstants.NAMESPACE), service.getCapabilities().iterator().next().getModuleNamespace());
-        assertEquals(MonitoringConstants.URI, service.getCapabilities().iterator().next().getCapabilityUri());
+        assertThat(Collections2.transform(service.getCapabilities(), new Function<Capability, String>() {
+            @Override
+            public String apply(Capability input) {
+                return input.getModuleName().get();
+            }
+        }), CoreMatchers.hasItems(MonitoringConstants.MODULE_NAME, "ietf-inet-types", "ietf-yang-types", "ietf-netconf-monitoring-extension"));
+
     }
 }

@@ -13,7 +13,7 @@ import com.google.common.base.Preconditions;
 import javax.management.ObjectName;
 import javax.management.openmbean.SimpleType;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
+import org.opendaylight.controller.netconf.util.NetconfUtil;
 
 public class ObjectNameAttributeMappingStrategy extends
         AbstractAttributeMappingStrategy<ObjectNameAttributeMappingStrategy.MappedDependency, SimpleType<?>> {
@@ -37,7 +37,7 @@ public class ObjectNameAttributeMappingStrategy extends
         String realClass = value.getClass().getName();
         Preconditions.checkArgument(realClass.equals(expectedClass), "Type mismatch, expected " + expectedClass
                 + " but was " + realClass);
-        Util.checkType(value, ObjectName.class);
+        NetconfUtil.checkType(value, ObjectName.class);
 
         ObjectName on = (ObjectName) value;
 

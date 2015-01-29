@@ -11,7 +11,7 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import java.util.Map;
-import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
+import org.opendaylight.controller.netconf.util.NetconfUtil;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.w3c.dom.Document;
@@ -30,10 +30,10 @@ public class SimpleIdentityRefAttributeWritingStrategy extends SimpleAttributeWr
     }
 
     protected Object preprocess(Object value) {
-        Util.checkType(value, Map.class);
+        NetconfUtil.checkType(value, Map.class);
         Preconditions.checkArgument(((Map<?, ?>)value).size() == 1, "Unexpected number of values in %s, expected 1", value);
         Object stringValue = ((Map<?, ?>) value).values().iterator().next();
-        Util.checkType(stringValue, String.class);
+        NetconfUtil.checkType(stringValue, String.class);
 
         return stringValue;
     }
