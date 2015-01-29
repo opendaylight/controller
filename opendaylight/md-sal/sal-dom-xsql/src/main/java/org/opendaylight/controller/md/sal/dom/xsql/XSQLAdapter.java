@@ -82,6 +82,7 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
     }
 
     public static File getXQLLogfile() {
+        if(true) return new File("/tmp/xql.log");
         tmpDir = System.getProperty("java.io.tmpdir");
         xqlLog = new File(tmpDir + "/xql.log");
         return xqlLog;
@@ -152,7 +153,7 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
                 List<Object> result = new LinkedList<Object>();
                 YangInstanceIdentifier instanceIdentifier = YangInstanceIdentifier
                         .builder()
-                        .node(XSQLODLUtils.getPath(table.getODLNode()).get(0))
+                        .node(XSQLODLUtils.getPath(table.getODLNodes().get(0)).get(0))
                         .toInstance();
                 DOMDataReadTransaction t = this.domDataBroker
                         .newReadOnlyTransaction();
@@ -163,7 +164,11 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
                 if (node == null) {
                     return result;
                 }
-
+                result.add(node);
+                XSQLAdapter.log("*************************");
+                XSQLAdapter.log(node.toString());
+                XSQLAdapter.log("*************************");
+                /*
                 Map<?, ?> children = XSQLODLUtils.getChildren(node);
                 for (Object c : children.values()) {
                     result.add(c);
@@ -172,7 +177,7 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
                     for (Object child : sons.values()) {
                         result.add(child);
                     }*/
-                }
+                //}
 
                 return result;
             } catch (Exception err) {
