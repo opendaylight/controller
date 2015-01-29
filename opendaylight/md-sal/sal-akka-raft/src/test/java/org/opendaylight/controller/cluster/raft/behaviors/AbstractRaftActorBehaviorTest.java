@@ -74,7 +74,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
             context.getTermInformation().update(1000, "test");
 
             AppendEntries appendEntries =
-                new AppendEntries(100, "leader-1", 0, 0, null, 101);
+                new AppendEntries(100, "leader-1", 0, 0, null, 101, -1);
 
             RaftActorBehavior behavior = createBehavior(context);
 
@@ -131,7 +131,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
                     new MockRaftActorContext.MockReplicatedLogEntry(1, 0, new MockRaftActorContext.MockPayload("zero")));
 
                 AppendEntries appendEntries =
-                    new AppendEntries(2, "leader-1", -1, 1, entries, 0);
+                    new AppendEntries(2, "leader-1", -1, 1, entries, 0, -1);
 
                 RaftActorBehavior behavior = createBehavior(context);
 
@@ -347,7 +347,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
     }
 
     protected AppendEntries createAppendEntriesWithNewerTerm() {
-        return new AppendEntries(100, "leader-1", 0, 0, null, 1);
+        return new AppendEntries(100, "leader-1", 0, 0, null, 1, -1);
     }
 
     protected AppendEntriesReply createAppendEntriesReplyWithNewerTerm() {

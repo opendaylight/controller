@@ -181,7 +181,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
 
             // The new commitIndex is 101
             AppendEntries appendEntries =
-                new AppendEntries(2, "leader-1", 100, 1, entries, 101);
+                new AppendEntries(2, "leader-1", 100, 1, entries, 101, 100);
 
             RaftActorBehavior raftBehavior =
                 createBehavior(context).handleMessage(getRef(), appendEntries);
@@ -217,7 +217,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             // AppendEntries is now sent with a bigger term
             // this will set the receivers term to be the same as the sender's term
             AppendEntries appendEntries =
-                new AppendEntries(100, "leader-1", 0, 0, null, 101);
+                new AppendEntries(100, "leader-1", 0, 0, null, 101, -1);
 
             RaftActorBehavior behavior = createBehavior(context);
 
@@ -293,7 +293,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             // This will not work for a Candidate because as soon as a Candidate
             // is created it increments the term
             AppendEntries appendEntries =
-                new AppendEntries(1, "leader-1", 2, 1, entries, 4);
+                new AppendEntries(1, "leader-1", 2, 1, entries, 4, -1);
 
             RaftActorBehavior behavior = createBehavior(context);
 
@@ -373,7 +373,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             // This will not work for a Candidate because as soon as a Candidate
             // is created it increments the term
             AppendEntries appendEntries =
-                new AppendEntries(2, "leader-1", 1, 1, entries, 3);
+                new AppendEntries(2, "leader-1", 1, 1, entries, 3, -1);
 
             RaftActorBehavior behavior = createBehavior(context);
 
@@ -446,7 +446,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
                     new MockRaftActorContext.MockReplicatedLogEntry(1, 4, new MockRaftActorContext.MockPayload("two-1")));
 
             AppendEntries appendEntries =
-                    new AppendEntries(1, "leader-1", 3, 1, entries, 4);
+                    new AppendEntries(1, "leader-1", 3, 1, entries, 4, -1);
 
             RaftActorBehavior behavior = createBehavior(context);
 
@@ -502,7 +502,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
                     new MockRaftActorContext.MockReplicatedLogEntry(1, 4, new MockRaftActorContext.MockPayload("two-1")));
 
             AppendEntries appendEntries =
-                    new AppendEntries(1, "leader-1", 3, 1, entries, 4);
+                    new AppendEntries(1, "leader-1", 3, 1, entries, 4, 3);
 
             RaftActorBehavior behavior = createBehavior(context);
 

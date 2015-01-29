@@ -166,4 +166,8 @@ public interface RaftActorContext {
      * @return ConfigParams
      */
     public ConfigParams getConfigParams();
+
+    public void setSnapshotCaptureInitiated(boolean snapshotCaptureInitiated);
+
+    public boolean isSnapshotCaptureInitiated();
 }

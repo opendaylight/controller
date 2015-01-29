@@ -99,7 +99,7 @@ public class Client {
             }
         });
 
-        return new AppendEntries(1, "member-1", 0, 100, modification, 1);
+        return new AppendEntries(1, "member-1", 0, 100, modification, 1, -1);
     }
 
     public static AppendEntries keyValueAppendEntries() {
@@ -124,6 +124,6 @@ public class Client {
             }
         });
 
-        return new AppendEntries(1, "member-1", 0, 100, modification, 1);
+        return new AppendEntries(1, "member-1", 0, 100, modification, 1, -1);
     }
 }

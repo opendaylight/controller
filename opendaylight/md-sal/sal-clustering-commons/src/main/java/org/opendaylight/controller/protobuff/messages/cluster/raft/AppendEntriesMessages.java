@@ -8,10 +8,10 @@ public final class AppendEntriesMessages {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
-  public interface AppendEntriesOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
+  public interface AppendEntriesOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:org.opendaylight.controller.cluster.raft.AppendEntries)
+      com.google.protobuf.MessageOrBuilder {
 
-    // optional int64 term = 1;
     /**
      * <code>optional int64 term = 1;</code>
      */
@@ -21,7 +21,6 @@ public final class AppendEntriesMessages {
      */
     long getTerm();
 
-    // optional string leaderId = 2;
     /**
      * <code>optional string leaderId = 2;</code>
      */
@@ -36,7 +35,6 @@ public final class AppendEntriesMessages {
     com.google.protobuf.ByteString
         getLeaderIdBytes();
 
-    // optional int64 prevLogIndex = 3;
     /**
      * <code>optional int64 prevLogIndex = 3;</code>
      */
@@ -46,7 +44,6 @@ public final class AppendEntriesMessages {
      */
     long getPrevLogIndex();
 
-    // optional int64 prevLogTerm = 4;
     /**
      * <code>optional int64 prevLogTerm = 4;</code>
      */
@@ -56,11 +53,10 @@ public final class AppendEntriesMessages {
      */
     long getPrevLogTerm();
 
-    // repeated .org.opendaylight.controller.cluster.raft.AppendEntries.ReplicatedLogEntry logEntries = 5;
     /**
      * <code>repeated .org.opendaylight.controller.cluster.raft.AppendEntries.ReplicatedLogEntry logEntries = 5;</code>
      */
-    java.util.List<org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry>
+    java.util.List<org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry> 
         getLogEntriesList();
     /**
      * <code>repeated .org.opendaylight.controller.cluster.raft.AppendEntries.ReplicatedLogEntry logEntries = 5;</code>
@@ -73,7 +69,7 @@ public final class AppendEntriesMessages {
     /**
      * <code>repeated .org.opendaylight.controller.cluster.raft.AppendEntries.ReplicatedLogEntry logEntries = 5;</code>
      */
-    java.util.List<? extends org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntryOrBuilder>
+    java.util.List<? extends org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntryOrBuilder> 
         getLogEntriesOrBuilderList();
     /**
      * <code>repeated .org.opendaylight.controller.cluster.raft.AppendEntries.ReplicatedLogEntry logEntries = 5;</code>
@@ -81,7 +77,6 @@ public final class AppendEntriesMessages {
     org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntryOrBuilder getLogEntriesOrBuilder(
         int index);
 
-    // optional int64 leaderCommit = 6;
     /**
      * <code>optional int64 leaderCommit = 6;</code>
      */
@@ -90,13 +85,23 @@ public final class AppendEntriesMessages {
      * <code>optional int64 leaderCommit = 6;</code>
      */
     long getLeaderCommit();
+
+    /**
+     * <code>optional int64 replicatedToAllIndex = 7;</code>
+     */
+    boolean hasReplicatedToAllIndex();
+    /**
+     * <code>optional int64 replicatedToAllIndex = 7;</code>
+     */
+    long getReplicatedToAllIndex();
   }
   /**
    * Protobuf type {@code org.opendaylight.controller.cluster.raft.AppendEntries}
    */
   public static final class AppendEntries extends
-      com.google.protobuf.GeneratedMessage
-      implements AppendEntriesOrBuilder {
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:org.opendaylight.controller.cluster.raft.AppendEntries)
+      AppendEntriesOrBuilder {
     // Use AppendEntries.newBuilder() to construct.
     private AppendEntries(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -148,8 +153,9 @@ public final class AppendEntriesMessages {
               break;
             }
             case 18: {
+              com.google.protobuf.ByteString bs = input.readBytes();
               bitField0_ |= 0x00000002;
-              leaderId_ = input.readBytes();
+              leaderId_ = bs;
               break;
             }
             case 24: {
@@ -173,6 +179,11 @@ public final class AppendEntriesMessages {
             case 48: {
               bitField0_ |= 0x00000010;
               leaderCommit_ = input.readInt64();
+              break;
+            }
+            case 56: {
+              bitField0_ |= 0x00000020;
+              replicatedToAllIndex_ = input.readInt64();
               break;
             }
           }
@@ -217,10 +228,10 @@ public final class AppendEntriesMessages {
       return PARSER;
     }
 
-    public interface ReplicatedLogEntryOrBuilder
-        extends com.google.protobuf.MessageOrBuilder {
+    public interface ReplicatedLogEntryOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:org.opendaylight.controller.cluster.raft.AppendEntries.ReplicatedLogEntry)
+        com.google.protobuf.MessageOrBuilder {
 
-      // optional int64 term = 1;
       /**
        * <code>optional int64 term = 1;</code>
        */
@@ -230,7 +241,6 @@ public final class AppendEntriesMessages {
        */
       long getTerm();
 
-      // optional int64 index = 2;
       /**
        * <code>optional int64 index = 2;</code>
        */
@@ -240,7 +250,6 @@ public final class AppendEntriesMessages {
        */
       long getIndex();
 
-      // optional .org.opendaylight.controller.cluster.raft.AppendEntries.ReplicatedLogEntry.Payload data = 3;
       /**
        * <code>optional .org.opendaylight.controller.cluster.raft.AppendEntries.ReplicatedLogEntry.Payload data = 3;</code>
        */
@@ -258,8 +267,9 @@ public final class AppendEntriesMessages {
      * Protobuf type {@code org.opendaylight.controller.cluster.raft.AppendEntries.ReplicatedLogEntry}
      */
     public static final class ReplicatedLogEntry extends
-        com.google.protobuf.GeneratedMessage
-        implements ReplicatedLogEntryOrBuilder {
+        com.google.protobuf.GeneratedMessage implements
+        // @@protoc_insertion_point(message_implements:org.opendaylight.controller.cluster.raft.AppendEntries.ReplicatedLogEntry)
+        ReplicatedLogEntryOrBuilder {
       // Use ReplicatedLogEntry.newBuilder() to construct.
       private ReplicatedLogEntry(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
         super(builder);
@@ -368,10 +378,10 @@ public final class AppendEntriesMessages {
       }
 
       public interface PayloadOrBuilder extends
+          // @@protoc_insertion_point(interface_extends:org.opendaylight.controller.cluster.raft.AppendEntries.ReplicatedLogEntry.Payload)
           com.google.protobuf.GeneratedMessage.
               ExtendableMessageOrBuilder<Payload> {
 
-        // optional string clientPayloadClassName = 1;
         /**
          * <code>optional string clientPayloadClassName = 1;</code>
          */
@@ -391,7 +401,9 @@ public final class AppendEntriesMessages {
        */
       public static final class Payload extends
           com.google.protobuf.GeneratedMessage.ExtendableMessage<
-            Payload> implements PayloadOrBuilder {
+            Payload> implements
+          // @@protoc_insertion_point(message_implements:org.opendaylight.controller.cluster.raft.AppendEntries.ReplicatedLogEntry.Payload)
+          PayloadOrBuilder {
         // Use Payload.newBuilder() to construct.
         private Payload(com.google.protobuf.GeneratedMessage.ExtendableBuilder<org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Payload, ?> builder) {
           super(builder);
@@ -438,8 +450,9 @@ public final class AppendEntriesMessages {
                   break;
                 }
                 case 10: {
+                  com.google.protobuf.ByteString bs = input.readBytes();
                   bitField0_ |= 0x00000001;
-                  clientPayloadClassName_ = input.readBytes();
+                  clientPayloadClassName_ = bs;
                   break;
                 }
               }
@@ -482,7 +495,6 @@ public final class AppendEntriesMessages {
         }
 
         private int bitField0_;
-        // optional string clientPayloadClassName = 1;
         public static final int CLIENTPAYLOADCLASSNAME_FIELD_NUMBER = 1;
         private java.lang.Object clientPayloadClassName_;
         /**
@@ -499,7 +511,7 @@ public final class AppendEntriesMessages {
           if (ref instanceof java.lang.String) {
             return (java.lang.String) ref;
           } else {
-            com.google.protobuf.ByteString bs =
+            com.google.protobuf.ByteString bs = 
                 (com.google.protobuf.ByteString) ref;
             java.lang.String s = bs.toStringUtf8();
             if (bs.isValidUtf8()) {
@@ -515,7 +527,7 @@ public final class AppendEntriesMessages {
             getClientPayloadClassNameBytes() {
           java.lang.Object ref = clientPayloadClassName_;
           if (ref instanceof java.lang.String) {
-            com.google.protobuf.ByteString b =
+            com.google.protobuf.ByteString b = 
                 com.google.protobuf.ByteString.copyFromUtf8(
                     (java.lang.String) ref);
             clientPayloadClassName_ = b;
@@ -531,7 +543,8 @@ public final class AppendEntriesMessages {
         private byte memoizedIsInitialized = -1;
         public final boolean isInitialized() {
           byte isInitialized = memoizedIsInitialized;
-          if (isInitialized != -1) return isInitialized == 1;
+          if (isInitialized == 1) return true;
+          if (isInitialized == 0) return false;
 
           if (!extensionsAreInitialized()) {
             memoizedIsInitialized = 0;
@@ -648,7 +661,9 @@ public final class AppendEntriesMessages {
          */
         public static final class Builder extends
             com.google.protobuf.GeneratedMessage.ExtendableBuilder<
-              org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Payload, Builder> implements org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.PayloadOrBuilder {
+              org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Payload, Builder> implements
+            // @@protoc_insertion_point(builder_implements:org.opendaylight.controller.cluster.raft.AppendEntries.ReplicatedLogEntry.Payload)
+            org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.PayloadOrBuilder {
           public static final com.google.protobuf.Descriptors.Descriptor
               getDescriptor() {
             return org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_ReplicatedLogEntry_Payload_descriptor;
@@ -743,7 +758,7 @@ public final class AppendEntriesMessages {
 
           public final boolean isInitialized() {
             if (!extensionsAreInitialized()) {
-
+              
               return false;
             }
             return true;
@@ -768,7 +783,6 @@ public final class AppendEntriesMessages {
           }
           private int bitField0_;
 
-          // optional string clientPayloadClassName = 1;
           private java.lang.Object clientPayloadClassName_ = "";
           /**
            * <code>optional string clientPayloadClassName = 1;</code>
@@ -782,9 +796,12 @@ public final class AppendEntriesMessages {
           public java.lang.String getClientPayloadClassName() {
             java.lang.Object ref = clientPayloadClassName_;
             if (!(ref instanceof java.lang.String)) {
-              java.lang.String s = ((com.google.protobuf.ByteString) ref)
-                  .toStringUtf8();
-              clientPayloadClassName_ = s;
+              com.google.protobuf.ByteString bs =
+                  (com.google.protobuf.ByteString) ref;
+              java.lang.String s = bs.toStringUtf8();
+              if (bs.isValidUtf8()) {
+                clientPayloadClassName_ = s;
+              }
               return s;
             } else {
               return (java.lang.String) ref;
@@ -797,7 +814,7 @@ public final class AppendEntriesMessages {
               getClientPayloadClassNameBytes() {
             java.lang.Object ref = clientPayloadClassName_;
             if (ref instanceof String) {
-              com.google.protobuf.ByteString b =
+              com.google.protobuf.ByteString b = 
                   com.google.protobuf.ByteString.copyFromUtf8(
                       (java.lang.String) ref);
               clientPayloadClassName_ = b;
@@ -854,7 +871,6 @@ public final class AppendEntriesMessages {
       }
 
       private int bitField0_;
-      // optional int64 term = 1;
       public static final int TERM_FIELD_NUMBER = 1;
       private long term_;
       /**
@@ -870,7 +886,6 @@ public final class AppendEntriesMessages {
         return term_;
       }
 
-      // optional int64 index = 2;
       public static final int INDEX_FIELD_NUMBER = 2;
       private long index_;
       /**
@@ -886,7 +901,6 @@ public final class AppendEntriesMessages {
         return index_;
       }
 
-      // optional .org.opendaylight.controller.cluster.raft.AppendEntries.ReplicatedLogEntry.Payload data = 3;
       public static final int DATA_FIELD_NUMBER = 3;
       private org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Payload data_;
       /**
@@ -916,7 +930,8 @@ public final class AppendEntriesMessages {
       private byte memoizedIsInitialized = -1;
       public final boolean isInitialized() {
         byte isInitialized = memoizedIsInitialized;
-        if (isInitialized != -1) return isInitialized == 1;
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
 
         if (hasData()) {
           if (!getData().isInitialized()) {
@@ -1043,8 +1058,9 @@ public final class AppendEntriesMessages {
        * Protobuf type {@code org.opendaylight.controller.cluster.raft.AppendEntries.ReplicatedLogEntry}
        */
       public static final class Builder extends
-          com.google.protobuf.GeneratedMessage.Builder<Builder>
-         implements org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntryOrBuilder {
+          com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:org.opendaylight.controller.cluster.raft.AppendEntries.ReplicatedLogEntry)
+          org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntryOrBuilder {
         public static final com.google.protobuf.Descriptors.Descriptor
             getDescriptor() {
           return org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_ReplicatedLogEntry_descriptor;
@@ -1164,7 +1180,7 @@ public final class AppendEntriesMessages {
         public final boolean isInitialized() {
           if (hasData()) {
             if (!getData().isInitialized()) {
-
+              
               return false;
             }
           }
@@ -1190,7 +1206,6 @@ public final class AppendEntriesMessages {
         }
         private int bitField0_;
 
-        // optional int64 term = 1;
         private long term_ ;
         /**
          * <code>optional int64 term = 1;</code>
@@ -1223,7 +1238,6 @@ public final class AppendEntriesMessages {
           return this;
         }
 
-        // optional int64 index = 2;
         private long index_ ;
         /**
          * <code>optional int64 index = 2;</code>
@@ -1256,7 +1270,6 @@ public final class AppendEntriesMessages {
           return this;
         }
 
-        // optional .org.opendaylight.controller.cluster.raft.AppendEntries.ReplicatedLogEntry.Payload data = 3;
         private org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Payload data_ = org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Payload.getDefaultInstance();
         private com.google.protobuf.SingleFieldBuilder<
             org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Payload, org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Payload.Builder, org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.PayloadOrBuilder> dataBuilder_;
@@ -1360,12 +1373,12 @@ public final class AppendEntriesMessages {
          * <code>optional .org.opendaylight.controller.cluster.raft.AppendEntries.ReplicatedLogEntry.Payload data = 3;</code>
          */
         private com.google.protobuf.SingleFieldBuilder<
-            org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Payload, org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Payload.Builder, org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.PayloadOrBuilder>
+            org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Payload, org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Payload.Builder, org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.PayloadOrBuilder> 
             getDataFieldBuilder() {
           if (dataBuilder_ == null) {
             dataBuilder_ = new com.google.protobuf.SingleFieldBuilder<
                 org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Payload, org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Payload.Builder, org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.PayloadOrBuilder>(
-                    data_,
+                    getData(),
                     getParentForChildren(),
                     isClean());
             data_ = null;
@@ -1385,7 +1398,6 @@ public final class AppendEntriesMessages {
     }
 
     private int bitField0_;
-    // optional int64 term = 1;
     public static final int TERM_FIELD_NUMBER = 1;
     private long term_;
     /**
@@ -1401,7 +1413,6 @@ public final class AppendEntriesMessages {
       return term_;
     }
 
-    // optional string leaderId = 2;
     public static final int LEADERID_FIELD_NUMBER = 2;
     private java.lang.Object leaderId_;
     /**
@@ -1418,7 +1429,7 @@ public final class AppendEntriesMessages {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -1434,7 +1445,7 @@ public final class AppendEntriesMessages {
         getLeaderIdBytes() {
       java.lang.Object ref = leaderId_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         leaderId_ = b;
@@ -1444,7 +1455,6 @@ public final class AppendEntriesMessages {
       }
     }
 
-    // optional int64 prevLogIndex = 3;
     public static final int PREVLOGINDEX_FIELD_NUMBER = 3;
     private long prevLogIndex_;
     /**
@@ -1460,7 +1470,6 @@ public final class AppendEntriesMessages {
       return prevLogIndex_;
     }
 
-    // optional int64 prevLogTerm = 4;
     public static final int PREVLOGTERM_FIELD_NUMBER = 4;
     private long prevLogTerm_;
     /**
@@ -1476,7 +1485,6 @@ public final class AppendEntriesMessages {
       return prevLogTerm_;
     }
 
-    // repeated .org.opendaylight.controller.cluster.raft.AppendEntries.ReplicatedLogEntry logEntries = 5;
     public static final int LOGENTRIES_FIELD_NUMBER = 5;
     private java.util.List<org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry> logEntries_;
     /**
@@ -1488,7 +1496,7 @@ public final class AppendEntriesMessages {
     /**
      * <code>repeated .org.opendaylight.controller.cluster.raft.AppendEntries.ReplicatedLogEntry logEntries = 5;</code>
      */
-    public java.util.List<? extends org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntryOrBuilder>
+    public java.util.List<? extends org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntryOrBuilder> 
         getLogEntriesOrBuilderList() {
       return logEntries_;
     }
@@ -1512,7 +1520,6 @@ public final class AppendEntriesMessages {
       return logEntries_.get(index);
     }
 
-    // optional int64 leaderCommit = 6;
     public static final int LEADERCOMMIT_FIELD_NUMBER = 6;
     private long leaderCommit_;
     /**
@@ -1528,6 +1535,21 @@ public final class AppendEntriesMessages {
       return leaderCommit_;
     }
 
+    public static final int REPLICATEDTOALLINDEX_FIELD_NUMBER = 7;
+    private long replicatedToAllIndex_;
+    /**
+     * <code>optional int64 replicatedToAllIndex = 7;</code>
+     */
+    public boolean hasReplicatedToAllIndex() {
+      return ((bitField0_ & 0x00000020) == 0x00000020);
+    }
+    /**
+     * <code>optional int64 replicatedToAllIndex = 7;</code>
+     */
+    public long getReplicatedToAllIndex() {
+      return replicatedToAllIndex_;
+    }
+
     private void initFields() {
       term_ = 0L;
       leaderId_ = "";
@@ -1535,11 +1557,13 @@ public final class AppendEntriesMessages {
       prevLogTerm_ = 0L;
       logEntries_ = java.util.Collections.emptyList();
       leaderCommit_ = 0L;
+      replicatedToAllIndex_ = 0L;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
 
       for (int i = 0; i < getLogEntriesCount(); i++) {
         if (!getLogEntries(i).isInitialized()) {
@@ -1571,6 +1595,9 @@ public final class AppendEntriesMessages {
       }
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
         output.writeInt64(6, leaderCommit_);
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        output.writeInt64(7, replicatedToAllIndex_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -1604,6 +1631,10 @@ public final class AppendEntriesMessages {
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(6, leaderCommit_);
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(7, replicatedToAllIndex_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1687,8 +1718,9 @@ public final class AppendEntriesMessages {
      * Protobuf type {@code org.opendaylight.controller.cluster.raft.AppendEntries}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntriesOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:org.opendaylight.controller.cluster.raft.AppendEntries)
+        org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntriesOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_descriptor;
@@ -1738,6 +1770,8 @@ public final class AppendEntriesMessages {
         }
         leaderCommit_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000020);
+        replicatedToAllIndex_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000040);
         return this;
       }
 
@@ -1795,6 +1829,10 @@ public final class AppendEntriesMessages {
           to_bitField0_ |= 0x00000010;
         }
         result.leaderCommit_ = leaderCommit_;
+        if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
+          to_bitField0_ |= 0x00000020;
+        }
+        result.replicatedToAllIndex_ = replicatedToAllIndex_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -1843,7 +1881,7 @@ public final class AppendEntriesMessages {
               logEntriesBuilder_ = null;
               logEntries_ = other.logEntries_;
               bitField0_ = (bitField0_ & ~0x00000010);
-              logEntriesBuilder_ =
+              logEntriesBuilder_ = 
                 com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
                    getLogEntriesFieldBuilder() : null;
             } else {
@@ -1854,6 +1892,9 @@ public final class AppendEntriesMessages {
         if (other.hasLeaderCommit()) {
           setLeaderCommit(other.getLeaderCommit());
         }
+        if (other.hasReplicatedToAllIndex()) {
+          setReplicatedToAllIndex(other.getReplicatedToAllIndex());
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
@@ -1861,7 +1902,7 @@ public final class AppendEntriesMessages {
       public final boolean isInitialized() {
         for (int i = 0; i < getLogEntriesCount(); i++) {
           if (!getLogEntries(i).isInitialized()) {
-
+            
             return false;
           }
         }
@@ -1887,7 +1928,6 @@ public final class AppendEntriesMessages {
       }
       private int bitField0_;
 
-      // optional int64 term = 1;
       private long term_ ;
       /**
        * <code>optional int64 term = 1;</code>
@@ -1920,7 +1960,6 @@ public final class AppendEntriesMessages {
         return this;
       }
 
-      // optional string leaderId = 2;
       private java.lang.Object leaderId_ = "";
       /**
        * <code>optional string leaderId = 2;</code>
@@ -1934,9 +1973,12 @@ public final class AppendEntriesMessages {
       public java.lang.String getLeaderId() {
         java.lang.Object ref = leaderId_;
         if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
-          leaderId_ = s;
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            leaderId_ = s;
+          }
           return s;
         } else {
           return (java.lang.String) ref;
@@ -1949,7 +1991,7 @@ public final class AppendEntriesMessages {
           getLeaderIdBytes() {
         java.lang.Object ref = leaderId_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           leaderId_ = b;
@@ -1994,7 +2036,6 @@ public final class AppendEntriesMessages {
         return this;
       }
 
-      // optional int64 prevLogIndex = 3;
       private long prevLogIndex_ ;
       /**
        * <code>optional int64 prevLogIndex = 3;</code>
@@ -2027,7 +2068,6 @@ public final class AppendEntriesMessages {
         return this;
       }
 
-      // optional int64 prevLogTerm = 4;
       private long prevLogTerm_ ;
       /**
        * <code>optional int64 prevLogTerm = 4;</code>
@@ -2060,7 +2100,6 @@ public final class AppendEntriesMessages {
         return this;
       }
 
-      // repeated .org.opendaylight.controller.cluster.raft.AppendEntries.ReplicatedLogEntry logEntries = 5;
       private java.util.List<org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry> logEntries_ =
         java.util.Collections.emptyList();
       private void ensureLogEntriesIsMutable() {
@@ -2202,7 +2241,8 @@ public final class AppendEntriesMessages {
           java.lang.Iterable<? extends org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry> values) {
         if (logEntriesBuilder_ == null) {
           ensureLogEntriesIsMutable();
-          super.addAll(values, logEntries_);
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, logEntries_);
           onChanged();
         } else {
           logEntriesBuilder_.addAllMessages(values);
@@ -2255,7 +2295,7 @@ public final class AppendEntriesMessages {
       /**
        * <code>repeated .org.opendaylight.controller.cluster.raft.AppendEntries.ReplicatedLogEntry logEntries = 5;</code>
        */
-      public java.util.List<? extends org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntryOrBuilder>
+      public java.util.List<? extends org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntryOrBuilder> 
            getLogEntriesOrBuilderList() {
         if (logEntriesBuilder_ != null) {
           return logEntriesBuilder_.getMessageOrBuilderList();
@@ -2281,12 +2321,12 @@ public final class AppendEntriesMessages {
       /**
        * <code>repeated .org.opendaylight.controller.cluster.raft.AppendEntries.ReplicatedLogEntry logEntries = 5;</code>
        */
-      public java.util.List<org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Builder>
+      public java.util.List<org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Builder> 
            getLogEntriesBuilderList() {
         return getLogEntriesFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilder<
-          org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry, org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Builder, org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntryOrBuilder>
+          org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry, org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Builder, org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntryOrBuilder> 
           getLogEntriesFieldBuilder() {
         if (logEntriesBuilder_ == null) {
           logEntriesBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
@@ -2300,7 +2340,6 @@ public final class AppendEntriesMessages {
         return logEntriesBuilder_;
       }
 
-      // optional int64 leaderCommit = 6;
       private long leaderCommit_ ;
       /**
        * <code>optional int64 leaderCommit = 6;</code>
@@ -2333,6 +2372,38 @@ public final class AppendEntriesMessages {
         return this;
       }
 
+      private long replicatedToAllIndex_ ;
+      /**
+       * <code>optional int64 replicatedToAllIndex = 7;</code>
+       */
+      public boolean hasReplicatedToAllIndex() {
+        return ((bitField0_ & 0x00000040) == 0x00000040);
+      }
+      /**
+       * <code>optional int64 replicatedToAllIndex = 7;</code>
+       */
+      public long getReplicatedToAllIndex() {
+        return replicatedToAllIndex_;
+      }
+      /**
+       * <code>optional int64 replicatedToAllIndex = 7;</code>
+       */
+      public Builder setReplicatedToAllIndex(long value) {
+        bitField0_ |= 0x00000040;
+        replicatedToAllIndex_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int64 replicatedToAllIndex = 7;</code>
+       */
+      public Builder clearReplicatedToAllIndex() {
+        bitField0_ = (bitField0_ & ~0x00000040);
+        replicatedToAllIndex_ = 0L;
+        onChanged();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:org.opendaylight.controller.cluster.raft.AppendEntries)
     }
 
@@ -2344,17 +2415,17 @@ public final class AppendEntriesMessages {
     // @@protoc_insertion_point(class_scope:org.opendaylight.controller.cluster.raft.AppendEntries)
   }
 
-  private static com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_fieldAccessorTable;
-  private static com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_ReplicatedLogEntry_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_ReplicatedLogEntry_fieldAccessorTable;
-  private static com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_ReplicatedLogEntry_Payload_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
@@ -2369,51 +2440,51 @@ public final class AppendEntriesMessages {
   static {
     java.lang.String[] descriptorData = {
       "\n\033AppendEntriesMessages.proto\022(org.opend" +
-      "aylight.controller.cluster.raft\"\227\003\n\rAppe" +
+      "aylight.controller.cluster.raft\"\265\003\n\rAppe" +
       "ndEntries\022\014\n\004term\030\001 \001(\003\022\020\n\010leaderId\030\002 \001(" +
       "\t\022\024\n\014prevLogIndex\030\003 \001(\003\022\023\n\013prevLogTerm\030\004" +
       " \001(\003\022^\n\nlogEntries\030\005 \003(\0132J.org.opendayli" +
       "ght.controller.cluster.raft.AppendEntrie" +
       "s.ReplicatedLogEntry\022\024\n\014leaderCommit\030\006 \001" +
-      "(\003\032\304\001\n\022ReplicatedLogEntry\022\014\n\004term\030\001 \001(\003\022" +
-      "\r\n\005index\030\002 \001(\003\022`\n\004data\030\003 \001(\0132R.org.opend" +
-      "aylight.controller.cluster.raft.AppendEn",
-      "tries.ReplicatedLogEntry.Payload\032/\n\007Payl" +
-      "oad\022\036\n\026clientPayloadClassName\030\001 \001(\t*\004\010\002\020" +
-      "eBV\n;org.opendaylight.controller.protobu" +
-      "ff.messages.cluster.raftB\025AppendEntriesM" +
-      "essagesH\001"
+      "(\003\022\034\n\024replicatedToAllIndex\030\007 \001(\003\032\304\001\n\022Rep" +
+      "licatedLogEntry\022\014\n\004term\030\001 \001(\003\022\r\n\005index\030\002" +
+      " \001(\003\022`\n\004data\030\003 \001(\0132R.org.opendaylight.co",
+      "ntroller.cluster.raft.AppendEntries.Repl" +
+      "icatedLogEntry.Payload\032/\n\007Payload\022\036\n\026cli" +
+      "entPayloadClassName\030\001 \001(\t*\004\010\002\020eBV\n;org.o" +
+      "pendaylight.controller.protobuff.message" +
+      "s.cluster.raftB\025AppendEntriesMessagesH\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-      new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
-        public com.google.protobuf.ExtensionRegistry assignDescriptors(
-            com.google.protobuf.Descriptors.FileDescriptor root) {
-          descriptor = root;
-          internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_descriptor =
-            getDescriptor().getMessageTypes().get(0);
-          internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_descriptor,
-              new java.lang.String[] { "Term", "LeaderId", "PrevLogIndex", "PrevLogTerm", "LogEntries", "LeaderCommit", });
-          internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_ReplicatedLogEntry_descriptor =
-            internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_descriptor.getNestedTypes().get(0);
-          internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_ReplicatedLogEntry_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_ReplicatedLogEntry_descriptor,
-              new java.lang.String[] { "Term", "Index", "Data", });
-          internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_ReplicatedLogEntry_Payload_descriptor =
-            internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_ReplicatedLogEntry_descriptor.getNestedTypes().get(0);
-          internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_ReplicatedLogEntry_Payload_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_ReplicatedLogEntry_Payload_descriptor,
-              new java.lang.String[] { "ClientPayloadClassName", });
-          return null;
-        }
-      };
+        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
+          public com.google.protobuf.ExtensionRegistry assignDescriptors(
+              com.google.protobuf.Descriptors.FileDescriptor root) {
+            descriptor = root;
+            return null;
+          }
+        };
     com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
+    internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_descriptor =
+      getDescriptor().getMessageTypes().get(0);
+    internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_descriptor,
+        new java.lang.String[] { "Term", "LeaderId", "PrevLogIndex", "PrevLogTerm", "LogEntries", "LeaderCommit", "ReplicatedToAllIndex", });
+    internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_ReplicatedLogEntry_descriptor =
+      internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_descriptor.getNestedTypes().get(0);
+    internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_ReplicatedLogEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_ReplicatedLogEntry_descriptor,
+        new java.lang.String[] { "Term", "Index", "Data", });
+    internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_ReplicatedLogEntry_Payload_descriptor =
+      internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_ReplicatedLogEntry_descriptor.getNestedTypes().get(0);
+    internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_ReplicatedLogEntry_Payload_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_ReplicatedLogEntry_Payload_descriptor,
+        new java.lang.String[] { "ClientPayloadClassName", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)
