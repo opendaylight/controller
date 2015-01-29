@@ -3,7 +3,6 @@
     <snapshots>
         <snapshot>
             <required-capabilities>
-                <capability>urn:opendaylight:l2:types?module=opendaylight-l2-types&amp;revision=2013-08-27</capability>
                 <capability>
                     urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding?module=opendaylight-md-sal-binding&amp;revision=2013-10-28
                 </capability>
@@ -12,13 +11,10 @@
                     urn:opendaylight:params:xml:ns:yang:controller:config?module=config&amp;revision=2013-04-05
                 </capability>
                 <capability>urn:ietf:params:netconf:capability:candidate:1.0</capability>
-                <capability>urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring?module=ietf-netconf-monitoring&amp;revision=2010-10-04</capability>
                 <capability>urn:ietf:params:xml:ns:yang:rpc-context?module=rpc-context&amp;revision=2013-06-17
                 </capability>
                 <capability>
                     urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl?module=opendaylight-sal-binding-broker-impl&amp;revision=2013-10-28
-                </capability>
-                <capability>urn:ietf:params:xml:ns:yang:ietf-inet-types?module=ietf-inet-types&amp;revision=2010-09-24
                 </capability>
                 <capability>urn:ietf:params:xml:ns:yang:ietf-yang-types?module=ietf-yang-types&amp;revision=2010-09-24
                 </capability>
@@ -26,8 +22,6 @@
                     urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl?module=opendaylight-sal-dom-broker-impl&amp;revision=2013-10-28
                 </capability>
                 <capability>urn:opendaylight:params:xml:ns:yang:controller:logback:config?module=config-logging&amp;revision=2013-07-16</capability>
-                <capability>urn:opendaylight:yang:extension:yang-ext?module=yang-ext&amp;revision=2013-07-09
-                </capability>
                 <capability>
                     urn:opendaylight:params:xml:ns:yang:controller:md:sal:common?module=opendaylight-md-sal-common&amp;revision=2013-10-28
                 </capability>

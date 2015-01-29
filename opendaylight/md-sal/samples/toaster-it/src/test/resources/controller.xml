@@ -225,7 +225,6 @@
                 <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:common?module=opendaylight-md-sal-common&amp;revision=2013-10-28</capability>
 
                 <!-- Toaster capabilities -->
-                <capability>http://netconfcentral.org/ns/toaster?module=toaster&amp;revision=2009-11-20</capability>
                 <capability>urn:opendaylight:params:xml:ns:yang:controller:config:kitchen-service:impl?module=kitchen-service-impl&amp;revision=2014-01-31</capability>
                 <capability>urn:opendaylight:params:xml:ns:yang:controller:config:toaster-provider:impl?module=toaster-provider-impl&amp;revision=2014-01-31</capability>
 
