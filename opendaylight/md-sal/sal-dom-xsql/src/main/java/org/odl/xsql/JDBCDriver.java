@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.odl.xsql;
 
 import java.sql.Connection;
@@ -10,7 +17,9 @@ import java.util.Properties;
 import java.util.logging.Logger;
 
 import org.opendaylight.controller.md.sal.dom.xsql.jdbc.JDBCConnection;
-
+/**
+ * @author Sharon Aicler(saichler@gmail.com)
+ **/
 public class JDBCDriver implements Driver {
 
     public static JDBCDriver drv = new JDBCDriver();

@@ -2,18 +2,29 @@ package org.opendaylight.xsql.test;
 
 import java.io.InputStream;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.dom.xsql.XSQLAdapter;
 import org.opendaylight.controller.md.sal.dom.xsql.XSQLBluePrint;
 import org.opendaylight.controller.md.sal.dom.xsql.jdbc.JDBCResultSet;
 import org.opendaylight.controller.md.sal.dom.xsql.jdbc.JDBCServer;
+import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
 
 public class XSQLTest {
-
-    XSQLBluePrint bluePrint = null;
+    private static final String DATASTORE_TEST_YANG = "/sal-persisted-dom-test.yang";
+    private XSQLBluePrint bluePrint = null;
+    //private static SchemaContext schemaContext = null;
+    @BeforeClass
+    public static void loadSchemaContext(){
+        //schemaContext = createTestContext();
+    }
 
     @Before
     public void before() {
@@ -166,5 +177,19 @@ public class XSQLTest {
     private static void log(String str) {
         System.out.print("*** XSQL Tests -");
         System.out.println(str);
+    }
+
+    public static final InputStream getDatastoreTestInputStream() {
+        return getInputStream(DATASTORE_TEST_YANG);
+    }
+
+    private static InputStream getInputStream(final String resourceName) {
+        return XSQLTest.class.getResourceAsStream(DATASTORE_TEST_YANG);
+    }
+
+    public static SchemaContext createTestContext() {
+        YangParserImpl parser = new YangParserImpl();
+        Set<Module> modules = parser.parseYangModelsFromStreams(Collections.singletonList(getDatastoreTestInputStream()));
+        return parser.resolveSchemaContext(modules);
     }
 }
