@@ -9,8 +9,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSelection;
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.SettableFuture;
 import java.util.concurrent.Semaphore;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
@@ -18,7 +17,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.concurrent.Future;
+import scala.concurrent.Promise;
 
 final class NoOpTransactionContext extends AbstractTransactionContext {
     private static final Logger LOG = LoggerFactory.getLogger(NoOpTransactionContext.class);
@@ -38,10 +37,10 @@ final class NoOpTransactionContext extends AbstractTransactionContext {
     }
 
     @Override
-    public Future<ActorSelection> readyTransaction() {
+    public void readyTransaction(Promise<ActorSelection> promise) {
         LOG.debug("Tx {} readyTransaction called", identifier);
         operationLimiter.release();
-        return akka.dispatch.Futures.failed(failure);
+        promise.failure(failure);
     }
 
     @Override
@@ -63,20 +62,16 @@ final class NoOpTransactionContext extends AbstractTransactionContext {
     }
 
     @Override
-    public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readData(
-            YangInstanceIdentifier path) {
+    public void readData(final YangInstanceIdentifier path, SettableFuture<Optional<NormalizedNode<?, ?>>> proxyFuture) {
         LOG.debug("Tx {} readData called path = {}", identifier, path);
         operationLimiter.release();
-        return Futures.immediateFailedCheckedFuture(new ReadFailedException(
-                "Error reading data for path " + path, failure));
+        proxyFuture.setException(new ReadFailedException("Error reading data for path " + path, failure));
     }
 
     @Override
-    public CheckedFuture<Boolean, ReadFailedException> dataExists(
-            YangInstanceIdentifier path) {
+    public void dataExists(YangInstanceIdentifier path, SettableFuture<Boolean> proxyFuture) {
         LOG.debug("Tx {} dataExists called path = {}", identifier, path);
         operationLimiter.release();
-        return Futures.immediateFailedCheckedFuture(new ReadFailedException(
-                "Error checking exists for path " + path, failure));
+        proxyFuture.setException(new ReadFailedException("Error checking exists for path " + path, failure));
     }
 }

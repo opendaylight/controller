@@ -9,12 +9,12 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSelection;
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import java.util.List;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import scala.concurrent.Future;
+import scala.concurrent.Promise;
 
 /*
  * FIXME: why do we need this interface? It should be possible to integrate it with
@@ -23,7 +23,7 @@ import scala.concurrent.Future;
 interface TransactionContext {
     void closeTransaction();
 
-    Future<ActorSelection> readyTransaction();
+    void readyTransaction(Promise<ActorSelection> promise);
 
     void writeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data);
 
@@ -31,10 +31,9 @@ interface TransactionContext {
 
     void mergeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data);
 
-    CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readData(
-            final YangInstanceIdentifier path);
+    void readData(final YangInstanceIdentifier path, SettableFuture<Optional<NormalizedNode<?, ?>>> proxyFuture);
 
-    CheckedFuture<Boolean, ReadFailedException> dataExists(YangInstanceIdentifier path);
+    void dataExists(YangInstanceIdentifier path, SettableFuture<Boolean> proxyFuture);
 
     List<Future<Object>> getRecordedOperationFutures();
 }
