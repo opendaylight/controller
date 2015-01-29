@@ -255,6 +255,20 @@ public class Follower extends AbstractRaftActorBehavior {
         sender.tell(new AppendEntriesReply(context.getId(), currentTerm(), true,
             lastIndex(), lastTerm()), actor());
 
+
+        long minReplicatedToAllIndex = appendEntries.getReplicatedToAllIndex();
+        while (minReplicatedToAllIndex >= context.getLastApplied()) {
+            //  we would want to keep the lastApplied as its used while capturing snapshots
+            --minReplicatedToAllIndex;
+        }
+
+        if (!context.isSnapshotCaptureInitiated() && minReplicatedToAllIndex > -1 &&
+                context.getReplicatedLog().isPresent(minReplicatedToAllIndex)) {
+            context.getReplicatedLog().snapshotPreCommit(
+                    appendEntries.getReplicatedToAllIndex(), context.getTermInformation().getCurrentTerm());
+            context.getReplicatedLog().snapshotCommit();
+        }
+
         return this;
     }
 

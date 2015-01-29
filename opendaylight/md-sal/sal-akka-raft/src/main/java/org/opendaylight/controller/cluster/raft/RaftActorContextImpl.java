@@ -41,6 +41,8 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private final ConfigParams configParams;
 
+    private boolean snapshotCaptureInitiated;
+
     public RaftActorContextImpl(ActorRef actor, UntypedActorContext context,
         String id,
         ElectionTerm termInformation, long commitIndex,
@@ -128,6 +130,16 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override public ConfigParams getConfigParams() {
         return configParams;
+    }
+
+    @Override
+    public void setSnapshotCaptureInitiated(boolean snapshotCaptureInitiated) {
+        this.snapshotCaptureInitiated = snapshotCaptureInitiated;
+    }
+
+    @Override
+    public boolean isSnapshotCaptureInitiated() {
+        return snapshotCaptureInitiated;
     }
 
     @Override public void addToPeers(String name, String address) {
