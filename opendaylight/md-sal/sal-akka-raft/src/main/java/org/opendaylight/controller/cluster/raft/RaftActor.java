@@ -317,7 +317,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                     snapshot.getLastAppliedTerm()
                 );
             }
-            applySnapshot(ByteString.copyFrom(snapshot.getState()));
+
+            applySnapshot(snapshot.getState());
 
             //clears the followers log, sets the snapshot index to ensure adjusted-index works
             replicatedLog = new ReplicatedLogImpl(snapshot);
@@ -362,7 +363,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             LOG.info("CaptureSnapshotReply received by actor");
             CaptureSnapshotReply csr = (CaptureSnapshotReply) message;
 
-            ByteString stateInBytes = csr.getSnapshot();
+            ByteString stateInBytes = ByteString.copyFrom(csr.getSnapshot());
             LOG.info("CaptureSnapshotReply stateInBytes size:{}", stateInBytes.size());
             handleCaptureSnapshotReply(stateInBytes);
 
@@ -612,9 +613,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      * operations when the derived actor is out of sync with it's peers
      * and the only way to bring it in sync is by applying a snapshot
      *
-     * @param snapshot A snapshot of the state of the actor
+     * @param snapshotBytes A snapshot of the state of the actor
      */
-    protected abstract void applySnapshot(ByteString snapshot);
+    protected abstract void applySnapshot(byte [] snapshotBytes);
 
     /**
      * This method will be called by the RaftActor when the state of the

@@ -41,7 +41,7 @@ public class ExampleActor extends RaftActor {
     private final DataPersistenceProvider dataPersistenceProvider;
 
     private long persistIdentifier = 1;
-    private Optional<ActorRef> roleChangeNotifier;
+    private final Optional<ActorRef> roleChangeNotifier;
 
 
     public ExampleActor(String id, Map<String, String> peerAddresses,
@@ -127,10 +127,10 @@ public class ExampleActor extends RaftActor {
         } catch (Exception e) {
             LOG.error(e, "Exception in creating snapshot");
         }
-        getSelf().tell(new CaptureSnapshotReply(bs), null);
+        getSelf().tell(new CaptureSnapshotReply(bs.toByteArray()), null);
     }
 
-    @Override protected void applySnapshot(ByteString snapshot) {
+    @Override protected void applySnapshot(byte [] snapshot) {
         state.clear();
         try {
             state.putAll((HashMap) toObject(snapshot));
@@ -162,12 +162,12 @@ public class ExampleActor extends RaftActor {
         }
     }
 
-    private Object toObject(ByteString bs) throws ClassNotFoundException, IOException {
+    private Object toObject(byte [] bs) throws ClassNotFoundException, IOException {
         Object obj = null;
         ByteArrayInputStream bis = null;
         ObjectInputStream ois = null;
         try {
-            bis = new ByteArrayInputStream(bs.toByteArray());
+            bis = new ByteArrayInputStream(bs);
             ois = new ObjectInputStream(bis);
             obj = ois.readObject();
         } finally {

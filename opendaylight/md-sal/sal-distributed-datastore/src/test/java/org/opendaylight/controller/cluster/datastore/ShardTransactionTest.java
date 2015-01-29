@@ -12,7 +12,7 @@ import akka.testkit.TestActorRef;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.ShardWriteTransaction.GetCompositeModificationReply;
 import org.opendaylight.controller.cluster.datastore.exceptions.UnknownMessageException;
@@ -20,6 +20,7 @@ import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionReply;
+import org.opendaylight.controller.cluster.datastore.messages.CreateSnapshot;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.DataExistsReply;
 import org.opendaylight.controller.cluster.datastore.messages.DeleteData;
@@ -39,17 +40,19 @@ import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
 import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec.Encoded;
+import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
+import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.duration.Duration;
 
 public class ShardTransactionTest extends AbstractActorTest {
-    private static final InMemoryDOMDataStore store =
-        new InMemoryDOMDataStore("OPER", MoreExecutors.sameThreadExecutor());
 
     private static final SchemaContext testSchemaContext = TestModel.createTestContext();
 
@@ -61,8 +64,11 @@ public class ShardTransactionTest extends AbstractActorTest {
 
     private final ShardStats shardStats = new ShardStats(SHARD_IDENTIFIER.toString(), "DataStore");
 
-    @BeforeClass
-    public static void staticSetup() {
+    private final InMemoryDOMDataStore store =
+            new InMemoryDOMDataStore("OPER", MoreExecutors.sameThreadExecutor());
+
+    @Before
+    public void setup() {
         store.onGlobalContextUpdated(testSchemaContext);
     }
 
@@ -71,21 +77,33 @@ public class ShardTransactionTest extends AbstractActorTest {
             Collections.<ShardIdentifier, String>emptyMap(), datastoreContext, TestModel.createTestContext()));
     }
 
+    private ActorRef newTransactionActor(DOMStoreTransaction transaction, String name) {
+        return newTransactionActor(transaction, name, DataStoreVersions.CURRENT_VERSION);
+    }
+
+    private ActorRef newTransactionActor(DOMStoreTransaction transaction, String name, short version) {
+        return newTransactionActor(transaction, null, name, version);
+    }
+
+    private ActorRef newTransactionActor(DOMStoreTransaction transaction, ActorRef shard, String name) {
+        return newTransactionActor(transaction, null, name, DataStoreVersions.CURRENT_VERSION);
+    }
+
+    private ActorRef newTransactionActor(DOMStoreTransaction transaction, ActorRef shard, String name,
+            short version) {
+        Props props = ShardTransaction.props(transaction, shard != null ? shard : createShard(),
+                testSchemaContext, datastoreContext, shardStats, "txn", version);
+        return getSystem().actorOf(props, name);
+    }
+
     @Test
     public void testOnReceiveReadData() throws Exception {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = createShard();
-            Props props = ShardTransaction.props(store.newReadOnlyTransaction(), shard,
-                    testSchemaContext, datastoreContext, shardStats, "txn",
-                    DataStoreVersions.CURRENT_VERSION);
 
-            testOnReceiveReadData(getSystem().actorOf(props, "testReadDataRO"));
+            testOnReceiveReadData(newTransactionActor(store.newReadOnlyTransaction(), shard, "testReadDataRO"));
 
-            props = ShardTransaction.props(store.newReadWriteTransaction(), shard,
-                    testSchemaContext, datastoreContext, shardStats, "txn",
-                    DataStoreVersions.CURRENT_VERSION);
-
-            testOnReceiveReadData(getSystem().actorOf(props, "testReadDataRW"));
+            testOnReceiveReadData(newTransactionActor(store.newReadWriteTransaction(), shard, "testReadDataRW"));
         }
 
         private void testOnReceiveReadData(final ActorRef transaction) {
@@ -111,19 +129,12 @@ public class ShardTransactionTest extends AbstractActorTest {
     public void testOnReceiveReadDataWhenDataNotFound() throws Exception {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = createShard();
-            Props props = ShardTransaction.props( store.newReadOnlyTransaction(), shard,
-                    testSchemaContext, datastoreContext, shardStats, "txn",
-                    DataStoreVersions.CURRENT_VERSION);
 
-            testOnReceiveReadDataWhenDataNotFound(getSystem().actorOf(
-                    props, "testReadDataWhenDataNotFoundRO"));
+            testOnReceiveReadDataWhenDataNotFound(newTransactionActor(
+                    store.newReadOnlyTransaction(), shard, "testReadDataWhenDataNotFoundRO"));
 
-            props = ShardTransaction.props( store.newReadWriteTransaction(), shard,
-                    testSchemaContext, datastoreContext, shardStats, "txn",
-                    DataStoreVersions.CURRENT_VERSION);
-
-            testOnReceiveReadDataWhenDataNotFound(getSystem().actorOf(
-                    props, "testReadDataWhenDataNotFoundRW"));
+            testOnReceiveReadDataWhenDataNotFound(newTransactionActor(
+                    store.newReadWriteTransaction(), shard, "testReadDataWhenDataNotFoundRW"));
         }
 
         private void testOnReceiveReadDataWhenDataNotFound(final ActorRef transaction) {
@@ -147,12 +158,8 @@ public class ShardTransactionTest extends AbstractActorTest {
     @Test
     public void testOnReceiveReadDataHeliumR1() throws Exception {
         new JavaTestKit(getSystem()) {{
-            final ActorRef shard = createShard();
-            Props props = ShardTransaction.props(store.newReadOnlyTransaction(), shard,
-                    testSchemaContext, datastoreContext, shardStats, "txn",
-                    DataStoreVersions.HELIUM_1_VERSION);
-
-            ActorRef transaction = getSystem().actorOf(props, "testOnReceiveReadDataHeliumR1");
+            ActorRef transaction = newTransactionActor(store.newReadOnlyTransaction(),
+                    "testOnReceiveReadDataHeliumR1", DataStoreVersions.HELIUM_1_VERSION);
 
             transaction.tell(new ReadData(YangInstanceIdentifier.builder().build()).toSerializable(),
                     getRef());
@@ -168,17 +175,12 @@ public class ShardTransactionTest extends AbstractActorTest {
     public void testOnReceiveDataExistsPositive() throws Exception {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = createShard();
-            Props props = ShardTransaction.props(store.newReadOnlyTransaction(), shard,
-                    testSchemaContext, datastoreContext, shardStats, "txn",
-                    DataStoreVersions.CURRENT_VERSION);
 
-            testOnReceiveDataExistsPositive(getSystem().actorOf(props, "testDataExistsPositiveRO"));
+            testOnReceiveDataExistsPositive(newTransactionActor(store.newReadOnlyTransaction(), shard,
+                    "testDataExistsPositiveRO"));
 
-            props = ShardTransaction.props(store.newReadWriteTransaction(), shard,
-                    testSchemaContext, datastoreContext, shardStats, "txn",
-                    DataStoreVersions.CURRENT_VERSION);
-
-            testOnReceiveDataExistsPositive(getSystem().actorOf(props, "testDataExistsPositiveRW"));
+            testOnReceiveDataExistsPositive(newTransactionActor(store.newReadWriteTransaction(), shard,
+                    "testDataExistsPositiveRW"));
         }
 
         private void testOnReceiveDataExistsPositive(final ActorRef transaction) {
@@ -203,17 +205,12 @@ public class ShardTransactionTest extends AbstractActorTest {
     public void testOnReceiveDataExistsNegative() throws Exception {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = createShard();
-            Props props = ShardTransaction.props(store.newReadOnlyTransaction(), shard,
-                    testSchemaContext, datastoreContext, shardStats, "txn",
-                    DataStoreVersions.CURRENT_VERSION);
 
-            testOnReceiveDataExistsNegative(getSystem().actorOf(props, "testDataExistsNegativeRO"));
+            testOnReceiveDataExistsNegative(newTransactionActor(store.newReadOnlyTransaction(), shard,
+                    "testDataExistsNegativeRO"));
 
-            props = ShardTransaction.props(store.newReadWriteTransaction(), shard,
-                    testSchemaContext, datastoreContext, shardStats, "txn",
-                    DataStoreVersions.CURRENT_VERSION);
-
-            testOnReceiveDataExistsNegative(getSystem().actorOf(props, "testDataExistsNegativeRW"));
+            testOnReceiveDataExistsNegative(newTransactionActor(store.newReadWriteTransaction(), shard,
+                    "testDataExistsNegativeRW"));
         }
 
         private void testOnReceiveDataExistsNegative(final ActorRef transaction) {
@@ -249,11 +246,8 @@ public class ShardTransactionTest extends AbstractActorTest {
     @Test
     public void testOnReceiveWriteData() throws Exception {
         new JavaTestKit(getSystem()) {{
-            final ActorRef shard = createShard();
-            final Props props = ShardTransaction.props(store.newWriteOnlyTransaction(), shard,
-                    testSchemaContext, datastoreContext, shardStats, "txn",
-                    DataStoreVersions.CURRENT_VERSION);
-            final ActorRef transaction = getSystem().actorOf(props, "testOnReceiveWriteData");
+            final ActorRef transaction = newTransactionActor(store.newWriteOnlyTransaction(),
+                    "testOnReceiveWriteData");
 
             transaction.tell(new WriteData(TestModel.TEST_PATH,
                     ImmutableNodes.containerNode(TestModel.TEST_QNAME)).toSerializable(
@@ -275,11 +269,8 @@ public class ShardTransactionTest extends AbstractActorTest {
     @Test
     public void testOnReceiveHeliumR1WriteData() throws Exception {
         new JavaTestKit(getSystem()) {{
-            final ActorRef shard = createShard();
-            final Props props = ShardTransaction.props(store.newWriteOnlyTransaction(), shard,
-                    testSchemaContext, datastoreContext, shardStats, "txn",
-                    DataStoreVersions.HELIUM_1_VERSION);
-            final ActorRef transaction = getSystem().actorOf(props, "testOnReceiveHeliumR1WriteData");
+            final ActorRef transaction = newTransactionActor(store.newWriteOnlyTransaction(),
+                    "testOnReceiveHeliumR1WriteData", DataStoreVersions.HELIUM_1_VERSION);
 
             Encoded encoded = new NormalizedNodeToNodeCodec(null).encode(TestModel.TEST_PATH,
                     ImmutableNodes.containerNode(TestModel.TEST_QNAME));
@@ -298,11 +289,8 @@ public class ShardTransactionTest extends AbstractActorTest {
     @Test
     public void testOnReceiveMergeData() throws Exception {
         new JavaTestKit(getSystem()) {{
-            final ActorRef shard = createShard();
-            final Props props = ShardTransaction.props(store.newReadWriteTransaction(), shard,
-                    testSchemaContext, datastoreContext, shardStats, "txn",
-                    DataStoreVersions.CURRENT_VERSION);
-            final ActorRef transaction = getSystem().actorOf(props, "testMergeData");
+            final ActorRef transaction = newTransactionActor(store.newReadWriteTransaction(),
+                    "testMergeData");
 
             transaction.tell(new MergeData(TestModel.TEST_PATH,
                     ImmutableNodes.containerNode(TestModel.TEST_QNAME)).toSerializable(
@@ -324,11 +312,8 @@ public class ShardTransactionTest extends AbstractActorTest {
     @Test
     public void testOnReceiveHeliumR1MergeData() throws Exception {
         new JavaTestKit(getSystem()) {{
-            final ActorRef shard = createShard();
-            final Props props = ShardTransaction.props(store.newWriteOnlyTransaction(), shard,
-                    testSchemaContext, datastoreContext, shardStats, "txn",
-                    DataStoreVersions.HELIUM_1_VERSION);
-            final ActorRef transaction = getSystem().actorOf(props, "testOnReceiveHeliumR1MergeData");
+            final ActorRef transaction = newTransactionActor(store.newWriteOnlyTransaction(),
+                    "testOnReceiveHeliumR1MergeData", DataStoreVersions.HELIUM_1_VERSION);
 
             Encoded encoded = new NormalizedNodeToNodeCodec(null).encode(TestModel.TEST_PATH,
                     ImmutableNodes.containerNode(TestModel.TEST_QNAME));
@@ -347,11 +332,8 @@ public class ShardTransactionTest extends AbstractActorTest {
     @Test
     public void testOnReceiveDeleteData() throws Exception {
         new JavaTestKit(getSystem()) {{
-            final ActorRef shard = createShard();
-            final Props props = ShardTransaction.props( store.newWriteOnlyTransaction(), shard,
-                    testSchemaContext, datastoreContext, shardStats, "txn",
-                    DataStoreVersions.CURRENT_VERSION);
-            final ActorRef transaction = getSystem().actorOf(props, "testDeleteData");
+            final ActorRef transaction = newTransactionActor(store.newWriteOnlyTransaction(),
+                    "testDeleteData");
 
             transaction.tell(new DeleteData(TestModel.TEST_PATH).toSerializable(
                     DataStoreVersions.HELIUM_2_VERSION), getRef());
@@ -371,11 +353,8 @@ public class ShardTransactionTest extends AbstractActorTest {
     @Test
     public void testOnReceiveReadyTransaction() throws Exception {
         new JavaTestKit(getSystem()) {{
-            final ActorRef shard = createShard();
-            final Props props = ShardTransaction.props( store.newReadWriteTransaction(), shard,
-                    testSchemaContext, datastoreContext, shardStats, "txn",
-                    DataStoreVersions.CURRENT_VERSION);
-            final ActorRef transaction = getSystem().actorOf(props, "testReadyTransaction");
+            final ActorRef transaction = newTransactionActor(store.newReadWriteTransaction(),
+                    "testReadyTransaction");
 
             watch(transaction);
 
@@ -389,11 +368,8 @@ public class ShardTransactionTest extends AbstractActorTest {
 
         // test
         new JavaTestKit(getSystem()) {{
-            final ActorRef shard = createShard();
-            final Props props = ShardTransaction.props( store.newReadWriteTransaction(), shard,
-                testSchemaContext, datastoreContext, shardStats, "txn",
-                DataStoreVersions.CURRENT_VERSION);
-            final ActorRef transaction = getSystem().actorOf(props, "testReadyTransaction2");
+            final ActorRef transaction = newTransactionActor(store.newReadWriteTransaction(),
+                    "testReadyTransaction2");
 
             watch(transaction);
 
@@ -404,18 +380,38 @@ public class ShardTransactionTest extends AbstractActorTest {
             expectMsgAnyClassOf(duration("5 seconds"), ReadyTransactionReply.class,
                     Terminated.class);
         }};
-
     }
 
-    @SuppressWarnings("unchecked")
+    @Test
+    public void testOnReceiveCreateSnapshot() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            ShardTest.writeToStore(store, TestModel.TEST_PATH,
+                    ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+
+            NormalizedNode<?,?> expectedRoot = ShardTest.readStore(store,
+                    YangInstanceIdentifier.builder().build());
+
+            final ActorRef transaction = newTransactionActor(store.newReadOnlyTransaction(),
+                    "testOnReceiveCreateSnapshot");
+
+            transaction.tell(CreateSnapshot.INSTANCE, getRef());
+
+            CaptureSnapshotReply reply = expectMsgClass(duration("3 seconds"), CaptureSnapshotReply.class);
+
+            assertNotNull("getSnapshot is null", reply.getSnapshot());
+
+            NormalizedNode<?,?> actualRoot = SerializationUtils.deserializeNormalizedNode(
+                    reply.getSnapshot());
+
+            assertEquals("Root node", expectedRoot, actualRoot);
+        }};
+    }
+
     @Test
     public void testOnReceiveCloseTransaction() throws Exception {
         new JavaTestKit(getSystem()) {{
-            final ActorRef shard = createShard();
-            final Props props = ShardTransaction.props(store.newReadWriteTransaction(), shard,
-                    testSchemaContext, datastoreContext, shardStats, "txn",
-                    DataStoreVersions.CURRENT_VERSION);
-            final ActorRef transaction = getSystem().actorOf(props, "testCloseTransaction");
+            final ActorRef transaction = newTransactionActor(store.newReadWriteTransaction(),
+                    "testCloseTransaction");
 
             watch(transaction);
 
@@ -445,12 +441,8 @@ public class ShardTransactionTest extends AbstractActorTest {
                 Duration.create(500, TimeUnit.MILLISECONDS)).build();
 
         new JavaTestKit(getSystem()) {{
-            final ActorRef shard = createShard();
-            final Props props = ShardTransaction.props(store.newReadWriteTransaction(), shard,
-                    testSchemaContext, datastoreContext, shardStats, "txn",
-                    DataStoreVersions.CURRENT_VERSION);
-            final ActorRef transaction =
-                getSystem().actorOf(props, "testShardTransactionInactivity");
+            final ActorRef transaction = newTransactionActor(store.newReadWriteTransaction(),
+                    "testShardTransactionInactivity");
 
             watch(transaction);
 

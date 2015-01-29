@@ -8,8 +8,12 @@
 package org.opendaylight.controller.cluster.datastore.utils;
 
 import com.google.common.base.Preconditions;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
+import java.io.DataInputStream;
 import java.io.DataOutput;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputStreamReader;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeOutputStreamWriter;
@@ -97,6 +101,24 @@ public final class SerializationUtils {
             }
 
         return null;
+    }
+
+    public static NormalizedNode<?, ?> deserializeNormalizedNode(byte [] bytes) {
+        return deserializeNormalizedNode(new DataInputStream(new ByteArrayInputStream(bytes)));
+    }
+
+    public static NormalizedNode<?, ?> tryDeserializeNormalizedNode(byte [] bytes) {
+        try {
+            return deserializeNormalizedNode(new DataInputStream(new ByteArrayInputStream(bytes)));
+        } catch(Exception e) {
+            return null;
+        }
+    }
+
+    public static byte [] serializeNormalizedNode(NormalizedNode<?, ?> node) {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        serializeNormalizedNode(node, new DataOutputStream(bos));
+        return bos.toByteArray();
     }
 
     public static void serializePath(YangInstanceIdentifier path, DataOutput out) {

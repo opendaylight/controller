@@ -11,7 +11,6 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Cancellable;
-import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
@@ -52,13 +51,12 @@ import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransacti
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChain;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
+import org.opendaylight.controller.cluster.datastore.messages.CreateSnapshot;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
 import org.opendaylight.controller.cluster.datastore.messages.ForwardedReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolved;
-import org.opendaylight.controller.cluster.datastore.messages.ReadData;
-import org.opendaylight.controller.cluster.datastore.messages.ReadDataReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
@@ -67,10 +65,10 @@ import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.modification.ModificationPayload;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
+import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotifier;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationByteStringPayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationPayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
@@ -96,6 +94,8 @@ import scala.concurrent.duration.FiniteDuration;
  * </p>
  */
 public class Shard extends RaftActor {
+
+    private static final YangInstanceIdentifier DATASTORE_ROOT = YangInstanceIdentifier.builder().build();
 
     private static final Object TX_COMMIT_TIMEOUT_CHECK_MESSAGE = "txCommitTimeoutCheck";
 
@@ -123,8 +123,6 @@ public class Shard extends RaftActor {
     private final DataPersistenceProvider dataPersistenceProvider;
 
     private SchemaContext schemaContext;
-
-    private ActorRef createSnapshotTransaction;
 
     private int createSnapshotTransactionCounter;
 
@@ -244,9 +242,7 @@ public class Shard extends RaftActor {
             LOG.debug("onReceiveCommand: Received message {} from {}", message, getSender());
         }
 
-        if(message.getClass().equals(ReadDataReply.SERIALIZABLE_CLASS)) {
-            handleReadDataReply(message);
-        } else if (message.getClass().equals(CreateTransaction.SERIALIZABLE_CLASS)) {
+        if (message.getClass().equals(CreateTransaction.SERIALIZABLE_CLASS)) {
             handleCreateTransaction(message);
         } else if(message instanceof ForwardedReadyTransaction) {
             handleForwardedReadyTransaction((ForwardedReadyTransaction)message);
@@ -475,20 +471,6 @@ public class Shard extends RaftActor {
                 " when the system is coming up or recovering and a leader is being elected. Try again" +
                 " later.")), getSelf());
         }
-    }
-
-    private void handleReadDataReply(final Object message) {
-        // This must be for install snapshot. Don't want to open this up and trigger
-        // deSerialization
-
-        self().tell(new CaptureSnapshotReply(ReadDataReply.fromSerializableAsByteString(message)),
-                self());
-
-        createSnapshotTransaction = null;
-
-        // Send a PoisonPill instead of sending close transaction because we do not really need
-        // a response
-        getSender().tell(PoisonPill.getInstance(), self());
     }
 
     private void closeTransactionChain(final CloseTransactionChain closeTransactionChain) {
@@ -824,24 +806,21 @@ public class Shard extends RaftActor {
 
     @Override
     protected void createSnapshot() {
-        if (createSnapshotTransaction == null) {
+        // Create a transaction actor. We are really going to treat the transaction as a worker
+        // so that this actor does not get block building the snapshot. THe transaction actor will
+        // after processing the CreateSnapshot message.
 
-            // Create a transaction. We are really going to treat the transaction as a worker
-            // so that this actor does not get block building the snapshot
-            createSnapshotTransaction = createTransaction(
+        ActorRef createSnapshotTransaction = createTransaction(
                 TransactionProxy.TransactionType.READ_ONLY.ordinal(),
                 "createSnapshot" + ++createSnapshotTransactionCounter, "",
                 DataStoreVersions.CURRENT_VERSION);
 
-            createSnapshotTransaction.tell(
-                new ReadData(YangInstanceIdentifier.builder().build()).toSerializable(), self());
-
-        }
+        createSnapshotTransaction.tell(CreateSnapshot.INSTANCE, self());
     }
 
     @VisibleForTesting
     @Override
-    protected void applySnapshot(final ByteString snapshot) {
+    protected void applySnapshot(final byte[] snapshotBytes) {
         // Since this will be done only on Recovery or when this actor is a Follower
         // we can safely commit everything in here. We not need to worry about event notifications
         // as they would have already been disabled on the follower
@@ -849,15 +828,20 @@ public class Shard extends RaftActor {
         LOG.info("Applying snapshot");
         try {
             DOMStoreWriteTransaction transaction = store.newWriteOnlyTransaction();
-            NormalizedNodeMessages.Node serializedNode = NormalizedNodeMessages.Node.parseFrom(snapshot);
-            NormalizedNode<?, ?> node = new NormalizedNodeToNodeCodec(schemaContext)
-                .decode(serializedNode);
+
+            NormalizedNode<?, ?> node = SerializationUtils.tryDeserializeNormalizedNode(snapshotBytes);
+            if(node == null) {
+                // Must be from legacy protobuf serialization - try that.
+                NormalizedNodeMessages.Node serializedNode = NormalizedNodeMessages.Node.parseFrom(
+                        ByteString.copyFrom(snapshotBytes));
+                node = new NormalizedNodeToNodeCodec(schemaContext).decode(serializedNode);
+            }
 
             // delete everything first
-            transaction.delete(YangInstanceIdentifier.builder().build());
+            transaction.delete(DATASTORE_ROOT);
 
             // Add everything from the remote node back
-            transaction.write(YangInstanceIdentifier.builder().build(), node);
+            transaction.write(DATASTORE_ROOT, node);
             syncCommitTransaction(transaction);
         } catch (InvalidProtocolBufferException | InterruptedException | ExecutionException e) {
             LOG.error(e, "An exception occurred when applying snapshot");
