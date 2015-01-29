@@ -41,6 +41,8 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private final ConfigParams configParams;
 
+    private long replicatedToAllIndex = -1;
+
     public RaftActorContextImpl(ActorRef actor, UntypedActorContext context,
         String id,
         ElectionTerm termInformation, long commitIndex,
@@ -128,6 +130,16 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override public ConfigParams getConfigParams() {
         return configParams;
+    }
+
+    @Override
+    public long getReplicatedToAllIndex() {
+        return replicatedToAllIndex;
+    }
+
+    @Override
+    public void setReplicatedToAllIndex(long replicatedToAllIndex) {
+        this.replicatedToAllIndex = replicatedToAllIndex;
     }
 
     @Override public void addToPeers(String name, String address) {

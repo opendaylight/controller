@@ -166,4 +166,18 @@ public interface RaftActorContext {
      * @return ConfigParams
      */
     public ConfigParams getConfigParams();
+
+    /**
+     * Minimum index of the in-memory log which has been successfully replicated to all the followers
+     * (and not just the majority)
+     * @return long
+     */
+    long getReplicatedToAllIndex();
+
+    /**
+     * Minimum index of the in-memory log which has been successfully replicated to all the followers
+     * (and not just the majority)
+     * @param replicatedToAllIndex : -1 if there are no followers else long
+     */
+    void setReplicatedToAllIndex(long replicatedToAllIndex);
 }

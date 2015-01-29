@@ -34,6 +34,7 @@ public class MockRaftActorContext implements RaftActorContext {
     private ReplicatedLog replicatedLog;
     private Map<String, String> peerAddresses = new HashMap<>();
     private ConfigParams configParams;
+    private long replicatedToAllIndex;
 
     public MockRaftActorContext(){
         electionTerm = null;
@@ -183,6 +184,16 @@ public class MockRaftActorContext implements RaftActorContext {
 
     public void setConfigParams(ConfigParams configParams) {
         this.configParams = configParams;
+    }
+
+    @Override
+    public long getReplicatedToAllIndex() {
+        return replicatedToAllIndex;
+    }
+
+    @Override
+    public void setReplicatedToAllIndex(long replicatedToAllIndex) {
+        this.replicatedToAllIndex = replicatedToAllIndex;
     }
 
     public static class SimpleReplicatedLog extends AbstractReplicatedLogImpl {

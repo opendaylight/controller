@@ -255,6 +255,10 @@ public class Follower extends AbstractRaftActorBehavior {
         sender.tell(new AppendEntriesReply(context.getId(), currentTerm(), true,
             lastIndex(), lastTerm()), actor());
 
+        if (appendEntries.getReplicatedToAllIndex() > -1) {
+            fakeSnapshot(appendEntries.getReplicatedToAllIndex());
+        }
+
         return this;
     }
 

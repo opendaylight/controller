@@ -226,7 +226,30 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             applyLogToStateMachine(context.getCommitIndex());
         }
 
+        purgeInMemoryLog();
+
         return this;
+    }
+
+    private void purgeInMemoryLog() {
+        //find the lowest index across followers which has been replicated to all. -1 if there are no followers.
+        // we would delete the in-mem log from that index on, in-order to minimize mem usage
+        // we would also share this info thru AE with the followers so that they can delete their log entries as well.
+        long replicatedToAllIndex = followerToLog.isEmpty() ? -1 : Integer.MAX_VALUE;
+        for (FollowerLogInformation info : followerToLog.values()) {
+            if (info.getMatchIndex() < replicatedToAllIndex) {
+                replicatedToAllIndex = info.getMatchIndex();
+            }
+        }
+        if (replicatedToAllIndex > -1)  {
+            /*LOG.debug("Leader|replicatedToAllIndex="+replicatedToAllIndex +
+                            "|logsize=" + context.getReplicatedLog().size() +
+                            "|lastIndex=" + context.getReplicatedLog().lastIndex() +
+                            "|snapshotIndex=" + context.getReplicatedLog().getSnapshotIndex() +
+                            "|lastApplied=" + context.getLastApplied()
+            );*/
+            super.fakeSnapshot(replicatedToAllIndex);
+        }
     }
 
     @Override
@@ -464,7 +487,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             new AppendEntries(currentTerm(), context.getId(),
                 prevLogIndex(followerNextIndex),
                 prevLogTerm(followerNextIndex), entries,
-                context.getCommitIndex()).toSerializable(),
+                context.getCommitIndex(),
+                context.getReplicatedToAllIndex()).toSerializable(),
             actor()
         );
     }

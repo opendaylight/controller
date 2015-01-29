@@ -421,4 +421,17 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         return numMajority;
 
     }
+
+    protected void fakeSnapshot(long fakeSnapshotCaptureIndex) {
+
+        if (fakeSnapshotCaptureIndex != -1 && fakeSnapshotCaptureIndex < context.getLastApplied()) {
+            // if the fakeSnapshotCaptureIndex is applied to state, then make a fake-snapshot to clear
+            // the in-mem journal and adjust the snapshot index etc
+            // NOTE: we check if the captureIndex is < lastApplied and not <=, as we would want to keep the lastApplied
+            // as its used while capturing snapshots
+            context.setReplicatedToAllIndex(fakeSnapshotCaptureIndex);
+            context.getReplicatedLog().snapshotPreCommit(fakeSnapshotCaptureIndex, context.getTermInformation().getCurrentTerm());
+            context.getReplicatedLog().snapshotCommit();
+        }
+    }
 }
