@@ -103,7 +103,6 @@
             <Private-Package>org.opendaylight.controller.netconf.confignetconfconnector.mapping.*,
                             org.opendaylight.controller.netconf.confignetconfconnector.operations.*,
                             org.opendaylight.controller.netconf.confignetconfconnector.transactions,
-                            org.opendaylight.controller.netconf.confignetconfconnector.util,
                             org.opendaylight.controller.netconf.confignetconfconnector.osgi,
                             org.opendaylight.controller.netconf.confignetconfconnector.exception,</Private-Package>
             <Import-Package>*</Import-Package>

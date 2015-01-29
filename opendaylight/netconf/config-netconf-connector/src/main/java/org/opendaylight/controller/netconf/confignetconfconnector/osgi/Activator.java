@@ -11,9 +11,16 @@ package org.opendaylight.controller.netconf.confignetconfconnector.osgi;
 import static com.google.common.base.Preconditions.checkState;
 
 import java.util.Dictionary;
+import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Set;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.rpc.context.rev130617.RpcContextRef;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.rev130405.Modules;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
+import org.opendaylight.yangtools.yang.model.util.FilteringSchemaContextProxy;
+import org.opendaylight.yangtools.yang.model.util.FilteringSchemaContextProxy.ModuleId;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -30,6 +37,7 @@ public class Activator implements BundleActivator {
     private BundleContext context;
     private ServiceRegistration<?> osgiRegistration;
     private ConfigRegistryLookupThread configRegistryLookup = null;
+    private final Set<ModuleId> ModuleIds = new HashSet<>();
 
     @Override
     public void start(final BundleContext context) throws Exception {
@@ -37,11 +45,21 @@ public class Activator implements BundleActivator {
 
         ServiceTrackerCustomizer<SchemaContextProvider, ConfigRegistryLookupThread> customizer = new ServiceTrackerCustomizer<SchemaContextProvider, ConfigRegistryLookupThread>() {
             @Override
-            public ConfigRegistryLookupThread addingService(ServiceReference<SchemaContextProvider> reference) {
+            public ConfigRegistryLookupThread addingService(final ServiceReference<SchemaContextProvider> reference) {
                 LOG.debug("Got addingService(SchemaContextProvider) event, starting ConfigRegistryLookupThread");
                 checkState(configRegistryLookup == null, "More than one onYangStoreAdded received");
 
-                SchemaContextProvider schemaContextProvider = reference.getBundle().getBundleContext().getService(reference);
+                //for config, config (rpc-context) yang schemas visible only
+                ModuleIds.add(new ModuleId("config", Modules.QNAME.getRevision()));
+                ModuleIds.add(new ModuleId("rpc-context", RpcContextRef.QNAME.getRevision()));
+
+                SchemaContextProvider schemaContextProvider = new SchemaContextProvider() {
+                    @Override
+                    public SchemaContext getSchemaContext() {
+                        return new FilteringSchemaContextProxy(reference.getBundle().getBundleContext().getService(reference).getSchemaContext(),
+                                ModuleIds, new HashSet<ModuleId>());
+                    }
+                };
 
                 YangStoreServiceImpl yangStoreService = new YangStoreServiceImpl(schemaContextProvider);
                 configRegistryLookup = new ConfigRegistryLookupThread(yangStoreService);

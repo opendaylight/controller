@@ -11,7 +11,7 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 import com.google.common.base.Optional;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.mapping.ObjectNameAttributeMappingStrategy;
-import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
+import org.opendaylight.controller.netconf.util.NetconfUtil;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -32,7 +32,7 @@ public class ObjectNameAttributeWritingStrategy implements AttributeWritingStrat
 
     @Override
     public void writeElement(Element parentElement, String namespace, Object value) {
-        Util.checkType(value, ObjectNameAttributeMappingStrategy.MappedDependency.class);
+        NetconfUtil.checkType(value, ObjectNameAttributeMappingStrategy.MappedDependency.class);
         Element innerNode = XmlUtil.createElement(document, key, Optional.of(namespace));
 
         String moduleName = ((ObjectNameAttributeMappingStrategy.MappedDependency) value).getServiceName();
