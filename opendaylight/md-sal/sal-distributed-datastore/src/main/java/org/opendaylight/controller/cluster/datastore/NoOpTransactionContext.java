@@ -9,8 +9,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSelection;
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.SettableFuture;
 import java.util.concurrent.Semaphore;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
@@ -63,20 +62,16 @@ final class NoOpTransactionContext extends AbstractTransactionContext {
     }
 
     @Override
-    public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readData(
-            YangInstanceIdentifier path) {
+    public void readData(final YangInstanceIdentifier path, SettableFuture<Optional<NormalizedNode<?, ?>>> proxyFuture) {
         LOG.debug("Tx {} readData called path = {}", identifier, path);
         operationLimiter.release();
-        return Futures.immediateFailedCheckedFuture(new ReadFailedException(
-                "Error reading data for path " + path, failure));
+        proxyFuture.setException(new ReadFailedException("Error reading data for path " + path, failure));
     }
 
     @Override
-    public CheckedFuture<Boolean, ReadFailedException> dataExists(
-            YangInstanceIdentifier path) {
+    public void dataExists(YangInstanceIdentifier path, SettableFuture<Boolean> proxyFuture) {
         LOG.debug("Tx {} dataExists called path = {}", identifier, path);
         operationLimiter.release();
-        return Futures.immediateFailedCheckedFuture(new ReadFailedException(
-                "Error checking exists for path " + path, failure));
+        proxyFuture.setException(new ReadFailedException("Error checking exists for path " + path, failure));
     }
 }
