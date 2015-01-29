@@ -206,7 +206,6 @@ public class NeutronLoadBalancerHealthMonitorNorthbound {
             if (loadBalancerHealthMonitorInterface.neutronLoadBalancerHealthMonitorExists(singleton.getLoadBalancerHealthMonitorID())) {
                 throw new BadRequestException("LoadBalancerHealthMonitor UUID already exists");
             }
-            loadBalancerHealthMonitorInterface.addNeutronLoadBalancerHealthMonitor(singleton);
 
             Object[] instances = NeutronUtil.getInstances(INeutronLoadBalancerHealthMonitorAware.class, this);
             if (instances != null) {
