@@ -112,8 +112,8 @@ public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
         }
 
         notificationVerifier.assertNotificationCount(2);
-        notificationVerifier.assertNotificationContent(0, 0, 0, 9);
-        notificationVerifier.assertNotificationContent(1, 4, 3, 9);
+        notificationVerifier.assertNotificationContent(0, 0, 0, 11);
+        notificationVerifier.assertNotificationContent(1, 4, 3, 11);
 
         mockedAggregator.assertSnapshotCount(2);
         // Capabilities are stripped for persister

@@ -11,7 +11,7 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 import com.google.common.base.Preconditions;
 import com.google.common.io.BaseEncoding;
 import java.util.List;
-import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
+import org.opendaylight.controller.netconf.util.NetconfUtil;
 import org.w3c.dom.Document;
 
 public class SimpleBinaryAttributeWritingStrategy extends SimpleAttributeWritingStrategy {
@@ -26,7 +26,7 @@ public class SimpleBinaryAttributeWritingStrategy extends SimpleAttributeWriting
 
     @Override
     protected Object preprocess(Object value) {
-        Util.checkType(value, List.class);
+        NetconfUtil.checkType(value, List.class);
         BaseEncoding en = BaseEncoding.base64();
 
         List<?> list = (List<?>) value;
