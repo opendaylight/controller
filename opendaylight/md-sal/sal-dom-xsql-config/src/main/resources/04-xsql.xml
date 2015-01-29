@@ -8,8 +8,8 @@
                     </type>
                     <name>XSQL</name>
                     <data-broker>
-                       <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-data-broker</type>
-                       <name>binding-data-broker</name>
+                        <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-async-data-broker</type>
+                        <name>binding-data-broker</name>
                     </data-broker>
                     <async-data-broker>
                         <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:dom-async-data-broker</type>

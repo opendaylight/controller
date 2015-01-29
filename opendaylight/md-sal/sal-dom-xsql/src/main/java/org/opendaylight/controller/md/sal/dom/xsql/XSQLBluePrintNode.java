@@ -2,9 +2,11 @@ package org.opendaylight.controller.md.sal.dom.xsql;
 
 import java.io.Serializable;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,11 +26,20 @@ public class XSQLBluePrintNode implements Serializable {
     private Set<XSQLColumn> columns = new HashSet<XSQLColumn>();
     private Map<String, XSQLColumn> origNameToColumn = new HashMap<String, XSQLColumn>();
 
-    private transient Object odlNode = null;
+    private transient List<Object> odlNodes = new ArrayList<>();
     private boolean module = false;
     private String bluePrintTableName = null;
     private String odlTableName = null;
     private String origName = null;
+
+    public void mergeAugmentation(XSQLBluePrintNode aug){
+        this.relations.addAll(aug.relations);
+        this.inheritingNodes.addAll(aug.inheritingNodes);
+        this.children.addAll(aug.children);
+        this.columns.addAll(aug.columns);
+        this.origNameToColumn.putAll(aug.origNameToColumn);
+        this.odlNodes.addAll(aug.odlNodes);
+    }
 
     public XSQLBluePrintNode(String name, String _origName, int _level) {
         this.level = _level;
@@ -44,14 +55,13 @@ public class XSQLBluePrintNode implements Serializable {
         this.level = _level;
     }
 
-    public XSQLBluePrintNode(Object _odlNode, int _level,
-            XSQLBluePrintNode _parent) {
-        this.odlNode = _odlNode;
+    public XSQLBluePrintNode(Object _odlNode, int _level,XSQLBluePrintNode _parent) {
+        this.odlNodes.add(_odlNode);
         this.level = _level;
         this.module = XSQLODLUtils.isModule(_odlNode);
         this.parent = _parent;
         this.bluePrintTableName = XSQLODLUtils.getBluePrintName(_odlNode);
-        this.odlTableName = XSQLODLUtils.getODLNodeName(this.odlNode);
+        this.odlTableName = XSQLODLUtils.getODLNodeName(this.odlNodes.get(0));
     }
 
     public String getOrigName() {
@@ -72,13 +82,13 @@ public class XSQLBluePrintNode implements Serializable {
 
     public String getODLTableName() {
         if (this.odlTableName == null) {
-            this.odlTableName = XSQLODLUtils.getODLNodeName(this.odlNode);
+            this.odlTableName = XSQLODLUtils.getODLNodeName(this.odlNodes.get(0));
         }
         return this.odlTableName;
     }
 
-    public Object getODLNode() {
-        return this.odlNode;
+    public List<Object> getODLNodes() {
+        return this.odlNodes;
     }
 
     public void AddChild(XSQLBluePrintNode ch) {
@@ -218,7 +228,7 @@ public class XSQLBluePrintNode implements Serializable {
         if (myInterfaceName != null) {
             return myInterfaceName;
         }
-        if (odlNode != null) {
+        if (odlNodes.size()>0) {
             return getBluePrintNodeName();
         }
         if (odlTableName != null) {
@@ -238,7 +248,7 @@ public class XSQLBluePrintNode implements Serializable {
     @Override
     public boolean equals(Object obj) {
         XSQLBluePrintNode other = (XSQLBluePrintNode) obj;
-        if (odlNode != null) {
+        if (odlNodes!=null && odlNodes.size()>0) {
             return getBluePrintNodeName().equals(other.getBluePrintNodeName());
         } else if (this.odlTableName == null && other.odlTableName != null) {
             return false;
@@ -255,7 +265,7 @@ public class XSQLBluePrintNode implements Serializable {
     public int hashCode() {
         if (myInterfaceString != null) {
             return myInterfaceString.hashCode();
-        } else if (odlNode != null) {
+        } else if (odlNodes!=null && odlNodes.size()>0) {
             return bluePrintTableName.hashCode();
         }
         return 0;
