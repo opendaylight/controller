@@ -17,7 +17,7 @@ import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
+import org.opendaylight.controller.netconf.util.NetconfUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +47,7 @@ class CompositeAttributeResolvingStrategy extends
             return Optional.absent();
         }
 
-        Util.checkType(value, Map.class);
+        NetconfUtil.checkType(value, Map.class);
         Map<?, ?> valueMap = (Map<?, ?>) value;
         valueMap = preprocessValueMap(valueMap);
 
