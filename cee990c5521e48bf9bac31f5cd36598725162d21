@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_f7455b17",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 399,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-01-30T03:07:52Z",
+      "side": 1,
+      "message": "Ignore my last comment - I looked at it quickly and misread it.\nWhat is the reason for changing this to pass in an akka Promise to be completed rather than returning a java Future? I think the latter is more natural plus it\u0027s more efficient as the intermediate Promise adds overhead and isn\u0027t needed.",
+      "parentUuid": "7a96c907_97de576c",
+      "revId": "cee990c5521e48bf9bac31f5cd36598725162d21",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_b7d91385",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
         "patchSetId": 1
