@@ -20,6 +20,7 @@ public class ShardIdentifier {
     private final String shardName;
     private final String memberName;
     private final String type;
+    private final String fullName;
 
     public ShardIdentifier(String shardName, String memberName, String type) {
 
@@ -30,6 +31,9 @@ public class ShardIdentifier {
         this.shardName = shardName;
         this.memberName = memberName;
         this.type = type;
+
+        fullName = new StringBuilder(memberName).append("-shard-").append(shardName).append("-")
+                .append(type).toString();
     }
 
     @Override
@@ -64,14 +68,10 @@ public class ShardIdentifier {
         return result;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         //ensure the output of toString matches the pattern above
-        return new StringBuilder(memberName)
-                    .append("-shard-")
-                    .append(shardName)
-                    .append("-")
-                    .append(type)
-                    .toString();
+        return fullName;
     }
 
     public static Builder builder(){
