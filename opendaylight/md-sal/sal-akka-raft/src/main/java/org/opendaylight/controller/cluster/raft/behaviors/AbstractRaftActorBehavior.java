@@ -94,8 +94,8 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         // 1. Reply false if term < currentTerm (§5.1)
         if (appendEntries.getTerm() < currentTerm()) {
             if(LOG.isDebugEnabled()) {
-                LOG.debug("Cannot append entries because sender term {} is less than {}",
-                        appendEntries.getTerm(), currentTerm());
+                LOG.debug("{}: Cannot append entries because sender term {} is less than {}",
+                        context.getId(), appendEntries.getTerm(), currentTerm());
             }
 
             sender.tell(
@@ -136,7 +136,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         RequestVote requestVote) {
 
         if(LOG.isDebugEnabled()) {
-            LOG.debug(requestVote.toString());
+            LOG.debug("{}: Received {}", context.getId(), requestVote);
         }
 
         boolean grantVote = false;
@@ -350,12 +350,13 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
                 //if one index is not present in the log, no point in looping
                 // around as the rest wont be present either
                 LOG.warning(
-                        "Missing index {} from log. Cannot apply state. Ignoring {} to {}", i, i, index);
+                        "{}: Missing index {} from log. Cannot apply state. Ignoring {} to {}",
+                        context.getId(), i, i, index);
                 break;
             }
         }
         if(LOG.isDebugEnabled()) {
-            LOG.debug("Setting last applied to {}", newLastApplied);
+            LOG.debug("{}: Setting last applied to {}", context.getId(), newLastApplied);
         }
         context.setLastApplied(newLastApplied);
 
@@ -393,7 +394,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         try {
             close();
         } catch (Exception e) {
-            LOG.error(e, "Failed to close behavior : {}", this.state());
+            LOG.error(e, "{}: Failed to close behavior : {}", context.getId(), this.state());
         }
 
         return behavior;

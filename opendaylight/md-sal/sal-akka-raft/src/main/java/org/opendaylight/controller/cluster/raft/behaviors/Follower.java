@@ -77,7 +77,7 @@ public class Follower extends AbstractRaftActorBehavior {
 
         if(appendEntries.getEntries() != null && appendEntries.getEntries().size() > 0) {
             if(LOG.isDebugEnabled()) {
-                LOG.debug(appendEntries.toString());
+                LOG.debug("{}: handleAppendEntries: {}", context.getId(), appendEntries);
             }
         }
 
@@ -109,8 +109,8 @@ public class Follower extends AbstractRaftActorBehavior {
             // it's log.
 
             if(LOG.isDebugEnabled()) {
-                LOG.debug("The followers log is empty and the senders prevLogIndex is {}",
-                        appendEntries.getPrevLogIndex());
+                LOG.debug("{}: The followers log is empty and the senders prevLogIndex is {}",
+                        context.getId(), appendEntries.getPrevLogIndex());
             }
 
         } else if (lastIndex() > -1
@@ -121,8 +121,8 @@ public class Follower extends AbstractRaftActorBehavior {
             // prevLogIndex entry was not found in it's log
 
             if(LOG.isDebugEnabled()) {
-                LOG.debug("The log is not empty but the prevLogIndex {} was not found in it",
-                        appendEntries.getPrevLogIndex());
+                LOG.debug("{}: The log is not empty but the prevLogIndex {} was not found in it",
+                        context.getId(), appendEntries.getPrevLogIndex());
             }
 
         } else if (lastIndex() > -1
@@ -135,8 +135,8 @@ public class Follower extends AbstractRaftActorBehavior {
 
             if (LOG.isDebugEnabled()) {
                 LOG.debug(
-                        "Cannot append entries because previous entry term {}  is not equal to append entries prevLogTerm {}"
-                        , prevLogTerm
+                        "{}: Cannot append entries because previous entry term {}  is not equal to append entries prevLogTerm {}"
+                        , context.getId(), prevLogTerm
                         , appendEntries.getPrevLogTerm());
             }
         } else {
@@ -147,9 +147,9 @@ public class Follower extends AbstractRaftActorBehavior {
             // We found that the log was out of sync so just send a negative
             // reply and return
             if(LOG.isDebugEnabled()) {
-                LOG.debug("Follower ({}) is out-of-sync, " +
+                LOG.debug("{}: Follower ({}) is out-of-sync, " +
                         "so sending negative reply, lastIndex():{}, lastTerm():{}",
-                        context.getId(), lastIndex(), lastTerm()
+                        context.getId(), context.getId(), lastIndex(), lastTerm()
                 );
             }
             sender.tell(
@@ -162,9 +162,8 @@ public class Follower extends AbstractRaftActorBehavior {
         if (appendEntries.getEntries() != null
             && appendEntries.getEntries().size() > 0) {
             if(LOG.isDebugEnabled()) {
-                LOG.debug(
-                    "Number of entries to be appended = {}", appendEntries.getEntries().size()
-                );
+                LOG.debug("{}: Number of entries to be appended = {}", context.getId(),
+                        appendEntries.getEntries().size());
             }
 
             // 3. If an existing entry conflicts with a new one (same index
@@ -189,9 +188,8 @@ public class Follower extends AbstractRaftActorBehavior {
                     }
 
                     if(LOG.isDebugEnabled()) {
-                        LOG.debug(
-                            "Removing entries from log starting at {}", matchEntry.getIndex()
-                        );
+                        LOG.debug("{}: Removing entries from log starting at {}", context.getId(),
+                                matchEntry.getIndex());
                     }
 
                     // Entries do not match so remove all subsequent entries
@@ -202,8 +200,8 @@ public class Follower extends AbstractRaftActorBehavior {
             }
 
             if(LOG.isDebugEnabled()) {
-                LOG.debug("After cleanup entries to be added from = {}", (addEntriesFrom + lastIndex())
-                );
+                LOG.debug("{}: After cleanup entries to be added from = {}", context.getId(),
+                        (addEntriesFrom + lastIndex()));
             }
 
             // 4. Append any new entries not already in the log
@@ -211,13 +209,14 @@ public class Follower extends AbstractRaftActorBehavior {
                  i < appendEntries.getEntries().size(); i++) {
 
                 if(LOG.isDebugEnabled()) {
-                    LOG.debug("Append entry to log {}", appendEntries.getEntries().get(i).getData());
+                    LOG.debug("{}: Append entry to log {}", context.getId(),
+                            appendEntries.getEntries().get(i).getData());
                 }
                 context.getReplicatedLog().appendAndPersist(appendEntries.getEntries().get(i));
             }
 
             if(LOG.isDebugEnabled()) {
-                LOG.debug("Log size is now {}", context.getReplicatedLog().size());
+                LOG.debug("{}: Log size is now {}", context.getId(), context.getReplicatedLog().size());
             }
         }
 
@@ -232,7 +231,7 @@ public class Follower extends AbstractRaftActorBehavior {
 
         if (prevCommitIndex != context.getCommitIndex()) {
             if(LOG.isDebugEnabled()) {
-                LOG.debug("Commit index set to {}", context.getCommitIndex());
+                LOG.debug("{}: Commit index set to {}", context.getId(), context.getCommitIndex());
             }
         }
 
@@ -242,9 +241,9 @@ public class Follower extends AbstractRaftActorBehavior {
         if (appendEntries.getLeaderCommit() > context.getLastApplied() &&
             context.getLastApplied() < lastIndex()) {
             if(LOG.isDebugEnabled()) {
-                LOG.debug("applyLogToStateMachine, " +
+                LOG.debug("{}: applyLogToStateMachine, " +
                         "appendEntries.getLeaderCommit():{}," +
-                        "context.getLastApplied():{}, lastIndex():{}",
+                        "context.getLastApplied():{}, lastIndex():{}", context.getId(),
                     appendEntries.getLeaderCommit(), context.getLastApplied(), lastIndex()
                 );
             }
@@ -302,8 +301,8 @@ public class Follower extends AbstractRaftActorBehavior {
     private void handleInstallSnapshot(ActorRef sender, InstallSnapshot installSnapshot) {
 
         if(LOG.isDebugEnabled()) {
-            LOG.debug("InstallSnapshot received by follower " +
-                    "datasize:{} , Chunk:{}/{}", installSnapshot.getData().size(),
+            LOG.debug("{}: InstallSnapshot received by follower " +
+                    "datasize:{} , Chunk:{}/{}", context.getId(), installSnapshot.getData().size(),
                 installSnapshot.getChunkIndex(), installSnapshot.getTotalChunks()
             );
         }
@@ -339,8 +338,7 @@ public class Follower extends AbstractRaftActorBehavior {
             snapshotTracker = null;
 
         } catch (Exception e){
-
-            LOG.error(e, "Exception in InstallSnapshot of follower:");
+            LOG.error(e, "{}: Exception in InstallSnapshot of follower", context.getId());
             //send reply with success as false. The chunk will be sent again on failure
             sender.tell(new InstallSnapshotReply(currentTerm(), context.getId(),
                     installSnapshot.getChunkIndex(), false), actor());
