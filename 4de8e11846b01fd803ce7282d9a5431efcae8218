@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_3763c3b2",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-01-30T06:33:47Z",
+      "side": 1,
+      "message": "Long.MAX_VALUE?",
+      "range": {
+        "startLine": 238,
+        "startChar": 75,
+        "endLine": 238,
+        "endChar": 84
+      },
+      "revId": "4de8e11846b01fd803ce7282d9a5431efcae8218",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_d7593fff",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-01-30T06:33:47Z",
+      "side": 1,
+      "message": "What happens if a \"real\" snapshot is in progress. Since a real snapshot is asynchronous will it play well with this?",
+      "revId": "4de8e11846b01fd803ce7282d9a5431efcae8218",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
