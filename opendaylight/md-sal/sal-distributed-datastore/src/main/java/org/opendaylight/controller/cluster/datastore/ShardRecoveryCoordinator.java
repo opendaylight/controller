@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import akka.event.LoggingAdapter;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.Collection;
@@ -21,8 +22,6 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Coordinates persistence recovery of journal log entries and snapshots for a shard. Each snapshot
@@ -37,16 +36,19 @@ class ShardRecoveryCoordinator {
 
     private static final int TIME_OUT = 10;
 
-    private static final Logger LOG = LoggerFactory.getLogger(ShardRecoveryCoordinator.class);
-
     private final List<DOMStoreWriteTransaction> resultingTxList = Lists.newArrayList();
     private final SchemaContext schemaContext;
     private final String shardName;
     private final ExecutorService executor;
+    private final LoggingAdapter log;
+    private final String name;
 
-    ShardRecoveryCoordinator(String shardName, SchemaContext schemaContext) {
+    ShardRecoveryCoordinator(String shardName, SchemaContext schemaContext, LoggingAdapter log,
+            String name) {
         this.schemaContext = schemaContext;
         this.shardName = shardName;
+        this.log = log;
+        this.name = name;
 
         executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(),
                 new ThreadFactoryBuilder().setDaemon(true)
@@ -85,7 +87,7 @@ class ShardRecoveryCoordinator {
             if(executor.awaitTermination(TIME_OUT, TimeUnit.MINUTES))  {
                 return resultingTxList;
             } else {
-                LOG.error("Recovery for shard {} timed out after {} minutes", shardName, TIME_OUT);
+                log.error("{}: Recovery for shard {} timed out after {} minutes", name, shardName, TIME_OUT);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

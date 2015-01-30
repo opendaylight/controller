@@ -109,7 +109,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
         leaderId = context.getId();
 
-        LOG.debug("Election:Leader has following peers: {}", getFollowerIds());
+        LOG.debug("{}: Election: Leader has following peers: {}", context.getId(), getFollowerIds());
 
         minReplicationCount = getMajorityVoteCount(getFollowerIds().size());
 
@@ -153,7 +153,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         AppendEntries appendEntries) {
 
         if(LOG.isDebugEnabled()) {
-            LOG.debug(appendEntries.toString());
+            LOG.debug("{}: handleAppendEntries: {}", context.getId(), appendEntries);
         }
 
         return this;
@@ -165,7 +165,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
         if(! appendEntriesReply.isSuccess()) {
             if(LOG.isDebugEnabled()) {
-                LOG.debug(appendEntriesReply.toString());
+                LOG.debug("{}: handleAppendEntriesReply: {}", context.getId(), appendEntriesReply);
             }
         }
 
@@ -175,7 +175,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             followerToLog.get(followerId);
 
         if(followerLogInformation == null){
-            LOG.error("Unknown follower {}", followerId);
+            LOG.error("{}: handleAppendEntriesReply - unknown follower {}", context.getId(), followerId);
             return this;
         }
 
@@ -322,9 +322,9 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 if(followerToSnapshot.isLastChunk(reply.getChunkIndex())) {
                     //this was the last chunk reply
                     if(LOG.isDebugEnabled()) {
-                        LOG.debug("InstallSnapshotReply received, " +
+                        LOG.debug("{}: InstallSnapshotReply received, " +
                                 "last chunk received, Chunk:{}. Follower:{} Setting nextIndex:{}",
-                            reply.getChunkIndex(), followerId,
+                                context.getId(), reply.getChunkIndex(), followerId,
                             context.getReplicatedLog().getSnapshotIndex() + 1
                         );
                     }
@@ -336,8 +336,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                     mapFollowerToSnapshot.remove(followerId);
 
                     if(LOG.isDebugEnabled()) {
-                        LOG.debug("followerToLog.get(followerId).getNextIndex()=" +
-                            followerToLog.get(followerId).getNextIndex());
+                        LOG.debug("{}: followerToLog.get(followerId).getNextIndex()=" +
+                                context.getId(), followerToLog.get(followerId).getNextIndex());
                     }
 
                     if (mapFollowerToSnapshot.isEmpty()) {
@@ -350,19 +350,16 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                     followerToSnapshot.markSendStatus(true);
                 }
             } else {
-                LOG.info("InstallSnapshotReply received, " +
-                        "sending snapshot chunk failed, Will retry, Chunk:{}",
-                    reply.getChunkIndex()
-                );
+                LOG.info("{}: InstallSnapshotReply received sending snapshot chunk failed, Will retry, Chunk: {}",
+                        context.getId(), reply.getChunkIndex());
 
                 followerToSnapshot.markSendStatus(false);
             }
 
         } else {
-            LOG.error("ERROR!!" +
-                    "FollowerId in InstallSnapshotReply not known to Leader" +
+            LOG.error("{}: FollowerId in InstallSnapshotReply not known to Leader" +
                     " or Chunk Index in InstallSnapshotReply not matching {} != {}",
-                followerToSnapshot.getChunkIndex(), reply.getChunkIndex()
+                    context.getId(), followerToSnapshot.getChunkIndex(), reply.getChunkIndex()
             );
 
             if(reply.getChunkIndex() == INVALID_CHUNK_INDEX){
@@ -377,7 +374,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         long logIndex = replicate.getReplicatedLogEntry().getIndex();
 
         if(LOG.isDebugEnabled()) {
-            LOG.debug("Replicate message {}", logIndex);
+            LOG.debug("{}: Replicate message {}", context.getId(), logIndex);
         }
 
         // Create a tracker entry we will use this later to notify the
@@ -434,11 +431,10 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                         // then snapshot should be sent
 
                         if(LOG.isDebugEnabled()) {
-                            LOG.debug("InitiateInstallSnapshot to follower:{}," +
-                                    "follower-nextIndex:{}, leader-snapshot-index:{},  " +
-                                    "leader-last-index:{}", followerId,
-                                followerNextIndex, leaderSnapShotIndex, leaderLastIndex
-                            );
+                            LOG.debug(String.format("%s: InitiateInstallSnapshot to follower: %s," +
+                                    "follower-nextIndex: %s, leader-snapshot-index: %s,  " +
+                                    "leader-last-index: %s", context.getId(), followerId,
+                                followerNextIndex, leaderSnapShotIndex, leaderLastIndex));
                         }
                         actor().tell(new InitiateInstallSnapshot(), actor());
 
@@ -494,7 +490,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
                 if (!context.getReplicatedLog().isPresent(nextIndex) &&
                     context.getReplicatedLog().isInSnapshot(nextIndex)) {
-                    LOG.info("{} follower needs a snapshot install", e.getKey());
+                    LOG.info("{}: {} follower needs a snapshot install", context.getId(), e.getKey());
                     if (snapshot.isPresent()) {
                         // if a snapshot is present in the memory, most likely another install is in progress
                         // no need to capture snapshot
@@ -516,7 +512,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     // on every install snapshot, we try to capture the snapshot.
     // Once a capture is going on, another one issued will get ignored by RaftActor.
     private void initiateCaptureSnapshot() {
-        LOG.info("Initiating Snapshot Capture to Install Snapshot, Leader:{}", getLeaderId());
+        LOG.info("{}: Initiating Snapshot Capture to Install Snapshot, Leader:{}", context.getId(), getLeaderId());
         ReplicatedLogEntry lastAppliedEntry = context.getReplicatedLog().get(context.getLastApplied());
         long lastAppliedIndex = -1;
         long lastAppliedTerm = -1;
@@ -569,12 +565,13 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                     ).toSerializable(),
                     actor()
                 );
-                LOG.info("InstallSnapshot sent to follower {}, Chunk: {}/{}",
-                    followerActor.path(), mapFollowerToSnapshot.get(followerId).getChunkIndex(),
-                    mapFollowerToSnapshot.get(followerId).getTotalChunks());
+                LOG.info("{}: InstallSnapshot sent to follower {}, Chunk: {}/{}",
+                        context.getId(), followerActor.path(),
+                        mapFollowerToSnapshot.get(followerId).getChunkIndex(),
+                        mapFollowerToSnapshot.get(followerId).getTotalChunks());
             }
         } catch (IOException e) {
-            LOG.error(e, "InstallSnapshot failed for Leader.");
+            LOG.error(e, "{}: InstallSnapshot failed for Leader.", context.getId());
         }
     }
 
@@ -590,7 +587,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         }
         ByteString nextChunk = followerToSnapshot.getNextChunk();
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Leader's snapshot nextChunk size:{}", nextChunk.size());
+            LOG.debug("{}: Leader's snapshot nextChunk size:{}", context.getId(), nextChunk.size());
         }
         return nextChunk;
     }
@@ -654,14 +651,14 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
      * snapshot chunks
      */
     protected class FollowerToSnapshot {
-        private ByteString snapshotBytes;
+        private final ByteString snapshotBytes;
         private int offset = 0;
         // the next snapshot chunk is sent only if the replyReceivedForOffset matches offset
         private int replyReceivedForOffset;
         // if replyStatus is false, the previous chunk is attempted
         private boolean replyStatus = false;
         private int chunkIndex;
-        private int totalChunks;
+        private final int totalChunks;
         private int lastChunkHashCode = AbstractLeader.INITIAL_LAST_CHUNK_HASH_CODE;
         private int nextChunkHashCode = AbstractLeader.INITIAL_LAST_CHUNK_HASH_CODE;
 
@@ -671,8 +668,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             totalChunks = ( size / context.getConfigParams().getSnapshotChunkSize()) +
                 ((size % context.getConfigParams().getSnapshotChunkSize()) > 0 ? 1 : 0);
             if(LOG.isDebugEnabled()) {
-                LOG.debug("Snapshot {} bytes, total chunks to send:{}",
-                    size, totalChunks);
+                LOG.debug("{}: Snapshot {} bytes, total chunks to send:{}",
+                        context.getId(), size, totalChunks);
             }
             replyReceivedForOffset = -1;
             chunkIndex = AbstractLeader.FIRST_CHUNK_INDEX;
@@ -741,7 +738,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             }
 
             if(LOG.isDebugEnabled()) {
-                LOG.debug("length={}, offset={},size={}",
+                LOG.debug("{}: Next chunk: length={}, offset={},size={}", context.getId(),
                     snapshotLength, start, size);
             }
             ByteString substring = getSnapshotBytes().substring(start, start + size);

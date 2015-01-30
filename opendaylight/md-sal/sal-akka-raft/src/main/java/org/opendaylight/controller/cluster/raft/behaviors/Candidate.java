@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
+import java.util.Set;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
@@ -18,8 +19,6 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
-
-import java.util.Set;
 
 /**
  * The behavior of a RaftActor when it is in the CandidateState
@@ -53,7 +52,7 @@ public class Candidate extends AbstractRaftActorBehavior {
         peers = context.getPeerAddresses().keySet();
 
         if(LOG.isDebugEnabled()) {
-            LOG.debug("Election:Candidate has following peers: {}", peers);
+            LOG.debug("{}: Election: Candidate has following peers: {}", context.getId(), peers);
         }
 
         votesRequired = getMajorityVoteCount(peers.size());
@@ -66,7 +65,7 @@ public class Candidate extends AbstractRaftActorBehavior {
         AppendEntries appendEntries) {
 
         if(LOG.isDebugEnabled()) {
-            LOG.debug(appendEntries.toString());
+            LOG.debug("{}: handleAppendEntries: {}", context.getId(), appendEntries);
         }
 
         return this;
@@ -106,7 +105,8 @@ public class Candidate extends AbstractRaftActorBehavior {
             RaftRPC rpc = (RaftRPC) message;
 
             if(LOG.isDebugEnabled()) {
-                LOG.debug("RaftRPC message received {} my term is {}", rpc, context.getTermInformation().getCurrentTerm());
+                LOG.debug("{}: RaftRPC message received {} my term is {}", context.getId(), rpc,
+                        context.getTermInformation().getCurrentTerm());
             }
 
             // If RPC request or response contains term T > currentTerm:
@@ -150,7 +150,7 @@ public class Candidate extends AbstractRaftActorBehavior {
             context.getId());
 
         if(LOG.isDebugEnabled()) {
-            LOG.debug("Starting new term {}", (currentTerm + 1));
+            LOG.debug("{}: Starting new term {}", context.getId(), (currentTerm + 1));
         }
 
         // Request for a vote
