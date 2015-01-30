@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_97de576c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 399,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-01-30T00:51:57Z",
+      "side": 1,
+      "message": "A single future (i.e. Promise) won\u0027t work with multiple shards.",
+      "revId": "cee990c5521e48bf9bac31f5cd36598725162d21",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_b7d91385",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 566,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-01-30T00:51:57Z",
+      "side": 1,
+      "message": "This needs to be:\n\n               if(transactionContext \u003d\u003d null) {\n                    LOG.debug(\"Tx {} Adding operation on complete {}\", identifier);\n\n                    txOperationsOnComplete.add(operation);\n                } else {\n                    operation.invoke(transactionContext);\n                }\n\nYou\u0027ll also need to rebase due to my gerrit https://git.opendaylight.org/gerrit/#/c/14591/",
+      "revId": "cee990c5521e48bf9bac31f5cd36598725162d21",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
