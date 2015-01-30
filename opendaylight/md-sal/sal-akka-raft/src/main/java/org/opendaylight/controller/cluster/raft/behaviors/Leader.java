@@ -57,8 +57,8 @@ public class Leader extends AbstractLeader {
 
         if (originalMessage instanceof IsolatedLeaderCheck) {
             if (isLeaderIsolated()) {
-                LOG.info("At least {} followers need to be active, Switching {} from Leader to IsolatedLeader",
-                    minIsolatedLeaderPeerCount, leaderId);
+                LOG.info("{}: At least {} followers need to be active, Switching {} from Leader to IsolatedLeader",
+                        context.getId(), minIsolatedLeaderPeerCount, leaderId);
                 return switchBehavior(new IsolatedLeader(context));
             }
         }

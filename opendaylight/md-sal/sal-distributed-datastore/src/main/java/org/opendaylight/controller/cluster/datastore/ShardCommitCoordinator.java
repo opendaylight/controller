@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
 import akka.actor.Status;
+import akka.event.LoggingAdapter;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import java.util.LinkedList;
@@ -19,8 +20,6 @@ import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransacti
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Coordinates commits for a shard ensuring only one concurrent 3-phase commit.
@@ -28,8 +27,6 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Pantelis
  */
 public class ShardCommitCoordinator {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ShardCommitCoordinator.class);
 
     private final Cache<String, CohortEntry> cohortCache;
 
@@ -39,11 +36,18 @@ public class ShardCommitCoordinator {
 
     private final int queueCapacity;
 
-    public ShardCommitCoordinator(long cacheExpiryTimeoutInSec, int queueCapacity) {
+    private final LoggingAdapter log;
+
+    private final String name;
+
+    public ShardCommitCoordinator(long cacheExpiryTimeoutInSec, int queueCapacity, LoggingAdapter log,
+            String name) {
         cohortCache = CacheBuilder.newBuilder().expireAfterAccess(
                 cacheExpiryTimeoutInSec, TimeUnit.SECONDS).build();
 
         this.queueCapacity = queueCapacity;
+        this.log = log;
+        this.name = name;
 
         // We use a LinkedList here to avoid synchronization overhead with concurrent queue impls
         // since this should only be accessed on the shard's dispatcher.
@@ -74,9 +78,9 @@ public class ShardCommitCoordinator {
     public void handleCanCommit(CanCommitTransaction canCommit, final ActorRef sender,
             final ActorRef shard) {
         String transactionID = canCommit.getTransactionID();
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Processing canCommit for transaction {} for shard {}",
-                    transactionID, shard.path());
+        if(log.isDebugEnabled()) {
+            log.debug("{}: Processing canCommit for transaction {} for shard {}",
+                    name, transactionID, shard.path());
         }
 
         // Lookup the cohort entry that was cached previously (or should have been) by
@@ -86,8 +90,8 @@ public class ShardCommitCoordinator {
             // Either canCommit was invoked before ready(shouldn't happen)  or a long time passed
             // between canCommit and ready and the entry was expired from the cache.
             IllegalStateException ex = new IllegalStateException(
-                    String.format("No cohort entry found for transaction %s", transactionID));
-            LOG.error(ex.getMessage());
+                    String.format("%s: No cohort entry found for transaction %s", name, transactionID));
+            log.error(ex.getMessage());
             sender.tell(new Status.Failure(ex), shard);
             return;
         }
@@ -98,8 +102,8 @@ public class ShardCommitCoordinator {
         if(currentCohortEntry != null) {
             // There's already a Tx commit in progress - attempt to queue this entry to be
             // committed after the current Tx completes.
-            LOG.debug("Transaction {} is already in progress - queueing transaction {}",
-                    currentCohortEntry.getTransactionID(), transactionID);
+            log.debug("{}: Transaction {} is already in progress - queueing transaction {}",
+                    name, currentCohortEntry.getTransactionID(), transactionID);
 
             if(queuedCohortEntries.size() < queueCapacity) {
                 queuedCohortEntries.offer(cohortEntry);
@@ -107,10 +111,10 @@ public class ShardCommitCoordinator {
                 removeCohortEntry(transactionID);
 
                 RuntimeException ex = new RuntimeException(
-                        String.format("Could not enqueue transaction %s - the maximum commit queue"+
+                        String.format("%s: Could not enqueue transaction %s - the maximum commit queue"+
                                       " capacity %d has been reached.",
-                                transactionID, queueCapacity));
-                LOG.error(ex.getMessage());
+                                      name, transactionID, queueCapacity));
+                log.error(ex.getMessage());
                 sender.tell(new Status.Failure(ex), shard);
             }
         } else {
@@ -140,7 +144,7 @@ public class ShardCommitCoordinator {
                 removeCohortEntry(cohortEntry.getTransactionID());
             }
         } catch (InterruptedException | ExecutionException e) {
-            LOG.debug("An exception occurred during canCommit", e);
+            log.debug("{}: An exception occurred during canCommit: {}", name, e);
 
             // Remove the entry from the cache now since the Tx will be aborted.
             removeCohortEntry(cohortEntry.getTransactionID());
