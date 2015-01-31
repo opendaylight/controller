@@ -273,20 +273,24 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
             leader.handleMessage(leaderActor, new SendHeartBeat());
 
-            AppendEntriesMessages.AppendEntries aeproto = (AppendEntriesMessages.AppendEntries)MessageCollectorActor.getFirstMatching(
-                followerActor, AppendEntries.SERIALIZABLE_CLASS);
+            Thread.sleep(actorContext.getConfigParams().getHeartBeatInterval().toMillis());
+
+            AppendEntriesMessages.AppendEntries ae = (AppendEntriesMessages.AppendEntries)MessageCollectorActor.getFirstMatching(
+                followerActor, AppendEntriesMessages.AppendEntries.class);
+
 
             assertNotNull("AppendEntries should be sent even if InstallSnapshotReply is not " +
-                "received", aeproto);
+                "received", ae);
 
-            AppendEntries ae = (AppendEntries) SerializationUtils.fromSerializable(aeproto);
-
-            assertTrue("AppendEntries should be sent with empty entries", ae.getEntries().isEmpty());
+            assertEquals("AppendEntries should be sent with empty entries", 0, ae.getLogEntriesCount());
 
             //InstallSnapshotReply received
             leader.getFollowerToSnapshot().markSendStatus(true);
 
             leader.handleMessage(senderActor, new SendHeartBeat());
+
+            Thread.sleep(actorContext.getConfigParams().getHeartBeatInterval().toMillis());
+
 
             InstallSnapshotMessages.InstallSnapshot isproto = (InstallSnapshotMessages.InstallSnapshot)
                 MessageCollectorActor.getFirstMatching(followerActor,
@@ -473,6 +477,21 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
             Leader leader = new Leader(actorContext);
 
+            final String outHearbeat =
+                new ExpectMsg<String>(duration("1 seconds"), "match hint") {
+                    // do not put code outside this method, will run afterwards
+                    protected String match(Object in) {
+                        if (in instanceof AppendEntriesMessages.AppendEntries) {
+                            return "match";
+
+                        } else {
+                            return "message mismatch:" + in.getClass();
+                        }
+                    }
+                }.get();
+
+            assertEquals("match", outHearbeat);
+
             // new entry
             ReplicatedLogImplEntry entry =
                 new ReplicatedLogImplEntry(newEntryIndex, currentTerm,
@@ -623,7 +642,10 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
             leader.handleMessage(leaderActor, new SendInstallSnapshot(bs));
 
-            Object o = MessageCollectorActor.getAllMessages(followerActor).get(0);
+            Thread.sleep(actorContext.getConfigParams().getHeartBeatInterval().toMillis());
+
+            Object o = MessageCollectorActor.getFirstMatching(followerActor, InstallSnapshotMessages.InstallSnapshot.class);
+
 
             assertTrue(o instanceof InstallSnapshotMessages.InstallSnapshot);
 
@@ -637,7 +659,9 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
             leader.handleMessage(leaderActor, new SendHeartBeat());
 
-            o = MessageCollectorActor.getAllMessages(followerActor).get(1);
+            Thread.sleep(actorContext.getConfigParams().getHeartBeatInterval().toMillis());
+
+            o = MessageCollectorActor.getAllMatching(followerActor, InstallSnapshotMessages.InstallSnapshot.class).get(1);
 
             assertTrue(o instanceof InstallSnapshotMessages.InstallSnapshot);
 
@@ -696,7 +720,10 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
                 leader.handleMessage(leaderActor, new SendInstallSnapshot(bs));
 
-                Object o = MessageCollectorActor.getAllMessages(followerActor).get(0);
+                Thread.sleep(actorContext.getConfigParams().getHeartBeatInterval().toMillis());
+
+                Object o = MessageCollectorActor.getFirstMatching(followerActor, InstallSnapshotMessages.InstallSnapshot.class);
+
 
                 assertTrue(o instanceof InstallSnapshotMessages.InstallSnapshot);
 
@@ -714,7 +741,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
                 Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
 
-                o = MessageCollectorActor.getAllMessages(followerActor).get(1);
+                o = MessageCollectorActor.getAllMatching(followerActor, InstallSnapshotMessages.InstallSnapshot.class).get(1);
 
                 assertTrue(o instanceof InstallSnapshotMessages.InstallSnapshot);
 
@@ -833,6 +860,54 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
     }
 
     @Test
+    public void testHeartbeatActorScheduler() throws Exception {
+        new JavaTestKit(getSystem()) {{
+
+            ActorRef leaderActor = getSystem().actorOf(Props.create(MessageCollectorActor.class));
+
+            MockRaftActorContext leaderActorContext =
+                new MockRaftActorContext("leader", getSystem(), leaderActor);
+
+            ActorRef followerActor =  getSystem().actorOf(Props.create(ForwardMessageToBehaviorActor.class));
+
+            MockRaftActorContext followerActorContext =
+                new MockRaftActorContext("follower", getSystem(), followerActor);
+
+            Follower follower = new Follower(followerActorContext);
+
+            ForwardMessageToBehaviorActor.setBehavior(follower);
+
+            Map<String, String> peerAddresses = new HashMap();
+            peerAddresses.put(followerActor.path().toString(),
+                followerActor.path().toString());
+
+            leaderActorContext.setPeerAddresses(peerAddresses);
+            leaderActorContext.setCommitIndex(1);
+            leaderActorContext.setIndex(1);
+
+            Leader leader = new Leader(leaderActorContext);
+            leader.markFollowerActive(followerActor.path().toString());
+
+            Thread.sleep(leaderActorContext.getConfigParams().getHeartBeatInterval().toMillis());
+
+            AppendEntriesMessages.AppendEntries appendEntries =
+                (AppendEntriesMessages.AppendEntries) ForwardMessageToBehaviorActor
+                    .getFirstMatching(followerActor, AppendEntriesMessages.AppendEntries.class);
+
+            assertNotNull(appendEntries);
+
+            assertEquals(1, appendEntries.getLeaderCommit());
+
+            Thread.sleep(leaderActorContext.getConfigParams().getHeartBeatInterval().toMillis());
+
+            List<Object> heartbeatMsgs =
+                ForwardMessageToBehaviorActor.getAllMatching(followerActor, AppendEntriesMessages.AppendEntries.class);
+
+            assertEquals(2, heartbeatMsgs.size());
+        }};
+    }
+
+    @Test
     public void testLeaderCreatedWithCommitIndexLessThanLastIndex() throws Exception {
         new JavaTestKit(getSystem()) {{
 
@@ -877,15 +952,27 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
             leader.handleMessage(leaderActor, new SendHeartBeat());
 
-            AppendEntriesMessages.AppendEntries appendEntries =
-                (AppendEntriesMessages.AppendEntries) MessageCollectorActor
-                    .getFirstMatching(followerActor, AppendEntriesMessages.AppendEntries.class);
+            Thread.sleep(leaderActorContext.getConfigParams().getHeartBeatInterval().toMillis());
+
+            List<Object> appendEntries = MessageCollectorActor
+                .getAllMatching(followerActor, AppendEntriesMessages.AppendEntries.class);
+
 
             assertNotNull(appendEntries);
 
-            assertEquals(1, appendEntries.getLeaderCommit());
-            assertEquals(1, appendEntries.getLogEntries(0).getIndex());
-            assertEquals(0, appendEntries.getPrevLogIndex());
+            boolean appendEntryTested = false;
+            for(Object appendEntry : appendEntries) {
+                AppendEntriesMessages.AppendEntries entry = (AppendEntriesMessages.AppendEntries) appendEntry;
+                if(entry.getLogEntriesCount() > 0) {
+                    assertEquals(1, entry.getLeaderCommit());
+                    assertEquals(1, entry.getLogEntries(0).getIndex());
+                    assertEquals(0, entry.getPrevLogIndex());
+                    appendEntryTested = true;
+                    break;
+                }
+            }
+
+            assertTrue(appendEntryTested);
 
             AppendEntriesReply appendEntriesReply =
                 (AppendEntriesReply) MessageCollectorActor.getFirstMatching(
@@ -946,15 +1033,25 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
             leader.handleMessage(leaderActor, new SendHeartBeat());
 
-            AppendEntriesMessages.AppendEntries appendEntries =
-                (AppendEntriesMessages.AppendEntries) MessageCollectorActor
-                    .getFirstMatching(followerActor, AppendEntriesMessages.AppendEntries.class);
+            Thread.sleep(leaderActorContext.getConfigParams().getHeartBeatInterval().toMillis());
+            List<Object> appendEntries = MessageCollectorActor
+                .getAllMatching(followerActor, AppendEntriesMessages.AppendEntries.class);
+
 
             assertNotNull(appendEntries);
 
-            assertEquals(1, appendEntries.getLeaderCommit());
-            assertEquals(1, appendEntries.getLogEntries(0).getIndex());
-            assertEquals(0, appendEntries.getPrevLogIndex());
+            boolean appendEntryTested = false;
+            for(Object appendEntry : appendEntries) {
+                AppendEntriesMessages.AppendEntries entry = (AppendEntriesMessages.AppendEntries) appendEntry;
+                if(entry.getLogEntriesCount() > 0) {
+                    assertEquals(1, entry.getLeaderCommit());
+                    assertEquals(1, entry.getLogEntries(0).getIndex());
+                    assertEquals(0, entry.getPrevLogIndex());
+                    appendEntryTested = true;
+                    break;
+                }
+            }
+            assertTrue(appendEntryTested);
 
             AppendEntriesReply appendEntriesReply =
                 (AppendEntriesReply) MessageCollectorActor.getFirstMatching(

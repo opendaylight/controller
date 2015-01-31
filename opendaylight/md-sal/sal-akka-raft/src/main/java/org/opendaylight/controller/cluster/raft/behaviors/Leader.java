@@ -73,7 +73,7 @@ public class Leader extends AbstractLeader {
     }
 
     protected void scheduleInstallSnapshotCheck(FiniteDuration interval) {
-        if (getFollowerIds().isEmpty()) {
+        if (followers.size() == 0) {
             // Optimization - do not bother scheduling a heartbeat as there are
             // no followers
             return;

@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
-import akka.actor.Cancellable;
+import akka.actor.PoisonPill;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -26,11 +26,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.TimeUnit;
+import java.util.Set;
+
 import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
 import org.opendaylight.controller.cluster.raft.ClientRequestTrackerImpl;
+import org.opendaylight.controller.cluster.raft.EntriesPackageActor;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformationImpl;
+import org.opendaylight.controller.cluster.raft.HeartbeatActor;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
@@ -45,7 +48,6 @@ import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
-import scala.concurrent.duration.FiniteDuration;
 
 /**
  * The behavior of a RaftActor when it is in the Leader state
@@ -83,7 +85,9 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     private final Map<String, FollowerLogInformation> followerToLog;
     private final Map<String, FollowerToSnapshot> mapFollowerToSnapshot = new HashMap<>();
 
-    private Cancellable heartbeatSchedule = null;
+    protected final Set<String> followers;
+
+    protected final Map<String, ActorRef> followerPackagingActor;
 
     private final Collection<ClientRequestTracker> trackerList = new LinkedList<>();
 
@@ -96,8 +100,10 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     public AbstractLeader(RaftActorContext context) {
         super(context);
 
+        followers = context.getPeerAddresses().keySet();
+
         final Builder<String, FollowerLogInformation> ftlBuilder = ImmutableMap.builder();
-        for (String followerId : context.getPeerAddresses().keySet()) {
+        for (String followerId : followers) {
             FollowerLogInformation followerLogInformation =
                 new FollowerLogInformationImpl(followerId,
                     context.getCommitIndex(), -1,
@@ -109,9 +115,9 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
         leaderId = context.getId();
 
-        LOG.debug("Election:Leader has following peers: {}", getFollowerIds());
+        LOG.debug("Election:Leader has following peers: {}", followers);
 
-        minReplicationCount = getMajorityVoteCount(getFollowerIds().size());
+        minReplicationCount = getMajorityVoteCount(followers.size());
 
         // the isolated Leader peer count will be 1 less than the majority vote count.
         // this is because the vote count has the self vote counted in it
@@ -123,21 +129,19 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
         snapshot = Optional.absent();
 
+        followerPackagingActor = new HashMap<>(followers.size());
+
+        createSupportingActors();
+
+
         // Immediately schedule a heartbeat
         // Upon election: send initial empty AppendEntries RPCs
         // (heartbeat) to each server; repeat during idle periods to
         // prevent election timeouts (§5.2)
-        scheduleHeartBeat(new FiniteDuration(0, TimeUnit.SECONDS));
+        sendHeartBeat();
     }
 
-    /**
-     * Return an immutable collection of follower identifiers.
-     *
-     * @return Collection of follower IDs
-     */
-    protected final Collection<String> getFollowerIds() {
-        return followerToLog.keySet();
-    }
+
 
     private Optional<ByteString> getSnapshot() {
         return snapshot;
@@ -282,32 +286,68 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             }
         }
 
-        try {
-            if (message instanceof SendHeartBeat) {
-                sendHeartBeat();
-                return this;
+        if (message instanceof SendHeartBeat) {
+            sendHeartBeat();
+            return this;
 
-            } else if(message instanceof InitiateInstallSnapshot) {
-                installSnapshotIfNeeded();
+        } else if(message instanceof InitiateInstallSnapshot) {
+            installSnapshotIfNeeded();
 
-            } else if(message instanceof SendInstallSnapshot) {
-                // received from RaftActor
-                setSnapshot(Optional.of(((SendInstallSnapshot) message).getSnapshot()));
-                sendInstallSnapshot();
+        } else if(message instanceof SendInstallSnapshot) {
+            // received from RaftActor
+            setSnapshot(Optional.of(((SendInstallSnapshot) message).getSnapshot()));
+            sendInstallSnapshot();
 
-            } else if (message instanceof Replicate) {
-                replicate((Replicate) message);
+        } else if (message instanceof Replicate) {
+            replicate((Replicate) message);
 
-            } else if (message instanceof InstallSnapshotReply){
-                handleInstallSnapshotReply((InstallSnapshotReply) message);
+        } else if (message instanceof InstallSnapshotReply){
+            handleInstallSnapshotReply((InstallSnapshotReply) message);
 
-            }
-        } finally {
-            scheduleHeartBeat(context.getConfigParams().getHeartBeatInterval());
         }
+
 
         return super.handleMessage(sender, message);
     }
+
+    /**
+     * We are creating two supporting actors for each follower in leader
+     *
+     * 1. EntriesPackageActor
+     * 2. HeartbeatActor
+     *
+     * So, if leader have two followers, then, there will be two pairs of these actors.
+     *
+     * Leader will delegate the process of message serialization to EntriesPacakgeActor, this will help Leader to process
+     * messages for followers without getting blocked, while serialization in progress.
+     *
+     * Once, Serialization is done, EntriesPackageActor will send that message to the HeartbeatActor.
+     *
+     * HeartbeatActor does two jobs -
+     * 1. Sending heartbeat messages to follower.
+     * 2. forwarding the messages (Both ApendEntries and InstallSnapshot)to the follower.
+     *
+     * Heartbeat will go to follower at scheduled interval, no matter if Heartbeatactor has received a message from
+     * EntriesPackageActor or not. This will help to stabilize the cluster, keeping leader node intact and not
+     * triggering next election, even if leader is busy performing other operations.
+     *
+     *
+     */
+
+    protected void createSupportingActors() {
+        // Create Heartbeat actor for followers
+        for(String followerId : followers) {
+            ActorSelection followerActor = context.getPeerActorSelection(followerId);
+            ActorRef leader = context.getActor();
+            ActorRef heartbeatActorRef = context.actorOf(HeartbeatActor.props(followerActor, leader,
+                context.getConfigParams().getHeartBeatInterval()));
+            ActorRef packageActorRef =  context.actorOf(EntriesPackageActor.props(heartbeatActorRef));
+
+            followerPackagingActor.put(followerId, packageActorRef);
+        }
+    }
+
+
 
     private void handleInstallSnapshotReply(InstallSnapshotReply reply) {
         String followerId = reply.getFollowerId();
@@ -398,8 +438,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
     private void sendAppendEntries() {
         // Send an AppendEntries to all followers
-        for (Entry<String, FollowerLogInformation> e : followerToLog.entrySet()) {
-            final String followerId = e.getKey();
+        for (String followerId : followers) {
             ActorSelection followerActor = context.getPeerActorSelection(followerId);
 
             if (followerActor != null) {
@@ -410,10 +449,10 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 if (mapFollowerToSnapshot.get(followerId) != null) {
                     // if install snapshot is in process , then sent next chunk if possible
                     if (isFollowerActive && mapFollowerToSnapshot.get(followerId).canSendNextChunk()) {
-                        sendSnapshotChunk(followerActor, followerId);
+                        sendSnapshotChunk(followerId);
                     } else {
                         // we send a heartbeat even if we have not received a reply for the last chunk
-                        sendAppendEntriesToFollower(followerActor, followerNextIndex,
+                        sendAppendEntriesToFollower(followerId, followerNextIndex,
                             Collections.<ReplicatedLogEntry>emptyList());
                     }
 
@@ -451,20 +490,21 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                         entries =  Collections.<ReplicatedLogEntry>emptyList();
                     }
 
-                    sendAppendEntriesToFollower(followerActor, followerNextIndex, entries);
+                    sendAppendEntriesToFollower(followerId, followerNextIndex, entries);
 
                 }
             }
         }
     }
 
-    private void sendAppendEntriesToFollower(ActorSelection followerActor, long followerNextIndex,
-        List<ReplicatedLogEntry> entries) {
-        followerActor.tell(
+    private void sendAppendEntriesToFollower(String followerId, long followerNextIndex,
+                                             List<ReplicatedLogEntry> entries) {
+        ActorRef packagingActorRef = followerPackagingActor.get(followerId);
+        packagingActorRef.tell(
             new AppendEntries(currentTerm(), context.getId(),
                 prevLogIndex(followerNextIndex),
                 prevLogTerm(followerNextIndex), entries,
-                context.getCommitIndex()).toSerializable(),
+                context.getCommitIndex()),
             actor()
         );
     }
@@ -498,7 +538,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                     if (snapshot.isPresent()) {
                         // if a snapshot is present in the memory, most likely another install is in progress
                         // no need to capture snapshot
-                        sendSnapshotChunk(followerActor, e.getKey());
+                        sendSnapshotChunk(e.getKey());
 
                     } else {
                         initiateCaptureSnapshot();
@@ -545,7 +585,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
                 if (!context.getReplicatedLog().isPresent(nextIndex) &&
                     context.getReplicatedLog().isInSnapshot(nextIndex)) {
-                    sendSnapshotChunk(followerActor, e.getKey());
+                    sendSnapshotChunk(e.getKey());
                 }
             }
         }
@@ -555,10 +595,11 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
      *  Sends a snapshot chunk to a given follower
      *  InstallSnapshot should qualify as a heartbeat too.
      */
-    private void sendSnapshotChunk(ActorSelection followerActor, String followerId) {
+    private void sendSnapshotChunk(String followerId) {
         try {
             if (snapshot.isPresent()) {
-                followerActor.tell(
+                ActorRef packagingActorRef = followerPackagingActor.get(followerId);
+                packagingActorRef.tell(
                     new InstallSnapshot(currentTerm(), context.getId(),
                         context.getReplicatedLog().getSnapshotIndex(),
                         context.getReplicatedLog().getSnapshotTerm(),
@@ -566,11 +607,11 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                         mapFollowerToSnapshot.get(followerId).incrementChunkIndex(),
                         mapFollowerToSnapshot.get(followerId).getTotalChunks(),
                         Optional.of(mapFollowerToSnapshot.get(followerId).getLastChunkHashCode())
-                    ).toSerializable(),
+                    ),
                     actor()
                 );
-                LOG.info("InstallSnapshot sent to follower {}, Chunk: {}/{}",
-                    followerActor.path(), mapFollowerToSnapshot.get(followerId).getChunkIndex(),
+                LOG.info("InstallSnapshot sent to packaging actor {}, Chunk: {}/{}",
+                    packagingActorRef.path(), mapFollowerToSnapshot.get(followerId).getChunkIndex(),
                     mapFollowerToSnapshot.get(followerId).getTotalChunks());
             }
         } catch (IOException e) {
@@ -596,39 +637,19 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     }
 
     private void sendHeartBeat() {
-        if (!followerToLog.isEmpty()) {
+        if (followers.size() > 0) {
             sendAppendEntries();
         }
     }
 
-    private void stopHeartBeat() {
-        if (heartbeatSchedule != null && !heartbeatSchedule.isCancelled()) {
-            heartbeatSchedule.cancel();
-        }
-    }
 
-    private void scheduleHeartBeat(FiniteDuration interval) {
-        if (followerToLog.isEmpty()) {
-            // Optimization - do not bother scheduling a heartbeat as there are
-            // no followers
-            return;
-        }
-
-        stopHeartBeat();
-
-        // Schedule a heartbeat. When the scheduler triggers a SendHeartbeat
-        // message is sent to itself.
-        // Scheduling the heartbeat only once here because heartbeats do not
-        // need to be sent if there are other messages being sent to the remote
-        // actor.
-        heartbeatSchedule = context.getActorSystem().scheduler().scheduleOnce(
-            interval, context.getActor(), new SendHeartBeat(),
-            context.getActorSystem().dispatcher(), context.getActor());
-    }
 
     @Override
     public void close() throws Exception {
-        stopHeartBeat();
+        for(String followerId : followers) {
+            ActorRef packagingActor = followerPackagingActor.get(followerId);
+            packagingActor.tell(PoisonPill.getInstance(), null);
+        }
     }
 
     @Override
