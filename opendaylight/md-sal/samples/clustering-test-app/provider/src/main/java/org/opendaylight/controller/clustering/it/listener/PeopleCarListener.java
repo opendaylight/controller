@@ -38,7 +38,6 @@ public class PeopleCarListener implements CarPurchaseListener {
 
   @Override
   public void onCarBought(CarBought notification) {
-    log.info("onCarBought notification : Adding car person entry");
 
     final CarPersonBuilder carPersonBuilder = new CarPersonBuilder();
     carPersonBuilder.setCarId(notification.getCarId());
@@ -46,6 +45,8 @@ public class PeopleCarListener implements CarPurchaseListener {
     CarPersonKey key = new CarPersonKey(notification.getCarId(), notification.getPersonId());
     carPersonBuilder.setKey(key);
     final CarPerson carPerson = carPersonBuilder.build();
+
+    log.info("Car bought, adding car-person entry: [{}]", carPerson);
 
     InstanceIdentifier<CarPerson> carPersonIId =
         InstanceIdentifier.<CarPeople>builder(CarPeople.class).child(CarPerson.class, carPerson.getKey()).build();
@@ -57,12 +58,12 @@ public class PeopleCarListener implements CarPurchaseListener {
     Futures.addCallback(tx.submit(), new FutureCallback<Void>() {
       @Override
       public void onSuccess(final Void result) {
-        log.info("Car bought, entry added to map of people and car [{}]", carPerson);
+        log.info("Successfully added car-person entry: [{}]", carPerson);
       }
 
       @Override
       public void onFailure(final Throwable t) {
-        log.info("Car bought, Failed entry addition to map of people and car [{}]", carPerson);
+        log.error(String.format("Failed to add car-person entry: [%s]", carPerson), t);
       }
     });
 
