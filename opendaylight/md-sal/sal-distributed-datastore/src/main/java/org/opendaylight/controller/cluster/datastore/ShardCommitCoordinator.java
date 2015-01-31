@@ -205,6 +205,7 @@ public class ShardCommitCoordinator {
             // Dequeue the next cohort entry waiting in the queue.
             currentCohortEntry = queuedCohortEntries.poll();
             if(currentCohortEntry != null) {
+                currentCohortEntry.updateLastAccessTime();
                 doCanCommit(currentCohortEntry);
             }
         }
