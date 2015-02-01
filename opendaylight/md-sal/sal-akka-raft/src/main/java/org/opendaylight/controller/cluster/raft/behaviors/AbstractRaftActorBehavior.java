@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
 import akka.actor.Cancellable;
-import akka.event.LoggingAdapter;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
@@ -24,6 +23,7 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
+import org.slf4j.Logger;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -46,7 +46,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     /**
      *
      */
-    protected final LoggingAdapter LOG;
+    protected final Logger LOG;
 
     /**
      *
@@ -349,7 +349,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
             } else {
                 //if one index is not present in the log, no point in looping
                 // around as the rest wont be present either
-                LOG.warning(
+                LOG.warn(
                         "{}: Missing index {} from log. Cannot apply state. Ignoring {} to {}",
                         context.getId(), i, i, index);
                 break;
@@ -394,7 +394,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         try {
             close();
         } catch (Exception e) {
-            LOG.error(e, "{}: Failed to close behavior : {}", context.getId(), this.state());
+            LOG.error("{}: Failed to close behavior : {}", context.getId(), this.state(), e);
         }
 
         return behavior;

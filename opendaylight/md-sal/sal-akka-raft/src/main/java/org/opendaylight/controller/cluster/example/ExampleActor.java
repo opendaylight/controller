@@ -125,7 +125,7 @@ public class ExampleActor extends RaftActor {
         try {
             bs = fromObject(state);
         } catch (Exception e) {
-            LOG.error(e, "Exception in creating snapshot");
+            LOG.error("Exception in creating snapshot", e);
         }
         getSelf().tell(new CaptureSnapshotReply(bs.toByteArray()), null);
     }
@@ -135,7 +135,7 @@ public class ExampleActor extends RaftActor {
         try {
             state.putAll((HashMap) toObject(snapshot));
         } catch (Exception e) {
-           LOG.error(e, "Exception in applying snapshot");
+           LOG.error("Exception in applying snapshot", e);
         }
         if(LOG.isDebugEnabled()) {
             LOG.debug("Snapshot applied to state : {}", ((HashMap) state).size());

@@ -11,14 +11,13 @@ package org.opendaylight.controller.cluster.example;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
-import akka.event.Logging;
-import akka.event.LoggingAdapter;
 import org.opendaylight.controller.cluster.example.messages.KeyValue;
 import org.opendaylight.controller.cluster.example.messages.KeyValueSaved;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ClientActor extends UntypedActor {
-    protected final LoggingAdapter LOG =
-        Logging.getLogger(getContext().system(), this);
+    protected final Logger LOG = LoggerFactory.getLogger(getClass());
 
     private final ActorRef target;
 
