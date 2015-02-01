@@ -12,8 +12,6 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
-import akka.event.Logging;
-import akka.event.LoggingAdapter;
 import com.google.common.base.Preconditions;
 import com.google.protobuf.GeneratedMessage;
 import java.io.Serializable;
@@ -22,6 +20,8 @@ import java.util.Map;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.test.MockPayloadMessages;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MockRaftActorContext implements RaftActorContext {
 
@@ -144,8 +144,8 @@ public class MockRaftActorContext implements RaftActorContext {
         return this.system;
     }
 
-    @Override public LoggingAdapter getLogger() {
-        return Logging.getLogger(system, this);
+    @Override public Logger getLogger() {
+        return LoggerFactory.getLogger(getClass());
     }
 
     @Override public Map<String, String> getPeerAddresses() {

@@ -615,7 +615,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                         followerToSnapshot.getTotalChunks());
             }
         } catch (IOException e) {
-            LOG.error(e, "{}: InstallSnapshot failed for Leader.", context.getId());
+            LOG.error("{}: InstallSnapshot failed for Leader.", context.getId(), e);
         }
     }
 
