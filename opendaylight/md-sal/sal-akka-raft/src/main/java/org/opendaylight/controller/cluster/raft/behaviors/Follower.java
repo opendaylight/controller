@@ -338,7 +338,7 @@ public class Follower extends AbstractRaftActorBehavior {
             snapshotTracker = null;
 
         } catch (Exception e){
-            LOG.error(e, "{}: Exception in InstallSnapshot of follower", context.getId());
+            LOG.error("{}: Exception in InstallSnapshot of follower", context.getId(), e);
             //send reply with success as false. The chunk will be sent again on failure
             sender.tell(new InstallSnapshotReply(currentTerm(), context.getId(),
                     installSnapshot.getChunkIndex(), false), actor());
