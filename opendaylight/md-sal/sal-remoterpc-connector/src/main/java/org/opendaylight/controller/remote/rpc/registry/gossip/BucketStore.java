@@ -13,8 +13,6 @@ import akka.actor.ActorRefProvider;
 import akka.actor.Address;
 import akka.actor.Props;
 import akka.cluster.ClusterActorRefProvider;
-import akka.event.Logging;
-import akka.event.LoggingAdapter;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,6 +27,8 @@ import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketSto
 import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetBucketsByMembersReply;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.UpdateRemoteBuckets;
 import org.opendaylight.controller.utils.ConditionalProbe;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A store that syncs its data across nodes in the cluster.
@@ -43,7 +43,7 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
 
     private static final Long NO_VERSION = -1L;
 
-    final LoggingAdapter log = Logging.getLogger(getContext().system(), this);
+    protected final Logger log = LoggerFactory.getLogger(getClass());
 
     /**
      * Bucket owned by the node
