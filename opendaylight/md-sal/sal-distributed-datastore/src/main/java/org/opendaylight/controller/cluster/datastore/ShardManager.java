@@ -15,8 +15,6 @@ import akka.actor.OneForOneStrategy;
 import akka.actor.Props;
 import akka.actor.SupervisorStrategy;
 import akka.cluster.ClusterEvent;
-import akka.event.Logging;
-import akka.event.LoggingAdapter;
 import akka.japi.Creator;
 import akka.japi.Function;
 import akka.japi.Procedure;
@@ -54,6 +52,8 @@ import org.opendaylight.controller.cluster.datastore.messages.PrimaryNotFound;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.Duration;
 
 /**
@@ -67,8 +67,7 @@ import scala.concurrent.duration.Duration;
  */
 public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
-    protected final LoggingAdapter LOG =
-        Logging.getLogger(getContext().system(), this);
+    private final Logger LOG = LoggerFactory.getLogger(getClass());
 
     // Stores a mapping between a member name and the address of the member
     // Member names look like "member-1", "member-2" etc and are as specified
@@ -186,7 +185,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 knownModules = ImmutableSet.copyOf(msg.getModules());
             } else if (message instanceof RecoveryFailure) {
                 RecoveryFailure failure = (RecoveryFailure) message;
-                LOG.error(failure.cause(), "Recovery failed");
+                LOG.error("Recovery failed", failure.cause());
             } else if (message instanceof RecoveryCompleted) {
                 LOG.info("Recovery complete : {}", persistenceId());
 
@@ -424,12 +423,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             new Function<Throwable, SupervisorStrategy.Directive>() {
                 @Override
                 public SupervisorStrategy.Directive apply(Throwable t) {
-                    StringBuilder sb = new StringBuilder();
-                    for(StackTraceElement element : t.getStackTrace()) {
-                       sb.append("\n\tat ")
-                         .append(element.toString());
-                    }
-                    LOG.warning("Supervisor Strategy of resume applied {}",sb.toString());
+                    LOG.warn("Supervisor Strategy caught unexpected exception - resuming", t);
                     return SupervisorStrategy.resume();
                 }
             }

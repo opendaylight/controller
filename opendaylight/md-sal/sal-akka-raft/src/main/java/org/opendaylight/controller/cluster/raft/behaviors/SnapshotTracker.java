@@ -8,22 +8,22 @@
 
 package org.opendaylight.controller.cluster.raft.behaviors;
 
-import akka.event.LoggingAdapter;
 import com.google.common.base.Optional;
 import com.google.protobuf.ByteString;
+import org.slf4j.Logger;
 
 /**
  * SnapshotTracker does house keeping for a snapshot that is being installed in chunks on the Follower
  */
 public class SnapshotTracker {
-    private final LoggingAdapter LOG;
+    private final Logger LOG;
     private final int totalChunks;
     private ByteString collectedChunks = ByteString.EMPTY;
     private int lastChunkIndex = AbstractLeader.FIRST_CHUNK_INDEX - 1;
     private boolean sealed = false;
     private int lastChunkHashCode = AbstractLeader.INITIAL_LAST_CHUNK_HASH_CODE;
 
-    SnapshotTracker(LoggingAdapter LOG, int totalChunks){
+    SnapshotTracker(Logger LOG, int totalChunks){
         this.LOG = LOG;
         this.totalChunks = totalChunks;
     }
@@ -77,6 +77,8 @@ public class SnapshotTracker {
     }
 
     public static class InvalidChunkException extends Exception {
+        private static final long serialVersionUID = 1L;
+
         InvalidChunkException(String message){
             super(message);
         }

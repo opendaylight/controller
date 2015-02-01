@@ -10,8 +10,6 @@ package org.opendaylight.controller.cluster.raft;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
-import akka.event.Logging;
-import akka.event.LoggingAdapter;
 import akka.japi.Procedure;
 import akka.persistence.RecoveryCompleted;
 import akka.persistence.SaveSnapshotFailure;
@@ -43,6 +41,8 @@ import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * RaftActor encapsulates a state machine that needs to be kept synchronized
@@ -85,8 +85,7 @@ import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntries
  * </ul>
  */
 public abstract class RaftActor extends AbstractUntypedPersistentActor {
-    protected final LoggingAdapter LOG =
-        Logging.getLogger(getContext().system(), this);
+    protected final Logger LOG = LoggerFactory.getLogger(getClass());
 
     /**
      * The current state determines the current behavior of a RaftActor
@@ -338,8 +337,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         } else if (message instanceof SaveSnapshotFailure) {
             SaveSnapshotFailure saveSnapshotFailure = (SaveSnapshotFailure) message;
 
-            LOG.error(saveSnapshotFailure.cause(), "{}: SaveSnapshotFailure received for snapshot Cause:",
-                    persistenceId());
+            LOG.error("{}: SaveSnapshotFailure received for snapshot Cause:",
+                    persistenceId(), saveSnapshotFailure.cause());
 
             context.getReplicatedLog().snapshotRollback();
 

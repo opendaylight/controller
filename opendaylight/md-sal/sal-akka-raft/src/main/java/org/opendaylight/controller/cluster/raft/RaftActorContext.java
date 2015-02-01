@@ -12,9 +12,8 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
-import akka.event.LoggingAdapter;
-
 import java.util.Map;
+import org.slf4j.Logger;
 
 /**
  * The RaftActorContext contains that portion of the RaftActors state that
@@ -106,7 +105,7 @@ public interface RaftActorContext {
      *
      * @return
      */
-    LoggingAdapter getLogger();
+    Logger getLogger();
 
     /**
      * Get a mapping of peerId's to their addresses

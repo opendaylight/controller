@@ -8,17 +8,16 @@
 
 package org.opendaylight.controller.cluster.common.actor;
 
-import akka.event.Logging;
-import akka.event.LoggingAdapter;
 import akka.japi.Procedure;
 import akka.persistence.SnapshotSelectionCriteria;
 import akka.persistence.UntypedPersistentActor;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractUntypedPersistentActor extends UntypedPersistentActor {
 
-    protected final LoggingAdapter LOG =
-        Logging.getLogger(getContext().system(), this);
+    protected final Logger LOG = LoggerFactory.getLogger(getClass());
 
     public AbstractUntypedPersistentActor() {
         if(LOG.isDebugEnabled()) {
@@ -119,7 +118,7 @@ public abstract class AbstractUntypedPersistentActor extends UntypedPersistentAc
             try {
                 procedure.apply(o);
             } catch (Exception e) {
-                LOG.error(e, "An unexpected error occurred");
+                LOG.error("An unexpected error occurred", e);
             }
         }
 

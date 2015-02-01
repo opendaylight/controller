@@ -7,17 +7,17 @@
  */
 package org.opendaylight.controller.cluster.datastore.compat;
 
+import akka.actor.PoisonPill;
+import akka.actor.Props;
+import akka.japi.Creator;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.PreCommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.PreCommitTransactionReply;
-import akka.actor.PoisonPill;
-import akka.actor.Props;
-import akka.event.Logging;
-import akka.event.LoggingAdapter;
-import akka.japi.Creator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An actor to maintain backwards compatibility for the base Helium version where the 3-phase commit
@@ -28,7 +28,7 @@ import akka.japi.Creator;
  */
 public class BackwardsCompatibleThreePhaseCommitCohort extends AbstractUntypedActor {
 
-    private final LoggingAdapter LOG = Logging.getLogger(getContext().system(), this);
+    private static final Logger LOG = LoggerFactory.getLogger(BackwardsCompatibleThreePhaseCommitCohort.class);
 
     private final String transactionId;
 
