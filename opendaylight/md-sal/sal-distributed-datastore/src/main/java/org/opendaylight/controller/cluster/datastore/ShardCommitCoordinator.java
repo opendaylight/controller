@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
 import akka.actor.Status;
-import akka.event.LoggingAdapter;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import java.util.LinkedList;
@@ -20,6 +19,7 @@ import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransacti
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
+import org.slf4j.Logger;
 
 /**
  * Coordinates commits for a shard ensuring only one concurrent 3-phase commit.
@@ -36,11 +36,11 @@ public class ShardCommitCoordinator {
 
     private final int queueCapacity;
 
-    private final LoggingAdapter log;
+    private final Logger log;
 
     private final String name;
 
-    public ShardCommitCoordinator(long cacheExpiryTimeoutInSec, int queueCapacity, LoggingAdapter log,
+    public ShardCommitCoordinator(long cacheExpiryTimeoutInSec, int queueCapacity, Logger log,
             String name) {
         cohortCache = CacheBuilder.newBuilder().expireAfterAccess(
                 cacheExpiryTimeoutInSec, TimeUnit.SECONDS).build();
