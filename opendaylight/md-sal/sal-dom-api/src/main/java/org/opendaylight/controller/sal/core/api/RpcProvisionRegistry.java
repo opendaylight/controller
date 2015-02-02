@@ -15,6 +15,10 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
+/**
+ * @deprecated Use {@link org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService} and {@link org.opendaylight.controller.md.sal.dom.api.DOMRpcService} instead.
+ */
+@Deprecated
 public interface RpcProvisionRegistry extends RpcImplementation, BrokerService, RouteChangePublisher<RpcRoutingContext, YangInstanceIdentifier>, DOMService {
 
     /**
