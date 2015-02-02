@@ -25,7 +25,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <packaging>bundle</packaging>
   <dependencies>
     <dependency>
-      <groupId>${symbol_dollar}{groupId}</groupId>
+      <groupId>${symbol_dollar}{project.groupId}</groupId>
       <artifactId>${artifactId}-api</artifactId>
       <version>${symbol_dollar}{project.version}</version>
     </dependency>
