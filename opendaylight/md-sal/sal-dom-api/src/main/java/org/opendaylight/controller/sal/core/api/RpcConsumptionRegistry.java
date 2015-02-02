@@ -8,11 +8,14 @@
 package org.opendaylight.controller.sal.core.api;
 
 import java.util.concurrent.Future;
-
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
+/**
+ * @deprecated Use {@link org.opendaylight.controller.md.sal.dom.api.DOMRpcService} instead.
+ */
+@Deprecated
 public interface RpcConsumptionRegistry {
     /**
      * Sends an RPC to other components registered to the broker.
