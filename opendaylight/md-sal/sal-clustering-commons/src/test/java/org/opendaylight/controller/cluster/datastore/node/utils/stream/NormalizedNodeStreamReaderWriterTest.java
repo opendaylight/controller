@@ -15,15 +15,16 @@ import java.io.IOException;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Assert;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
+import org.opendaylight.controller.cluster.datastore.util.InstanceIdentifierUtils;
 import org.opendaylight.controller.cluster.datastore.util.TestModel;
+import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
-import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetEntryNodeBuilder;
@@ -33,9 +34,13 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 public class NormalizedNodeStreamReaderWriterTest {
 
     @Test
-    public void testNormalizedNodeStreamReaderWriter() throws IOException {
+    public void testNormalizedNodeStreaming() throws IOException {
 
-        testNormalizedNodeStreamReaderWriter(createTestContainer());
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        NormalizedNodeOutputStreamWriter writer = new NormalizedNodeOutputStreamWriter(byteArrayOutputStream);
+
+        NormalizedNode<?, ?> testContainer = createTestContainer();
+        writer.writeNormalizedNode(testContainer);
 
         QName toaster = QName.create("http://netconfcentral.org/ns/toaster","2009-11-20","toaster");
         QName darknessFactor = QName.create("http://netconfcentral.org/ns/toaster","2009-11-20","darknessFactor");
@@ -43,9 +48,21 @@ public class NormalizedNodeStreamReaderWriterTest {
                 withNodeIdentifier(new NodeIdentifier(toaster)).
                 withChild(ImmutableNodes.leafNode(darknessFactor, "1000")).build();
 
-        testNormalizedNodeStreamReaderWriter(Builders.containerBuilder().
+        ContainerNode toasterContainer = Builders.containerBuilder().
                 withNodeIdentifier(new NodeIdentifier(SchemaContext.NAME)).
-                withChild(toasterNode).build());
+                withChild(toasterNode).build();
+        writer.writeNormalizedNode(toasterContainer);
+
+        NormalizedNodeInputStreamReader reader = new NormalizedNodeInputStreamReader(
+                new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
+
+        NormalizedNode<?,?> node = reader.readNormalizedNode();
+        Assert.assertEquals(testContainer, node);
+
+        node = reader.readNormalizedNode();
+        Assert.assertEquals(toasterContainer, node);
+
+        writer.close();
     }
 
     private NormalizedNode<?, ?> createTestContainer() {
@@ -76,24 +93,75 @@ public class NormalizedNodeStreamReaderWriterTest {
                 build();
     }
 
-    private void testNormalizedNodeStreamReaderWriter(NormalizedNode<?, ?> input) throws IOException {
+    @Test
+    public void testYangInstanceIdentifierStreaming() throws IOException  {
+        YangInstanceIdentifier path = YangInstanceIdentifier.builder(TestModel.TEST_PATH).
+                node(TestModel.OUTER_LIST_QNAME).nodeWithKey(
+                        TestModel.INNER_LIST_QNAME, TestModel.ID_QNAME, 10).build();
 
-        byte[] byteData = null;
-
-        try(ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            NormalizedNodeStreamWriter writer = new NormalizedNodeOutputStreamWriter(byteArrayOutputStream)) {
-
-            NormalizedNodeWriter normalizedNodeWriter = NormalizedNodeWriter.forStreamWriter(writer);
-            normalizedNodeWriter.write(input);
-            byteData = byteArrayOutputStream.toByteArray();
-
-        }
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        NormalizedNodeOutputStreamWriter writer =
+                new NormalizedNodeOutputStreamWriter(byteArrayOutputStream);
+        writer.writeYangInstanceIdentifier(path);
 
         NormalizedNodeInputStreamReader reader = new NormalizedNodeInputStreamReader(
-                new ByteArrayInputStream(byteData));
+                new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
+
+        YangInstanceIdentifier newPath = reader.readYangInstanceIdentifier();
+        Assert.assertEquals(path, newPath);
+
+        writer.close();
+    }
+
+    @Test
+    public void testNormalizedNodeAndYangInstanceIdentifierStreaming() throws IOException {
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        NormalizedNodeOutputStreamWriter writer = new NormalizedNodeOutputStreamWriter(byteArrayOutputStream);
+
+        NormalizedNode<?, ?> testContainer = TestModel.createBaseTestContainerBuilder().build();
+        writer.writeNormalizedNode(testContainer);
+
+        YangInstanceIdentifier path = YangInstanceIdentifier.builder(TestModel.TEST_PATH).
+                node(TestModel.OUTER_LIST_QNAME).nodeWithKey(
+                        TestModel.INNER_LIST_QNAME, TestModel.ID_QNAME, 10).build();
+
+        writer.writeYangInstanceIdentifier(path);
+
+        NormalizedNodeInputStreamReader reader = new NormalizedNodeInputStreamReader(
+                new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
 
         NormalizedNode<?,?> node = reader.readNormalizedNode();
-        Assert.assertEquals(input, node);
+        Assert.assertEquals(testContainer, node);
+
+        YangInstanceIdentifier newPath = reader.readYangInstanceIdentifier();
+        Assert.assertEquals(path, newPath);
+
+        writer.close();
+    }
+
+    @Test(expected=InvalidNormalizedNodeStreamException.class, timeout=10000)
+    public void testInvalidNormalizedNodeStream() throws IOException {
+        byte[] protobufBytes = new NormalizedNodeToNodeCodec(null).encode(
+                TestModel.createBaseTestContainerBuilder().build()).getNormalizedNode().toByteArray();
+
+        NormalizedNodeInputStreamReader reader = new NormalizedNodeInputStreamReader(
+                new ByteArrayInputStream(protobufBytes));
+
+        reader.readNormalizedNode();
+    }
+
+    @Test(expected=InvalidNormalizedNodeStreamException.class, timeout=10000)
+    public void testInvalidYangInstanceIdentifierStream() throws IOException {
+        YangInstanceIdentifier path = YangInstanceIdentifier.builder(TestModel.TEST_PATH).build();
+
+        byte[] protobufBytes = ShardTransactionMessages.DeleteData.newBuilder().setInstanceIdentifierPathArguments(
+                InstanceIdentifierUtils.toSerializable(path)).build().toByteArray();
+
+        NormalizedNodeInputStreamReader reader = new NormalizedNodeInputStreamReader(
+                new ByteArrayInputStream(protobufBytes));
+
+        reader.readYangInstanceIdentifier();
     }
 
     @Test

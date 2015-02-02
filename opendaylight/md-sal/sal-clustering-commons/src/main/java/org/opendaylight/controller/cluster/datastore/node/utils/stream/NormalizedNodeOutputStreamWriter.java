@@ -46,6 +46,9 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
 
     private static final Logger LOG = LoggerFactory.getLogger(NormalizedNodeOutputStreamWriter.class);
 
+    static final byte SIGNATURE_MARKER = (byte) 0xab;
+    static final short CURRENT_VERSION = (short) 1;
+
     static final byte IS_CODE_VALUE = 1;
     static final byte IS_STRING_VALUE = 2;
     static final byte IS_NULL_VALUE = 3;
@@ -55,6 +58,8 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
     private final Map<String, Integer> stringCodeMap = new HashMap<>();
 
     private NormalizedNodeWriter normalizedNodeWriter;
+
+    private boolean wroteSignatureMarker;
 
     public NormalizedNodeOutputStreamWriter(OutputStream stream) throws IOException {
         Preconditions.checkNotNull(stream);
@@ -74,7 +79,16 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
     }
 
     public void writeNormalizedNode(NormalizedNode<?, ?> node) throws IOException {
+        writeSignatureMarkerAndVersionIfNeeded();
         normalizedNodeWriter().write(node);
+    }
+
+    private void writeSignatureMarkerAndVersionIfNeeded() throws IOException {
+        if(!wroteSignatureMarker) {
+            output.writeByte(SIGNATURE_MARKER);
+            output.writeShort(CURRENT_VERSION);
+            wroteSignatureMarker = true;
+        }
     }
 
     @Override
@@ -201,6 +215,9 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
     private void startNode(final QName qName, byte nodeType) throws IOException {
 
         Preconditions.checkNotNull(qName, "QName of node identifier should not be null.");
+
+        writeSignatureMarkerAndVersionIfNeeded();
+
         // First write the type of node
         output.writeByte(nodeType);
         // Write Start Tag
@@ -247,6 +264,11 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
     }
 
     public void writeYangInstanceIdentifier(YangInstanceIdentifier identifier) throws IOException {
+        writeSignatureMarkerAndVersionIfNeeded();
+        writeYangInstanceIdentifierInternal(identifier);
+    }
+
+    private void writeYangInstanceIdentifierInternal(YangInstanceIdentifier identifier) throws IOException {
         Iterable<YangInstanceIdentifier.PathArgument> pathArguments = identifier.getPathArguments();
         int size = Iterables.size(pathArguments);
         output.writeInt(size);
@@ -363,7 +385,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
                 output.write(bytes);
                 break;
             case ValueTypes.YANG_IDENTIFIER_TYPE:
-                writeYangInstanceIdentifier((YangInstanceIdentifier) value);
+                writeYangInstanceIdentifierInternal((YangInstanceIdentifier) value);
                 break;
             case ValueTypes.NULL_TYPE :
                 break;

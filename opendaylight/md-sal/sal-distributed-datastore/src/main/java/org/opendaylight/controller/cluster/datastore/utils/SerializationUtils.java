@@ -17,6 +17,7 @@ import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.InvalidNormalizedNodeStreamException;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputStreamReader;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeOutputStreamWriter;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
@@ -93,15 +94,19 @@ public final class SerializationUtils {
     }
 
     public static NormalizedNode<?, ?> deserializeNormalizedNode(DataInput in) {
-            try {
-                boolean present = in.readBoolean();
-                if(present) {
-                    NormalizedNodeInputStreamReader streamReader = streamReader(in);
-                    return streamReader.readNormalizedNode();
-                }
-            } catch (IOException e) {
-                throw new IllegalArgumentException("Error deserializing NormalizedNode", e);
-            }
+        try {
+            return tryDeserializeNormalizedNode(in);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Error deserializing NormalizedNode", e);
+        }
+    }
+
+    private static NormalizedNode<?, ?> tryDeserializeNormalizedNode(DataInput in) throws IOException {
+        boolean present = in.readBoolean();
+        if(present) {
+            NormalizedNodeInputStreamReader streamReader = streamReader(in);
+            return streamReader.readNormalizedNode();
+        }
 
         return null;
     }
@@ -109,18 +114,17 @@ public final class SerializationUtils {
     public static NormalizedNode<?, ?> deserializeNormalizedNode(byte [] bytes) {
         NormalizedNode<?, ?> node = null;
         try {
-            node = deserializeNormalizedNode(new DataInputStream(new ByteArrayInputStream(bytes)));
-        } catch(Exception e) {
-        }
-
-        if(node == null) {
-            // Must be from legacy protobuf serialization - try that.
+            node = tryDeserializeNormalizedNode(new DataInputStream(new ByteArrayInputStream(bytes)));
+        } catch(InvalidNormalizedNodeStreamException e) {
+            // Probably from legacy protobuf serialization - try that.
             try {
                 NormalizedNodeMessages.Node serializedNode = NormalizedNodeMessages.Node.parseFrom(bytes);
                 node =  new NormalizedNodeToNodeCodec(null).decode(serializedNode);
-            } catch (InvalidProtocolBufferException e) {
+            } catch (InvalidProtocolBufferException e2) {
                 throw new IllegalArgumentException("Error deserializing NormalizedNode", e);
             }
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Error deserializing NormalizedNode", e);
         }
 
         return node;
