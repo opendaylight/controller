@@ -8,37 +8,36 @@
 package org.opendaylight.controller.remote.rpc.messages;
 
 import com.google.common.base.Preconditions;
+import java.io.Serializable;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
-import java.io.Serializable;
-
 public class InvokeRpc implements Serializable {
-  private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -2813459607858108953L;
 
-  private final QName rpc;
-  private final YangInstanceIdentifier identifier;
-  private final CompositeNode input;
+    private final QName rpc;
+    private final YangInstanceIdentifier identifier;
+    private final CompositeNode input;
 
-  public InvokeRpc(final QName rpc, final YangInstanceIdentifier identifier, final CompositeNode input) {
-    Preconditions.checkNotNull(rpc, "rpc qname should not be null");
-    Preconditions.checkNotNull(input, "rpc input should not be null");
+    public InvokeRpc(final QName rpc, final YangInstanceIdentifier identifier, final CompositeNode input) {
+        Preconditions.checkNotNull(rpc, "rpc qname should not be null");
+        Preconditions.checkNotNull(input, "rpc input should not be null");
 
-    this.rpc = rpc;
-    this.identifier = identifier;
-    this.input = input;
-  }
+        this.rpc = rpc;
+        this.identifier = identifier;
+        this.input = input;
+    }
 
-  public QName getRpc() {
-    return rpc;
-  }
+    public QName getRpc() {
+        return rpc;
+    }
 
-  public YangInstanceIdentifier getIdentifier() {
-    return identifier;
-  }
+    public YangInstanceIdentifier getIdentifier() {
+        return identifier;
+    }
 
-  public CompositeNode getInput() {
-    return input;
-  }
+    public CompositeNode getInput() {
+        return input;
+    }
 }

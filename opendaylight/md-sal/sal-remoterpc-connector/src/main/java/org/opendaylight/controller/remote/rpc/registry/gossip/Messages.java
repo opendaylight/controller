@@ -46,7 +46,8 @@ public class Messages {
         }
 
         public static class ContainsBuckets implements Serializable{
-            private static final long serialVersionUID = 1L;
+            private static final long serialVersionUID = -4940160367495308286L;
+
             private final Map<Address, Bucket> buckets;
 
             public ContainsBuckets(Map<Address, Bucket> buckets){
@@ -87,7 +88,8 @@ public class Messages {
         }
 
         public static class ContainsBucketVersions implements Serializable{
-            private static final long serialVersionUID = 1L;
+            private static final long serialVersionUID = -8172148925383801613L;
+
             Map<Address, Long> versions;
 
             public ContainsBucketVersions(Map<Address, Long> versions) {
@@ -119,15 +121,16 @@ public class Messages {
 
     public static class GossiperMessages{
         public static class Tick implements Serializable {
-            private static final long serialVersionUID = 1L;
+            private static final long serialVersionUID = -4770935099506366773L;
         }
 
         public static final class GossipTick extends Tick {
-            private static final long serialVersionUID = 1L;
+            private static final long serialVersionUID = 5803354404380026143L;
         }
 
         public static final class GossipStatus extends ContainsBucketVersions implements Serializable{
-            private static final long serialVersionUID = 1L;
+            private static final long serialVersionUID = -593037395143883265L;
+
             private final Address from;
 
             public GossipStatus(Address from, Map<Address, Long> versions) {
@@ -141,7 +144,8 @@ public class Messages {
         }
 
         public static final class GossipEnvelope extends ContainsBuckets implements Serializable {
-            private static final long serialVersionUID = 1L;
+            private static final long serialVersionUID = 8346634072582438818L;
+
             private final Address from;
             private final Address to;
 
