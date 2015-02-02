@@ -8,9 +8,13 @@
 package org.opendaylight.controller.sal.core.api;
 
 import java.util.EventListener;
-
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcAvailabilityListener;
 import org.opendaylight.yangtools.yang.common.QName;
 
+/**
+ * @deprecated Use {@link DOMRpcAvailabilityListener} instead.
+ */
+@Deprecated
 public interface RpcRegistrationListener extends EventListener {
 
     public void onRpcImplementationAdded(QName name);

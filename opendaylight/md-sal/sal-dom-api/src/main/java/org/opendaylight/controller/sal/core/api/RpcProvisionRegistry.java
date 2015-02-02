@@ -8,6 +8,8 @@
 package org.opendaylight.controller.sal.core.api;
 
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangePublisher;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.md.sal.dom.api.DOMService;
 import org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration;
 import org.opendaylight.controller.sal.core.api.Broker.RpcRegistration;
@@ -15,6 +17,10 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
+/**
+ * @deprecated Use {@link DOMRpcProviderService} and {@link DOMRpcService} instead.
+ */
+@Deprecated
 public interface RpcProvisionRegistry extends RpcImplementation, BrokerService, RouteChangePublisher<RpcRoutingContext, YangInstanceIdentifier>, DOMService {
 
     /**
