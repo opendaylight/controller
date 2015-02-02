@@ -9,7 +9,10 @@ package org.opendaylight.controller.sal.core.api;
 
 /**
  * Exception reported when no RPC implementation is found in the system.
+ *
+ * @deprecated Use {@link org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementationNotAvailableException} instead.
  */
+@Deprecated
 public class RpcImplementationUnavailableException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
