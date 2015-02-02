@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_f5b553ee",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/listener/NetconfDeviceCommunicator.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-02-02T10:12:14Z",
+      "side": 1,
+      "message": "Log could be simplified to:\n\nlogger.debug(\"{}: Connection failed\", id, future.cause); \n\n- logging framework would handle the case of a null exception for us\n- also logging device id along with the message helps debugging if multiple netconf devices are connected at once",
+      "revId": "beb7c68cfd43b00e355cf436a7ee2ed5aff5f280",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_15b9dfe8",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/sal/NetconfDeviceTopologyAdapter.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-02-02T10:12:14Z",
+      "side": 1,
+      "message": "probably could have package private access",
+      "revId": "beb7c68cfd43b00e355cf436a7ee2ed5aff5f280",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_b5cfcb7e",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/sal/NetconfDeviceTopologyAdapter.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-02-02T10:12:14Z",
+      "side": 1,
+      "message": "the default reason string should be extracted into a static constant.\nAlso the whole reason initialization could be simplified to a one liner:\n\nString reason \u003d (throwable !\u003d null \u0026\u0026 throwable.getMessage() !\u003d null) ? throwable.getMessage() : UNKNOWN_REASON;",
+      "revId": "beb7c68cfd43b00e355cf436a7ee2ed5aff5f280",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_35a3bbb3",
+        "filename": "opendaylight/netconf/netconf-testtool/src/main/java/org/opendaylight/controller/netconf/test/tool/NetconfDeviceSimulator.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-02-02T10:12:14Z",
+      "side": 1,
+      "message": "This feature should be documented on the wiki (just one sentence mentioning the feature and the switch should be enough)",
+      "revId": "beb7c68cfd43b00e355cf436a7ee2ed5aff5f280",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
