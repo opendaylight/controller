@@ -10,14 +10,15 @@ package org.opendaylight.controller.remote.rpc.messages;
 import java.io.Serializable;
 
 public class RpcResponse implements Serializable {
-  private static final long serialVersionUID = 1L;
-  private final String resultCompositeNode;
+    private static final long serialVersionUID = -4211279498688989245L;
 
-  public RpcResponse(final String resultCompositeNode) {
-    this.resultCompositeNode = resultCompositeNode;
-  }
+    private final String resultCompositeNode;
 
-  public String getResultCompositeNode() {
-    return resultCompositeNode;
-  }
+    public RpcResponse(final String resultCompositeNode) {
+        this.resultCompositeNode = resultCompositeNode;
+    }
+
+    public String getResultCompositeNode() {
+        return resultCompositeNode;
+    }
 }
