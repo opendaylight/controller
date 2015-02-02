@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_90d73ded",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/HeartbeatActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-02-02T23:51:56Z",
+      "side": 1,
+      "message": "This was done to handle scenario if actorselection is there, but not actorreference. which i am not really sure. Look at comment in AbstractLeader.java",
+      "parentUuid": "7a96c907_da13a664",
+      "revId": "6d5b03344abc49b8ed3f4c81a1534a2403b8e66b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_3a1dea73",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/HeartbeatActor.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-02-01T04:46:09Z",
       "side": 1,
       "message": "This is scheduled once on the first AppendEntries sent so that instance will be sent in every heartbeat. If the index data is updated in a subsequent AppendEntries it won\u0027t get picked up here. How about using the SendHeartbeat message here?",
+      "revId": "6d5b03344abc49b8ed3f4c81a1534a2403b8e66b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5009b593",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/HeartbeatActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-02-02T23:51:56Z",
+      "side": 1,
+      "message": "yes, you are right, i was under the impression that if i change the object in reference, scheduler will automatically pick the new object, but that is not the case. I am canceling and restarting the scheduler, if appendEntry message with updated data comes in.",
+      "parentUuid": "7a96c907_3a1dea73",
       "revId": "6d5b03344abc49b8ed3f4c81a1534a2403b8e66b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -81,6 +117,24 @@
       "writtenOn": "2015-02-01T04:17:35Z",
       "side": 1,
       "message": "Is it safe to capture this once? I think this is dynamic - other code looks it up when needed. Also, I\u0027ve seen this return null.",
+      "revId": "6d5b03344abc49b8ed3f4c81a1534a2403b8e66b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_70dcf112",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 340,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-02-02T23:51:56Z",
+      "side": 1,
+      "message": "hmm, I am not sure, I thought ActorSelection will always be there even if ActorReference is not present, that is why I am checking ActorReference before scheduling the heartbeat. So, Other possibility could be create these supporting actors only for those followers, whose ActorReference is getting resolved at this time. Create other follower\u0027s supporting actor dynamically, when they join cluster.",
+      "parentUuid": "7a96c907_fa3f82d4",
       "revId": "6d5b03344abc49b8ed3f4c81a1534a2403b8e66b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
