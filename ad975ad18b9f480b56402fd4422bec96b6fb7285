@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_b5dcabe5",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-02-02T14:20:41Z",
+      "side": 1,
+      "message": "Bug 1674, right? not 1764\n\nhttps://bugs.opendaylight.org/show_bug.cgi?id\u003d1674",
+      "range": {
+        "startLine": 7,
+        "startChar": 4,
+        "endLine": 7,
+        "endChar": 8
+      },
+      "revId": "ad975ad18b9f480b56402fd4422bec96b6fb7285",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_75e623b6",
+        "filename": "opendaylight/networkconfiguration/neutron/northbound/src/main/java/org/opendaylight/controller/networkconfig/neutron/northbound/NeutronLoadBalancerHealthMonitorNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-02-02T14:20:41Z",
+      "side": 1,
+      "message": "is this TODO comment still applicable? \nIf not, maybe remove it. If yes, please update it.",
+      "range": {
+        "startLine": 79,
+        "startChar": 15,
+        "endLine": 79,
+        "endChar": 19
+      },
+      "revId": "ad975ad18b9f480b56402fd4422bec96b6fb7285",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_95e16f9c",
+        "filename": "opendaylight/networkconfiguration/neutron/src/main/java/org/opendaylight/controller/networkconfig/neutron/NeutronLoadBalancerHealthMonitor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-02-02T14:20:41Z",
+      "side": 1,
+      "message": "trailing space?",
+      "range": {
+        "startLine": 228,
+        "startChar": 0,
+        "endLine": 228,
+        "endChar": 1
+      },
+      "revId": "ad975ad18b9f480b56402fd4422bec96b6fb7285",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
