@@ -1,0 +1,112 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_f0b1e1e1",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-02T23:32:23Z",
+      "side": 1,
+      "message": "I don\u0027t want to lose the final on this. I know you want to manipulate the RaftActorContext in the tests and there is already a way to do that when you extend RaftActor (see getRaftActorContext()). So you could have gotten MockRaftActor and just set things as you do today instead of using the setter.",
+      "revId": "501fae2ad599afd555b02685d7cf173d7a6be698",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_10b56dcc",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 518,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-02T23:32:23Z",
+      "side": 1,
+      "message": "Don\u0027t need this setter if you make changes using the existing mechanism.",
+      "revId": "501fae2ad599afd555b02685d7cf173d7a6be698",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_50945536",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-02T23:32:23Z",
+      "side": 1,
+      "message": "basically minReplicatedToAllIndex needs to be \u003c\u003d context.getLastApplied() right? Wouldn\u0027t Math.min not work here?",
+      "range": {
+        "startLine": 249,
+        "startChar": 15,
+        "endLine": 249,
+        "endChar": 38
+      },
+      "revId": "501fae2ad599afd555b02685d7cf173d7a6be698",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_70ae3187",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 258,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-02T23:32:23Z",
+      "side": 1,
+      "message": "I think a majority of this code can probably live in AbstractBehavior and be reused by AbstractLeader/Follower",
+      "revId": "501fae2ad599afd555b02685d7cf173d7a6be698",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_109ecd56",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-02T23:32:23Z",
+      "side": 1,
+      "message": "Seen comment from AbstractLeader",
+      "revId": "501fae2ad599afd555b02685d7cf173d7a6be698",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_f09a4162",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-02T23:32:23Z",
+      "side": 1,
+      "message": "We should probably hide the fake snapshotting mechanism in a helper method on ReplicatedLog. Thoughts?",
+      "revId": "501fae2ad599afd555b02685d7cf173d7a6be698",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
