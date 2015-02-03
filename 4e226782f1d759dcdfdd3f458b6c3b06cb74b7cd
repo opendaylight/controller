@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_c6caeb6d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 693,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-03T11:06:22Z",
+      "side": 1,
+      "message": "The cause needs to be the first argument when using the akka LoggingAdapter.",
+      "revId": "4e226782f1d759dcdfdd3f458b6c3b06cb74b7cd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_66c99777",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 776,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-03T11:06:22Z",
+      "side": 1,
+      "message": "See above",
+      "revId": "4e226782f1d759dcdfdd3f458b6c3b06cb74b7cd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_86c4e35f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardWriteTransaction.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-03T11:06:22Z",
+      "side": 1,
+      "message": "Typo in class name:) Didn\u0027t notice it before.",
+      "revId": "4e226782f1d759dcdfdd3f458b6c3b06cb74b7cd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

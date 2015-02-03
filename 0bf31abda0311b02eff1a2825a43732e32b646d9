@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_a696bf4a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/modification/MutableCompositeModificationTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-03T11:06:22Z",
+      "side": 0,
+      "message": "Have we retained this behavior that every serialized composite modification is different? I remember that this was a bug fix.",
+      "revId": "0bf31abda0311b02eff1a2825a43732e32b646d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
