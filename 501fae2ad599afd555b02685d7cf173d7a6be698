@@ -59,6 +59,40 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_3033c915",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-03T04:05:41Z",
+      "side": 1,
+      "message": "Couldn\u0027t we use Math.min(minReplicatedToAllIndex, context.getLastApplied()) here?",
+      "revId": "501fae2ad599afd555b02685d7cf173d7a6be698",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_902bbd93",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 258,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-03T04:05:41Z",
+      "side": 1,
+      "message": "So we\u0027re faking it out even though we didn\u0027t actually snapshot - seems safe....",
+      "revId": "501fae2ad599afd555b02685d7cf173d7a6be698",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_70ae3187",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
         "patchSetId": 3
@@ -104,6 +138,23 @@
       "writtenOn": "2015-02-02T23:32:23Z",
       "side": 1,
       "message": "We should probably hide the fake snapshotting mechanism in a helper method on ReplicatedLog. Thoughts?",
+      "revId": "501fae2ad599afd555b02685d7cf173d7a6be698",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_501d3572",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/CandidateTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-03T04:05:41Z",
+      "side": 1,
+      "message": "Collections.\u003cReplicatedLogEntry\u003eemptyList() avoids compiler warning.",
       "revId": "501fae2ad599afd555b02685d7cf173d7a6be698",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
