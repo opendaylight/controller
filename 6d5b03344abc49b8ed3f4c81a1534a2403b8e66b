@@ -196,6 +196,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_68e16599",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/HeartbeatActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-03T20:56:26Z",
+      "side": 1,
+      "message": "But we don\u0027t try to resolve the ActorSelection in handleReceive - we just invoke the ActorSelection. Same in other places throughout the code - I haven\u0027t seen any other code that tries to resolve. Why is it necessary to do it here? Why do we not want to schedule the heartbeat here if the ActorSelection can\u0027t be resolved? How expensive is it? We\u0027re resolving on every call and I\u0027m concerned it may block this actor for significant time and may cause the follower to time out and re-elect. \n\nIn fact, we could just check if heartbeatSchedule is null - we don\u0027t really need setScheduler, e.g.:\n\n  if(heartbeatSchedule \u003d\u003d null) {\n      Optional\u003cActorRef\u003e followerActorRef \u003d    \n                                  getSingleActorRefFromSelector(followerActor);\n        if(followerActorRef.isPresent()) {\n            heartbeatSchedule \u003d ...\n        }\n  }\n\nThat way getSingleActorRefFromSelector  is off the fast path - we would only check it if the heartbeat isn\u0027t scheduled. Still, I don\u0027t see why getSingleActorRefFromSelector is needed for the reasons mentioned above.",
+      "parentUuid": "7a96c907_688c0580",
+      "revId": "6d5b03344abc49b8ed3f4c81a1534a2403b8e66b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_3a1dea73",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/HeartbeatActor.java",
         "patchSetId": 1
