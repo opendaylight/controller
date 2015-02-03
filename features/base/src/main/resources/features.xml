@@ -16,8 +16,8 @@
       <feature>odl-base-jackson</feature>
       <feature>odl-base-spring-security</feature>
    </feature>
-   <feature name="odl-base-dummy-console" description="Temporary Dummy Console" version="1.1.2-SNAPSHOT">
-      <bundle>mvn:org.opendaylight.controller/dummy-console/1.1.2-SNAPSHOT</bundle>
+   <feature name="odl-base-dummy-console" description="Temporary Dummy Console" version="1.1.2-Helium-SR2">
+      <bundle>mvn:org.opendaylight.controller/dummy-console/1.1.2-Helium-SR2</bundle>
    </feature>
    <feature name="odl-base-felix-dm" description="Felix Dependency Manager" version="${felix.dependencymanager.version}">
       <bundle>mvn:org.osgi/org.osgi.compendium/${osgi.compendium.version}</bundle>
@@ -36,7 +36,7 @@
       <bundle>wrap:mvn:io.netty/netty-common/${netty.version}</bundle>
       <bundle>wrap:mvn:io.netty/netty-handler/${netty.version}</bundle>
       <bundle>wrap:mvn:io.netty/netty-codec-http/${netty.version}</bundle>
-      <bundle>mvn:org.opendaylight.controller.thirdparty/ganymed/1.1.2-SNAPSHOT</bundle>
+      <bundle>mvn:org.opendaylight.controller.thirdparty/ganymed/1.1.2-Helium-SR2</bundle>
    </feature>
    <feature name="odl-base-jersey" description="Jersey" version="${jersey.version}">
       <feature>odl-base-gemini-web</feature>

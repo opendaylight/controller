@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.opendaylight</artifactId>
-    <version>1.4.2-SNAPSHOT</version>
+    <version>1.4.2-Helium-SR2</version>
     <relativePath>../../../opendaylight/commons/opendaylight</relativePath>
   </parent>
   <scm>
@@ -16,7 +16,7 @@
 
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>northboundtest</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>0.4.2-Helium-SR2</version>
         <packaging>bundle</packaging>
 
         <build>

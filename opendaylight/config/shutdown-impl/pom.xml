@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>config-plugin-parent</artifactId>
-    <version>0.2.7-SNAPSHOT</version>
+    <version>0.2.7-Helium-SR2</version>
     <relativePath>../config-plugin-parent</relativePath>
   </parent>
   <artifactId>shutdown-impl</artifactId>

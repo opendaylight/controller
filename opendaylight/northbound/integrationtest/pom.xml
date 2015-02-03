@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.integrationtest</artifactId>
-    <version>0.5.4-SNAPSHOT</version>
+    <version>0.5.4-Helium-SR2</version>
     <relativePath>../../commons/integrationtest</relativePath>
   </parent>
 
   <artifactId>northbound.integrationtest</artifactId>
-  <version>0.4.4-SNAPSHOT</version>
+  <version>0.4.4-Helium-SR2</version>
   <dependencies>
     <dependency>
       <groupId>ch.qos.logback</groupId>

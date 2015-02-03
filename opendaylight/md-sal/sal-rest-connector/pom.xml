@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>sal-parent</artifactId>
-    <version>1.1.2-SNAPSHOT</version>
+    <version>1.1.2-Helium-SR2</version>
   </parent>
   <artifactId>sal-rest-connector</artifactId>
   <packaging>bundle</packaging>

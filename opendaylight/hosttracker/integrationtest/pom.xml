@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.integrationtest</artifactId>
-    <version>0.5.4-SNAPSHOT</version>
+    <version>0.5.4-Helium-SR2</version>
     <relativePath>../../commons/integrationtest</relativePath>
   </parent>
 
   <artifactId>hosttracker.integrationtest</artifactId>
-  <version>0.5.4-SNAPSHOT</version>
+  <version>0.5.4-Helium-SR2</version>
   <properties>
     <sonar.jacoco.itReportPath>../implementaiton/target/jacoco-it.exec</sonar.jacoco.itReportPath>
     <!-- Sonar jacoco plugin to get integration test coverage info -->

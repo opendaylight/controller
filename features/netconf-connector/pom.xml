@@ -10,7 +10,7 @@
    <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>sal-parent</artifactId>
-    <version>1.1.2-SNAPSHOT</version>
+    <version>1.1.2-Helium-SR2</version>
     <relativePath>../../opendaylight/md-sal</relativePath>
    </parent>
    <!--
@@ -21,7 +21,7 @@
   -->
    <artifactId>features-netconf-connector</artifactId>
    <!-- Optional TODO: Uncomment version if you are not using a parent pom.xml
-   <version>1.0.2-SNAPSHOT</version>
+   <version>1.0.2-Helium-SR2</version>
    -->
    <packaging>jar</packaging>
    <properties>
@@ -42,21 +42,21 @@
         <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>features-yangtools</artifactId>
-          <version>0.6.4-SNAPSHOT</version>
+          <version>0.6.4-Helium-SR2</version>
           <classifier>features</classifier>
           <type>xml</type>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>features-mdsal</artifactId>
-          <version>1.1.2-SNAPSHOT</version>
+          <version>1.1.2-Helium-SR2</version>
           <classifier>features</classifier>
           <type>xml</type>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.openflowplugin</groupId>
           <artifactId>features-openflowplugin</artifactId>
-          <version>0.0.5-SNAPSHOT</version>
+          <version>0.0.5-Helium-SR2</version>
           <classifier>features</classifier>
           <type>xml</type>
         </dependency>

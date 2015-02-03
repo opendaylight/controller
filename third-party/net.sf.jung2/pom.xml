@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.thirdparty</artifactId>
-    <version>1.1.3-SNAPSHOT</version>
+    <version>1.1.3-Helium-SR2</version>
     <relativePath>../commons/thirdparty</relativePath>
   </parent>
   <scm>
@@ -17,7 +17,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.controller.thirdparty</groupId>
   <artifactId>net.sf.jung2</artifactId>
-  <version>2.0.4-SNAPSHOT</version>
+  <version>2.0.4-Helium-SR2</version>
   <packaging>bundle</packaging>
   <build>
     <plugins>

@@ -7,12 +7,12 @@
   <parent>
      <groupId>org.opendaylight.controller.samples</groupId>
      <artifactId>sal-samples</artifactId>
-     <version>1.1.2-SNAPSHOT</version>
+     <version>1.1.2-Helium-SR2</version>
   </parent>
 
   <artifactId>l2switch.aggregator</artifactId>
   <groupId>org.opendaylight.controller.samples.l2switch</groupId>
-  <version>1.0.2-SNAPSHOT</version>
+  <version>1.0.2-Helium-SR2</version>
   <packaging>pom</packaging>
 
   <modules>

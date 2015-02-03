@@ -6,7 +6,7 @@
   </prerequisites>
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>commons.thirdparty</artifactId>
-  <version>1.1.4-SNAPSHOT</version>
+  <version>1.1.4-Helium-SR2</version>
   <packaging>pom</packaging>
   <scm>
     <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>

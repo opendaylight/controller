@@ -4,13 +4,13 @@
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>odlparent</artifactId>
-    <version>1.4.4-SNAPSHOT</version>
+    <version>1.4.4-Helium-SR2</version>
     <relativePath></relativePath>
   </parent>
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>commons.opendaylight</artifactId>
-  <version>1.4.4-SNAPSHOT</version>
+  <version>1.4.4-Helium-SR2</version>
   <packaging>pom</packaging>
   <prerequisites>
     <maven>3.0</maven>
@@ -20,24 +20,24 @@
 
     <akka.version>2.3.4</akka.version>
     <aopalliance.version>1.0.0</aopalliance.version>
-    <appauth.version>0.4.4-SNAPSHOT</appauth.version>
-    <archetype-app-northbound>0.0.3-SNAPSHOT</archetype-app-northbound>
+    <appauth.version>0.4.4-Helium-SR2</appauth.version>
+    <archetype-app-northbound>0.0.3-Helium-SR2</archetype-app-northbound>
     <aries.util.version>1.1.0</aries.util.version>
-    <arphandler.version>0.5.4-SNAPSHOT</arphandler.version>
+    <arphandler.version>0.5.4-Helium-SR2</arphandler.version>
     <!-- Controller Modules Versions -->
     <asm.version>4.1</asm.version>
     <!-- Plugin Versions -->
     <bouncycastle.version>1.50</bouncycastle.version>
     <bundle.plugin.version>2.4.0</bundle.plugin.version>
-    <bundlescanner.api.version>0.4.4-SNAPSHOT</bundlescanner.api.version>
-    <bundlescanner.implementation.version>0.4.4-SNAPSHOT</bundlescanner.implementation.version>
-    <bundlescanner.version>0.4.4-SNAPSHOT</bundlescanner.version>
+    <bundlescanner.api.version>0.4.4-Helium-SR2</bundlescanner.api.version>
+    <bundlescanner.implementation.version>0.4.4-Helium-SR2</bundlescanner.implementation.version>
+    <bundlescanner.version>0.4.4-Helium-SR2</bundlescanner.version>
     <checkstyle.version>2.12</checkstyle.version>
-    <clustering.services.version>0.5.3-SNAPSHOT</clustering.services.version>
-    <clustering.services_implementation.version>0.4.5-SNAPSHOT</clustering.services_implementation.version>
-    <clustering.stub.version>0.4.4-SNAPSHOT</clustering.stub.version>
-    <clustering.test.version>0.4.4-SNAPSHOT</clustering.test.version>
-    <commmons.northbound.version>0.4.4-SNAPSHOT</commmons.northbound.version>
+    <clustering.services.version>0.5.3-Helium-SR2</clustering.services.version>
+    <clustering.services_implementation.version>0.4.5-Helium-SR2</clustering.services_implementation.version>
+    <clustering.stub.version>0.4.4-Helium-SR2</clustering.stub.version>
+    <clustering.test.version>0.4.4-Helium-SR2</clustering.test.version>
+    <commmons.northbound.version>0.4.4-Helium-SR2</commmons.northbound.version>
     <!-- Third Party Versions -->
     <codahale.metrics.version>3.0.1</codahale.metrics.version>
 
@@ -51,23 +51,23 @@
     <commons.tomcat.api>7.0.53.v201406060720</commons.tomcat.api>
     <commons.tomcat.util>7.0.53.v201406070630</commons.tomcat.util>
 
-    <commons.checkstyle.version>0.0.5-SNAPSHOT</commons.checkstyle.version>
+    <commons.checkstyle.version>0.0.5-Helium-SR2</commons.checkstyle.version>
     <commons.fileupload.version>1.2.2</commons.fileupload.version>
-    <commons.httpclient.version>0.1.4-SNAPSHOT</commons.httpclient.version>
+    <commons.httpclient.version>0.1.4-Helium-SR2</commons.httpclient.version>
     <commons.io.version>2.4</commons.io.version>
     <commons.lang3.version>3.1</commons.lang3.version>
-    <commons.logback_settings.version>0.0.4-SNAPSHOT</commons.logback_settings.version>
+    <commons.logback_settings.version>0.0.4-Helium-SR2</commons.logback_settings.version>
     <commons.net.version>3.0.1</commons.net.version>
-    <commons.opendaylight.commons.httpclient>0.1.4-SNAPSHOT</commons.opendaylight.commons.httpclient>
-    <commons.opendaylight.concepts.version>0.5.4-SNAPSHOT</commons.opendaylight.concepts.version>
-    <commons.opendaylight.version>1.4.4-SNAPSHOT</commons.opendaylight.version>
-    <commons.parent.version>1.0.4-SNAPSHOT</commons.parent.version>
+    <commons.opendaylight.commons.httpclient>0.1.4-Helium-SR2</commons.opendaylight.commons.httpclient>
+    <commons.opendaylight.concepts.version>0.5.4-Helium-SR2</commons.opendaylight.concepts.version>
+    <commons.opendaylight.version>1.4.4-Helium-SR2</commons.opendaylight.version>
+    <commons.parent.version>1.0.4-Helium-SR2</commons.parent.version>
     <compiler.version>2.3.2</compiler.version>
-    <commons.httpclient.version>0.1.4-SNAPSHOT</commons.httpclient.version>
-    <concepts.version>0.5.4-SNAPSHOT</concepts.version>
+    <commons.httpclient.version>0.1.4-Helium-SR2</commons.httpclient.version>
+    <concepts.version>0.5.4-Helium-SR2</concepts.version>
     <concurrentlinkedhashmap.version>1.4</concurrentlinkedhashmap.version>
-    <config.version>0.2.7-SNAPSHOT</config.version>
-    <aaa.version>0.1.2-SNAPSHOT</aaa.version>
+    <config.version>0.2.7-Helium-SR2</config.version>
+    <aaa.version>0.1.2-Helium-SR2</aaa.version>
     <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
     <config.clustering.configfile>05-clustering.xml</config.clustering.configfile>
     <config.netty.configfile>00-netty.xml</config.netty.configfile>
@@ -78,16 +78,16 @@
     <config.restconf.configfile>10-rest-connector.xml</config.restconf.configfile>
     <config.netconf.connector.configfile>99-netconf-connector.xml</config.netconf.connector.configfile>
     <config.statistics.manager.configfile>30-statistics-manager.xml</config.statistics.manager.configfile>
-    <configuration.implementation.version>0.4.5-SNAPSHOT</configuration.implementation.version>
-    <configuration.version>0.4.5-SNAPSHOT</configuration.version>
-    <connectionmanager.version>0.1.4-SNAPSHOT</connectionmanager.version>
-    <containermanager.it.version>0.5.4-SNAPSHOT</containermanager.it.version>
-    <containermanager.northbound.version>0.4.4-SNAPSHOT</containermanager.northbound.version>
-    <containermanager.shell.version>0.5.4-SNAPSHOT</containermanager.shell.version>
-    <containermanager.version>0.5.4-SNAPSHOT</containermanager.version>
-    <controllermanager.northbound.version>0.0.4-SNAPSHOT</controllermanager.northbound.version>
-    <devices.web.version>0.4.4-SNAPSHOT</devices.web.version>
-    <dummy-console.version>1.1.2-SNAPSHOT</dummy-console.version>
+    <configuration.implementation.version>0.4.5-Helium-SR2</configuration.implementation.version>
+    <configuration.version>0.4.5-Helium-SR2</configuration.version>
+    <connectionmanager.version>0.1.4-Helium-SR2</connectionmanager.version>
+    <containermanager.it.version>0.5.4-Helium-SR2</containermanager.it.version>
+    <containermanager.northbound.version>0.4.4-Helium-SR2</containermanager.northbound.version>
+    <containermanager.shell.version>0.5.4-Helium-SR2</containermanager.shell.version>
+    <containermanager.version>0.5.4-Helium-SR2</containermanager.version>
+    <controllermanager.northbound.version>0.0.4-Helium-SR2</controllermanager.northbound.version>
+    <devices.web.version>0.4.4-Helium-SR2</devices.web.version>
+    <dummy-console.version>1.1.2-Helium-SR2</dummy-console.version>
     <eclipse.persistence.version>2.5.0</eclipse.persistence.version>
     <eclipse.jdt.core.compiler.batch.version>3.8.0.I20120518-2145</eclipse.jdt.core.compiler.batch.version>
     <!-- enforcer version -->
@@ -99,78 +99,78 @@
 
     <exi.nagasena.version>0000.0002.0038.0</exi.nagasena.version>
     <felix.util.version>1.6.0</felix.util.version>
-    <filtervalve.version>1.4.4-SNAPSHOT</filtervalve.version>
+    <filtervalve.version>1.4.4-Helium-SR2</filtervalve.version>
     <findbugs.maven.plugin.version>2.4.0</findbugs.maven.plugin.version>
-    <flowprogrammer.northbound.version>0.4.4-SNAPSHOT</flowprogrammer.northbound.version>
-    <flows.web.version>0.4.4-SNAPSHOT</flows.web.version>
-    <forwarding.staticrouting>0.5.4-SNAPSHOT</forwarding.staticrouting>
-    <forwarding.staticrouting.northbound.version>0.4.4-SNAPSHOT</forwarding.staticrouting.northbound.version>
-    <forwardingrulesmanager.implementation.version>0.4.4-SNAPSHOT</forwardingrulesmanager.implementation.version>
-    <forwardingrulesmanager.version>0.6.2-SNAPSHOT</forwardingrulesmanager.version>
-    <ganymed.version>1.1.2-SNAPSHOT</ganymed.version>
-    <hosttracker.api.version>0.5.4-SNAPSHOT</hosttracker.api.version>
-    <hosttracker.implementation.version>0.5.4-SNAPSHOT</hosttracker.implementation.version>
-    <hosttracker.northbound.version>0.4.4-SNAPSHOT</hosttracker.northbound.version>
-    <hosttracker.shell.version>1.0.2-SNAPSHOT</hosttracker.shell.version>
-    <hosttracker_new.api.version>0.4.4-SNAPSHOT</hosttracker_new.api.version>
-    <hosttracker_new.implementation.version>0.4.4-SNAPSHOT</hosttracker_new.implementation.version>
-    <httpservice-bridge.northbound.version>0.0.4-SNAPSHOT</httpservice-bridge.northbound.version>
-    <ietf-inet-types.version>2010.09.24.4.2-SNAPSHOT</ietf-inet-types.version>
-    <ietf-restconf.version>2013.10.19.1.2-SNAPSHOT</ietf-restconf.version>
-    <ietf-topology.version>2013.10.21.2.2-SNAPSHOT</ietf-topology.version>
-    <ietf-yang-types.version>2010.09.24.4.2-SNAPSHOT</ietf-yang-types.version>
+    <flowprogrammer.northbound.version>0.4.4-Helium-SR2</flowprogrammer.northbound.version>
+    <flows.web.version>0.4.4-Helium-SR2</flows.web.version>
+    <forwarding.staticrouting>0.5.4-Helium-SR2</forwarding.staticrouting>
+    <forwarding.staticrouting.northbound.version>0.4.4-Helium-SR2</forwarding.staticrouting.northbound.version>
+    <forwardingrulesmanager.implementation.version>0.4.4-Helium-SR2</forwardingrulesmanager.implementation.version>
+    <forwardingrulesmanager.version>0.6.2-Helium-SR2</forwardingrulesmanager.version>
+    <ganymed.version>1.1.2-Helium-SR2</ganymed.version>
+    <hosttracker.api.version>0.5.4-Helium-SR2</hosttracker.api.version>
+    <hosttracker.implementation.version>0.5.4-Helium-SR2</hosttracker.implementation.version>
+    <hosttracker.northbound.version>0.4.4-Helium-SR2</hosttracker.northbound.version>
+    <hosttracker.shell.version>1.0.2-Helium-SR2</hosttracker.shell.version>
+    <hosttracker_new.api.version>0.4.4-Helium-SR2</hosttracker_new.api.version>
+    <hosttracker_new.implementation.version>0.4.4-Helium-SR2</hosttracker_new.implementation.version>
+    <httpservice-bridge.northbound.version>0.0.4-Helium-SR2</httpservice-bridge.northbound.version>
+    <ietf-inet-types.version>2010.09.24.4.2-Helium-SR2</ietf-inet-types.version>
+    <ietf-restconf.version>2013.10.19.1.2-Helium-SR2</ietf-restconf.version>
+    <ietf-topology.version>2013.10.21.2.2-Helium-SR2</ietf-topology.version>
+    <ietf-yang-types.version>2010.09.24.4.2-Helium-SR2</ietf-yang-types.version>
     <jdepend.maven.plugin.version>2.0-beta-2</jdepend.maven.plugin.version>
     <jmxGeneratorPath>src/main/yang-gen-config</jmxGeneratorPath>
-    <jolokia-bridge.version>0.0.4-SNAPSHOT</jolokia-bridge.version>
+    <jolokia-bridge.version>0.0.4-Helium-SR2</jolokia-bridge.version>
     <jolokia.version>1.1.4</jolokia.version>
     <jsr305.api.version>2.0.1</jsr305.api.version>
     <jsr311.api.version>1.1.1</jsr311.api.version>
     <jsr311.v2.api.version>2.0</jsr311.v2.api.version>
-    <karaf.branding.version>1.0.2-SNAPSHOT</karaf.branding.version>
+    <karaf.branding.version>1.0.2-Helium-SR2</karaf.branding.version>
     <karaf.shell.version>3.0.0</karaf.shell.version>
     <karaf.version>3.0.1</karaf.version>
     <leveldb.version>0.7</leveldb.version>
     <leveldbjni.version>1.8</leveldbjni.version>
     <lifecycle.mapping.version>1.0.0</lifecycle.mapping.version>
     <logback.version>1.0.9</logback.version>
-    <logging.bridge.version>0.4.4-SNAPSHOT</logging.bridge.version>
+    <logging.bridge.version>0.4.4-Helium-SR2</logging.bridge.version>
     <maven.plugin.api.version>3.0.5</maven.plugin.api.version>
     <mimepull.version>1.9.4</mimepull.version>
-    <mdsal.version>1.1.2-SNAPSHOT</mdsal.version>
-    <netconf.version>0.2.7-SNAPSHOT</netconf.version>
-    <networkconfig.bridgedomain.northbound.version>0.0.5-SNAPSHOT</networkconfig.bridgedomain.northbound.version>
-    <networkconfig.neutron.implementation.version>0.4.4-SNAPSHOT</networkconfig.neutron.implementation.version>
-    <networkconfig.neutron.northbound.version>0.4.4-SNAPSHOT</networkconfig.neutron.northbound.version>
-    <networkconfig.neutron.version>0.4.4-SNAPSHOT</networkconfig.neutron.version>
+    <mdsal.version>1.1.2-Helium-SR2</mdsal.version>
+    <netconf.version>0.2.7-Helium-SR2</netconf.version>
+    <networkconfig.bridgedomain.northbound.version>0.0.5-Helium-SR2</networkconfig.bridgedomain.northbound.version>
+    <networkconfig.neutron.implementation.version>0.4.4-Helium-SR2</networkconfig.neutron.implementation.version>
+    <networkconfig.neutron.northbound.version>0.4.4-Helium-SR2</networkconfig.neutron.northbound.version>
+    <networkconfig.neutron.version>0.4.4-Helium-SR2</networkconfig.neutron.version>
     <!-- ODL repository / plugin repository -->
     <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
-    <northbound.commons.version>0.4.4-SNAPSHOT</northbound.commons.version>
-    <northbound.hosttracker.version>1.4.4-SNAPSHOT</northbound.hosttracker.version>
-    <northbound.jolokia.version>1.4.4-SNAPSHOT</northbound.jolokia.version>
-    <opendaylight-l2-types.version>2013.08.27.4.2-SNAPSHOT</opendaylight-l2-types.version>
-    <osgi-brandfragment.web.version>0.0.4-SNAPSHOT</osgi-brandfragment.web.version>
+    <northbound.commons.version>0.4.4-Helium-SR2</northbound.commons.version>
+    <northbound.hosttracker.version>1.4.4-Helium-SR2</northbound.hosttracker.version>
+    <northbound.jolokia.version>1.4.4-Helium-SR2</northbound.jolokia.version>
+    <opendaylight-l2-types.version>2013.08.27.4.2-Helium-SR2</opendaylight-l2-types.version>
+    <osgi-brandfragment.web.version>0.0.4-Helium-SR2</osgi-brandfragment.web.version>
     <pax.exam.version>4.0.0</pax.exam.version>
     <parboiled.version>1.1.6</parboiled.version>
     <parboiled.scala.version>1.1.6</parboiled.scala.version>
     <propertymavenplugin.version>1.0-alpha-2</propertymavenplugin.version>
     <protobuf.version>2.5.0</protobuf.version>
-    <protocol-framework.version>0.5.2-SNAPSHOT</protocol-framework.version>
-    <protocol_plugins.openflow.version>0.4.4-SNAPSHOT</protocol_plugins.openflow.version>
-    <protocol_plugins.stub.version>0.4.4-SNAPSHOT</protocol_plugins.stub.version>
-    <routing.dijkstra_implementation.version>0.4.4-SNAPSHOT</routing.dijkstra_implementation.version>
-    <sal.connection.version>0.1.4-SNAPSHOT</sal.connection.version>
-    <sal.implementation.version>0.4.4-SNAPSHOT</sal.implementation.version>
-    <sal.networkconfiguration.version>0.0.5-SNAPSHOT</sal.networkconfiguration.version>
-    <sal.version>0.8.3-SNAPSHOT</sal.version>
+    <protocol-framework.version>0.5.2-Helium-SR2</protocol-framework.version>
+    <protocol_plugins.openflow.version>0.4.4-Helium-SR2</protocol_plugins.openflow.version>
+    <protocol_plugins.stub.version>0.4.4-Helium-SR2</protocol_plugins.stub.version>
+    <routing.dijkstra_implementation.version>0.4.4-Helium-SR2</routing.dijkstra_implementation.version>
+    <sal.connection.version>0.1.4-Helium-SR2</sal.connection.version>
+    <sal.implementation.version>0.4.4-Helium-SR2</sal.implementation.version>
+    <sal.networkconfiguration.version>0.0.5-Helium-SR2</sal.networkconfiguration.version>
+    <sal.version>0.8.3-Helium-SR2</sal.version>
     <salGeneratorPath>src/main/yang-gen-sal</salGeneratorPath>
-    <samples.loadbalancer>0.5.4-SNAPSHOT</samples.loadbalancer>
-    <samples.loadbalancer.northbound.version>0.4.4-SNAPSHOT</samples.loadbalancer.northbound.version>
-    <samples.simpleforwarding.version>0.4.4-SNAPSHOT</samples.simpleforwarding.version>
-    <sanitytest.version>0.4.4-SNAPSHOT</sanitytest.version>
+    <samples.loadbalancer>0.5.4-Helium-SR2</samples.loadbalancer>
+    <samples.loadbalancer.northbound.version>0.4.4-Helium-SR2</samples.loadbalancer.northbound.version>
+    <samples.simpleforwarding.version>0.4.4-Helium-SR2</samples.simpleforwarding.version>
+    <sanitytest.version>0.4.4-Helium-SR2</sanitytest.version>
     <scala.version>2.10</scala.version>
     <scala.micro.version>4</scala.micro.version>
-    <security.version>0.4.4-SNAPSHOT</security.version>
-    <karaf.security.version>0.4.4-SNAPSHOT</karaf.security.version>
+    <security.version>0.4.4-Helium-SR2</security.version>
+    <karaf.security.version>0.4.4-Helium-SR2</karaf.security.version>
     <shapeless.version>1.2.4</shapeless.version>
     <sitedeploy>dav:http://nexus.opendaylight.org/content/sites/site</sitedeploy>
     <sonar.branch>${user.name}-private-view</sonar.branch>
@@ -187,31 +187,31 @@
     <spring-security-karaf.version>3.1.4.RELEASE</spring-security-karaf.version>
     <spring-security.version>3.1.3.RELEASE</spring-security.version>
     <spring.version>3.1.3.RELEASE</spring.version>
-    <statistics.northbound.version>0.4.4-SNAPSHOT</statistics.northbound.version>
-    <statisticsmanager.implementation.version>0.4.4-SNAPSHOT</statisticsmanager.implementation.version>
-    <statisticsmanager.version>0.5.3-SNAPSHOT</statisticsmanager.version>
-    <subnets.northbound.version>0.4.4-SNAPSHOT</subnets.northbound.version>
+    <statistics.northbound.version>0.4.4-Helium-SR2</statistics.northbound.version>
+    <statisticsmanager.implementation.version>0.4.4-Helium-SR2</statisticsmanager.implementation.version>
+    <statisticsmanager.version>0.5.3-Helium-SR2</statisticsmanager.version>
+    <subnets.northbound.version>0.4.4-Helium-SR2</subnets.northbound.version>
     <surefire.version>2.15</surefire.version>
-    <switchmanager.api.version>0.7.3-SNAPSHOT</switchmanager.api.version>
-    <switchmanager.implementation.version>0.4.4-SNAPSHOT</switchmanager.implementation.version>
-    <switchmanager.northbound.version>0.4.4-SNAPSHOT</switchmanager.northbound.version>
+    <switchmanager.api.version>0.7.3-Helium-SR2</switchmanager.api.version>
+    <switchmanager.implementation.version>0.4.4-Helium-SR2</switchmanager.implementation.version>
+    <switchmanager.northbound.version>0.4.4-Helium-SR2</switchmanager.northbound.version>
     <testvm.argLine>-Xmx1024m -XX:MaxPermSize=256m</testvm.argLine>
-    <topology.northbound.version>0.4.4-SNAPSHOT</topology.northbound.version>
-    <topology.web.version>0.4.4-SNAPSHOT</topology.web.version>
-    <topologymanager.version>0.4.4-SNAPSHOT</topologymanager.version>
-    <topologymanager.shell.version>1.0.2-SNAPSHOT</topologymanager.shell.version>
-    <troubleshoot.web.version>0.4.4-SNAPSHOT</troubleshoot.web.version>
+    <topology.northbound.version>0.4.4-Helium-SR2</topology.northbound.version>
+    <topology.web.version>0.4.4-Helium-SR2</topology.web.version>
+    <topologymanager.version>0.4.4-Helium-SR2</topologymanager.version>
+    <topologymanager.shell.version>1.0.2-Helium-SR2</topologymanager.shell.version>
+    <troubleshoot.web.version>0.4.4-Helium-SR2</troubleshoot.web.version>
     <typesafe.config.version>1.2.0</typesafe.config.version>
     <uncommons.maths.version>1.2.2a</uncommons.maths.version>
-    <usermanager.implementation.version>0.4.4-SNAPSHOT</usermanager.implementation.version>
-    <usermanager.northbound.version>0.0.4-SNAPSHOT</usermanager.northbound.version>
-    <usermanager.version>0.4.4-SNAPSHOT</usermanager.version>
-    <nsf.version>0.4.4-SNAPSHOT</nsf.version>
-    <web.version>0.4.4-SNAPSHOT</web.version>
+    <usermanager.implementation.version>0.4.4-Helium-SR2</usermanager.implementation.version>
+    <usermanager.northbound.version>0.0.4-Helium-SR2</usermanager.northbound.version>
+    <usermanager.version>0.4.4-Helium-SR2</usermanager.version>
+    <nsf.version>0.4.4-Helium-SR2</nsf.version>
+    <web.version>0.4.4-Helium-SR2</web.version>
     <xtend.dstdir>src/main/xtend-gen</xtend.dstdir>
-    <yang-ext.version>2013.09.07.4.2-SNAPSHOT</yang-ext.version>
-    <yang-jmx-generator.version>1.0.2-SNAPSHOT</yang-jmx-generator.version>
-    <yangtools.version>0.6.4-SNAPSHOT</yangtools.version>
+    <yang-ext.version>2013.09.07.4.2-Helium-SR2</yang-ext.version>
+    <yang-jmx-generator.version>1.0.2-Helium-SR2</yang-jmx-generator.version>
+    <yangtools.version>0.6.4-Helium-SR2</yangtools.version>
     <sshd-core.version>0.12.0</sshd-core.version>
     <jmh.version>0.9.7</jmh.version>
   </properties>
@@ -1035,12 +1035,12 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>httpservice-bridge</artifactId>
-        <version>0.0.4-SNAPSHOT</version>
+        <version>0.0.4-Helium-SR2</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>jolokia-bridge</artifactId>
-        <version>0.0.4-SNAPSHOT</version>
+        <version>0.0.4-Helium-SR2</version>
       </dependency>
       <!-- Karaf Dependencies -->
       <dependency>
@@ -1858,7 +1858,7 @@
       <dependency>
         <groupId>org.opendaylight.yangtools.model</groupId>
         <artifactId>ietf-yang-types-20130715</artifactId>
-        <version>2013.07.15.1.2-SNAPSHOT</version>
+        <version>2013.07.15.1.2-Helium-SR2</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.yangtools.model</groupId>
@@ -1934,7 +1934,7 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>commons.logback_settings</artifactId>
-        <version>0.0.4-SNAPSHOT</version>
+        <version>0.0.4-Helium-SR2</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -2157,7 +2157,7 @@
             <dependency>
               <groupId>org.opendaylight.controller</groupId>
               <artifactId>commons.logback_settings</artifactId>
-              <version>0.0.4-SNAPSHOT</version>
+              <version>0.0.4-Helium-SR2</version>
             </dependency>
           </dependencies>
           <executions>
@@ -2408,7 +2408,7 @@
           <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>checkstyle</artifactId>
-            <version>0.0.5-SNAPSHOT</version>
+            <version>0.0.5-Helium-SR2</version>
           </dependency>
         </dependencies>
         <executions>

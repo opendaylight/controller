@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.opendaylight</artifactId>
-    <version>1.4.4-SNAPSHOT</version>
+    <version>1.4.4-Helium-SR2</version>
     <relativePath>../../opendaylight/commons/opendaylight</relativePath>
   </parent>
   <artifactId>features-base</artifactId>
@@ -447,13 +447,13 @@
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>features-test</artifactId>
-      <version>0.6.4-SNAPSHOT</version>
+      <version>0.6.4-Helium-SR2</version>
     </dependency>
     <!-- dependency for opendaylight-karaf-empty for use by testing -->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>opendaylight-karaf-empty</artifactId>
-      <version>1.4.4-SNAPSHOT</version>
+      <version>1.4.4-Helium-SR2</version>
       <type>zip</type>
     </dependency>
   </dependencies>

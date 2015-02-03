@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.opendaylight</artifactId>
-    <version>1.4.4-SNAPSHOT</version>
+    <version>1.4.4-Helium-SR2</version>
     <relativePath>../../commons/opendaylight</relativePath>
   </parent>
   <artifactId>distribution.opendaylight-karaf</artifactId>
@@ -92,7 +92,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>features-restconf</artifactId>
-      <version>1.1.2-SNAPSHOT</version>
+      <version>1.1.2-Helium-SR2</version>
       <classifier>features</classifier>
       <type>xml</type>
       <scope>runtime</scope>
