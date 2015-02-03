@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.cluster.datastore.node.utils.serialization;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import java.math.BigDecimal;
@@ -91,6 +90,12 @@ public enum ValueType {
         Object deserialize(final String str) {
             throw new UnsupportedOperationException("Should have been caught by caller");
         }
+    },
+    NULL_TYPE {
+        @Override
+        Object deserialize(final String str) {
+            return null;
+        }
     };
 
     private static final Map<Class<?>, ValueType> TYPES;
@@ -116,7 +121,9 @@ public enum ValueType {
     abstract Object deserialize(String str);
 
     public static final ValueType getSerializableType(Object node) {
-        Preconditions.checkNotNull(node, "node should not be null");
+        if(node == null){
+            return NULL_TYPE;
+        }
 
         final ValueType type = TYPES.get(node.getClass());
         if (type != null) {

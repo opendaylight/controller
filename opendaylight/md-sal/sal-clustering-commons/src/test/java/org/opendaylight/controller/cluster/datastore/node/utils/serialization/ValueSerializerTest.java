@@ -291,6 +291,24 @@ public class ValueSerializerTest{
 
     }
 
+    @Test
+    public void testSerializeNull(){
+        NormalizedNodeMessages.Node.Builder builder = NormalizedNodeMessages.Node.newBuilder();
+        Object none = null;
+        ValueSerializer.serialize(builder, mock(QNameSerializationContext.class),none);
+
+        assertEquals(ValueType.NULL_TYPE.ordinal(), builder.getIntValueType());
+        assertEquals("", builder.getValue());
+
+        NormalizedNodeMessages.PathArgumentAttribute.Builder builder1 = NormalizedNodeMessages.PathArgumentAttribute.newBuilder();
+
+        ValueSerializer.serialize(builder1, mock(QNameSerializationContext.class),none);
+
+        assertEquals(ValueType.NULL_TYPE.ordinal(), builder1.getType());
+        assertEquals("", builder.getValue());
+
+    }
+
 
     @Test
     public void testDeSerializeShort(){
@@ -516,6 +534,32 @@ public class ValueSerializerTest{
         assertTrue("not a byte array", o instanceof byte[]);
         assertTrue("bytes value does not match" ,Arrays.equals(bytes, (byte[]) o));
 
+
+    }
+
+    @Test
+    public void testDeSerializeNullType(){
+        NormalizedNodeMessages.Node.Builder nodeBuilder = NormalizedNodeMessages.Node.newBuilder();
+        nodeBuilder.setIntValueType(ValueType.NULL_TYPE.ordinal());
+        nodeBuilder.setValue("");
+
+        Object o = ValueSerializer
+                .deSerialize(mock(QNameDeSerializationContext.class),
+                        nodeBuilder.build());
+
+        assertEquals(null, o);
+
+        NormalizedNodeMessages.PathArgumentAttribute.Builder argumentBuilder
+                = NormalizedNodeMessages.PathArgumentAttribute.newBuilder();
+
+        argumentBuilder.setType(ValueType.NULL_TYPE.ordinal());
+        argumentBuilder.setValue("");
+
+        o = ValueSerializer
+                .deSerialize(mock(QNameDeSerializationContext.class),
+                        argumentBuilder.build());
+
+        assertEquals(null, o);
 
     }
 

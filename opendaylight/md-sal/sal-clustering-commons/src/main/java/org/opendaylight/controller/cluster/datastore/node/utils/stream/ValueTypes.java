@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import java.math.BigDecimal;
@@ -31,6 +30,7 @@ final class ValueTypes {
     public static final byte BIG_INTEGER_TYPE = 10;
     public static final byte BIG_DECIMAL_TYPE = 11;
     public static final byte BINARY_TYPE = 12;
+    public static final byte NULL_TYPE = 13;
 
     private static final Map<Class<?>, Byte> TYPES;
 
@@ -57,7 +57,9 @@ final class ValueTypes {
     }
 
     public static final byte getSerializableType(Object node) {
-        Preconditions.checkNotNull(node, "node should not be null");
+        if(node == null){
+            return NULL_TYPE;
+        }
 
         final Byte type = TYPES.get(node.getClass());
         if (type != null) {

@@ -284,7 +284,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
                 return bytes;
 
             case ValueTypes.YANG_IDENTIFIER_TYPE :
-            return readYangInstanceIdentifier();
+                return readYangInstanceIdentifier();
 
             default :
                 return null;

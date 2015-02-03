@@ -59,10 +59,15 @@ public class NormalizedNodeStreamReaderWriterTest {
                 new YangInstanceIdentifier.NodeWithValue(TestModel.BINARY_LEAF_LIST_QNAME, bytes2)).
                 withValue(bytes2).build();
 
+        LeafSetEntryNode<Object> entry3 = ImmutableLeafSetEntryNodeBuilder.create().withNodeIdentifier(
+                new YangInstanceIdentifier.NodeWithValue(TestModel.BINARY_LEAF_LIST_QNAME, null)).
+                withValue(null).build();
+
+
         return TestModel.createBaseTestContainerBuilder().
                 withChild(ImmutableLeafSetNodeBuilder.create().withNodeIdentifier(
                         new YangInstanceIdentifier.NodeIdentifier(TestModel.BINARY_LEAF_LIST_QNAME)).
-                        withChild(entry1).withChild(entry2).build()).
+                        withChild(entry1).withChild(entry2).withChild(entry3).build()).
                 withChild(ImmutableNodes.leafNode(TestModel.SOME_BINARY_DATA_QNAME, new byte[]{1,2,3,4})).
                 withChild(Builders.orderedMapBuilder().
                       withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.ORDERED_LIST_QNAME)).
