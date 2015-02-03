@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_8654e321",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ReplicatedLogImplEntry.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-03T15:39:21Z",
+      "side": 1,
+      "message": "The problem is that it didn\u0027t have a serialVersionUID in helium so setting it to your own #, be 1 or 2, will break. So a helium-version serialized instance will have serialVersionUID set to the runtime-generated value. So to keep it backwards compatible, if we set it to the generated value (using serialVer via eclipse) then it should match the previous runtime-generated value.  Of course different JVMs could theoretically generate different values but that doesn\u0027t appear to be the case in reality, at least with OpenJDK and Oracle (we had tested that before).",
+      "parentUuid": "7a96c907_86738314",
+      "revId": "0bf31abda0311b02eff1a2825a43732e32b646d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_86edc3f1",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AbstractRaftRPC.java",
         "patchSetId": 4
@@ -137,6 +155,24 @@
       "side": 1,
       "message": "How about moving it to a private method and adding some comments on it. That way it does not get removed in subsequent cleanup drives :)",
       "parentUuid": "7a96c907_0688d3e5",
+      "revId": "0bf31abda0311b02eff1a2825a43732e32b646d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_26338f15",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ReplicatedLogImplEntryTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-03T15:39:21Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "7a96c907_e65b6785",
       "revId": "0bf31abda0311b02eff1a2825a43732e32b646d9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
