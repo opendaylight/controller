@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>config-subsystem</artifactId>
-    <version>0.2.7-Helium-SR2</version>
+    <version>0.2.8-SNAPSHOT</version>
     <relativePath>../</relativePath>
   </parent>
 

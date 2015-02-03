@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>commons.opendaylight</artifactId>
-        <version>1.4.2-Helium-SR2</version>
+        <version>1.4.3-SNAPSHOT</version>
         <relativePath>../../commons/opendaylight</relativePath>
     </parent>
   <scm>
@@ -17,7 +17,7 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>web.brandfragment</artifactId>
-    <version>0.4.2-Helium-SR2</version>
+    <version>0.4.3-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
     <build>

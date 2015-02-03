@@ -11,8 +11,8 @@
     <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
     <nexus.repository.release>opendaylight.release</nexus.repository.release>
     <nexus.repository.snapshot>opendaylight.release</nexus.repository.snaphot>
-    <yang.version>0.6.4-Helium-SR2</yang.version>
-    <yang.codegen.version>0.6.4-Helium-SR2</yang.codegen.version>
+    <yang.version>0.6.5-SNAPSHOT</yang.version>
+    <yang.codegen.version>0.6.5-SNAPSHOT</yang.codegen.version>
     <bundle.plugin.version>2.3.7</bundle.plugin.version>
   </properties>
   <scm>

@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>itests-controller</artifactId>
-        <version>1.4.4-Helium-SR2</version>
+        <version>1.4.5-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>base-features-it</artifactId>

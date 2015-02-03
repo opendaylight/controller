@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>releasepom</artifactId>
-    <version>0.1.4-Helium-SR2</version>
+    <version>0.1.5-SNAPSHOT</version>
     <relativePath>../..</relativePath>
   </parent>
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>karaf.branding</artifactId>
-  <version>1.0.2-Helium-SR2</version>
+  <version>1.0.3-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <name>OpenDaylight :: Karaf :: Branding</name>
 
