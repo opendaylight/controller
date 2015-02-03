@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>config-subsystem</artifactId>
-    <version>0.2.7-Helium-SR2</version>
+    <version>0.2.8-SNAPSHOT</version>
     <relativePath>../../opendaylight/config/</relativePath>
   </parent>
   <artifactId>features-config</artifactId>
@@ -20,7 +20,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>opendaylight-karaf-empty</artifactId>
-      <version>1.4.4-Helium-SR2</version>
+      <version>1.4.5-SNAPSHOT</version>
       <type>zip</type>
     </dependency>
     <dependency>

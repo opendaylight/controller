@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.opendaylight</artifactId>
-    <version>1.4.4-Helium-SR2</version>
+    <version>1.4.5-SNAPSHOT</version>
     <relativePath>../opendaylight</relativePath>
   </parent>
 
   <artifactId>liblldp</artifactId>
-  <version>0.8.3-Helium-SR2</version>
+  <version>0.8.4-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <dependencies>
     <dependency>

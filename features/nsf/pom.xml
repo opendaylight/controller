@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.opendaylight</artifactId>
-    <version>1.4.4-Helium-SR2</version>
+    <version>1.4.5-SNAPSHOT</version>
     <relativePath>../../opendaylight/commons/opendaylight</relativePath>
   </parent>
   <artifactId>features-nsf</artifactId>
@@ -25,7 +25,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>opendaylight-karaf-empty</artifactId>
-      <version>1.4.4-Helium-SR2</version>
+      <version>1.4.5-SNAPSHOT</version>
       <type>zip</type>
     </dependency>
     <!-- Feature Dependencies -->

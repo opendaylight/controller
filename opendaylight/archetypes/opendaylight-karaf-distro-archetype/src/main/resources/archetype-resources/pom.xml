@@ -19,8 +19,8 @@
   <properties>
     <!-- Optional TODO: Move these properties to your parent pom and possibly
             DependencyManagement section of your parent pom -->
-    <branding.version>1.0.2-Helium-SR2</branding.version>
-    <karaf.resources.version>1.4.4-Helium-SR2</karaf.resources.version>
+    <branding.version>1.0.3-SNAPSHOT</branding.version>
+    <karaf.resources.version>1.4.5-SNAPSHOT</karaf.resources.version>
     <karaf.version>3.0.1</karaf.version>
   </properties>
 
@@ -81,7 +81,7 @@
       <dependency>
         <groupId>org.opendaylight.openflowplugin</groupId>
         <artifactId>features-openflowplugin</artifactId>
-        <version>0.0.5-Helium-SR2</version>
+        <version>0.0.6-SNAPSHOT</version>
         <classifier>features</classifier>
         <type>xml</type>
         <scope>runtime</scope>
