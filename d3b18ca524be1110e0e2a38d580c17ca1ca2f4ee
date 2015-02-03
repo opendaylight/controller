@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_cba67310",
+        "filename": "opendaylight/adsal/sal/api/src/main/java/org/opendaylight/controller/sal/core/MacAddress.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-03T23:15:34Z",
+      "side": 1,
+      "message": "Can nodeMacAddress be null?",
+      "revId": "d3b18ca524be1110e0e2a38d580c17ca1ca2f4ee",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
