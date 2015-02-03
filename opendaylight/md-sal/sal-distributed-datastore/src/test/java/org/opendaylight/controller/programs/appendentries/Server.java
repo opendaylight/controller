@@ -24,7 +24,7 @@ public class Server {
     public static class ServerActor extends UntypedActor {
 
         @Override public void onReceive(Object message) throws Exception {
-            if(AppendEntries.SERIALIZABLE_CLASS.equals(message.getClass())){
+            if(AppendEntries.LEGACY_SERIALIZABLE_CLASS.equals(message.getClass())){
                 AppendEntries appendEntries =
                     AppendEntries.fromSerializable(message);
 
