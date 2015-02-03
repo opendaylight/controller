@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_0839c1a3",
+        "filename": "features/neutron/pom.xml",
+        "patchSetId": 6
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-03T18:35:05Z",
+      "side": 1,
+      "message": "Why does switchingto jetty make neutron dependent on aaa?",
+      "range": {
+        "startLine": 20,
+        "startChar": 19,
+        "endLine": 20,
+        "endChar": 31
+      },
+      "revId": "40e9bacaf1206c37626e25cff1bb41b08ec752ab",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_283cbd92",
+        "filename": "karaf/opendaylight-karaf-resources/src/main/resources/etc/jetty.xml",
+        "patchSetId": 6
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-03T18:35:05Z",
+      "side": 1,
+      "message": "Is the confidential port to remain the same for both connectors?",
+      "revId": "40e9bacaf1206c37626e25cff1bb41b08ec752ab",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
