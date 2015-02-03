@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_c6f50bcc",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 434,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-03T10:04:15Z",
+      "side": 1,
+      "message": "Why did you switch to using String.format here?",
+      "revId": "8ae89463ed607b3d976e7b69a29e09be4bd21dcd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
