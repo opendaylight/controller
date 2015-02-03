@@ -67,7 +67,7 @@
     <concepts.version>0.5.5-SNAPSHOT</concepts.version>
     <concurrentlinkedhashmap.version>1.4</concurrentlinkedhashmap.version>
     <config.version>0.2.8-SNAPSHOT</config.version>
-    <aaa.version>0.1.2-Helium-SR2</aaa.version>
+    <aaa.version>0.1.3-SNAPSHOT</aaa.version>
     <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
     <config.clustering.configfile>05-clustering.xml</config.clustering.configfile>
     <config.netty.configfile>00-netty.xml</config.netty.configfile>
