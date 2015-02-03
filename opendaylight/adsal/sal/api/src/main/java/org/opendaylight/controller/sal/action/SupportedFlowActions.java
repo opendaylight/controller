@@ -27,6 +27,7 @@ import org.opendaylight.controller.sal.core.Property;
  */
 
 @XmlAccessorType(XmlAccessType.NONE)
+@Deprecated
 public class SupportedFlowActions extends Property {
     private static final long serialVersionUID = 1L;
     public static final String SupportedFlowActionsPropName = "supportedFlowActions";

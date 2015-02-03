@@ -40,6 +40,7 @@ import java.util.NoSuchElementException;
  * An iterator that will filter values from an iterator and return only those
  * values that match the predicate.
  */
+@Deprecated
 public abstract class FilterIterator<T> implements Iterator<T> {
     protected Iterator<T> subIterator;
     protected T next;

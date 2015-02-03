@@ -42,6 +42,7 @@ import java.util.NoSuchElementException;
  * @param <T>
  *            the type of elements returned by this iterator
  */
+@Deprecated
 public class IterableIterator<T> implements Iterator<T> {
     Iterator<? extends Iterable<T>> subIterator;
     Iterator<T> current = null;

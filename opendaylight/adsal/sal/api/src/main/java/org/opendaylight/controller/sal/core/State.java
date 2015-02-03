@@ -22,6 +22,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 @SuppressWarnings("serial")
+@Deprecated
 public class State extends Property {
     @XmlElement(name="value")
     private short stateValue;

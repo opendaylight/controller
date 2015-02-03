@@ -20,6 +20,7 @@ import org.opendaylight.controller.sal.core.UpdateType;
  * The Interface describes Inventory update methods to be implemented by
  * protocol plugin.
  */
+@Deprecated
 public interface IPluginOutInventoryService {
     /**
      * This method is called when some properties of a node are added/deleted/changed.

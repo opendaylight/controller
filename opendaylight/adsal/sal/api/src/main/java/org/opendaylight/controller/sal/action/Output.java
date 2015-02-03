@@ -20,6 +20,7 @@ import org.opendaylight.controller.sal.core.NodeConnector;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
+@Deprecated
 public class Output extends Action {
     private static final long serialVersionUID = 1L;
     @XmlElement

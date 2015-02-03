@@ -11,7 +11,7 @@ package org.opendaylight.controller.sal.utils;
 
 import java.util.ArrayList;
 import java.util.List;
-
+@Deprecated
 public final class TierHelper {
     private static TierHelper tierHelper;
     public static final int unknownTierNumber = 0;

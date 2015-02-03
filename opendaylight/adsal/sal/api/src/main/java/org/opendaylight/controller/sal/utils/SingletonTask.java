@@ -50,6 +50,7 @@ import org.slf4j.LoggerFactory;
  * new task * If the task has begun, set a bit to restart it after the current
  * task finishes
  */
+@Deprecated
 public class SingletonTask {
     protected static Logger logger = LoggerFactory
             .getLogger(SingletonTask.class);

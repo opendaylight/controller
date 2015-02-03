@@ -24,6 +24,7 @@ package org.opendaylight.controller.sal.core;
  * The interface describes methods used to retrieve the status of a given
  * Container
  */
+@Deprecated
 public interface IContainerListener {
     /**
      * Called to notify a change in the tag assigned to a switch

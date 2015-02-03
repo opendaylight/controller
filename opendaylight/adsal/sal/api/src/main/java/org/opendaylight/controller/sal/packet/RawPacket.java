@@ -29,6 +29,7 @@ import org.opendaylight.controller.sal.core.TimeStamp;
  * and how it will be transmitted. It essentially wraps the raw bytestream
  *
  */
+@Deprecated
 public class RawPacket {
     private byte[] packetData;
     private final LinkEncap encap;

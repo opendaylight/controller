@@ -12,6 +12,7 @@ package org.opendaylight.controller.sal.utils;
  * Global Constants
  *
  */
+@Deprecated
 public enum GlobalConstants {
     DEFAULT("default"),
     CONTAINERMANAGER("containermanager"),

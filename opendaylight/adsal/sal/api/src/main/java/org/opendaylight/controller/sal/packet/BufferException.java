@@ -10,6 +10,7 @@ package org.opendaylight.controller.sal.packet;
 /**
  * Describes an exception that is raised during BitBufferHelper operations.
  */
+@Deprecated
 public class BufferException extends Exception {
     private static final long serialVersionUID = 1L;
 

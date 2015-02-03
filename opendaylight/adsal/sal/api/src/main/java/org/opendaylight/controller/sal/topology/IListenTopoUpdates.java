@@ -19,6 +19,7 @@ import org.opendaylight.controller.sal.core.Edge;
  * registry. This interface (on a per-container base) and SAL will call it
  * providing the update.
  */
+@Deprecated
 public interface IListenTopoUpdates {
     /**
      * Called to update on Edge in the topology graph

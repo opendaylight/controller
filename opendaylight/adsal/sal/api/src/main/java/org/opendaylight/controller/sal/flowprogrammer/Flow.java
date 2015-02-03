@@ -33,6 +33,7 @@ import java.util.List;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
+@Deprecated
 public class Flow implements Cloneable, Serializable {
     protected static final Logger logger = LoggerFactory.getLogger(Flow.class);
     private static final long serialVersionUID = 1L;

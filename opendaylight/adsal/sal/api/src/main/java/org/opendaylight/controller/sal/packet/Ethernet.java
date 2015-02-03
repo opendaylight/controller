@@ -23,6 +23,7 @@ import org.opendaylight.controller.sal.utils.NetUtils;
 /**
  * Class that represents the Ethernet frame objects
  */
+@Deprecated
 public class Ethernet extends Packet {
     private static final String DMAC = "DestinationMACAddress";
     private static final String SMAC = "SourceMACAddress";

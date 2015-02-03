@@ -11,6 +11,7 @@ package org.opendaylight.controller.sal.action;
  * The enumeration of actions supported by the controller
  * Each entry has a unique id and the values range for the action element where applicable
  */
+@Deprecated
 public enum ActionType {
     DROP("drop", 0, 0),
     LOOPBACK("loopback", 0, 0),

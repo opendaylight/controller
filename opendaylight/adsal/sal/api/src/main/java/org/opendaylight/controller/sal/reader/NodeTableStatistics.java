@@ -24,6 +24,7 @@ import org.opendaylight.controller.sal.core.NodeTable;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
+@Deprecated
 public class NodeTableStatistics implements Serializable {
     private static final long serialVersionUID = 1L;
 

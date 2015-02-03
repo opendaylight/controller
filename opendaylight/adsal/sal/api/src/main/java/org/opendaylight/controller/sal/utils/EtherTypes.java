@@ -18,6 +18,7 @@ import java.util.List;
  *
  *
  */
+@Deprecated
 public enum EtherTypes {
     PVSTP("PVSTP", 0x010B), // 802.2 + SNAP (Spanning Tree)
     CDP("CDP", 0x2000), // 802.2 + SNAP

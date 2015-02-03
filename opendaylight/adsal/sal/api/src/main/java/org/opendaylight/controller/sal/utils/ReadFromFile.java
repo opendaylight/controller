@@ -24,6 +24,7 @@ import java.util.ArrayList;
  *
  *
  */
+@Deprecated
 public class ReadFromFile {
     private FileInputStream fileStream;
     private File filePointer;

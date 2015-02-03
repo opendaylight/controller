@@ -25,6 +25,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
+@Deprecated
 public class Bandwidth extends Property {
     private static final long serialVersionUID = 1L;
 

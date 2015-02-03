@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
+@Deprecated
 public class MatchField implements Cloneable, Serializable {
     private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(MatchField.class);

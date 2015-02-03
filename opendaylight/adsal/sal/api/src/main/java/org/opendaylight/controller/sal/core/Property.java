@@ -30,6 +30,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
+@Deprecated
 abstract public class Property implements Serializable, Cloneable {
     private static final long serialVersionUID = 1L;
     private final String name;

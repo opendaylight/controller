@@ -25,6 +25,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  */
 @XmlRootElement
+@Deprecated
 abstract public class DataLinkAddress implements Serializable {
     private static final long serialVersionUID = 1L;
     private String name;

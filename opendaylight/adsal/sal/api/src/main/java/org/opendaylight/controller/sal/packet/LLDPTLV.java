@@ -23,7 +23,7 @@ import org.opendaylight.controller.sal.utils.NetUtils;
 /**
  * Class that represents the LLDPTLV objects
  */
-
+@Deprecated
 public class LLDPTLV extends Packet {
     private static final String TYPE = "Type";
     private static final String LENGTH = "Length";

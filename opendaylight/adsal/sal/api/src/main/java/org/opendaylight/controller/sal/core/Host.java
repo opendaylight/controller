@@ -21,6 +21,7 @@ import org.opendaylight.controller.sal.packet.address.DataLinkAddress;
 
 @XmlRootElement(name="host")
 @XmlAccessorType(XmlAccessType.NONE)
+@Deprecated
 public class Host implements Serializable {
     private static final long serialVersionUID = 1L;
     @XmlElement

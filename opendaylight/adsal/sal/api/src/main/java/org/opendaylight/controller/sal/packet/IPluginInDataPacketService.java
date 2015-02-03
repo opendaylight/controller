@@ -24,6 +24,7 @@ package org.opendaylight.controller.sal.packet;
  * - "protocoloPluginType"
  * the value of the property will org.opendaylight.controller.sal.core.Node.NodeIDType
  */
+@Deprecated
 public interface IPluginInDataPacketService {
     /**
      * Transmit a data Packet. Packet will go out ONLY if the packet

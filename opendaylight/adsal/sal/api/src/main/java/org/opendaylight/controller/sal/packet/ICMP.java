@@ -20,7 +20,7 @@ import org.opendaylight.controller.sal.utils.NetUtils;
 /**
  * Class that represents the ICMP packet objects
  */
-
+@Deprecated
 public class ICMP extends Packet {
     private static final String TYPE = "Type";
     private static final String CODE = "Code";

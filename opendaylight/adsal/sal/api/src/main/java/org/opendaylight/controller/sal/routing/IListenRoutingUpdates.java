@@ -14,7 +14,7 @@ package org.opendaylight.controller.sal.routing;
  * know events published by the routing engine
  *
  */
-
+@Deprecated
 public interface IListenRoutingUpdates {
     /**
      * Method invoked when the recalculation of the all shortest path
