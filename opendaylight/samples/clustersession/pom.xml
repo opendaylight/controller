@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.opendaylight</artifactId>
-    <version>1.4.4-Helium-SR2</version>
+    <version>1.4.5-SNAPSHOT</version>
     <relativePath>../../commons/opendaylight</relativePath>
   </parent>
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>clustersession</artifactId>
-  <version>1.0.2-Helium-SR2</version>
+  <version>1.0.3-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <dependencies>
     <dependency>
@@ -43,7 +43,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>clustering.services</artifactId>
-      <version>0.5.3-Helium-SR2</version>
+      <version>0.5.4-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
