@@ -42,6 +42,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_6b2162fa",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/HeartbeatActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-03T06:21:31Z",
+      "side": 1,
+      "message": "It uses the leader actor as the sender so AppendEntriesReply should go to the leader.",
+      "parentUuid": "7a96c907_70307101",
+      "revId": "6d5b03344abc49b8ed3f4c81a1534a2403b8e66b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_cb0f562d",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/HeartbeatActor.java",
         "patchSetId": 1
@@ -234,6 +252,24 @@
       "side": 1,
       "message": "We still need this because we use the heartbeat for replication as well. For lagging followers on a timeout we do need to decide if some data needs to be sent to each follower.",
       "parentUuid": "7a96c907_7a2b7294",
+      "revId": "6d5b03344abc49b8ed3f4c81a1534a2403b8e66b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_4bcca635",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-03T06:21:31Z",
+      "side": 1,
+      "message": "I should re-phrase - I agree we need it but it\u0027s no longer being sent with these changes. Previously, it was only sent by the heartbeat timing but that was removed from this class.",
+      "parentUuid": "7a96c907_8b194e7b",
       "revId": "6d5b03344abc49b8ed3f4c81a1534a2403b8e66b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
