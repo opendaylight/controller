@@ -11,7 +11,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>config-plugin-parent</artifactId>
-    <version>0.2.7-Helium-SR2</version>
+    <version>0.2.8-SNAPSHOT</version>
     <relativePath>../config-plugin-parent</relativePath>
   </parent>
 
