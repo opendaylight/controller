@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_86738314",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ReplicatedLogImplEntry.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-03T14:25:42Z",
+      "side": 1,
+      "message": "Why not set it to 2 then instead of this generated number?",
+      "parentUuid": "7a96c907_467edbe5",
+      "revId": "0bf31abda0311b02eff1a2825a43732e32b646d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_86edc3f1",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AbstractRaftRPC.java",
         "patchSetId": 4
@@ -101,6 +119,24 @@
       "side": 1,
       "message": "I left that in to show the code that was used to generate the serialized instance prior to my changes (i.e. from helium) in case we need it again. I can remove if you want.",
       "parentUuid": "7a96c907_06b9b3e8",
+      "revId": "0bf31abda0311b02eff1a2825a43732e32b646d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_e65b6785",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ReplicatedLogImplEntryTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-03T14:25:42Z",
+      "side": 1,
+      "message": "How about moving it to a private method and adding some comments on it. That way it does not get removed in subsequent cleanup drives :)",
+      "parentUuid": "7a96c907_0688d3e5",
       "revId": "0bf31abda0311b02eff1a2825a43732e32b646d9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
