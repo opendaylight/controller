@@ -2,6 +2,69 @@
   "comments": [
     {
       "key": {
+        "uuid": "7a96c907_b05fd940",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-03T05:09:51Z",
+      "side": 1,
+      "message": "Could you please add the bug id to this message",
+      "range": {
+        "startLine": 7,
+        "startChar": 6,
+        "endLine": 7,
+        "endChar": 7
+      },
+      "revId": "6d5b03344abc49b8ed3f4c81a1534a2403b8e66b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_70307101",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/HeartbeatActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-03T05:09:51Z",
+      "side": 1,
+      "message": "AppendEntriesReply is not being handled here. It should be because this is where the replies will end up. Or am I missing something?\n\nFrom the Follower code AppendEntriesReply is sent to the sender.",
+      "revId": "6d5b03344abc49b8ed3f4c81a1534a2403b8e66b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_cb0f562d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/HeartbeatActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-03T05:09:51Z",
+      "side": 1,
+      "message": "Based on the EntriesPackageActor code we cannot hit the !empty condition because if it was not empty it would have sent a serialized message.",
+      "range": {
+        "startLine": 96,
+        "startChar": 33,
+        "endLine": 96,
+        "endChar": 40
+      },
+      "revId": "6d5b03344abc49b8ed3f4c81a1534a2403b8e66b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_da13a664",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/HeartbeatActor.java",
         "patchSetId": 1
@@ -108,6 +171,23 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_4b2b4682",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-03T05:09:51Z",
+      "side": 1,
+      "message": "Harman you seem to have undone some optimizations that Robert had put in place with an earlier patch. The followers set needs to go. See https://git.opendaylight.org/gerrit/#/c/14445/",
+      "revId": "6d5b03344abc49b8ed3f4c81a1534a2403b8e66b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_da3c06e5",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
         "patchSetId": 1
@@ -136,6 +216,24 @@
       "writtenOn": "2015-02-01T04:46:09Z",
       "side": 1,
       "message": "It does\u0027t look like we need this anymore.",
+      "revId": "6d5b03344abc49b8ed3f4c81a1534a2403b8e66b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_8b194e7b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-03T05:09:51Z",
+      "side": 1,
+      "message": "We still need this because we use the heartbeat for replication as well. For lagging followers on a timeout we do need to decide if some data needs to be sent to each follower.",
+      "parentUuid": "7a96c907_7a2b7294",
       "revId": "6d5b03344abc49b8ed3f4c81a1534a2403b8e66b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -171,6 +269,24 @@
       "side": 1,
       "message": "hmm, I am not sure, I thought ActorSelection will always be there even if ActorReference is not present, that is why I am checking ActorReference before scheduling the heartbeat. So, Other possibility could be create these supporting actors only for those followers, whose ActorReference is getting resolved at this time. Create other follower\u0027s supporting actor dynamically, when they join cluster.",
       "parentUuid": "7a96c907_fa3f82d4",
+      "revId": "6d5b03344abc49b8ed3f4c81a1534a2403b8e66b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_2b283a85",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 340,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-03T05:09:51Z",
+      "side": 1,
+      "message": "It\u0027s true that we always construct an ActorSelection for the peer dynamically but as Harman pointed out we should not need to. Maybe we can optimize getPeerActorSelection to cache the selection.",
+      "parentUuid": "7a96c907_70dcf112",
       "revId": "6d5b03344abc49b8ed3f4c81a1534a2403b8e66b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
