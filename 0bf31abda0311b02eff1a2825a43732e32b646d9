@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_66f2f7d3",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ReplicatedLogImplEntry.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-03T10:27:21Z",
+      "side": 1,
+      "message": "Is this version change unintended?",
+      "revId": "0bf31abda0311b02eff1a2825a43732e32b646d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_86edc3f1",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AbstractRaftRPC.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-03T10:27:21Z",
+      "side": 1,
+      "message": "again?",
+      "revId": "0bf31abda0311b02eff1a2825a43732e32b646d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_06b9b3e8",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ReplicatedLogImplEntryTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-03T10:27:21Z",
+      "side": 1,
+      "message": "commented code????",
+      "revId": "0bf31abda0311b02eff1a2825a43732e32b646d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
