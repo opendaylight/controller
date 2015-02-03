@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_702151fa",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/HeartbeatActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-03T03:06:20Z",
+      "side": 1,
+      "message": "Which comment? I guess I don\u0027t understand why getSingleActorRefFromSelector is necessary. It\u0027s only used to decide whether to schedule the heartbeat but handleReceive accesses followerActor regardless. Also if  followerActorRef.isPresent was false the first time, the heartbeat would never be scheduled on subsequent calls because heartbeatPayload would be non-null.",
+      "parentUuid": "7a96c907_90d73ded",
+      "revId": "6d5b03344abc49b8ed3f4c81a1534a2403b8e66b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_3a1dea73",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/HeartbeatActor.java",
         "patchSetId": 1
@@ -66,6 +84,24 @@
       "side": 1,
       "message": "yes, you are right, i was under the impression that if i change the object in reference, scheduler will automatically pick the new object, but that is not the case. I am canceling and restarting the scheduler, if appendEntry message with updated data comes in.",
       "parentUuid": "7a96c907_3a1dea73",
+      "revId": "6d5b03344abc49b8ed3f4c81a1534a2403b8e66b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_1011edab",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/HeartbeatActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-03T03:06:20Z",
+      "side": 1,
+      "message": "I think it would be easier to use the SendHeartbeat message here. Then in handleReceive, on SendHeartbeat, send heartbeatPayload to the followerActor. This would be more efficient than stopping/starting the schedule  as it could happen a lot.",
+      "parentUuid": "7a96c907_5009b593",
       "revId": "6d5b03344abc49b8ed3f4c81a1534a2403b8e66b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
