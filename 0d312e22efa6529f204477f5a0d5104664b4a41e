@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_26bcefdb",
+        "filename": "opendaylight/networkconfiguration/neutron/northbound/src/main/java/org/opendaylight/controller/networkconfig/neutron/northbound/NeutronNetworksNorthbound.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 2850
+      },
+      "writtenOn": "2015-02-03T10:20:17Z",
+      "side": 1,
+      "message": "Please add 409 too",
+      "range": {
+        "startLine": 185,
+        "startChar": 0,
+        "endLine": 185,
+        "endChar": 18
+      },
+      "revId": "0d312e22efa6529f204477f5a0d5104664b4a41e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
