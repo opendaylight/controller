@@ -101,6 +101,30 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_2887dd62",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/HeartbeatActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-02-03T17:49:53Z",
+      "side": 1,
+      "message": "In case of serialized message, call will never come here. If you see EntriesPackageActor code, there we send a message without serialization regardless if entries are present or not, just to bump the content of heartbeat. This code will get triggered for that call.",
+      "parentUuid": "7a96c907_cb0f562d",
+      "range": {
+        "startLine": 96,
+        "startChar": 33,
+        "endLine": 96,
+        "endChar": 40
+      },
+      "revId": "6d5b03344abc49b8ed3f4c81a1534a2403b8e66b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_da13a664",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/HeartbeatActor.java",
         "patchSetId": 1
@@ -154,6 +178,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_688c0580",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/HeartbeatActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-02-03T17:49:53Z",
+      "side": 1,
+      "message": "The reason its present is because i think actor selection can exist in beginning regardless of existence of actor reference. \nI agree it won\u0027t get scheduled, but as i pointed out to use scheduler start/stop (code i have committed yet, something like below) will make sure if condition is called.  \n\n//Cancel existing scheduler\n        if(heartbeatSchedule !\u003d null) {\n            heartbeatSchedule.cancel();\n        }\n\n        if(!message.getEntries().isEmpty()) {\n            // no need to send list data in heartbeat message\n            heartbeatPayload \u003d new AppendEntries(message.getTerm(), message.getLeaderId(), message.getPrevLogIndex(),\n                message.getPrevLogTerm(), Collections.\u003cReplicatedLogEntry\u003eemptyList(), message.getLeaderCommit()).toSerializable();\n        } else {\n            heartbeatPayload \u003d message.toSerializable();\n        }\n        Optional\u003cActorRef\u003e followerActorRef \u003d  getSingleActorRefFromSelector(followerActor);\n\n        if(followerActorRef.isPresent()) {\n            LOG.info(\"Starting the heartbeat scheduler for leader {} \", leader.path());\n            heartbeatSchedule \u003d getContext().system().scheduler().schedule(Duration.Zero(), interval,\n                followerActorRef.get(), heartbeatPayload, getContext().system().dispatcher(), leader);\n        }",
+      "parentUuid": "7a96c907_702151fa",
+      "revId": "6d5b03344abc49b8ed3f4c81a1534a2403b8e66b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_3a1dea73",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/HeartbeatActor.java",
         "patchSetId": 1
@@ -201,6 +243,24 @@
       "side": 1,
       "message": "I think it would be easier to use the SendHeartbeat message here. Then in handleReceive, on SendHeartbeat, send heartbeatPayload to the followerActor. This would be more efficient than stopping/starting the schedule  as it could happen a lot.",
       "parentUuid": "7a96c907_5009b593",
+      "revId": "6d5b03344abc49b8ed3f4c81a1534a2403b8e66b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_28eefd22",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/HeartbeatActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-02-03T17:49:53Z",
+      "side": 1,
+      "message": "so, you mean to use scheduler for SendHeartbeat message and change message dynamically because message content can change. I think that makes sense. I can think of that change.",
+      "parentUuid": "7a96c907_1011edab",
       "revId": "6d5b03344abc49b8ed3f4c81a1534a2403b8e66b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
