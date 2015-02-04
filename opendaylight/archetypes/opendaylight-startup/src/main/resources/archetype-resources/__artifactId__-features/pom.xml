@@ -13,6 +13,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>features-parent</artifactId>
     <version>1.5.0-SNAPSHOT</version>
+    <relativePath/>
   </parent>
   <groupId>${groupId}</groupId>
   <artifactId>${artifactId}-features</artifactId>
