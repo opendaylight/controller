@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_f13fa0d4",
+        "filename": "opendaylight/md-sal/sal-dummy-distributed-datastore/src/main/java/org/opendaylight/controller/dummy/datastore/DummyShard.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-04T12:18:38Z",
+      "side": 1,
+      "message": "We should probably handle InstallSnapshot as well so the leader gets responses.",
+      "revId": "f99bfc65f7af48ac5526cb6b053584a5fac1661b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
