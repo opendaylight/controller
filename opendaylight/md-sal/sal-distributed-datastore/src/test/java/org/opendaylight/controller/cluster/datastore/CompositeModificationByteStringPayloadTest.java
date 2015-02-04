@@ -24,6 +24,7 @@ import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
+@Deprecated
 public class CompositeModificationByteStringPayloadTest {
 
     private static final SchemaContext SCHEMA_CONTEXT = TestModel.createTestContext();
