@@ -16,6 +16,24 @@
       "revId": "67c82a6466ac996569ddbef37d7dad4a7ccd5423",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5d51c5d6",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMNotificationRouter.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-04T22:04:00Z",
+      "side": 1,
+      "message": "The disruptor will submit only a single task, which will execute continuously, so it is effectively bound. I will add a threadpool name.",
+      "parentUuid": "7a96c907_21b72bda",
+      "revId": "67c82a6466ac996569ddbef37d7dad4a7ccd5423",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
