@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_eb2a4f2b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-04T07:31:16Z",
+      "side": 1,
+      "message": "I am not understanding how can i replace the context within MockRaftActor (if that was the suggestion), when the RaftActor creates it within its constructor and does not allow a change in reference.\nI have now got rid of the MockRaftActorContext and updated the actor\u0027s context using its setters.\nBut that involved making configparams and peer addresses as non-final in the raftactorcontext.\n\nIn these tests the actor\u0027s contexts get updated with the snapshotCaptureInitiated flag which in turn decides if a fakesnapshot is to be performed.",
+      "parentUuid": "7a96c907_f0b1e1e1",
+      "revId": "501fae2ad599afd555b02685d7cf173d7a6be698",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_10b56dcc",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2015-02-02T23:32:23Z",
       "side": 1,
       "message": "Don\u0027t need this setter if you make changes using the existing mechanism.",
+      "revId": "501fae2ad599afd555b02685d7cf173d7a6be698",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_8b214b4f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 518,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-04T07:31:16Z",
+      "side": 1,
+      "message": "removed.",
+      "parentUuid": "7a96c907_10b56dcc",
       "revId": "501fae2ad599afd555b02685d7cf173d7a6be698",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -59,6 +95,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_cbb513ef",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-04T07:31:16Z",
+      "side": 1,
+      "message": "minReplicatedToAllIndex \u003c context.getLastApplied(), not \u003d\n\nReplaced with min.",
+      "parentUuid": "7a96c907_50945536",
+      "revId": "501fae2ad599afd555b02685d7cf173d7a6be698",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_3033c915",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
         "patchSetId": 3
@@ -70,6 +124,24 @@
       "writtenOn": "2015-02-03T04:05:41Z",
       "side": 1,
       "message": "Couldn\u0027t we use Math.min(minReplicatedToAllIndex, context.getLastApplied()) here?",
+      "revId": "501fae2ad599afd555b02685d7cf173d7a6be698",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_ebb80fe7",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-04T07:31:16Z",
+      "side": 1,
+      "message": "it would context.getLastApplied() -1. Replaced with min",
+      "parentUuid": "7a96c907_3033c915",
       "revId": "501fae2ad599afd555b02685d7cf173d7a6be698",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -93,6 +165,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_abca076c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 258,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-04T07:31:16Z",
+      "side": 1,
+      "message": "Yes, this would clear the logs and adjust the indices as well",
+      "parentUuid": "7a96c907_902bbd93",
+      "revId": "501fae2ad599afd555b02685d7cf173d7a6be698",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_70ae3187",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
         "patchSetId": 3
@@ -104,6 +194,24 @@
       "writtenOn": "2015-02-02T23:32:23Z",
       "side": 1,
       "message": "I think a majority of this code can probably live in AbstractBehavior and be reused by AbstractLeader/Follower",
+      "revId": "501fae2ad599afd555b02685d7cf173d7a6be698",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_4e94b1e1",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 258,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-04T07:31:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_70ae3187",
       "revId": "501fae2ad599afd555b02685d7cf173d7a6be698",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -127,6 +235,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_4ba0239f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-04T07:31:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_109ecd56",
+      "revId": "501fae2ad599afd555b02685d7cf173d7a6be698",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_f09a4162",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
         "patchSetId": 3
@@ -144,6 +270,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_6e8f2dcd",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-04T07:31:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_f09a4162",
+      "revId": "501fae2ad599afd555b02685d7cf173d7a6be698",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_501d3572",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/CandidateTest.java",
         "patchSetId": 3
@@ -155,6 +299,24 @@
       "writtenOn": "2015-02-03T04:05:41Z",
       "side": 1,
       "message": "Collections.\u003cReplicatedLogEntry\u003eemptyList() avoids compiler warning.",
+      "revId": "501fae2ad599afd555b02685d7cf173d7a6be698",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_4eab511d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/CandidateTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-04T07:31:16Z",
+      "side": 1,
+      "message": "Dont know why and how this got changed.\n\nReverted it back",
+      "parentUuid": "7a96c907_501d3572",
       "revId": "501fae2ad599afd555b02685d7cf173d7a6be698",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
