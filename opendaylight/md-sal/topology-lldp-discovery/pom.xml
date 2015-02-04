@@ -12,7 +12,6 @@
   <packaging>bundle</packaging>
   <properties>
     <bundle.plugin.version>2.4.0</bundle.plugin.version>
-    <guava.version>14.0.1</guava.version>
     <maven.clean.plugin.version>2.5</maven.clean.plugin.version>
   </properties>
   <dependencies>
