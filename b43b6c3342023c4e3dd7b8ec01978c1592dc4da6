@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_a236a4e5",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-04T21:28:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_7cc5a78c",
+      "revId": "b43b6c3342023c4e3dd7b8ec01978c1592dc4da6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_1c3103a2",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorContext.java",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2015-02-04T13:37:56Z",
       "side": 1,
       "message": "Since this is an interface, \"public\" is redundant - checkStyle reports this as a minor violation.",
+      "revId": "b43b6c3342023c4e3dd7b8ec01978c1592dc4da6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_024f586c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorContext.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-04T21:28:08Z",
+      "side": 1,
+      "message": "removed.",
+      "parentUuid": "7a96c907_1c3103a2",
       "revId": "b43b6c3342023c4e3dd7b8ec01978c1592dc4da6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_22529413",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorContextImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-04T21:28:08Z",
+      "side": 1,
+      "message": "removed.",
+      "parentUuid": "7a96c907_9c47531d",
+      "revId": "b43b6c3342023c4e3dd7b8ec01978c1592dc4da6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_7cde076f",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
         "patchSetId": 4
@@ -64,6 +118,24 @@
       "writtenOn": "2015-02-04T13:37:56Z",
       "side": 1,
       "message": "Please keep imports in alphabetical order.",
+      "revId": "b43b6c3342023c4e3dd7b8ec01978c1592dc4da6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_e25b4c2c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-04T21:28:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_7cde076f",
       "revId": "b43b6c3342023c4e3dd7b8ec01978c1592dc4da6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_8242883c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-04T21:28:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_fcd1b757",
+      "revId": "b43b6c3342023c4e3dd7b8ec01978c1592dc4da6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_dcce3bb4",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
         "patchSetId": 4
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_a23d44bd",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-04T21:28:08Z",
+      "side": 1,
+      "message": "done for the above.\n\nthe static remains separate.",
+      "parentUuid": "7a96c907_dcce3bb4",
+      "revId": "b43b6c3342023c4e3dd7b8ec01978c1592dc4da6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_7cfa87be",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
         "patchSetId": 4
@@ -115,6 +223,24 @@
       "writtenOn": "2015-02-04T13:37:56Z",
       "side": 1,
       "message": "\"config\" is passed  to the RaftActor constructor via the Props above so why do we need to set it here right after construction? It would be nice to avoid having to add a setter on RaftActorContext so ConfigParams can be final.",
+      "revId": "b43b6c3342023c4e3dd7b8ec01978c1592dc4da6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_e2ceecb3",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1032,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-04T21:28:08Z",
+      "side": 1,
+      "message": "yeah my bad. Didnt look at the MockRaftActor properly. Got rid of all the setters and back to original.",
+      "parentUuid": "7a96c907_7cfa87be",
       "revId": "b43b6c3342023c4e3dd7b8ec01978c1592dc4da6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
