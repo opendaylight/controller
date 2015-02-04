@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_7cc5a78c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-04T13:37:56Z",
+      "side": 1,
+      "message": "We had decided on keeping imports in alphabetical order - please configure your IDE to do so.",
+      "revId": "b43b6c3342023c4e3dd7b8ec01978c1592dc4da6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_1c3103a2",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorContext.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-04T13:37:56Z",
+      "side": 1,
+      "message": "Since this is an interface, \"public\" is redundant - checkStyle reports this as a minor violation.",
+      "revId": "b43b6c3342023c4e3dd7b8ec01978c1592dc4da6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_9c47531d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorContextImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-04T13:37:56Z",
+      "side": 1,
+      "message": "Why can\u0027t the unit tests call setPeerAddress(String peerId, String peerAddress) instead of making the entire peerAddresses map mutable via a setter on the interface just for the unit tests.\n\nAs a side note, if a method is testing, you can use @VisibleForTesting to indicate that.",
+      "revId": "b43b6c3342023c4e3dd7b8ec01978c1592dc4da6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_7cde076f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-04T13:37:56Z",
+      "side": 1,
+      "message": "Please keep imports in alphabetical order.",
+      "revId": "b43b6c3342023c4e3dd7b8ec01978c1592dc4da6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_fcd1b757",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-04T13:37:56Z",
+      "side": 1,
+      "message": "Please keep imports in alphabetical order.",
+      "revId": "b43b6c3342023c4e3dd7b8ec01978c1592dc4da6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_dcce3bb4",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-04T13:37:56Z",
+      "side": 1,
+      "message": "Please keep imports in alphabetical order.",
+      "revId": "b43b6c3342023c4e3dd7b8ec01978c1592dc4da6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_7cfa87be",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1032,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-04T13:37:56Z",
+      "side": 1,
+      "message": "\"config\" is passed  to the RaftActor constructor via the Props above so why do we need to set it here right after construction? It would be nice to avoid having to add a setter on RaftActorContext so ConfigParams can be final.",
+      "revId": "b43b6c3342023c4e3dd7b8ec01978c1592dc4da6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
