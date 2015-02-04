@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_ab50c75e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/SerializationUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-04T02:57:24Z",
+      "side": 1,
+      "message": "Do you think we should write a signature in our serialized NormalizedNode? That way we could potentially avoid this flow by exception logic. Furthermore this actually will mask deserialization problems :(\n\nAt the very least maybe we should log an error when the exception happens, which shouldn\u0027t happen normally.",
+      "revId": "cfc94248aa44307e7dc9aaefcb6748c478f93138",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
