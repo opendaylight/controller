@@ -8,11 +8,18 @@
 package org.opendaylight.controller.cluster.datastore.utils;
 
 import com.google.common.base.Preconditions;
+import com.google.protobuf.InvalidProtocolBufferException;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
+import java.io.DataInputStream;
 import java.io.DataOutput;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputStreamReader;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeOutputStreamWriter;
+import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
@@ -97,6 +104,32 @@ public final class SerializationUtils {
             }
 
         return null;
+    }
+
+    public static NormalizedNode<?, ?> deserializeNormalizedNode(byte [] bytes) {
+        NormalizedNode<?, ?> node = null;
+        try {
+            node = deserializeNormalizedNode(new DataInputStream(new ByteArrayInputStream(bytes)));
+        } catch(Exception e) {
+        }
+
+        if(node == null) {
+            // Must be from legacy protobuf serialization - try that.
+            try {
+                NormalizedNodeMessages.Node serializedNode = NormalizedNodeMessages.Node.parseFrom(bytes);
+                node =  new NormalizedNodeToNodeCodec(null).decode(serializedNode);
+            } catch (InvalidProtocolBufferException e) {
+                throw new IllegalArgumentException("Error deserializing NormalizedNode", e);
+            }
+        }
+
+        return node;
+    }
+
+    public static byte [] serializeNormalizedNode(NormalizedNode<?, ?> node) {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        serializeNormalizedNode(node, new DataOutputStream(bos));
+        return bos.toByteArray();
     }
 
     public static void serializePath(YangInstanceIdentifier path, DataOutput out) {

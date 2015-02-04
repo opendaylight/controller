@@ -7,20 +7,15 @@
  */
 package org.opendaylight.controller.cluster.raft.base.messages;
 
-import com.google.protobuf.ByteString;
 
 public class CaptureSnapshotReply {
-    private ByteString snapshot;
+    private final byte [] snapshot;
 
-    public CaptureSnapshotReply(ByteString snapshot) {
+    public CaptureSnapshotReply(byte [] snapshot) {
         this.snapshot = snapshot;
     }
 
-    public ByteString getSnapshot() {
+    public byte [] getSnapshot() {
         return snapshot;
-    }
-
-    public void setSnapshot(ByteString snapshot) {
-        this.snapshot = snapshot;
     }
 }

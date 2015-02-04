@@ -1,5 +1,17 @@
 package org.opendaylight.controller.cluster.raft;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
@@ -57,18 +69,6 @@ import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 public class RaftActorTest extends AbstractActorTest {
 
@@ -177,11 +177,10 @@ public class RaftActorTest extends AbstractActorTest {
         }
 
         @Override
-        protected void applyRecoverySnapshot(ByteString snapshot) {
-            delegate.applyRecoverySnapshot(snapshot);
+        protected void applyRecoverySnapshot(byte[] bytes) {
+            delegate.applyRecoverySnapshot(bytes);
             try {
-                Object data = toObject(snapshot);
-                System.out.println("!!!!!applyRecoverySnapshot: "+data);
+                Object data = toObject(bytes);
                 if (data instanceof List) {
                     state.addAll((List<?>) data);
                 }
@@ -194,7 +193,7 @@ public class RaftActorTest extends AbstractActorTest {
             delegate.createSnapshot();
         }
 
-        @Override protected void applySnapshot(ByteString snapshot) {
+        @Override protected void applySnapshot(byte [] snapshot) {
             delegate.applySnapshot(snapshot);
         }
 
@@ -216,12 +215,12 @@ public class RaftActorTest extends AbstractActorTest {
             return this.getId();
         }
 
-        private Object toObject(ByteString bs) throws ClassNotFoundException, IOException {
+        private Object toObject(byte[] bs) throws ClassNotFoundException, IOException {
             Object obj = null;
             ByteArrayInputStream bis = null;
             ObjectInputStream ois = null;
             try {
-                bis = new ByteArrayInputStream(bs.toByteArray());
+                bis = new ByteArrayInputStream(bs);
                 ois = new ObjectInputStream(bis);
                 obj = ois.readObject();
             } finally {
@@ -431,7 +430,7 @@ public class RaftActorTest extends AbstractActorTest {
 
                 mockRaftActor.onReceiveRecover(new SnapshotOffer(new SnapshotMetadata(persistenceId, 100, 100), snapshot));
 
-                verify(mockRaftActor.delegate).applyRecoverySnapshot(eq(snapshotBytes));
+                verify(mockRaftActor.delegate).applyRecoverySnapshot(eq(snapshotBytes.toByteArray()));
 
                 mockRaftActor.onReceiveRecover(new ReplicatedLogImplEntry(0, 1, new MockRaftActorContext.MockPayload("A")));
 
@@ -500,7 +499,7 @@ public class RaftActorTest extends AbstractActorTest {
 
                 mockRaftActor.onReceiveRecover(new SnapshotOffer(new SnapshotMetadata(persistenceId, 100, 100), snapshot));
 
-                verify(mockRaftActor.delegate, times(0)).applyRecoverySnapshot(any(ByteString.class));
+                verify(mockRaftActor.delegate, times(0)).applyRecoverySnapshot(any(byte[].class));
 
                 mockRaftActor.onReceiveRecover(new ReplicatedLogImplEntry(0, 1, new MockRaftActorContext.MockPayload("A")));
 
@@ -676,7 +675,7 @@ public class RaftActorTest extends AbstractActorTest {
 
                 mockRaftActor.setCurrentBehavior(new Leader(raftActorContext));
 
-                mockRaftActor.onReceiveCommand(new CaptureSnapshotReply(snapshotBytes));
+                mockRaftActor.onReceiveCommand(new CaptureSnapshotReply(snapshotBytes.toByteArray()));
 
                 verify(dataPersistenceProvider).saveSnapshot(anyObject());
 
@@ -722,7 +721,7 @@ public class RaftActorTest extends AbstractActorTest {
 
                 verify(mockRaftActor.delegate).createSnapshot();
 
-                mockRaftActor.onReceiveCommand(new CaptureSnapshotReply(snapshotBytes));
+                mockRaftActor.onReceiveCommand(new CaptureSnapshotReply(snapshotBytes.toByteArray()));
 
                 mockRaftActor.onReceiveCommand(new SaveSnapshotSuccess(new SnapshotMetadata("foo", 100, 100)));
 
@@ -814,7 +813,7 @@ public class RaftActorTest extends AbstractActorTest {
 
                 mockRaftActor.onReceiveCommand(new ApplySnapshot(snapshot));
 
-                verify(mockRaftActor.delegate).applySnapshot(eq(snapshotBytes));
+                verify(mockRaftActor.delegate).applySnapshot(eq(snapshot.getState()));
 
                 assertTrue("The replicatedLog should have changed",
                     oldReplicatedLog != mockRaftActor.getReplicatedLog());
@@ -859,7 +858,7 @@ public class RaftActorTest extends AbstractActorTest {
 
                 mockRaftActor.onReceiveCommand(new CaptureSnapshot(-1,1,-1,1));
 
-                mockRaftActor.onReceiveCommand(new CaptureSnapshotReply(snapshotBytes));
+                mockRaftActor.onReceiveCommand(new CaptureSnapshotReply(snapshotBytes.toByteArray()));
 
                 mockRaftActor.onReceiveCommand(new SaveSnapshotFailure(new SnapshotMetadata("foobar", 10L, 1234L),
                         new Exception()));
