@@ -93,6 +93,7 @@
         <feature>war</feature>
         <!-- presently we need sal-remote to be listed BEFORE sal-rest-connector because sal-rest-connector
              has a yang file which augments a yang file in sal-remote, and order seems to matter -->
+        <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.antlr/2.5.0</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-remote/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-rest-connector/${project.version}</bundle>
         <bundle>mvn:com.google.code.gson/gson/${gson.version}</bundle>
