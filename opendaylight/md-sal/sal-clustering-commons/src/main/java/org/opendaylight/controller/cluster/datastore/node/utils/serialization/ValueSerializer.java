@@ -16,6 +16,8 @@ import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessa
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public class ValueSerializer {
+    private static final String NULL_VALUE = "";
+
     public static void serialize(NormalizedNodeMessages.Node.Builder builder,
             QNameSerializationContext context, Object value) {
         builder.setIntValueType(ValueType.getSerializableType(value).ordinal());
@@ -35,8 +37,10 @@ public class ValueSerializer {
                     }
                 }
             }
-        } else if(value instanceof byte[]){
+        } else if(value instanceof byte[]) {
             builder.setBytesValue(ByteString.copyFrom((byte[]) value));
+        } else if(value == null){
+            builder.setValue(NULL_VALUE);
         } else {
             builder.setValue(value.toString());
         }
@@ -64,6 +68,8 @@ public class ValueSerializer {
             }
         } else if(value instanceof byte[]){
             builder.setBytesValue(ByteString.copyFrom((byte[]) value));
+        } else if(value == null){
+            builder.setValue(NULL_VALUE);
         } else {
             builder.setValue(value.toString());
         }

@@ -365,6 +365,8 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
             case ValueTypes.YANG_IDENTIFIER_TYPE:
                 writeYangInstanceIdentifier((YangInstanceIdentifier) value);
                 break;
+            case ValueTypes.NULL_TYPE :
+                break;
             default:
                 output.writeUTF(value.toString());
                 break;
