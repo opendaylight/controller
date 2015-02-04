@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_6b1cffc1",
+        "filename": "opendaylight/md-sal/sal-dummy-distributed-datastore/src/main/java/org/opendaylight/controller/dummy/datastore/DummyShard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-04T02:20:44Z",
+      "side": 1,
+      "message": "Should call logMessage?",
+      "revId": "5b8060d4f115cee85fe76e8bc568e3ce2a6cc680",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_ab2207ff",
+        "filename": "opendaylight/md-sal/sal-dummy-distributed-datastore/src/main/java/org/opendaylight/controller/dummy/datastore/DummyShard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-04T02:20:44Z",
+      "side": 1,
+      "message": "It would be useful to include the date/time, i.e.\n\n    System.out.println(new Date() + \": \" + message);",
+      "revId": "5b8060d4f115cee85fe76e8bc568e3ce2a6cc680",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_6b45dfb1",
+        "filename": "opendaylight/md-sal/sal-dummy-distributed-datastore/src/main/java/org/opendaylight/controller/dummy/datastore/DummyShard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-04T02:20:44Z",
+      "side": 1,
+      "message": "You could use String.format here.",
+      "revId": "5b8060d4f115cee85fe76e8bc568e3ce2a6cc680",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_8b270b12",
+        "filename": "opendaylight/md-sal/sal-dummy-distributed-datastore/src/main/java/org/opendaylight/controller/dummy/datastore/DummyShard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-04T02:20:44Z",
+      "side": 1,
+      "message": "You could use String.format here.",
+      "revId": "5b8060d4f115cee85fe76e8bc568e3ce2a6cc680",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
