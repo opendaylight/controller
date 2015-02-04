@@ -185,7 +185,8 @@ public class NeutronNetworksNorthbound {
     @StatusCodes({
         @ResponseCode(code = 201, condition = "Created"),
         @ResponseCode(code = 400, condition = "Bad Request"),
-        @ResponseCode(code = 401, condition = "Unauthorized") })
+        @ResponseCode(code = 401, condition = "Unauthorized"),
+        @ResponseCode(code = 409, condition = "Conflict") })
     public Response createNetworks(final NeutronNetworkRequest input) {
         INeutronNetworkCRUD networkInterface = NeutronCRUDInterfaces.getINeutronNetworkCRUD( this);
         if (networkInterface == null) {
@@ -199,7 +200,7 @@ public class NeutronNetworksNorthbound {
              * network ID can't already exist
              */
             if (networkInterface.networkExists(singleton.getID())) {
-                throw new BadRequestException("network UUID already exists");
+                throw new ResourceConflictException("network UUID already exists");
             }
 
             Object[] instances = NeutronUtil.getInstances(INeutronNetworkAware.class, this);
@@ -236,10 +237,10 @@ public class NeutronNetworksNorthbound {
                  * already in this bulk request
                  */
                 if (networkInterface.networkExists(test.getID())) {
-                    throw new BadRequestException("network UUID already exists");
+                    throw new ResourceConflictException("network UUID already exists");
                 }
                 if (testMap.containsKey(test.getID())) {
-                    throw new BadRequestException("network UUID already exists");
+                    throw new ResourceConflictException("network UUID already exists");
                 }
                 if (instances != null) {
                     for (Object instance: instances) {

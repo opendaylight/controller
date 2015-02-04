@@ -203,13 +203,13 @@ public class NeutronSubnetsNorthbound {
              *  *then* add the subnet to the cache
              */
             if (subnetInterface.subnetExists(singleton.getID())) {
-                throw new BadRequestException("subnet UUID already exists");
+                throw new ResourceConflictException("subnet UUID already exists");
             }
             if (!networkInterface.networkExists(singleton.getNetworkUUID())) {
                 throw new ResourceNotFoundException("network UUID does not exist.");
             }
             if (!singleton.isValidCIDR()) {
-                throw new BadRequestException("invaild CIDR");
+                throw new BadRequestException("invalid CIDR");
             }
             if (!singleton.initDefaults()) {
                 throw new InternalServerErrorException("subnet object could not be initialized properly");
@@ -253,10 +253,10 @@ public class NeutronSubnetsNorthbound {
                     throw new InternalServerErrorException("subnet object could not be initialized properly");
                 }
                 if (subnetInterface.subnetExists(test.getID())) {
-                    throw new BadRequestException("subnet UUID already exists");
+                    throw new ResourceConflictException("subnet UUID already exists");
                 }
                 if (testMap.containsKey(test.getID())) {
-                    throw new BadRequestException("subnet UUID already exists");
+                    throw new ResourceConflictException("subnet UUID already exists");
                 }
                 testMap.put(test.getID(), test);
                 if (!networkInterface.networkExists(test.getNetworkUUID())) {
