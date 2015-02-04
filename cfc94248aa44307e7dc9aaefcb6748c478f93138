@@ -16,6 +16,24 @@
       "revId": "cfc94248aa44307e7dc9aaefcb6748c478f93138",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_8e3b99d0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/SerializationUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-04T03:43:52Z",
+      "side": 1,
+      "message": "Yes - thank you - I was thinking the same thing at the time and meant to do it later but forgot about it - I should\u0027ve put it on my TODO list :)  I was also thinking we should have the NormalizedNodeOutputStreamWriter write a version # to support future changes. I can do these in another patch.",
+      "parentUuid": "7a96c907_ab50c75e",
+      "revId": "cfc94248aa44307e7dc9aaefcb6748c478f93138",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
