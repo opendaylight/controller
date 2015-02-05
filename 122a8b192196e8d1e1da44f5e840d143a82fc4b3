@@ -16,6 +16,24 @@
       "revId": "122a8b192196e8d1e1da44f5e840d143a82fc4b3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_6f4c0443",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-05T03:53:11Z",
+      "side": 1,
+      "message": "Agreed. The code in the for loop in sendAppendEntries can be refactored to, say,  checkAndSendAppendEntriesToFollower",
+      "parentUuid": "7a96c907_8f3630e6",
+      "revId": "122a8b192196e8d1e1da44f5e840d143a82fc4b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
