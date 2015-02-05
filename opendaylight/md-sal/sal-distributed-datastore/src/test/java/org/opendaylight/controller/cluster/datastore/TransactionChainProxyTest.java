@@ -11,12 +11,15 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.MockActorContext;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
@@ -29,10 +32,17 @@ public class TransactionChainProxyTest extends AbstractActorTest{
     ActorContext actorContext = null;
     SchemaContext schemaContext = mock(SchemaContext.class);
 
+    @Mock
+    ActorContext mockActorContext;
+
     @Before
     public void setUp() {
+        MockitoAnnotations.initMocks(this);
+
         actorContext = new MockActorContext(getSystem());
         actorContext.setSchemaContext(schemaContext);
+
+        doReturn(schemaContext).when(mockActorContext).getSchemaContext();
     }
 
     @SuppressWarnings("resource")
@@ -75,5 +85,33 @@ public class TransactionChainProxyTest extends AbstractActorTest{
         TransactionChainProxy two = new TransactionChainProxy(mock(ActorContext.class));
 
         Assert.assertNotEquals(one.getTransactionChainId(), two.getTransactionChainId());
+    }
+
+    @Test
+    public void testRateLimitingUsedInReadWriteTxCreation(){
+        TransactionChainProxy txChainProxy = new TransactionChainProxy(mockActorContext);
+
+        txChainProxy.newReadWriteTransaction();
+
+        verify(mockActorContext, times(1)).acquireTxCreationPermit();
+    }
+
+    @Test
+    public void testRateLimitingUsedInWriteOnlyTxCreation(){
+        TransactionChainProxy txChainProxy = new TransactionChainProxy(mockActorContext);
+
+        txChainProxy.newWriteOnlyTransaction();
+
+        verify(mockActorContext, times(1)).acquireTxCreationPermit();
+    }
+
+
+    @Test
+    public void testRateLimitingNotUsedInReadOnlyTxCreation(){
+        TransactionChainProxy txChainProxy = new TransactionChainProxy(mockActorContext);
+
+        txChainProxy.newReadOnlyTransaction();
+
+        verify(mockActorContext, times(0)).acquireTxCreationPermit();
     }
 }
