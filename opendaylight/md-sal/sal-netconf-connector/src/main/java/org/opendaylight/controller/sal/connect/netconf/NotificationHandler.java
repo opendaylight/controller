@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.sal.connect.netconf;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,6 +32,7 @@ final class NotificationHandler {
     private final MessageTransformer<NetconfMessage> messageTransformer;
     private final RemoteDeviceId id;
     private boolean passNotifications = false;
+    private NotificationFilter filter;
 
     NotificationHandler(final RemoteDeviceHandler<?> salFacade, final MessageTransformer<NetconfMessage> messageTransformer, final RemoteDeviceId id) {
         this.salFacade = Preconditions.checkNotNull(salFacade);
@@ -70,9 +72,21 @@ final class NotificationHandler {
         queue.add(notification);
     }
 
-    private void passNotification(final CompositeNode parsedNotification) {
+    private synchronized void passNotification(final CompositeNode parsedNotification) {
         logger.debug("{}: Forwarding notification {}", id, parsedNotification);
         Preconditions.checkNotNull(parsedNotification);
-        salFacade.onNotification(parsedNotification);
+
+        if(filter == null || filter.filterNotification(parsedNotification).isPresent()) {
+            salFacade.onNotification(parsedNotification);
+        }
+    }
+
+    synchronized void addNotificationFilter(final NotificationFilter filter) {
+        this.filter = filter;
+    }
+
+    static interface NotificationFilter {
+
+        Optional<CompositeNode> filterNotification(CompositeNode notification);
     }
 }

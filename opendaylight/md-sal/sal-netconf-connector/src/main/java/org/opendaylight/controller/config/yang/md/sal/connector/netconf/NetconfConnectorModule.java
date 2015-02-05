@@ -9,6 +9,7 @@ package org.opendaylight.controller.config.yang.md.sal.connector.netconf;
 
 import static org.opendaylight.controller.config.api.JmxAttributeValidationException.checkCondition;
 import static org.opendaylight.controller.config.api.JmxAttributeValidationException.checkNotNull;
+
 import com.google.common.base.Optional;
 import io.netty.util.concurrent.EventExecutor;
 import java.math.BigDecimal;
@@ -87,7 +88,6 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         }
 
         userCapabilities = getUserCapabilities();
-
     }
 
     private boolean isHostAddressPresent(final Host address) {
@@ -104,6 +104,8 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         final Broker domBroker = getDomRegistryDependency();
         final BindingAwareBroker bindingBroker = getBindingRegistryDependency();
 
+        // TODO 2313 refactor, too tangled NetconfDevice, SalFacade, Listener ...
+
         final RemoteDeviceHandler<NetconfSessionCapabilities> salFacade
                 = new NetconfDeviceSalFacade(id, domBroker, bindingBroker, bundleContext, globalProcessingExecutor);
 
@@ -111,17 +113,17 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
                 new NetconfDevice.SchemaResourcesDTO(schemaRegistry, schemaContextFactory, new NetconfStateSchemas.NetconfStateSchemasResolverImpl());
 
         final NetconfDevice device =
-                new NetconfDevice(schemaResourcesDTO, id, salFacade, globalProcessingExecutor, new NetconfMessageTransformer());
+                new NetconfDevice(schemaResourcesDTO, id, salFacade, globalProcessingExecutor, new NetconfMessageTransformer(), true);
 
         final NetconfDeviceCommunicator listener = userCapabilities.isPresent() ?
                 new NetconfDeviceCommunicator(id, device, userCapabilities.get()) : new NetconfDeviceCommunicator(id, device);
 
         final NetconfReconnectingClientConfiguration clientConfig = getClientConfig(listener);
-
         final NetconfClientDispatcher dispatcher = getClientDispatcherDependency();
+
         listener.initializeRemoteConnection(dispatcher, clientConfig);
 
-        return new MyAutoCloseable(listener, salFacade);
+        return new SalConnectorCloseable(listener, salFacade);
     }
 
     private Optional<NetconfSessionCapabilities> getUserCapabilities() {
@@ -152,7 +154,7 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         final InetSocketAddress socketAddress = getSocketAddress();
         final long clientConnectionTimeoutMillis = getConnectionTimeoutMillis();
 
-        final ReconnectStrategyFactory sf = new MyReconnectStrategyFactory(
+        final ReconnectStrategyFactory sf = new TimedReconnectStrategyFactory(
             getEventExecutorDependency(), getMaxConnectionAttempts(), getBetweenAttemptsTimeoutMillis(), getSleepFactor());
         final ReconnectStrategy strategy = sf.createReconnectStrategy();
 
@@ -160,21 +162,21 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         .withAddress(socketAddress)
         .withConnectionTimeoutMillis(clientConnectionTimeoutMillis)
         .withReconnectStrategy(strategy)
-        .withSessionListener(listener)
         .withAuthHandler(new LoginPassword(getUsername(),getPassword()))
         .withProtocol(getTcpOnly() ?
                 NetconfClientConfiguration.NetconfClientProtocol.TCP :
                 NetconfClientConfiguration.NetconfClientProtocol.SSH)
         .withConnectStrategyFactory(sf)
+        .withSessionListener(listener)
         .build();
     }
 
-    private static final class MyAutoCloseable implements AutoCloseable {
+    private static final class SalConnectorCloseable implements AutoCloseable {
         private final RemoteDeviceHandler<NetconfSessionCapabilities> salFacade;
         private final NetconfDeviceCommunicator listener;
 
-        public MyAutoCloseable(final NetconfDeviceCommunicator listener,
-                final RemoteDeviceHandler<NetconfSessionCapabilities> salFacade) {
+        public SalConnectorCloseable(final NetconfDeviceCommunicator listener,
+                                     final RemoteDeviceHandler<NetconfSessionCapabilities> salFacade) {
             this.listener = listener;
             this.salFacade = salFacade;
         }
@@ -186,13 +188,13 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         }
     }
 
-    private static final class MyReconnectStrategyFactory implements ReconnectStrategyFactory {
+    private static final class TimedReconnectStrategyFactory implements ReconnectStrategyFactory {
         private final Long connectionAttempts;
         private final EventExecutor executor;
         private final double sleepFactor;
         private final int minSleep;
 
-        MyReconnectStrategyFactory(final EventExecutor executor, final Long maxConnectionAttempts, final int minSleep, final BigDecimal sleepFactor) {
+        TimedReconnectStrategyFactory(final EventExecutor executor, final Long maxConnectionAttempts, final int minSleep, final BigDecimal sleepFactor) {
             if (maxConnectionAttempts != null && maxConnectionAttempts > 0) {
                 connectionAttempts = maxConnectionAttempts;
             } else {

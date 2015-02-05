@@ -26,7 +26,9 @@ import javax.annotation.Nullable;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageUtil;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf.notification._1._0.rev080714.CreateSubscriptionInput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.NetconfState;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.notifications.rev120206.NetconfCapabilityChange;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorSeverity;
@@ -51,6 +53,7 @@ import org.w3c.dom.Element;
 public class NetconfMessageTransformUtil {
 
     public static final String MESSAGE_ID_ATTR = "message-id";
+    public static final QName CREATE_SUBSCRIPTION_RPC_QNAME = QName.cachedReference(QName.create(CreateSubscriptionInput.QNAME, "create-subscription"));
 
     private NetconfMessageTransformUtil() {}
 
@@ -60,6 +63,8 @@ public class NetconfMessageTransformUtil {
     public static final QName IETF_NETCONF_MONITORING_SCHEMA_IDENTIFIER = QName.create(IETF_NETCONF_MONITORING, "identifier");
     public static final QName IETF_NETCONF_MONITORING_SCHEMA_VERSION = QName.create(IETF_NETCONF_MONITORING, "version");
     public static final QName IETF_NETCONF_MONITORING_SCHEMA_NAMESPACE = QName.create(IETF_NETCONF_MONITORING, "namespace");
+
+    public static final QName IETF_NETCONF_NOTIFICATIONS = QName.create(NetconfCapabilityChange.QNAME, "ietf-netconf-notifications");
 
     public static URI NETCONF_URI = URI.create("urn:ietf:params:xml:ns:netconf:base:1.0");
     public static QName NETCONF_QNAME = QName.create(NETCONF_URI, null, "netconf");
@@ -91,6 +96,9 @@ public class NetconfMessageTransformUtil {
     public static URI NETCONF_CANDIDATE_URI = URI
             .create("urn:ietf:params:netconf:capability:candidate:1.0");
 
+    public static URI NETCONF_NOTIFICATONS_URI = URI
+            .create("urn:ietf:params:netconf:capability:notification:1.0");
+
     public static URI NETCONF_RUNNING_WRITABLE_URI = URI
             .create("urn:ietf:params:netconf:capability:writable-running:1.0");
 
@@ -104,6 +112,10 @@ public class NetconfMessageTransformUtil {
     // Commit changes message
     public static final CompositeNode COMMIT_RPC_CONTENT =
             NodeFactory.createImmutableCompositeNode(NETCONF_COMMIT_QNAME, null, Collections.<Node<?>>emptyList());
+
+    // Create-subscription changes message
+    public static final CompositeNode CREATE_SUBSCRIPTION_RPC_CONTENT =
+            NodeFactory.createImmutableCompositeNode(CREATE_SUBSCRIPTION_RPC_QNAME, null, Collections.<Node<?>>emptyList());
 
     public static Node<?> toFilterStructure(final YangInstanceIdentifier identifier) {
         Node<?> previous = null;
