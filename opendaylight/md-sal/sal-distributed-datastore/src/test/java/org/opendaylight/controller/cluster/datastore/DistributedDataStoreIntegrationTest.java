@@ -790,8 +790,11 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
             Configuration config = new ConfigurationImpl("module-shards.conf", "modules.conf");
             ShardStrategyFactory.setConfiguration(config);
 
+            datastoreContextBuilder.dataStoreType(typeName);
+
             DatastoreContext datastoreContext = datastoreContextBuilder.build();
-            DistributedDataStore dataStore = new DistributedDataStore(getSystem(), typeName, cluster,
+
+            DistributedDataStore dataStore = new DistributedDataStore(getSystem(), cluster,
                     config, datastoreContext);
 
             SchemaContext schemaContext = SchemaContextHelper.full();

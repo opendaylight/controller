@@ -39,20 +39,21 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
 
     private final ActorContext actorContext;
 
-    public DistributedDataStore(ActorSystem actorSystem, String type, ClusterWrapper cluster,
+    public DistributedDataStore(ActorSystem actorSystem, ClusterWrapper cluster,
             Configuration configuration, DatastoreContext datastoreContext) {
         Preconditions.checkNotNull(actorSystem, "actorSystem should not be null");
-        Preconditions.checkNotNull(type, "type should not be null");
         Preconditions.checkNotNull(cluster, "cluster should not be null");
         Preconditions.checkNotNull(configuration, "configuration should not be null");
         Preconditions.checkNotNull(datastoreContext, "datastoreContext should not be null");
+
+        String type = datastoreContext.getDataStoreType();
 
         String shardManagerId = ShardManagerIdentifier.builder().type(type).build().toString();
 
         LOG.info("Creating ShardManager : {}", shardManagerId);
 
         actorContext = new ActorContext(actorSystem, actorSystem.actorOf(
-                ShardManager.props(type, cluster, configuration, datastoreContext)
+                ShardManager.props(cluster, configuration, datastoreContext)
                     .withMailbox(ActorContext.MAILBOX), shardManagerId ),
                 cluster, configuration, datastoreContext, type);
     }

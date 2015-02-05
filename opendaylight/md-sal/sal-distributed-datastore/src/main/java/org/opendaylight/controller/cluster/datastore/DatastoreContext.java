@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.util.Timeout;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.lang.WordUtils;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationReader;
 import org.opendaylight.controller.cluster.datastore.config.FileConfigurationReader;
 import org.opendaylight.controller.cluster.raft.ConfigParams;
@@ -53,6 +54,7 @@ public class DatastoreContext {
     private ConfigurationReader configurationReader = DEFAULT_CONFIGURATION_READER;
     private long transactionCreationInitialRateLimit = DEFAULT_TX_CREATION_INITIAL_RATE_LIMIT;
     private DefaultConfigParamsImpl raftConfig = new DefaultConfigParamsImpl();
+    private String dataStoreType;
 
     private DatastoreContext(){
         setShardJournalRecoveryLogBatchSize(DEFAULT_JOURNAL_RECOVERY_BATCH_SIZE);
@@ -114,6 +116,9 @@ public class DatastoreContext {
         return raftConfig.getElectionTimeoutFactor();
     }
 
+    public String getDataStoreType(){
+        return dataStoreType;
+    }
 
     public long getTransactionCreationInitialRateLimit() {
         return transactionCreationInitialRateLimit;
@@ -231,6 +236,12 @@ public class DatastoreContext {
 
         public Builder transactionCreationInitialRateLimit(long initialRateLimit){
             datastoreContext.transactionCreationInitialRateLimit = initialRateLimit;
+            return this;
+        }
+
+        public Builder dataStoreType(String dataStoreType){
+            datastoreContext.dataStoreType = dataStoreType;
+            datastoreContext.dataStoreMXBeanType = "Distributed" + WordUtils.capitalize(dataStoreType) + "Datastore";
             return this;
         }
 
