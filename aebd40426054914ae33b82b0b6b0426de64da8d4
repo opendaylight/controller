@@ -144,6 +144,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_0368b7f3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-05T20:12:55Z",
+      "side": 1,
+      "message": "Let me keep it simple for this commit. Let\u0027s play around with it till we figure out if we need to make it more complicated. Sound ok?",
+      "parentUuid": "7a96c907_c32acf2b",
+      "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_ef9c94c2",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
         "patchSetId": 1
