@@ -9,6 +9,7 @@ package org.opendaylight.controller.md.sal.dom.api;
 
 import java.util.Collection;
 import javax.annotation.Nonnull;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 /**
@@ -30,7 +31,7 @@ public interface DOMNotificationService {
      *         null or a SchemaPath which does not represent a valid {@link DOMNotification} type.
      * @throws NullPointerException if either of the arguments is null
      */
-    DOMNotificationListenerRegistration registerNotificationListener(@Nonnull DOMNotificationListener listener, @Nonnull Collection<SchemaPath> types);
+    <T extends DOMNotificationListener> ListenerRegistration<T> registerNotificationListener(@Nonnull T listener, @Nonnull Collection<SchemaPath> types);
 
     /**
      * Register a {@link DOMNotificationListener} to receive a set of notifications. As with
@@ -47,5 +48,5 @@ public interface DOMNotificationService {
      * @throws NullPointerException if listener is null
      */
     // FIXME: Java 8: provide a default implementation of this method.
-    DOMNotificationListenerRegistration registerNotificationListener(@Nonnull DOMNotificationListener listener, SchemaPath... types);
+    <T extends DOMNotificationListener> ListenerRegistration<T> registerNotificationListener(@Nonnull T listener, SchemaPath... types);
 }

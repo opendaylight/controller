@@ -10,8 +10,8 @@ package org.opendaylight.controller.md.sal.dom.spi;
 import com.google.common.collect.ForwardingObject;
 import java.util.Collection;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationListener;
-import org.opendaylight.controller.md.sal.dom.api.DOMNotificationListenerRegistration;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationService;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 /**
@@ -23,13 +23,13 @@ public abstract class ForwardingDOMNotificationService extends ForwardingObject 
     protected abstract DOMNotificationService delegate();
 
     @Override
-    public DOMNotificationListenerRegistration registerNotificationListener(final DOMNotificationListener listener,
+    public <T extends DOMNotificationListener> ListenerRegistration<T> registerNotificationListener(final T listener,
             final Collection<SchemaPath> types) {
         return delegate().registerNotificationListener(listener, types);
     }
 
     @Override
-    public DOMNotificationListenerRegistration registerNotificationListener(final DOMNotificationListener listener,
+    public <T extends DOMNotificationListener> ListenerRegistration<T> registerNotificationListener(final T listener,
             final SchemaPath... types) {
         return delegate().registerNotificationListener(listener, types);
     }
