@@ -87,7 +87,8 @@ public class MockRaftActorContext implements RaftActorContext {
 
     public void initReplicatedLog(){
         this.replicatedLog = new SimpleReplicatedLog();
-        this.replicatedLog.append(new MockReplicatedLogEntry(1, 1, new MockPayload("")));
+        this.replicatedLog.append(new MockReplicatedLogEntry(1, 0, new MockPayload("1")));
+        this.replicatedLog.append(new MockReplicatedLogEntry(1, 1, new MockPayload("2")));
     }
 
     @Override public ActorRef actorOf(Props props) {
@@ -241,6 +242,36 @@ public class MockRaftActorContext implements RaftActorContext {
         @Override
         public String toString() {
             return value;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((value == null) ? 0 : value.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            MockPayload other = (MockPayload) obj;
+            if (value == null) {
+                if (other.value != null) {
+                    return false;
+                }
+            } else if (!value.equals(other.value)) {
+                return false;
+            }
+            return true;
         }
     }
 

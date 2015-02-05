@@ -77,5 +77,9 @@ public interface FollowerLogInformation {
      */
     public void markFollowerInActive();
 
-
+    /**
+     * This will return the active time of follower, since it was last reset
+     * @return time in milliseconds
+     */
+    long timeSinceLastActivity();
 }
