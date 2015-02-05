@@ -46,7 +46,7 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
 
     private static final Logger logger = LoggerFactory.getLogger(NetconfDeviceCommunicator.class);
 
-    private final RemoteDevice<NetconfSessionCapabilities, NetconfMessage> remoteDevice;
+    private final RemoteDevice<NetconfSessionCapabilities, NetconfMessage, NetconfDeviceCommunicator> remoteDevice;
     private final Optional<NetconfSessionCapabilities> overrideNetconfCapabilities;
     private final RemoteDeviceId id;
     private final Lock sessionLock = new ReentrantLock();
@@ -56,17 +56,17 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
     private NetconfClientSession session;
     private Future<?> initFuture;
 
-    public NetconfDeviceCommunicator(final RemoteDeviceId id, final RemoteDevice<NetconfSessionCapabilities, NetconfMessage> remoteDevice,
+    public NetconfDeviceCommunicator(final RemoteDeviceId id, final RemoteDevice<NetconfSessionCapabilities, NetconfMessage, NetconfDeviceCommunicator> remoteDevice,
             final NetconfSessionCapabilities netconfSessionCapabilities) {
         this(id, remoteDevice, Optional.of(netconfSessionCapabilities));
     }
 
     public NetconfDeviceCommunicator(final RemoteDeviceId id,
-                                     final RemoteDevice<NetconfSessionCapabilities, NetconfMessage> remoteDevice) {
+                                     final RemoteDevice<NetconfSessionCapabilities, NetconfMessage, NetconfDeviceCommunicator> remoteDevice) {
         this(id, remoteDevice, Optional.<NetconfSessionCapabilities>absent());
     }
 
-    private NetconfDeviceCommunicator(final RemoteDeviceId id, final RemoteDevice<NetconfSessionCapabilities, NetconfMessage> remoteDevice,
+    private NetconfDeviceCommunicator(final RemoteDeviceId id, final RemoteDevice<NetconfSessionCapabilities, NetconfMessage, NetconfDeviceCommunicator> remoteDevice,
             final Optional<NetconfSessionCapabilities> overrideNetconfCapabilities) {
         this.id = id;
         this.remoteDevice = remoteDevice;
@@ -90,18 +90,23 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
             }
 
             remoteDevice.onRemoteSessionUp(netconfSessionCapabilities, this);
-        }
-        finally {
+        } finally {
             sessionLock.unlock();
         }
     }
 
-    public void initializeRemoteConnection(final NetconfClientDispatcher dispatch,
-                                           final NetconfClientConfiguration config) {
+    public void initializeRemoteConnection(final NetconfClientDispatcher dispatcher, final NetconfClientConfiguration config) {
+        // TODO 2313 extract listener from configuration
         if(config instanceof NetconfReconnectingClientConfiguration) {
-            initFuture = dispatch.createReconnectingClient((NetconfReconnectingClientConfiguration) config);
+            initFuture = dispatcher.createReconnectingClient((NetconfReconnectingClientConfiguration) config);
         } else {
-            initFuture = dispatch.createClient(config);
+            initFuture = dispatcher.createClient(config);
+        }
+    }
+
+    public void disconnect() {
+        if(session != null) {
+            session.close();
         }
     }
 
@@ -146,18 +151,14 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
         }
     }
 
-    private RpcResult<NetconfMessage> createSessionDownRpcResult()
-    {
+    private RpcResult<NetconfMessage> createSessionDownRpcResult() {
         return createErrorRpcResult( RpcError.ErrorType.TRANSPORT,
                              String.format( "The netconf session to %1$s is disconnected", id.getName() ) );
     }
 
-    private RpcResult<NetconfMessage> createErrorRpcResult( RpcError.ErrorType errorType, String message )
-    {
+    private RpcResult<NetconfMessage> createErrorRpcResult( RpcError.ErrorType errorType, String message ) {
         return RpcResultBuilder.<NetconfMessage>failed()
-                .withError( errorType, NetconfDocumentedException.ErrorTag.operation_failed.getTagValue(),
-                            message )
-                .build();
+                .withError(errorType, NetconfDocumentedException.ErrorTag.operation_failed.getTagValue(), message).build();
     }
 
     @Override
@@ -182,6 +183,7 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
         if(session != null) {
             session.close();
         }
+
         tearDown(id + ": Netconf session closed");
     }
 
@@ -220,14 +222,12 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
             logger.debug("{}: Message received {}", id, message);
 
             if(logger.isTraceEnabled()) {
-                logger.trace( "{}: Matched request: {} to response: {}", id,
-                              msgToS( request.request ), msgToS( message ) );
+                logger.trace( "{}: Matched request: {} to response: {}", id, msgToS( request.request ), msgToS( message ) );
             }
 
             try {
                 NetconfMessageTransformUtil.checkValidReply( request.request, message );
-            }
-            catch (final NetconfDocumentedException e) {
+            } catch (final NetconfDocumentedException e) {
                 logger.warn( "{}: Invalid request-reply match, reply message contains different message-id, request: {}, response: {}",
                              id, msgToS( request.request ), msgToS( message ), e );
 
@@ -238,8 +238,7 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
 
             try {
                 NetconfMessageTransformUtil.checkSuccessReply(message);
-            }
-            catch(final NetconfDocumentedException e) {
+            } catch(final NetconfDocumentedException e) {
                 logger.warn( "{}: Error reply from remote device, request: {}, response: {}", id,
                              msgToS( request.request ), msgToS( message ), e );
 
@@ -257,13 +256,11 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
     }
 
     @Override
-    public ListenableFuture<RpcResult<NetconfMessage>> sendRequest(
-                                               final NetconfMessage message, final QName rpc) {
+    public ListenableFuture<RpcResult<NetconfMessage>> sendRequest(final NetconfMessage message, final QName rpc) {
         sessionLock.lock();
         try {
             return sendRequestWithLock( message, rpc );
-        }
-        finally {
+        } finally {
             sessionLock.unlock();
         }
     }

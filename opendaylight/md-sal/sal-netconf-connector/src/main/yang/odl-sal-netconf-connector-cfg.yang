@@ -66,6 +66,13 @@ module odl-sal-netconf-connector-cfg {
                 }
             }
 
+            leaf reconnect-on-changed-schema {
+                type boolean;
+                default false;
+                description "If true, the connector would auto disconnect/reconnect when schemas are changed in the remote device.
+                             The connector subscribes (right after connect) to base netconf notifications and listens for netconf-capability-change notification";
+            }
+
             container dom-registry {
                 uses config:service-ref {
                     refine type {
