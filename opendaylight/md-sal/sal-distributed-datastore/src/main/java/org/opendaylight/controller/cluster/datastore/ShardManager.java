@@ -96,17 +96,15 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private final DataPersistenceProvider dataPersistenceProvider;
 
     /**
-     * @param type defines the kind of data that goes into shards created by this shard manager. Examples of type would be
-     *             configuration or operational
      */
-    protected ShardManager(String type, ClusterWrapper cluster, Configuration configuration,
+    protected ShardManager(ClusterWrapper cluster, Configuration configuration,
             DatastoreContext datastoreContext) {
 
-        this.type = Preconditions.checkNotNull(type, "type should not be null");
         this.cluster = Preconditions.checkNotNull(cluster, "cluster should not be null");
         this.configuration = Preconditions.checkNotNull(configuration, "configuration should not be null");
         this.datastoreContext = datastoreContext;
         this.dataPersistenceProvider = createDataPersistenceProvider(datastoreContext.isPersistent());
+        this.type = datastoreContext.getDataStoreType();
 
         // Subscribe this actor to cluster member events
         cluster.subscribeToMemberEvents(getSelf());
@@ -118,16 +116,15 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         return (persistent) ? new PersistentDataProvider() : new NonPersistentDataProvider();
     }
 
-    public static Props props(final String type,
+    public static Props props(
         final ClusterWrapper cluster,
         final Configuration configuration,
         final DatastoreContext datastoreContext) {
 
-        Preconditions.checkNotNull(type, "type should not be null");
         Preconditions.checkNotNull(cluster, "cluster should not be null");
         Preconditions.checkNotNull(configuration, "configuration should not be null");
 
-        return Props.create(new ShardManagerCreator(type, cluster, configuration, datastoreContext));
+        return Props.create(new ShardManagerCreator(cluster, configuration, datastoreContext));
     }
 
     @Override
@@ -529,14 +526,12 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private static class ShardManagerCreator implements Creator<ShardManager> {
         private static final long serialVersionUID = 1L;
 
-        final String type;
         final ClusterWrapper cluster;
         final Configuration configuration;
         final DatastoreContext datastoreContext;
 
-        ShardManagerCreator(String type, ClusterWrapper cluster,
+        ShardManagerCreator(ClusterWrapper cluster,
                 Configuration configuration, DatastoreContext datastoreContext) {
-            this.type = type;
             this.cluster = cluster;
             this.configuration = configuration;
             this.datastoreContext = datastoreContext;
@@ -544,7 +539,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
         @Override
         public ShardManager create() throws Exception {
-            return new ShardManager(type, cluster, configuration, datastoreContext);
+            return new ShardManager(cluster, configuration, datastoreContext);
         }
     }
 
