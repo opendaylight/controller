@@ -37,13 +37,15 @@ public class DatastoreContext {
     private final boolean persistent;
     private final ConfigurationReader configurationReader;
     private final long shardElectionTimeoutFactor;
+    private final long transactionCreationInitialRateLimit;
 
     private DatastoreContext(InMemoryDOMDataStoreConfigProperties dataStoreProperties,
             ConfigParams shardRaftConfig, String dataStoreMXBeanType, int operationTimeoutInSeconds,
             Duration shardTransactionIdleTimeout, int shardTransactionCommitTimeoutInSeconds,
             int shardTransactionCommitQueueCapacity, Timeout shardInitializationTimeout,
             Timeout shardLeaderElectionTimeout,
-            boolean persistent, ConfigurationReader configurationReader, long shardElectionTimeoutFactor) {
+            boolean persistent, ConfigurationReader configurationReader, long shardElectionTimeoutFactor,
+            long transactionCreationInitialRateLimit) {
         this.dataStoreProperties = dataStoreProperties;
         this.shardRaftConfig = shardRaftConfig;
         this.dataStoreMXBeanType = dataStoreMXBeanType;
@@ -56,6 +58,7 @@ public class DatastoreContext {
         this.persistent = persistent;
         this.configurationReader = configurationReader;
         this.shardElectionTimeoutFactor = shardElectionTimeoutFactor;
+        this.transactionCreationInitialRateLimit = transactionCreationInitialRateLimit;
     }
 
     public static Builder newBuilder() {
@@ -110,6 +113,11 @@ public class DatastoreContext {
         return this.shardElectionTimeoutFactor;
     }
 
+
+    public long getTransactionCreationInitialRateLimit() {
+        return transactionCreationInitialRateLimit;
+    }
+
     public static class Builder {
         private InMemoryDOMDataStoreConfigProperties dataStoreProperties;
         private Duration shardTransactionIdleTimeout = Duration.create(10, TimeUnit.MINUTES);
@@ -127,6 +135,7 @@ public class DatastoreContext {
         private int shardIsolatedLeaderCheckIntervalInMillis = shardHeartbeatIntervalInMillis * 10;
         private int shardSnapshotDataThresholdPercentage = 12;
         private long shardElectionTimeoutFactor = 2;
+        private long transactionCreationInitialRateLimit = 100;
 
         public Builder shardTransactionIdleTimeout(Duration shardTransactionIdleTimeout) {
             this.shardTransactionIdleTimeout = shardTransactionIdleTimeout;
@@ -209,6 +218,11 @@ public class DatastoreContext {
             return this;
         }
 
+        public Builder transactionCreationInitialRateLimit(long initialRateLimit){
+            this.transactionCreationInitialRateLimit = initialRateLimit;
+            return this;
+        }
+
 
         public DatastoreContext build() {
             DefaultConfigParamsImpl raftConfig = new DefaultConfigParamsImpl();
@@ -225,7 +239,7 @@ public class DatastoreContext {
                     operationTimeoutInSeconds, shardTransactionIdleTimeout,
                     shardTransactionCommitTimeoutInSeconds, shardTransactionCommitQueueCapacity,
                     shardInitializationTimeout, shardLeaderElectionTimeout,
-                    persistent, configurationReader, shardElectionTimeoutFactor);
+                    persistent, configurationReader, shardElectionTimeoutFactor, transactionCreationInitialRateLimit);
         }
     }
 }
