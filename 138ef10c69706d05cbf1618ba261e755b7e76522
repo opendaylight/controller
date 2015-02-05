@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_bd456971",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorContext.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-05T02:58:58Z",
+      "side": 1,
+      "message": "public is redundant in an interface - checkstyle will report a minor violation.",
+      "revId": "138ef10c69706d05cbf1618ba261e755b7e76522",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5d546520",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 429,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-05T02:58:58Z",
+      "side": 1,
+      "message": "It\u0027s not good practice to modify parameters (minReplicatedToAllIndex) - sonar reports this as a violation.",
+      "revId": "138ef10c69706d05cbf1618ba261e755b7e76522",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_af0a0c1f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 945,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-05T02:58:58Z",
+      "side": 1,
+      "message": "Instead of an arbitrary sleep here, you should call leaderActor.waitForRecoveryComplete().",
+      "revId": "138ef10c69706d05cbf1618ba261e755b7e76522",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_8f0f102e",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/protobuff/messages/cluster/raft/AppendEntriesMessages.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-05T02:58:58Z",
+      "side": 1,
+      "message": "Should changes to this file have been checked in? The proto file wash;t changed.",
+      "revId": "138ef10c69706d05cbf1618ba261e755b7e76522",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
