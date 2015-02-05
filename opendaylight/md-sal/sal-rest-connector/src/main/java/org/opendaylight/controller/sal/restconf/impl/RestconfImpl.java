@@ -863,7 +863,7 @@ public class RestconfImpl implements RestconfService {
             throw new RestconfDocumentedException("Input is required.", ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE);
         }
 
-        URI payloadNS = this.namespace(payload);
+        URI payloadNS = RestconfImpl.namespace(payload);
         if (payloadNS == null) {
             throw new RestconfDocumentedException(
                     "Data has bad format. Root element node must have namespace (XML format) or module name(JSON format)",
@@ -892,7 +892,7 @@ public class RestconfImpl implements RestconfService {
             DOMMountPoint mountPoint = incompleteInstIdWithData.getMountPoint();
             final Module module = findModule(mountPoint, payload);
 
-            String payloadName = this.getName(payload);
+            String payloadName = RestconfImpl.getName(payload);
             final DataSchemaNode schemaNode = ControllerContext.findInstanceDataChildByNameAndNamespace(
                     parentSchema, payloadName, module.getNamespace());
             value = this.normalizeNode(payload, schemaNode, mountPoint);
@@ -929,7 +929,7 @@ public class RestconfImpl implements RestconfService {
             throw new RestconfDocumentedException("Input is required.", ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE);
         }
 
-        URI payloadNS = this.namespace(payload);
+        URI payloadNS = RestconfImpl.namespace(payload);
         if (payloadNS == null) {
             throw new RestconfDocumentedException(
                     "Data has bad format. Root element node must have namespace (XML format) or module name(JSON format)",
@@ -938,7 +938,7 @@ public class RestconfImpl implements RestconfService {
 
         final Module module = this.findModule(null, payload);
 
-        String payloadName = this.getName(payload);
+        String payloadName = RestconfImpl.getName(payload);
         final DataSchemaNode schemaNode = ControllerContext.findInstanceDataChildByNameAndNamespace(module,
                 payloadName, module.getNamespace());
         final CompositeNode value = this.normalizeNode(payload, schemaNode, null);
@@ -1143,7 +1143,7 @@ public class RestconfImpl implements RestconfService {
     }
 
     private InstanceIdentifierContext addLastIdentifierFromData(final InstanceIdentifierContext identifierWithSchemaNode,
-            final CompositeNode data, final DataSchemaNode schemaOfData, SchemaContext schemaContext) {
+            final CompositeNode data, final DataSchemaNode schemaOfData, final SchemaContext schemaContext) {
         YangInstanceIdentifier instanceIdentifier = null;
         if (identifierWithSchemaNode != null) {
             instanceIdentifier = identifierWithSchemaNode.getInstanceIdentifier();
@@ -1207,12 +1207,12 @@ public class RestconfImpl implements RestconfService {
     }
 
     private boolean representsMountPointRootData(final Node<?> data) {
-        URI namespace = this.namespace(data);
+        URI namespace = RestconfImpl.namespace(data);
         return (SchemaContext.NAME.getNamespace().equals(namespace) /*
          * || MOUNT_POINT_MODULE_NAME .equals( namespace .
          * toString( ) )
          */)
-         && SchemaContext.NAME.getLocalName().equals(this.localName(data));
+         && SchemaContext.NAME.getLocalName().equals(RestconfImpl.localName(data));
     }
 
     private String addMountPointIdentifier(final String identifier) {
@@ -1326,16 +1326,12 @@ public class RestconfImpl implements RestconfService {
             final DOMMountPoint mountPoint) {
         final Object value = simpleNode.getValue();
         Object inputValue = value;
-        TypeDef typeDef = this.typeDefinition(schema);
+        TypeDef typeDef = RestconfImpl.typeDefinition(schema);
         TypeDefinition<? extends Object> typeDefinition = typeDef != null ? typeDef.typedef : null;
 
         // For leafrefs, extract the type it is pointing to
         if(typeDefinition instanceof LeafrefTypeDefinition) {
-            if (schema.getQName().equals(typeDef.qName)) {
-                typeDefinition = SchemaContextUtil.getBaseTypeForLeafRef(((LeafrefTypeDefinition) typeDefinition), mountPoint == null ? this.controllerContext.getGlobalSchema() : mountPoint.getSchemaContext(), schema);
-            } else {
-                typeDefinition = SchemaContextUtil.getBaseTypeForLeafRef(((LeafrefTypeDefinition) typeDefinition), mountPoint == null ? this.controllerContext.getGlobalSchema() : mountPoint.getSchemaContext(), typeDef.qName);
-            }
+            typeDefinition = SchemaContextUtil.getBaseTypeForLeafRef(((LeafrefTypeDefinition) typeDefinition), mountPoint == null ? this.controllerContext.getGlobalSchema() : mountPoint.getSchemaContext(), typeDef.qName);
         }
 
         if (typeDefinition instanceof IdentityrefTypeDefinition) {
@@ -1477,7 +1473,7 @@ public class RestconfImpl implements RestconfService {
         return currentAugment;
     }
 
-    private URI namespace(final Node<?> data) {
+    private static URI namespace(final Node<?> data) {
         if (data instanceof NodeWrapper) {
             return ((NodeWrapper<?>) data).getNamespace();
         } else if (data != null) {
@@ -1487,7 +1483,7 @@ public class RestconfImpl implements RestconfService {
         }
     }
 
-    private String localName(final Node<?> data) {
+    private static String localName(final Node<?> data) {
         if (data instanceof NodeWrapper) {
             return ((NodeWrapper<?>) data).getLocalName();
         } else if (data != null) {
@@ -1497,7 +1493,7 @@ public class RestconfImpl implements RestconfService {
         }
     }
 
-    private String getName(final Node<?> data) {
+    private static String getName(final Node<?> data) {
         if (data instanceof NodeWrapper) {
             return ((NodeWrapper<?>) data).getLocalName();
         } else if (data != null) {
@@ -1507,7 +1503,7 @@ public class RestconfImpl implements RestconfService {
         }
     }
 
-    private TypeDef typeDefinition(final TypeDefinition<?> type, final QName nodeQName) {
+    private static TypeDef typeDefinition(final TypeDefinition<?> type, final QName nodeQName) {
         TypeDefinition<?> baseType = type;
         QName qName = nodeQName;
         while (baseType.getBaseType() != null) {
@@ -1521,7 +1517,7 @@ public class RestconfImpl implements RestconfService {
 
     }
 
-    private TypeDef typeDefinition(final DataSchemaNode node) {
+    private static TypeDef typeDefinition(final DataSchemaNode node) {
         if (node instanceof LeafListSchemaNode) {
             return typeDefinition(((LeafListSchemaNode)node).getType(), node.getQName());
         } else if (node instanceof LeafSchemaNode) {
