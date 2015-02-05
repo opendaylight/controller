@@ -90,6 +90,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_a8f442f2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-05T14:03:25Z",
+      "side": 1,
+      "message": "Do you think we need to process every commit or maybe every nth commit?",
+      "parentUuid": "7a96c907_2f4a7cc5",
+      "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_ef9c94c2",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
         "patchSetId": 1
@@ -242,6 +260,24 @@
       "side": 1,
       "message": "Yeah - it wold be nice to avoid synchronization although it wouldn\u0027t block the commit from completing with the change above - it would just potentially block an akka thread.  We don\u0027t need it super accurate but hopefully synchronization errors would be relatively benign or at least recoverable.",
       "parentUuid": "7a96c907_2fc59c3b",
+      "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_68971a91",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-05T14:03:25Z",
+      "side": 1,
+      "message": "We should look at the metric Timer code. If the method calls above access an unsychronized HashMap that could be shared by other threads, that might cause the dreaded endless loop. If it\u0027s just updating shared non-volatile counters then it might operate on stale or incorrect data but that might be ok. It might result in a much larger or smaller rate limit, not sure. On the other hand, it\u0027s capturing a snapshot which I assume creates a local instance which indicates the snapshot calculations are probably local to the instance. If so, then potential synchronization errors would occur at the time of snapshot.\n\nAnother thing - we might want to capture commitTimer.getSnapshot() once - the 2 calls might result in different instances with slightly different data.",
+      "parentUuid": "7a96c907_45a9e779",
       "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
