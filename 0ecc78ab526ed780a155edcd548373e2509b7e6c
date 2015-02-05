@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_031d1773",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/yang/distributed-datastore-provider.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-05T20:28:52Z",
+      "side": 1,
+      "message": "make sense but is it number of transactions per second?",
+      "revId": "0ecc78ab526ed780a155edcd548373e2509b7e6c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
