@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_e396ebef",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-05T19:56:03Z",
+      "side": 1,
+      "message": "Don\u0027t forget to add a shared Timeout instance to ActorContext :)",
+      "revId": "bdf2c9e447b70b7d5d6aa7bd46a3181a1db1e722",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_23fdb33a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/yang/distributed-datastore-provider.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-05T19:56:03Z",
+      "side": 1,
+      "message": "So the tx-creation-initial-rate-limit defaults to 100. I assume that means 100 tx\u0027s per sec? If so, can you clarify that in the yang file? It just says number of transaction permits before applying back pressure.",
+      "revId": "bdf2c9e447b70b7d5d6aa7bd46a3181a1db1e722",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
