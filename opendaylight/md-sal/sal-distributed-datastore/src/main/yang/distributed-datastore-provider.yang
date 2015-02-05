@@ -180,6 +180,13 @@ module distributed-datastore-provider {
             description "The interval at which the leader of the shard will check if its majority
                         followers are active and term itself as isolated";
         }
+
+        leaf tx-creation-initial-rate-limit {
+            default 100;
+            type non-zero-uint32-type;
+            description "The number of transaction creation permits that are allowed before the data store
+                         should begin applying back pressure";
+        }
     }
 
     // Augments the 'configuration' choice node under modules/module.
