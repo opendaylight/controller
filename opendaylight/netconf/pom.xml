@@ -31,12 +31,16 @@
     <module>netconf-ssh</module>
     <module>netconf-tcp</module>
     <module>netconf-monitoring</module>
+    <module>ietf-netconf</module>
     <module>ietf-netconf-monitoring</module>
+    <module>ietf-netconf-notifications</module>
     <module>ietf-netconf-monitoring-extension</module>
     <module>netconf-connector-config</module>
     <module>netconf-auth</module>
     <module>netconf-usermanager</module>
     <module>netconf-testtool</module>
+    <module>netconf-notifications-impl</module>
+    <module>netconf-notifications-api</module>
 
     <module>netconf-artifacts</module>
   </modules>
