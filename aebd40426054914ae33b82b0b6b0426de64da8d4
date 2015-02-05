@@ -407,6 +407,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_c3ce4fb4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-05T18:16:22Z",
+      "side": 1,
+      "message": "I\u0027ll do this in a separate commit - I think if I go down this path I will be refactoring a lot of code and that will take away from the spirit of this commit.",
+      "parentUuid": "7a96c907_8fcdd05f",
+      "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_efea540e",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
         "patchSetId": 1
