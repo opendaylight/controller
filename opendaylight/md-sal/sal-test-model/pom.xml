@@ -9,6 +9,9 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <artifactId>sal-test-model</artifactId>
+    <packaging>bundle</packaging>
+
     <dependencies>
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
@@ -20,7 +23,6 @@
         </dependency>
     </dependencies>
 
-    <artifactId>sal-test-model</artifactId>
     <build>
         <plugins>
             <plugin>
