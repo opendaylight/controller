@@ -11,10 +11,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-import com.google.inject.Inject;
 import java.util.concurrent.Future;
-import org.junit.Before;
-import org.junit.Ignore;
+
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
@@ -22,36 +20,36 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.core.api.Broker;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.Lists;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.lists.UnorderedContainer;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.lists.unordered.container.UnorderedList;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.lists.unordered.container.UnorderedListBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.lists.unordered.container.UnorderedListKey;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
+import com.google.inject.Inject;
+
+/**
+ * covers creating, reading and deleting of an item in dataStore
+ */
 public class DataServiceTest extends AbstractTest {
 
     protected DataBrokerService consumerDataService;
 
-
     @Inject
     Broker broker2;
 
-    @Before
-    public void setUp() throws Exception {
-    }
-
-    /*
+    /**
      *
      * Ignored this, because classes here are constructed from
      * very different class loader as MD-SAL is run into,
      * this is code is run from different classloader.
      *
+     * @throws Exception
      */
     @Test
-    @Ignore
     public void test() throws Exception {
         BindingAwareConsumer consumer1 = new BindingAwareConsumer() {
 
@@ -60,7 +58,7 @@ public class DataServiceTest extends AbstractTest {
                 consumerDataService = session.getSALService(DataBrokerService.class);
             }
         };
-        broker.registerConsumer(consumer1, getBundleContext());
+        broker.registerConsumer(consumer1);
 
         assertNotNull(consumerDataService);
 
@@ -68,10 +66,10 @@ public class DataServiceTest extends AbstractTest {
         DataModificationTransaction transaction = consumerDataService.beginTransaction();
         assertNotNull(transaction);
 
-        InstanceIdentifier<Node> node1 = createNodeRef("0");
-        DataObject  node = consumerDataService.readConfigurationData(node1);
+        InstanceIdentifier<UnorderedList> node1 = createNodeRef("0");
+        DataObject node = consumerDataService.readConfigurationData(node1);
         assertNull(node);
-        Node nodeData1 = createNode("0");
+        UnorderedList nodeData1 = createNode("0");
 
         transaction.putConfigurationData(node1, nodeData1);
         Future<RpcResult<TransactionStatus>> commitResult = transaction.commit();
@@ -83,13 +81,13 @@ public class DataServiceTest extends AbstractTest {
         assertNotNull(result.getResult());
         assertEquals(TransactionStatus.COMMITED, result.getResult());
 
-        Node readedData = (Node) consumerDataService.readConfigurationData(node1);
+        UnorderedList readedData = (UnorderedList) consumerDataService.readConfigurationData(node1);
         assertNotNull(readedData);
         assertEquals(nodeData1.getKey(), readedData.getKey());
 
 
         DataModificationTransaction transaction2 = consumerDataService.beginTransaction();
-        assertNotNull(transaction);
+        assertNotNull(transaction2);
 
         transaction2.removeConfigurationData(node1);
 
@@ -104,21 +102,20 @@ public class DataServiceTest extends AbstractTest {
 
         DataObject readedData2 = consumerDataService.readConfigurationData(node1);
         assertNull(readedData2);
-
-
     }
 
 
-    private static InstanceIdentifier<Node> createNodeRef(final String string) {
-        NodeKey key = new NodeKey(new NodeId(string));
-        return  InstanceIdentifier.builder(Nodes.class).child(Node.class, key).build();
+    private static InstanceIdentifier<UnorderedList> createNodeRef(final String string) {
+        UnorderedListKey key = new UnorderedListKey(string);
+        return  InstanceIdentifier.builder(Lists.class).child(UnorderedContainer.class).child(UnorderedList.class, key).build();
     }
 
-    private static Node createNode(final String string) {
-        NodeBuilder ret = new NodeBuilder();
-        NodeId id = new NodeId(string);
-        ret.setKey(new NodeKey(id));
-        ret.setId(id);
+    private static UnorderedList createNode(final String string) {
+        UnorderedListBuilder ret = new UnorderedListBuilder();
+        UnorderedListKey nodeKey = new UnorderedListKey(string);
+        ret.setKey(nodeKey);
+        ret.setName("name of " + string);
+        ret.setName("value of " + string);
         return ret.build();
     }
 }
