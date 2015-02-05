@@ -44,11 +44,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.SettableFuture;
 
-// FIXME: Migrate to use new Data Broker APIs
+/**
+ * FIXME: Migrate to use new Data Broker APIs
+ */
 @SuppressWarnings("deprecation")
 public class ChangeOriginatedInDomBrokerTest extends AbstractDataServiceTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ChangeOriginatedInDomBrokerTest.class);
+    protected static final Logger LOG = LoggerFactory.getLogger(ChangeOriginatedInDomBrokerTest.class);
 
     private static final QName TLL_NAME_QNAME = QName.create(TopLevelList.QNAME, "name");
     private static final QName LIST1_ATTR_STR_QNAME = QName.create(List1.QNAME, "attr-str");
@@ -61,7 +63,7 @@ public class ChangeOriginatedInDomBrokerTest extends AbstractDataServiceTest {
     private static final List1Key LIST1_KEY = new List1Key(LIST1_ATTR_STR);
     private static final List11Key LIST11_KEY = new List11Key(LIST11_ATTR_INT);
 
-    private final SettableFuture<DataChangeEvent<InstanceIdentifier<?>, DataObject>> modificationCapture = SettableFuture.create();
+    protected final SettableFuture<DataChangeEvent<InstanceIdentifier<?>, DataObject>> modificationCapture = SettableFuture.create();
 
     private static final Map<QName, Object> TLL_KEY_BI = Collections.<QName, Object> singletonMap(TLL_NAME_QNAME,
             TLL_NAME);

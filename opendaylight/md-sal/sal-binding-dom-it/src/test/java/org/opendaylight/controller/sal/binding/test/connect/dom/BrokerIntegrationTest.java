@@ -25,7 +25,9 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
-// FIXME: Migrate to use new Data Broker APIs
+/**
+ * FIXME: Migrate to use new Data Broker APIs
+ */
 @SuppressWarnings("deprecation")
 public class BrokerIntegrationTest extends AbstractDataServiceTest {
 

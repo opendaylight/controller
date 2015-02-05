@@ -24,7 +24,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
-/*
+/**
  * FIXME: THis test should be moved to sal-binding-broker and rewriten
  * to use new DataBroker API
  */
