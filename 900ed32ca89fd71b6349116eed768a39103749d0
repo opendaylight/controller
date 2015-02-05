@@ -16,6 +16,24 @@
       "revId": "900ed32ca89fd71b6349116eed768a39103749d0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_6f73a480",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/NormalizedNodeInputStreamReader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-05T04:00:13Z",
+      "side": 1,
+      "message": "I pondered that. I was going to create my own but then got lazy and reused InvalidProtocolBufferException as it\u0027s thrown by protobuff for this same reason. I can add my own. InvalidNodeStreamException?",
+      "parentUuid": "7a96c907_2f1efc63",
+      "revId": "900ed32ca89fd71b6349116eed768a39103749d0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
