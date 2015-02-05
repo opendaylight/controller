@@ -21,8 +21,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
 import org.opendaylight.controller.cluster.raft.ClientRequestTrackerImpl;
@@ -129,7 +129,10 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         // Upon election: send initial empty AppendEntries RPCs
         // (heartbeat) to each server; repeat during idle periods to
         // prevent election timeouts (§5.2)
-        scheduleHeartBeat(new FiniteDuration(0, TimeUnit.SECONDS));
+        sendAppendEntries(0);
+
+        // It is important to schedule this heartbeat here
+        scheduleHeartBeat(context.getConfigParams().getHeartBeatInterval());
     }
 
     private Optional<ByteString> getSnapshot() {
@@ -222,6 +225,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             applyLogToStateMachine(context.getCommitIndex());
         }
 
+        //Send the next log entry immediately, if possible, no need to wait for heartbeat to trigger that event
+        sendUpdatesToFollower(followerId, followerLogInformation, false);
         return this;
     }
 
@@ -273,28 +278,25 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             }
         }
 
-        try {
-            if (message instanceof SendHeartBeat) {
-                sendHeartBeat();
-                return this;
-
-            } else if(message instanceof InitiateInstallSnapshot) {
-                installSnapshotIfNeeded();
-
-            } else if(message instanceof SendInstallSnapshot) {
-                // received from RaftActor
-                setSnapshot(Optional.of(((SendInstallSnapshot) message).getSnapshot()));
-                sendInstallSnapshot();
-
-            } else if (message instanceof Replicate) {
-                replicate((Replicate) message);
-
-            } else if (message instanceof InstallSnapshotReply){
-                handleInstallSnapshotReply((InstallSnapshotReply) message);
-
-            }
-        } finally {
+        if (message instanceof SendHeartBeat) {
+            sendHeartBeat();
             scheduleHeartBeat(context.getConfigParams().getHeartBeatInterval());
+            return this;
+
+        } else if(message instanceof InitiateInstallSnapshot) {
+            installSnapshotIfNeeded();
+
+        } else if(message instanceof SendInstallSnapshot) {
+            // received from RaftActor
+            setSnapshot(Optional.of(((SendInstallSnapshot) message).getSnapshot()));
+            sendInstallSnapshot();
+
+        } else if (message instanceof Replicate) {
+            replicate((Replicate) message);
+
+        } else if (message instanceof InstallSnapshotReply){
+            handleInstallSnapshotReply((InstallSnapshotReply) message);
+
         }
 
         return super.handleMessage(sender, message);
@@ -386,69 +388,94 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             context.setCommitIndex(logIndex);
             applyLogToStateMachine(logIndex);
         } else {
-            sendAppendEntries();
+            sendAppendEntries(0);
         }
     }
 
-    private void sendAppendEntries() {
+    private void sendAppendEntries(long timeSinceLastActivityInterval) {
         // Send an AppendEntries to all followers
-        for (String followerId : followers) {
-            ActorSelection followerActor = context.getPeerActorSelection(followerId);
-
-            if (followerActor != null) {
-                FollowerLogInformation followerLogInformation = followerToLog.get(followerId);
-                long followerNextIndex = followerLogInformation.getNextIndex().get();
-                boolean isFollowerActive = followerLogInformation.isFollowerActive();
-                List<ReplicatedLogEntry> entries = null;
-
-                if (mapFollowerToSnapshot.get(followerId) != null) {
-                    // if install snapshot is in process , then sent next chunk if possible
-                    if (isFollowerActive && mapFollowerToSnapshot.get(followerId).canSendNextChunk()) {
-                        sendSnapshotChunk(followerActor, followerId);
-                    } else {
-                        // we send a heartbeat even if we have not received a reply for the last chunk
-                        sendAppendEntriesToFollower(followerActor, followerNextIndex,
-                            Collections.<ReplicatedLogEntry>emptyList());
-                    }
-
-                } else {
-                    long leaderLastIndex = context.getReplicatedLog().lastIndex();
-                    long leaderSnapShotIndex = context.getReplicatedLog().getSnapshotIndex();
-
-                    if (isFollowerActive &&
-                        context.getReplicatedLog().isPresent(followerNextIndex)) {
-                        // FIXME : Sending one entry at a time
-                        entries = context.getReplicatedLog().getFrom(followerNextIndex, 1);
-
-                    } else if (isFollowerActive && followerNextIndex >= 0 &&
-                        leaderLastIndex >= followerNextIndex ) {
-                        // if the followers next index is not present in the leaders log, and
-                        // if the follower is just not starting and if leader's index is more than followers index
-                        // then snapshot should be sent
-
-                        if(LOG.isDebugEnabled()) {
-                            LOG.debug("{}: InitiateInstallSnapshot to follower:{}," +
-                                    "follower-nextIndex:{}, leader-snapshot-index:{},  " +
-                                    "leader-last-index:{}", logName(), followerId,
-                                followerNextIndex, leaderSnapShotIndex, leaderLastIndex
-                            );
-                        }
-                        actor().tell(new InitiateInstallSnapshot(), actor());
-
-                        // we would want to sent AE as the capture snapshot might take time
-                        entries =  Collections.<ReplicatedLogEntry>emptyList();
-
-                    } else {
-                        //we send an AppendEntries, even if the follower is inactive
-                        // in-order to update the followers timestamp, in case it becomes active again
-                        entries =  Collections.<ReplicatedLogEntry>emptyList();
-                    }
-
-                    sendAppendEntriesToFollower(followerActor, followerNextIndex, entries);
-
-                }
+        for (Entry<String, FollowerLogInformation> e : followerToLog.entrySet()) {
+            final String followerId = e.getKey();
+            final FollowerLogInformation followerLogInformation = e.getValue();
+            // This checks helps not to send a repeat message to the follower
+            if(!followerLogInformation.isFollowerActive() ||
+                    followerLogInformation.timeSinceLastActivity() >= timeSinceLastActivityInterval) {
+                sendUpdatesToFollower(followerId, followerLogInformation, true);
             }
         }
+    }
+
+    /**
+    *
+    * This method checks if any update needs to be sent to the given follower. This includes append log entries,
+    * sending next snapshot chunk, and initiating a snapshot.
+    * @return true if any update is sent, false otherwise
+    */
+
+   private void sendUpdatesToFollower(String followerId, FollowerLogInformation followerLogInformation,
+                                      boolean sendHeartbeat) {
+       ActorSelection followerActor = context.getPeerActorSelection(followerId);
+       if (followerActor != null) {
+           long followerNextIndex = followerLogInformation.getNextIndex().get();
+           boolean isFollowerActive = followerLogInformation.isFollowerActive();
+           boolean sendAppendEntries = false;
+           List<ReplicatedLogEntry> entries = Collections.emptyList();
+
+           if (mapFollowerToSnapshot.get(followerId) != null) {
+               // if install snapshot is in process , then sent next chunk if possible
+               if (isFollowerActive && mapFollowerToSnapshot.get(followerId).canSendNextChunk()) {
+                   sendSnapshotChunk(followerActor, followerId);
+               } else if(sendHeartbeat) {
+                   // we send a heartbeat even if we have not received a reply for the last chunk
+                   sendAppendEntries = true;
+               }
+
+           } else {
+               long leaderLastIndex = context.getReplicatedLog().lastIndex();
+               long leaderSnapShotIndex = context.getReplicatedLog().getSnapshotIndex();
+
+               if(LOG.isTraceEnabled()) {
+                   LOG.debug("{}: Checking sendAppendEntries for follower {}, followerNextIndex {}, leaderLastIndex: {}, leaderSnapShotIndex: {}",
+                           logName(), followerId, followerNextIndex, leaderLastIndex, leaderSnapShotIndex);
+               }
+
+               if (isFollowerActive && context.getReplicatedLog().isPresent(followerNextIndex)) {
+                   LOG.debug("{}: sendAppendEntries: {} is present for follower {}", logName(),
+                           followerNextIndex, followerId);
+
+                   // FIXME : Sending one entry at a time
+                   entries = context.getReplicatedLog().getFrom(followerNextIndex, 1);
+                   sendAppendEntries = true;
+
+               } else if (isFollowerActive && followerNextIndex >= 0 &&
+                       leaderLastIndex >= followerNextIndex ) {
+                   // if the followers next index is not present in the leaders log, and
+                   // if the follower is just not starting and if leader's index is more than followers index
+                   // then snapshot should be sent
+
+                   if(LOG.isDebugEnabled()) {
+                       LOG.debug("{}: InitiateInstallSnapshot to follower:{}," +
+                               "follower-nextIndex:{}, leader-snapshot-index:{},  " +
+                               "leader-last-index:{}", logName(), followerId,
+                               followerNextIndex, leaderSnapShotIndex, leaderLastIndex
+                               );
+                   }
+
+                   // Send heartbeat to follower whenever install snapshot is initiated.
+                   sendAppendEntries = true;
+
+                   actor().tell(new InitiateInstallSnapshot(), actor());
+               } else if(sendHeartbeat) {
+                   // we send an AppendEntries, even if the follower is inactive
+                   // in-order to update the followers timestamp, in case it becomes active again
+                   sendAppendEntries = true;
+               }
+
+               if(sendAppendEntries) {
+                   sendAppendEntriesToFollower(followerActor, followerNextIndex, entries);
+               }
+           }
+       }
     }
 
     private void sendAppendEntriesToFollower(ActorSelection followerActor, long followerNextIndex,
@@ -595,7 +622,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
     private void sendHeartBeat() {
         if (followers.size() > 0) {
-            sendAppendEntries();
+            sendAppendEntries(context.getConfigParams().getHeartBeatInterval().toMillis());
         }
     }
 
