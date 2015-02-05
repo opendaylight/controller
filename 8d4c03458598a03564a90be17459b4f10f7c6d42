@@ -108,6 +108,29 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_08cc5634",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-02-05T16:57:13Z",
+      "side": 1,
+      "message": "Why we are using \"_._\" in names? \nDoes this have any specific meaning?\n\nI noticed this pattern at several points,\ndoes that means all provider_._ leafs should be grouped\ntogether?\n\nIs not container better option?\n\neg. \n\ncontainer provider {\n   leaf network_type {\n\n   }\n   leaf segementation_id {\n\n   }\n}",
+      "range": {
+        "startLine": 30,
+        "startChar": 17,
+        "endLine": 30,
+        "endChar": 20
+      },
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_36552550",
         "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
         "patchSetId": 1
@@ -155,6 +178,52 @@
       "side": 1,
       "message": "Cool.",
       "parentUuid": "7a96c907_2442c810",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_68dcfae4",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-02-05T16:57:13Z",
+      "side": 1,
+      "message": "should not be this same type as subnet id? eg. uuid?\nPlease use proper types instead of strings whenever possible.",
+      "range": {
+        "startLine": 89,
+        "startChar": 11,
+        "endLine": 89,
+        "endChar": 17
+      },
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_88d706bf",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-02-05T16:57:13Z",
+      "side": 1,
+      "message": "same as previous... should not be there container binding?",
+      "range": {
+        "startLine": 126,
+        "startChar": 4,
+        "endLine": 126,
+        "endChar": 37
+      },
       "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -261,6 +330,29 @@
       "side": 1,
       "message": "Done",
       "parentUuid": "7a96c907_645f70e6",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_28e6f2b4",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-02-05T16:57:13Z",
+      "side": 1,
+      "message": "is this really necessary? Yang has concept of revisions?\nWithout this this model could be used to render also northbound v3.0 etc.",
+      "range": {
+        "startLine": 247,
+        "startChar": 2,
+        "endLine": 247,
+        "endChar": 18
+      },
       "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
