@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_8f3630e6",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-05T03:02:18Z",
+      "side": 1,
+      "message": "This is not going to be sufficient. Basically you need to do the same things here that are done in sendAppendEntries except for just this one follower. The easiest thing to do is to refactor the sendAppendEntries method to something like sendAppendEntriesToFollower. Then call that method from handleAppendEntriesReply. \n\nThat will ensure that we do the right thing for example when we are in the middle of installing a snapshot and so on.",
+      "revId": "122a8b192196e8d1e1da44f5e840d143a82fc4b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
