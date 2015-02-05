@@ -461,6 +461,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_439b1f72",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-05T18:39:43Z",
+      "side": 1,
+      "message": "The param is new for this patch but we also pass the datastoreType to\n\n- DistributeDataStoreFactory#createInstance\n- DistributedDataStore#constructor\n- ShardManager#constructor\n\nI\u0027d like to refactor that whole thing - but before I do even that I\u0027d like to refactor DatastoreContext itself. It\u0027s getting out of hand. Expect a couple more patches from me.",
+      "parentUuid": "7a96c907_e306ebcd",
+      "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_efea540e",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
         "patchSetId": 1
