@@ -108,6 +108,7 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
         if (impl != null) {
             LOG.trace("Transaction {} cancelled before submit", getIdentifier());
             FUTURE_UPDATER.lazySet(this, CANCELLED_FUTURE);
+            closeSubtransactions();
             return true;
         }
 
