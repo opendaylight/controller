@@ -95,4 +95,9 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
             stopwatch.stop();
         }
     }
+
+    @Override
+    public long getFollowerActiveTime() {
+        return stopwatch.elapsed(TimeUnit.MILLISECONDS);
+    }
 }
