@@ -226,6 +226,17 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             applyLogToStateMachine(context.getCommitIndex());
         }
 
+        //Send the next log entry immediately, if possible, no need to wait for heartbeat to trigger that event
+
+        final long followerNextIndex = followerLogInformation.getNextIndex();
+        if (context.getReplicatedLog().isPresent(followerNextIndex)) {
+            // FIXME : Sending one entry at a time
+            final List<ReplicatedLogEntry> entries = context.getReplicatedLog().getFrom(followerNextIndex, 1);
+            ActorSelection followerActor = context.getPeerActorSelection(followerId);
+            sendAppendEntriesToFollower(followerActor, followerNextIndex, entries);
+
+        }
+
         return this;
     }
 
