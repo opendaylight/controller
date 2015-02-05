@@ -108,6 +108,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_234cd36f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-05T17:52:30Z",
+      "side": 1,
+      "message": "Here is why I did not go with nth commit. Let\u0027s say my initial rate limit was 1/sec and I was to adjust the rate limit on every 20 transactions. In a fast system it would take me 20 secs to figure out that the rate could have been faster. I don\u0027t want that penalty. One alternative may be to do sampling for every transaction for the initial \u0027x\u0027 transactions then revert to sampling every \u0027nth\u0027 transaction. If there is a failure we could reset to sampling every transaction for \u0027x\u0027 transactions. How does that sound?",
+      "parentUuid": "7a96c907_a8f442f2",
+      "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_ef9c94c2",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
         "patchSetId": 1
@@ -301,6 +319,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_43479f4b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-05T17:52:30Z",
+      "side": 1,
+      "message": "will fix",
+      "parentUuid": "7a96c907_08d53642",
+      "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_28e8320f",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
         "patchSetId": 1
@@ -312,6 +348,24 @@
       "writtenOn": "2015-02-05T14:31:12Z",
       "side": 1,
       "message": "This can be static.",
+      "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_e3758b98",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-05T17:52:30Z",
+      "side": 1,
+      "message": "will fix",
+      "parentUuid": "7a96c907_28e8320f",
       "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
