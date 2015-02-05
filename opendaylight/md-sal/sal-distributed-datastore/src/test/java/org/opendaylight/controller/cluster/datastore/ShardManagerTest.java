@@ -1,5 +1,10 @@
 package org.opendaylight.controller.cluster.datastore;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.japi.Creator;
@@ -11,6 +16,13 @@ import akka.util.Timeout;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.net.URI;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,20 +46,6 @@ import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
-
-import java.net.URI;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class ShardManagerTest extends AbstractActorTest {
     private static int ID_COUNTER = 1;
@@ -73,8 +71,10 @@ public class ShardManagerTest extends AbstractActorTest {
     }
 
     private Props newShardMgrProps() {
-        return ShardManager.props(shardMrgIDSuffix, new MockClusterWrapper(), new MockConfiguration(),
-                DatastoreContext.newBuilder().build());
+
+        DatastoreContext.Builder builder = DatastoreContext.newBuilder();
+        builder.dataStoreType(shardMrgIDSuffix);
+        return ShardManager.props(new MockClusterWrapper(), new MockConfiguration(), builder.build());
     }
 
     @Test
@@ -351,10 +351,8 @@ public class ShardManagerTest extends AbstractActorTest {
     public void testRecoveryApplicable(){
         new JavaTestKit(getSystem()) {
             {
-                final Props persistentProps = ShardManager.props(shardMrgIDSuffix,
-                        new MockClusterWrapper(),
-                        new MockConfiguration(),
-                        DatastoreContext.newBuilder().persistent(true).build());
+                final Props persistentProps = ShardManager.props(new MockClusterWrapper(), new MockConfiguration(),
+                        DatastoreContext.newBuilder().persistent(true).dataStoreType(shardMrgIDSuffix).build());
                 final TestActorRef<ShardManager> persistentShardManager =
                         TestActorRef.create(getSystem(), persistentProps);
 
@@ -362,10 +360,8 @@ public class ShardManagerTest extends AbstractActorTest {
 
                 assertTrue("Recovery Applicable", dataPersistenceProvider1.isRecoveryApplicable());
 
-                final Props nonPersistentProps = ShardManager.props(shardMrgIDSuffix,
-                        new MockClusterWrapper(),
-                        new MockConfiguration(),
-                        DatastoreContext.newBuilder().persistent(false).build());
+                final Props nonPersistentProps = ShardManager.props(new MockClusterWrapper(), new MockConfiguration(),
+                        DatastoreContext.newBuilder().persistent(false).dataStoreType(shardMrgIDSuffix).build());
                 final TestActorRef<ShardManager> nonPersistentShardManager =
                         TestActorRef.create(getSystem(), nonPersistentProps);
 
@@ -386,7 +382,8 @@ public class ShardManagerTest extends AbstractActorTest {
             private static final long serialVersionUID = 1L;
             @Override
             public ShardManager create() throws Exception {
-                return new ShardManager(shardMrgIDSuffix, new MockClusterWrapper(), new MockConfiguration(), DatastoreContext.newBuilder().build()) {
+                return new ShardManager(new MockClusterWrapper(), new MockConfiguration(),
+                        DatastoreContext.newBuilder().dataStoreType(shardMrgIDSuffix).build()) {
                     @Override
                     protected DataPersistenceProvider createDataPersistenceProvider(boolean persistent) {
                         DataPersistenceProviderMonitor dataPersistenceProviderMonitor
@@ -426,8 +423,8 @@ public class ShardManagerTest extends AbstractActorTest {
         private final CountDownLatch recoveryComplete = new CountDownLatch(1);
 
         TestShardManager(String shardMrgIDSuffix) {
-            super(shardMrgIDSuffix, new MockClusterWrapper(), new MockConfiguration(),
-                    DatastoreContext.newBuilder().build());
+            super(new MockClusterWrapper(), new MockConfiguration(),
+                    DatastoreContext.newBuilder().dataStoreType(shardMrgIDSuffix).build());
         }
 
         @Override

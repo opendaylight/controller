@@ -85,7 +85,6 @@ public class ActorContext {
     private final ClusterWrapper clusterWrapper;
     private final Configuration configuration;
     private final DatastoreContext datastoreContext;
-    private final String dataStoreType;
     private final FiniteDuration operationDuration;
     private final Timeout operationTimeout;
     private final String selfAddressHostPort;
@@ -100,18 +99,17 @@ public class ActorContext {
     public ActorContext(ActorSystem actorSystem, ActorRef shardManager,
             ClusterWrapper clusterWrapper, Configuration configuration) {
         this(actorSystem, shardManager, clusterWrapper, configuration,
-                DatastoreContext.newBuilder().build(), UNKNOWN_DATA_STORE_TYPE);
+                DatastoreContext.newBuilder().build());
     }
 
     public ActorContext(ActorSystem actorSystem, ActorRef shardManager,
             ClusterWrapper clusterWrapper, Configuration configuration,
-            DatastoreContext datastoreContext, String dataStoreType) {
+            DatastoreContext datastoreContext) {
         this.actorSystem = actorSystem;
         this.shardManager = shardManager;
         this.clusterWrapper = clusterWrapper;
         this.configuration = configuration;
         this.datastoreContext = datastoreContext;
-        this.dataStoreType = dataStoreType;
         this.txRateLimiter = RateLimiter.create(datastoreContext.getTransactionCreationInitialRateLimit());
 
         operationDuration = Duration.create(datastoreContext.getOperationTimeoutInSeconds(), TimeUnit.SECONDS);
@@ -471,7 +469,7 @@ public class ActorContext {
      * @return
      */
     public Timer getOperationTimer(String operationName){
-        final String rate = MetricRegistry.name(DISTRIBUTED_DATA_STORE_METRIC_REGISTRY, dataStoreType, operationName, METRIC_RATE);
+        final String rate = MetricRegistry.name(DISTRIBUTED_DATA_STORE_METRIC_REGISTRY, datastoreContext.getDataStoreType(), operationName, METRIC_RATE);
         return metricRegistry.timer(rate);
     }
 
@@ -481,7 +479,7 @@ public class ActorContext {
      * @return
      */
     public String getDataStoreType() {
-        return dataStoreType;
+        return datastoreContext.getDataStoreType();
     }
 
     /**
