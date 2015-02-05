@@ -159,13 +159,23 @@ public class TestHelper {
 
     }
 
+    /**
+     * @return option containing models for testing purposes
+     */
+    public static Option salTestModelBundles() {
+        return new DefaultCompositeOption( //
+                mavenBundle(CONTROLLER, "sal-test-model").versionAsInProject()
+        );
+
+    }
+
     public static Option baseModelBundles() {
         return new DefaultCompositeOption( //
                 mavenBundle(YANGTOOLS_MODELS, "yang-ext").versionAsInProject(), // //
                 mavenBundle(YANGTOOLS_MODELS, "ietf-inet-types").versionAsInProject(), // //
                 mavenBundle(YANGTOOLS_MODELS, "ietf-yang-types").versionAsInProject(), // //
-                mavenBundle(YANGTOOLS_MODELS, "opendaylight-l2-types").versionAsInProject(), // //
-                mavenBundle(CONTROLLER_MODELS, "model-inventory").versionAsInProject());
+                mavenBundle(YANGTOOLS_MODELS, "opendaylight-l2-types").versionAsInProject() // //
+                );
     }
 
     public static Option junitAndMockitoBundles() {
