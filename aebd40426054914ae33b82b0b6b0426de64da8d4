@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_ef89f426",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-05T05:19:34Z",
+      "side": 1,
+      "message": "Yes will do",
+      "parentUuid": "7a96c907_af58cc32",
+      "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_efd1f457",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-02-05T03:42:55Z",
       "side": 1,
       "message": "So why do we only time the commit phase and not the canCommit as well (preCommit is a noop in this class)?",
+      "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_cfebd8ae",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-05T05:19:34Z",
+      "side": 1,
+      "message": "The assumption is that the commit is what is blocks the progress because of the replication related stuff. CanCommit may sit in a queue for a long time but it really won\u0027t take a long time to process. I don\u0027t think it\u0027s interesting to monitor. What\u0027s your opinion?",
+      "parentUuid": "7a96c907_efd1f457",
       "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_af83ec02",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-05T05:19:34Z",
+      "side": 1,
+      "message": "will do",
+      "parentUuid": "7a96c907_ef9c94c2",
+      "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_8f64f0e5",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2015-02-05T03:42:55Z",
       "side": 1,
       "message": "How about calling this after returnFuture.set(null) below so we free up the future callback listener quicker as success() incurs some processing overhead. Plus if an unchecked exception was grown from success(), at least it wouldn\u0027t affect the returnFuture.",
+      "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_0f8d4031",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 298,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-05T05:19:34Z",
+      "side": 1,
+      "message": "yes will do.",
+      "parentUuid": "7a96c907_8f64f0e5",
       "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_cf867813",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 330,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-05T05:19:34Z",
+      "side": 1,
+      "message": "No we don\u0027t. We cannot - it\u0027s core to our rate limiting logic.",
+      "parentUuid": "7a96c907_6fde446f",
+      "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_8fd95085",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
         "patchSetId": 1
@@ -98,6 +188,24 @@
       "writtenOn": "2015-02-05T03:42:55Z",
       "side": 1,
       "message": "I assume the Timer class is thread safe and concurrent?",
+      "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_2fc59c3b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-05T05:19:34Z",
+      "side": 1,
+      "message": "It is not thread safe as far as I can tell. I\u0027d hate to put in any synchronization here though - we don\u0027t need these metrics to be super accurate anyway - ballpark is good enough. What do you think?",
+      "parentUuid": "7a96c907_8fd95085",
       "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_8fcdd05f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-05T05:19:34Z",
+      "side": 1,
+      "message": "Makes sense",
+      "parentUuid": "7a96c907_ef4ed46e",
+      "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_efea540e",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
         "patchSetId": 1
@@ -138,6 +264,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_afff6c66",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 471,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-05T05:19:34Z",
+      "side": 1,
+      "message": "No it cannot because we pass it the operation name. A StringBuilder is used to construct the full name. I could put in some caching logic hopefully it won\u0027t be overkill.",
+      "parentUuid": "7a96c907_efea540e",
+      "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_4f8ca87f",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
         "patchSetId": 1
@@ -149,6 +293,24 @@
       "writtenOn": "2015-02-05T03:42:55Z",
       "side": 1,
       "message": "I\u0027m not familiar with the MetricRegistry library. Is it expensive to create a timer?",
+      "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_cf02f86e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 472,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-05T05:19:34Z",
+      "side": 1,
+      "message": "It does a getOrAdd so it does not create the Timer every time. I don\u0027t believe it\u0027s expensive to create a timer.",
+      "parentUuid": "7a96c907_4f8ca87f",
       "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
