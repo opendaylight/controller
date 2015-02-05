@@ -10,9 +10,9 @@ package org.opendaylight.controller.sal.connect.api;
 /**
  *
  */
-public interface RemoteDevice<PREF, M> {
+public interface RemoteDevice<PREF, M, LISTENER extends RemoteDeviceCommunicator<M>> {
 
-    void onRemoteSessionUp(PREF remoteSessionCapabilities, RemoteDeviceCommunicator<M> listener);
+    void onRemoteSessionUp(PREF remoteSessionCapabilities, LISTENER listener);
 
     void onRemoteSessionDown();
 
