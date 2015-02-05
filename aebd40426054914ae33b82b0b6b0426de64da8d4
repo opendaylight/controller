@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_2f4a7cc5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-05T11:30:31Z",
+      "side": 1,
+      "message": "That sounds reasonable. I was just curious...",
+      "parentUuid": "7a96c907_cfebd8ae",
+      "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_ef9c94c2",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
         "patchSetId": 1
@@ -212,6 +230,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_45a9e779",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-05T11:30:31Z",
+      "side": 1,
+      "message": "Yeah - it wold be nice to avoid synchronization although it wouldn\u0027t block the commit from completing with the change above - it would just potentially block an akka thread.  We don\u0027t need it super accurate but hopefully synchronization errors would be relatively benign or at least recoverable.",
+      "parentUuid": "7a96c907_2fc59c3b",
+      "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_ef4ed46e",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
         "patchSetId": 1
@@ -282,6 +318,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_c5b417d3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 471,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-05T11:30:31Z",
+      "side": 1,
+      "message": "right - missed that - caching would be overkill.",
+      "parentUuid": "7a96c907_afff6c66",
+      "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_4f8ca87f",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
         "patchSetId": 1
@@ -311,6 +365,24 @@
       "side": 1,
       "message": "It does a getOrAdd so it does not create the Timer every time. I don\u0027t believe it\u0027s expensive to create a timer.",
       "parentUuid": "7a96c907_4f8ca87f",
+      "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_65cbc353",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 472,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-05T11:30:31Z",
+      "side": 1,
+      "message": "Yeah - I realized that it\u0027s reused across calls when looking at the TPCProxy code - should\u0027ve removed his comment.",
+      "parentUuid": "7a96c907_cf02f86e",
       "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
