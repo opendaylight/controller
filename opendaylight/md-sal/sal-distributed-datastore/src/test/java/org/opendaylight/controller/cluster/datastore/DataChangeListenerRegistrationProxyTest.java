@@ -7,7 +7,11 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import java.util.concurrent.TimeUnit;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
@@ -16,6 +20,9 @@ import akka.dispatch.ExecutionContexts;
 import akka.dispatch.Futures;
 import akka.testkit.JavaTestKit;
 import akka.util.Timeout;
+import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.Uninterruptibles;
+import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -36,16 +43,9 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataCh
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import com.google.common.util.concurrent.MoreExecutors;
-import com.google.common.util.concurrent.Uninterruptibles;
 import scala.concurrent.ExecutionContextExecutor;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.eq;
 
 /**
  * Unit tests for DataChangeListenerRegistrationProxy.
@@ -207,6 +207,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
             doReturn(Futures.failed(new RuntimeException("mock"))).
                     when(actorContext).executeOperationAsync(any(ActorRef.class),
                             any(Object.class), any(Timeout.class));
+            doReturn(mock(DatastoreContext.class)).when(actorContext).getDatastoreContext();
 
             proxy.init(YangInstanceIdentifier.of(TestModel.TEST_QNAME),
                     AsyncDataBroker.DataChangeScope.ONE);
