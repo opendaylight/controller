@@ -89,8 +89,8 @@ import org.opendaylight.controller.netconf.confignetconfconnector.operations.edi
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.get.Get;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.getconfig.GetConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.runtimerpc.RuntimeRpc;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreServiceImpl;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreSnapshot;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreContext;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreService;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
 import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultCloseSession;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouter;
@@ -132,7 +132,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
     private TestImplModuleFactory factory4;
 
     @Mock
-    YangStoreSnapshot yangStoreSnapshot;
+    YangStoreContext yangStoreSnapshot;
     @Mock
     NetconfOperationRouter netconfOperationRouter;
     @Mock
@@ -629,13 +629,13 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
         YangParserImpl yangParser = new YangParserImpl();
         final SchemaContext schemaContext = yangParser.resolveSchemaContext(new HashSet<>(yangParser.parseYangModelsFromStreamsMapped(yangDependencies).values()));
-        YangStoreServiceImpl yangStoreService = new YangStoreServiceImpl(new SchemaContextProvider() {
+        YangStoreService yangStoreService = new YangStoreService(new SchemaContextProvider() {
             @Override
             public SchemaContext getSchemaContext() {
                 return schemaContext ;
             }
-        });
-        mBeanEntries.putAll(yangStoreService.getYangStoreSnapshot().getModuleMXBeanEntryMap());
+        }, mockedContext);
+        mBeanEntries.putAll(yangStoreService.getModuleMXBeanEntryMap());
 
         return mBeanEntries;
     }

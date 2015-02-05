@@ -27,7 +27,7 @@ import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 final class NetconfOperationProvider {
     private final Set<NetconfOperation> operations;
 
-    NetconfOperationProvider(YangStoreSnapshot yangStoreSnapshot, ConfigRegistryClient configRegistryClient,
+    NetconfOperationProvider(YangStoreContext yangStoreSnapshot, ConfigRegistryClient configRegistryClient,
             TransactionProvider transactionProvider, String netconfSessionIdForReporting) {
 
         operations = setUpOperations(yangStoreSnapshot, configRegistryClient, transactionProvider,
@@ -38,7 +38,7 @@ final class NetconfOperationProvider {
         return operations;
     }
 
-    private static Set<NetconfOperation> setUpOperations(YangStoreSnapshot yangStoreSnapshot,
+    private static Set<NetconfOperation> setUpOperations(YangStoreContext yangStoreSnapshot,
             ConfigRegistryClient configRegistryClient, TransactionProvider transactionProvider,
             String netconfSessionIdForReporting) {
         Set<NetconfOperation> ops = Sets.newHashSet();

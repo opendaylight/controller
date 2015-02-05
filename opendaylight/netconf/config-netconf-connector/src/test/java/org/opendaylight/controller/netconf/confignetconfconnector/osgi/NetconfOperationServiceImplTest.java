@@ -79,8 +79,8 @@ public class NetconfOperationServiceImplTest {
         }
     }
 
-    private YangStoreSnapshot mockYangStoreSnapshot(final String... qnames) {
-        YangStoreSnapshot mock = mock(YangStoreSnapshot.class);
+    private YangStoreContext mockYangStoreSnapshot(final String... qnames) {
+        YangStoreContext mock = mock(YangStoreContext.class);
 
         Map<String, Map<String, ModuleMXBeanEntry>> map = Maps.newHashMap();
 

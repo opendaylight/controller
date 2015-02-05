@@ -28,30 +28,28 @@ import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.yangtools.yang.model.api.Module;
 
 /**
- * Manages life cycle of {@link YangStoreSnapshot}.
+ * Manages life cycle of {@link YangStoreContext}.
  */
 public class NetconfOperationServiceImpl implements NetconfOperationService {
 
-    private final YangStoreSnapshot yangStoreSnapshot;
     private final NetconfOperationProvider operationProvider;
-    private final Set<Capability> capabilities;
     private final TransactionProvider transactionProvider;
+    private final YangStoreService yangStoreService;
 
     public NetconfOperationServiceImpl(final YangStoreService yangStoreService, final ConfigRegistryJMXClient jmxClient,
-            final String netconfSessionIdForReporting) throws YangStoreException {
+            final String netconfSessionIdForReporting) {
 
-        yangStoreSnapshot = yangStoreService.getYangStoreSnapshot();
-        checkConsistencyBetweenYangStoreAndConfig(jmxClient, yangStoreSnapshot);
+        this.yangStoreService = yangStoreService;
+        // FIXME does the consistency check even matter if the yang store service is dynamic ?
+//        checkConsistencyBetweenYangStoreAndConfig(jmxClient, this.yangStoreService);
 
         transactionProvider = new TransactionProvider(jmxClient, netconfSessionIdForReporting);
-        operationProvider = new NetconfOperationProvider(yangStoreSnapshot, jmxClient, transactionProvider,
+        operationProvider = new NetconfOperationProvider(yangStoreService, jmxClient, transactionProvider,
                 netconfSessionIdForReporting);
-        capabilities = setupCapabilities(yangStoreSnapshot);
     }
 
-
     @VisibleForTesting
-    static void checkConsistencyBetweenYangStoreAndConfig(final LookupRegistry jmxClient, final YangStoreSnapshot yangStoreSnapshot) {
+    static void checkConsistencyBetweenYangStoreAndConfig(final LookupRegistry jmxClient, final YangStoreContext yangStoreSnapshot) {
         Set<String> missingModulesFromConfig = Sets.newHashSet();
 
         Set<String> modulesSeenByConfig = jmxClient.getAvailableModuleFactoryQNames();
@@ -60,7 +58,7 @@ public class NetconfOperationServiceImpl implements NetconfOperationService {
         for (Map<String, ModuleMXBeanEntry> moduleNameToMBE : moduleMXBeanEntryMap.values()) {
             for (ModuleMXBeanEntry moduleMXBeanEntry : moduleNameToMBE.values()) {
                 String moduleSeenByYangStore = moduleMXBeanEntry.getYangModuleQName().toString();
-                if(!modulesSeenByConfig.contains(moduleSeenByYangStore)){
+                if(!modulesSeenByConfig.contains(moduleSeenByYangStore)) {
                     missingModulesFromConfig.add(moduleSeenByYangStore);
                 }
             }
@@ -76,13 +74,12 @@ public class NetconfOperationServiceImpl implements NetconfOperationService {
 
     @Override
     public void close() {
-        yangStoreSnapshot.close();
         transactionProvider.close();
     }
 
     @Override
     public Set<Capability> getCapabilities() {
-        return capabilities;
+        return setupCapabilities(yangStoreService);
     }
 
     @Override
@@ -90,7 +87,7 @@ public class NetconfOperationServiceImpl implements NetconfOperationService {
         return operationProvider.getOperations();
     }
 
-    private static Set<Capability> setupCapabilities(final YangStoreSnapshot yangStoreSnapshot) {
+    private static Set<Capability> setupCapabilities(final YangStoreContext yangStoreSnapshot) {
         Set<Capability> capabilities = new HashSet<>();
         // [RFC6241] 8.3.  Candidate Configuration Capability
         capabilities.add(new BasicCapability("urn:ietf:params:netconf:capability:candidate:1.0"));

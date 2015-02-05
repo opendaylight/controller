@@ -52,10 +52,8 @@ import org.opendaylight.controller.netconf.client.SimpleNetconfClientSessionList
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfigurationBuilder;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.NetconfOperationServiceFactoryImpl;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreException;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreContext;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreService;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreServiceImpl;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreSnapshot;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
 import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFactory;
@@ -70,7 +68,6 @@ import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFa
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.opendaylight.protocol.framework.NeverReconnectStrategy;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
 import org.w3c.dom.Element;
 
@@ -176,7 +173,7 @@ public abstract class AbstractNetconfConfigTest extends AbstractConfigTest {
         return clientDispatcher;
     }
 
-    private HardcodedYangStoreService getYangStore() throws YangStoreException, IOException {
+    private HardcodedYangStoreService getYangStore() throws IOException {
         final Collection<InputStream> yangDependencies = getBasicYangs();
         return new HardcodedYangStoreService(yangDependencies);
     }
@@ -246,11 +243,11 @@ public abstract class AbstractNetconfConfigTest extends AbstractConfigTest {
         return b.build();
     }
 
-    public static final class HardcodedYangStoreService implements YangStoreService {
+    public static final class HardcodedYangStoreService extends YangStoreService {
 
         private final List<InputStream> byteArrayInputStreams;
 
-        public HardcodedYangStoreService(final Collection<? extends InputStream> inputStreams) throws YangStoreException, IOException {
+        public HardcodedYangStoreService(final Collection<? extends InputStream> inputStreams) throws IOException {
             byteArrayInputStreams = new ArrayList<>();
             for (final InputStream inputStream : inputStreams) {
                 assertNotNull(inputStream);
@@ -260,8 +257,7 @@ public abstract class AbstractNetconfConfigTest extends AbstractConfigTest {
             }
         }
 
-        @Override
-        public YangStoreSnapshot getYangStoreSnapshot() throws YangStoreException {
+        protected synchronized YangStoreContext getYangStoreSnapshot() {
             for (final InputStream inputStream : byteArrayInputStreams) {
                 try {
                     inputStream.reset();
@@ -272,13 +268,9 @@ public abstract class AbstractNetconfConfigTest extends AbstractConfigTest {
 
             final YangParserImpl yangParser = new YangParserImpl();
             final SchemaContext schemaContext = yangParser.resolveSchemaContext(new HashSet<>(yangParser.parseYangModelsFromStreamsMapped(byteArrayInputStreams).values()));
-            final YangStoreServiceImpl yangStoreService = new YangStoreServiceImpl(new SchemaContextProvider() {
-                @Override
-                public SchemaContext getSchemaContext() {
-                    return schemaContext ;
-                }
-            });
-            return yangStoreService.getYangStoreSnapshot();
+            final YangStoreService yangStoreService = new YangStoreService();
+            yangStoreService.onGlobalContextUpdated(schemaContext);
+            return yangStoreService;
         }
     }
 }
