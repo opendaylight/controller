@@ -30,7 +30,7 @@ import org.opendaylight.controller.netconf.confignetconfconnector.mapping.rpc.In
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.rpc.ModuleRpcs;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.rpc.Rpcs;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.AbstractConfigNetconfOperation;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreSnapshot;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreContext;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
@@ -45,9 +45,9 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
     private static final Logger LOG = LoggerFactory.getLogger(RuntimeRpc.class);
     public static final String CONTEXT_INSTANCE = "context-instance";
 
-    private final YangStoreSnapshot yangStoreSnapshot;
+    private final YangStoreContext yangStoreSnapshot;
 
-    public RuntimeRpc(final YangStoreSnapshot yangStoreSnapshot, ConfigRegistryClient configRegistryClient,
+    public RuntimeRpc(final YangStoreContext yangStoreSnapshot, ConfigRegistryClient configRegistryClient,
             String netconfSessionIdForReporting) {
         super(configRegistryClient, netconfSessionIdForReporting);
         this.yangStoreSnapshot = yangStoreSnapshot;

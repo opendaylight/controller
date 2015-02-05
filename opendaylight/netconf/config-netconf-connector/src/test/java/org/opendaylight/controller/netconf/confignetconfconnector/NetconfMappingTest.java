@@ -13,6 +13,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -89,8 +91,8 @@ import org.opendaylight.controller.netconf.confignetconfconnector.operations.edi
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.get.Get;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.getconfig.GetConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.runtimerpc.RuntimeRpc;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreServiceImpl;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreSnapshot;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreContext;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreService;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
 import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultCloseSession;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouter;
@@ -109,6 +111,9 @@ import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.osgi.framework.Filter;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -132,7 +137,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
     private TestImplModuleFactory factory4;
 
     @Mock
-    YangStoreSnapshot yangStoreSnapshot;
+    YangStoreContext yangStoreSnapshot;
     @Mock
     NetconfOperationRouter netconfOperationRouter;
     @Mock
@@ -143,6 +148,13 @@ public class NetconfMappingTest extends AbstractConfigTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+
+
+        final Filter filter = mock(Filter.class);
+        doReturn(filter).when(mockedContext).createFilter(anyString());
+        doNothing().when(mockedContext).addServiceListener(any(ServiceListener.class), anyString());
+        doReturn(new ServiceReference<?>[]{}).when(mockedContext).getServiceReferences(anyString(), anyString());
+
         doReturn(getMbes()).when(this.yangStoreSnapshot).getModuleMXBeanEntryMap();
         doReturn(getModules()).when(this.yangStoreSnapshot).getModules();
         doNothing().when(netconfOperationServiceSnapshot).close();
@@ -151,6 +163,8 @@ public class NetconfMappingTest extends AbstractConfigTest {
         this.factory2 = new DepTestImplModuleFactory();
         this.factory3 = new IdentityTestModuleFactory();
         factory4 = new TestImplModuleFactory();
+
+
         super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext, this.factory, this.factory2,
                 this.factory3, factory4));
 
@@ -629,13 +643,13 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
         YangParserImpl yangParser = new YangParserImpl();
         final SchemaContext schemaContext = yangParser.resolveSchemaContext(new HashSet<>(yangParser.parseYangModelsFromStreamsMapped(yangDependencies).values()));
-        YangStoreServiceImpl yangStoreService = new YangStoreServiceImpl(new SchemaContextProvider() {
+        YangStoreService yangStoreService = new YangStoreService(new SchemaContextProvider() {
             @Override
             public SchemaContext getSchemaContext() {
                 return schemaContext ;
             }
-        });
-        mBeanEntries.putAll(yangStoreService.getYangStoreSnapshot().getModuleMXBeanEntryMap());
+        }, mockedContext);
+        mBeanEntries.putAll(yangStoreService.getModuleMXBeanEntryMap());
 
         return mBeanEntries;
     }

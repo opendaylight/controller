@@ -26,7 +26,7 @@ import org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtim
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.AbstractConfigNetconfOperation;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Datastore;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreSnapshot;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreContext;
 import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
 import org.opendaylight.controller.netconf.util.exception.UnexpectedElementException;
 import org.opendaylight.controller.netconf.util.exception.UnexpectedNamespaceException;
@@ -38,10 +38,10 @@ import org.w3c.dom.Element;
 
 public class Get extends AbstractConfigNetconfOperation {
 
-    private final YangStoreSnapshot yangStoreSnapshot;
+    private final YangStoreContext yangStoreSnapshot;
     private static final Logger LOG = LoggerFactory.getLogger(Get.class);
 
-    public Get(YangStoreSnapshot yangStoreSnapshot, ConfigRegistryClient configRegistryClient,
+    public Get(YangStoreContext yangStoreSnapshot, ConfigRegistryClient configRegistryClient,
                String netconfSessionIdForReporting) {
         super(configRegistryClient, netconfSessionIdForReporting);
         this.yangStoreSnapshot = yangStoreSnapshot;
