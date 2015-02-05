@@ -273,10 +273,11 @@ public class ActorContextTest extends AbstractActorTest{
         DatastoreContext mockDataStoreContext = mock(DatastoreContext.class);
 
         doReturn(155L).when(mockDataStoreContext).getTransactionCreationInitialRateLimit();
+        doReturn("config").when(mockDataStoreContext).getDataStoreType();
 
         ActorContext actorContext =
                 new ActorContext(getSystem(), mock(ActorRef.class), mock(ClusterWrapper.class),
-                        mock(Configuration.class), mockDataStoreContext, "config");
+                        mock(Configuration.class), mockDataStoreContext);
 
         // Check that the initial value is being picked up from DataStoreContext
         assertEquals(mockDataStoreContext.getTransactionCreationInitialRateLimit(), actorContext.getTxCreationLimit(), 1e-15);

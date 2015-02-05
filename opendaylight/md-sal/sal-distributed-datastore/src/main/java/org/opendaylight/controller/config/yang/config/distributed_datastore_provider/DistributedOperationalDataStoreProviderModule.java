@@ -41,7 +41,7 @@ public class DistributedOperationalDataStoreProviderModule extends
         }
 
         DatastoreContext datastoreContext = DatastoreContext.newBuilder()
-                .dataStoreMXBeanType("DistributedOperationalDatastore")
+                .dataStoreType("operational")
                 .dataStoreProperties(InMemoryDOMDataStoreConfigProperties.create(
                         props.getMaxShardDataChangeExecutorPoolSize().getValue().intValue(),
                         props.getMaxShardDataChangeExecutorQueueSize().getValue().intValue(),
@@ -70,8 +70,8 @@ public class DistributedOperationalDataStoreProviderModule extends
                 .transactionCreationInitialRateLimit(props.getTxCreationInitialRateLimit().getValue())
                 .build();
 
-        return DistributedDataStoreFactory.createInstance("operational",
-                getOperationalSchemaServiceDependency(), datastoreContext, bundleContext);
+        return DistributedDataStoreFactory.createInstance(getOperationalSchemaServiceDependency(),
+                datastoreContext, bundleContext);
     }
 
     public void setBundleContext(BundleContext bundleContext) {
