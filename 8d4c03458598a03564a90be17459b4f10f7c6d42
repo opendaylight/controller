@@ -131,6 +131,23 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_a86e82ff",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-05T17:23:09Z",
+      "side": 1,
+      "message": "Needs to be extracted and specialized type for individual uses of identifier. I think each domain has distinct identifiers and we certainly do not want to confuse port ID for a net ID.",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_36552550",
         "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
         "patchSetId": 1
@@ -201,6 +218,108 @@
         "endLine": 89,
         "endChar": 17
       },
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_68787ac4",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-05T17:23:09Z",
+      "side": 1,
+      "message": "this looks like yet another type of identifier",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_28827294",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-05T17:23:09Z",
+      "side": 1,
+      "message": "\u0027address pairs\u0027 seems to imply a pair of leaves.",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_487d7eb0",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-05T17:23:09Z",
+      "side": 1,
+      "message": "would this be a use of a networkUUID?",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_c848ae89",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-05T17:23:09Z",
+      "side": 1,
+      "message": "are these DHCP options? what is the expected string format?",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_685f1a42",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-05T17:23:09Z",
+      "side": 1,
+      "message": "what is the relationship between ID and opt_name?",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_c8718ee1",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-05T17:23:09Z",
+      "side": 1,
+      "message": "a reference do definition would be nice.",
       "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -283,6 +402,74 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_a83c42e3",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-05T17:23:09Z",
+      "side": 1,
+      "message": "what is the format of the string? is this subnetUUID?",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_c83f4ed5",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-05T17:23:09Z",
+      "side": 1,
+      "message": "inet:ip-address",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_882146b6",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-05T17:23:09Z",
+      "side": 1,
+      "message": "are these identifiers?",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_28303200",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-05T17:23:09Z",
+      "side": 1,
+      "message": "definitely an enum",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_d6f2c16e",
         "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
         "patchSetId": 1
@@ -330,6 +517,75 @@
       "side": 1,
       "message": "Done",
       "parentUuid": "7a96c907_645f70e6",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_e819ea88",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-05T17:23:09Z",
+      "side": 1,
+      "message": "not really... new revision perhaps?",
+      "parentUuid": "7a96c907_d9950941",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_081d3673",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-05T17:23:09Z",
+      "side": 1,
+      "message": "inet:ip-address? or can they actually be symbolic?",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_a813e264",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-05T17:23:09Z",
+      "side": 1,
+      "message": "looks like an enumeration. if it needs to be externally extensinble, it should be an identity",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_c8166e55",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-05T17:23:09Z",
+      "side": 1,
+      "message": "if it is \u0027either IPv4 or IPv6\u0027, just use inet:ip-address",
       "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
