@@ -10,12 +10,9 @@ package org.opendaylight.controller.test.sal.binding.it;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
@@ -23,40 +20,37 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.api.NotificationService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowAdded;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowAddedBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowRemoved;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowUpdated;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.NodeErrorNotification;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.NodeExperimenterErrorNotification;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowListener;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SwitchFlowRemoved;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.FlowCookie;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.bi.ba.notification.rev150205.OpendaylightTestNotificationListener;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.bi.ba.notification.rev150205.OutOfPixieDustNotification;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.bi.ba.notification.rev150205.OutOfPixieDustNotificationBuilder;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Ignore
+/**
+ * covers registering of notification listener, publishing of notification and receiving of notification.
+ */
 public class NotificationTest extends AbstractTest {
+    
+    private static final Logger LOG = LoggerFactory
+            .getLogger(NotificationTest.class);
 
-    private final FlowListener listener1 = new FlowListener();
-    private final FlowListener listener2 = new FlowListener();
+    protected final NotificationTestListener listener1 = new NotificationTestListener();
+    protected final NotificationTestListener listener2 = new NotificationTestListener();
 
-    private ListenerRegistration<NotificationListener> listener1Reg;
-    private ListenerRegistration<NotificationListener> listener2Reg;
+    protected ListenerRegistration<NotificationListener> listener1Reg;
+    protected ListenerRegistration<NotificationListener> listener2Reg;
 
-    private NotificationProviderService notifyProviderService;
+    protected NotificationProviderService notifyProviderService;
 
-    @Before
-    public void setUp() throws Exception {
-    }
-
+    /**
+     * test of delivering of notification
+     * @throws Exception
+     */
     @Test
     public void notificationTest() throws Exception {
-        /**
-         *
-         * The registration of the Provider 1.
-         *
-         */
+        LOG.info("The registration of the Provider 1.");
         AbstractTestProvider provider1 = new AbstractTestProvider() {
             @Override
             public void onSessionInitiated(ProviderContext session) {
@@ -65,15 +59,11 @@ public class NotificationTest extends AbstractTest {
         };
 
         // registerProvider method calls onSessionInitiated method above
-        broker.registerProvider(provider1, getBundleContext());
+        broker.registerProvider(provider1);
         assertNotNull(notifyProviderService);
 
-        /**
-         *
-         * The registration of the Consumer 1. It retrieves Notification Service
-         * from MD-SAL and registers SalFlowListener as notification listener
-         *
-         */
+        LOG.info("The registration of the Consumer 1. It retrieves Notification Service "
+                + "from MD-SAL and registers OpendaylightTestNotificationListener as notification listener");
         BindingAwareConsumer consumer1 = new BindingAwareConsumer() {
             @Override
             public void onSessionInitialized(ConsumerContext session) {
@@ -83,29 +73,26 @@ public class NotificationTest extends AbstractTest {
             }
         };
         // registerConsumer method calls onSessionInitialized method above
-        broker.registerConsumer(consumer1, getBundleContext());
+        broker.registerConsumer(consumer1);
 
         assertNotNull(listener1Reg);
 
-        /**
-         * The notification of type FlowAdded with cookie ID 0 is created. The
-         * delay 100ms to make sure that the notification was delivered to
-         * listener.
-         */
-        notifyProviderService.publish(flowAdded(0));
+        LOG.info("The notification of type FlowAdded with cookie ID 0 is created. The "
+                + "delay 100ms to make sure that the notification was delivered to "
+                + "listener.");
+        notifyProviderService.publish(noDustNotification("rainy day", 42));
         Thread.sleep(100);
 
         /**
          * Check that one notification was delivered and has correct cookie.
          *
          */
-        assertEquals(1, listener1.addedFlows.size());
-        assertEquals(0, listener1.addedFlows.get(0).getCookie().getValue().intValue());
+        assertEquals(1, listener1.notificationBag.size());
+        assertEquals("rainy day", listener1.notificationBag.get(0).getReason());
+        assertEquals(42, listener1.notificationBag.get(0).getDaysTillNewDust().intValue());
 
-        /**
-         * The registration of the Consumer 2. SalFlowListener is registered
-         * registered as notification listener.
-         */
+        LOG.info("The registration of the Consumer 2. SalFlowListener is registered "
+                + "registered as notification listener.");
         BindingAwareProvider provider = new BindingAwareProvider() {
 
             @Override
@@ -116,14 +103,12 @@ public class NotificationTest extends AbstractTest {
         };
 
         // registerConsumer method calls onSessionInitialized method above
-        broker.registerProvider(provider, getBundleContext());
+        broker.registerProvider(provider);
 
-        /**
-         * 3 notifications are published
-         */
-        notifyProviderService.publish(flowAdded(5));
-        notifyProviderService.publish(flowAdded(10));
-        notifyProviderService.publish(flowAdded(2));
+        LOG.info("3 notifications are published");
+        notifyProviderService.publish(noDustNotification("rainy day", 5));
+        notifyProviderService.publish(noDustNotification("rainy day", 10));
+        notifyProviderService.publish(noDustNotification("tax collector", 2));
 
         /**
          * The delay 100ms to make sure that the notifications were delivered to
@@ -136,8 +121,8 @@ public class NotificationTest extends AbstractTest {
          * received 4 in total, second 3 in total).
          *
          */
-        assertEquals(4, listener1.addedFlows.size());
-        assertEquals(3, listener2.addedFlows.size());
+        assertEquals(4, listener1.notificationBag.size());
+        assertEquals(3, listener2.notificationBag.size());
 
         /**
          * The second listener is closed (unregistered)
@@ -145,11 +130,8 @@ public class NotificationTest extends AbstractTest {
          */
         listener2Reg.close();
 
-        /**
-         *
-         * The notification 5 is published
-         */
-        notifyProviderService.publish(flowAdded(10));
+        LOG.info("The notification 5 is published");
+        notifyProviderService.publish(noDustNotification("entomologist hunt", 10));
 
         /**
          * The delay 100ms to make sure that the notification was delivered to
@@ -163,73 +145,38 @@ public class NotificationTest extends AbstractTest {
          * second consumer because its listener was unregistered.
          *
          */
-        assertEquals(5, listener1.addedFlows.size());
-        assertEquals(3, listener2.addedFlows.size());
+        assertEquals(5, listener1.notificationBag.size());
+        assertEquals(3, listener2.notificationBag.size());
 
     }
 
     /**
-     * Creates instance of the type FlowAdded. Only cookie value is set. It is
+     * Creates instance of the type OutOfPixieDustNotification. It is
      * used only for testing purpose.
      *
-     * @param i
-     *            cookie value
-     * @return instance of the type FlowAdded
+     * @param reason
+     * @param days
+     * @return instance of the type OutOfPixieDustNotification
      */
-    public static FlowAdded flowAdded(int i) {
-        FlowAddedBuilder ret = new FlowAddedBuilder();
-        ret.setCookie(new FlowCookie(BigInteger.valueOf(i)));
+    public static OutOfPixieDustNotification noDustNotification(String reason, int days) {
+        OutOfPixieDustNotificationBuilder ret = new OutOfPixieDustNotificationBuilder();
+        ret.setReason(reason).setDaysTillNewDust(days);
         return ret.build();
     }
 
     /**
      *
      * Implements
-     * {@link org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowListener
-     * SalFlowListener} and contains attributes which keep lists of objects of
-     * the type
-     * {@link org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819. NodeFlow
-     * NodeFlow}. The lists are defined for flows which were added, removed or
-     * updated.
+     * {@link OpendaylightTestNotificationListener} and contains attributes which keep lists of objects of
+     * the type {@link OutOfFairyDustNotification}.
      */
-    private static class FlowListener implements SalFlowListener {
+    public static class NotificationTestListener implements OpendaylightTestNotificationListener {
 
-        List<FlowAdded> addedFlows = new ArrayList<>();
-        List<FlowRemoved> removedFlows = new ArrayList<>();
-        List<FlowUpdated> updatedFlows = new ArrayList<>();
+        List<OutOfPixieDustNotification> notificationBag = new ArrayList<>();
 
         @Override
-        public void onFlowAdded(FlowAdded notification) {
-            addedFlows.add(notification);
-        }
-
-        @Override
-        public void onFlowRemoved(FlowRemoved notification) {
-            removedFlows.add(notification);
-        };
-
-        @Override
-        public void onFlowUpdated(FlowUpdated notification) {
-            updatedFlows.add(notification);
-        }
-
-        @Override
-        public void onSwitchFlowRemoved(SwitchFlowRemoved notification) {
-            // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public void onNodeErrorNotification(NodeErrorNotification notification) {
-            // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public void onNodeExperimenterErrorNotification(
-                NodeExperimenterErrorNotification notification) {
-            // TODO Auto-generated method stub
-
+        public void onOutOfPixieDustNotification(OutOfPixieDustNotification arg0) {
+            notificationBag.add(arg0);
         }
 
     }

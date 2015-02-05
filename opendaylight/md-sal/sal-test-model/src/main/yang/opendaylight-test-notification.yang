@@ -1,0 +1,25 @@
+module opendaylight-test-notification {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:test:bi:ba:notification";
+    prefix "ntf";
+
+    description
+        "Test model for testing of registering notification listener and publishing of notification.";
+
+    revision "2015-02-05" {
+        description
+            "Initial revision";
+    }
+
+    notification out-of-pixie-dust-notification {
+        description "Just a testing notification that we can not fly for now.";
+
+        leaf reason {
+            type string;
+        }
+
+        leaf days-till-new-dust {
+            type uint16;
+        }
+    }
+}
