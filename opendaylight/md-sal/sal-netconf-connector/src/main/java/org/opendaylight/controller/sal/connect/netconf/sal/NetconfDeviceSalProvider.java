@@ -130,9 +130,7 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
 
         @Override
         synchronized public void close() throws Exception {
-            if(registration != null) {
-                onDeviceDisconnected();
-            }
+            onDeviceDisconnected();
             mountService = null;
         }
 
