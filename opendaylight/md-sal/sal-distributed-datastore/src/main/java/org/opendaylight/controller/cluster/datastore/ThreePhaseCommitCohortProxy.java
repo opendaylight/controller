@@ -11,12 +11,15 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorSelection;
 import akka.dispatch.Futures;
 import akka.dispatch.OnComplete;
+import akka.util.Timeout;
+import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransaction;
@@ -28,6 +31,8 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCoh
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
+import scala.concurrent.duration.FiniteDuration;
 import scala.runtime.AbstractFunction1;
 
 /**
@@ -44,6 +49,19 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
     private final List<Future<ActorSelection>> cohortFutures;
     private volatile List<ActorSelection> cohorts;
     private final String transactionId;
+    private static final OperationCallback NO_OP_CALLBACK = new OperationCallback() {
+        @Override
+        public void run() {
+        }
+
+        @Override
+        public void success() {
+        }
+
+        @Override
+        public void failure() {
+        }
+    };
 
     public ThreePhaseCommitCohortProxy(ActorContext actorContext,
             List<Future<ActorSelection>> cohortFutures, String transactionId) {
@@ -151,8 +169,10 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Tx {}: Sending {} to cohort {}", transactionId, message, cohort);
             }
-
-            futureList.add(actorContext.executeOperationAsync(cohort, message));
+            FiniteDuration operationDuration = Duration.create(actorContext.getDatastoreContext().getShardTransactionCommitTimeoutInSeconds(),
+                    TimeUnit.SECONDS);
+            Timeout operationTimeout = new Timeout(operationDuration);
+            futureList.add(actorContext.executeOperationAsync(cohort, message, operationTimeout));
         }
 
         return Futures.sequence(futureList, actorContext.getActorSystem().dispatcher());
@@ -180,11 +200,16 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
     @Override
     public ListenableFuture<Void> commit() {
         return voidOperation("commit",  new CommitTransaction(transactionId).toSerializable(),
-                CommitTransactionReply.SERIALIZABLE_CLASS, true);
+                CommitTransactionReply.SERIALIZABLE_CLASS, true, new CommitCallback(actorContext));
     }
 
     private ListenableFuture<Void> voidOperation(final String operationName, final Object message,
-            final Class<?> expectedResponseClass, final boolean propagateException) {
+                                                 final Class<?> expectedResponseClass, final boolean propagateException) {
+        return voidOperation(operationName, message, expectedResponseClass, propagateException, NO_OP_CALLBACK);
+    }
+
+    private ListenableFuture<Void> voidOperation(final String operationName, final Object message,
+                                                 final Class<?> expectedResponseClass, final boolean propagateException, final OperationCallback callback) {
 
         if(LOG.isDebugEnabled()) {
             LOG.debug("Tx {} {}", transactionId, operationName);
@@ -196,7 +221,7 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
 
         if(cohorts != null) {
             finishVoidOperation(operationName, message, expectedResponseClass, propagateException,
-                    returnFuture);
+                    returnFuture, callback);
         } else {
             buildCohortList().onComplete(new OnComplete<Void>() {
                 @Override
@@ -213,7 +238,7 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
                         }
                     } else {
                         finishVoidOperation(operationName, message, expectedResponseClass,
-                                propagateException, returnFuture);
+                                propagateException, returnFuture, callback);
                     }
                 }
             }, actorContext.getActorSystem().dispatcher());
@@ -223,11 +248,14 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
     }
 
     private void finishVoidOperation(final String operationName, final Object message,
-            final Class<?> expectedResponseClass, final boolean propagateException,
-            final SettableFuture<Void> returnFuture) {
+                                     final Class<?> expectedResponseClass, final boolean propagateException,
+                                     final SettableFuture<Void> returnFuture, final OperationCallback callback) {
         if(LOG.isDebugEnabled()) {
             LOG.debug("Tx {} finish {}", transactionId, operationName);
         }
+
+        callback.run();
+
         Future<Iterable<Object>> combinedFuture = invokeCohorts(message);
 
         combinedFuture.onComplete(new OnComplete<Iterable<Object>>() {
@@ -247,6 +275,7 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
                 }
 
                 if(exceptionToPropagate != null) {
+                    callback.failure();
                     if(LOG.isDebugEnabled()) {
                         LOG.debug("Tx {}: a {} cohort Future failed: {}", transactionId,
                             operationName, exceptionToPropagate);
@@ -266,6 +295,7 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
                         returnFuture.set(null);
                     }
                 } else {
+                    callback.success();
                     if(LOG.isDebugEnabled()) {
                         LOG.debug("Tx {}: {} succeeded", transactionId, operationName);
                     }
@@ -279,4 +309,58 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
     List<Future<ActorSelection>> getCohortFutures() {
         return Collections.unmodifiableList(cohortFutures);
     }
+
+    private static interface OperationCallback {
+        void run();
+        void success();
+        void failure();
+    }
+
+    private static class CommitCallback implements OperationCallback{
+
+        private static final Logger LOG = LoggerFactory.getLogger(CommitCallback.class);
+        private static final String COMMIT = "commit";
+
+        private final Timer commitTimer;
+        private final ActorContext actorContext;
+        private Timer.Context timerContext;
+
+        CommitCallback(ActorContext actorContext){
+            this.actorContext = actorContext;
+            commitTimer = actorContext.getOperationTimer(COMMIT);
+        }
+
+        @Override
+        public void run() {
+            timerContext = commitTimer.time();
+        }
+
+        @Override
+        public void success() {
+            timerContext.stop();
+
+            // Figure out the allowed latency
+            // Formula : mean latency + half of the standard deviation. This should allow for wild fluctuations in
+            // transaction processing latency
+            double allowedLatency = commitTimer.getSnapshot().getMean() + commitTimer.getSnapshot().getStdDev() / 2;
+
+            double newRateLimit =
+                    ((double) actorContext.getDatastoreContext().getShardTransactionCommitTimeoutInSeconds()
+                            / (TimeUnit.NANOSECONDS.toSeconds((long) allowedLatency)))
+                            / actorContext.getDatastoreContext().getShardTransactionCommitTimeoutInSeconds();
+
+            LOG.debug("Data Store {} commit rateLimit adjusted to {} allowedLatency = {}",
+                    actorContext.getDataStoreType(), newRateLimit, allowedLatency);
+
+            actorContext.setTxCreationLimit(newRateLimit);
+        }
+
+        @Override
+        public void failure() {
+            // This would mean we couldn't get a transaction completed in 30 seconds which is
+            // the default transaction commit timeout. Using the timeout information to figure out the rate limit is
+            // not going to be useful - so we leave it as it is
+        }
+    }
+
 }

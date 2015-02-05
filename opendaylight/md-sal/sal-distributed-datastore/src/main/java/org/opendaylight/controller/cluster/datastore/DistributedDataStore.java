@@ -54,7 +54,7 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
         actorContext = new ActorContext(actorSystem, actorSystem.actorOf(
                 ShardManager.props(type, cluster, configuration, datastoreContext)
                     .withMailbox(ActorContext.MAILBOX), shardManagerId ),
-                cluster, configuration, datastoreContext);
+                cluster, configuration, datastoreContext, type);
     }
 
     public DistributedDataStore(ActorContext actorContext) {
@@ -94,11 +94,13 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
 
     @Override
     public DOMStoreWriteTransaction newWriteOnlyTransaction() {
+        actorContext.acquireTxCreationPermit();
         return new TransactionProxy(actorContext, TransactionProxy.TransactionType.WRITE_ONLY);
     }
 
     @Override
     public DOMStoreReadWriteTransaction newReadWriteTransaction() {
+        actorContext.acquireTxCreationPermit();
         return new TransactionProxy(actorContext, TransactionProxy.TransactionType.READ_WRITE);
     }
 
