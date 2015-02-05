@@ -56,10 +56,10 @@ import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
 import org.opendaylight.controller.netconf.client.NetconfClientSession;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
+import org.opendaylight.controller.netconf.client.conf.NetconfReconnectingClientConfiguration;
 import org.opendaylight.controller.netconf.client.conf.NetconfReconnectingClientConfigurationBuilder;
 import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.LoginPassword;
 import org.opendaylight.controller.sal.connect.api.RemoteDevice;
-import org.opendaylight.controller.sal.connect.api.RemoteDeviceCommunicator;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.protocol.framework.ReconnectStrategy;
@@ -77,7 +77,7 @@ public class NetconfDeviceCommunicatorTest {
     NetconfClientSession mockSession;
 
     @Mock
-    RemoteDevice<NetconfSessionCapabilities, NetconfMessage> mockDevice;
+    RemoteDevice<NetconfSessionCapabilities, NetconfMessage, NetconfDeviceCommunicator> mockDevice;
 
     NetconfDeviceCommunicator communicator;
 
@@ -85,16 +85,15 @@ public class NetconfDeviceCommunicatorTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks( this );
 
-        communicator = new NetconfDeviceCommunicator( new RemoteDeviceId( "test" ), mockDevice );
+        communicator = new NetconfDeviceCommunicator( new RemoteDeviceId( "test" ), mockDevice);
     }
 
     @SuppressWarnings("unchecked")
-    void setupSession()
-    {
-        doReturn( Collections.<String>emptySet() ).when( mockSession ).getServerCapabilities();
-        doNothing().when( mockDevice ).onRemoteSessionUp( any( NetconfSessionCapabilities.class ),
-                                                          any( RemoteDeviceCommunicator.class ) );
-        communicator.onSessionUp( mockSession );
+    void setupSession() {
+        doReturn(Collections.<String>emptySet()).when(mockSession).getServerCapabilities();
+        doNothing().when(mockDevice).onRemoteSessionUp(any(NetconfSessionCapabilities.class),
+                any(NetconfDeviceCommunicator.class));
+        communicator.onSessionUp(mockSession);
     }
 
     private ListenableFuture<RpcResult<NetconfMessage>> sendRequest() throws Exception {
@@ -340,7 +339,7 @@ public class NetconfDeviceCommunicatorTest {
      */
     @Test
     public void testNetconfDeviceReconnectInCommunicator() throws Exception {
-        final RemoteDevice<NetconfSessionCapabilities, NetconfMessage> device = mock(RemoteDevice.class);
+        final RemoteDevice<NetconfSessionCapabilities, NetconfMessage, NetconfDeviceCommunicator> device = mock(RemoteDevice.class);
 
         final TimedReconnectStrategy timedReconnectStrategy = new TimedReconnectStrategy(GlobalEventExecutor.INSTANCE, 10000, 0, 1.0, null, 100L, null);
         final ReconnectStrategy reconnectStrategy = spy(new ReconnectStrategy() {
@@ -360,11 +359,11 @@ public class NetconfDeviceCommunicatorTest {
             }
         });
 
-        final NetconfDeviceCommunicator listener = new NetconfDeviceCommunicator(new RemoteDeviceId("test"), device);
         final EventLoopGroup group = new NioEventLoopGroup();
         final Timer time = new HashedWheelTimer();
         try {
-            final NetconfClientConfiguration cfg = NetconfReconnectingClientConfigurationBuilder.create()
+            final NetconfDeviceCommunicator listener = new NetconfDeviceCommunicator(new RemoteDeviceId("test"), device);
+            final NetconfReconnectingClientConfiguration cfg = NetconfReconnectingClientConfigurationBuilder.create()
                     .withAddress(new InetSocketAddress("localhost", 65000))
                     .withReconnectStrategy(reconnectStrategy)
                     .withConnectStrategyFactory(new ReconnectStrategyFactory() {
@@ -378,7 +377,6 @@ public class NetconfDeviceCommunicatorTest {
                     .withProtocol(NetconfClientConfiguration.NetconfClientProtocol.SSH)
                     .withSessionListener(listener)
                     .build();
-
 
             listener.initializeRemoteConnection(new NetconfClientDispatcherImpl(group, group, time), cfg);
 
