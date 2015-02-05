@@ -17,26 +17,25 @@ import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.Top;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
-/*
+/**
  * FIXME: THis test should be moved to sal-binding-broker and rewriten
  * to use new DataBroker API
  */
 @SuppressWarnings("deprecation")
 public class ConcurrentImplicitCreateTest extends AbstractDataServiceTest {
 
-    private static final NodeKey NODE_FOO_KEY = new NodeKey(new NodeId("foo"));
-    private static final NodeKey NODE_BAR_KEY = new NodeKey(new NodeId("foo"));
-    private static InstanceIdentifier<Nodes> NODES_PATH = InstanceIdentifier.builder(Nodes.class).build();
-    private static InstanceIdentifier<Node> NODE_FOO_PATH = NODES_PATH.child(Node.class, NODE_FOO_KEY);
-    private static InstanceIdentifier<Node> NODE_BAR_PATH = NODES_PATH.child(Node.class, NODE_FOO_KEY);
+    private static final TopLevelListKey NODE_FOO_KEY = new TopLevelListKey("foo");
+    private static final TopLevelListKey NODE_BAR_KEY = new TopLevelListKey("foo");
+    private static InstanceIdentifier<Top> NODES_PATH = InstanceIdentifier.builder(Top.class).build();
+    private static InstanceIdentifier<TopLevelList> NODE_FOO_PATH = NODES_PATH.child(TopLevelList.class, NODE_FOO_KEY);
+    private static InstanceIdentifier<TopLevelList> NODE_BAR_PATH = NODES_PATH.child(TopLevelList.class, NODE_FOO_KEY);
 
     @Test
     public void testConcurrentCreate() throws InterruptedException, ExecutionException {
@@ -44,8 +43,8 @@ public class ConcurrentImplicitCreateTest extends AbstractDataServiceTest {
         DataModificationTransaction fooTx = baDataService.beginTransaction();
         DataModificationTransaction barTx = baDataService.beginTransaction();
 
-        fooTx.putOperationalData(NODE_FOO_PATH, new NodeBuilder().setKey(NODE_FOO_KEY).build());
-        barTx.putOperationalData(NODE_BAR_PATH, new NodeBuilder().setKey(NODE_BAR_KEY).build());
+        fooTx.putOperationalData(NODE_FOO_PATH, new TopLevelListBuilder().setKey(NODE_FOO_KEY).build());
+        barTx.putOperationalData(NODE_BAR_PATH, new TopLevelListBuilder().setKey(NODE_BAR_KEY).build());
 
         Future<RpcResult<TransactionStatus>> fooFuture = fooTx.commit();
         Future<RpcResult<TransactionStatus>> barFuture = barTx.commit();

@@ -22,87 +22,75 @@ import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.table.types.rev131026.table.features.TableFeatures;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.table.types.rev131026.table.features.TableFeaturesBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.table.types.rev131026.table.features.TableFeaturesKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.TreeComplexUsesAugment;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.TreeComplexUsesAugmentBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.complex.from.grouping.ContainerWithUses;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.complex.from.grouping.ContainerWithUsesBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.complex.from.grouping.ListViaUses;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.complex.from.grouping.ListViaUsesBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.complex.from.grouping.ListViaUsesKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.Top;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListKey;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 import com.google.common.util.concurrent.SettableFuture;
 
-/*
- * FIXME: THis test should be moved to compat test-suite and rewriten
- * to use sal-test-model
+/**
+ * FIXME: THis test should be moved to compat test-suite
  */
 @SuppressWarnings("deprecation")
 public class WildcardedDataChangeListenerTest extends AbstractDataServiceTest {
 
-    private static final NodeKey NODE_0_KEY = new NodeKey(new NodeId("test:0"));
-    private static final NodeKey NODE_1_KEY = new NodeKey(new NodeId("test:1"));
+    private static final TopLevelListKey TOP_LEVEL_LIST_0_KEY = new TopLevelListKey("test:0");
+    private static final TopLevelListKey TOP_LEVEL_LIST_1_KEY = new TopLevelListKey("test:1");
 
-    public static final InstanceIdentifier<Flow> DEEP_WILDCARDED_PATH = InstanceIdentifier.builder(Nodes.class)
-            .child(Node.class) //
-            .augmentation(FlowCapableNode.class) //
-            .child(Table.class) //
-            .child(Flow.class) //
+    protected static final InstanceIdentifier<ListViaUses> DEEP_WILDCARDED_PATH = InstanceIdentifier
+            .builder(Top.class)
+            .child(TopLevelList.class) //
+            .augmentation(TreeComplexUsesAugment.class) //
+            .child(ListViaUses.class) //
             .build();
 
-    private static final TableKey TABLE_0_KEY = new TableKey((short) 0);
-    private static final TableFeaturesKey TABLE_FEATURES_KEY = new TableFeaturesKey((short) 0);
-
-    private static final InstanceIdentifier<Table> NODE_0_TABLE_PATH = InstanceIdentifier.builder(Nodes.class)
-            .child(Node.class, NODE_0_KEY) //
-            .augmentation(FlowCapableNode.class) //
-            .child(Table.class, TABLE_0_KEY) //
+    private static final InstanceIdentifier<TreeComplexUsesAugment> NODE_0_TCU_PATH = InstanceIdentifier
+            .builder(Top.class)
+            .child(TopLevelList.class, TOP_LEVEL_LIST_0_KEY) //
+            .augmentation(TreeComplexUsesAugment.class) //
             .build();
 
-    private static final InstanceIdentifier<Table> NODE_1_TABLE_PATH = InstanceIdentifier.builder(Nodes.class)
-            .child(Node.class, NODE_1_KEY) //
-            .augmentation(FlowCapableNode.class) //
-            .child(Table.class, TABLE_0_KEY) //
+    private static final InstanceIdentifier<TreeComplexUsesAugment> NODE_1_TCU_PATH = InstanceIdentifier
+            .builder(Top.class)
+            .child(TopLevelList.class, TOP_LEVEL_LIST_1_KEY) //
+            .augmentation(TreeComplexUsesAugment.class) //
             .build();
 
-    private static final FlowKey FLOW_KEY = new FlowKey(new FlowId("test"));
 
-    private static final InstanceIdentifier<Flow> NODE_0_FLOW_PATH = NODE_0_TABLE_PATH.child(Flow.class, FLOW_KEY);
+    private static final ListViaUsesKey LIST_VIA_USES_KEY = new ListViaUsesKey("test");
 
-    private static final InstanceIdentifier<Flow> NODE_1_FLOW_PATH = NODE_1_TABLE_PATH.child(Flow.class, FLOW_KEY);
+    private static final InstanceIdentifier<ListViaUses> NODE_0_LVU_PATH = NODE_0_TCU_PATH.child(ListViaUses.class, LIST_VIA_USES_KEY);
 
-    private static final InstanceIdentifier<TableFeatures> NODE_0_TABLE_FEATURES_PATH =
-            NODE_0_TABLE_PATH.child(TableFeatures.class, TABLE_FEATURES_KEY);
+    private static final InstanceIdentifier<ListViaUses> NODE_1_LVU_PATH = NODE_1_TCU_PATH.child(ListViaUses.class, LIST_VIA_USES_KEY);
 
-    private static final TableFeatures TABLE_FEATURES = new TableFeaturesBuilder()//
-            .setKey(TABLE_FEATURES_KEY) //
-            .setName("Foo") //
-            .setMaxEntries(1000L) //
+    private static final InstanceIdentifier<ContainerWithUses> NODE_0_CWU_PATH =
+            NODE_0_TCU_PATH.child(ContainerWithUses.class);
+
+    private static final ContainerWithUses CWU= new ContainerWithUsesBuilder()//
+            .setLeafFromGrouping("some container value") //
             .build();
 
-    private static final Flow FLOW = new FlowBuilder() //
-            .setKey(FLOW_KEY) //
-            .setBarrier(true) //
-            .setStrict(true) //
+    private static final ListViaUses LVU = new ListViaUsesBuilder() //
+            .setKey(LIST_VIA_USES_KEY) //
+            .setName("john")
             .build();
 
     @Test
-    public void testSepareteWrites() throws InterruptedException, TimeoutException, ExecutionException {
+    public void testSeparateWrites() throws InterruptedException, TimeoutException, ExecutionException {
 
         DataProviderService dataBroker = testContext.getBindingDataBroker();
 
         final SettableFuture<DataChangeEvent<InstanceIdentifier<?>, DataObject>> eventFuture = SettableFuture.create();
         dataBroker.registerDataChangeListener(DEEP_WILDCARDED_PATH, new DataChangeListener() {
-
             @Override
             public void onDataChanged(final DataChangeEvent<InstanceIdentifier<?>, DataObject> dataChangeEvent) {
                 eventFuture.set(dataChangeEvent);
@@ -110,9 +98,9 @@ public class WildcardedDataChangeListenerTest extends AbstractDataServiceTest {
         });
 
         DataModificationTransaction transaction = dataBroker.beginTransaction();
-        transaction.putOperationalData(NODE_0_TABLE_FEATURES_PATH, TABLE_FEATURES);
-        transaction.putOperationalData(NODE_0_FLOW_PATH, FLOW);
-        transaction.putOperationalData(NODE_1_FLOW_PATH, FLOW);
+        transaction.putOperationalData(NODE_0_CWU_PATH, CWU);
+        transaction.putOperationalData(NODE_0_LVU_PATH, LVU);
+        transaction.putOperationalData(NODE_1_LVU_PATH, LVU);
         transaction.commit().get();
 
         DataChangeEvent<InstanceIdentifier<?>, DataObject> event = eventFuture.get(1000, TimeUnit.MILLISECONDS);
@@ -127,29 +115,26 @@ public class WildcardedDataChangeListenerTest extends AbstractDataServiceTest {
 
         final SettableFuture<DataChangeEvent<InstanceIdentifier<?>, DataObject>> eventFuture = SettableFuture.create();
         dataBroker.registerDataChangeListener(DEEP_WILDCARDED_PATH, new DataChangeListener() {
-
             @Override
             public void onDataChanged(final DataChangeEvent<InstanceIdentifier<?>, DataObject> dataChangeEvent) {
                 eventFuture.set(dataChangeEvent);
             }
         });
 
-        DataModificationTransaction tableTx = dataBroker.beginTransaction();
-        tableTx.putOperationalData(NODE_0_TABLE_FEATURES_PATH, TABLE_FEATURES);
-        tableTx.commit().get();
+        DataModificationTransaction cwuTx = dataBroker.beginTransaction();
+        cwuTx.putOperationalData(NODE_0_CWU_PATH, CWU);
+        cwuTx.commit().get();
 
         assertFalse(eventFuture.isDone());
 
-        DataModificationTransaction flowTx = dataBroker.beginTransaction();
+        DataModificationTransaction lvuTx = dataBroker.beginTransaction();
 
-        Table table = new TableBuilder() //
-                .setKey(TABLE_0_KEY) //
-                .setFlow(Collections.singletonList(FLOW)) //
-                .build();
+        TreeComplexUsesAugment tcua = new TreeComplexUsesAugmentBuilder()
+        .setListViaUses(Collections.singletonList(LVU)).build();
 
-        flowTx.putOperationalData(NODE_0_TABLE_PATH, table);
-        flowTx.putOperationalData(NODE_1_FLOW_PATH, FLOW);
-        flowTx.commit().get();
+        lvuTx.putOperationalData(NODE_0_TCU_PATH, tcua);
+        lvuTx.putOperationalData(NODE_1_LVU_PATH, LVU);
+        lvuTx.commit().get();
 
         validateEvent(eventFuture.get(1000, TimeUnit.MILLISECONDS));
     }
@@ -161,7 +146,7 @@ public class WildcardedDataChangeListenerTest extends AbstractDataServiceTest {
 
         // We wrote initial state NODE_0_FLOW
         DataModificationTransaction transaction = dataBroker.beginTransaction();
-        transaction.putOperationalData(NODE_0_FLOW_PATH, FLOW);
+        transaction.putOperationalData(NODE_0_LVU_PATH, LVU);
         transaction.commit().get();
 
         // We registered DataChangeListener
@@ -176,23 +161,23 @@ public class WildcardedDataChangeListenerTest extends AbstractDataServiceTest {
         assertFalse(eventFuture.isDone());
 
         DataModificationTransaction secondTx = dataBroker.beginTransaction();
-        secondTx.putOperationalData(NODE_0_FLOW_PATH, FLOW);
-        secondTx.putOperationalData(NODE_1_FLOW_PATH, FLOW);
+        secondTx.putOperationalData(NODE_0_LVU_PATH, LVU);
+        secondTx.putOperationalData(NODE_1_LVU_PATH, LVU);
         secondTx.commit().get();
 
         DataChangeEvent<InstanceIdentifier<?>, DataObject> event = (eventFuture.get(1000, TimeUnit.MILLISECONDS));
         assertNotNull(event);
         // Data change should contains NODE_1 Flow - which was added
-        assertTrue(event.getCreatedOperationalData().containsKey(NODE_1_FLOW_PATH));
+        assertTrue(event.getCreatedOperationalData().containsKey(NODE_1_LVU_PATH));
         // Data change must not containe NODE_0 Flow which was replaced with same value.
-        assertFalse(event.getUpdatedOperationalData().containsKey(NODE_0_FLOW_PATH));
+        assertFalse(event.getUpdatedOperationalData().containsKey(NODE_0_LVU_PATH));
     }
 
     private static void validateEvent(final DataChangeEvent<InstanceIdentifier<?>, DataObject> event) {
         assertNotNull(event);
-        assertTrue(event.getCreatedOperationalData().containsKey(NODE_1_FLOW_PATH));
-        assertTrue(event.getCreatedOperationalData().containsKey(NODE_0_FLOW_PATH));
-        assertFalse(event.getCreatedOperationalData().containsKey(NODE_0_TABLE_FEATURES_PATH));
+        assertTrue(event.getCreatedOperationalData().containsKey(NODE_1_LVU_PATH));
+        assertTrue(event.getCreatedOperationalData().containsKey(NODE_0_LVU_PATH));
+        assertFalse(event.getCreatedOperationalData().containsKey(NODE_0_CWU_PATH));
     }
 
 }
