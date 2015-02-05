@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_debdc869",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-02-05T23:55:52Z",
+      "side": 1,
+      "message": "Actually, i left to put null check of followerActor here and that is exactly why i was passing it instead of obtaining inside the method, like it was done in sendAppendEntries.",
+      "parentUuid": "7a96c907_9e8420d5",
+      "revId": "92e55ed12fa5a04b31b60e46d9477ff42adbb8f1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_be879cd6",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
         "patchSetId": 2
