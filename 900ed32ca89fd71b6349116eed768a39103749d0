@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_2f1efc63",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/NormalizedNodeInputStreamReader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-05T02:55:13Z",
+      "side": 1,
+      "message": "Why did you choose to throw InvalidProtocolBufferException? A more specific exception would make things clearer.",
+      "revId": "900ed32ca89fd71b6349116eed768a39103749d0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
