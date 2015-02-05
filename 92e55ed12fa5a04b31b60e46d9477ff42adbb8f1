@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_9e8420d5",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-05T23:43:26Z",
+      "side": 1,
+      "message": "We don\u0027t need to pass followerActor - sendLogEntries can obtain it. Also check for null followerActor in sendLogEntries as sendAppendEntries does.\n\nWe could also pass in followerLogInformation to sendLogEntries and eliminate passing followerNextIndex and isFollowerActive. In this case isFollowerActive will be true anyway since we just set it above.",
+      "revId": "92e55ed12fa5a04b31b60e46d9477ff42adbb8f1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_be879cd6",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 413,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-05T23:43:26Z",
+      "side": 1,
+      "message": "I know this is existing code but we don\u0027t need to look up in the followerToLog here since we\u0027re iterating the entrySet. followerLogInformation \u003d e.getValue()",
+      "revId": "92e55ed12fa5a04b31b60e46d9477ff42adbb8f1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_1e7810f1",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 427,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-05T23:43:26Z",
+      "side": 1,
+      "message": "java doc syntax here - /**",
+      "revId": "92e55ed12fa5a04b31b60e46d9477ff42adbb8f1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5e55384e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 429,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-05T23:43:26Z",
+      "side": 1,
+      "message": "How about:\n\nThis method checks if any update needs to be sent to the given follower. This includes append log entries, sending next snapshot chunk, and initiating a snapshot. \n\n@return true if any update is sent, false otherwise",
+      "revId": "92e55ed12fa5a04b31b60e46d9477ff42adbb8f1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3e738c16",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 433,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-05T23:43:26Z",
+      "side": 1,
+      "message": "This may send log entries and also may send or initiate a snapshot. How about we name it sendUpdatesToFollower?",
+      "revId": "92e55ed12fa5a04b31b60e46d9477ff42adbb8f1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
