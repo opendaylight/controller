@@ -67,6 +67,7 @@ public class DistributedOperationalDataStoreProviderModule extends
                 .shardIsolatedLeaderCheckIntervalInMillis(
                     props.getShardIsolatedLeaderCheckIntervalInMillis().getValue())
                 .shardElectionTimeoutFactor(props.getShardElectionTimeoutFactor().getValue())
+                .transactionCreationInitialRateLimit(props.getTxCreationInitialRateLimit().getValue())
                 .build();
 
         return DistributedDataStoreFactory.createInstance("operational",
