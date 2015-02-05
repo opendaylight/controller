@@ -37,9 +37,9 @@ import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.sal.connect.api.MessageTransformer;
-import org.opendaylight.controller.sal.connect.api.RemoteDeviceCommunicator;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceHandler;
 import org.opendaylight.controller.sal.connect.api.SchemaSourceProviderFactory;
+import org.opendaylight.controller.sal.connect.netconf.listener.NetconfDeviceCommunicator;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionPreferences;
 import org.opendaylight.controller.sal.connect.netconf.sal.NetconfDeviceRpc;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil;
@@ -101,7 +101,7 @@ public class NetconfDeviceTest {
         final ArrayList<String> capList = Lists.newArrayList(TEST_CAPABILITY);
 
         final RemoteDeviceHandler<NetconfSessionPreferences> facade = getFacade();
-        final RemoteDeviceCommunicator<NetconfMessage> listener = getListener();
+        final NetconfDeviceCommunicator listener = getListener();
 
         final SchemaContextFactory schemaFactory = getSchemaFactory();
 
@@ -115,7 +115,7 @@ public class NetconfDeviceTest {
 
         final NetconfDevice.SchemaResourcesDTO schemaResourcesDTO
                 = new NetconfDevice.SchemaResourcesDTO(getSchemaRegistry(), schemaFactory, stateSchemasResolver);
-        final NetconfDevice device = new NetconfDevice(schemaResourcesDTO, getId(), facade, getExecutor(), getMessageTransformer());
+        final NetconfDevice device = new NetconfDevice(schemaResourcesDTO, getId(), facade, getExecutor(), getMessageTransformer(), true);
         // Monitoring not supported
         final NetconfSessionPreferences sessionCaps = getSessionCaps(false, capList);
         device.onRemoteSessionUp(sessionCaps, listener);
@@ -128,7 +128,7 @@ public class NetconfDeviceTest {
     @Test
     public void testNetconfDeviceMissingSource() throws Exception {
         final RemoteDeviceHandler<NetconfSessionPreferences> facade = getFacade();
-        final RemoteDeviceCommunicator<NetconfMessage> listener = getListener();
+        final NetconfDeviceCommunicator listener = getListener();
 
         final SchemaContextFactory schemaFactory = getSchemaFactory();
 
@@ -147,7 +147,7 @@ public class NetconfDeviceTest {
 
         final NetconfDevice.SchemaResourcesDTO schemaResourcesDTO
                 = new NetconfDevice.SchemaResourcesDTO(getSchemaRegistry(), schemaFactory, stateSchemasResolver);
-        final NetconfDevice device = new NetconfDevice(schemaResourcesDTO, getId(), facade, getExecutor(), getMessageTransformer());
+        final NetconfDevice device = new NetconfDevice(schemaResourcesDTO, getId(), facade, getExecutor(), getMessageTransformer(), true);
         // Monitoring supported
         final NetconfSessionPreferences sessionCaps = getSessionCaps(true, Lists.newArrayList(TEST_CAPABILITY, TEST_CAPABILITY2));
         device.onRemoteSessionUp(sessionCaps, listener);
@@ -167,13 +167,13 @@ public class NetconfDeviceTest {
     @Test
     public void testNotificationBeforeSchema() throws Exception {
         final RemoteDeviceHandler<NetconfSessionPreferences> facade = getFacade();
-        final RemoteDeviceCommunicator<NetconfMessage> listener = getListener();
+        final NetconfDeviceCommunicator listener = getListener();
 
         final MessageTransformer<NetconfMessage> messageTransformer = getMessageTransformer();
 
         final NetconfDevice.SchemaResourcesDTO schemaResourcesDTO
                 = new NetconfDevice.SchemaResourcesDTO(getSchemaRegistry(), getSchemaFactory(), stateSchemasResolver);
-        final NetconfDevice device = new NetconfDevice(schemaResourcesDTO, getId(), facade, getExecutor(), messageTransformer);
+        final NetconfDevice device = new NetconfDevice(schemaResourcesDTO, getId(), facade, getExecutor(), messageTransformer, true);
 
         device.onNotification(netconfMessage);
         device.onNotification(netconfMessage);
@@ -196,14 +196,14 @@ public class NetconfDeviceTest {
     @Test
     public void testNetconfDeviceReconnect() throws Exception {
         final RemoteDeviceHandler<NetconfSessionPreferences> facade = getFacade();
-        final RemoteDeviceCommunicator<NetconfMessage> listener = getListener();
+        final NetconfDeviceCommunicator listener = getListener();
 
         final SchemaContextFactory schemaContextProviderFactory = getSchemaFactory();
         final MessageTransformer<NetconfMessage> messageTransformer = getMessageTransformer();
 
         final NetconfDevice.SchemaResourcesDTO schemaResourcesDTO
                 = new NetconfDevice.SchemaResourcesDTO(getSchemaRegistry(), schemaContextProviderFactory, stateSchemasResolver);
-        final NetconfDevice device = new NetconfDevice(schemaResourcesDTO, getId(), facade, getExecutor(), messageTransformer);
+        final NetconfDevice device = new NetconfDevice(schemaResourcesDTO, getId(), facade, getExecutor(), messageTransformer, true);
         final NetconfSessionPreferences sessionCaps = getSessionCaps(true,
                 Lists.newArrayList(TEST_NAMESPACE + "?module=" + TEST_MODULE + "&amp;revision=" + TEST_REVISION));
         device.onRemoteSessionUp(sessionCaps, listener);
@@ -299,8 +299,8 @@ public class NetconfDeviceTest {
                 capabilities);
     }
 
-    public RemoteDeviceCommunicator<NetconfMessage> getListener() throws Exception {
-        final RemoteDeviceCommunicator<NetconfMessage> remoteDeviceCommunicator = mockCloseableClass(RemoteDeviceCommunicator.class);
+    public NetconfDeviceCommunicator getListener() throws Exception {
+        final NetconfDeviceCommunicator remoteDeviceCommunicator = mockCloseableClass(NetconfDeviceCommunicator.class);
         doReturn(Futures.immediateFuture(rpcResult)).when(remoteDeviceCommunicator).sendRequest(any(NetconfMessage.class), any(QName.class));
         return remoteDeviceCommunicator;
     }
