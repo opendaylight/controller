@@ -126,6 +126,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_c32acf2b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-05T18:32:29Z",
+      "side": 1,
+      "message": "Sounds good although I don\u0027t want to make this too complicated.",
+      "parentUuid": "7a96c907_234cd36f",
+      "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_ef9c94c2",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
         "patchSetId": 1
@@ -419,6 +437,24 @@
       "side": 1,
       "message": "I\u0027ll do this in a separate commit - I think if I go down this path I will be refactoring a lot of code and that will take away from the spirit of this commit.",
       "parentUuid": "7a96c907_8fcdd05f",
+      "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_e306ebcd",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-05T18:32:29Z",
+      "side": 1,
+      "message": "That\u0027s fine although I\u0027m not sure what would need to be refactored. The dataStoreType param is new for this patch and we already pass in DatastoreContext.",
+      "parentUuid": "7a96c907_c3ce4fb4",
       "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
