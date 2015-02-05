@@ -284,6 +284,40 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_08d53642",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-05T14:31:12Z",
+      "side": 1,
+      "message": "Since this isn\u0027t static, it should be lower-case.",
+      "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_28e8320f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-05T14:31:12Z",
+      "side": 1,
+      "message": "This can be static.",
+      "revId": "aebd40426054914ae33b82b0b6b0426de64da8d4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_ef4ed46e",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
         "patchSetId": 1
