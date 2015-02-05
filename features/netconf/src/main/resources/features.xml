@@ -22,6 +22,8 @@
     <bundle>mvn:org.opendaylight.controller/netconf-api/${project.version}</bundle>
     <bundle>mvn:org.opendaylight.controller/netconf-auth/${project.version}</bundle>
     <bundle>mvn:org.opendaylight.controller/ietf-netconf-monitoring/${project.version}</bundle>
+    <bundle>mvn:org.opendaylight.controller/ietf-netconf/${project.version}</bundle>
+    <bundle>mvn:org.opendaylight.controller/ietf-netconf-notifications/${project.version}</bundle>
     <bundle>mvn:org.opendaylight.controller/ietf-netconf-monitoring-extension/${project.version}</bundle>
     <bundle>mvn:org.opendaylight.yangtools.model/ietf-inet-types/${ietf-inet-types.version}</bundle>
     <bundle>mvn:org.opendaylight.yangtools.model/ietf-yang-types/${ietf-yang-types.version}</bundle>
@@ -43,6 +45,7 @@
     <feature version='${project.version}'>odl-config-netconf-connector</feature>
     <!-- Netconf will not provide schemas without monitoring -->
     <feature version='${project.version}'>odl-netconf-monitoring</feature>
+    <feature version='${project.version}'>odl-netconf-notifications-impl</feature>
     <bundle>mvn:org.opendaylight.controller/netconf-impl/${project.version}</bundle>
   </feature>
   <feature name='odl-config-netconf-connector' version='${project.version}' description="OpenDaylight :: Netconf :: Connector">
@@ -50,6 +53,7 @@
     <feature version='${project.version}'>odl-netconf-api</feature>
     <feature version='${project.version}'>odl-netconf-mapping-api</feature>
     <feature version='${project.version}'>odl-netconf-util</feature>
+    <feature version='${project.version}'>odl-netconf-notifications-api</feature>
     <bundle>mvn:org.opendaylight.controller/config-netconf-connector/${project.version}</bundle>
   </feature>
   <feature name='odl-netconf-netty-util' version='${project.version}' description="OpenDaylight :: Netconf :: Netty Util">
@@ -74,6 +78,14 @@
   <feature name='odl-netconf-monitoring' version='${project.version}' description="OpenDaylight :: Netconf :: Monitoring">
     <feature version='${project.version}'>odl-netconf-util</feature>
     <bundle>mvn:org.opendaylight.controller/netconf-monitoring/${project.version}</bundle>
+  </feature>
+  <feature name='odl-netconf-notifications-api' version='${project.version}' description="OpenDaylight :: Netconf :: Notification :: Api">
+    <feature version='${project.version}'>odl-netconf-api</feature>
+    <bundle>mvn:org.opendaylight.controller/netconf-notifications-api/${project.version}</bundle>
+  </feature>
+  <feature name='odl-netconf-notifications-impl' version='${project.version}' description="OpenDaylight :: Netconf :: Monitoring :: Impl">
+    <feature version='${project.version}'>odl-netconf-notifications-api</feature>
+    <bundle>mvn:org.opendaylight.controller/netconf-notifications-impl/${project.version}</bundle>
   </feature>
 
 </features>
