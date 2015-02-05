@@ -226,6 +226,13 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             applyLogToStateMachine(context.getCommitIndex());
         }
 
+        //Send the next log entry immediately, if possible, no need to wait for heartbeat to trigger that event
+
+        final long followerNextIndex = followerLogInformation.getNextIndex();
+        final ActorSelection followerActor = context.getPeerActorSelection(followerId);
+
+        sendLogEntries(followerId, followerActor, followerNextIndex, true);
+
         return this;
     }
 
@@ -407,55 +414,72 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 long followerNextIndex = followerLogInformation.getNextIndex();
                 boolean isFollowerActive = followerLogInformation.isFollowerActive();
 
-                if (mapFollowerToSnapshot.get(followerId) != null) {
-                    // if install snapshot is in process , then sent next chunk if possible
-                    if (isFollowerActive && mapFollowerToSnapshot.get(followerId).canSendNextChunk()) {
-                        sendSnapshotChunk(followerActor, followerId);
-                    } else {
-                        // we send a heartbeat even if we have not received a reply for the last chunk
-                        sendAppendEntriesToFollower(followerActor, followerNextIndex,
-                            Collections.<ReplicatedLogEntry>emptyList());
-                    }
+                boolean entriesSent = sendLogEntries(followerId, followerActor, followerNextIndex, isFollowerActive);
 
-                } else {
-                    long leaderLastIndex = context.getReplicatedLog().lastIndex();
-                    long leaderSnapShotIndex = context.getReplicatedLog().getSnapshotIndex();
-                    final List<ReplicatedLogEntry> entries;
-
-                    if (isFollowerActive &&
-                        context.getReplicatedLog().isPresent(followerNextIndex)) {
-                        // FIXME : Sending one entry at a time
-                        entries = context.getReplicatedLog().getFrom(followerNextIndex, 1);
-
-                    } else if (isFollowerActive && followerNextIndex >= 0 &&
-                        leaderLastIndex >= followerNextIndex ) {
-                        // if the followers next index is not present in the leaders log, and
-                        // if the follower is just not starting and if leader's index is more than followers index
-                        // then snapshot should be sent
-
-                        if(LOG.isDebugEnabled()) {
-                            LOG.debug("InitiateInstallSnapshot to follower:{}," +
-                                    "follower-nextIndex:{}, leader-snapshot-index:{},  " +
-                                    "leader-last-index:{}", followerId,
-                                followerNextIndex, leaderSnapShotIndex, leaderLastIndex
-                            );
-                        }
-                        actor().tell(new InitiateInstallSnapshot(), actor());
-
-                        // we would want to sent AE as the capture snapshot might take time
-                        entries =  Collections.<ReplicatedLogEntry>emptyList();
-
-                    } else {
-                        //we send an AppendEntries, even if the follower is inactive
-                        // in-order to update the followers timestamp, in case it becomes active again
-                        entries =  Collections.<ReplicatedLogEntry>emptyList();
-                    }
-
-                    sendAppendEntriesToFollower(followerActor, followerNextIndex, entries);
-
+                if(!entriesSent) {
+                    sendAppendEntriesToFollower(followerActor, followerNextIndex,
+                        Collections.<ReplicatedLogEntry>emptyList());
                 }
             }
         }
+    }
+
+    /*
+        This method sends the append entries to the given follower, if entries are not sent, then it returns false.
+        this return value can be used to sent empty entries list as a heartbeat message
+     */
+
+    private boolean sendLogEntries(String followerId, ActorSelection followerActor, long followerNextIndex,
+                                   boolean isFollowerActive) {
+
+        boolean entriesSent = true;
+
+        if (mapFollowerToSnapshot.get(followerId) != null) {
+            // if install snapshot is in process , then sent next chunk if possible
+            if (isFollowerActive && mapFollowerToSnapshot.get(followerId).canSendNextChunk()) {
+                sendSnapshotChunk(followerActor, followerId);
+            } else {
+                // we send a heartbeat even if we have not received a reply for the last chunk
+                entriesSent = false;
+            }
+
+        } else {
+            long leaderLastIndex = context.getReplicatedLog().lastIndex();
+            long leaderSnapShotIndex = context.getReplicatedLog().getSnapshotIndex();
+
+            if (isFollowerActive &&
+                context.getReplicatedLog().isPresent(followerNextIndex)) {
+                // FIXME : Sending one entry at a time
+                final List<ReplicatedLogEntry> entries = context.getReplicatedLog().getFrom(followerNextIndex, 1);
+
+                sendAppendEntriesToFollower(followerActor, followerNextIndex, entries);
+
+            } else if (isFollowerActive && followerNextIndex >= 0 &&
+                leaderLastIndex >= followerNextIndex ) {
+                // if the followers next index is not present in the leaders log, and
+                // if the follower is just not starting and if leader's index is more than followers index
+                // then snapshot should be sent
+
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("InitiateInstallSnapshot to follower:{}," +
+                            "follower-nextIndex:{}, leader-snapshot-index:{},  " +
+                            "leader-last-index:{}", followerId,
+                        followerNextIndex, leaderSnapShotIndex, leaderLastIndex
+                    );
+                }
+                actor().tell(new InitiateInstallSnapshot(), actor());
+
+                entriesSent = false;
+
+            } else {
+                //we send an AppendEntries, even if the follower is inactive
+                // in-order to update the followers timestamp, in case it becomes active again
+                entriesSent = false;
+            }
+
+        }
+
+        return entriesSent;
     }
 
     private void sendAppendEntriesToFollower(ActorSelection followerActor, long followerNextIndex,
