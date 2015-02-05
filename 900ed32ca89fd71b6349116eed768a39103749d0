@@ -52,6 +52,24 @@
       "revId": "900ed32ca89fd71b6349116eed768a39103749d0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_e896caef",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/NormalizedNodeInputStreamReader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-05T16:59:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_2fa03c9e",
+      "revId": "900ed32ca89fd71b6349116eed768a39103749d0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
