@@ -412,10 +412,10 @@ public class ShardTransactionTest extends AbstractActorTest {
     }
 
     @Test
-    public void testOnReceiveCloseTransaction() throws Exception {
+    public void testReadWriteTxOnReceiveCloseTransaction() throws Exception {
         new JavaTestKit(getSystem()) {{
             final ActorRef transaction = newTransactionActor(store.newReadWriteTransaction(),
-                    "testCloseTransaction");
+                    "testReadWriteTxOnReceiveCloseTransaction");
 
             watch(transaction);
 
@@ -423,6 +423,35 @@ public class ShardTransactionTest extends AbstractActorTest {
 
             expectMsgClass(duration("3 seconds"), CloseTransactionReply.SERIALIZABLE_CLASS);
             expectTerminated(duration("3 seconds"), transaction);
+        }};
+    }
+
+    @Test
+    public void testWriteOnlyTxOnReceiveCloseTransaction() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            final ActorRef transaction = newTransactionActor(store.newWriteOnlyTransaction(),
+                    "testWriteTxOnReceiveCloseTransaction");
+
+            watch(transaction);
+
+            transaction.tell(new CloseTransaction().toSerializable(), getRef());
+
+            expectMsgClass(duration("3 seconds"), CloseTransactionReply.SERIALIZABLE_CLASS);
+            expectTerminated(duration("3 seconds"), transaction);
+        }};
+    }
+
+    @Test
+    public void testReadOnlyTxOnReceiveCloseTransaction() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            final ActorRef transaction = newTransactionActor(store.newReadOnlyTransaction(),
+                    "testReadOnlyTxOnReceiveCloseTransaction");
+
+            watch(transaction);
+
+            transaction.tell(new CloseTransaction().toSerializable(), getRef());
+
+            expectMsgClass(duration("3 seconds"), Terminated.class);
         }};
     }
 

@@ -39,12 +39,6 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
  * The ShardTransaction Actor delegates all actions to DOMDataReadWriteTransaction
  * </p>
  * <p>
- * Even though the DOMStore and the DOMStoreTransactionChain implement multiple types of transactions
- * the ShardTransaction Actor only works with read-write transactions. This is just to keep the logic simple. At this
- * time there are no known advantages for creating a read-only or write-only transaction which may change over time
- * at which point we can optimize things in the distributed store as well.
- * </p>
- * <p>
  * Handles Messages <br/>
  * ---------------- <br/>
  * <li> {@link org.opendaylight.controller.cluster.datastore.messages.ReadData}
@@ -114,10 +108,14 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         }
     }
 
+    protected boolean returnCloseTransactionReply() {
+        return true;
+    }
+
     private void closeTransaction(boolean sendReply) {
         getDOMStoreTransaction().close();
 
-        if(sendReply) {
+        if(sendReply && returnCloseTransactionReply()) {
             getSender().tell(CloseTransactionReply.INSTANCE.toSerializable(), getSelf());
         }
 

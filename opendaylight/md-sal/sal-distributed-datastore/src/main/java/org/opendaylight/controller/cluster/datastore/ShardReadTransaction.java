@@ -96,4 +96,9 @@ public class ShardReadTransaction extends ShardTransaction {
     protected DOMStoreTransaction getDOMStoreTransaction() {
         return transaction;
     }
+
+    @Override
+    protected boolean returnCloseTransactionReply() {
+        return false;
+    }
 }
