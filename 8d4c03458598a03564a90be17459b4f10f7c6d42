@@ -148,6 +148,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_9e366051",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-02-06T01:36:56Z",
+      "side": 1,
+      "message": "well each domain/resource has distinct id, but basic property of the id is same, it\u0027s just a string associated with one resource. I see it something like network.id (subnet.id, port.id), if i understand your comment, you want it something like network.network-id?",
+      "parentUuid": "7a96c907_a86e82ff",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_36552550",
         "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
         "patchSetId": 1
@@ -292,6 +310,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_7e691424",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-02-06T01:36:56Z",
+      "side": 1,
+      "message": "this is dictionary of name value pair,  providing options as name value pairs, such as, opt_name\u003d\u0027bootfile-name\u0027, opt_value\u003d\u0027pxelinux.0\u0027",
+      "parentUuid": "7a96c907_c848ae89",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_685f1a42",
         "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
         "patchSetId": 1
@@ -309,6 +345,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_beec7c90",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-02-06T01:36:56Z",
+      "side": 1,
+      "message": "see above reply.",
+      "parentUuid": "7a96c907_685f1a42",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_c8718ee1",
         "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
         "patchSetId": 1
@@ -320,6 +374,24 @@
       "writtenOn": "2015-02-05T17:23:09Z",
       "side": 1,
       "message": "a reference do definition would be nice.",
+      "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5e03f841",
+        "filename": "opendaylight/networkconfiguration/neutron/model/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-02-06T01:36:56Z",
+      "side": 1,
+      "message": "see above reply",
+      "parentUuid": "7a96c907_c8718ee1",
       "revId": "8d4c03458598a03564a90be17459b4f10f7c6d42",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
