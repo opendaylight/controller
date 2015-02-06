@@ -6,6 +6,8 @@
       "http://netconfcentral.org/ns/toaster";
 
     prefix toast;
+    
+    import restconf-doc-ext { prefix "restconf-ext"; }
 
     organization "Netconf Central";
 
@@ -196,5 +198,7 @@
           "Indicates the amount of bread that was re-stocked";
       }
     }  // notification toasterOutOfStock
+    
+    restconf-ext:module-scope-private;
     
   }  // module toaster

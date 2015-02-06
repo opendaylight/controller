@@ -1,0 +1,33 @@
+module hidden_completely {
+
+  yang-version 1;
+
+  namespace "namespace";
+
+  prefix hidden;
+  import restconf-doc-ext { prefix "restconf-ext"; }
+
+  organization "Organization";
+
+  contact
+    "Alex Fan <alefan@cisco.org>";
+
+  description
+    "Description";
+
+  revision "2009-11-20" {
+    description
+      "Revision in progress.";
+  }
+
+  container top {
+    description
+      "Top-level container";
+
+    leaf top-leaf {
+      type string;
+    }
+  }
+  restconf-ext:module-scope-private;
+
+}

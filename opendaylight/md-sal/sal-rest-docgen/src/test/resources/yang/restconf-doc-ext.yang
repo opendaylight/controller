@@ -1,0 +1,24 @@
+module restconf-doc-ext {
+    yang-version 1;
+    namespace "urn:simple.extension.typedefs";
+    prefix "restconf-ext";
+
+    organization "opendaylight";
+    contact "http://www.opendaylight.org/";
+
+    description "Model rest conf extension typedefs.";
+
+    revision "2015-01-27" {
+        reference "Initial revision.";
+    }
+
+    extension module-scope-private {
+        description "Presence of this extension keyword indicates that this module should be hidden from restconf documentation. Thus marking it private.";
+    }
+    
+    extension children-scope-private {
+        description "TBD";
+    }
+
+
+}

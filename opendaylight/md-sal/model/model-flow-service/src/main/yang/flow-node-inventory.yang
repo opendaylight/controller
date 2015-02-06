@@ -10,7 +10,8 @@ module flow-node-inventory {
     import opendaylight-flow-types {prefix flow;revision-date "2013-10-26";}
     import opendaylight-group-types {prefix group;revision-date "2013-10-18";}
     import opendaylight-meter-types {prefix meter;revision-date "2013-09-18";}
-    
+    import restconf-doc-ext { prefix "restconf-ext"; }
+
     revision "2013-08-19" {
         description "Flow Capable Node extensions to the Inventory model";
     }
@@ -202,6 +203,7 @@ module flow-node-inventory {
             }
             
         }
+        restconf-ext:children-scope-private;
     }
 
     grouping flow-node-connector {

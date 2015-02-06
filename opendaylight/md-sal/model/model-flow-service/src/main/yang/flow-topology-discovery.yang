@@ -3,7 +3,8 @@ module flow-topology-discovery {
     prefix flow-node-topo;
 
     import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
-    
+    import restconf-doc-ext { prefix "restconf-ext"; }
+
     revision "2013-08-19" {
         description "Flow Capable Node extensions to the Inventory model";
     }
@@ -38,5 +39,7 @@ module flow-topology-discovery {
     rpc solicit-refresh {
     
     }
+
+    restconf-ext:module-scope-private;
 
 }

@@ -5,6 +5,7 @@ module flow-capable-transaction {
     import opendaylight-inventory {prefix inv; revision-date "2013-08-19";}
     import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
     import yang-ext {prefix ext; revision-date "2013-07-09";}
+    import restconf-doc-ext { prefix "restconf-ext"; }
 
     revision "2013-11-03" {
         description "Initial revision";
@@ -59,4 +60,7 @@ module flow-capable-transaction {
             }
         }
     }
+    
+    restconf-ext:module-scope-private;
+
 }

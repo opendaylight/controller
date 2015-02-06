@@ -4,6 +4,7 @@ module opendaylight-inventory {
 
     import yang-ext {prefix ext; revision-date "2013-07-09";}
     import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
+    import restconf-doc-ext { prefix "restconf-ext"; }
 
 
     revision "2013-08-19" {
@@ -97,6 +98,7 @@ module opendaylight-inventory {
             ext:context-instance "node-connector-context";
 
             uses node-connector;
+            
         }
     }
 
@@ -110,6 +112,7 @@ module opendaylight-inventory {
             type node-connector-id;
             description "The unique identifier for the node-connector.";
         }
+        restconf-ext:children-scope-private;
     }
 
     grouping node-context-ref {

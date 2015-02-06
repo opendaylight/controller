@@ -10,7 +10,7 @@ module packet-processing {
     import opendaylight-table-types {prefix table-type;revision-date "2013-10-26";}
     import opendaylight-action-types {prefix action-type;revision-date "2013-11-12";}
     import opendaylight-flow-types {prefix flow-type;revision-date "2013-10-26";}
-
+    import restconf-doc-ext { prefix "restconf-ext"; }
     
     revision "2013-07-09" {
         description "";
@@ -103,4 +103,6 @@ module packet-processing {
 		uses action-type:action-list;
     	}
     }
+    
+    restconf-ext:module-scope-private;
 }

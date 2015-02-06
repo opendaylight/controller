@@ -6,6 +6,7 @@ module config-logging {
 
     import config { prefix config; revision-date 2013-04-05; }
     import rpc-context { prefix rpcx; revision-date 2013-06-17; }
+    import restconf-doc-ext { prefix "restconf-ext"; }
 
     organization "Cisco Systems, Inc.";
 
@@ -189,6 +190,8 @@ module config-logging {
             }
         }
     }
+
+    restconf-ext:module-scope-private;
 
 }
 

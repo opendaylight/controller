@@ -55,6 +55,10 @@
       <artifactId>slf4j-log4j12</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools.model</groupId>
+      <artifactId>yang-ext</artifactId>
+    </dependency>
   </dependencies>
 
   <build>

@@ -1,10 +1,5 @@
 package org.opendaylight.controller.sal.rest.doc.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import com.google.common.base.Preconditions;
 import java.io.File;
 import java.util.Arrays;
@@ -29,6 +24,13 @@ import org.opendaylight.controller.sal.rest.doc.swagger.ResourceList;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 
 /**
  *
@@ -71,7 +73,27 @@ public class ApiDocGeneratorTest {
         }
     }
 
-    /**
+  @Test
+  public void testHiddenChildren() throws Exception {
+    Preconditions.checkArgument(helper.getModules() != null, "No modules found");
+
+    for (Entry<File, Module> m : helper.getModules().entrySet()) {
+      if (m.getKey().getAbsolutePath().endsWith("hidden.yang")) {
+        ApiDeclaration doc = generator.getSwaggerDocSpec(m.getValue(), "http://localhost:8080/restconf", "",
+                schemaContext);
+
+        List<Api> apis = doc.getApis();
+        for(Api api: apis){
+          assertFalse("hidden-list should have been hidden", (api.getPath().contains("hidden-list")));
+          assertFalse("hidden-augmented should have been hidden", (api.getPath().contains("hidden-augmented")));
+          assertFalse("augmented_container should have been hidden", (api.getPath().contains("augmented_container")));
+        }
+      }
+    }
+  }
+
+
+  /**
      * Validate whether ApiDelcaration contains Apis with concrete path and whether this Apis contain specified POST
      * operations.
      */
@@ -274,17 +296,26 @@ public class ApiDocGeneratorTest {
 
         Resource toaster = null;
         Resource toaster2 = null;
-        for (Resource r : resourceListing.getApis()) {
+        Resource hidden_completely = null;
+        Resource children_hidden = null;
+
+      for (Resource r : resourceListing.getApis()) {
             String path = r.getPath();
             if (path.contains("toaster2")) {
                 toaster2 = r;
             } else if (path.contains("toaster")) {
                 toaster = r;
+            } else if (path.contains("hidden_completely")) {
+              hidden_completely = r;
+            } else if (path.contains("hidden")) {
+              children_hidden = r;
             }
         }
 
         assertNotNull(toaster2);
         assertNotNull(toaster);
+        assertNotNull(children_hidden);
+        assertNull(hidden_completely);
 
         assertEquals(HTTP_HOST + "/toaster(2009-11-20)", toaster.getPath());
         assertEquals(HTTP_HOST + "/toaster2(2009-11-20)", toaster2.getPath());

@@ -13,6 +13,7 @@ module ietf-netconf-monitoring {
     import ietf-inet-types {
       prefix inet;
     }
+    import restconf-doc-ext { prefix "restconf-ext"; }
 
     organization
       "IETF NETCONF (Network Configuration) Working Group";
@@ -590,4 +591,7 @@ module ietf-netconf-monitoring {
         }
       }
     }  // rpc get-schema
+    
+    restconf-ext:module-scope-private;
+
 } // module

@@ -6,6 +6,7 @@ module threadpool-impl {
     import threadpool { prefix th; revision-date 2013-04-09; }
     import config { prefix config; revision-date 2013-04-05; }
     import rpc-context { prefix rpcx; revision-date 2013-06-17; }
+    import restconf-doc-ext { prefix "restconf-ext"; }
 
     organization "Cisco Systems, Inc.";
 
@@ -112,5 +113,8 @@ module threadpool-impl {
             }
         }
     }
+    
+    restconf-ext:module-scope-private;
+
 }
 

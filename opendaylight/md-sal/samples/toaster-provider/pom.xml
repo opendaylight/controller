@@ -39,6 +39,10 @@
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools.model</groupId>
+      <artifactId>yang-ext</artifactId>
+    </dependency>
 
     <!-- dependencies to use AbstractDataBrokerTest -->
     <dependency>

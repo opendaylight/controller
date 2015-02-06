@@ -6,7 +6,8 @@ module opendaylight-action-types {
     import ietf-yang-types {prefix yang; revision-date "2010-09-24";}
     import opendaylight-l2-types {prefix l2t; revision-date "2013-08-27";}
     import opendaylight-match-types {prefix match; revision-date "2013-10-26";}
-    
+    import restconf-doc-ext { prefix "restconf-ext"; }
+
     revision "2013-11-12" {
         description "Initial revision of action service";
     }
@@ -348,4 +349,6 @@ module opendaylight-action-types {
              }  
          }
      }
+     
+     restconf-ext:module-scope-private;
 }

@@ -7,7 +7,8 @@ module opendaylight-meter-statistics {
     import flow-node-inventory {prefix flow-node;revision-date "2013-08-19";}
     import opendaylight-meter-types {prefix meter-types;revision-date "2013-09-18";}
     import flow-capable-transaction {prefix tr;}
-    
+    import restconf-doc-ext { prefix "restconf-ext"; }
+
     contact
         "Anilkumar Vishnoi
         Email: avishnoi@in.ibm.com";
@@ -38,6 +39,7 @@ module opendaylight-meter-statistics {
             //config "false";
             uses meter-types:meter-features-reply;
         }
+        restconf-ext:children-scope-private;
     }
 
     // RPC calls

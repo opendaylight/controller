@@ -1,0 +1,24 @@
+module hidden_augmented {
+
+    yang-version 1;
+
+    namespace
+      "http://netconfcentral.org/ns/hidden/augmented";
+
+    prefix toast;
+    import hidden {prefix hc; revision-date 2009-11-20;}
+    import restconf-doc-ext { prefix "restconf-ext"; }
+
+    revision "2014-7-14" {
+    }
+
+    augment "/hc:visible_parent" {
+        container augmented_container {
+            leaf aug-leaf {
+                type uint32;
+            }
+        }
+        //hiding the augmented container from doc
+        restconf-ext:children-scope-private;
+    }
+}

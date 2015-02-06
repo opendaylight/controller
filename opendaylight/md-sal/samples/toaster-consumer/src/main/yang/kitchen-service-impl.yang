@@ -9,6 +9,7 @@ module kitchen-service-impl {
     import rpc-context { prefix rpcx; revision-date 2013-06-17; }
 
     import opendaylight-md-sal-binding { prefix mdsal; revision-date 2013-10-28; }
+    import restconf-doc-ext { prefix "restconf-ext"; }
 
     description
         "This module contains the base YANG definitions for
@@ -84,4 +85,7 @@ module kitchen-service-impl {
             }
         }
     }
+    
+    restconf-ext:module-scope-private;
+
 }

@@ -1,0 +1,43 @@
+module hidden {
+
+    yang-version 1;
+
+    namespace
+      "http://netconfcentral.org/ns/hidden";
+
+    prefix hidden;
+    import restconf-doc-ext { prefix "restconf-ext"; }
+
+
+    organization "Netconf Central";
+
+    contact
+      "Andy Bierman <andy@netconfcentral.org>";
+
+    description
+      "YANG version of the TOASTER-MIB.";
+
+    revision "2009-11-20" {
+      description
+        "Toaster module in progress.";
+    }
+
+    container visible_parent {
+        container hidden_children {
+
+             leaf id {
+                 type string;
+             }
+             list hidden-list {
+             		        key "id";
+                             leaf id {
+                                 type string;
+                             }
+
+             }
+             restconf-ext:children-scope-private;
+        }
+    }
+
+
+  }

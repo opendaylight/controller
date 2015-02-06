@@ -17,6 +17,10 @@
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-common</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools.model</groupId>
+      <artifactId>yang-ext</artifactId>
+    </dependency>
   </dependencies>
 
   <build>

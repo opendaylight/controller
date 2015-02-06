@@ -6,6 +6,7 @@ module statistics-manager {
 
     import config { prefix config; revision-date 2013-04-05; }
     import opendaylight-md-sal-binding { prefix mdsal; revision-date 2013-10-28; }
+    import restconf-doc-ext { prefix "restconf-ext"; }
 
     description
         "This module contains the base YANG definitions for
@@ -62,5 +63,5 @@ module statistics-manager {
             }
         }
     }
-
+    restconf-ext:module-scope-private;
 }
