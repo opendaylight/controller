@@ -295,6 +295,24 @@ public class RestconfImpl implements RestconfService {
     }
 
     @Override
+    public NormalizedNodeContext getOperations(final String identifier, final UriInfo uriInfo) {
+        Set<Module> modules = null;
+        DOMMountPoint mountPoint = null;
+        if (identifier.contains(ControllerContext.MOUNT)) {
+            final InstanceIdentifierContext mountPointIdentifier =
+                    controllerContext.toMountPointIdentifier(identifier);
+            mountPoint = mountPointIdentifier.getMountPoint();
+            modules = controllerContext.getAllModules(mountPoint);
+        } else {
+            final String errMsg = "URI has bad format. If operations behind mount point should be showed,"
+                    + " URI has to end with " + ControllerContext.MOUNT;
+            throw new RestconfDocumentedException(errMsg, ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
+        }
+
+        return operationsFromModulesToNormalizedContext(modules, mountPoint);
+    }
+
+    @Override
     public StructuredData getAvailableStreams(final UriInfo uriInfo) {
         final Set<String> availableStreams = Notificator.getStreamNames();
 
@@ -311,23 +329,6 @@ public class RestconfImpl implements RestconfService {
         final QName qName = streamsSchemaNode.getQName();
         final CompositeNode streamsNode = NodeFactory.createImmutableCompositeNode(qName, null, streamsAsData);
         return new StructuredData(streamsNode, streamsSchemaNode, null, parsePrettyPrintParameter(uriInfo));
-    }
-
-    @Override
-    public StructuredData getOperations(final String identifier, final UriInfo uriInfo) {
-        Set<Module> modules = null;
-        DOMMountPoint mountPoint = null;
-        if (identifier.contains(ControllerContext.MOUNT)) {
-            final InstanceIdentifierContext mountPointIdentifier = controllerContext.toMountPointIdentifier(identifier);
-            mountPoint = mountPointIdentifier.getMountPoint();
-            modules = controllerContext.getAllModules(mountPoint);
-        } else {
-            throw new RestconfDocumentedException(
-                    "URI has bad format. If operations behind mount point should be showed, URI has to end with "
-                            + ControllerContext.MOUNT, ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
-        }
-
-        return operationsFromModulesToStructuredData(modules, mountPoint, parsePrettyPrintParameter(uriInfo));
     }
 
     private StructuredData operationsFromModulesToStructuredData(final Set<Module> modules,

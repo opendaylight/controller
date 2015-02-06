@@ -62,7 +62,7 @@ public class StatisticsRestconfServiceWrapper implements RestconfService {
     }
 
     @Override
-    public StructuredData getOperations(final String identifier, final UriInfo uriInfo) {
+    public NormalizedNodeContext getOperations(final String identifier, final UriInfo uriInfo) {
         return delegate.getOperations(identifier, uriInfo);
     }
 
