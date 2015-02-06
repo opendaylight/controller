@@ -43,6 +43,7 @@ public class NeutronNorthboundRSApplication extends Application {
         classes.add(NeutronLoadBalancerPoolNorthbound.class);
         classes.add(NeutronLoadBalancerHealthMonitorNorthbound.class);
         classes.add(NeutronLoadBalancerPoolMembersNorthbound.class);
+      classes.add(MOXyJsonProvider.class);
         return classes;
     }
 
@@ -56,9 +57,10 @@ public class NeutronNorthboundRSApplication extends Application {
         moxyJsonProvider.setMarshalEmptyCollections(true);
         moxyJsonProvider.setValueWrapper("$");
 
-        Map<String, String> namespacePrefixMapper = new HashMap<String, String>(1);
+        Map<String, String> namespacePrefixMapper = new HashMap<String, String>(3);
         namespacePrefixMapper.put("router", "router");        // FIXME: fill in with XSD
         namespacePrefixMapper.put("provider", "provider");    // FIXME: fill in with XSD
+        namespacePrefixMapper.put("binding", "binding");
         moxyJsonProvider.setNamespacePrefixMapper(namespacePrefixMapper);
         moxyJsonProvider.setNamespaceSeparator(':');
 
