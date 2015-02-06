@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_990afa1f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-06T00:19:01Z",
+      "side": 1,
+      "message": "InitializeBehavior should be the last thing that we call. After this call the RaftActor will join the Raft cluster. That should not happen before recovery is really complete and the state is fully updated.",
+      "revId": "ea861df919ae064646cc06a3d7c15e73382e3db4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
