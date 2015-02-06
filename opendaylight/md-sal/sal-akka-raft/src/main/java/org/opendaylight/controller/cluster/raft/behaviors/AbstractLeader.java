@@ -337,6 +337,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
         if (followerToSnapshot != null &&
             followerToSnapshot.getChunkIndex() == reply.getChunkIndex()) {
+            boolean wasLastChunk = false;
 
             if (reply.isSuccess()) {
                 if(followerToSnapshot.isLastChunk(reply.getChunkIndex())) {
@@ -365,6 +366,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                         // we can remove snapshot from the memory
                         setSnapshot(Optional.<ByteString>absent());
                     }
+                    wasLastChunk = true;
 
                 } else {
                     followerToSnapshot.markSendStatus(true);
@@ -375,6 +377,14 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
                 followerToSnapshot.markSendStatus(false);
             }
+
+            if (!wasLastChunk && followerToSnapshot.canSendNextChunk()) {
+                ActorSelection followerActor = context.getPeerActorSelection(followerId);
+                if(followerActor != null) {
+                    sendSnapshotChunk(followerActor, followerId);
+                }
+            }
+
 
         } else {
             LOG.error("{}: FollowerId in InstallSnapshotReply not known to Leader" +
