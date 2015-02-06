@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_ae9c475e",
+        "filename": "opendaylight/archetypes/opendaylight-startup/src/main/resources/archetype-resources/__artifactId__-features/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-02-06T18:38:16Z",
+      "side": 1,
+      "message": "Is this necessary? I ask because I was thinking the opposite (i.e. remove it from api,impl,karaf).",
+      "revId": "12fa2670527dfe66df922dd2feb2001eec3f60ba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
