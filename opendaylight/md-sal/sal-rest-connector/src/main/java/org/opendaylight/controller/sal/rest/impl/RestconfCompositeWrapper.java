@@ -37,7 +37,7 @@ public class RestconfCompositeWrapper implements RestconfService, SchemaRetrieva
     }
 
     @Override
-    public StructuredData getModule(final String identifier, final UriInfo uriInfo) {
+    public NormalizedNodeContext getModule(final String identifier, final UriInfo uriInfo) {
         return restconf.getModule(identifier, uriInfo);
     }
 
