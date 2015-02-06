@@ -128,6 +128,33 @@ public class AbstractReplicatedLogImplTest {
 
     }
 
+    @Test
+    public void testSnapshotPreCommit() {
+        replicatedLogImpl.append(new MockReplicatedLogEntry(2, 4, new MockPayload("E")));
+        replicatedLogImpl.append(new MockReplicatedLogEntry(2, 5, new MockPayload("F")));
+        replicatedLogImpl.append(new MockReplicatedLogEntry(3, 6, new MockPayload("G")));
+        replicatedLogImpl.append(new MockReplicatedLogEntry(3, 7, new MockPayload("H")));
+
+        replicatedLogImpl.snapshotPreCommit(4, 3);
+        assertEquals(3, replicatedLogImpl.size());
+        assertEquals(4, replicatedLogImpl.getSnapshotIndex());
+
+        replicatedLogImpl.snapshotPreCommit(6, 3);
+        assertEquals(1, replicatedLogImpl.size());
+        assertEquals(6, replicatedLogImpl.getSnapshotIndex());
+
+        replicatedLogImpl.snapshotPreCommit(7, 3);
+        assertEquals(0, replicatedLogImpl.size());
+        assertEquals(7, replicatedLogImpl.getSnapshotIndex());
+
+        //running it again on an empty list should not throw exception
+        replicatedLogImpl.snapshotPreCommit(7, 3);
+        assertEquals(0, replicatedLogImpl.size());
+        assertEquals(7, replicatedLogImpl.getSnapshotIndex());
+
+
+    }
+
     // create a snapshot for test
     public Map<Long, String> takeSnapshot(final int numEntries) {
         Map<Long, String> map = new HashMap<>(numEntries);

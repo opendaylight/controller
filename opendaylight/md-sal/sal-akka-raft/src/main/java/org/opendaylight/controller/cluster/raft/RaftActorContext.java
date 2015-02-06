@@ -89,7 +89,7 @@ public interface RaftActorContext {
      *
      * @param replicatedLog
      */
-    public void setReplicatedLog(ReplicatedLog replicatedLog);
+    void setReplicatedLog(ReplicatedLog replicatedLog);
 
     /**
      * @return A representation of the log
@@ -137,7 +137,7 @@ public interface RaftActorContext {
      *
      * @param name
      */
-    public void removePeer(String name);
+    void removePeer(String name);
 
     /**
      * Given a peerId return the corresponding actor
@@ -165,5 +165,10 @@ public interface RaftActorContext {
     /**
      * @return ConfigParams
      */
-    public ConfigParams getConfigParams();
+    ConfigParams getConfigParams();
+
+    void setSnapshotCaptureInitiated(boolean snapshotCaptureInitiated);
+
+    boolean isSnapshotCaptureInitiated();
+
 }
