@@ -119,7 +119,7 @@ public class StatisticsRestconfServiceWrapper implements RestconfService {
     }
 
     @Override
-    public StructuredData getAvailableStreams(final UriInfo uriInfo) {
+    public NormalizedNodeContext getAvailableStreams(final UriInfo uriInfo) {
         return delegate.getAvailableStreams(uriInfo);
     }
 

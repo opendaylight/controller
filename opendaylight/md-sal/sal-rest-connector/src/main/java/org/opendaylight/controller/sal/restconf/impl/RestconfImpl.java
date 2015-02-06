@@ -313,22 +313,23 @@ public class RestconfImpl implements RestconfService {
     }
 
     @Override
-    public StructuredData getAvailableStreams(final UriInfo uriInfo) {
+    public NormalizedNodeContext getAvailableStreams(final UriInfo uriInfo) {
+        final SchemaContext schemaContext = controllerContext.getGlobalSchema();
         final Set<String> availableStreams = Notificator.getStreamNames();
-
-        final List<Node<?>> streamsAsData = new ArrayList<Node<?>>();
         final Module restconfModule = getRestconfModule();
         final DataSchemaNode streamSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(restconfModule,
                 Draft02.RestConfModule.STREAM_LIST_SCHEMA_NODE);
+        Preconditions.checkState(streamSchemaNode instanceof ListSchemaNode);
+
+        final CollectionNodeBuilder<MapEntryNode, MapNode> listStreamsBuilder = Builders
+                .mapBuilder((ListSchemaNode) streamSchemaNode);
+
         for (final String streamName : availableStreams) {
-            streamsAsData.add(toStreamCompositeNode(streamName, streamSchemaNode));
+            listStreamsBuilder.withChild(toStreamEntryNode(streamName, streamSchemaNode));
         }
 
-        final DataSchemaNode streamsSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(restconfModule,
-                Draft02.RestConfModule.STREAMS_CONTAINER_SCHEMA_NODE);
-        final QName qName = streamsSchemaNode.getQName();
-        final CompositeNode streamsNode = NodeFactory.createImmutableCompositeNode(qName, null, streamsAsData);
-        return new StructuredData(streamsNode, streamsSchemaNode, null, parsePrettyPrintParameter(uriInfo));
+        return new NormalizedNodeContext(new InstanceIdentifierContext(null, streamSchemaNode, null,
+                schemaContext), listStreamsBuilder.build());
     }
 
     private StructuredData operationsFromModulesToStructuredData(final Set<Module> modules,
@@ -1698,5 +1699,50 @@ public class RestconfImpl implements RestconfService {
 
         return new NormalizedNodeContext(new InstanceIdentifierContext(null, operationsSchemaNode,
                 mountPoint, schemaContext), operationsContainerBuilder.build());
+    }
+
+    protected MapEntryNode toStreamEntryNode(final String streamName, final DataSchemaNode streamSchemaNode) {
+        Preconditions.checkArgument(streamSchemaNode instanceof ListSchemaNode,
+                "streamSchemaNode has to be of type ListSchemaNode");
+        final ListSchemaNode listStreamSchemaNode = (ListSchemaNode) streamSchemaNode;
+        final DataContainerNodeAttrBuilder<NodeIdentifierWithPredicates, MapEntryNode> streamNodeValues = Builders
+                .mapEntryBuilder(listStreamSchemaNode);
+
+        List<DataSchemaNode> instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
+                (listStreamSchemaNode), "name");
+        final DataSchemaNode nameSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
+        Preconditions.checkState(nameSchemaNode instanceof LeafSchemaNode);
+        streamNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) nameSchemaNode).withValue(streamName)
+                .build());
+
+        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
+                (listStreamSchemaNode), "description");
+        final DataSchemaNode descriptionSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
+        Preconditions.checkState(descriptionSchemaNode instanceof LeafSchemaNode);
+        streamNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) nameSchemaNode)
+                .withValue("DESCRIPTION_PLACEHOLDER").build());
+
+        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
+                (listStreamSchemaNode), "replay-support");
+        final DataSchemaNode replaySupportSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
+        Preconditions.checkState(replaySupportSchemaNode instanceof LeafSchemaNode);
+        streamNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) replaySupportSchemaNode)
+                .withValue(Boolean.valueOf(true)).build());
+
+        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
+                (listStreamSchemaNode), "replay-log-creation-time");
+        final DataSchemaNode replayLogCreationTimeSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
+        Preconditions.checkState(replayLogCreationTimeSchemaNode instanceof LeafSchemaNode);
+        streamNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) replayLogCreationTimeSchemaNode)
+                .withValue("").build());
+
+        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
+                (listStreamSchemaNode), "events");
+        final DataSchemaNode eventsSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
+        Preconditions.checkState(eventsSchemaNode instanceof LeafSchemaNode);
+        streamNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) eventsSchemaNode)
+                .withValue("").build());
+
+        return streamNodeValues.build();
     }
 }
