@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_5e2698cf",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-02-06T00:15:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_9e8420d5",
+      "revId": "92e55ed12fa5a04b31b60e46d9477ff42adbb8f1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_be879cd6",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
         "patchSetId": 2
@@ -48,6 +66,24 @@
       "writtenOn": "2015-02-05T23:43:26Z",
       "side": 1,
       "message": "I know this is existing code but we don\u0027t need to look up in the followerToLog here since we\u0027re iterating the entrySet. followerLogInformation \u003d e.getValue()",
+      "revId": "92e55ed12fa5a04b31b60e46d9477ff42adbb8f1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_9e3c20e4",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 413,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-02-06T00:15:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_be879cd6",
       "revId": "92e55ed12fa5a04b31b60e46d9477ff42adbb8f1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -71,6 +107,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_be3f9cd5",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 427,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-02-06T00:15:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_1e7810f1",
+      "revId": "92e55ed12fa5a04b31b60e46d9477ff42adbb8f1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_5e55384e",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
         "patchSetId": 2
@@ -88,6 +142,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_fe3524f7",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 429,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-02-06T00:15:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_5e55384e",
+      "revId": "92e55ed12fa5a04b31b60e46d9477ff42adbb8f1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_3e738c16",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
         "patchSetId": 2
@@ -99,6 +171,24 @@
       "writtenOn": "2015-02-05T23:43:26Z",
       "side": 1,
       "message": "This may send log entries and also may send or initiate a snapshot. How about we name it sendUpdatesToFollower?",
+      "revId": "92e55ed12fa5a04b31b60e46d9477ff42adbb8f1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_de32a80f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 433,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-02-06T00:15:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_3e738c16",
       "revId": "92e55ed12fa5a04b31b60e46d9477ff42adbb8f1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
