@@ -47,7 +47,7 @@ public class StatisticsRestconfServiceWrapper implements RestconfService {
     }
 
     @Override
-    public StructuredData getModules(final String identifier, final UriInfo uriInfo) {
+    public NormalizedNodeContext getModules(final String identifier, final UriInfo uriInfo) {
         return delegate.getModules(identifier, uriInfo);
     }
 
