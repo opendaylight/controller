@@ -63,13 +63,22 @@ import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.InstanceIdentifierBuilder;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
+import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
+import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
+import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ModifiedNodeDoesNotExistException;
 import org.opendaylight.yangtools.yang.data.composite.node.schema.cnsn.parser.CnSnToNormalizedNodeParserFactory;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
+import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeAttrBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.ListNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
@@ -163,11 +172,11 @@ public class RestconfImpl implements RestconfService {
         try {
             EVENT_SUBSCRIPTION_AUGMENT_REVISION = new SimpleDateFormat("yyyy-MM-dd").parse("2014-07-08");
             NETCONF_BASE_QNAME = QName.create(QNameModule.create(new URI(NETCONF_BASE), null), NETCONF_BASE_PAYLOAD_NAME );
-        } catch (ParseException e) {
+        } catch (final ParseException e) {
             throw new RestconfDocumentedException(
                     "It wasn't possible to convert revision date of sal-remote-augment to date", ErrorType.APPLICATION,
                     ErrorTag.OPERATION_FAILED);
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             throw new RestconfDocumentedException(
                     "It wasn't possible to create instance of URI class with "+NETCONF_BASE+" URI", ErrorType.APPLICATION,
                     ErrorTag.OPERATION_FAILED);
@@ -190,41 +199,40 @@ public class RestconfImpl implements RestconfService {
     }
 
     @Override
-    public StructuredData getModules(final UriInfo uriInfo) {
-        final Module restconfModule = this.getRestconfModule();
+    public NormalizedNodeContext getModules(final UriInfo uriInfo) {
+        final Set<Module> allModules = controllerContext.getAllModules();
+        final MapNode allModuleMap = makeModuleMapNode(allModules);
 
-        final List<Node<?>> modulesAsData = new ArrayList<Node<?>>();
-        final DataSchemaNode moduleSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(restconfModule,
-                Draft02.RestConfModule.MODULE_LIST_SCHEMA_NODE);
+        final SchemaContext schemaContext = controllerContext.getGlobalSchema();
 
-        Set<Module> allModules = this.controllerContext.getAllModules();
-        for (final Module module : allModules) {
-            CompositeNode moduleCompositeNode = this.toModuleCompositeNode(module, moduleSchemaNode);
-            modulesAsData.add(moduleCompositeNode);
-        }
+        final Module restconfModule = getRestconfModule();
+        final DataSchemaNode modulesSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(
+                restconfModule, Draft02.RestConfModule.MODULES_CONTAINER_SCHEMA_NODE);
+        Preconditions.checkState(modulesSchemaNode instanceof ContainerSchemaNode);
 
-        final DataSchemaNode modulesSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(restconfModule,
-                Draft02.RestConfModule.MODULES_CONTAINER_SCHEMA_NODE);
-        QName qName = modulesSchemaNode.getQName();
-        final CompositeNode modulesNode = NodeFactory.createImmutableCompositeNode(qName, null, modulesAsData);
-        return new StructuredData(modulesNode, modulesSchemaNode, null, parsePrettyPrintParameter(uriInfo));
+        final DataContainerNodeAttrBuilder<NodeIdentifier, ContainerNode> moduleContainerBuilder =
+                Builders.containerBuilder((ContainerSchemaNode) modulesSchemaNode);
+        moduleContainerBuilder.withChild(allModuleMap);
+
+        return new NormalizedNodeContext(new InstanceIdentifierContext(null, modulesSchemaNode,
+                null, schemaContext), moduleContainerBuilder.build());
     }
 
     @Override
     public StructuredData getAvailableStreams(final UriInfo uriInfo) {
-        Set<String> availableStreams = Notificator.getStreamNames();
+        final Set<String> availableStreams = Notificator.getStreamNames();
 
         final List<Node<?>> streamsAsData = new ArrayList<Node<?>>();
-        Module restconfModule = this.getRestconfModule();
+        final Module restconfModule = getRestconfModule();
         final DataSchemaNode streamSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(restconfModule,
                 Draft02.RestConfModule.STREAM_LIST_SCHEMA_NODE);
         for (final String streamName : availableStreams) {
-            streamsAsData.add(this.toStreamCompositeNode(streamName, streamSchemaNode));
+            streamsAsData.add(toStreamCompositeNode(streamName, streamSchemaNode));
         }
 
         final DataSchemaNode streamsSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(restconfModule,
                 Draft02.RestConfModule.STREAMS_CONTAINER_SCHEMA_NODE);
-        QName qName = streamsSchemaNode.getQName();
+        final QName qName = streamsSchemaNode.getQName();
         final CompositeNode streamsNode = NodeFactory.createImmutableCompositeNode(qName, null, streamsAsData);
         return new StructuredData(streamsNode, streamsSchemaNode, null, parsePrettyPrintParameter(uriInfo));
     }
@@ -234,9 +242,9 @@ public class RestconfImpl implements RestconfService {
         Set<Module> modules = null;
         DOMMountPoint mountPoint = null;
         if (identifier.contains(ControllerContext.MOUNT)) {
-            InstanceIdentifierContext mountPointIdentifier = this.controllerContext.toMountPointIdentifier(identifier);
+            final InstanceIdentifierContext mountPointIdentifier = controllerContext.toMountPointIdentifier(identifier);
             mountPoint = mountPointIdentifier.getMountPoint();
-            modules = this.controllerContext.getAllModules(mountPoint);
+            modules = controllerContext.getAllModules(mountPoint);
         } else {
             throw new RestconfDocumentedException(
                     "URI has bad format. If modules behind mount point should be showed, URI has to end with "
@@ -244,32 +252,32 @@ public class RestconfImpl implements RestconfService {
         }
 
         final List<Node<?>> modulesAsData = new ArrayList<Node<?>>();
-        Module restconfModule = this.getRestconfModule();
+        final Module restconfModule = getRestconfModule();
         final DataSchemaNode moduleSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(restconfModule,
                 Draft02.RestConfModule.MODULE_LIST_SCHEMA_NODE);
 
         for (final Module module : modules) {
-            modulesAsData.add(this.toModuleCompositeNode(module, moduleSchemaNode));
+            modulesAsData.add(toModuleCompositeNode(module, moduleSchemaNode));
         }
 
         final DataSchemaNode modulesSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(restconfModule,
                 Draft02.RestConfModule.MODULES_CONTAINER_SCHEMA_NODE);
-        QName qName = modulesSchemaNode.getQName();
+        final QName qName = modulesSchemaNode.getQName();
         final CompositeNode modulesNode = NodeFactory.createImmutableCompositeNode(qName, null, modulesAsData);
         return new StructuredData(modulesNode, modulesSchemaNode, mountPoint, parsePrettyPrintParameter(uriInfo));
     }
 
     @Override
     public StructuredData getModule(final String identifier, final UriInfo uriInfo) {
-        final QName moduleNameAndRevision = this.getModuleNameAndRevision(identifier);
+        final QName moduleNameAndRevision = getModuleNameAndRevision(identifier);
         Module module = null;
         DOMMountPoint mountPoint = null;
         if (identifier.contains(ControllerContext.MOUNT)) {
-            InstanceIdentifierContext mountPointIdentifier = this.controllerContext.toMountPointIdentifier(identifier);
+            final InstanceIdentifierContext mountPointIdentifier = controllerContext.toMountPointIdentifier(identifier);
             mountPoint = mountPointIdentifier.getMountPoint();
-            module = this.controllerContext.findModuleByNameAndRevision(mountPoint, moduleNameAndRevision);
+            module = controllerContext.findModuleByNameAndRevision(mountPoint, moduleNameAndRevision);
         } else {
-            module = this.controllerContext.findModuleByNameAndRevision(moduleNameAndRevision);
+            module = controllerContext.findModuleByNameAndRevision(moduleNameAndRevision);
         }
 
         if (module == null) {
@@ -278,17 +286,17 @@ public class RestconfImpl implements RestconfService {
                     ErrorType.PROTOCOL, ErrorTag.UNKNOWN_ELEMENT);
         }
 
-        Module restconfModule = this.getRestconfModule();
+        final Module restconfModule = getRestconfModule();
         final DataSchemaNode moduleSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(restconfModule,
                 Draft02.RestConfModule.MODULE_LIST_SCHEMA_NODE);
-        final CompositeNode moduleNode = this.toModuleCompositeNode(module, moduleSchemaNode);
+        final CompositeNode moduleNode = toModuleCompositeNode(module, moduleSchemaNode);
         return new StructuredData(moduleNode, moduleSchemaNode, mountPoint, parsePrettyPrintParameter(uriInfo));
     }
 
     @Override
     public StructuredData getOperations(final UriInfo uriInfo) {
-        Set<Module> allModules = this.controllerContext.getAllModules();
-        return this.operationsFromModulesToStructuredData(allModules, null, parsePrettyPrintParameter(uriInfo));
+        final Set<Module> allModules = controllerContext.getAllModules();
+        return operationsFromModulesToStructuredData(allModules, null, parsePrettyPrintParameter(uriInfo));
     }
 
     @Override
@@ -296,56 +304,56 @@ public class RestconfImpl implements RestconfService {
         Set<Module> modules = null;
         DOMMountPoint mountPoint = null;
         if (identifier.contains(ControllerContext.MOUNT)) {
-            InstanceIdentifierContext mountPointIdentifier = this.controllerContext.toMountPointIdentifier(identifier);
+            final InstanceIdentifierContext mountPointIdentifier = controllerContext.toMountPointIdentifier(identifier);
             mountPoint = mountPointIdentifier.getMountPoint();
-            modules = this.controllerContext.getAllModules(mountPoint);
+            modules = controllerContext.getAllModules(mountPoint);
         } else {
             throw new RestconfDocumentedException(
                     "URI has bad format. If operations behind mount point should be showed, URI has to end with "
                             + ControllerContext.MOUNT, ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
         }
 
-        return this.operationsFromModulesToStructuredData(modules, mountPoint, parsePrettyPrintParameter(uriInfo));
+        return operationsFromModulesToStructuredData(modules, mountPoint, parsePrettyPrintParameter(uriInfo));
     }
 
     private StructuredData operationsFromModulesToStructuredData(final Set<Module> modules,
             final DOMMountPoint mountPoint, final boolean prettyPrint) {
         final List<Node<?>> operationsAsData = new ArrayList<Node<?>>();
-        Module restconfModule = this.getRestconfModule();
+        final Module restconfModule = getRestconfModule();
         final DataSchemaNode operationsSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(
                 restconfModule, Draft02.RestConfModule.OPERATIONS_CONTAINER_SCHEMA_NODE);
-        QName qName = operationsSchemaNode.getQName();
-        SchemaPath path = operationsSchemaNode.getPath();
-        ContainerSchemaNodeBuilder containerSchemaNodeBuilder = new ContainerSchemaNodeBuilder(
+        final QName qName = operationsSchemaNode.getQName();
+        final SchemaPath path = operationsSchemaNode.getPath();
+        final ContainerSchemaNodeBuilder containerSchemaNodeBuilder = new ContainerSchemaNodeBuilder(
                 Draft02.RestConfModule.NAME, 0, qName, path);
         final ContainerSchemaNodeBuilder fakeOperationsSchemaNode = containerSchemaNodeBuilder;
         for (final Module module : modules) {
-            Set<RpcDefinition> rpcs = module.getRpcs();
+            final Set<RpcDefinition> rpcs = module.getRpcs();
             for (final RpcDefinition rpc : rpcs) {
-                QName rpcQName = rpc.getQName();
-                SimpleNode<Object> immutableSimpleNode = NodeFactory.<Object> createImmutableSimpleNode(rpcQName, null,
+                final QName rpcQName = rpc.getQName();
+                final SimpleNode<Object> immutableSimpleNode = NodeFactory.<Object> createImmutableSimpleNode(rpcQName, null,
                         null);
                 operationsAsData.add(immutableSimpleNode);
 
-                String name = module.getName();
-                LeafSchemaNodeBuilder leafSchemaNodeBuilder = new LeafSchemaNodeBuilder(name, 0, rpcQName,
+                final String name = module.getName();
+                final LeafSchemaNodeBuilder leafSchemaNodeBuilder = new LeafSchemaNodeBuilder(name, 0, rpcQName,
                         SchemaPath.create(true, QName.create("dummy")));
                 final LeafSchemaNodeBuilder fakeRpcSchemaNode = leafSchemaNodeBuilder;
                 fakeRpcSchemaNode.setAugmenting(true);
 
-                EmptyType instance = EmptyType.getInstance();
+                final EmptyType instance = EmptyType.getInstance();
                 fakeRpcSchemaNode.setType(instance);
                 fakeOperationsSchemaNode.addChildNode(fakeRpcSchemaNode.build());
             }
         }
 
         final CompositeNode operationsNode = NodeFactory.createImmutableCompositeNode(qName, null, operationsAsData);
-        ContainerSchemaNode schemaNode = fakeOperationsSchemaNode.build();
+        final ContainerSchemaNode schemaNode = fakeOperationsSchemaNode.build();
         return new StructuredData(operationsNode, schemaNode, mountPoint, prettyPrint);
     }
 
     private Module getRestconfModule() {
-        Module restconfModule = controllerContext.getRestconfModule();
+        final Module restconfModule = controllerContext.getRestconfModule();
         if (restconfModule == null) {
             throw new RestconfDocumentedException("ietf-restconf module was not found.", ErrorType.APPLICATION,
                     ErrorTag.OPERATION_NOT_SUPPORTED);
@@ -363,8 +371,8 @@ public class RestconfImpl implements RestconfService {
             moduleNameAndRevision = identifier;
         }
 
-        Splitter splitter = Splitter.on("/").omitEmptyStrings();
-        Iterable<String> split = splitter.split(moduleNameAndRevision);
+        final Splitter splitter = Splitter.on("/").omitEmptyStrings();
+        final Iterable<String> split = splitter.split(moduleNameAndRevision);
         final List<String> pathArgs = Lists.<String> newArrayList(split);
         if (pathArgs.size() < 2) {
             throw new RestconfDocumentedException(
@@ -374,10 +382,10 @@ public class RestconfImpl implements RestconfService {
 
         try {
             final String moduleName = pathArgs.get(0);
-            String revision = pathArgs.get(1);
+            final String revision = pathArgs.get(1);
             final Date moduleRevision = REVISION_FORMAT.parse(revision);
             return QName.create(null, moduleRevision, moduleName);
-        } catch (ParseException e) {
+        } catch (final ParseException e) {
             throw new RestconfDocumentedException("URI has bad format. It should be \'moduleName/yyyy-MM-dd\'",
                     ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
         }
@@ -428,7 +436,7 @@ public class RestconfImpl implements RestconfService {
         instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
                 ((DataNodeContainer) moduleSchemaNode), "revision");
         final DataSchemaNode revisionSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
-        Date _revision = module.getRevision();
+        final Date _revision = module.getRevision();
         moduleNodeValues.add(NodeFactory.<String> createImmutableSimpleNode(revisionSchemaNode.getQName(), null,
                 REVISION_FORMAT.format(_revision)));
 
@@ -456,9 +464,9 @@ public class RestconfImpl implements RestconfService {
 
     @Override
     public StructuredData invokeRpc(final String identifier, final CompositeNode payload, final UriInfo uriInfo) {
-        final RpcExecutor rpc = this.resolveIdentifierInInvokeRpc(identifier);
-        QName rpcName = rpc.getRpcDefinition().getQName();
-        URI rpcNamespace = rpcName.getNamespace();
+        final RpcExecutor rpc = resolveIdentifierInInvokeRpc(identifier);
+        final QName rpcName = rpc.getRpcDefinition().getQName();
+        final URI rpcNamespace = rpcName.getNamespace();
         if (Objects.equal(rpcNamespace.toString(), SAL_REMOTE_NAMESPACE)
                 && Objects.equal(rpcName.getLocalName(), SAL_REMOTE_RPC_SUBSRCIBE)) {
             return invokeSalRemoteRpcSubscribeRPC(payload, rpc.getRpcDefinition(), parsePrettyPrintParameter(uriInfo));
@@ -500,7 +508,7 @@ public class RestconfImpl implements RestconfService {
         final YangInstanceIdentifier pathIdentifier = ((YangInstanceIdentifier) pathValue);
         String streamName = null;
         if (!Iterables.isEmpty(pathIdentifier.getPathArguments())) {
-            String fullRestconfIdentifier = this.controllerContext.toFullRestconfIdentifier(pathIdentifier);
+            final String fullRestconfIdentifier = controllerContext.toFullRestconfIdentifier(pathIdentifier);
 
             LogicalDatastoreType datastore = parseEnumTypeParameter(value, LogicalDatastoreType.class,
                     DATASTORE_PARAM_NAME);
@@ -547,12 +555,12 @@ public class RestconfImpl implements RestconfService {
         DOMMountPoint mountPoint = null;
         if (identifier.contains(ControllerContext.MOUNT)) {
             // mounted RPC call - look up mount instance.
-            InstanceIdentifierContext mountPointId = controllerContext.toMountPointIdentifier(identifier);
+            final InstanceIdentifierContext mountPointId = controllerContext.toMountPointIdentifier(identifier);
             mountPoint = mountPointId.getMountPoint();
 
-            int startOfRemoteRpcName = identifier.lastIndexOf(ControllerContext.MOUNT)
+            final int startOfRemoteRpcName = identifier.lastIndexOf(ControllerContext.MOUNT)
                     + ControllerContext.MOUNT.length() + 1;
-            String remoteRpcName = identifier.substring(startOfRemoteRpcName);
+            final String remoteRpcName = identifier.substring(startOfRemoteRpcName);
             identifierEncoded = remoteRpcName;
 
         } else if (identifier.indexOf("/") != CHAR_NOT_FOUND) {
@@ -591,9 +599,9 @@ public class RestconfImpl implements RestconfService {
                     + " couldn't be splitted to 2 parts (module:rpc name)", ErrorType.APPLICATION,
                     ErrorTag.INVALID_VALUE);
         }
-        for (Module module : schemaContext.getModules()) {
+        for (final Module module : schemaContext.getModules()) {
             if (module.getName().equals(splittedIdentifier[0])) {
-                for (RpcDefinition rpcDefinition : module.getRpcs()) {
+                for (final RpcDefinition rpcDefinition : module.getRpcs()) {
                     if (rpcDefinition.getQName().getLocalName().equals(splittedIdentifier[1])) {
                         return rpcDefinition;
                     }
@@ -609,18 +617,18 @@ public class RestconfImpl implements RestconfService {
         }
 
         CompositeNode rpcRequest = null;
-        RpcDefinition rpc = rpcExecutor.getRpcDefinition();
-        QName rpcName = rpc.getQName();
+        final RpcDefinition rpc = rpcExecutor.getRpcDefinition();
+        final QName rpcName = rpc.getQName();
 
         if (payload == null) {
             rpcRequest = NodeFactory.createMutableCompositeNode(rpcName, null, null, null, null);
         } else {
             final CompositeNode value = this.normalizeNode(payload, rpc.getInput(), null);
-            List<Node<?>> input = Collections.<Node<?>> singletonList(value);
+            final List<Node<?>> input = Collections.<Node<?>> singletonList(value);
             rpcRequest = NodeFactory.createMutableCompositeNode(rpcName, null, input, null, null);
         }
 
-        RpcResult<CompositeNode> rpcResult = rpcExecutor.invokeRpc(rpcRequest);
+        final RpcResult<CompositeNode> rpcResult = rpcExecutor.invokeRpc(rpcRequest);
 
         checkRpcSuccessAndThrowException(rpcResult);
 
@@ -646,7 +654,7 @@ public class RestconfImpl implements RestconfService {
     @Override
     public NormalizedNodeContext readConfigurationData(final String identifier, final UriInfo uriInfo) {
         final InstanceIdentifierContext iiWithData = controllerContext.toInstanceIdentifier(identifier);
-        DOMMountPoint mountPoint = iiWithData.getMountPoint();
+        final DOMMountPoint mountPoint = iiWithData.getMountPoint();
         NormalizedNode<?, ?> data = null;
         YangInstanceIdentifier normalizedII;
         if (mountPoint != null) {
@@ -667,9 +675,9 @@ public class RestconfImpl implements RestconfService {
         }
 
         if (node instanceof CompositeNode) {
-            ImmutableList.Builder<Node<?>> newChildNodes = ImmutableList.<Node<?>> builder();
+            final ImmutableList.Builder<Node<?>> newChildNodes = ImmutableList.<Node<?>> builder();
             if (depth > 1) {
-                for (Node<?> childNode : ((CompositeNode) node).getValue()) {
+                for (final Node<?> childNode : ((CompositeNode) node).getValue()) {
                     newChildNodes.add(pruneDataAtDepth(childNode, depth - 1));
                 }
             }
@@ -681,13 +689,13 @@ public class RestconfImpl implements RestconfService {
     }
 
     private Integer parseDepthParameter(final UriInfo info) {
-        String param = info.getQueryParameters(false).getFirst(UriParameters.DEPTH.toString());
+        final String param = info.getQueryParameters(false).getFirst(UriParameters.DEPTH.toString());
         if (Strings.isNullOrEmpty(param) || "unbounded".equals(param)) {
             return null;
         }
 
         try {
-            Integer depth = Integer.valueOf(param);
+            final Integer depth = Integer.valueOf(param);
             if (depth < 1) {
                 throw new RestconfDocumentedException(new RestconfError(ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE,
                         "Invalid depth parameter: " + depth, null,
@@ -695,7 +703,7 @@ public class RestconfImpl implements RestconfService {
             }
 
             return depth;
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             throw new RestconfDocumentedException(new RestconfError(ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE,
                     "Invalid depth parameter: " + e.getMessage(), null,
                     "The depth parameter must be an integer > 1 or \"unbounded\""));
@@ -705,7 +713,7 @@ public class RestconfImpl implements RestconfService {
     @Override
     public NormalizedNodeContext readOperationalData(final String identifier, final UriInfo info) {
         final InstanceIdentifierContext iiWithData = controllerContext.toInstanceIdentifier(identifier);
-        DOMMountPoint mountPoint = iiWithData.getMountPoint();
+        final DOMMountPoint mountPoint = iiWithData.getMountPoint();
         NormalizedNode<?, ?> data = null;
         YangInstanceIdentifier normalizedII;
         if (mountPoint != null) {
@@ -721,17 +729,17 @@ public class RestconfImpl implements RestconfService {
     }
 
     private boolean parsePrettyPrintParameter(final UriInfo info) {
-        String param = info.getQueryParameters(false).getFirst(UriParameters.PRETTY_PRINT.toString());
+        final String param = info.getQueryParameters(false).getFirst(UriParameters.PRETTY_PRINT.toString());
         return Boolean.parseBoolean(param);
     }
 
     @Override
     public Response updateConfigurationData(final String identifier, final Node<?> payload) {
-        final InstanceIdentifierContext iiWithData = this.controllerContext.toInstanceIdentifier(identifier);
+        final InstanceIdentifierContext iiWithData = controllerContext.toInstanceIdentifier(identifier);
 
         validateInput(iiWithData.getSchemaNode(), payload);
 
-        DOMMountPoint mountPoint = iiWithData.getMountPoint();
+        final DOMMountPoint mountPoint = iiWithData.getMountPoint();
         validateTopLevelNodeName(payload, iiWithData.getInstanceIdentifier());
         final CompositeNode value = this.normalizeNode(payload, iiWithData.getSchemaNode(), mountPoint);
         validateListKeysEqualityInPayloadAndUri(iiWithData, value);
@@ -772,7 +780,7 @@ public class RestconfImpl implements RestconfService {
                 }
 
                 break;
-            } catch (TransactionCommitFailedException e) {
+            } catch (final TransactionCommitFailedException e) {
                 if(e instanceof OptimisticLockFailedException) {
                     if(--tries <= 0) {
                         LOG.debug("Got OptimisticLockFailedException on last try - failing");
@@ -834,7 +842,7 @@ public class RestconfImpl implements RestconfService {
 
     private void isEqualUriAndPayloadKeyValues(final Map<QName, Object> uriKeyValues, final CompositeNode payload,
             final List<QName> keyDefinitions) {
-        for (QName keyDefinition : keyDefinitions) {
+        for (final QName keyDefinition : keyDefinitions) {
             final Object uriKeyValue = uriKeyValues.get(keyDefinition);
             // should be caught during parsing URI to InstanceIdentifier
             if (uriKeyValue == null) {
@@ -847,7 +855,7 @@ public class RestconfImpl implements RestconfService {
                         + " in the message body.", ErrorType.PROTOCOL, ErrorTag.DATA_MISSING);
             }
 
-            Object payloadKeyValue = payloadKeyValues.iterator().next().getValue();
+            final Object payloadKeyValue = payloadKeyValues.iterator().next().getValue();
             if (!uriKeyValue.equals(payloadKeyValue)) {
                 throw new RestconfDocumentedException("The value '" + uriKeyValue + "' for key '"
                         + keyDefinition.getLocalName() + "' specified in the URI doesn't match the value '"
@@ -863,7 +871,7 @@ public class RestconfImpl implements RestconfService {
             throw new RestconfDocumentedException("Input is required.", ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE);
         }
 
-        URI payloadNS = this.namespace(payload);
+        final URI payloadNS = namespace(payload);
         if (payloadNS == null) {
             throw new RestconfDocumentedException(
                     "Data has bad format. Root element node must have namespace (XML format) or module name(JSON format)",
@@ -872,27 +880,27 @@ public class RestconfImpl implements RestconfService {
 
         InstanceIdentifierContext iiWithData = null;
         CompositeNode value = null;
-        if (this.representsMountPointRootData(payload)) {
+        if (representsMountPointRootData(payload)) {
             // payload represents mount point data and URI represents path to the mount point
 
-            if (this.endsWithMountPoint(identifier)) {
+            if (endsWithMountPoint(identifier)) {
                 throw new RestconfDocumentedException("URI has bad format. URI should be without \""
                         + ControllerContext.MOUNT + "\" for POST operation.", ErrorType.PROTOCOL,
                         ErrorTag.INVALID_VALUE);
             }
 
-            final String completeIdentifier = this.addMountPointIdentifier(identifier);
-            iiWithData = this.controllerContext.toInstanceIdentifier(completeIdentifier);
+            final String completeIdentifier = addMountPointIdentifier(identifier);
+            iiWithData = controllerContext.toInstanceIdentifier(completeIdentifier);
 
             value = this.normalizeNode(payload, iiWithData.getSchemaNode(), iiWithData.getMountPoint());
         } else {
-            final InstanceIdentifierContext incompleteInstIdWithData = this.controllerContext
+            final InstanceIdentifierContext incompleteInstIdWithData = controllerContext
                     .toInstanceIdentifier(identifier);
             final DataNodeContainer parentSchema = (DataNodeContainer) incompleteInstIdWithData.getSchemaNode();
-            DOMMountPoint mountPoint = incompleteInstIdWithData.getMountPoint();
+            final DOMMountPoint mountPoint = incompleteInstIdWithData.getMountPoint();
             final Module module = findModule(mountPoint, payload);
 
-            String payloadName = this.getName(payload);
+            final String payloadName = getName(payload);
             final DataSchemaNode schemaNode = ControllerContext.findInstanceDataChildByNameAndNamespace(
                     parentSchema, payloadName, module.getNamespace());
             value = this.normalizeNode(payload, schemaNode, mountPoint);
@@ -902,7 +910,7 @@ public class RestconfImpl implements RestconfService {
 
         final NormalizedNode<?, ?> datastoreNormalizedData = compositeNodeToDatastoreNormalizedNode(value,
                 iiWithData.getSchemaNode());
-        DOMMountPoint mountPoint = iiWithData.getMountPoint();
+        final DOMMountPoint mountPoint = iiWithData.getMountPoint();
         YangInstanceIdentifier normalizedII;
 
         try {
@@ -914,9 +922,9 @@ public class RestconfImpl implements RestconfService {
                 normalizedII = controllerContext.toNormalized(iiWithData.getInstanceIdentifier());
                 broker.commitConfigurationDataPost(normalizedII, datastoreNormalizedData);
             }
-        } catch(RestconfDocumentedException e) {
+        } catch(final RestconfDocumentedException e) {
             throw e;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new RestconfDocumentedException("Error creating data", e);
         }
 
@@ -929,7 +937,7 @@ public class RestconfImpl implements RestconfService {
             throw new RestconfDocumentedException("Input is required.", ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE);
         }
 
-        URI payloadNS = this.namespace(payload);
+        final URI payloadNS = namespace(payload);
         if (payloadNS == null) {
             throw new RestconfDocumentedException(
                     "Data has bad format. Root element node must have namespace (XML format) or module name(JSON format)",
@@ -938,13 +946,13 @@ public class RestconfImpl implements RestconfService {
 
         final Module module = this.findModule(null, payload);
 
-        String payloadName = this.getName(payload);
+        final String payloadName = getName(payload);
         final DataSchemaNode schemaNode = ControllerContext.findInstanceDataChildByNameAndNamespace(module,
                 payloadName, module.getNamespace());
         final CompositeNode value = this.normalizeNode(payload, schemaNode, null);
-        final InstanceIdentifierContext iiWithData = this.addLastIdentifierFromData(null, value, schemaNode,ControllerContext.getInstance().getGlobalSchema());
+        final InstanceIdentifierContext iiWithData = addLastIdentifierFromData(null, value, schemaNode,ControllerContext.getInstance().getGlobalSchema());
         final NormalizedNode<?, ?> datastoreNormalizedData = compositeNodeToDatastoreNormalizedNode(value, schemaNode);
-        DOMMountPoint mountPoint = iiWithData.getMountPoint();
+        final DOMMountPoint mountPoint = iiWithData.getMountPoint();
         YangInstanceIdentifier normalizedII;
 
         try {
@@ -957,9 +965,9 @@ public class RestconfImpl implements RestconfService {
                 normalizedII = controllerContext.toNormalized(iiWithData.getInstanceIdentifier());
                 broker.commitConfigurationDataPost(normalizedII, datastoreNormalizedData);
             }
-        } catch(RestconfDocumentedException e) {
+        } catch(final RestconfDocumentedException e) {
             throw e;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new RestconfDocumentedException("Error creating data", e);
         }
 
@@ -969,7 +977,7 @@ public class RestconfImpl implements RestconfService {
     @Override
     public Response deleteConfigurationData(final String identifier) {
         final InstanceIdentifierContext iiWithData = controllerContext.toInstanceIdentifier(identifier);
-        DOMMountPoint mountPoint = iiWithData.getMountPoint();
+        final DOMMountPoint mountPoint = iiWithData.getMountPoint();
         YangInstanceIdentifier normalizedII;
 
         try {
@@ -981,7 +989,7 @@ public class RestconfImpl implements RestconfService {
                 normalizedII = controllerContext.toNormalized(iiWithData.getInstanceIdentifier());
                 broker.commitConfigurationDataDelete(normalizedII).get();
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             final Optional<Throwable> searchedException = Iterables.tryFind(Throwables.getCausalChain(e),
                     Predicates.instanceOf(ModifiedNodeDoesNotExistException.class));
             if (searchedException.isPresent()) {
@@ -1013,14 +1021,14 @@ public class RestconfImpl implements RestconfService {
             throw new RestconfDocumentedException("Stream was not found.", ErrorType.PROTOCOL, ErrorTag.UNKNOWN_ELEMENT);
         }
 
-        Map<String, String> paramToValues = resolveValuesFromUri(identifier);
-        LogicalDatastoreType datastore = parserURIEnumParameter(LogicalDatastoreType.class,
+        final Map<String, String> paramToValues = resolveValuesFromUri(identifier);
+        final LogicalDatastoreType datastore = parserURIEnumParameter(LogicalDatastoreType.class,
                 paramToValues.get(DATASTORE_PARAM_NAME));
         if (datastore == null) {
             throw new RestconfDocumentedException("Stream name doesn't contains datastore value (pattern /datastore=)",
                     ErrorType.APPLICATION, ErrorTag.MISSING_ATTRIBUTE);
         }
-        DataChangeScope scope = parserURIEnumParameter(DataChangeScope.class, paramToValues.get(SCOPE_PARAM_NAME));
+        final DataChangeScope scope = parserURIEnumParameter(DataChangeScope.class, paramToValues.get(SCOPE_PARAM_NAME));
         if (scope == null) {
             throw new RestconfDocumentedException("Stream name doesn't contains datastore value (pattern /scope=)",
                     ErrorType.APPLICATION, ErrorTag.MISSING_ATTRIBUTE);
@@ -1031,12 +1039,12 @@ public class RestconfImpl implements RestconfService {
         final UriBuilder uriBuilder = uriInfo.getAbsolutePathBuilder();
         int notificationPort = NOTIFICATION_PORT;
         try {
-            WebSocketServer webSocketServerInstance = WebSocketServer.getInstance();
+            final WebSocketServer webSocketServerInstance = WebSocketServer.getInstance();
             notificationPort = webSocketServerInstance.getPort();
-        } catch (NullPointerException e) {
+        } catch (final NullPointerException e) {
             WebSocketServer.createInstance(NOTIFICATION_PORT);
         }
-        UriBuilder port = uriBuilder.port(notificationPort);
+        final UriBuilder port = uriBuilder.port(notificationPort);
         final URI uriToWebsocketServer = port.replacePath(streamName).build();
 
         return Response.status(Status.OK).location(uriToWebsocketServer).build();
@@ -1051,13 +1059,13 @@ public class RestconfImpl implements RestconfService {
      */
     private <T> T parseEnumTypeParameter(final CompositeNode compNode, final Class<T> classDescriptor,
             final String paramName) {
-        QNameModule salRemoteAugment = QNameModule.create(NAMESPACE_EVENT_SUBSCRIPTION_AUGMENT,
+        final QNameModule salRemoteAugment = QNameModule.create(NAMESPACE_EVENT_SUBSCRIPTION_AUGMENT,
                 EVENT_SUBSCRIPTION_AUGMENT_REVISION);
-        SimpleNode<?> simpleNode = compNode.getFirstSimpleByName(QName.create(salRemoteAugment, paramName));
+        final SimpleNode<?> simpleNode = compNode.getFirstSimpleByName(QName.create(salRemoteAugment, paramName));
         if (simpleNode == null) {
             return null;
         }
-        Object rawValue = simpleNode.getValue();
+        final Object rawValue = simpleNode.getValue();
         if (!(rawValue instanceof String)) {
             return null;
         }
@@ -1079,9 +1087,9 @@ public class RestconfImpl implements RestconfService {
     }
 
     private <T> T resolveAsEnum(final Class<T> classDescriptor, final String value) {
-        T[] enumConstants = classDescriptor.getEnumConstants();
+        final T[] enumConstants = classDescriptor.getEnumConstants();
         if (enumConstants != null) {
-            for (T enm : classDescriptor.getEnumConstants()) {
+            for (final T enm : classDescriptor.getEnumConstants()) {
                 if (((Enum<?>) enm).name().equals(value)) {
                     return enm;
                 }
@@ -1091,10 +1099,10 @@ public class RestconfImpl implements RestconfService {
     }
 
     private Map<String, String> resolveValuesFromUri(final String uri) {
-        Map<String, String> result = new HashMap<>();
-        String[] tokens = uri.split("/");
+        final Map<String, String> result = new HashMap<>();
+        final String[] tokens = uri.split("/");
         for (int i = 1; i < tokens.length; i++) {
-            String[] parameterTokens = tokens[i].split("=");
+            final String[] parameterTokens = tokens[i].split("=");
             if (parameterTokens.length == 2) {
                 result.put(parameterTokens[0], parameterTokens[1]);
             }
@@ -1107,11 +1115,11 @@ public class RestconfImpl implements RestconfService {
         if (data instanceof NodeWrapper) {
             module = findModule(mountPoint, (NodeWrapper<?>) data);
         } else if (data != null) {
-            URI namespace = data.getNodeType().getNamespace();
+            final URI namespace = data.getNodeType().getNamespace();
             if (mountPoint != null) {
-                module = this.controllerContext.findModuleByNamespace(mountPoint, namespace);
+                module = controllerContext.findModuleByNamespace(mountPoint, namespace);
             } else {
-                module = this.controllerContext.findModuleByNamespace(namespace);
+                module = controllerContext.findModuleByNamespace(namespace);
             }
         }
         if (module != null) {
@@ -1123,19 +1131,19 @@ public class RestconfImpl implements RestconfService {
     }
 
     private Module findModule(final DOMMountPoint mountPoint, final NodeWrapper<?> data) {
-        URI namespace = data.getNamespace();
+        final URI namespace = data.getNamespace();
         Preconditions.<URI> checkNotNull(namespace);
 
         Module module = null;
         if (mountPoint != null) {
-            module = this.controllerContext.findModuleByNamespace(mountPoint, namespace);
+            module = controllerContext.findModuleByNamespace(mountPoint, namespace);
             if (module == null) {
-                module = this.controllerContext.findModuleByName(mountPoint, namespace.toString());
+                module = controllerContext.findModuleByName(mountPoint, namespace.toString());
             }
         } else {
-            module = this.controllerContext.findModuleByNamespace(namespace);
+            module = controllerContext.findModuleByNamespace(namespace);
             if (module == null) {
-                module = this.controllerContext.findModuleByName(namespace.toString());
+                module = controllerContext.findModuleByName(namespace.toString());
             }
         }
 
@@ -1143,7 +1151,7 @@ public class RestconfImpl implements RestconfService {
     }
 
     private InstanceIdentifierContext addLastIdentifierFromData(final InstanceIdentifierContext identifierWithSchemaNode,
-            final CompositeNode data, final DataSchemaNode schemaOfData, SchemaContext schemaContext) {
+            final CompositeNode data, final DataSchemaNode schemaOfData, final SchemaContext schemaContext) {
         YangInstanceIdentifier instanceIdentifier = null;
         if (identifierWithSchemaNode != null) {
             instanceIdentifier = identifierWithSchemaNode.getInstanceIdentifier();
@@ -1158,15 +1166,15 @@ public class RestconfImpl implements RestconfService {
         }
 
         if ((schemaOfData instanceof ListSchemaNode)) {
-            HashMap<QName, Object> keys = this.resolveKeysFromData(((ListSchemaNode) schemaOfData), data);
+            final HashMap<QName, Object> keys = resolveKeysFromData(((ListSchemaNode) schemaOfData), data);
             iiBuilder.nodeWithKey(schemaOfData.getQName(), keys);
         } else {
             iiBuilder.node(schemaOfData.getQName());
         }
 
-        YangInstanceIdentifier instance = iiBuilder.toInstance();
+        final YangInstanceIdentifier instance = iiBuilder.toInstance();
         DOMMountPoint mountPoint = null;
-        SchemaContext schemaCtx = null;
+        final SchemaContext schemaCtx = null;
         if (identifierWithSchemaNode != null) {
             mountPoint = identifierWithSchemaNode.getMountPoint();
         }
@@ -1176,11 +1184,11 @@ public class RestconfImpl implements RestconfService {
 
     private HashMap<QName, Object> resolveKeysFromData(final ListSchemaNode listNode, final CompositeNode dataNode) {
         final HashMap<QName, Object> keyValues = new HashMap<QName, Object>();
-        List<QName> _keyDefinition = listNode.getKeyDefinition();
+        final List<QName> _keyDefinition = listNode.getKeyDefinition();
         for (final QName key : _keyDefinition) {
             SimpleNode<? extends Object> head = null;
-            String localName = key.getLocalName();
-            List<SimpleNode<? extends Object>> simpleNodesByName = dataNode.getSimpleNodesByName(localName);
+            final String localName = key.getLocalName();
+            final List<SimpleNode<? extends Object>> simpleNodesByName = dataNode.getSimpleNodesByName(localName);
             if (simpleNodesByName != null) {
                 head = Iterables.getFirst(simpleNodesByName, null);
             }
@@ -1207,16 +1215,16 @@ public class RestconfImpl implements RestconfService {
     }
 
     private boolean representsMountPointRootData(final Node<?> data) {
-        URI namespace = this.namespace(data);
+        final URI namespace = namespace(data);
         return (SchemaContext.NAME.getNamespace().equals(namespace) /*
          * || MOUNT_POINT_MODULE_NAME .equals( namespace .
          * toString( ) )
          */)
-         && SchemaContext.NAME.getLocalName().equals(this.localName(data));
+         && SchemaContext.NAME.getLocalName().equals(localName(data));
     }
 
     private String addMountPointIdentifier(final String identifier) {
-        boolean endsWith = identifier.endsWith("/");
+        final boolean endsWith = identifier.endsWith("/");
         if (endsWith) {
             return (identifier + ControllerContext.MOUNT);
         }
@@ -1226,7 +1234,7 @@ public class RestconfImpl implements RestconfService {
 
     private CompositeNode normalizeNode(final Node<?> node, final DataSchemaNode schema, final DOMMountPoint mountPoint) {
         if (schema == null) {
-            String localName = node == null ? null :
+            final String localName = node == null ? null :
                     node instanceof NodeWrapper ? ((NodeWrapper<?>)node).getLocalName() :
                     node.getNodeType().getLocalName();
 
@@ -1241,13 +1249,13 @@ public class RestconfImpl implements RestconfService {
 
         if ((node instanceof NodeWrapper<?>)) {
             NodeWrapper<?> nodeWrap = (NodeWrapper<?>) node;
-            boolean isChangeAllowed = ((NodeWrapper<?>) node).isChangeAllowed();
+            final boolean isChangeAllowed = ((NodeWrapper<?>) node).isChangeAllowed();
             if (isChangeAllowed) {
                 nodeWrap = topLevelElementAsCompositeNodeWrapper((NodeWrapper<?>) node, schema);
                 try {
                     this.normalizeNode(nodeWrap, schema, null, mountPoint);
-                } catch (IllegalArgumentException e) {
-                    RestconfDocumentedException restconfDocumentedException = new RestconfDocumentedException(e.getMessage(), ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
+                } catch (final IllegalArgumentException e) {
+                    final RestconfDocumentedException restconfDocumentedException = new RestconfDocumentedException(e.getMessage(), ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
                     restconfDocumentedException.addSuppressed(e);
                     throw restconfDocumentedException;
                 }
@@ -1276,7 +1284,7 @@ public class RestconfImpl implements RestconfService {
         if (nodeBuilder.getQname() != null) {
             currentAugment = previousAugment;
         } else {
-            currentAugment = this.normalizeNodeName(nodeBuilder, schema, previousAugment, mountPoint);
+            currentAugment = normalizeNodeName(nodeBuilder, schema, previousAugment, mountPoint);
             if (nodeBuilder.getQname() == null) {
                 throw new RestconfDocumentedException(
                         "Data has bad format.\nIf data is in XML format then namespace for \""
@@ -1302,8 +1310,8 @@ public class RestconfImpl implements RestconfService {
     }
 
     private void normalizeAnyXmlNode(final CompositeNodeWrapper compositeNode, final AnyXmlSchemaNode schema) {
-        List<NodeWrapper<?>> children = compositeNode.getValues();
-        for (NodeWrapper<? extends Object> child : children) {
+        final List<NodeWrapper<?>> children = compositeNode.getValues();
+        for (final NodeWrapper<? extends Object> child : children) {
             child.setNamespace(schema.getQName().getNamespace());
             if (child instanceof CompositeNodeWrapper) {
                 normalizeAnyXmlNode((CompositeNodeWrapper) child, schema);
@@ -1326,15 +1334,15 @@ public class RestconfImpl implements RestconfService {
             final DOMMountPoint mountPoint) {
         final Object value = simpleNode.getValue();
         Object inputValue = value;
-        TypeDef typeDef = this.typeDefinition(schema);
+        final TypeDef typeDef = this.typeDefinition(schema);
         TypeDefinition<? extends Object> typeDefinition = typeDef != null ? typeDef.typedef : null;
 
         // For leafrefs, extract the type it is pointing to
         if(typeDefinition instanceof LeafrefTypeDefinition) {
             if (schema.getQName().equals(typeDef.qName)) {
-                typeDefinition = SchemaContextUtil.getBaseTypeForLeafRef(((LeafrefTypeDefinition) typeDefinition), mountPoint == null ? this.controllerContext.getGlobalSchema() : mountPoint.getSchemaContext(), schema);
+                typeDefinition = SchemaContextUtil.getBaseTypeForLeafRef(((LeafrefTypeDefinition) typeDefinition), mountPoint == null ? controllerContext.getGlobalSchema() : mountPoint.getSchemaContext(), schema);
             } else {
-                typeDefinition = SchemaContextUtil.getBaseTypeForLeafRef(((LeafrefTypeDefinition) typeDefinition), mountPoint == null ? this.controllerContext.getGlobalSchema() : mountPoint.getSchemaContext(), typeDef.qName);
+                typeDefinition = SchemaContextUtil.getBaseTypeForLeafRef(((LeafrefTypeDefinition) typeDefinition), mountPoint == null ? controllerContext.getGlobalSchema() : mountPoint.getSchemaContext(), typeDef.qName);
             }
         }
 
@@ -1345,7 +1353,7 @@ public class RestconfImpl implements RestconfService {
         Object outputValue = inputValue;
 
         if (typeDefinition != null) {
-            Codec<Object, Object> codec = RestCodec.from(typeDefinition, mountPoint);
+            final Codec<Object, Object> codec = RestCodec.from(typeDefinition, mountPoint);
             outputValue = codec == null ? null : codec.deserialize(inputValue);
         }
 
@@ -1369,7 +1377,7 @@ public class RestconfImpl implements RestconfService {
                     schema, child.getLocalName());
 
             if (potentialSchemaNodes.size() > 1 && child.getNamespace() == null) {
-                StringBuilder builder = new StringBuilder();
+                final StringBuilder builder = new StringBuilder();
                 for (final DataSchemaNode potentialSchemaNode : potentialSchemaNodes) {
                     builder.append("   ").append(potentialSchemaNode.getQName().getNamespace().toString()).append("\n");
                 }
@@ -1384,7 +1392,7 @@ public class RestconfImpl implements RestconfService {
             boolean rightNodeSchemaFound = false;
             for (final DataSchemaNode potentialSchemaNode : potentialSchemaNodes) {
                 if (!rightNodeSchemaFound) {
-                    final QName potentialCurrentAugment = this.normalizeNodeName(child, potentialSchemaNode,
+                    final QName potentialCurrentAugment = normalizeNodeName(child, potentialSchemaNode,
                             currentAugment, mountPoint);
                     if (child.getQname() != null) {
                         this.normalizeNode(child, potentialSchemaNode, potentialCurrentAugment, mountPoint);
@@ -1400,7 +1408,7 @@ public class RestconfImpl implements RestconfService {
         }
 
         if ((schema instanceof ListSchemaNode)) {
-            ListSchemaNode listSchemaNode = (ListSchemaNode) schema;
+            final ListSchemaNode listSchemaNode = (ListSchemaNode) schema;
             final List<QName> listKeys = listSchemaNode.getKeyDefinition();
             for (final QName listKey : listKeys) {
                 boolean foundKey = false;
@@ -1421,16 +1429,16 @@ public class RestconfImpl implements RestconfService {
 
     private void checkNodeMultiplicityAccordingToSchema(final DataNodeContainer dataNodeContainer,
             final List<NodeWrapper<?>> nodes) {
-        Map<String, Integer> equalNodeNamesToCounts = new HashMap<String, Integer>();
-        for (NodeWrapper<?> child : nodes) {
+        final Map<String, Integer> equalNodeNamesToCounts = new HashMap<String, Integer>();
+        for (final NodeWrapper<?> child : nodes) {
             Integer count = equalNodeNamesToCounts.get(child.getLocalName());
             equalNodeNamesToCounts.put(child.getLocalName(), count == null ? 1 : ++count);
         }
 
-        for (DataSchemaNode childSchemaNode : dataNodeContainer.getChildNodes()) {
+        for (final DataSchemaNode childSchemaNode : dataNodeContainer.getChildNodes()) {
             if (childSchemaNode instanceof ContainerSchemaNode || childSchemaNode instanceof LeafSchemaNode) {
-                String localName = childSchemaNode.getQName().getLocalName();
-                Integer count = equalNodeNamesToCounts.get(localName);
+                final String localName = childSchemaNode.getQName().getLocalName();
+                final Integer count = equalNodeNamesToCounts.get(localName);
                 if (count != null && count > 1) {
                     throw new RestconfDocumentedException("Multiple input data elements were specified for '"
                             + childSchemaNode.getQName().getLocalName()
@@ -1557,7 +1565,7 @@ public class RestconfImpl implements RestconfService {
 
     private NormalizedNode<?, ?> compositeNodeToDatastoreNormalizedNode(final CompositeNode compNode,
             final DataSchemaNode schema) {
-        List<Node<?>> lst = new ArrayList<Node<?>>();
+        final List<Node<?>> lst = new ArrayList<Node<?>>();
         lst.add(compNode);
         if (schema instanceof ContainerSchemaNode) {
             return CnSnToNormalizedNodeParserFactory.getInstance().getContainerNodeParser()
@@ -1624,4 +1632,25 @@ public class RestconfImpl implements RestconfService {
         // TODO Auto-generated method stub
         return null;
     }
+
+    private MapNode makeModuleMapNode(final Set<Module> modules) {
+        Preconditions.checkNotNull(modules);
+        final Module restconfModule = getRestconfModule();
+        final DataSchemaNode moduleSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(
+                restconfModule, Draft02.RestConfModule.MODULE_LIST_SCHEMA_NODE);
+        Preconditions.checkState(moduleSchemaNode instanceof ListSchemaNode);
+
+        final CollectionNodeBuilder<MapEntryNode, MapNode> listModuleBuilder = Builders
+                .mapBuilder((ListSchemaNode) moduleSchemaNode);
+
+        for (final Module module : modules) {
+            listModuleBuilder.withChild(toModuleEntryNode(module, moduleSchemaNode));
+        }
+        return listModuleBuilder.build();
+    }
+
+    protected MapEntryNode toModuleEntryNode(final Module module, final DataSchemaNode moduleSchemaNode) {
+        Preconditions.checkArgument(moduleSchemaNode instanceof ListSchemaNode,
+                "moduleSchemaNode has to be of type ListSchemaNode");        final ListSchemaNode listModuleSchemaNode = (ListSchemaNode) moduleSchemaNode;        final DataContainerNodeAttrBuilder<NodeIdentifierWithPredicates, MapEntryNode> moduleNodeValues = Builders                .mapEntryBuilder(listModuleSchemaNode);        List<DataSchemaNode> instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(                (listModuleSchemaNode), "name");        final DataSchemaNode nameSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);        Preconditions.checkState(nameSchemaNode instanceof LeafSchemaNode);        moduleNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) nameSchemaNode).withValue(module.getName())                .build());        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(                (listModuleSchemaNode), "revision");        final DataSchemaNode revisionSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);        Preconditions.checkState(revisionSchemaNode instanceof LeafSchemaNode);        final String revision = REVISION_FORMAT.format(module.getRevision());        moduleNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) revisionSchemaNode).withValue(revision)                .build());        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(                (listModuleSchemaNode), "namespace");        final DataSchemaNode namespaceSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);        Preconditions.checkState(namespaceSchemaNode instanceof LeafSchemaNode);        moduleNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) namespaceSchemaNode)                .withValue(module.getNamespace().toString()).build());        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(                (listModuleSchemaNode), "feature");        final DataSchemaNode featureSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);        Preconditions.checkState(featureSchemaNode instanceof LeafListSchemaNode);        final ListNodeBuilder<Object, LeafSetEntryNode<Object>> featuresBuilder = Builders                .leafSetBuilder((LeafListSchemaNode) featureSchemaNode);        for (final FeatureDefinition feature : module.getFeatures()) {            featuresBuilder.withChild(Builders.leafSetEntryBuilder(((LeafListSchemaNode) featureSchemaNode))                    .withValue(feature.getQName().getLocalName()).build());        }        moduleNodeValues.withChild(featuresBuilder.build());
+        return moduleNodeValues.build();    }
 }
