@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_b1a82adc",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 459,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-06T21:45:54Z",
+      "side": 1,
+      "message": "This is regardung the heartbeat not being sent for InitaiteInstallsnapshot\n\nConsider a scenario: where the followers nextIndex is behind, and on AER we come to know that a snapshot is to be send. \nWe initiate the install snapshot, but dont send the heartbeat/AE. \n\nIf this happens too close(just before) to a scheduled Heartbeat, that heartbeat will get dropped and since we dont send an append entries , follower will have to wait till the next heartbeat.\nEssentially the follower would be waiting for more than 1 heartbeat.\n\nSo i think we should send the heartbeat for the IntiateInstallsnapshot as well.\n\n\nAlso there is another issue( which i think exists in the current code as well).\nIf the capture snapshot spans more than heartbeat interval, an InitiateInstallSnapshot might get initiated again.",
+      "revId": "2c84210d590af64ce3b21ef0423dd031315c272e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
