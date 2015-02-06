@@ -16,6 +16,24 @@
       "revId": "12fa2670527dfe66df922dd2feb2001eec3f60ba",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_aeb3e7e7",
+        "filename": "opendaylight/archetypes/opendaylight-startup/src/main/resources/archetype-resources/__artifactId__-features/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-02-06T18:41:11Z",
+      "side": 1,
+      "message": "Nevermind. I didn\u0027t think it cared either way about the element, but just tried again and see that the warnings all go away. Disregard my earlier comment.",
+      "parentUuid": "7a96c907_ae9c475e",
+      "revId": "12fa2670527dfe66df922dd2feb2001eec3f60ba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
