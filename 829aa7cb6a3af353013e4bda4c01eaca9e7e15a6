@@ -52,6 +52,24 @@
       "revId": "829aa7cb6a3af353013e4bda4c01eaca9e7e15a6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_395e4613",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 413,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-02-06T00:40:48Z",
+      "side": 1,
+      "message": "I think, i get your point now, if we pass flag, then we can remove followerActor check from appendEntries all together and just send heartbeat based on the flag.",
+      "parentUuid": "7a96c907_5942323f",
+      "revId": "829aa7cb6a3af353013e4bda4c01eaca9e7e15a6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
