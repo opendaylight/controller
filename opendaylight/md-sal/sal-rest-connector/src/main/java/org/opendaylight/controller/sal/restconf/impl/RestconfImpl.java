@@ -252,6 +252,39 @@ public class RestconfImpl implements RestconfService {
                 mountPoint, schemaContext), moduleContainerBuilder.build());
     }
 
+    @Override
+    public NormalizedNodeContext getModule(final String identifier, final UriInfo uriInfo) {
+        final QName moduleNameAndRevision = getModuleNameAndRevision(identifier);
+        Module module = null;
+        DOMMountPoint mountPoint = null;
+        final SchemaContext schemaContext;
+        if (identifier.contains(ControllerContext.MOUNT)) {
+            final InstanceIdentifierContext mountPointIdentifier = controllerContext.toMountPointIdentifier(identifier);
+            mountPoint = mountPointIdentifier.getMountPoint();
+            module = controllerContext.findModuleByNameAndRevision(mountPoint, moduleNameAndRevision);
+            schemaContext = mountPoint.getSchemaContext();
+        } else {
+            module = controllerContext.findModuleByNameAndRevision(moduleNameAndRevision);
+            schemaContext = controllerContext.getGlobalSchema();
+        }
+
+        if (module == null) {
+            final String errMsg = "Module with name '" + moduleNameAndRevision.getLocalName()
+                    + "' and revision '" + moduleNameAndRevision.getRevision() + "' was not found.";
+            throw new RestconfDocumentedException(errMsg, ErrorType.PROTOCOL, ErrorTag.UNKNOWN_ELEMENT);
+        }
+
+        final Module restconfModule = getRestconfModule();
+        final Set<Module> modules = Collections.singleton(module);
+        final MapNode moduleMap = makeModuleMapNode(modules, mountPoint);
+
+        final DataSchemaNode moduleSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(
+                restconfModule, Draft02.RestConfModule.MODULE_LIST_SCHEMA_NODE);
+        Preconditions.checkState(moduleSchemaNode instanceof ListSchemaNode);
+
+        return new NormalizedNodeContext(new InstanceIdentifierContext(null, moduleSchemaNode, mountPoint,
+                schemaContext), moduleMap);
+    }
 
     @Override
     public StructuredData getAvailableStreams(final UriInfo uriInfo) {
@@ -270,32 +303,6 @@ public class RestconfImpl implements RestconfService {
         final QName qName = streamsSchemaNode.getQName();
         final CompositeNode streamsNode = NodeFactory.createImmutableCompositeNode(qName, null, streamsAsData);
         return new StructuredData(streamsNode, streamsSchemaNode, null, parsePrettyPrintParameter(uriInfo));
-    }
-
-    @Override
-    public StructuredData getModule(final String identifier, final UriInfo uriInfo) {
-        final QName moduleNameAndRevision = getModuleNameAndRevision(identifier);
-        Module module = null;
-        DOMMountPoint mountPoint = null;
-        if (identifier.contains(ControllerContext.MOUNT)) {
-            final InstanceIdentifierContext mountPointIdentifier = controllerContext.toMountPointIdentifier(identifier);
-            mountPoint = mountPointIdentifier.getMountPoint();
-            module = controllerContext.findModuleByNameAndRevision(mountPoint, moduleNameAndRevision);
-        } else {
-            module = controllerContext.findModuleByNameAndRevision(moduleNameAndRevision);
-        }
-
-        if (module == null) {
-            throw new RestconfDocumentedException("Module with name '" + moduleNameAndRevision.getLocalName()
-                    + "' and revision '" + moduleNameAndRevision.getRevision() + "' was not found.",
-                    ErrorType.PROTOCOL, ErrorTag.UNKNOWN_ELEMENT);
-        }
-
-        final Module restconfModule = getRestconfModule();
-        final DataSchemaNode moduleSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(restconfModule,
-                Draft02.RestConfModule.MODULE_LIST_SCHEMA_NODE);
-        final CompositeNode moduleNode = toModuleCompositeNode(module, moduleSchemaNode);
-        return new StructuredData(moduleNode, moduleSchemaNode, mountPoint, parsePrettyPrintParameter(uriInfo));
     }
 
     @Override
