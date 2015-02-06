@@ -1,0 +1,57 @@
+// Contents of "bundle-provider-impl"
+module bundle-provider-impl {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:bundle-provider:impl";
+    prefix "bundle-provider-impl";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import rpc-context { prefix rpcx; revision-date 2013-06-17; }
+    import opendaylight-md-sal-binding { prefix mdsal; revision-date 2013-10-28; }
+
+    contact
+       "Gabriel Robitaille-Montpetit <grmontpetit@inocybe.com>";
+
+    revision "2015-01-11" {
+        description
+            "3rd revision: Bundle Service to add / remove bundles via RESTConf.";
+    }
+
+    identity bundle-provider-impl {
+        base config:module-type;
+        // Specifies the prefix for generated java classes.
+        config:java-name-prefix BundleProvider;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case bundle-provider-impl {
+            when "/config:modules/config:module/config:type = 'bundle-provider-impl'";
+
+            container rpc-registry {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity mdsal:binding-rpc-registry;
+                    }
+                }
+            }
+
+            container notification-service {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity mdsal:binding-notification-service;
+                    }
+                }
+            }
+
+            container data-broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity mdsal:binding-async-data-broker;
+                    }
+                }
+            }
+        }
+    }
+}

@@ -91,5 +91,22 @@
         <bundle>mvn:org.opendaylight.controller.samples/clustering-it-provider/${project.version}</bundle>
         <configfile finalname="${config.configfile.directory}/20-clustering-test-app.xml">mvn:org.opendaylight.controller.samples/clustering-it-config/${project.version}/xml/config</configfile>
     </feature>
-
+    <feature name="odl-features-service" version='0.0.1-SNAPSHOT' xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+          <!--
+          <feature version='${yangtools.version}'>odl-yangtools-common</feature>
+          <feature version='${yangtools.version}'>odl-yangtools-binding</feature>
+          <feature version='${project.version}'>odl-mdsal-broker</feature>
+          <bundle start="true">mvn:org.opendaylight.controller/features-service/0.0.1-SNAPSHOT</bundle>
+          <bundle start="true">mvn:org.opendaylight.controller/features-service-impl/0.0.1-SNAPSHOT</bundle>
+          <bundle>wrap:mvn:com.google.collections/google-collections/1.0</bundle>
+          <bundle>wrap:mvn:com.google.guava/guava/14.0.1</bundle>
+          -->
+          <bundle>wrap:mvn:org.apache.karaf.bundle/org.apache.karaf.bundle.core/3.0.1</bundle>
+          <bundle start="true">mvn:org.opendaylight.controller/bundle/0.0.1-SNAPSHOT</bundle>
+          <bundle start="true">mvn:org.opendaylight.controller/bundle-provider/0.0.1-SNAPSHOT</bundle>
+          <!--bundle start="true">mvn:org.opendaylight.controller/features-swagger/0.0.1-SNAPSHOT</bundle-->
+          <configfile finalname="${config.configfile.directory}/03-features-service.xml">mvn:org.opendaylight.controller/odl-features-config/0.0.1-SNAPSHOT/xml/config</configfile>
+    </feature>
 </features>
