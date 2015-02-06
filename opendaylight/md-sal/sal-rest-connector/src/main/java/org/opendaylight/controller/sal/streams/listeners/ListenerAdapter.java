@@ -80,10 +80,8 @@ public class ListenerAdapter implements DOMDataChangeListener {
     /**
      * Creates new {@link ListenerAdapter} listener specified by path and stream name.
      *
-     * @param path
-     *            Path to data in data store.
-     * @param streamName
-     *            The name of the stream.
+     * @param path       Path to data in data store.
+     * @param streamName The name of the stream.
      */
     ListenerAdapter(final YangInstanceIdentifier path, final String streamName) {
         Preconditions.checkNotNull(path);
@@ -147,8 +145,7 @@ public class ListenerAdapter implements DOMDataChangeListener {
         /**
          * Creates new event specified by {@link EventType} type.
          *
-         * @param type
-         *            EventType
+         * @param type EventType
          */
         public Event(final EventType type) {
             this.type = type;
@@ -166,8 +163,7 @@ public class ListenerAdapter implements DOMDataChangeListener {
         /**
          * Sets subscriber for event.
          *
-         * @param subscriber
-         *            Channel
+         * @param subscriber Channel
          */
         public void setSubscriber(final Channel subscriber) {
             this.subscriber = subscriber;
@@ -185,8 +181,7 @@ public class ListenerAdapter implements DOMDataChangeListener {
         /**
          * Sets event data.
          *
-         * @param String
-         *            data.
+         * @param String data.
          */
         public void setData(final String data) {
             this.data = data;
@@ -214,8 +209,7 @@ public class ListenerAdapter implements DOMDataChangeListener {
     /**
      * Prepare data in printable form and transform it to String.
      *
-     * @param change
-     *            DataChangeEvent
+     * @param change DataChangeEvent
      * @return Data in printable form.
      */
     private String prepareXmlFrom(AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
@@ -254,8 +248,7 @@ public class ListenerAdapter implements DOMDataChangeListener {
     /**
      * Formats data specified by RFC3339.
      *
-     * @param d
-     *            Date
+     * @param d Date
      * @return Data specified by RFC3339.
      */
     private String toRFC3339(final Date d) {
@@ -264,6 +257,7 @@ public class ListenerAdapter implements DOMDataChangeListener {
 
     /**
      * Creates {@link Document} document.
+     *
      * @return {@link Document} document.
      */
     private Document createDocument() {
@@ -279,16 +273,13 @@ public class ListenerAdapter implements DOMDataChangeListener {
     /**
      * Adds values to data changed notification event element.
      *
-     * @param doc
-     *            {@link Document}
-     * @param dataChangedNotificationEventElement
-     *            {@link Element}
-     * @param change
-     *            {@link DataChangeEvent}
+     * @param doc                                 {@link Document}
+     * @param dataChangedNotificationEventElement {@link Element}
+     * @param change                              {@link DataChangeEvent}
      */
     private void addValuesToDataChangedNotificationEventElement(final Document doc,
-            final Element dataChangedNotificationEventElement,
-            AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
+                                                                final Element dataChangedNotificationEventElement,
+                                                                AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
         addValuesFromDataToElement(doc, change.getCreatedData().keySet(), dataChangedNotificationEventElement,
                 Operation.CREATED);
         if (change.getCreatedData().isEmpty()) {
@@ -302,44 +293,36 @@ public class ListenerAdapter implements DOMDataChangeListener {
     /**
      * Adds values from data to element.
      *
-     * @param doc
-     *            {@link Document}
-     * @param data
-     *            Set of {@link YangInstanceIdentifier}.
-     * @param element
-     *            {@link Element}
-     * @param store
-     *            {@link Store}
-     * @param operation
-     *            {@link Operation}
+     * @param doc       {@link Document}
+     * @param data      Set of {@link YangInstanceIdentifier}.
+     * @param element   {@link Element}
+     * @param store     {@link Store}
+     * @param operation {@link Operation}
      */
     private void addValuesFromDataToElement(Document doc, Set<YangInstanceIdentifier> data, Element element,
-            Operation operation) {
+                                            Operation operation) {
         if (data == null || data.isEmpty()) {
             return;
         }
         for (YangInstanceIdentifier path : data) {
-            Node node = createDataChangeEventElement(doc, path, null, operation);
-            element.appendChild(node);
+            if (!ControllerContext.getInstance().isNodeMixin(path)) {
+                Node node = createDataChangeEventElement(doc, path, null, operation);
+                element.appendChild(node);
+            }
         }
     }
 
     /**
      * Adds values from data to element.
      *
-     * @param doc
-     *            {@link Document}
-     * @param data
-     *            Map of {@link YangInstanceIdentifier} and {@link CompositeNode}.
-     * @param element
-     *            {@link Element}
-     * @param store
-     *            {@link Store}
-     * @param operation
-     *            {@link Operation}
+     * @param doc       {@link Document}
+     * @param data      Map of {@link YangInstanceIdentifier} and {@link CompositeNode}.
+     * @param element   {@link Element}
+     * @param store     {@link Store}
+     * @param operation {@link Operation}
      */
     private void addValuesFromDataToElement(Document doc, Map<YangInstanceIdentifier, CompositeNode> data, Element element,
-            Operation operation) {
+                                            Operation operation) {
         if (data == null || data.isEmpty()) {
             return;
         }
@@ -352,20 +335,15 @@ public class ListenerAdapter implements DOMDataChangeListener {
     /**
      * Creates changed event element from data.
      *
-     * @param doc
-     *            {@link Document}
-     * @param path
-     *            Path to data in data store.
-     * @param data
-     *            {@link CompositeNode}
-     * @param store
-     *            {@link Store}
-     * @param operation
-     *            {@link Operation}
+     * @param doc       {@link Document}
+     * @param path      Path to data in data store.
+     * @param data      {@link CompositeNode}
+     * @param store     {@link Store}
+     * @param operation {@link Operation}
      * @return {@link Node} node represented by changed event element.
      */
     private Node createDataChangeEventElement(Document doc, YangInstanceIdentifier path, CompositeNode data,
-            Operation operation) {
+                                              Operation operation) {
         Element dataChangeEventElement = doc.createElement("data-change-event");
 
         Element pathElement = doc.createElement("path");
@@ -394,10 +372,8 @@ public class ListenerAdapter implements DOMDataChangeListener {
     /**
      * Translates {@link CompositeNode} data to XML format.
      *
-     * @param path
-     *            Path to data in data store.
-     * @param data
-     *            {@link CompositeNode}
+     * @param path Path to data in data store.
+     * @param data {@link CompositeNode}
      * @return Data in XML format.
      */
     private Node translateToXml(final YangInstanceIdentifier path, final CompositeNode data) {
@@ -420,19 +396,17 @@ public class ListenerAdapter implements DOMDataChangeListener {
     /**
      * Adds path as value to element.
      *
-     * @param path
-     *            Path to data in data store.
-     * @param element
-     *            {@link Element}
+     * @param path    Path to data in data store.
+     * @param element {@link Element}
      */
     private void addPathAsValueToElement(final YangInstanceIdentifier path, final Element element) {
         // Map< key = namespace, value = prefix>
         Map<String, String> prefixes = new HashMap<>();
-        YangInstanceIdentifier instanceIdentifier = path;
+        final YangInstanceIdentifier normalizedPath = ControllerContext.getInstance().toXpathRepresentation(path);
         StringBuilder textContent = new StringBuilder();
 
         // FIXME: BUG-1281: this is duplicated code from yangtools (BUG-1275)
-        for (PathArgument pathArgument : instanceIdentifier.getPathArguments()) {
+        for (PathArgument pathArgument : normalizedPath.getPathArguments()) {
             textContent.append("/");
             writeIdentifierWithNamespacePrefix(element, textContent, pathArgument.getNodeType(), prefixes);
             if (pathArgument instanceof NodeIdentifierWithPredicates) {
@@ -459,17 +433,13 @@ public class ListenerAdapter implements DOMDataChangeListener {
     /**
      * Writes identifier that consists of prefix and QName.
      *
-     * @param element
-     *            {@link Element}
-     * @param textContent
-     *            StringBuilder
-     * @param qName
-     *            QName
-     * @param prefixes
-     *            Map of namespaces and prefixes.
+     * @param element     {@link Element}
+     * @param textContent StringBuilder
+     * @param qName       QName
+     * @param prefixes    Map of namespaces and prefixes.
      */
     private static void writeIdentifierWithNamespacePrefix(final Element element, final StringBuilder textContent,
-            final QName qName, final Map<String, String> prefixes) {
+                                                           final QName qName, final Map<String, String> prefixes) {
         String namespace = qName.getNamespace().toString();
         String prefix = prefixes.get(namespace);
         if (prefix == null) {
@@ -490,8 +460,7 @@ public class ListenerAdapter implements DOMDataChangeListener {
     /**
      * Generates new prefix which consists of four random characters <a-z>.
      *
-     * @param prefixes
-     *            Collection of prefixes.
+     * @param prefixes Collection of prefixes.
      * @return New prefix which consists of four random characters <a-z>.
      */
     private static String generateNewPrefix(final Collection<String> prefixes) {
@@ -520,8 +489,7 @@ public class ListenerAdapter implements DOMDataChangeListener {
     /**
      * Sets {@link ListenerRegistration} registration.
      *
-     * @param registration
-     *            ListenerRegistration<DataChangeListener>
+     * @param registration ListenerRegistration<DataChangeListener>
      */
     public void setRegistration(final ListenerRegistration<DOMDataChangeListener> registration) {
         this.registration = registration;
@@ -559,8 +527,7 @@ public class ListenerAdapter implements DOMDataChangeListener {
      * Creates event of type {@link EventType#REGISTER}, set {@link Channel} subscriber to the event and post event into
      * event bus.
      *
-     * @param subscriber
-     *            Channel
+     * @param subscriber Channel
      */
     public void addSubscriber(final Channel subscriber) {
         if (!subscriber.isActive()) {

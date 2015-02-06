@@ -486,7 +486,7 @@ public class RestconfImpl implements RestconfService {
                     ErrorType.APPLICATION, ErrorTag.OPERATION_FAILED);
         }
 
-        final YangInstanceIdentifier pathIdentifier = ((YangInstanceIdentifier) pathValue);
+        final YangInstanceIdentifier pathIdentifier = (YangInstanceIdentifier) pathValue;
         String streamName = null;
         if (!Iterables.isEmpty(pathIdentifier.getPathArguments())) {
             String fullRestconfIdentifier = this.controllerContext.toFullRestconfIdentifier(pathIdentifier);
@@ -517,7 +517,8 @@ public class RestconfImpl implements RestconfService {
                 null, output, null, null);
 
         if (!Notificator.existListenerFor(streamName)) {
-            Notificator.createListener(pathIdentifier, streamName);
+            YangInstanceIdentifier normalizedPathIdentifier = controllerContext.toNormalized(pathIdentifier);
+            Notificator.createListener(normalizedPathIdentifier, streamName);
         }
 
         return new StructuredData(responseData, rpc.getOutput(), null, prettyPrint);

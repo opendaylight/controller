@@ -31,6 +31,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.ws.rs.core.Response.Status;
+import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationException;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationOperation;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizer;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
@@ -912,6 +913,26 @@ public class ControllerContext implements SchemaContextListener {
         } catch (NullPointerException e) {
             throw new RestconfDocumentedException("Data normalizer isn't set. Normalization isn't possible", e);
         }
+    }
+
+    public YangInstanceIdentifier toXpathRepresentation(final YangInstanceIdentifier instanceIdentifier) {
+        try {
+            return dataNormalizer.toLegacy(instanceIdentifier);
+        } catch (NullPointerException e) {
+            throw new RestconfDocumentedException("Data normalizer isn't set. Normalization isn't possible", e);
+        } catch (DataNormalizationException e) {
+            throw new RestconfDocumentedException("Data normalizer failed. Normalization isn't possible", e);
+        }
+    }
+
+    public boolean isNodeMixin(YangInstanceIdentifier path) {
+        final DataNormalizationOperation<?> operation;
+        try {
+            operation = dataNormalizer.getOperation(path);
+        } catch (DataNormalizationException e) {
+            throw new RestconfDocumentedException("Data normalizer failed. Normalization isn't possible", e);
+        }
+        return operation.isMixin();
     }
 
     public DataNormalizationOperation<?> getRootOperation() {
