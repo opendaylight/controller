@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_1e07b01d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 413,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-06T00:20:16Z",
+      "side": 1,
+      "message": "I see why you were passing followerActor to sendUpdatesToFollower b/c it\u0027s needed here as well. How about we pass a flag to sendUpdatesToFollower whether or not to send an empty message? That way followerActor can be obtained in sendUpdatesToFollower and we avoid looking it up twice here.  Also sendUpdatesToFollower wouldn\u0027t have to return anything. Having sendUpdatesToFollower return true if followerActor is null isn\u0027t technically correct.",
+      "revId": "829aa7cb6a3af353013e4bda4c01eaca9e7e15a6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
