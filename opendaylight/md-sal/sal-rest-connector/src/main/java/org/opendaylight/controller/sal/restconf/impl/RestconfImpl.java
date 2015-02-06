@@ -218,6 +218,38 @@ public class RestconfImpl implements RestconfService {
                 null, schemaContext), moduleContainerBuilder.build());
     }
 
+    /**
+     * Valid only for mount point
+     */
+    @Override
+    public NormalizedNodeContext getModules(final String identifier, final UriInfo uriInfo) {
+        Preconditions.checkNotNull(identifier);
+        if ( ! identifier.contains(ControllerContext.MOUNT)) {
+            final String errMsg = "URI has bad format. If modules behind mount point should be showed,"
+                    + " URI has to end with " + ControllerContext.MOUNT;
+            throw new RestconfDocumentedException(errMsg, ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
+        }
+
+        final InstanceIdentifierContext mountPointIdentifier = controllerContext.toMountPointIdentifier(identifier);
+        final DOMMountPoint mountPoint = mountPointIdentifier.getMountPoint();
+        final Set<Module> modules = controllerContext.getAllModules(mountPoint);
+        final SchemaContext schemaContext = mountPoint.getSchemaContext();
+        final MapNode mountPointModulesMap = makeModuleMapNode(modules);
+
+        final Module restconfModule = getRestconfModule();
+        final DataSchemaNode modulesSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(
+                restconfModule, Draft02.RestConfModule.MODULES_CONTAINER_SCHEMA_NODE);
+        Preconditions.checkState(modulesSchemaNode instanceof ContainerSchemaNode);
+
+        final DataContainerNodeAttrBuilder<NodeIdentifier, ContainerNode> moduleContainerBuilder =
+                Builders.containerBuilder((ContainerSchemaNode) modulesSchemaNode);
+        moduleContainerBuilder.withChild(mountPointModulesMap);
+
+        return new NormalizedNodeContext(new InstanceIdentifierContext(null, modulesSchemaNode,
+                mountPoint, schemaContext), moduleContainerBuilder.build());
+    }
+
+
     @Override
     public StructuredData getAvailableStreams(final UriInfo uriInfo) {
         final Set<String> availableStreams = Notificator.getStreamNames();
@@ -235,36 +267,6 @@ public class RestconfImpl implements RestconfService {
         final QName qName = streamsSchemaNode.getQName();
         final CompositeNode streamsNode = NodeFactory.createImmutableCompositeNode(qName, null, streamsAsData);
         return new StructuredData(streamsNode, streamsSchemaNode, null, parsePrettyPrintParameter(uriInfo));
-    }
-
-    @Override
-    public StructuredData getModules(final String identifier, final UriInfo uriInfo) {
-        Set<Module> modules = null;
-        DOMMountPoint mountPoint = null;
-        if (identifier.contains(ControllerContext.MOUNT)) {
-            final InstanceIdentifierContext mountPointIdentifier = controllerContext.toMountPointIdentifier(identifier);
-            mountPoint = mountPointIdentifier.getMountPoint();
-            modules = controllerContext.getAllModules(mountPoint);
-        } else {
-            throw new RestconfDocumentedException(
-                    "URI has bad format. If modules behind mount point should be showed, URI has to end with "
-                            + ControllerContext.MOUNT, ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
-        }
-
-        final List<Node<?>> modulesAsData = new ArrayList<Node<?>>();
-        final Module restconfModule = getRestconfModule();
-        final DataSchemaNode moduleSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(restconfModule,
-                Draft02.RestConfModule.MODULE_LIST_SCHEMA_NODE);
-
-        for (final Module module : modules) {
-            modulesAsData.add(toModuleCompositeNode(module, moduleSchemaNode));
-        }
-
-        final DataSchemaNode modulesSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(restconfModule,
-                Draft02.RestConfModule.MODULES_CONTAINER_SCHEMA_NODE);
-        final QName qName = modulesSchemaNode.getQName();
-        final CompositeNode modulesNode = NodeFactory.createImmutableCompositeNode(qName, null, modulesAsData);
-        return new StructuredData(modulesNode, modulesSchemaNode, mountPoint, parsePrettyPrintParameter(uriInfo));
     }
 
     @Override
