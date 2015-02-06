@@ -1,0 +1,71 @@
+/*
+ * Copyright (c) 2014 Inocybe Technologies, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
+module features {
+	yang-version 1;
+
+	namespace "urn:opendaylight:features:features";
+    prefix features-service;
+
+    import features-service-groupings{prefix features-service-groupings;}
+    import features-common{prefix features-common;}
+
+    contact
+      "Gabriel Robitaille-Montpetit <grmontpetit@inocybe.com>";
+
+    revision 2015-01-11 {
+        description
+            "3rd revision: Features Service to add / remove features via RESTConf";
+    }
+
+    container features {
+        description "The reprensentation of a feature.";
+        config true;
+        list features {
+            uses features-service-groupings:feature-fields;
+        }
+        leaf featuresServiceStatus{
+            type enumeration{
+                enum "available"{
+                    value 1;
+                    description
+                        "The feature service is available to install / uninstall features.";
+                }
+                enum "unavailable"{
+                    value 2;
+                    description
+                        "The feature service is unavailable to install / uninstall features.";
+                }
+            }
+        }
+        list featureList{
+            uses features-service-groupings:feature-fields;
+            description "The list of features in the system.";
+        }
+    }
+
+    rpc install-feature {
+      description "Used to install a feature by providing its name and optional field version.";
+      input {
+        uses features-service-groupings:feature-fields;
+      }
+    }
+
+    rpc uninstall-feature {
+      description "Used to uninstall a feature by providing its location and optional field version.";
+      input {
+          uses features-service-groupings:feature-fields;
+        }
+    }
+
+    notification feature-is-claimed {
+      description
+        "Indicate that the feature is required by another feature.";
+    }
+
+}

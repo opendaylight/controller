@@ -1,0 +1,59 @@
+// Contents of "features-service-groupings"
+module features-service-groupings {
+    namespace "urn:opendaylight:features-service-groupings";
+    prefix "features-service-groupings";
+
+    import features-common{prefix features-common;}
+
+    revision 2015-01-11 {
+        description
+            "3rd revision: Features Service to add / remove features via RESTConf";
+    }
+
+    typedef bundle-location {
+        description 
+            "The location of the bundle ie: mvn:org.group.id/artefact.id/version";
+        type string {
+            pattern '[a-zA-Z]([a-zA-Z0-9\-_.])*';
+            length "1..256";
+        }
+    }
+
+    grouping feature-fields {
+        description "The fields for a feature.";
+        leaf count {
+            type features-common:count;
+            mandatory false;
+            description
+                "The feature.";
+        }
+        leaf name {
+            type features-common:name;
+            mandatory true;
+            description
+                "The feature.";
+        }
+        leaf version {
+            type features-common:version;
+            mandatory false;
+            description
+                "The version.";
+        }
+        leaf isInstalled {
+            type features-common:isInstalled;
+            mandatory false;
+            description
+                "The version.";
+        }
+        leaf-list featuresDependencies {
+            type features-common:name;
+            description
+                "The dependencies needed by the feature.";
+        }
+        leaf-list bundlesDependencies {
+            type bundle-location;
+            description
+                "The dependencies needed by the feature.";
+        }
+    }
+}

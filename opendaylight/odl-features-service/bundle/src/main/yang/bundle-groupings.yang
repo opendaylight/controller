@@ -1,0 +1,57 @@
+/*
+ * Copyright (c) 2014 Inocybe Technologies, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+module bundle-groupings {
+    namespace "urn:opendaylight:controller:bundle:bundle-groupings";
+    prefix "bundle-groupings";
+
+    import bundle-common{prefix bundle-common;}
+
+    revision 2015-01-11 {
+        description
+            "3rd revision: Bundles Service to add / remove bundle via RESTConf";
+    }
+
+    grouping bundle-fields {
+        description "The fields for a bundle.";
+        leaf count {
+            type bundle-common:count;
+            mandatory false;
+            description
+                "The number of time a bundle is required.";
+        }
+        leaf location {
+            type bundle-common:location;
+            mandatory true;
+            description
+                "The bundle itself.";
+        }
+        leaf version {
+            type bundle-common:version;
+            mandatory false;
+            description
+                "The version.";
+        }
+        leaf isInstalled {
+            type bundle-common:isInstalled;
+            mandatory false;
+            description
+                "The bundle is installed or not installed.";
+        }
+    }
+
+    grouping operation-result {
+        leaf success {
+            type boolean;
+            mandatory false;
+        }
+        leaf failure {
+            type boolean;
+            mandatory false;
+        }
+    }
+}

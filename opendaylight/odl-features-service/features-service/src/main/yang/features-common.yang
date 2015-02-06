@@ -1,0 +1,61 @@
+/*
+ * Copyright (c) 2014 Inocybe Technologies, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
+module features-common {
+    yang-version 1;
+
+    namespace "urn:opendaylight:features-service:features-common";
+    prefix "features-common";
+
+    description
+        "Common features types and definitions for features-service.";
+
+    revision 2015-01-11 {
+        description
+            "3rd revision: Features Service to add / remove features via RESTConf";
+    }
+
+    typedef count {
+        description 
+            "Count the number of times the
+            feature has been installed.";
+        type int32;
+    }
+
+    typedef description {
+        description "A human-readable description for an object.";
+        type string {
+            length "1..4096";
+        }
+    }
+
+    typedef name {
+        description 
+            "A generic string name type. 
+             Must start with a letter";
+        type string {
+            pattern '[a-zA-Z]([a-zA-Z0-9\-_.])*';
+            length "1..256";
+        }
+    }
+
+    typedef version {
+        description 
+            "A feature name type. 
+             Must start with a letter";
+        type string {
+            pattern '[a-zA-Z]([a-zA-Z0-9\-_.])*';
+            length "1..256";
+        }
+    }
+    typedef isInstalled {
+        description 
+            "Tells if a feature is installed or not.";
+        type boolean;
+    }
+}

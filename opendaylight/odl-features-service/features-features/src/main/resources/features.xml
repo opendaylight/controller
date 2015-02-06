@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- vi: set et smarttab sw=4 tabstop=4: -->
+<!--
+ Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+
+ This program and the accompanying materials are made available under the
+ terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ and is available at http://www.eclipse.org/legal/epl-v10.html
+-->
+<features name="odl-features-service-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+          <feature>odl-yangtools-common</feature>
+          <feature>odl-yangtools-binding</feature>
+          <feature>odl-mdsal-broker</feature>
+          <feature>odl-restconf</feature>
+          <!--
+          <bundle>wrap:mvn:com.google.collections/google-collections/1.0</bundle>
+          <bundle start="true">mvn:org.opendaylight.controller/features-service/${project.version}</bundle>
+          <bundle start="true">mvn:org.opendaylight.controller/features-service-impl/${project.version}</bundle>
+          -->
+          <bundle start="true">mvn:org.opendaylight.controller/bundles/${project.version}</bundle>
+          <bundle start="true">mvn:org.opendaylight.controller/bundle-provider/${project.version}</bundle>
+          <!--
+          <bundle start="true">mvn:org.opendaylight.controller/features-swagger/${project.version}</bundle>
+          -->
+          <configfile finalname="${config.configfile.directory}/${config.pusher.file.name}">mvn:org.opendaylight.controller/features-config/${project.version}/xml/config</configfile>
+</features>
