@@ -67,6 +67,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
+import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
@@ -79,6 +80,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeAttrBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.ListNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeAttrBuilder;
 import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
@@ -287,6 +289,12 @@ public class RestconfImpl implements RestconfService {
     }
 
     @Override
+    public NormalizedNodeContext getOperations(final UriInfo uriInfo) {
+        final Set<Module> allModules = controllerContext.getAllModules();
+        return operationsFromModulesToNormalizedContext(allModules, null);
+    }
+
+    @Override
     public StructuredData getAvailableStreams(final UriInfo uriInfo) {
         final Set<String> availableStreams = Notificator.getStreamNames();
 
@@ -303,12 +311,6 @@ public class RestconfImpl implements RestconfService {
         final QName qName = streamsSchemaNode.getQName();
         final CompositeNode streamsNode = NodeFactory.createImmutableCompositeNode(qName, null, streamsAsData);
         return new StructuredData(streamsNode, streamsSchemaNode, null, parsePrettyPrintParameter(uriInfo));
-    }
-
-    @Override
-    public StructuredData getOperations(final UriInfo uriInfo) {
-        final Set<Module> allModules = controllerContext.getAllModules();
-        return operationsFromModulesToStructuredData(allModules, null, parsePrettyPrintParameter(uriInfo));
     }
 
     @Override
@@ -1663,4 +1665,37 @@ public class RestconfImpl implements RestconfService {
     protected MapEntryNode toModuleEntryNode(final Module module, final DataSchemaNode moduleSchemaNode) {
         Preconditions.checkArgument(moduleSchemaNode instanceof ListSchemaNode,
                 "moduleSchemaNode has to be of type ListSchemaNode");        final ListSchemaNode listModuleSchemaNode = (ListSchemaNode) moduleSchemaNode;        final DataContainerNodeAttrBuilder<NodeIdentifierWithPredicates, MapEntryNode> moduleNodeValues = Builders                .mapEntryBuilder(listModuleSchemaNode);        List<DataSchemaNode> instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(                (listModuleSchemaNode), "name");        final DataSchemaNode nameSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);        Preconditions.checkState(nameSchemaNode instanceof LeafSchemaNode);        moduleNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) nameSchemaNode).withValue(module.getName())                .build());        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(                (listModuleSchemaNode), "revision");        final DataSchemaNode revisionSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);        Preconditions.checkState(revisionSchemaNode instanceof LeafSchemaNode);        final String revision = REVISION_FORMAT.format(module.getRevision());        moduleNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) revisionSchemaNode).withValue(revision)                .build());        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(                (listModuleSchemaNode), "namespace");        final DataSchemaNode namespaceSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);        Preconditions.checkState(namespaceSchemaNode instanceof LeafSchemaNode);        moduleNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) namespaceSchemaNode)                .withValue(module.getNamespace().toString()).build());        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(                (listModuleSchemaNode), "feature");        final DataSchemaNode featureSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);        Preconditions.checkState(featureSchemaNode instanceof LeafListSchemaNode);        final ListNodeBuilder<Object, LeafSetEntryNode<Object>> featuresBuilder = Builders                .leafSetBuilder((LeafListSchemaNode) featureSchemaNode);        for (final FeatureDefinition feature : module.getFeatures()) {            featuresBuilder.withChild(Builders.leafSetEntryBuilder(((LeafListSchemaNode) featureSchemaNode))                    .withValue(feature.getQName().getLocalName()).build());        }        moduleNodeValues.withChild(featuresBuilder.build());        return moduleNodeValues.build();    }
+
+    private NormalizedNodeContext operationsFromModulesToNormalizedContext(final Set<Module> modules,
+           final DOMMountPoint mountPoint) {
+        final SchemaContext schemaContext = mountPoint != null
+                ? mountPoint.getSchemaContext() : controllerContext.getGlobalSchema();
+        final Module restconfModule = getRestconfModule();
+        final DataSchemaNode operationsSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(
+                restconfModule, Draft02.RestConfModule.OPERATIONS_CONTAINER_SCHEMA_NODE);
+        Preconditions.checkState(operationsSchemaNode instanceof ContainerSchemaNode);
+
+        final DataContainerNodeAttrBuilder<NodeIdentifier, ContainerNode> operationsContainerBuilder =
+                Builders.containerBuilder((ContainerSchemaNode) operationsSchemaNode);
+
+        for (final Module module : modules) {
+            final Set<RpcDefinition> rpcs = module.getRpcs();
+            for (final RpcDefinition rpc : rpcs) {
+                final EmptyType instance = EmptyType.getInstance();
+                final QName rpcQName = rpc.getQName();
+                final String name = module.getName();
+                // TODO what does mean "dummy" here exactly?
+                final LeafSchemaNodeBuilder leafSchemaNodeBuilder = new LeafSchemaNodeBuilder(name, 0, rpcQName,
+                        SchemaPath.create(true, QName.create("dummy")));
+                leafSchemaNodeBuilder.setAugmenting(true);
+                leafSchemaNodeBuilder.setType(instance);
+                final NormalizedNodeAttrBuilder<NodeIdentifier, Object, LeafNode<Object>> leafBuilder =
+                        Builders.leafBuilder(leafSchemaNodeBuilder.build());
+                operationsContainerBuilder.withChild(leafBuilder.build());
+            }
+        }
+
+        return new NormalizedNodeContext(new InstanceIdentifierContext(null, operationsSchemaNode,
+                mountPoint, schemaContext), operationsContainerBuilder.build());
+    }
 }
