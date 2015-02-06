@@ -444,7 +444,9 @@ public class NetconfDeviceSimulator implements Closeable {
                 final SimulatedEditConfig sEditConfig = new SimulatedEditConfig(String.valueOf(currentSessionId), storage);
                 final SimulatedGetConfig sGetConfig = new SimulatedGetConfig(String.valueOf(currentSessionId), storage);
                 final SimulatedCommit sCommit = new SimulatedCommit(String.valueOf(currentSessionId));
-                return Sets.<NetconfOperation>newHashSet(sGet,  sGetConfig, sEditConfig, sCommit);
+                final SimulatedLock sLock = new SimulatedLock(String.valueOf(currentSessionId));
+                final SimulatedUnLock sUnlock = new SimulatedUnLock(String.valueOf(currentSessionId));
+                return Sets.<NetconfOperation>newHashSet(sGet,  sGetConfig, sEditConfig, sCommit, sLock, sUnlock);
             }
 
             @Override
