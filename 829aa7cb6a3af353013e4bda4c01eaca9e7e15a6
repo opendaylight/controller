@@ -16,6 +16,24 @@
       "revId": "829aa7cb6a3af353013e4bda4c01eaca9e7e15a6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5942323f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 413,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-02-06T00:27:35Z",
+      "side": 1,
+      "message": "hmm, I would prefer to pass followerActor to the sendUpdatesToFollower and keep if check of followerActor at calling method, instead of of passing a flag, whose value will be updated by the method/API.  I feel its like when you pass some object to API and API changes its state, is not right either. We can do such kind of thing if we are returning more than one value.\n\nIn short, how about, if i pass followerActor to sendUpdatesToFollower and check null of followerActor before calling sendUpdatesToFollower?",
+      "parentUuid": "7a96c907_1e07b01d",
+      "revId": "829aa7cb6a3af353013e4bda4c01eaca9e7e15a6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
