@@ -1,5 +1,18 @@
 package org.opendaylight.controller.cluster.raft;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
@@ -56,27 +69,17 @@ import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payloa
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.controller.cluster.raft.utils.MockAkkaJournal;
 import org.opendaylight.controller.cluster.raft.utils.MockSnapshotStore;
+import org.slf4j.impl.SimpleLogger;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
 public class RaftActorTest extends AbstractActorTest {
 
+    static {
+        System.setProperty(SimpleLogger.LOG_KEY_PREFIX + "org.opendaylight.controller.cluster.raft", "debug");
+    }
 
     @After
     public void tearDown() {
@@ -896,18 +899,29 @@ public class RaftActorTest extends AbstractActorTest {
     @Test
     public void testRaftRoleChangeNotifier() throws Exception {
         new JavaTestKit(getSystem()) {{
+
             ActorRef notifierActor = getSystem().actorOf(Props.create(MessageCollectorActor.class));
+            MessageCollectorActor.waitUntilReady(notifierActor);
+
             DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+            long heartBeatInterval = 100;
+            config.setHeartBeatInterval(FiniteDuration.create(heartBeatInterval, TimeUnit.MILLISECONDS));
+            config.setElectionTimeoutFactor(1);
             String id = "testRaftRoleChangeNotifier";
 
-            TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(), MockRaftActor.props(id,
+            TestActorRef.create(getSystem(), MockRaftActor.props(id,
                 Collections.<String,String>emptyMap(), Optional.<ConfigParams>of(config), notifierActor), id);
 
-            // sleeping for a minimum of 2 seconds, if it spans more its fine.
-            Uninterruptibles.sleepUninterruptibly(2, TimeUnit.SECONDS);
+            List<Object> matches =  null;
+            for(int i = 0; i < 5000 / heartBeatInterval * 2; i++) {
+                Uninterruptibles.sleepUninterruptibly(heartBeatInterval * 2, TimeUnit.MILLISECONDS);
+                matches = MessageCollectorActor.getAllMatching(notifierActor, RoleChanged.class);
+                assertNotNull(matches);
+                if(matches.size() == 3) {
+                    break;
+                }
+            }
 
-            List<Object> matches =  MessageCollectorActor.getAllMatching(notifierActor, RoleChanged.class);
-            assertNotNull(matches);
             assertEquals(3, matches.size());
 
             // check if the notifier got a role change from null to Follower
