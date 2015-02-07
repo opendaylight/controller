@@ -1,0 +1,86 @@
+module event-aggregator {
+    yang-version 1;
+    namespace "urn:cisco:params:xml:ns:yang:messagebus:eventaggregator";
+    prefix "eventaggregator";
+
+    organization "Cisco Systems, Inc.";
+    contact "Robert Gallas";
+
+    description
+        "Module implementing message but RPC.
+
+        Copyright (c)2014 Cisco Systems, Inc. All rights reserved.
+
+        This program and the accompanying materials are made available
+        under the terms of the Eclipse Public License v1.0 which
+        accompanies this distribution, and is available at
+        http://www.eclipse.org/legal/epl-v10.html";
+
+    revision "2014-12-02" {
+        description "Initial revision";
+    }
+
+    typedef pattern {
+        type string {
+            length 1..max;
+        }
+
+        // FIXME: make this a regular expression
+        description "A match pattern. Specifically this is a wildcard pattern.";
+    }
+
+    typedef notification-pattern {
+        type pattern;
+        description
+            "Pattern for matching candidate notification types. This pattern is to be
+            applied against the concatenation of the namespace of the module which
+            defines that particular notification, followed by a single colon, and
+            then followed by notification identifier, as supplied in the argument to
+            the notification statement.";
+    }
+
+    typedef topic-id {
+        type string {
+            length 1..max;
+        }
+        description
+            "A topic identifier. It uniquely defines a topic as seen by the the user
+            of this model's RPCs";
+    }
+
+    rpc create-topic {
+	description
+            "Create a new topic. A topic is an aggregation of several notification
+	    types from a set of nodes.";
+
+        input {
+            leaf notification-pattern {
+                type notification-pattern;
+                mandatory true;
+            }
+
+            leaf node-id-pattern {
+                type pattern;
+                mandatory true;
+                description
+                    "Pattern for matching candidate event source nodes when looking
+                    for contributors to the topic. The pattern will be applied against
+                    /network-topology/topology/node/node-id";
+            }
+        }
+
+        output {
+            leaf topic-id {
+                type topic-id;
+            }
+        }
+    }
+
+    rpc destroy-topic {
+        input {
+            leaf topic-id {
+                type topic-id;
+            }
+        }
+    }
+}

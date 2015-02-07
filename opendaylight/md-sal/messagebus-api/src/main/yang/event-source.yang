@@ -1,0 +1,96 @@
+module event-source {
+    yang-version 1;
+    namespace "urn:cisco:params:xml:ns:yang:messagebus:eventsource";
+    prefix "eventsource";
+
+    import network-topology { prefix nt; revision-date "2013-10-21"; }
+    import opendaylight-inventory {prefix inv; revision-date "2013-08-19";}
+    import yang-ext {prefix ext; revision-date "2013-07-09";}
+
+    organization "Cisco Systems, Inc.";
+    contact "Robert Gallas";
+
+    description
+        "Base model for a topology where individual nodes can produce events.
+
+        Module implementing event source topology and encapped notification.
+
+        Copyright (c)2014 Cisco Systems, Inc. All rights reserved.
+
+        This program and the accompanying materials are made available
+        under the terms of the Eclipse Public License v1.0 which
+        accompanies this distribution, and is available at
+        http://www.eclipse.org/legal/epl-v10.html";
+
+    revision "2014-12-02" {
+        description "first revision";
+    }
+
+    typedef join-topic-status {
+        type enumeration {
+            enum up;
+            enum down;
+        }
+        description "Object status";
+    }
+
+    typedef node-ref {
+        type leafref {
+            path "/inv:nodes/inv:node/inv:id";
+        }
+    }
+
+    grouping topology-event-source-type {
+        container topology-event-source {
+            presence "indicates an event source-aware topology";
+        }
+    }
+
+    rpc join-topic {
+        input {
+            leaf node {
+               ext:context-reference "inv:node-context";
+               type "instance-identifier";
+            }
+            leaf topic-id {
+                type string;
+                description "in current implementation notification-pattern is defined by topic-id.
+                             By persisting topic definition we could omit notification-pattern";
+            }
+            leaf notification-pattern {
+                type string;
+            }
+        }
+
+        output {
+            leaf status {
+                type join-topic-status;
+            }
+        }
+    }
+
+    notification encap-data {
+        leaf encap-format {
+            type string;
+            description "Should we keep it?";
+        }
+
+        leaf event-source {
+            type string;
+            description "should be matched to node-ref?";
+        }
+
+        anyxml payload;
+    }
+
+    augment "/nt:network-topology/nt:topology/nt:topology-types" {
+        uses topology-event-source-type;
+    }
+
+    augment "/nt:network-topology/nt:topology/nt:node" {
+        when "../../nt:topology-types/topology-event-source";
+        leaf event-source-node {
+            type node-ref;
+        }
+    }
+}
