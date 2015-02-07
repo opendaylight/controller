@@ -309,6 +309,18 @@
                 <type>xml</type>
             </dependency>
 
+            <!-- MessageBus -->
+            <dependency>
+                <groupId>org.opendaylight.controller</groupId>
+                <artifactId>message-bus-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.controller</groupId>
+                <artifactId>message-bus-impl</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 </project>
