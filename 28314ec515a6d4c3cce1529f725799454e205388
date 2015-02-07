@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_b486d8d9",
+        "filename": "opendaylight/md-sal/messagebus-api/src/main/yang/event-source.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 984
+      },
+      "writtenOn": "2015-02-07T22:12:11Z",
+      "side": 1,
+      "message": "in current implementation notification-pattern is defined by topic-id.\n                             By persisting topic definition we could omit notification-pattern",
+      "range": {
+        "startLine": 36,
+        "startChar": 29,
+        "endLine": 37,
+        "endChar": 94
+      },
+      "revId": "28314ec515a6d4c3cce1529f725799454e205388",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
