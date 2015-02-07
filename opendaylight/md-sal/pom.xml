@@ -90,6 +90,9 @@
 
     <!-- Clustering -->
     <module>sal-remoterpc-connector</module>
+
+    <!-- Message Bus -->
+    <module>messagebus-api</module>
   </modules>
 
   <build>

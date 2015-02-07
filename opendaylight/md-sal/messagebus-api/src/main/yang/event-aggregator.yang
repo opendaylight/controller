@@ -1,0 +1,40 @@
+module event-aggregator {
+    yang-version 1;
+    namespace "urn:cisco:params:xml:ns:yang:messagebus:eventaggregator";
+    prefix "eventaggregator";
+
+    organization "Cisco Systems";
+
+    contact "Robert Gallas";
+
+    description "Module implementing message but RPC.";
+
+    revision "2014-12-02" {
+      description "first revision";
+    }
+
+    rpc create-topic {
+        input {
+	        leaf notification-pattern {
+	            type string;
+	        }
+	        leaf node-id-pattern {
+	            type string;
+	        }
+        }
+
+        output {
+	        leaf topic-id {
+	            type string;
+	        }
+        }
+    }
+
+    rpc destroy-topic {
+        input {
+	        leaf topic-id {
+	            type string;
+	        }
+        }
+    }
+}
