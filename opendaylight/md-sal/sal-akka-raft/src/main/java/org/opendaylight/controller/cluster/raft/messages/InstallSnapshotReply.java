@@ -15,7 +15,7 @@ public class InstallSnapshotReply extends AbstractRaftRPC {
     // responding
     private final String followerId;
     private final int chunkIndex;
-    private boolean success;
+    private final boolean success;
 
     public InstallSnapshotReply(long term, String followerId, int chunkIndex,
         boolean success) {
@@ -35,5 +35,13 @@ public class InstallSnapshotReply extends AbstractRaftRPC {
 
     public boolean isSuccess() {
         return success;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("InstallSnapshotReply [term=").append(term).append(", followerId=").append(followerId)
+                .append(", chunkIndex=").append(chunkIndex).append(", success=").append(success).append("]");
+        return builder.toString();
     }
 }
