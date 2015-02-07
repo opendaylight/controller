@@ -23,16 +23,20 @@ import scala.concurrent.duration.FiniteDuration;
 
 
 public class MessageCollectorActor extends UntypedActor {
-    private List<Object> messages = new ArrayList<>();
+    private final List<Object> messages = new ArrayList<>();
 
     @Override public void onReceive(Object message) throws Exception {
         if(message instanceof String){
             if("get-all-messages".equals(message)){
-                getSender().tell(new ArrayList(messages), getSelf());
+                getSender().tell(new ArrayList<>(messages), getSelf());
             }
-        } else {
+        } else if(message != null) {
             messages.add(message);
         }
+    }
+
+    public void clear() {
+        messages.clear();
     }
 
     public static List<Object> getAllMessages(ActorRef actor) throws Exception {
@@ -40,11 +44,7 @@ public class MessageCollectorActor extends UntypedActor {
         Timeout operationTimeout = new Timeout(operationDuration);
         Future<Object> future = Patterns.ask(actor, "get-all-messages", operationTimeout);
 
-        try {
-            return (List<Object>) Await.result(future, operationDuration);
-        } catch (Exception e) {
-            throw e;
-        }
+        return (List<Object>) Await.result(future, operationDuration);
     }
 
     /**
