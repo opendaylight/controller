@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_11747e34",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 2508
+      },
+      "writtenOn": "2015-02-07T00:26:33Z",
+      "side": 1,
+      "message": "Please advise if this comment was still correct or not. (As I mentioned in commit message it didn\u0027t seem this was true.)",
+      "revId": "3d529bff0285a84e7568deaaa97f9b64fd76b465",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
