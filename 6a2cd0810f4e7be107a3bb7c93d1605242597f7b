@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_f406a01c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 423,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-02-07T03:30:18Z",
+      "side": 1,
+      "message": "I added is isfollowerActive check also, let me know if its unnecessary",
+      "range": {
+        "startLine": 423,
+        "startChar": 39,
+        "endLine": 423,
+        "endChar": 55
+      },
+      "revId": "6a2cd0810f4e7be107a3bb7c93d1605242597f7b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
