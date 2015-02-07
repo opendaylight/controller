@@ -35,6 +35,7 @@ public class RequestVote extends AbstractRaftRPC {
     public RequestVote() {
     }
 
+    @Override
     public long getTerm() {
         return term;
     }
@@ -63,14 +64,12 @@ public class RequestVote extends AbstractRaftRPC {
         this.lastLogTerm = lastLogTerm;
     }
 
-    @Override public String toString() {
-        final StringBuilder sb =
-            new StringBuilder("RequestVote{");
-        sb.append("term='").append(getTerm()).append('\'');
-        sb.append("candidateId='").append(candidateId).append('\'');
-        sb.append(", lastLogIndex=").append(lastLogIndex);
-        sb.append(", lastLogTerm=").append(lastLogTerm);
-        sb.append('}');
-        return sb.toString();
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("RequestVote [term=").append(term).append(", candidateId=").append(candidateId)
+                .append(", lastLogIndex=").append(lastLogIndex).append(", lastLogTerm=").append(lastLogTerm)
+                .append("]");
+        return builder.toString();
     }
 }
