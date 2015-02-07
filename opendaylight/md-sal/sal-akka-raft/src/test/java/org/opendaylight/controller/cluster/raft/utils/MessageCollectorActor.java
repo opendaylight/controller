@@ -16,6 +16,7 @@ import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
@@ -23,16 +24,27 @@ import scala.concurrent.duration.FiniteDuration;
 
 
 public class MessageCollectorActor extends UntypedActor {
-    private List<Object> messages = new ArrayList<>();
+    private static final String ARE_YOU_READY = "ARE_YOU_READY";
+
+    private final List<Object> messages = new ArrayList<>();
 
     @Override public void onReceive(Object message) throws Exception {
+        if(message.equals(ARE_YOU_READY)) {
+            getSender().tell("yes", getSelf());
+            return;
+        }
+
         if(message instanceof String){
             if("get-all-messages".equals(message)){
-                getSender().tell(new ArrayList(messages), getSelf());
+                getSender().tell(new ArrayList<>(messages), getSelf());
             }
-        } else {
+        } else if(message != null) {
             messages.add(message);
         }
+    }
+
+    public void clear() {
+        messages.clear();
     }
 
     public static List<Object> getAllMessages(ActorRef actor) throws Exception {
@@ -40,11 +52,7 @@ public class MessageCollectorActor extends UntypedActor {
         Timeout operationTimeout = new Timeout(operationDuration);
         Future<Object> future = Patterns.ask(actor, "get-all-messages", operationTimeout);
 
-        try {
-            return (List<Object>) Await.result(future, operationDuration);
-        } catch (Exception e) {
-            throw e;
-        }
+        return (List<Object>) Await.result(future, operationDuration);
     }
 
     /**
@@ -79,4 +87,17 @@ public class MessageCollectorActor extends UntypedActor {
         return output;
     }
 
+    public static void waitUntilReady(ActorRef actor) throws Exception {
+        long timeout = 500;
+        FiniteDuration duration = Duration.create(timeout, TimeUnit.MILLISECONDS);
+        for(int i = 0; i < 10; i++) {
+            try {
+                Await.ready(Patterns.ask(actor, ARE_YOU_READY, timeout), duration);
+                return;
+            } catch (TimeoutException e) {
+            }
+        }
+
+        throw new TimeoutException("Actor not ready in time.");
+    }
 }
