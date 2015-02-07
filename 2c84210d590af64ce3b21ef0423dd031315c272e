@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "7a96c907_f1e472e2",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 405,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-07T01:13:33Z",
+      "side": 1,
+      "message": "The followerLogInformation.getFollowerActiveTime() is just an elapsed time, so it might be very small.\n\nI guess you can just do a check between followerActiveTime and heartbeat interval, as the above condition will always be true.\n\nAlso, would we able to move the getHeartBeatInterval.toMillis() outside the loop and assign to a long.",
+      "revId": "2c84210d590af64ce3b21ef0423dd031315c272e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_b1a82adc",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
         "patchSetId": 4
