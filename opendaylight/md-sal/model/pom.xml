@@ -18,6 +18,7 @@
     <module>model-flow-service</module>
     <module>model-flow-statistics</module>
     <module>model-topology</module>
+    <module>notifications-2008-07-14</module>
   </modules>
 
   <properties>

@@ -1,0 +1,53 @@
+module messagebus-app-impl {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:messagebus:app:impl";
+    prefix "binding-impl";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import opendaylight-md-sal-binding {prefix sal;}
+    import opendaylight-md-sal-dom {prefix dom;}
+
+
+    description
+        "Service definition for Message Bus application implementation.";
+ 
+    revision "2015-02-03" {
+        description "Second revision. Message Bus opensourcing";
+    }
+
+    identity messagebus-app-impl {
+        base config:module-type;
+        config:java-name-prefix MessageBusAppImpl;
+    }
+    
+    augment "/config:modules/config:module/config:configuration" {
+        case messagebus-app-impl {
+            when "/config:modules/config:module/config:type = 'messagebus-app-impl'";
+            
+            container binding-broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity sal:binding-broker-osgi-registry;
+                    }
+                }
+            }
+
+            container dom-broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity dom:dom-broker-osgi-registry;
+                    }
+                }
+            }
+
+        }
+    }
+    
+    augment "/config:modules/config:module/config:state" {
+        case messagebus-app-impl {
+            when "/config:modules/config:module/config:type = 'messagebus-app-impl'";
+        }
+    }
+}
