@@ -30,6 +30,7 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -39,13 +40,18 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType;
 import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
 import org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException;
+import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
+import org.opendaylight.controller.cluster.datastore.messages.BatchedModificationsReply;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
@@ -60,6 +66,11 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.WriteData;
 import org.opendaylight.controller.cluster.datastore.messages.WriteDataReply;
+import org.opendaylight.controller.cluster.datastore.modification.AbstractModification;
+import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
+import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
+import org.opendaylight.controller.cluster.datastore.modification.Modification;
+import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.DefaultShardStrategy;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
@@ -71,9 +82,11 @@ import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.CreateTransactionReply;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.slf4j.impl.SimpleLogger;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
@@ -81,6 +94,10 @@ import scala.concurrent.duration.Duration;
 
 @SuppressWarnings("resource")
 public class TransactionProxyTest {
+
+    static {
+        System.setProperty(SimpleLogger.LOG_KEY_PREFIX + "org.opendaylight.controller.cluster.datastore", "debug");
+    }
 
     @SuppressWarnings("serial")
     static class TestException extends RuntimeException {
@@ -102,7 +119,10 @@ public class TransactionProxyTest {
     @Mock
     private ClusterWrapper mockClusterWrapper;
 
-    String memberName = "mock-member";
+    private final String memberName = "mock-member";
+
+    private final Builder dataStoreContextBuilder = DatastoreContext.newBuilder().operationTimeoutInSeconds(2).
+            shardBatchedModificationCount(1);
 
     @BeforeClass
     public static void setUpClass() throws IOException {
@@ -126,14 +146,12 @@ public class TransactionProxyTest {
 
         schemaContext = TestModel.createTestContext();
 
-        DatastoreContext dataStoreContext = DatastoreContext.newBuilder().operationTimeoutInSeconds(2).build();
-
         doReturn(getSystem()).when(mockActorContext).getActorSystem();
         doReturn(memberName).when(mockActorContext).getCurrentMemberName();
         doReturn(schemaContext).when(mockActorContext).getSchemaContext();
         doReturn(mockClusterWrapper).when(mockActorContext).getClusterWrapper();
         doReturn(mockClusterWrapper).when(mockActorContext).getClusterWrapper();
-        doReturn(dataStoreContext).when(mockActorContext).getDatastoreContext();
+        doReturn(dataStoreContextBuilder.build()).when(mockActorContext).getDatastoreContext();
         doReturn(10).when(mockActorContext).getTransactionOutstandingOperationLimit();
 
         ShardStrategyFactory.setConfiguration(configuration);
@@ -186,11 +204,15 @@ public class TransactionProxyTest {
     }
 
     private ReadData eqSerializedReadData() {
+        return eqSerializedReadData(TestModel.TEST_PATH);
+    }
+
+    private ReadData eqSerializedReadData(final YangInstanceIdentifier path) {
         ArgumentMatcher<ReadData> matcher = new ArgumentMatcher<ReadData>() {
             @Override
             public boolean matches(Object argument) {
                 return ReadData.SERIALIZABLE_CLASS.equals(argument.getClass()) &&
-                       ReadData.fromSerializable(argument).getPath().equals(TestModel.TEST_PATH);
+                       ReadData.fromSerializable(argument).getPath().equals(path);
             }
         };
 
@@ -209,23 +231,13 @@ public class TransactionProxyTest {
         return argThat(matcher);
     }
 
-    private WriteData eqSerializedWriteData(final NormalizedNode<?, ?> nodeToWrite) {
-        return eqSerializedWriteData(nodeToWrite, DataStoreVersions.CURRENT_VERSION);
-    }
-
-    private WriteData eqSerializedWriteData(final NormalizedNode<?, ?> nodeToWrite,
-            final int transactionVersion) {
+    private WriteData eqLegacyWriteData(final NormalizedNode<?, ?> nodeToWrite) {
         ArgumentMatcher<WriteData> matcher = new ArgumentMatcher<WriteData>() {
             @Override
             public boolean matches(Object argument) {
-                if((transactionVersion >= DataStoreVersions.LITHIUM_VERSION &&
-                        WriteData.SERIALIZABLE_CLASS.equals(argument.getClass())) ||
-                   (transactionVersion < DataStoreVersions.LITHIUM_VERSION &&
-                           ShardTransactionMessages.WriteData.class.equals(argument.getClass()))) {
-
+                if(ShardTransactionMessages.WriteData.class.equals(argument.getClass())) {
                     WriteData obj = WriteData.fromSerializable(argument);
-                    return obj.getPath().equals(TestModel.TEST_PATH) &&
-                           obj.getData().equals(nodeToWrite);
+                    return obj.getPath().equals(TestModel.TEST_PATH) && obj.getData().equals(nodeToWrite);
                 }
 
                 return false;
@@ -235,39 +247,13 @@ public class TransactionProxyTest {
         return argThat(matcher);
     }
 
-    private WriteData eqWriteData(final NormalizedNode<?, ?> nodeToWrite) {
-        ArgumentMatcher<WriteData> matcher = new ArgumentMatcher<WriteData>() {
-            @Override
-            public boolean matches(Object argument) {
-                if(argument instanceof WriteData) {
-                    WriteData obj = (WriteData) argument;
-                    return obj.getPath().equals(TestModel.TEST_PATH) &&
-                        obj.getData().equals(nodeToWrite);
-                }
-                return false;
-            }
-        };
-
-        return argThat(matcher);
-    }
-
-    private MergeData eqSerializedMergeData(final NormalizedNode<?, ?> nodeToWrite) {
-        return eqSerializedMergeData(nodeToWrite, DataStoreVersions.CURRENT_VERSION);
-    }
-
-    private MergeData eqSerializedMergeData(final NormalizedNode<?, ?> nodeToWrite,
-            final int transactionVersion) {
+    private MergeData eqLegacyMergeData(final NormalizedNode<?, ?> nodeToWrite) {
         ArgumentMatcher<MergeData> matcher = new ArgumentMatcher<MergeData>() {
             @Override
             public boolean matches(Object argument) {
-                if((transactionVersion >= DataStoreVersions.LITHIUM_VERSION &&
-                        MergeData.SERIALIZABLE_CLASS.equals(argument.getClass())) ||
-                   (transactionVersion < DataStoreVersions.LITHIUM_VERSION &&
-                           ShardTransactionMessages.MergeData.class.equals(argument.getClass()))) {
-
+                if(ShardTransactionMessages.MergeData.class.equals(argument.getClass())) {
                     MergeData obj = MergeData.fromSerializable(argument);
-                    return obj.getPath().equals(TestModel.TEST_PATH) &&
-                           obj.getData().equals(nodeToWrite);
+                    return obj.getPath().equals(TestModel.TEST_PATH) && obj.getData().equals(nodeToWrite);
                 }
 
                 return false;
@@ -277,41 +263,12 @@ public class TransactionProxyTest {
         return argThat(matcher);
     }
 
-    private MergeData eqMergeData(final NormalizedNode<?, ?> nodeToWrite) {
-        ArgumentMatcher<MergeData> matcher = new ArgumentMatcher<MergeData>() {
-            @Override
-            public boolean matches(Object argument) {
-                if(argument instanceof MergeData) {
-                    MergeData obj = ((MergeData) argument);
-                    return obj.getPath().equals(TestModel.TEST_PATH) &&
-                        obj.getData().equals(nodeToWrite);
-                }
-
-               return false;
-            }
-        };
-
-        return argThat(matcher);
-    }
-
-    private DeleteData eqSerializedDeleteData() {
+    private DeleteData eqLegacyDeleteData(final YangInstanceIdentifier expPath) {
         ArgumentMatcher<DeleteData> matcher = new ArgumentMatcher<DeleteData>() {
             @Override
             public boolean matches(Object argument) {
-                return DeleteData.SERIALIZABLE_CLASS.equals(argument.getClass()) &&
-                       DeleteData.fromSerializable(argument).getPath().equals(TestModel.TEST_PATH);
-            }
-        };
-
-        return argThat(matcher);
-    }
-
-        private DeleteData eqDeleteData() {
-        ArgumentMatcher<DeleteData> matcher = new ArgumentMatcher<DeleteData>() {
-            @Override
-            public boolean matches(Object argument) {
-                return argument instanceof DeleteData &&
-                    ((DeleteData)argument).getPath().equals(TestModel.TEST_PATH);
+                return ShardTransactionMessages.DeleteData.class.equals(argument.getClass()) &&
+                       DeleteData.fromSerializable(argument).getPath().equals(expPath);
             }
         };
 
@@ -328,7 +285,7 @@ public class TransactionProxyTest {
 
     private Future<Object> readSerializedDataReply(NormalizedNode<?, ?> data,
             short transactionVersion) {
-        return Futures.successful(new ReadDataReply(data).toSerializable(transactionVersion));
+        return Futures.successful(new ReadDataReply(data, transactionVersion).toSerializable());
     }
 
     private Future<Object> readSerializedDataReply(NormalizedNode<?, ?> data) {
@@ -336,7 +293,7 @@ public class TransactionProxyTest {
     }
 
     private Future<ReadDataReply> readDataReply(NormalizedNode<?, ?> data) {
-        return Futures.successful(new ReadDataReply(data));
+        return Futures.successful(new ReadDataReply(data, DataStoreVersions.CURRENT_VERSION));
     }
 
     private Future<Object> dataExistsSerializedReply(boolean exists) {
@@ -347,48 +304,41 @@ public class TransactionProxyTest {
         return Futures.successful(new DataExistsReply(exists));
     }
 
-    private Future<Object> writeSerializedDataReply(short version) {
-        return Futures.successful(new WriteDataReply().toSerializable(version));
-    }
-
-    private Future<Object> writeSerializedDataReply() {
-        return writeSerializedDataReply(DataStoreVersions.CURRENT_VERSION);
-    }
-
-    private Future<WriteDataReply> writeDataReply() {
-        return Futures.successful(new WriteDataReply());
-    }
-
-    private Future<Object> mergeSerializedDataReply(short version) {
-        return Futures.successful(new MergeDataReply().toSerializable(version));
-    }
-
-    private Future<Object> mergeSerializedDataReply() {
-        return mergeSerializedDataReply(DataStoreVersions.CURRENT_VERSION);
+    private Future<BatchedModificationsReply> batchedModificationsReply() {
+        return Futures.successful(BatchedModificationsReply.INSTANCE);
     }
 
     private Future<Object> incompleteFuture(){
         return mock(Future.class);
     }
 
-    private Future<MergeDataReply> mergeDataReply() {
-        return Futures.successful(new MergeDataReply());
-    }
-
-    private Future<Object> deleteSerializedDataReply(short version) {
-        return Futures.successful(new DeleteDataReply().toSerializable(version));
-    }
-
-    private Future<Object> deleteSerializedDataReply() {
-        return deleteSerializedDataReply(DataStoreVersions.CURRENT_VERSION);
-    }
-
-    private Future<DeleteDataReply> deleteDataReply() {
-        return Futures.successful(new DeleteDataReply());
-    }
-
     private ActorSelection actorSelection(ActorRef actorRef) {
         return getSystem().actorSelection(actorRef.path());
+    }
+
+    private void expectBatchedModifications(ActorRef actorRef) {
+        doReturn(batchedModificationsReply()).when(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), isA(BatchedModifications.class));
+    }
+
+    private void expectBatchedModifications() {
+        doReturn(batchedModificationsReply()).when(mockActorContext).executeOperationAsync(
+                any(ActorSelection.class), isA(BatchedModifications.class));
+    }
+
+    private void expectIncompleteBatchedModifications() {
+        doReturn(incompleteFuture()).when(mockActorContext).executeOperationAsync(
+                any(ActorSelection.class), isA(BatchedModifications.class));
+    }
+
+    private void expectReadyTransaction(ActorRef actorRef) {
+        doReturn(readySerializedTxReply(actorRef.path().toString())).when(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), isA(ReadyTransaction.SERIALIZABLE_CLASS));
+    }
+
+    private void expectFailedBatchedModifications(ActorRef actorRef) {
+        doReturn(Futures.failed(new TestException())).when(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), isA(BatchedModifications.class));
     }
 
     private CreateTransactionReply createTransactionReply(ActorRef actorRef, int transactionVersion){
@@ -445,8 +395,7 @@ public class TransactionProxyTest {
     public void testRead() throws Exception {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_ONLY);
 
-        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
-                READ_ONLY);
+        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, READ_ONLY);
 
         doReturn(readSerializedDataReply(null)).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqSerializedReadData());
@@ -475,8 +424,7 @@ public class TransactionProxyTest {
         doReturn(Futures.successful(new Object())).when(mockActorContext).
                 executeOperationAsync(eq(actorSelection(actorRef)), eqSerializedReadData());
 
-        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
-                READ_ONLY);
+        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, READ_ONLY);
 
         transactionProxy.read(TestModel.TEST_PATH).checkedGet(5, TimeUnit.SECONDS);
     }
@@ -488,8 +436,7 @@ public class TransactionProxyTest {
         doReturn(Futures.failed(new TestException())).when(mockActorContext).
                 executeOperationAsync(eq(actorSelection(actorRef)), eqSerializedReadData());
 
-        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
-                READ_ONLY);
+        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, READ_ONLY);
 
         propagateReadFailedExceptionCause(transactionProxy.read(TestModel.TEST_PATH));
     }
@@ -540,21 +487,19 @@ public class TransactionProxyTest {
 
     @Test(expected = TestException.class)
     public void testReadWithPriorRecordingOperationFailure() throws Throwable {
+        doReturn(dataStoreContextBuilder.shardBatchedModificationCount(2).build()).
+                when(mockActorContext).getDatastoreContext();
+
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
 
         NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-        doReturn(writeSerializedDataReply()).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedWriteData(nodeToWrite));
-
-        doReturn(Futures.failed(new TestException())).when(mockActorContext).
-                executeOperationAsync(eq(actorSelection(actorRef)), eqSerializedDeleteData());
+        expectFailedBatchedModifications(actorRef);
 
         doReturn(readSerializedDataReply(null)).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqSerializedReadData());
 
-        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
-                READ_WRITE);
+        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, READ_WRITE);
 
         transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
 
@@ -574,14 +519,12 @@ public class TransactionProxyTest {
 
         NormalizedNode<?, ?> expectedNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-        doReturn(writeSerializedDataReply()).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedWriteData(expectedNode));
+        expectBatchedModifications(actorRef);
 
         doReturn(readSerializedDataReply(expectedNode)).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqSerializedReadData());
 
-        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
-                READ_WRITE);
+        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, READ_WRITE);
 
         transactionProxy.write(TestModel.TEST_PATH, expectedNode);
 
@@ -589,16 +532,19 @@ public class TransactionProxyTest {
                 TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
 
         assertEquals("NormalizedNode isPresent", true, readOptional.isPresent());
-
         assertEquals("Response NormalizedNode", expectedNode, readOptional.get());
+
+        InOrder inOrder = Mockito.inOrder(mockActorContext);
+        inOrder.verify(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), isA(BatchedModifications.class));
+
+        inOrder.verify(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), eqSerializedReadData());
     }
 
     @Test(expected=IllegalStateException.class)
     public void testReadPreConditionCheck() {
-
-        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
-                WRITE_ONLY);
-
+        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, WRITE_ONLY);
         transactionProxy.read(TestModel.TEST_PATH);
     }
 
@@ -624,8 +570,7 @@ public class TransactionProxyTest {
     public void testExists() throws Exception {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_ONLY);
 
-        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
-                READ_ONLY);
+        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, READ_ONLY);
 
         doReturn(dataExistsSerializedReply(false)).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqSerializedDataExists());
@@ -672,23 +617,21 @@ public class TransactionProxyTest {
         doReturn(Futures.failed(new TestException())).when(mockActorContext).
                 executeOperationAsync(eq(actorSelection(actorRef)), eqSerializedDataExists());
 
-        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
-                READ_ONLY);
+        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, READ_ONLY);
 
         propagateReadFailedExceptionCause(transactionProxy.exists(TestModel.TEST_PATH));
     }
 
     @Test(expected = TestException.class)
     public void testExistsWithPriorRecordingOperationFailure() throws Throwable {
+        doReturn(dataStoreContextBuilder.shardBatchedModificationCount(2).build()).
+                when(mockActorContext).getDatastoreContext();
+
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
 
         NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-        doReturn(writeSerializedDataReply()).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedWriteData(nodeToWrite));
-
-        doReturn(Futures.failed(new TestException())).when(mockActorContext).
-                executeOperationAsync(eq(actorSelection(actorRef)), eqSerializedDeleteData());
+        expectFailedBatchedModifications(actorRef);
 
         doReturn(dataExistsSerializedReply(false)).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqSerializedDataExists());
@@ -714,28 +657,30 @@ public class TransactionProxyTest {
 
         NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-        doReturn(writeSerializedDataReply()).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedWriteData(nodeToWrite));
+        expectBatchedModifications(actorRef);
 
         doReturn(dataExistsSerializedReply(true)).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqSerializedDataExists());
 
-        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
-                READ_WRITE);
+        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, READ_WRITE);
 
         transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
 
         Boolean exists = transactionProxy.exists(TestModel.TEST_PATH).checkedGet();
 
         assertEquals("Exists response", true, exists);
+
+        InOrder inOrder = Mockito.inOrder(mockActorContext);
+        inOrder.verify(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), isA(BatchedModifications.class));
+
+        inOrder.verify(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), eqSerializedDataExists());
     }
 
     @Test(expected=IllegalStateException.class)
     public void testExistsPreConditionCheck() {
-
-        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
-                WRITE_ONLY);
-
+        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, WRITE_ONLY);
         transactionProxy.exists(TestModel.TEST_PATH);
     }
 
@@ -756,7 +701,7 @@ public class TransactionProxyTest {
                     // Expected
                 }
             } else {
-                assertEquals("Recording operation Future result type", expResultType,
+                assertEquals(String.format("Recording operation %d Future result type", i +1 ), expResultType,
                              Await.result(future, Duration.create(5, TimeUnit.SECONDS)).getClass());
             }
         }
@@ -768,19 +713,20 @@ public class TransactionProxyTest {
 
         NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-        doReturn(writeSerializedDataReply()).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedWriteData(nodeToWrite));
+        expectBatchedModifications(actorRef);
+        expectReadyTransaction(actorRef);
 
-        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
-                WRITE_ONLY);
+        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, WRITE_ONLY);
 
         transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
 
-        verify(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedWriteData(nodeToWrite));
+        // This sends the batched modification.
+        transactionProxy.ready();
+
+        verifyOneBatchedModification(actorRef, new WriteModification(TestModel.TEST_PATH, nodeToWrite));
 
         verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
-                WriteDataReply.class);
+                BatchedModificationsReply.class);
     }
 
     @Test
@@ -795,10 +741,10 @@ public class TransactionProxyTest {
         doReturn(readSerializedDataReply(null)).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqSerializedReadData());
 
-        final NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        expectBatchedModifications(actorRef);
+        expectReadyTransaction(actorRef);
 
-        doReturn(writeSerializedDataReply()).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedWriteData(nodeToWrite));
+        final NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         final TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, READ_WRITE);
 
@@ -832,33 +778,28 @@ public class TransactionProxyTest {
             throw caughtEx.get();
         }
 
-        verify(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedWriteData(nodeToWrite));
+        // This sends the batched modification.
+        transactionProxy.ready();
+
+        verifyOneBatchedModification(actorRef, new WriteModification(TestModel.TEST_PATH, nodeToWrite));
 
         verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
-                WriteDataReply.class);
+                BatchedModificationsReply.class);
     }
 
     @Test(expected=IllegalStateException.class)
     public void testWritePreConditionCheck() {
-
-        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
-                READ_ONLY);
-
-        transactionProxy.write(TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, READ_ONLY);
+        transactionProxy.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
     }
 
     @Test(expected=IllegalStateException.class)
     public void testWriteAfterReadyPreConditionCheck() {
-
-        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
-                WRITE_ONLY);
+        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, WRITE_ONLY);
 
         transactionProxy.ready();
 
-        transactionProxy.write(TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+        transactionProxy.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
     }
 
     @Test
@@ -867,37 +808,40 @@ public class TransactionProxyTest {
 
         NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-        doReturn(mergeSerializedDataReply()).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedMergeData(nodeToWrite));
+        expectBatchedModifications(actorRef);
+        expectReadyTransaction(actorRef);
 
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, WRITE_ONLY);
 
         transactionProxy.merge(TestModel.TEST_PATH, nodeToWrite);
 
-        verify(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedMergeData(nodeToWrite));
+        // This sends the batched modification.
+        transactionProxy.ready();
+
+        verifyOneBatchedModification(actorRef, new MergeModification(TestModel.TEST_PATH, nodeToWrite));
 
         verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
-                MergeDataReply.class);
+                BatchedModificationsReply.class);
     }
 
     @Test
     public void testDelete() throws Exception {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY);
 
-        doReturn(deleteSerializedDataReply()).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedDeleteData());
+        expectBatchedModifications(actorRef);
+        expectReadyTransaction(actorRef);
 
-        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
-                WRITE_ONLY);
+        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, WRITE_ONLY);
 
         transactionProxy.delete(TestModel.TEST_PATH);
 
-        verify(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedDeleteData());
+        // This sends the batched modification.
+        transactionProxy.ready();
+
+        verifyOneBatchedModification(actorRef, new DeleteModification(TestModel.TEST_PATH));
 
         verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
-                DeleteDataReply.class);
+                BatchedModificationsReply.class);
     }
 
     private void verifyCohortFutures(ThreePhaseCommitCohortProxy proxy,
@@ -934,14 +878,10 @@ public class TransactionProxyTest {
         doReturn(readSerializedDataReply(null)).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqSerializedReadData());
 
-        doReturn(writeSerializedDataReply()).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedWriteData(nodeToWrite));
+        expectBatchedModifications(actorRef);
+        expectReadyTransaction(actorRef);
 
-        doReturn(readySerializedTxReply(actorRef.path().toString())).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), isA(ReadyTransaction.SERIALIZABLE_CLASS));
-
-        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
-                READ_WRITE);
+        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, READ_WRITE);
 
         transactionProxy.read(TestModel.TEST_PATH);
 
@@ -954,9 +894,12 @@ public class TransactionProxyTest {
         ThreePhaseCommitCohortProxy proxy = (ThreePhaseCommitCohortProxy) ready;
 
         verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
-                WriteDataReply.class);
+                BatchedModificationsReply.class);
 
         verifyCohortFutures(proxy, getSystem().actorSelection(actorRef.path()));
+
+        verify(mockActorContext).executeOperationAsync(eq(actorSelection(actorRef)),
+                isA(BatchedModifications.class));
     }
 
     private ActorRef testCompatibilityWithHeliumVersion(short version) throws Exception {
@@ -968,14 +911,16 @@ public class TransactionProxyTest {
         doReturn(readSerializedDataReply(testNode, version)).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqSerializedReadData());
 
-        doReturn(writeSerializedDataReply(version)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedWriteData(testNode, version));
+        doReturn(Futures.successful(new WriteDataReply().toSerializable(version))).when(mockActorContext).
+                executeOperationAsync(eq(actorSelection(actorRef)), eqLegacyWriteData(testNode));
 
-        doReturn(mergeSerializedDataReply(version)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedMergeData(testNode, version));
+        doReturn(Futures.successful(new MergeDataReply().toSerializable(version))).when(mockActorContext).
+                executeOperationAsync(eq(actorSelection(actorRef)), eqLegacyMergeData(testNode));
 
-        doReturn(readySerializedTxReply(actorRef.path().toString())).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), isA(ReadyTransaction.SERIALIZABLE_CLASS));
+        doReturn(Futures.successful(new DeleteDataReply().toSerializable(version))).when(mockActorContext).
+                executeOperationAsync(eq(actorSelection(actorRef)), eqLegacyDeleteData(TestModel.TEST_PATH));
+
+        expectReadyTransaction(actorRef);
 
         doReturn(actorRef.path().toString()).when(mockActorContext).resolvePath(eq(actorRef.path().toString()),
                 eq(actorRef.path().toString()));
@@ -992,6 +937,8 @@ public class TransactionProxyTest {
 
         transactionProxy.merge(TestModel.TEST_PATH, testNode);
 
+        transactionProxy.delete(TestModel.TEST_PATH);
+
         DOMStoreThreePhaseCommitCohort ready = transactionProxy.ready();
 
         assertTrue(ready instanceof ThreePhaseCommitCohortProxy);
@@ -999,7 +946,8 @@ public class TransactionProxyTest {
         ThreePhaseCommitCohortProxy proxy = (ThreePhaseCommitCohortProxy) ready;
 
         verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
-                ShardTransactionMessages.WriteDataReply.class, ShardTransactionMessages.MergeDataReply.class);
+                ShardTransactionMessages.WriteDataReply.class, ShardTransactionMessages.MergeDataReply.class,
+                ShardTransactionMessages.DeleteDataReply.class);
 
         verifyCohortFutures(proxy, getSystem().actorSelection(actorRef.path()));
 
@@ -1028,21 +976,13 @@ public class TransactionProxyTest {
 
         NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-        doReturn(mergeSerializedDataReply()).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedMergeData(nodeToWrite));
+        expectFailedBatchedModifications(actorRef);
 
-        doReturn(Futures.failed(new TestException())).when(mockActorContext).
-                executeOperationAsync(eq(actorSelection(actorRef)), eqSerializedWriteData(nodeToWrite));
-
-        doReturn(readySerializedTxReply(actorRef.path().toString())).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), isA(ReadyTransaction.SERIALIZABLE_CLASS));
+        expectReadyTransaction(actorRef);
 
         doReturn(false).when(mockActorContext).isPathLocal(actorRef.path().toString());
 
-        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
-                WRITE_ONLY);
-
-        transactionProxy.merge(TestModel.TEST_PATH, nodeToWrite);
+        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, WRITE_ONLY);
 
         transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
 
@@ -1054,8 +994,7 @@ public class TransactionProxyTest {
 
         verifyCohortFutures(proxy, TestException.class);
 
-        verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
-                MergeDataReply.class, TestException.class);
+        verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(), TestException.class);
     }
 
     @Test
@@ -1064,15 +1003,13 @@ public class TransactionProxyTest {
 
         NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-        doReturn(mergeSerializedDataReply()).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedMergeData(nodeToWrite));
+        expectBatchedModifications(actorRef);
 
         doReturn(Futures.failed(new TestException())).when(mockActorContext).
                 executeOperationAsync(eq(actorSelection(actorRef)),
                         isA(ReadyTransaction.SERIALIZABLE_CLASS));
 
-        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
-                WRITE_ONLY);
+        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, WRITE_ONLY);
 
         transactionProxy.merge(TestModel.TEST_PATH, nodeToWrite);
 
@@ -1083,7 +1020,7 @@ public class TransactionProxyTest {
         ThreePhaseCommitCohortProxy proxy = (ThreePhaseCommitCohortProxy) ready;
 
         verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
-                MergeDataReply.class);
+                BatchedModificationsReply.class);
 
         verifyCohortFutures(proxy, TestException.class);
     }
@@ -1094,8 +1031,7 @@ public class TransactionProxyTest {
         doReturn(Futures.failed(new PrimaryNotFoundException("mock"))).when(
                 mockActorContext).findPrimaryShardAsync(anyString());
 
-        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
-                WRITE_ONLY);
+        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, WRITE_ONLY);
 
         NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
@@ -1120,15 +1056,13 @@ public class TransactionProxyTest {
 
         NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-        doReturn(writeSerializedDataReply()).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedWriteData(nodeToWrite));
+        expectBatchedModifications(actorRef);
 
         doReturn(Futures.successful(new Object())).when(mockActorContext).
                 executeOperationAsync(eq(actorSelection(actorRef)),
                         isA(ReadyTransaction.SERIALIZABLE_CLASS));
 
-        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
-                WRITE_ONLY);
+        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, WRITE_ONLY);
 
         transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
 
@@ -1159,8 +1093,7 @@ public class TransactionProxyTest {
         doReturn(readSerializedDataReply(null)).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqSerializedReadData());
 
-        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
-                READ_WRITE);
+        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, READ_WRITE);
 
         transactionProxy.read(TestModel.TEST_PATH);
 
@@ -1196,9 +1129,7 @@ public class TransactionProxyTest {
 
         String actorPath = "akka.tcp://system@127.0.0.1:2550/user/tx-actor";
         CreateTransactionReply createTransactionReply = CreateTransactionReply.newBuilder()
-            .setTransactionId("txn-1")
-            .setTransactionActorPath(actorPath)
-            .build();
+            .setTransactionId("txn-1").setTransactionActorPath(actorPath).build();
 
         doReturn(Futures.successful(createTransactionReply)).when(mockActorContext).
             executeOperationAsync(eq(actorSystem.actorSelection(shardActorRef.path())),
@@ -1239,7 +1170,7 @@ public class TransactionProxyTest {
     }
 
     @Test
-    public void testLocalTxActorWrite() throws Exception {
+    public void testLocalTxActorReady() throws Exception {
         ActorSystem actorSystem = getSystem();
         ActorRef shardActorRef = actorSystem.actorOf(Props.create(DoNothingActor.class));
 
@@ -1250,48 +1181,26 @@ public class TransactionProxyTest {
             when(mockActorContext).findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
 
         String actorPath = "akka.tcp://system@127.0.0.1:2550/user/tx-actor";
-        CreateTransactionReply createTransactionReply = CreateTransactionReply.newBuilder()
-            .setTransactionId("txn-1")
-            .setTransactionActorPath(actorPath)
-            .build();
+        CreateTransactionReply createTransactionReply = CreateTransactionReply.newBuilder().
+            setTransactionId("txn-1").setTransactionActorPath(actorPath).
+            setMessageVersion(DataStoreVersions.CURRENT_VERSION).build();
 
         doReturn(Futures.successful(createTransactionReply)).when(mockActorContext).
-        executeOperationAsync(eq(actorSystem.actorSelection(shardActorRef.path())),
+            executeOperationAsync(eq(actorSystem.actorSelection(shardActorRef.path())),
                 eqCreateTransaction(memberName, WRITE_ONLY));
 
         doReturn(true).when(mockActorContext).isPathLocal(actorPath);
 
-        NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
-
-        doReturn(writeDataReply()).when(mockActorContext).executeOperationAsync(
-            any(ActorSelection.class), eqWriteData(nodeToWrite));
+        doReturn(batchedModificationsReply()).when(mockActorContext).executeOperationAsync(
+                any(ActorSelection.class), isA(BatchedModifications.class));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, WRITE_ONLY);
+
+        NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
         transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
 
-        verify(mockActorContext).executeOperationAsync(
-            any(ActorSelection.class), eqWriteData(nodeToWrite));
-
-        //testing local merge
-        doReturn(mergeDataReply()).when(mockActorContext).executeOperationAsync(
-            any(ActorSelection.class), eqMergeData(nodeToWrite));
-
-        transactionProxy.merge(TestModel.TEST_PATH, nodeToWrite);
-
-        verify(mockActorContext).executeOperationAsync(
-            any(ActorSelection.class), eqMergeData(nodeToWrite));
-
-
-        //testing local delete
-        doReturn(deleteDataReply()).when(mockActorContext).executeOperationAsync(
-            any(ActorSelection.class), eqDeleteData());
-
-        transactionProxy.delete(TestModel.TEST_PATH);
-
-        verify(mockActorContext).executeOperationAsync(any(ActorSelection.class), eqDeleteData());
-
         verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
-            WriteDataReply.class, MergeDataReply.class, DeleteDataReply.class);
+                BatchedModificationsReply.class);
 
         // testing ready
         doReturn(readyTxReply(shardActorRef.path().toString())).when(mockActorContext).executeOperationAsync(
@@ -1332,10 +1241,9 @@ public class TransactionProxyTest {
         }
 
         String actorPath = "akka.tcp://system@127.0.0.1:2550/user/tx-actor";
-        CreateTransactionReply createTransactionReply = CreateTransactionReply.newBuilder()
-                .setTransactionId("txn-1")
-                .setTransactionActorPath(actorPath)
-                .build();
+        CreateTransactionReply createTransactionReply = CreateTransactionReply.newBuilder().
+                setTransactionId("txn-1").setTransactionActorPath(actorPath).
+                setMessageVersion(DataStoreVersions.CURRENT_VERSION).build();
 
         doReturn(Futures.successful(createTransactionReply)).when(mockActorContext).
                 executeOperationAsync(eq(actorSystem.actorSelection(shardActorRef.path())),
@@ -1351,9 +1259,9 @@ public class TransactionProxyTest {
 
         long end = System.currentTimeMillis();
 
-        Assert.assertTrue(String.format("took less time than expected %s was %s",
-                mockActorContext.getDatastoreContext().getOperationTimeoutInSeconds()*1000,
-                (end-start)), (end - start) > mockActorContext.getDatastoreContext().getOperationTimeoutInSeconds()*1000);
+        int expected = mockActorContext.getDatastoreContext().getOperationTimeoutInSeconds()*1000;
+        Assert.assertTrue(String.format("Expected elapsed time: %s. Actual: %s",
+                expected, (end-start)), (end - start) > expected);
 
     }
 
@@ -1379,10 +1287,9 @@ public class TransactionProxyTest {
         }
 
         String actorPath = "akka.tcp://system@127.0.0.1:2550/user/tx-actor";
-        CreateTransactionReply createTransactionReply = CreateTransactionReply.newBuilder()
-                .setTransactionId("txn-1")
-                .setTransactionActorPath(actorPath)
-                .build();
+        CreateTransactionReply createTransactionReply = CreateTransactionReply.newBuilder().
+                setTransactionId("txn-1").setTransactionActorPath(actorPath).
+                setMessageVersion(DataStoreVersions.CURRENT_VERSION).build();
 
         doReturn(Futures.successful(createTransactionReply)).when(mockActorContext).
                 executeOperationAsync(eq(actorSystem.actorSelection(shardActorRef.path())),
@@ -1398,9 +1305,9 @@ public class TransactionProxyTest {
 
         long end = System.currentTimeMillis();
 
-        Assert.assertTrue(String.format("took more time than expected %s was %s",
-                mockActorContext.getDatastoreContext().getOperationTimeoutInSeconds()*1000,
-                (end-start)), (end - start) <= mockActorContext.getDatastoreContext().getOperationTimeoutInSeconds()*1000);
+        int expected = mockActorContext.getDatastoreContext().getOperationTimeoutInSeconds()*1000;
+        Assert.assertTrue(String.format("Expected elapsed time: %s. Actual: %s",
+                expected, (end-start)), (end - start) <= expected);
     }
 
     public void testWriteThrottling(boolean shardFound){
@@ -1410,8 +1317,7 @@ public class TransactionProxyTest {
             public void run(TransactionProxy transactionProxy) {
                 NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-                doReturn(incompleteFuture()).when(mockActorContext).executeOperationAsync(
-                        any(ActorSelection.class), eqWriteData(nodeToWrite));
+                expectBatchedModifications();
 
                 transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
 
@@ -1427,15 +1333,13 @@ public class TransactionProxyTest {
             public void run(TransactionProxy transactionProxy) {
                 NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-                doReturn(incompleteFuture()).when(mockActorContext).executeOperationAsync(
-                        any(ActorSelection.class), eqWriteData(nodeToWrite));
+                expectIncompleteBatchedModifications();
 
                 transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
 
                 transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
             }
         });
-
     }
 
     @Test
@@ -1446,8 +1350,7 @@ public class TransactionProxyTest {
             public void run(TransactionProxy transactionProxy) {
                 NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-                doReturn(incompleteFuture()).when(mockActorContext).executeOperationAsync(
-                        any(ActorSelection.class), eqWriteData(nodeToWrite));
+                expectBatchedModifications();
 
                 transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
 
@@ -1465,15 +1368,13 @@ public class TransactionProxyTest {
             public void run(TransactionProxy transactionProxy) {
                 NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-                doReturn(writeSerializedDataReply()).when(mockActorContext).executeOperationAsync(
-                        any(ActorSelection.class), eqSerializedWriteData(nodeToWrite));
+                expectBatchedModifications();
 
                 transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
 
                 transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
             }
         });
-
     }
 
     @Test
@@ -1484,8 +1385,7 @@ public class TransactionProxyTest {
             public void run(TransactionProxy transactionProxy) {
                 NormalizedNode<?, ?> nodeToMerge = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-                doReturn(incompleteFuture()).when(mockActorContext).executeOperationAsync(
-                        any(ActorSelection.class), eqMergeData(nodeToMerge));
+                expectIncompleteBatchedModifications();
 
                 transactionProxy.merge(TestModel.TEST_PATH, nodeToMerge);
 
@@ -1502,8 +1402,7 @@ public class TransactionProxyTest {
             public void run(TransactionProxy transactionProxy) {
                 NormalizedNode<?, ?> nodeToMerge = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-                doReturn(incompleteFuture()).when(mockActorContext).executeOperationAsync(
-                        any(ActorSelection.class), eqMergeData(nodeToMerge));
+                expectBatchedModifications();
 
                 transactionProxy.merge(TestModel.TEST_PATH, nodeToMerge);
 
@@ -1519,8 +1418,7 @@ public class TransactionProxyTest {
             public void run(TransactionProxy transactionProxy) {
                 NormalizedNode<?, ?> nodeToMerge = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-                doReturn(mergeDataReply()).when(mockActorContext).executeOperationAsync(
-                        any(ActorSelection.class), eqMergeData(nodeToMerge));
+                expectBatchedModifications();
 
                 transactionProxy.merge(TestModel.TEST_PATH, nodeToMerge);
 
@@ -1536,8 +1434,7 @@ public class TransactionProxyTest {
         throttleOperation(new TransactionProxyOperation() {
             @Override
             public void run(TransactionProxy transactionProxy) {
-                doReturn(incompleteFuture()).when(mockActorContext).executeOperationAsync(
-                        any(ActorSelection.class), eqDeleteData());
+                expectIncompleteBatchedModifications();
 
                 transactionProxy.delete(TestModel.TEST_PATH);
 
@@ -1553,8 +1450,7 @@ public class TransactionProxyTest {
         completeOperation(new TransactionProxyOperation() {
             @Override
             public void run(TransactionProxy transactionProxy) {
-                doReturn(incompleteFuture()).when(mockActorContext).executeOperationAsync(
-                        any(ActorSelection.class), eqDeleteData());
+                expectBatchedModifications();
 
                 transactionProxy.delete(TestModel.TEST_PATH);
 
@@ -1568,8 +1464,7 @@ public class TransactionProxyTest {
         completeOperation(new TransactionProxyOperation() {
             @Override
             public void run(TransactionProxy transactionProxy) {
-                doReturn(deleteDataReply()).when(mockActorContext).executeOperationAsync(
-                        any(ActorSelection.class), eqDeleteData());
+                expectBatchedModifications();
 
                 transactionProxy.delete(TestModel.TEST_PATH);
 
@@ -1687,8 +1582,7 @@ public class TransactionProxyTest {
             public void run(TransactionProxy transactionProxy) {
                 NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-                doReturn(incompleteFuture()).when(mockActorContext).executeOperationAsync(
-                        any(ActorSelection.class), eqWriteData(nodeToWrite));
+                expectBatchedModifications();
 
                 doReturn(incompleteFuture()).when(mockActorContext).executeOperationAsync(
                         any(ActorSelection.class), any(ReadyTransaction.class));
@@ -1709,11 +1603,7 @@ public class TransactionProxyTest {
                 NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
                 NormalizedNode<?, ?> carsNode = ImmutableNodes.containerNode(CarsModel.BASE_QNAME);
 
-                doReturn(writeDataReply()).when(mockActorContext).executeOperationAsync(
-                        any(ActorSelection.class), eqWriteData(nodeToWrite));
-
-                doReturn(incompleteFuture()).when(mockActorContext).executeOperationAsync(
-                        any(ActorSelection.class), eqWriteData(carsNode));
+                expectBatchedModifications();
 
                 doReturn(incompleteFuture()).when(mockActorContext).executeOperationAsync(
                         any(ActorSelection.class), any(ReadyTransaction.class));
@@ -1725,5 +1615,202 @@ public class TransactionProxyTest {
                 transactionProxy.ready();
             }
         }, 2, true);
+    }
+
+    @Test
+    public void testModificationOperationBatching() throws Throwable {
+        doReturn(dataStoreContextBuilder.shardBatchedModificationCount(3).build()).
+                when(mockActorContext).getDatastoreContext();
+
+        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
+
+        expectBatchedModifications(actorRef);
+
+        expectReadyTransaction(actorRef);
+
+        YangInstanceIdentifier writePath1 = TestModel.TEST_PATH;
+        NormalizedNode<?, ?> writeNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+
+        YangInstanceIdentifier writePath2 = TestModel.OUTER_LIST_PATH;
+        NormalizedNode<?, ?> writeNode2 = ImmutableNodes.containerNode(TestModel.OUTER_LIST_QNAME);
+
+        YangInstanceIdentifier writePath3 = TestModel.INNER_LIST_PATH;
+        NormalizedNode<?, ?> writeNode3 = ImmutableNodes.containerNode(TestModel.INNER_LIST_QNAME);
+
+        YangInstanceIdentifier mergePath1 = TestModel.TEST_PATH;
+        NormalizedNode<?, ?> mergeNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+
+        YangInstanceIdentifier mergePath2 = TestModel.OUTER_LIST_PATH;
+        NormalizedNode<?, ?> mergeNode2 = ImmutableNodes.containerNode(TestModel.OUTER_LIST_QNAME);
+
+        YangInstanceIdentifier mergePath3 = TestModel.INNER_LIST_PATH;
+        NormalizedNode<?, ?> mergeNode3 = ImmutableNodes.containerNode(TestModel.INNER_LIST_QNAME);
+
+        YangInstanceIdentifier deletePath1 = TestModel.TEST_PATH;
+        YangInstanceIdentifier deletePath2 = TestModel.OUTER_LIST_PATH;
+
+        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, READ_WRITE);
+
+        transactionProxy.write(writePath1, writeNode1);
+        transactionProxy.write(writePath2, writeNode2);
+        transactionProxy.delete(deletePath1);
+        transactionProxy.merge(mergePath1, mergeNode1);
+        transactionProxy.merge(mergePath2, mergeNode2);
+        transactionProxy.write(writePath3, writeNode3);
+        transactionProxy.merge(mergePath3, mergeNode3);
+        transactionProxy.delete(deletePath2);
+
+        // This sends the last batch.
+        transactionProxy.ready();
+
+        List<BatchedModifications> batchedModifications = captureBatchedModifications(actorRef);
+        assertEquals("Captured BatchedModifications count", 3, batchedModifications.size());
+
+        verifyBatchedModifications(batchedModifications.get(0), new WriteModification(writePath1, writeNode1),
+                new WriteModification(writePath2, writeNode2), new DeleteModification(deletePath1));
+
+        verifyBatchedModifications(batchedModifications.get(1), new MergeModification(mergePath1, mergeNode1),
+                new MergeModification(mergePath2, mergeNode2), new WriteModification(writePath3, writeNode3));
+
+        verifyBatchedModifications(batchedModifications.get(2), new MergeModification(mergePath3, mergeNode3),
+                new DeleteModification(deletePath2));
+
+        verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
+                BatchedModificationsReply.class, BatchedModificationsReply.class, BatchedModificationsReply.class);
+    }
+
+    @Test
+    public void testModificationOperationBatchingWithInterleavedReads() throws Throwable {
+        doReturn(dataStoreContextBuilder.shardBatchedModificationCount(10).build()).
+                when(mockActorContext).getDatastoreContext();
+
+        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
+
+        expectBatchedModifications(actorRef);
+
+        YangInstanceIdentifier writePath1 = TestModel.TEST_PATH;
+        NormalizedNode<?, ?> writeNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+
+        YangInstanceIdentifier writePath2 = TestModel.OUTER_LIST_PATH;
+        NormalizedNode<?, ?> writeNode2 = ImmutableNodes.containerNode(TestModel.OUTER_LIST_QNAME);
+
+        YangInstanceIdentifier mergePath1 = TestModel.TEST_PATH;
+        NormalizedNode<?, ?> mergeNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+
+        YangInstanceIdentifier mergePath2 = TestModel.INNER_LIST_PATH;
+        NormalizedNode<?, ?> mergeNode2 = ImmutableNodes.containerNode(TestModel.INNER_LIST_QNAME);
+
+        YangInstanceIdentifier deletePath = TestModel.OUTER_LIST_PATH;
+
+        doReturn(readSerializedDataReply(writeNode2)).when(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), eqSerializedReadData(writePath2));
+
+        doReturn(readSerializedDataReply(mergeNode2)).when(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), eqSerializedReadData(mergePath2));
+
+        doReturn(dataExistsSerializedReply(true)).when(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), eqSerializedDataExists());
+
+        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, READ_WRITE);
+
+        transactionProxy.write(writePath1, writeNode1);
+        transactionProxy.write(writePath2, writeNode2);
+
+        Optional<NormalizedNode<?, ?>> readOptional = transactionProxy.read(writePath2).
+                get(5, TimeUnit.SECONDS);
+
+        assertEquals("NormalizedNode isPresent", true, readOptional.isPresent());
+        assertEquals("Response NormalizedNode", writeNode2, readOptional.get());
+
+        transactionProxy.merge(mergePath1, mergeNode1);
+        transactionProxy.merge(mergePath2, mergeNode2);
+
+        readOptional = transactionProxy.read(mergePath2).get(5, TimeUnit.SECONDS);
+
+        transactionProxy.delete(deletePath);
+
+        Boolean exists = transactionProxy.exists(TestModel.TEST_PATH).checkedGet();
+        assertEquals("Exists response", true, exists);
+
+        assertEquals("NormalizedNode isPresent", true, readOptional.isPresent());
+        assertEquals("Response NormalizedNode", mergeNode2, readOptional.get());
+
+        List<BatchedModifications> batchedModifications = captureBatchedModifications(actorRef);
+        assertEquals("Captured BatchedModifications count", 3, batchedModifications.size());
+
+        verifyBatchedModifications(batchedModifications.get(0), new WriteModification(writePath1, writeNode1),
+                new WriteModification(writePath2, writeNode2));
+
+        verifyBatchedModifications(batchedModifications.get(1), new MergeModification(mergePath1, mergeNode1),
+                new MergeModification(mergePath2, mergeNode2));
+
+        verifyBatchedModifications(batchedModifications.get(2), new DeleteModification(deletePath));
+
+        InOrder inOrder = Mockito.inOrder(mockActorContext);
+        inOrder.verify(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), isA(BatchedModifications.class));
+
+        inOrder.verify(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), eqSerializedReadData(writePath2));
+
+        inOrder.verify(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), isA(BatchedModifications.class));
+
+        inOrder.verify(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), eqSerializedReadData(mergePath2));
+
+        inOrder.verify(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), isA(BatchedModifications.class));
+
+        inOrder.verify(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), eqSerializedDataExists());
+
+        verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
+                BatchedModificationsReply.class, BatchedModificationsReply.class, BatchedModificationsReply.class);
+    }
+
+    private List<BatchedModifications> captureBatchedModifications(ActorRef actorRef) {
+        ArgumentCaptor<BatchedModifications> batchedModificationsCaptor =
+                ArgumentCaptor.forClass(BatchedModifications.class);
+        verify(mockActorContext, Mockito.atLeastOnce()).executeOperationAsync(
+                eq(actorSelection(actorRef)), batchedModificationsCaptor.capture());
+
+        List<BatchedModifications> batchedModifications = filterCaptured(
+                batchedModificationsCaptor, BatchedModifications.class);
+        return batchedModifications;
+    }
+
+    private <T> List<T> filterCaptured(ArgumentCaptor<T> captor, Class<T> type) {
+        List<T> captured = new ArrayList<>();
+        for(T c: captor.getAllValues()) {
+            if(type.isInstance(c)) {
+                captured.add(c);
+            }
+        }
+
+        return captured;
+    }
+
+    private void verifyOneBatchedModification(ActorRef actorRef, Modification expected) {
+        List<BatchedModifications> batchedModifications = captureBatchedModifications(actorRef);
+        assertEquals("Captured BatchedModifications count", 1, batchedModifications.size());
+
+        verifyBatchedModifications(batchedModifications.get(0), expected);
+    }
+
+    private void verifyBatchedModifications(Object message, Modification... expected) {
+        assertEquals("Message type", BatchedModifications.class, message.getClass());
+        BatchedModifications batchedModifications = (BatchedModifications)message;
+        assertEquals("BatchedModifications size", expected.length, batchedModifications.getModifications().size());
+        for(int i = 0; i < batchedModifications.getModifications().size(); i++) {
+            Modification actual = batchedModifications.getModifications().get(i);
+            assertEquals("Modification type", expected[i].getClass(), actual.getClass());
+            assertEquals("getPath", ((AbstractModification)expected[i]).getPath(),
+                    ((AbstractModification)actual).getPath());
+            if(actual instanceof WriteModification) {
+                assertEquals("getData", ((WriteModification)expected[i]).getData(),
+                        ((WriteModification)actual).getData());
+            }
+        }
     }
 }

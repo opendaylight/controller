@@ -26,6 +26,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableCo
  *
  * @author Thomas Pantelis
  */
+@Deprecated
 public class WriteDataTest {
 
     @Test
@@ -35,15 +36,15 @@ public class WriteDataTest {
                 new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
                 withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
-        WriteData expected = new WriteData(path, data);
+        WriteData expected = new WriteData(path, data, DataStoreVersions.CURRENT_VERSION);
 
-        Object serialized = expected.toSerializable(DataStoreVersions.CURRENT_VERSION);
+        Object serialized = expected.toSerializable();
         assertEquals("Serialized type", WriteData.class, serialized.getClass());
         assertEquals("Version", DataStoreVersions.CURRENT_VERSION, ((WriteData)serialized).getVersion());
 
         Object clone = SerializationUtils.clone((Serializable) serialized);
-        assertEquals("Version", DataStoreVersions.CURRENT_VERSION, ((WriteData)clone).getVersion());
         WriteData actual = WriteData.fromSerializable(clone);
+        assertEquals("Version", DataStoreVersions.CURRENT_VERSION, actual.getVersion());
         assertEquals("getPath", expected.getPath(), actual.getPath());
         assertEquals("getData", expected.getData(), actual.getData());
     }
@@ -69,9 +70,9 @@ public class WriteDataTest {
                 new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
                 withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
-        WriteData expected = new WriteData(path, data);
+        WriteData expected = new WriteData(path, data, DataStoreVersions.HELIUM_1_VERSION);
 
-        Object serialized = expected.toSerializable(DataStoreVersions.HELIUM_1_VERSION);
+        Object serialized = expected.toSerializable();
         assertEquals("Serialized type", ShardTransactionMessages.WriteData.class, serialized.getClass());
 
         WriteData actual = WriteData.fromSerializable(SerializationUtils.clone((Serializable) serialized));

@@ -16,7 +16,11 @@ import org.opendaylight.controller.protobuff.messages.transaction.ShardTransacti
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-public class WriteData extends ModifyData implements VersionedSerializableMessage {
+/**
+ * @deprecated Replaced by BatchedModifications.
+ */
+@Deprecated
+public class WriteData extends ModifyData {
     private static final long serialVersionUID = 1L;
 
     public static final Class<WriteData> SERIALIZABLE_CLASS = WriteData.class;
@@ -24,14 +28,13 @@ public class WriteData extends ModifyData implements VersionedSerializableMessag
     public WriteData() {
     }
 
-    public WriteData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
-        super(path, data);
+    public WriteData(YangInstanceIdentifier path, NormalizedNode<?, ?> data, short version) {
+        super(path, data, version);
     }
 
     @Override
-    public Object toSerializable(short toVersion) {
-        if(toVersion >= DataStoreVersions.LITHIUM_VERSION) {
-            setVersion(toVersion);
+    public Object toSerializable() {
+        if(getVersion() >= DataStoreVersions.LITHIUM_VERSION) {
             return this;
         } else {
             // To base or R1 Helium version
@@ -50,7 +53,8 @@ public class WriteData extends ModifyData implements VersionedSerializableMessag
             ShardTransactionMessages.WriteData o = (ShardTransactionMessages.WriteData) serializable;
             Decoded decoded = new NormalizedNodeToNodeCodec(null).decode(
                     o.getInstanceIdentifierPathArguments(), o.getNormalizedNode());
-            return new WriteData(decoded.getDecodedPath(), decoded.getDecodedNode());
+            return new WriteData(decoded.getDecodedPath(), decoded.getDecodedNode(),
+                    DataStoreVersions.HELIUM_2_VERSION);
         }
     }
 
