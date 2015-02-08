@@ -16,7 +16,11 @@ import org.opendaylight.controller.protobuff.messages.transaction.ShardTransacti
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-public class MergeData extends ModifyData implements VersionedSerializableMessage {
+/**
+ * @deprecated Replaced by BatchedModifications.
+ */
+@Deprecated
+public class MergeData extends ModifyData {
     private static final long serialVersionUID = 1L;
 
     public static final Class<MergeData> SERIALIZABLE_CLASS = MergeData.class;
@@ -24,14 +28,13 @@ public class MergeData extends ModifyData implements VersionedSerializableMessag
     public MergeData() {
     }
 
-    public MergeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
-        super(path, data);
+    public MergeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data, short version) {
+        super(path, data, version);
     }
 
     @Override
-    public Object toSerializable(short toVersion) {
-        if(toVersion >= DataStoreVersions.LITHIUM_VERSION) {
-            setVersion(toVersion);
+    public Object toSerializable() {
+        if(getVersion() >= DataStoreVersions.LITHIUM_VERSION) {
             return this;
         } else {
             // To base or R1 Helium version
@@ -50,7 +53,8 @@ public class MergeData extends ModifyData implements VersionedSerializableMessag
             ShardTransactionMessages.MergeData o = (ShardTransactionMessages.MergeData) serializable;
             Decoded decoded = new NormalizedNodeToNodeCodec(null).decode(
                     o.getInstanceIdentifierPathArguments(), o.getNormalizedNode());
-            return new MergeData(decoded.getDecodedPath(), decoded.getDecodedNode());
+            return new MergeData(decoded.getDecodedPath(), decoded.getDecodedNode(),
+                    DataStoreVersions.HELIUM_2_VERSION);
         }
     }
 

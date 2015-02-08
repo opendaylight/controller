@@ -32,13 +32,14 @@ public class ReadDataReplyTest {
                 new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
                 withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
-        ReadDataReply expected = new ReadDataReply(data);
+        ReadDataReply expected = new ReadDataReply(data, DataStoreVersions.CURRENT_VERSION);
 
-        Object serialized = expected.toSerializable(DataStoreVersions.CURRENT_VERSION);
+        Object serialized = expected.toSerializable();
         assertEquals("Serialized type", ReadDataReply.class, serialized.getClass());
 
         ReadDataReply actual = ReadDataReply.fromSerializable(SerializationUtils.clone(
                 (Serializable) serialized));
+        assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, actual.getVersion());
         assertEquals("getNormalizedNode", expected.getNormalizedNode(), actual.getNormalizedNode());
     }
 
@@ -60,9 +61,9 @@ public class ReadDataReplyTest {
                 new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
                 withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
-        ReadDataReply expected = new ReadDataReply(data);
+        ReadDataReply expected = new ReadDataReply(data, DataStoreVersions.HELIUM_1_VERSION);
 
-        Object serialized = expected.toSerializable(DataStoreVersions.HELIUM_1_VERSION);
+        Object serialized = expected.toSerializable();
         assertEquals("Serialized type", ShardTransactionMessages.ReadDataReply.class, serialized.getClass());
 
         ReadDataReply actual = ReadDataReply.fromSerializable(SerializationUtils.clone(

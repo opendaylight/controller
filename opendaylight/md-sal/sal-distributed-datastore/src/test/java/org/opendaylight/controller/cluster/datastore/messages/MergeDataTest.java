@@ -23,15 +23,15 @@ public class MergeDataTest {
                 new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
                 withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
-        MergeData expected = new MergeData(path, data);
+        MergeData expected = new MergeData(path, data, DataStoreVersions.CURRENT_VERSION);
 
-        Object serialized = expected.toSerializable(DataStoreVersions.CURRENT_VERSION);
+        Object serialized = expected.toSerializable();
         assertEquals("Serialized type", MergeData.class, serialized.getClass());
         assertEquals("Version", DataStoreVersions.CURRENT_VERSION, ((MergeData)serialized).getVersion());
 
         Object clone = SerializationUtils.clone((Serializable) serialized);
-        assertEquals("Version", DataStoreVersions.CURRENT_VERSION, ((MergeData)clone).getVersion());
         MergeData actual = MergeData.fromSerializable(clone);
+        assertEquals("Version", DataStoreVersions.CURRENT_VERSION, actual.getVersion());
         assertEquals("getPath", expected.getPath(), actual.getPath());
         assertEquals("getData", expected.getData(), actual.getData());
     }
@@ -58,9 +58,9 @@ public class MergeDataTest {
                 new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
                 withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
-        MergeData expected = new MergeData(path, data);
+        MergeData expected = new MergeData(path, data, DataStoreVersions.HELIUM_1_VERSION);
 
-        Object serialized = expected.toSerializable(DataStoreVersions.HELIUM_1_VERSION);
+        Object serialized = expected.toSerializable();
         assertEquals("Serialized type", ShardTransactionMessages.MergeData.class, serialized.getClass());
 
         MergeData actual = MergeData.fromSerializable(SerializationUtils.clone((Serializable) serialized));

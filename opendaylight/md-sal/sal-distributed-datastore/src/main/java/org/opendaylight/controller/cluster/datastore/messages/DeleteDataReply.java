@@ -10,7 +10,12 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 
+/**
+ * @deprecated Replaced by BatchedModificationsReply.
+ */
+@Deprecated
 public class DeleteDataReply extends EmptyReply {
+    private static final long serialVersionUID = 1L;
 
     private static final Object LEGACY_SERIALIZED_INSTANCE =
             ShardTransactionMessages.DeleteDataReply.newBuilder().build();
