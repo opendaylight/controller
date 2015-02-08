@@ -1,0 +1,231 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_94b4fc82",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeChangeListener.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-08T03:57:58Z",
+      "side": 1,
+      "message": "DataTreeCandidateNode should be DataTreeCandidate.",
+      "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_b4b9f87a",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeChangeService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-08T03:57:58Z",
+      "side": 1,
+      "message": "\"If there is any pre-existing data in the tree on the path ....\"",
+      "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_54b2f494",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeChangeService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-08T03:57:58Z",
+      "side": 1,
+      "message": "\"you will receive an initial data change event...",
+      "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_14a8ec1e",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeChangeService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-08T03:57:58Z",
+      "side": 1,
+      "message": "Instead of double-quotes around close, how about a java doc link, i.e. {@link ListenerRegistration#close close}",
+      "range": {
+        "startLine": 37,
+        "startChar": 7,
+        "endLine": 37,
+        "endChar": 19
+      },
+      "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_34a5e846",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeChangeService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-08T03:57:58Z",
+      "side": 1,
+      "message": "How about:\n\n\u003cb\u003eNote\u003c/b\u003e: you MUST unregister your listener on bundle shutdown - if you fail to do this and your bundle is dynamically restarted in the same OSGi container instance, your stale listener will continue to receive change events.",
+      "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_d465a41e",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeChangeService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-08T03:57:58Z",
+      "side": 1,
+      "message": "BTW - if listeners were registered by advertising their registrations as OSGi instances then there\u0027s no explicit need to unregister on bundle shutdown - this would happen automatically. This is how I\u0027ve done it in the past -  you can\u0027t rely on  people doing the right thing and unregistering - having it automatic saves a lot of bugs.",
+      "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_f46a20ed",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeChangeService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-08T03:57:58Z",
+      "side": 1,
+      "message": "This param is not in the signature.",
+      "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_b47018dd",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeChangeService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-08T03:57:58Z",
+      "side": 1,
+      "message": "This is actually named \"tree\" in the signature. However it\u0027s not a tree per se - how about naming it \"treePathId\"?",
+      "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_547994c6",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeChangeService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-08T03:57:58Z",
+      "side": 1,
+      "message": "The type in the signature is DOMDataTreeIdentifier - not YANG Instance Identifier although it contains one. How about:\n\n   identifies the tree and YangInstanceIdentifier path for which to register.",
+      "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_d44cc4a0",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStoreTreeChangePublisher.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-08T03:57:58Z",
+      "side": 1,
+      "message": "How is this interface different than DOMDataTreeChangeService (or its usage)?",
+      "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_747610d9",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStoreTreeChangePublisher.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-08T03:57:58Z",
+      "side": 1,
+      "message": "how about:\n\n  If there is any preexisting data in the tree for the path for which you are registering...",
+      "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_147f8cac",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStoreTreeChangePublisher.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-08T03:57:58Z",
+      "side": 1,
+      "message": "Same comments from DOMDataTreeChangeService apply in this section as well.",
+      "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_347c08b5",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStoreTreeChangePublisher.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-08T03:57:58Z",
+      "side": 1,
+      "message": "incomplete sentence - how about:\n   the listener to receive data change notifications.",
+      "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
