@@ -7,6 +7,7 @@ import com.google.common.base.Stopwatch;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -53,17 +54,22 @@ public class MutableCompositeModificationTest extends AbstractModificationTest {
 
         MutableCompositeModification clone = (MutableCompositeModification) SerializationUtils.clone(compositeModification);
 
+        assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, clone.getVersion());
+
         assertEquals("getModifications size", 3, clone.getModifications().size());
 
         WriteModification write = (WriteModification)clone.getModifications().get(0);
+        assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, write.getVersion());
         assertEquals("getPath", writePath, write.getPath());
         assertEquals("getData", writeData, write.getData());
 
         MergeModification merge = (MergeModification)clone.getModifications().get(1);
+        assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, merge.getVersion());
         assertEquals("getPath", mergePath, merge.getPath());
         assertEquals("getData", mergeData, merge.getData());
 
         DeleteModification delete = (DeleteModification)clone.getModifications().get(2);
+        assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, delete.getVersion());
         assertEquals("getPath", deletePath, delete.getPath());
     }
 

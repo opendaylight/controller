@@ -15,18 +15,19 @@ import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.List;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.DataExistsReply;
-import org.opendaylight.controller.cluster.datastore.messages.DeleteData;
-import org.opendaylight.controller.cluster.datastore.messages.MergeData;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 import org.opendaylight.controller.cluster.datastore.messages.ReadDataReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.SerializableMessage;
-import org.opendaylight.controller.cluster.datastore.messages.VersionedSerializableMessage;
-import org.opendaylight.controller.cluster.datastore.messages.WriteData;
+import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
+import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
+import org.opendaylight.controller.cluster.datastore.modification.Modification;
+import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -36,7 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
 
-final class TransactionContextImpl extends AbstractTransactionContext {
+class TransactionContextImpl extends AbstractTransactionContext {
     private static final Logger LOG = LoggerFactory.getLogger(TransactionContextImpl.class);
 
     private final ActorContext actorContext;
@@ -44,8 +45,9 @@ final class TransactionContextImpl extends AbstractTransactionContext {
     private final ActorSelection actor;
     private final boolean isTxActorLocal;
     private final short remoteTransactionVersion;
-    private final OperationCompleter operationCompleter;
 
+    private final OperationCompleter operationCompleter;
+    private BatchedModifications batchedModifications;
 
     TransactionContextImpl(String transactionPath, ActorSelection actor, TransactionIdentifier identifier,
             ActorContext actorContext, SchemaContext schemaContext,
@@ -69,13 +71,12 @@ final class TransactionContextImpl extends AbstractTransactionContext {
         return actor;
     }
 
-    private Future<Object> executeOperationAsync(SerializableMessage msg) {
-        return completeOperation(actorContext.executeOperationAsync(getActor(), isTxActorLocal ? msg : msg.toSerializable()));
+    protected short getRemoteTransactionVersion() {
+        return remoteTransactionVersion;
     }
 
-    private Future<Object> executeOperationAsync(VersionedSerializableMessage msg) {
-        return completeOperation(actorContext.executeOperationAsync(getActor(), isTxActorLocal ? msg :
-                msg.toSerializable(remoteTransactionVersion)));
+    protected Future<Object> executeOperationAsync(SerializableMessage msg) {
+        return completeOperation(actorContext.executeOperationAsync(getActor(), isTxActorLocal ? msg : msg.toSerializable()));
     }
 
     @Override
@@ -89,6 +90,10 @@ final class TransactionContextImpl extends AbstractTransactionContext {
     public Future<ActorSelection> readyTransaction() {
         LOG.debug("Tx {} readyTransaction called with {} previous recorded operations pending",
                 identifier, recordedOperationFutures.size());
+
+        // Send the remaining batched modifications if any.
+
+        sendBatchedModifications();
 
         // Send the ReadyTransaction message to the Tx actor.
 
@@ -155,25 +160,48 @@ final class TransactionContextImpl extends AbstractTransactionContext {
         }, TransactionProxy.SAME_FAILURE_TRANSFORMER, actorContext.getActorSystem().dispatcher());
     }
 
+    private void batchModification(Modification modification) {
+        if(batchedModifications == null) {
+            batchedModifications = new BatchedModifications(remoteTransactionVersion);
+        }
+
+        batchedModifications.addModification(modification);
+
+        if(batchedModifications.getModifications().size() >=
+                actorContext.getDatastoreContext().getShardBatchedModificationCount()) {
+            sendBatchedModifications();
+        }
+    }
+
+    private void sendBatchedModifications() {
+        if(batchedModifications != null) {
+            LOG.debug("Tx {} sending {} batched modifications", identifier,
+                    batchedModifications.getModifications().size());
+
+            recordedOperationFutures.add(executeOperationAsync(batchedModifications));
+            batchedModifications = null;
+        }
+    }
+
     @Override
     public void deleteData(YangInstanceIdentifier path) {
         LOG.debug("Tx {} deleteData called path = {}", identifier, path);
 
-        recordedOperationFutures.add(executeOperationAsync(new DeleteData(path)));
+        batchModification(new DeleteModification(path));
     }
 
     @Override
     public void mergeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
         LOG.debug("Tx {} mergeData called path = {}", identifier, path);
 
-        recordedOperationFutures.add(executeOperationAsync(new MergeData(path, data)));
+        batchModification(new MergeModification(path, data));
     }
 
     @Override
     public void writeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
         LOG.debug("Tx {} writeData called path = {}", identifier, path);
 
-        recordedOperationFutures.add(executeOperationAsync(new WriteData(path, data)));
+        batchModification(new WriteModification(path, data));
     }
 
     @Override
@@ -181,6 +209,10 @@ final class TransactionContextImpl extends AbstractTransactionContext {
             final YangInstanceIdentifier path,final SettableFuture<Optional<NormalizedNode<?, ?>>> returnFuture ) {
 
         LOG.debug("Tx {} readData called path = {}", identifier, path);
+
+        // Send the remaining batched modifications if any.
+
+        sendBatchedModifications();
 
         // If there were any previous recorded put/merge/delete operation reply Futures then we
         // must wait for them to successfully complete. This is necessary to honor the read
@@ -262,6 +294,10 @@ final class TransactionContextImpl extends AbstractTransactionContext {
     public void dataExists(final YangInstanceIdentifier path, final SettableFuture<Boolean> returnFuture) {
 
         LOG.debug("Tx {} dataExists called path = {}", identifier, path);
+
+        // Send the remaining batched modifications if any.
+
+        sendBatchedModifications();
 
         // If there were any previous recorded put/merge/delete operation reply Futures then we
         // must wait for them to successfully complete. This is necessary to honor the read
