@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_7795b285",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/src/main/java/org/opendaylight/controller/md/sal/dom/xsql/XSQLAdapter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-08T21:19:28Z",
+      "side": 1,
+      "message": "Why is this not using an slf4j Logger?",
+      "revId": "3d7e284dd2112dee2b3b64474b317a0b9f69fbb5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_b77fba65",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/src/main/java/org/opendaylight/controller/md/sal/dom/xsql/XSQLAdapter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-08T21:19:28Z",
+      "side": 1,
+      "message": "This introduces commented-out code. If it\u0027s not needed, it should be removed.",
+      "revId": "3d7e284dd2112dee2b3b64474b317a0b9f69fbb5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5798b6bf",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/src/main/java/org/opendaylight/controller/md/sal/dom/xsql/XSQLBluePrintNode.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-08T21:19:28Z",
+      "side": 1,
+      "message": "if (!odlNodes.isEmpty()) {",
+      "revId": "3d7e284dd2112dee2b3b64474b317a0b9f69fbb5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_378baa69",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/src/main/java/org/opendaylight/xsql/XSQLProvider.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-08T21:19:28Z",
+      "side": 1,
+      "message": "removing standard logging... why?",
+      "revId": "3d7e284dd2112dee2b3b64474b317a0b9f69fbb5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_178eae79",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/src/main/java/org/opendaylight/yang/gen/v1/http/netconfcentral/org/ns/xsql/rev140626/XSQLModule.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-08T21:19:28Z",
+      "side": 1,
+      "message": "commented-out code ... what is its purpose?",
+      "revId": "3d7e284dd2112dee2b3b64474b317a0b9f69fbb5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
