@@ -42,6 +42,7 @@ public class DatastoreContext {
     public static final int DEFAULT_SHARD_ELECTION_TIMEOUT_FACTOR = 2;
     public static final int DEFAULT_TX_CREATION_INITIAL_RATE_LIMIT = 100;
     public static final String UNKNOWN_DATA_STORE_TYPE = "unknown";
+    public static final int DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT= 100;
 
     private InMemoryDOMDataStoreConfigProperties dataStoreProperties;
     private Duration shardTransactionIdleTimeout = DatastoreContext.DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT;
@@ -54,8 +55,9 @@ public class DatastoreContext {
     private boolean persistent = DEFAULT_PERSISTENT;
     private ConfigurationReader configurationReader = DEFAULT_CONFIGURATION_READER;
     private long transactionCreationInitialRateLimit = DEFAULT_TX_CREATION_INITIAL_RATE_LIMIT;
-    private DefaultConfigParamsImpl raftConfig = new DefaultConfigParamsImpl();
+    private final DefaultConfigParamsImpl raftConfig = new DefaultConfigParamsImpl();
     private String dataStoreType = UNKNOWN_DATA_STORE_TYPE;
+    private int shardBatchedModificationCount = DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT;
 
     private DatastoreContext(){
         setShardJournalRecoveryLogBatchSize(DEFAULT_JOURNAL_RECOVERY_BATCH_SIZE);
@@ -152,8 +154,12 @@ public class DatastoreContext {
         raftConfig.setSnapshotBatchCount(shardSnapshotBatchCount);
     }
 
+    public int getShardBatchedModificationCount() {
+        return shardBatchedModificationCount;
+    }
+
     public static class Builder {
-        private DatastoreContext datastoreContext = new DatastoreContext();
+        private final DatastoreContext datastoreContext = new DatastoreContext();
 
         public Builder shardTransactionIdleTimeout(Duration shardTransactionIdleTimeout) {
             datastoreContext.shardTransactionIdleTimeout = shardTransactionIdleTimeout;
@@ -243,6 +249,11 @@ public class DatastoreContext {
         public Builder dataStoreType(String dataStoreType){
             datastoreContext.dataStoreType = dataStoreType;
             datastoreContext.dataStoreMXBeanType = "Distributed" + WordUtils.capitalize(dataStoreType) + "Datastore";
+            return this;
+        }
+
+        public Builder shardBatchedModificationCount(int shardBatchedModificationCount) {
+            datastoreContext.shardBatchedModificationCount = shardBatchedModificationCount;
             return this;
         }
 

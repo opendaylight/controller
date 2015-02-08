@@ -25,6 +25,7 @@ public class DistributedDataStoreTest extends AbstractActorTest {
         schemaContext = TestModel.createTestContext();
 
         doReturn(schemaContext).when(actorContext).getSchemaContext();
+        doReturn(DatastoreContext.newBuilder().build()).when(actorContext).getDatastoreContext();
     }
 
     @Test

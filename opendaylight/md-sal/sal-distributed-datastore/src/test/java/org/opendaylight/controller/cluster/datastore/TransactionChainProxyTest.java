@@ -43,6 +43,7 @@ public class TransactionChainProxyTest extends AbstractActorTest{
         actorContext.setSchemaContext(schemaContext);
 
         doReturn(schemaContext).when(mockActorContext).getSchemaContext();
+        doReturn(DatastoreContext.newBuilder().build()).when(mockActorContext).getDatastoreContext();
     }
 
     @SuppressWarnings("resource")

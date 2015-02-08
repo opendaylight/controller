@@ -129,9 +129,9 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         try {
             final CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> future = transaction.read(path);
             Optional<NormalizedNode<?, ?>> optional = future.checkedGet();
-            ReadDataReply readDataReply = new ReadDataReply(optional.orNull());
+            ReadDataReply readDataReply = new ReadDataReply(optional.orNull(), clientTxVersion);
 
-            sender().tell((returnSerialized ? readDataReply.toSerializable(clientTxVersion): readDataReply), self());
+            sender().tell((returnSerialized ? readDataReply.toSerializable(): readDataReply), self());
 
         } catch (Exception e) {
             LOG.error(String.format("Unexpected error reading path %s", path), e);
