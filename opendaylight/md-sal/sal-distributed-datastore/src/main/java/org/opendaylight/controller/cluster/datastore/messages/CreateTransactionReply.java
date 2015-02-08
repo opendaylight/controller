@@ -57,4 +57,11 @@ public class CreateTransactionReply implements SerializableMessage {
                 (short)o.getMessageVersion());
     }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("CreateTransactionReply [transactionPath=").append(transactionPath).append(", transactionId=")
+                .append(transactionId).append(", version=").append(version).append("]");
+        return builder.toString();
+    }
 }
