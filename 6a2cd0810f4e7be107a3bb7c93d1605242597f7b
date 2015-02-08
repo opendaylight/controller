@@ -63,6 +63,24 @@
       "revId": "6a2cd0810f4e7be107a3bb7c93d1605242597f7b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_d4be0465",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 424,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-08T03:05:29Z",
+      "side": 1,
+      "message": "Forget this comment - just remembered that handleAppendEntriesReply does not call this method - duh.",
+      "parentUuid": "7a96c907_f4c1c054",
+      "revId": "6a2cd0810f4e7be107a3bb7c93d1605242597f7b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
