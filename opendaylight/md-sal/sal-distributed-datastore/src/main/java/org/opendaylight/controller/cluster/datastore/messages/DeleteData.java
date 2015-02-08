@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -18,18 +17,22 @@ import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
-public class DeleteData implements VersionedSerializableMessage, Externalizable {
+/**
+ * @deprecated Replaced by BatchedModifications.
+ */
+@Deprecated
+public class DeleteData extends VersionedExternalizableMessage {
     private static final long serialVersionUID = 1L;
 
     public static final Class<DeleteData> SERIALIZABLE_CLASS = DeleteData.class;
 
     private YangInstanceIdentifier path;
-    private short version;
 
     public DeleteData() {
     }
 
-    public DeleteData(final YangInstanceIdentifier path) {
+    public DeleteData(final YangInstanceIdentifier path, short version) {
+        super(version);
         this.path = path;
     }
 
@@ -37,26 +40,21 @@ public class DeleteData implements VersionedSerializableMessage, Externalizable 
         return path;
     }
 
-    public short getVersion() {
-        return version;
-    }
-
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        version = in.readShort(); // Read the version - don't need to do anything with it now
+        super.readExternal(in);
         path = SerializationUtils.deserializePath(in);
     }
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeShort(version);
+        super.writeExternal(out);
         SerializationUtils.serializePath(path, out);
     }
 
     @Override
-    public Object toSerializable(short toVersion) {
-        if(toVersion >= DataStoreVersions.LITHIUM_VERSION) {
-            version = toVersion;
+    public Object toSerializable() {
+        if(getVersion() >= DataStoreVersions.LITHIUM_VERSION) {
             return this;
         } else {
             // To base or R1 Helium version
@@ -71,7 +69,8 @@ public class DeleteData implements VersionedSerializableMessage, Externalizable 
         } else {
             // From base or R1 Helium version
             ShardTransactionMessages.DeleteData o = (ShardTransactionMessages.DeleteData) serializable;
-            return new DeleteData(InstanceIdentifierUtils.fromSerializable(o.getInstanceIdentifierPathArguments()));
+            return new DeleteData(InstanceIdentifierUtils.fromSerializable(o.getInstanceIdentifierPathArguments()),
+                    DataStoreVersions.HELIUM_2_VERSION);
         }
     }
 

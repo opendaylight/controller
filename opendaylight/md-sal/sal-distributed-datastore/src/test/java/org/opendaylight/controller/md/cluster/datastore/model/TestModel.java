@@ -31,7 +31,10 @@ public class TestModel {
   private static final String DATASTORE_TEST_YANG = "/odl-datastore-test.yang";
 
   public static final YangInstanceIdentifier TEST_PATH = YangInstanceIdentifier.of(TEST_QNAME);
-  public static final YangInstanceIdentifier OUTER_LIST_PATH = YangInstanceIdentifier.builder(TEST_PATH).node(OUTER_LIST_QNAME).build();
+  public static final YangInstanceIdentifier OUTER_LIST_PATH = YangInstanceIdentifier.builder(TEST_PATH).
+          node(OUTER_LIST_QNAME).build();
+  public static final YangInstanceIdentifier INNER_LIST_PATH = YangInstanceIdentifier.builder(TEST_PATH).
+          node(OUTER_LIST_QNAME).node(INNER_LIST_QNAME).build();
   public static final QName TWO_QNAME = QName.create(TEST_QNAME,"two");
   public static final QName THREE_QNAME = QName.create(TEST_QNAME,"three");
 

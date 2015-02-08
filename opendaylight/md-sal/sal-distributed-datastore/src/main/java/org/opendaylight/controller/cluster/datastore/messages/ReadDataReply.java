@@ -9,7 +9,6 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import com.google.protobuf.ByteString;
-import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -19,18 +18,18 @@ import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-public class ReadDataReply implements VersionedSerializableMessage, Externalizable {
+public class ReadDataReply extends VersionedExternalizableMessage {
     private static final long serialVersionUID = 1L;
 
     public static final Class<ReadDataReply> SERIALIZABLE_CLASS = ReadDataReply.class;
 
     private NormalizedNode<?, ?> normalizedNode;
-    private short version;
 
     public ReadDataReply() {
     }
 
-    public ReadDataReply(NormalizedNode<?, ?> normalizedNode) {
+    public ReadDataReply(NormalizedNode<?, ?> normalizedNode, short version) {
+        super(version);
         this.normalizedNode = normalizedNode;
     }
 
@@ -40,20 +39,19 @@ public class ReadDataReply implements VersionedSerializableMessage, Externalizab
 
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        version = in.readShort();
+        super.readExternal(in);
         normalizedNode = SerializationUtils.deserializeNormalizedNode(in);
     }
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeShort(version);
+        super.writeExternal(out);
         SerializationUtils.serializeNormalizedNode(normalizedNode, out);
     }
 
     @Override
-    public Object toSerializable(short toVersion) {
-        if(toVersion >= DataStoreVersions.LITHIUM_VERSION) {
-            version = toVersion;
+    public Object toSerializable() {
+        if(getVersion() >= DataStoreVersions.LITHIUM_VERSION) {
             return this;
         } else {
             return toSerializableReadDataReply(normalizedNode);
@@ -78,7 +76,8 @@ public class ReadDataReply implements VersionedSerializableMessage, Externalizab
         } else {
             ShardTransactionMessages.ReadDataReply o =
                     (ShardTransactionMessages.ReadDataReply) serializable;
-            return new ReadDataReply(new NormalizedNodeToNodeCodec(null).decode(o.getNormalizedNode()));
+            return new ReadDataReply(new NormalizedNodeToNodeCodec(null).decode(o.getNormalizedNode()),
+                    DataStoreVersions.HELIUM_2_VERSION);
         }
     }
 

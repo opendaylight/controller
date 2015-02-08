@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -17,17 +16,21 @@ import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils.Ap
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-public abstract class ModifyData implements Externalizable {
+/**
+ * @deprecated Replaced by BatchedModifications.
+ */
+@Deprecated
+public abstract class ModifyData extends VersionedExternalizableMessage {
     private static final long serialVersionUID = 1L;
 
     private YangInstanceIdentifier path;
     private NormalizedNode<?, ?> data;
-    private short version;
 
     protected ModifyData() {
     }
 
-    protected ModifyData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
+    protected ModifyData(YangInstanceIdentifier path, NormalizedNode<?, ?> data, short version) {
+        super(version);
         this.path = path;
         this.data = data;
     }
@@ -40,23 +43,15 @@ public abstract class ModifyData implements Externalizable {
         return data;
     }
 
-    public short getVersion() {
-        return version;
-    }
-
-    protected void setVersion(short version) {
-        this.version = version;
-    }
-
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        version = in.readShort();
+        super.readExternal(in);
         SerializationUtils.deserializePathAndNode(in, this, APPLIER);
     }
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeShort(version);
+        super.writeExternal(out);
         SerializationUtils.serializePathAndNode(path, data, out);
     }
 

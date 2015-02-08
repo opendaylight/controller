@@ -14,7 +14,7 @@ import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
  *
  * @author Thomas Pantelis
  */
-public abstract class EmptyReply extends EmptyExternalizable implements VersionedSerializableMessage {
+public abstract class EmptyReply extends EmptyExternalizable {
 
     private final Object legacySerializedInstance;
 
@@ -23,7 +23,6 @@ public abstract class EmptyReply extends EmptyExternalizable implements Versione
         this.legacySerializedInstance = legacySerializedInstance;
     }
 
-    @Override
     public Object toSerializable(short toVersion) {
         return toVersion >= DataStoreVersions.LITHIUM_VERSION ? this : legacySerializedInstance;
     }
