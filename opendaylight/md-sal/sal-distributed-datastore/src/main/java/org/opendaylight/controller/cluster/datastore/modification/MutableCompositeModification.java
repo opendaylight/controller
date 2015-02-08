@@ -27,10 +27,15 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 public class MutableCompositeModification implements CompositeModification {
     private static final long serialVersionUID = 1L;
 
-    private final List<Modification> modifications;
+    private final List<Modification> modifications = new ArrayList<>();
+    private short version;
 
     public MutableCompositeModification() {
-        modifications = new ArrayList<>();
+        this(DataStoreVersions.CURRENT_VERSION);
+    }
+
+    public MutableCompositeModification(short version) {
+        this.version = version;
     }
 
     @Override
@@ -43,6 +48,14 @@ public class MutableCompositeModification implements CompositeModification {
     @Override
     public byte getType() {
         return COMPOSITE;
+    }
+
+    public short getVersion() {
+        return version;
+    }
+
+    public void setVersion(short version) {
+        this.version = version;
     }
 
     /**
@@ -62,7 +75,7 @@ public class MutableCompositeModification implements CompositeModification {
 
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        in.readShort();
+        version = in.readShort();
 
         int size = in.readInt();
 
@@ -75,15 +88,15 @@ public class MutableCompositeModification implements CompositeModification {
                 byte type = in.readByte();
                 switch(type) {
                 case Modification.WRITE:
-                    modifications.add(WriteModification.fromStream(in));
+                    modifications.add(WriteModification.fromStream(in, version));
                     break;
 
                 case Modification.MERGE:
-                    modifications.add(MergeModification.fromStream(in));
+                    modifications.add(MergeModification.fromStream(in, version));
                     break;
 
                 case Modification.DELETE:
-                    modifications.add(DeleteModification.fromStream(in));
+                    modifications.add(DeleteModification.fromStream(in, version));
                     break;
                 }
             }
@@ -94,7 +107,7 @@ public class MutableCompositeModification implements CompositeModification {
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeShort(DataStoreVersions.CURRENT_VERSION);
+        out.writeShort(version);
 
         out.writeInt(modifications.size());
 
@@ -121,8 +134,7 @@ public class MutableCompositeModification implements CompositeModification {
         builder.setTimeStamp(System.nanoTime());
 
         for (Modification m : modifications) {
-            builder.addModification(
-                    (PersistentMessages.Modification) m.toSerializable());
+            builder.addModification((PersistentMessages.Modification) m.toSerializable());
         }
 
         return builder.build();

@@ -14,10 +14,14 @@ import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InOrder;
+import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.datastore.ShardWriteTransaction.GetCompositeModificationReply;
 import org.opendaylight.controller.cluster.datastore.exceptions.UnknownMessageException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
+import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
+import org.opendaylight.controller.cluster.datastore.messages.BatchedModificationsReply;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateSnapshot;
@@ -46,9 +50,11 @@ import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.duration.Duration;
 
@@ -250,8 +256,8 @@ public class ShardTransactionTest extends AbstractActorTest {
                     "testOnReceiveWriteData");
 
             transaction.tell(new WriteData(TestModel.TEST_PATH,
-                    ImmutableNodes.containerNode(TestModel.TEST_QNAME)).toSerializable(
-                            DataStoreVersions.HELIUM_2_VERSION), getRef());
+                    ImmutableNodes.containerNode(TestModel.TEST_QNAME), DataStoreVersions.HELIUM_2_VERSION).
+                        toSerializable(), getRef());
 
             expectMsgClass(duration("5 seconds"), ShardTransactionMessages.WriteDataReply.class);
 
@@ -259,7 +265,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
             // unserialized write
             transaction.tell(new WriteData(TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME)),
+                ImmutableNodes.containerNode(TestModel.TEST_QNAME), DataStoreVersions.CURRENT_VERSION),
                 getRef());
 
             expectMsgClass(duration("5 seconds"), WriteDataReply.class);
@@ -293,8 +299,8 @@ public class ShardTransactionTest extends AbstractActorTest {
                     "testMergeData");
 
             transaction.tell(new MergeData(TestModel.TEST_PATH,
-                    ImmutableNodes.containerNode(TestModel.TEST_QNAME)).toSerializable(
-                            DataStoreVersions.HELIUM_2_VERSION), getRef());
+                    ImmutableNodes.containerNode(TestModel.TEST_QNAME), DataStoreVersions.HELIUM_2_VERSION).
+                        toSerializable(), getRef());
 
             expectMsgClass(duration("5 seconds"), ShardTransactionMessages.MergeDataReply.class);
 
@@ -302,7 +308,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
             //unserialized merge
             transaction.tell(new MergeData(TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME)),
+                ImmutableNodes.containerNode(TestModel.TEST_QNAME), DataStoreVersions.CURRENT_VERSION),
                 getRef());
 
             expectMsgClass(duration("5 seconds"), MergeDataReply.class);
@@ -335,20 +341,72 @@ public class ShardTransactionTest extends AbstractActorTest {
             final ActorRef transaction = newTransactionActor(store.newWriteOnlyTransaction(),
                     "testDeleteData");
 
-            transaction.tell(new DeleteData(TestModel.TEST_PATH).toSerializable(
-                    DataStoreVersions.HELIUM_2_VERSION), getRef());
+            transaction.tell(new DeleteData(TestModel.TEST_PATH, DataStoreVersions.HELIUM_2_VERSION).
+                    toSerializable(), getRef());
 
             expectMsgClass(duration("5 seconds"), ShardTransactionMessages.DeleteDataReply.class);
 
             assertModification(transaction, DeleteModification.class);
 
             //unserialized
-            transaction.tell(new DeleteData(TestModel.TEST_PATH), getRef());
+            transaction.tell(new DeleteData(TestModel.TEST_PATH, DataStoreVersions.CURRENT_VERSION), getRef());
 
             expectMsgClass(duration("5 seconds"), DeleteDataReply.class);
         }};
     }
 
+    @Test
+    public void testOnReceiveBatchedModifications() throws Exception {
+        new JavaTestKit(getSystem()) {{
+
+            DOMStoreWriteTransaction mockWriteTx = Mockito.mock(DOMStoreWriteTransaction.class);
+            final ActorRef transaction = newTransactionActor(mockWriteTx, "testOnReceiveBatchedModifications");
+
+            YangInstanceIdentifier writePath = TestModel.TEST_PATH;
+            NormalizedNode<?, ?> writeData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
+                    new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
+                    withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
+
+            YangInstanceIdentifier mergePath = TestModel.OUTER_LIST_PATH;
+            NormalizedNode<?, ?> mergeData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
+                    new YangInstanceIdentifier.NodeIdentifier(TestModel.OUTER_LIST_QNAME)).build();
+
+            YangInstanceIdentifier deletePath = TestModel.TEST_PATH;
+
+            BatchedModifications batched = new BatchedModifications(DataStoreVersions.CURRENT_VERSION);
+            batched.addModification(new WriteModification(writePath, writeData));
+            batched.addModification(new MergeModification(mergePath, mergeData));
+            batched.addModification(new DeleteModification(deletePath));
+
+            transaction.tell(batched, getRef());
+
+            expectMsgClass(duration("5 seconds"), BatchedModificationsReply.class);
+
+            JavaTestKit verification = new JavaTestKit(getSystem());
+            transaction.tell(new ShardWriteTransaction.GetCompositedModification(), verification.getRef());
+
+            CompositeModification compositeModification = verification.expectMsgClass(duration("5 seconds"),
+                        GetCompositeModificationReply.class).getModification();
+
+            assertEquals("CompositeModification size", 3, compositeModification.getModifications().size());
+
+            WriteModification write = (WriteModification)compositeModification.getModifications().get(0);
+            assertEquals("getPath", writePath, write.getPath());
+            assertEquals("getData", writeData, write.getData());
+
+            MergeModification merge = (MergeModification)compositeModification.getModifications().get(1);
+            assertEquals("getPath", mergePath, merge.getPath());
+            assertEquals("getData", mergeData, merge.getData());
+
+            DeleteModification delete = (DeleteModification)compositeModification.getModifications().get(2);
+            assertEquals("getPath", deletePath, delete.getPath());
+
+            InOrder inOrder = Mockito.inOrder(mockWriteTx);
+            inOrder.verify(mockWriteTx).write(writePath, writeData);
+            inOrder.verify(mockWriteTx).merge(mergePath, mergeData);
+            inOrder.verify(mockWriteTx).delete(deletePath);
+        }};
+    }
 
     @Test
     public void testOnReceiveReadyTransaction() throws Exception {
@@ -463,8 +521,8 @@ public class ShardTransactionTest extends AbstractActorTest {
                 DataStoreVersions.CURRENT_VERSION);
         final TestActorRef<ShardTransaction> transaction = TestActorRef.apply(props,getSystem());
 
-        transaction.receive(new DeleteData(TestModel.TEST_PATH).toSerializable(
-                DataStoreVersions.CURRENT_VERSION), ActorRef.noSender());
+        transaction.receive(new DeleteData(TestModel.TEST_PATH, DataStoreVersions.CURRENT_VERSION).
+                toSerializable(), ActorRef.noSender());
     }
 
     @Test

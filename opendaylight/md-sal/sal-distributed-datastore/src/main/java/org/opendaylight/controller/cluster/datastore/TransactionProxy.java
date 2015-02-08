@@ -214,7 +214,8 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         }
 
         // Note : Currently mailbox-capacity comes from akka.conf and not from the config-subsystem
-        this.operationLimiter = new Semaphore(actorContext.getTransactionOutstandingOperationLimit());
+        this.operationLimiter = new Semaphore(actorContext.getTransactionOutstandingOperationLimit() *
+                actorContext.getDatastoreContext().getShardBatchedModificationCount());
         this.operationCompleter = new OperationCompleter(operationLimiter);
 
         LOG.debug("Created txn {} of type {} on chain {}", identifier, transactionType, transactionChainId);
@@ -304,7 +305,8 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
     private void throttleOperation(int acquirePermits) {
         try {
-            if(!operationLimiter.tryAcquire(acquirePermits, actorContext.getDatastoreContext().getOperationTimeoutInSeconds(), TimeUnit.SECONDS)){
+            if(!operationLimiter.tryAcquire(acquirePermits,
+                    actorContext.getDatastoreContext().getOperationTimeoutInSeconds(), TimeUnit.SECONDS)){
                 LOG.warn("Failed to acquire operation permit for transaction {}", getIdentifier());
             }
         } catch (InterruptedException e) {
@@ -689,7 +691,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         private TransactionContext createValidTransactionContext(CreateTransactionReply reply) {
             String transactionPath = reply.getTransactionPath();
 
-            LOG.debug("Tx {} Received transaction actor path {}", identifier, transactionPath);
+            LOG.debug("Tx {} Received {}", identifier, reply);
 
             ActorSelection transactionActor = actorContext.actorSelection(transactionPath);
 
@@ -707,8 +709,13 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             // Check if TxActor is created in the same node
             boolean isTxActorLocal = actorContext.isPathLocal(transactionPath);
 
-            return new TransactionContextImpl(transactionPath, transactionActor, identifier,
-                actorContext, schemaContext, isTxActorLocal, reply.getVersion(), operationCompleter);
+            if(reply.getVersion() >= DataStoreVersions.LITHIUM_VERSION) {
+                return new TransactionContextImpl(transactionPath, transactionActor, identifier,
+                    actorContext, schemaContext, isTxActorLocal, reply.getVersion(), operationCompleter);
+            } else {
+                return new LegacyTransactionContextImpl(transactionPath, transactionActor, identifier,
+                        actorContext, schemaContext, isTxActorLocal, reply.getVersion(), operationCompleter);
+            }
         }
     }
 }

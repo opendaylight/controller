@@ -79,8 +79,8 @@ public class ShardTransactionHeliumBackwardsCompatibilityTest extends AbstractAc
             // Write data to the Tx
 
             txActor.tell(new WriteData(TestModel.TEST_PATH,
-                    ImmutableNodes.containerNode(TestModel.TEST_QNAME)).toSerializable(
-                            DataStoreVersions.BASE_HELIUM_VERSION), getRef());
+                    ImmutableNodes.containerNode(TestModel.TEST_QNAME), DataStoreVersions.BASE_HELIUM_VERSION).
+                        toSerializable(), getRef());
 
             expectMsgClass(duration, ShardTransactionMessages.WriteDataReply.class);
 
@@ -153,9 +153,11 @@ public class ShardTransactionHeliumBackwardsCompatibilityTest extends AbstractAc
             // Write data to the Tx
 
             txActor.tell(new WriteData(TestModel.TEST_PATH,
-                    ImmutableNodes.containerNode(TestModel.TEST_QNAME)), getRef());
+                    ImmutableNodes.containerNode(TestModel.TEST_QNAME),
+                    DataStoreVersions.BASE_HELIUM_VERSION).toSerializable(), getRef());
 
-            expectMsgClass(duration, WriteDataReply.class);
+            expectMsgClass(duration, WriteDataReply.INSTANCE.toSerializable(
+                    DataStoreVersions.BASE_HELIUM_VERSION).getClass());
 
             // Ready the Tx
 

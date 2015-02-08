@@ -22,21 +22,22 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
  *
  * @author Thomas Pantelis
  */
+@Deprecated
 public class DeleteDataTest {
 
     @Test
     public void testSerialization() {
         YangInstanceIdentifier path = TestModel.TEST_PATH;
 
-        DeleteData expected = new DeleteData(path);
+        DeleteData expected = new DeleteData(path, DataStoreVersions.CURRENT_VERSION);
 
-        Object serialized = expected.toSerializable(DataStoreVersions.CURRENT_VERSION);
+        Object serialized = expected.toSerializable();
         assertEquals("Serialized type", DeleteData.class, serialized.getClass());
         assertEquals("Version", DataStoreVersions.CURRENT_VERSION, ((DeleteData)serialized).getVersion());
 
         Object clone = SerializationUtils.clone((Serializable) serialized);
-        assertEquals("Version", DataStoreVersions.CURRENT_VERSION, ((DeleteData)clone).getVersion());
         DeleteData actual = DeleteData.fromSerializable(clone);
+        assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, actual.getVersion());
         assertEquals("getPath", expected.getPath(), actual.getPath());
     }
 
@@ -58,9 +59,9 @@ public class DeleteDataTest {
     public void testSerializationWithHeliumR1Version() throws Exception {
         YangInstanceIdentifier path = TestModel.TEST_PATH;
 
-        DeleteData expected = new DeleteData(path);
+        DeleteData expected = new DeleteData(path, DataStoreVersions.HELIUM_1_VERSION);
 
-        Object serialized = expected.toSerializable(DataStoreVersions.HELIUM_1_VERSION);
+        Object serialized = expected.toSerializable();
         assertEquals("Serialized type", ShardTransactionMessages.DeleteData.class, serialized.getClass());
 
         DeleteData actual = DeleteData.fromSerializable(SerializationUtils.clone((Serializable) serialized));

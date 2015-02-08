@@ -156,6 +156,15 @@ module distributed-datastore-provider {
                           an operation (eg transaction create).";
          }
 
+         leaf shard-batched-modification-count {
+            default 100;
+            type non-zero-uint32-type;
+            description "The number of transaction modification operations (put, merge, delete) to
+                        batch before sending to the shard transaction actor. Batching improves
+                        performance as less modifications messages are sent to the actor and thus
+                        lessens the chance that the transaction actor's mailbox queue could get full.";
+         }
+
          leaf enable-metric-capture {
             default false;
             type boolean;

@@ -31,6 +31,11 @@ public class WriteModification extends AbstractModification {
     private NormalizedNode<?, ?> data;
 
     public WriteModification() {
+        this(DataStoreVersions.CURRENT_VERSION);
+    }
+
+    public WriteModification(short version) {
+        super(version);
     }
 
     public WriteModification(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
@@ -54,14 +59,11 @@ public class WriteModification extends AbstractModification {
 
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        in.readShort(); // version
-
         SerializationUtils.deserializePathAndNode(in, this, APPLIER);
     }
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeShort(DataStoreVersions.CURRENT_VERSION);
         SerializationUtils.serializePathAndNode(getPath(), data, out);
     }
 
@@ -81,8 +83,9 @@ public class WriteModification extends AbstractModification {
         return new WriteModification(decoded.getDecodedPath(), decoded.getDecodedNode());
     }
 
-    public static WriteModification fromStream(ObjectInput in) throws ClassNotFoundException, IOException {
-        WriteModification mod = new WriteModification();
+    public static WriteModification fromStream(ObjectInput in, short version)
+            throws ClassNotFoundException, IOException {
+        WriteModification mod = new WriteModification(version);
         mod.readExternal(in);
         return mod;
     }
