@@ -46,6 +46,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
+import org.opendaylight.controller.cluster.raft.base.messages.InitiateInstallSnapshot;
 import org.opendaylight.controller.cluster.raft.behaviors.Follower;
 import org.opendaylight.controller.cluster.raft.behaviors.Leader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
@@ -1118,6 +1119,89 @@ public class RaftActorTest extends AbstractActorTest {
             }
         };
     }
+
+    @Test
+    public void testFakeSnapshotsForLeaderWithInInitiateSnapshots() throws Exception {
+        new JavaTestKit(getSystem()) {
+            {
+                String persistenceId = "leader1";
+
+                ActorRef followerActor1 =
+                        getSystem().actorOf(Props.create(MessageCollectorActor.class));
+                ActorRef followerActor2 =
+                        getSystem().actorOf(Props.create(MessageCollectorActor.class));
+
+                DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+                config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+                config.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
+
+                DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
+
+                Map<String, String> peerAddresses = new HashMap<>();
+                peerAddresses.put("follower-1", followerActor1.path().toString());
+                peerAddresses.put("follower-2", followerActor2.path().toString());
+
+                TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(),
+                        MockRaftActor.props(persistenceId, peerAddresses,
+                                Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
+
+                MockRaftActor leaderActor = mockActorRef.underlyingActor();
+                leaderActor.getRaftActorContext().setCommitIndex(9);
+                leaderActor.getRaftActorContext().setLastApplied(9);
+                leaderActor.getRaftActorContext().getTermInformation().update(1, persistenceId);
+
+                leaderActor.waitForInitializeBehaviorComplete();
+
+                // create 8 entries in the log - 0 to 4 are applied and will get picked up as part of the capture snapshot
+
+                Leader leader = new Leader(leaderActor.getRaftActorContext());
+                leaderActor.setCurrentBehavior(leader);
+                assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
+
+                // create 5 entries in the log
+                MockRaftActorContext.MockReplicatedLogBuilder logBuilder = new MockRaftActorContext.MockReplicatedLogBuilder();
+                leaderActor.getRaftActorContext().setReplicatedLog(logBuilder.createEntries(5, 10, 1).build());
+                leaderActor.getRaftActorContext().getReplicatedLog().setSnapshotIndex(4);
+                assertEquals(5, leaderActor.getReplicatedLog().size());
+
+                leaderActor.onReceiveCommand(new AppendEntriesReply("follower-1", 1, true, 9, 1));
+                assertEquals(5, leaderActor.getReplicatedLog().size());
+
+                // set the 2nd follower nextIndex which has been snapshotted
+                leaderActor.onReceiveCommand(new AppendEntriesReply("follower-2", 1, true, 0, 1));
+                assertEquals(5, leaderActor.getReplicatedLog().size());
+
+                // simulate a real snapshot
+                leaderActor.onReceiveCommand(new InitiateInstallSnapshot());
+                assertEquals(5, leaderActor.getReplicatedLog().size());
+                assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
+
+                //reply from a slow follower does not initiate a fake snapshot
+                leaderActor.onReceiveCommand(new AppendEntriesReply("follower-2", 1, true, 9, 1));
+                assertEquals("Fake snapshot should not happen when Initiate is in progress", 5, leaderActor.getReplicatedLog().size());
+
+                ByteString snapshotBytes  = fromObject(Arrays.asList(
+                        new MockRaftActorContext.MockPayload("foo-0"),
+                        new MockRaftActorContext.MockPayload("foo-1"),
+                        new MockRaftActorContext.MockPayload("foo-2"),
+                        new MockRaftActorContext.MockPayload("foo-3"),
+                        new MockRaftActorContext.MockPayload("foo-4")));
+                leaderActor.onReceiveCommand(new CaptureSnapshotReply(snapshotBytes.toByteArray()));
+                assertFalse(leaderActor.getRaftActorContext().isSnapshotCaptureInitiated());
+
+                assertEquals("Real snapshot didn't clear the log till lastApplied", 0, leaderActor.getReplicatedLog().size());
+
+                //reply from a slow follower after should not raise errors
+                leaderActor.onReceiveCommand(new AppendEntriesReply("follower-2", 1, true, 5, 1));
+                assertEquals(0, leaderActor.getReplicatedLog().size());
+
+                mockActorRef.tell(PoisonPill.getInstance(), getRef());
+
+            }
+        };
+    }
+
+
 
     private ByteString fromObject(Object snapshot) throws Exception {
         ByteArrayOutputStream b = null;
