@@ -30,8 +30,13 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
+import org.slf4j.impl.SimpleLogger;
 
 public class FollowerTest extends AbstractRaftActorBehaviorTest {
+
+    static {
+        System.setProperty(SimpleLogger.LOG_KEY_PREFIX + MockRaftActorContext.class.getName(), "trace");
+    }
 
     private final ActorRef followerActor = getSystem().actorOf(Props.create(
         DoNothingActor.class));
@@ -45,6 +50,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         return createActorContext(followerActor);
     }
 
+    @Override
     protected  RaftActorContext createActorContext(ActorRef actorRef){
         return new MockRaftActorContext("test", getSystem(), actorRef);
     }
@@ -54,12 +60,14 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         new JavaTestKit(getSystem()) {{
 
             new Within(DefaultConfigParamsImpl.HEART_BEAT_INTERVAL.$times(6)) {
+                @Override
                 protected void run() {
 
                     Follower follower = new Follower(createActorContext(getTestActor()));
 
                     final Boolean out = new ExpectMsg<Boolean>(DefaultConfigParamsImpl.HEART_BEAT_INTERVAL.$times(6), "ElectionTimeout") {
                         // do not put code outside this method, will run afterwards
+                        @Override
                         protected Boolean match(Object in) {
                             if (in instanceof ElectionTimeout) {
                                 return true;
@@ -92,6 +100,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         new JavaTestKit(getSystem()) {{
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     RaftActorContext context = createActorContext(getTestActor());
@@ -104,6 +113,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
 
                     final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"), "RequestVoteReply") {
                         // do not put code outside this method, will run afterwards
+                        @Override
                         protected Boolean match(Object in) {
                             if (in instanceof RequestVoteReply) {
                                 RequestVoteReply reply = (RequestVoteReply) in;
@@ -125,6 +135,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         new JavaTestKit(getSystem()) {{
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     RaftActorContext context = createActorContext(getTestActor());
@@ -137,6 +148,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
 
                     final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"), "RequestVoteReply") {
                         // do not put code outside this method, will run afterwards
+                        @Override
                         protected Boolean match(Object in) {
                             if (in instanceof RequestVoteReply) {
                                 RequestVoteReply reply = (RequestVoteReply) in;
@@ -233,6 +245,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"),
                 "AppendEntriesReply") {
                 // do not put code outside this method, will run afterwards
+                @Override
                 protected Boolean match(Object in) {
                     if (in instanceof AppendEntriesReply) {
                         AppendEntriesReply reply = (AppendEntriesReply) in;
@@ -312,6 +325,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"),
                 "AppendEntriesReply") {
                 // do not put code outside this method, will run afterwards
+                @Override
                 protected Boolean match(Object in) {
                     if (in instanceof AppendEntriesReply) {
                         AppendEntriesReply reply = (AppendEntriesReply) in;
@@ -405,6 +419,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"),
                 "AppendEntriesReply") {
                 // do not put code outside this method, will run afterwards
+                @Override
                 protected Boolean match(Object in) {
                     if (in instanceof AppendEntriesReply) {
                         AppendEntriesReply reply = (AppendEntriesReply) in;
@@ -462,6 +477,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"),
                     "AppendEntriesReply") {
                 // do not put code outside this method, will run afterwards
+                @Override
                 protected Boolean match(Object in) {
                     if (in instanceof AppendEntriesReply) {
                         AppendEntriesReply reply = (AppendEntriesReply) in;
@@ -518,6 +534,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"),
                     "AppendEntriesReply") {
                 // do not put code outside this method, will run afterwards
+                @Override
                 protected Boolean match(Object in) {
                     if (in instanceof AppendEntriesReply) {
                         AppendEntriesReply reply = (AppendEntriesReply) in;

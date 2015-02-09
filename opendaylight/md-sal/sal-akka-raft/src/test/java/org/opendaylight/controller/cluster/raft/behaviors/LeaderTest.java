@@ -53,6 +53,10 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
         System.setProperty(SimpleLogger.LOG_KEY_PREFIX + MockRaftActorContext.class.getName(), "trace");
     }
 
+    static {
+        System.setProperty(SimpleLogger.LOG_KEY_PREFIX + MockRaftActorContext.class.getName(), "trace");
+    }
+
     private final ActorRef leaderActor =
         getSystem().actorOf(Props.create(DoNothingActor.class));
     private final ActorRef senderActor =
