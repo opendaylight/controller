@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_82f83ac4",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeChangeListener.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-02-09T09:51:00Z",
+      "side": 1,
+      "message": "Actually robert is correct - DataTreeCandidate contains DataTreeCandidateNode which  reports ModificationType.\n\nDataTreeCandidate is only collection of DataTreeCandidateNode",
+      "parentUuid": "7a96c907_94b4fc82",
+      "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_b4b9f87a",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeChangeService.java",
         "patchSetId": 6
@@ -110,6 +128,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_220126af",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeChangeService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-02-09T09:51:00Z",
+      "side": 1,
+      "message": "I prefer explicit registration over whiteboard pattern\nOSGI listeners are not context aware - e.g. path and additional criteria - which broker should pick them up... is there a broker? Etc.",
+      "parentUuid": "7a96c907_d465a41e",
+      "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_f46a20ed",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeChangeService.java",
         "patchSetId": 6
@@ -172,6 +208,24 @@
       "writtenOn": "2015-02-08T03:57:58Z",
       "side": 1,
       "message": "How is this interface different than DOMDataTreeChangeService (or its usage)?",
+      "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_42feb2af",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStoreTreeChangePublisher.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-02-09T09:51:00Z",
+      "side": 1,
+      "message": "This is data store level service (no notion of Logical DataStore Type).",
+      "parentUuid": "7a96c907_d44cc4a0",
       "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
