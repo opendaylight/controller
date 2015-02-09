@@ -17,7 +17,7 @@ import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
+import org.opendaylight.controller.netconf.impl.CommitNotifier;
 import org.opendaylight.controller.netconf.impl.NetconfServerSession;
 import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
 import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultCloseSession;
@@ -43,7 +43,7 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
     private final Collection<NetconfOperation> allNetconfOperations;
 
     public NetconfOperationRouterImpl(final NetconfOperationServiceSnapshot netconfOperationServiceSnapshot, final CapabilityProvider capabilityProvider,
-            final DefaultCommitNotificationProducer commitNotifier) {
+            final CommitNotifier commitNotifier) {
         this.netconfOperationServiceSnapshot = Preconditions.checkNotNull(netconfOperationServiceSnapshot);
 
         final String sessionId = netconfOperationServiceSnapshot.getNetconfSessionIdForReporting();
