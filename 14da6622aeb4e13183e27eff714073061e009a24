@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_c212c208",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMRpcIdentifier.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-02-09T09:43:31Z",
+      "side": 1,
+      "message": "Could you provide documentation for this concept?",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 16,
+        "endChar": 31
+      },
+      "revId": "14da6622aeb4e13183e27eff714073061e009a24",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_a20d36ea",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/md/sal/dom/spi/ForwardingDOMRpcService.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-02-09T09:43:31Z",
+      "side": 1,
+      "message": "Missing copyright header",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 51
+      },
+      "revId": "14da6622aeb4e13183e27eff714073061e009a24",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
