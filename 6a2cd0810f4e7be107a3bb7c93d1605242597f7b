@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "7a96c907_3dfe2baf",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/FollowerLogInformation.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-09T18:03:36Z",
+      "side": 1,
+      "message": "The name of this method suggests that we are asking for the amount of time the follower was active. What we really are trying to get is the time since the last response was received from the follower. I suggest to change this name to timeSinceLastReply.",
+      "revId": "6a2cd0810f4e7be107a3bb7c93d1605242597f7b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_f406a01c",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
         "patchSetId": 5
@@ -78,6 +95,23 @@
       "side": 1,
       "message": "Forget this comment - just remembered that handleAppendEntriesReply does not call this method - duh.",
       "parentUuid": "7a96c907_f4c1c054",
+      "revId": "6a2cd0810f4e7be107a3bb7c93d1605242597f7b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3decebf2",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 1189,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-09T18:03:36Z",
+      "side": 1,
+      "message": "Why not use ForwardMessageToBehaviorActor for Leader?",
       "revId": "6a2cd0810f4e7be107a3bb7c93d1605242597f7b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
