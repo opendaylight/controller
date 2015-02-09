@@ -37,6 +37,23 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_fd19a3d7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-09T19:30:07Z",
+      "side": 1,
+      "message": "Can we make this a protected method, return true by default but override in ShardReadTransaction to return false. I think this would be cleaner.",
+      "revId": "3d529bff0285a84e7568deaaa97f9b64fd76b465",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_fde443e2",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTransactionTest.java",
         "patchSetId": 1
