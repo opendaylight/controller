@@ -83,6 +83,9 @@ public class TestHelper {
                 mavenBundle("org.eclipse.birt.runtime.3_7_1", "org.apache.xml.resolver", "1.2.0"),
 
                 mavenBundle(CONTROLLER, "config-netconf-connector").versionAsInProject(), //
+                mavenBundle(CONTROLLER, "netconf-notifications-api").versionAsInProject(), //
+                mavenBundle(CONTROLLER, "ietf-netconf").versionAsInProject(), //
+                mavenBundle(CONTROLLER, "ietf-netconf-notifications").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "netconf-impl").versionAsInProject(), //
 
                 mavenBundle(CONTROLLER, "config-persister-file-xml-adapter").versionAsInProject().noStart(),
