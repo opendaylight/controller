@@ -41,10 +41,10 @@
             <name>global-netconf-processing-executor</name>
           </processing-executor>
         </module>
-      </modules>
     </data>
   </configuration>
   <required-capabilities>
       <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf?module=odl-sal-netconf-connector-cfg&amp;revision=2013-10-28</capability>
+      <capability>urn:opendaylight:params:xml:ns:yang:controller:netconf:northbound:ssh?module=netconf-northbound-ssh&amp;revision=2015-01-14</capability>
   </required-capabilities>
 </snapshot>

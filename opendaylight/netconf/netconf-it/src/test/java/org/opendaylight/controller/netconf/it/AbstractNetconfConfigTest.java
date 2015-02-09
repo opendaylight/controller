@@ -57,7 +57,7 @@ import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStore
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreServiceImpl;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreSnapshot;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
-import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
+import org.opendaylight.controller.netconf.impl.NetconfServerDispatcherImpl;
 import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFactory;
 import org.opendaylight.controller.netconf.impl.SessionIdProvider;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfMonitoringServiceImpl;
@@ -139,7 +139,7 @@ public abstract class AbstractNetconfConfigTest extends AbstractConfigTest {
     }
 
     private Channel startNetconfTcpServer(final NetconfOperationServiceFactoryListenerImpl factoriesListener) throws Exception {
-        final NetconfServerDispatcher dispatch = createDispatcher(factoriesListener, getNetconfMonitoringService(), getNotificationProducer());
+        final NetconfServerDispatcherImpl dispatch = createDispatcher(factoriesListener, getNetconfMonitoringService(), getNotificationProducer());
 
         final ChannelFuture s;
         if(getTcpServerAddress() instanceof LocalAddress) {
@@ -206,7 +206,7 @@ public abstract class AbstractNetconfConfigTest extends AbstractConfigTest {
         return yangDependencies;
     }
 
-    protected NetconfServerDispatcher createDispatcher(
+    protected NetconfServerDispatcherImpl createDispatcher(
             final NetconfOperationServiceFactoryListenerImpl factoriesListener, final SessionMonitoringService sessionMonitoringService,
             final DefaultCommitNotificationProducer commitNotifier) {
         final SessionIdProvider idProvider = new SessionIdProvider();
@@ -214,9 +214,9 @@ public abstract class AbstractNetconfConfigTest extends AbstractConfigTest {
         final NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new NetconfServerSessionNegotiatorFactory(
                 hashedWheelTimer, factoriesListener, idProvider, SERVER_CONNECTION_TIMEOUT_MILLIS, commitNotifier, sessionMonitoringService);
 
-        final NetconfServerDispatcher.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerChannelInitializer(
+        final NetconfServerDispatcherImpl.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcherImpl.ServerChannelInitializer(
                 serverNegotiatorFactory);
-        return new NetconfServerDispatcher(serverChannelInitializer, nettyThreadgroup, nettyThreadgroup);
+        return new NetconfServerDispatcherImpl(serverChannelInitializer, nettyThreadgroup, nettyThreadgroup);
     }
 
     protected HashedWheelTimer getHashedWheelTimer() {

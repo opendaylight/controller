@@ -7,6 +7,7 @@
     <repository>mvn:org.opendaylight.controller/features-config/${config.version}/xml/features</repository>
     <repository>mvn:org.opendaylight.controller/features-config-persister/${config.version}/xml/features</repository>
     <repository>mvn:org.opendaylight.controller/features-config-netty/${config.version}/xml/features</repository>
+    <repository>mvn:org.opendaylight.controller/features-netconf/${netconf.version}/xml/features</repository>
     <repository>mvn:org.opendaylight.controller/features-akka/${commons.opendaylight.version}/xml/features</repository>
     <feature name='odl-mdsal-all' version='${project.version}' description="OpenDaylight :: MDSAL :: All">
         <feature version='${project.version}'>odl-mdsal-broker</feature>
@@ -21,6 +22,20 @@
       <bundle>mvn:org.opendaylight.controller/sal-common-impl/${mdsal.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/sal-common-util/${mdsal.version}</bundle>
     </feature>
+
+    <!-- TODO move to netconf features, however there are some weird dependencies on features-config-persister all over that cause cyclic dependencies-->
+    <feature name='odl-netconf-mdsal' version='${project.version}' description="OpenDaylight :: Netconf :: All">
+        <feature version='${config.version}'>odl-config-all</feature>
+        <feature version='${netconf.version}'>odl-netconf-all</feature>
+        <bundle>mvn:org.opendaylight.controller/netconf-ssh/${netconf.version}</bundle>
+        <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
+        <bundle>mvn:org.opendaylight.controller/config-mdsal-connector/${netconf.version}</bundle>
+        <!-- TODO 01-netconf.xml file requires netconf-config-dispatcher to be present and its part of netconf-connector features. Clean Up-->
+        <bundle>mvn:org.opendaylight.controller/netconf-config-dispatcher/${config.version}</bundle>
+        <configfile finalname='${config.configfile.directory}/${config.netconf.client.configfile}'>mvn:org.opendaylight.controller/netconf-config/${netconf.version}/xml/config</configfile>
+        <configfile finalname='${config.configfile.directory}/${config.netconf.mdsal.configfile}'>mvn:org.opendaylight.controller/netconf-mdsal-config/${netconf.version}/xml/config</configfile>
+    </feature>
+
     <feature name='odl-mdsal-broker' version='${project.version}' description="OpenDaylight :: MDSAL :: Broker">
         <feature version='${yangtools.version}'>odl-yangtools-common</feature>
         <feature version='${yangtools.version}'>odl-yangtools-binding</feature>

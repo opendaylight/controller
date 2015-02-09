@@ -49,6 +49,17 @@
             <name>global-netconf-processing-executor-threadfactory</name>
           </threadFactory>
         </module>
+
+        <module>
+          <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:threadpool:impl:scheduled">prefix:threadpool-scheduled</type>
+          <name>global-netconf-ssh-scheduled-executor</name>
+          <max-thread-count xmlns="urn:opendaylight:params:xml:ns:yang:controller:threadpool:impl:scheduled">8</max-thread-count>
+
+          <threadFactory xmlns="urn:opendaylight:params:xml:ns:yang:controller:threadpool:impl:scheduled">
+            <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:threadpool">prefix:threadfactory</type>
+            <name>global-netconf-processing-executor-threadfactory</name>
+          </threadFactory>
+        </module>
       </modules>
 
       <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
@@ -72,6 +83,10 @@
             <name>global-netconf-processing-executor</name>
             <provider>/modules/module[type='threadpool-flexible'][name='global-netconf-processing-executor']</provider>
           </instance>
+            <instance>
+            <name>global-netconf-ssh-scheduled-executor</name>
+            <provider>/modules/module[type='threadpool-scheduled'][name='global-netconf-ssh-scheduled-executor']</provider>
+          </instance>
         </service>
       </services>
 
@@ -81,5 +96,6 @@
       <capability>urn:opendaylight:params:xml:ns:yang:controller:config:netconf:client:dispatcher?module=odl-netconfig-client-cfg&amp;revision=2014-04-08</capability>
       <capability>urn:opendaylight:params:xml:ns:yang:controller:threadpool:impl?module=threadpool-impl&amp;revision=2013-04-05</capability>
       <capability>urn:opendaylight:params:xml:ns:yang:controller:threadpool:impl:flexible?module=threadpool-impl-flexible&amp;revision=2013-12-01</capability>
+      <capability>urn:opendaylight:params:xml:ns:yang:controller:threadpool:impl:scheduled?module=threadpool-impl-scheduled&amp;revision=2013-12-01</capability>
   </required-capabilities>
 </snapshot>

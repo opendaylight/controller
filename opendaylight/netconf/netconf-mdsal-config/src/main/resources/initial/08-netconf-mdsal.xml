@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+  ~
+  ~ This program and the accompanying materials are made available under the
+  ~ terms of the Eclipse Public License v1.0 which accompanies this distribution,
+  ~ and is available at http://www.eclipse.org/legal/epl-v10.html
+  -->
+
+<!-- vi: set et smarttab sw=4 tabstop=4: -->
+
+<snapshot>
+  <configuration>
+    <data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+      <modules xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+
+          <module>
+              <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:netconf:mdsal:mapper">prefix:netconf-mdsal-mapper</type>
+              <name>netconf-mdsal-mapper</name>
+              <root-schema-service>
+                  <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:schema-service</type>
+                  <name>yang-schema-service</name>
+              </root-schema-service>
+              <dom-broker xmlns="urn:opendaylight:params:xml:ns:yang:controller:netconf:mdsal:mapper">
+                  <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:dom-async-data-broker</type>
+                  <name>inmemory-data-broker</name>
+              </dom-broker>
+          </module>
+
+          <module>
+              <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:netconf:northbound:impl">prefix:netconf-server-dispatcher-impl</type>
+              <name>netconf-mdsal-server-dispatcher</name>
+              <mappers xmlns="urn:opendaylight:params:xml:ns:yang:controller:config:netconf:northbound:impl">
+                  <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:netconf:north:mapper">dom:netconf-northbound-mapper</type>
+                  <name>netconf-mdsal-mapper</name>
+              </mappers>
+              <boss-thread-group xmlns="urn:opendaylight:params:xml:ns:yang:controller:config:netconf:northbound:impl">
+                  <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:netty">prefix:netty-threadgroup</type>
+                  <name>global-boss-group</name>
+              </boss-thread-group>
+              <worker-thread-group xmlns="urn:opendaylight:params:xml:ns:yang:controller:config:netconf:northbound:impl">
+                  <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:netty">prefix:netty-threadgroup</type>
+                  <name>global-worker-group</name>
+              </worker-thread-group>
+              <timer xmlns="urn:opendaylight:params:xml:ns:yang:controller:config:netconf:northbound:impl">
+                  <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:netty">prefix:netty-timer</type>
+                  <name>global-timer</name>
+              </timer>
+          </module>
+
+          <module>
+              <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:netconf:northbound:ssh">prefix:netconf-northbound-ssh</type>
+              <name>netconf-mdsal-ssh-server</name>
+
+              <event-executor xmlns="urn:opendaylight:params:xml:ns:yang:controller:netconf:northbound:ssh">
+                  <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:netty">prefix:netty-event-executor</type>
+                  <name>global-event-executor</name>
+              </event-executor>
+              <worker-thread-group xmlns="urn:opendaylight:params:xml:ns:yang:controller:netconf:northbound:ssh">
+                  <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:netty">prefix:netty-threadgroup</type>
+                  <name>global-worker-group</name>
+              </worker-thread-group>
+              <processing-executor xmlns="urn:opendaylight:params:xml:ns:yang:controller:netconf:northbound:ssh">
+                  <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:threadpool">prefix:threadpool</type>
+                  <name>global-netconf-ssh-scheduled-executor</name>
+              </processing-executor>
+              <dispatcher xmlns="urn:opendaylight:params:xml:ns:yang:controller:netconf:northbound:ssh">
+                  <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:netconf:northbound">prefix:netconf-server-dispatcher</type>
+                  <name>netconf-mdsal-server-dispatcher</name>
+              </dispatcher>
+
+              <username>admin</username>
+              <password>admin</password>
+          </module>
+
+      </modules>
+
+        <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+            <service>
+                <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:netconf:north:mapper">prefix:netconf-northbound-mapper</type>
+                <instance>
+                    <name>netconf-mdsal-mapper</name>
+                    <provider>/modules/module[type='netconf-mdsal-mapper'][name='netconf-mdsal-mapper']</provider>
+                </instance>
+            </service>
+            <service>
+                <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:netconf:northbound">prefix:netconf-server-dispatcher</type>
+                <instance>
+                    <name>netconf-mdsal-server-dispatcher</name>
+                    <provider>/modules/module[type='netconf-server-dispatcher-impl'][name='netconf-mdsal-server-dispatcher']</provider>
+                </instance>
+            </service>
+        </services>
+
+    </data>
+  </configuration>
+  <required-capabilities>
+      <capability>urn:opendaylight:params:xml:ns:yang:controller:netconf:mdsal:mapper?module=netconf-mdsal-mapper&amp;revision=2015-01-14</capability>
+      <capability>urn:opendaylight:params:xml:ns:yang:controller:netconf:northbound:ssh?module=netconf-northbound-ssh&amp;revision=2015-01-14</capability>
+      <capability>urn:opendaylight:params:xml:ns:yang:controller:config:netconf:northbound:impl?module=netconf-northbound-impl&amp;revision=2015-01-12</capability>
+      <capability>urn:opendaylight:params:xml:ns:yang:controller:threadpool:impl:scheduled?module=threadpool-impl-scheduled&amp;revision=2013-12-01</capability>
+  </required-capabilities>
+</snapshot>
