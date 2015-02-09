@@ -73,6 +73,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_7d3ef329",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/FollowerLogInformation.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-09T19:23:42Z",
+      "side": 1,
+      "message": "I think timeSinceLastActivity sounds more accurate",
+      "parentUuid": "7a96c907_7dd033f6",
+      "revId": "6a2cd0810f4e7be107a3bb7c93d1605242597f7b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_f406a01c",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
         "patchSetId": 5
