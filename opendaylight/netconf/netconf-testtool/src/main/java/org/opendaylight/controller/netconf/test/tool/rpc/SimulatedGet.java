@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.netconf.test.tool;
+package org.opendaylight.controller.netconf.test.tool.rpc;
 
 import com.google.common.base.Optional;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
@@ -17,11 +17,11 @@ import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-class SimulatedGet extends AbstractConfigNetconfOperation {
+public class SimulatedGet extends AbstractConfigNetconfOperation {
 
     private final DataList storage;
 
-    SimulatedGet(final String netconfSessionIdForReporting, final DataList storage) {
+    public SimulatedGet(final String netconfSessionIdForReporting, final DataList storage) {
         super(null, netconfSessionIdForReporting);
         this.storage = storage;
     }

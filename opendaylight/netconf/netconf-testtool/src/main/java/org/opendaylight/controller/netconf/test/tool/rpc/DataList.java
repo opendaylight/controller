@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.netconf.test.tool;
+package org.opendaylight.controller.netconf.test.tool.rpc;
 
 import java.util.Collections;
 import java.util.List;
