@@ -407,6 +407,9 @@ public class ListenerAdapter implements DOMDataChangeListener {
 
         // FIXME: BUG-1281: this is duplicated code from yangtools (BUG-1275)
         for (PathArgument pathArgument : normalizedPath.getPathArguments()) {
+            if (pathArgument instanceof YangInstanceIdentifier.AugmentationIdentifier) {
+                continue;
+            }
             textContent.append("/");
             writeIdentifierWithNamespacePrefix(element, textContent, pathArgument.getNodeType(), prefixes);
             if (pathArgument instanceof NodeIdentifierWithPredicates) {
