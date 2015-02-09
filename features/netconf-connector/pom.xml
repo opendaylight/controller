@@ -121,6 +121,10 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
+      <artifactId>config-mdsal-connector</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
       <artifactId>netconf-tcp</artifactId>
     </dependency>
     <dependency>
