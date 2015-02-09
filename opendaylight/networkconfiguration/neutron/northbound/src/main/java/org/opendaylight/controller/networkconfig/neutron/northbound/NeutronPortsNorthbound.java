@@ -8,10 +8,16 @@
 
 package org.opendaylight.controller.networkconfig.neutron.northbound;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import org.codehaus.enunciate.jaxrs.ResponseCode;
+import org.codehaus.enunciate.jaxrs.StatusCodes;
+import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronPortAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
+import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
+import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
+import org.opendaylight.controller.networkconfig.neutron.NeutronSubnet;
+import org.opendaylight.controller.networkconfig.neutron.Neutron_IPs;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -27,17 +33,10 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-
-import org.codehaus.enunciate.jaxrs.ResponseCode;
-import org.codehaus.enunciate.jaxrs.StatusCodes;
-import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
-import org.opendaylight.controller.networkconfig.neutron.INeutronPortAware;
-import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
-import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
-import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
-import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
-import org.opendaylight.controller.networkconfig.neutron.NeutronSubnet;
-import org.opendaylight.controller.networkconfig.neutron.Neutron_IPs;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Neutron Northbound REST APIs.<br>
@@ -302,8 +301,10 @@ public class NeutronPortsNorthbound {
                     }
                     for (Neutron_IPs test_fixedIP : test.getFixedIPs()) {
                         for (Neutron_IPs check_fixedIP : check.getFixedIPs()) {
-                            if (test_fixedIP.getIpAddress().equals(check_fixedIP.getIpAddress())) {
-                                throw new ResourceConflictException("IP address already allocated");
+                            if (test_fixedIP.getSubnetUUID().equals(check_fixedIP.getSubnetUUID())) {
+                                if (test_fixedIP.getIpAddress().equals(check_fixedIP.getIpAddress())) {
+                                    throw new ResourceConflictException("IP address already allocated");
+                                }
                             }
                         }
                     }
