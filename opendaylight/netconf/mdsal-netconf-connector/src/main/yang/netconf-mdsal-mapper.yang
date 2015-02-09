@@ -1,0 +1,50 @@
+module netconf-mdsal-mapper {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:netconf:mdsal:mapper";
+    prefix "nmm";
+
+    import netconf-northbound-mapper { prefix nnm; revision-date 2015-01-14; }
+    import opendaylight-md-sal-dom { prefix md-sal-dom; revision-date 2013-10-28; }
+    import config { prefix config; revision-date 2013-04-05; }
+
+    organization "Cisco Systems, Inc.";
+
+    description
+        "This module contains the base YANG definitions for
+         an MD-SAL mapper implementation";
+
+    revision "2015-01-14" {
+        description
+            "Initial revision.";
+    }
+
+    identity netconf-mdsal-mapper {
+        base config:module-type;
+        config:provided-service nnm:netconf-northbound-mapper;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case netconf-mdsal-mapper {
+            when "/config:modules/config:module/config:type = 'netconf-mdsal-mapper'";
+
+            container root-schema-service {
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity md-sal-dom:schema-service;
+                    }
+                }
+            }
+
+            container dom-broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity md-sal-dom:dom-async-data-broker;
+                    }
+                }
+            }
+        }
+    }
+
+}
