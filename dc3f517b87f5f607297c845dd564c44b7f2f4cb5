@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_3d15cbe4",
+        "filename": "opendaylight/config/config-persister-feature-adapter/src/main/java/org/opendaylight/controller/configpusherfeature/internal/AbstractFeatureWrapper.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2015-02-09T17:54:40Z",
+      "side": 1,
+      "message": "It appears in third party feature, pulled in by default: https://github.com/ops4j/org.ops4j.pax.web/tree/master/pax-web-features/src/main/resources\nIt is the only known (to me, so far) .xml feature-config file not intended for config subsystem. Is there a better way to handle it without hardcoding?",
+      "parentUuid": "7a96c907_e109432d",
+      "revId": "dc3f517b87f5f607297c845dd564c44b7f2f4cb5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_010f8f31",
         "filename": "opendaylight/config/config-persister-feature-adapter/src/main/java/org/opendaylight/controller/configpusherfeature/internal/AbstractFeatureWrapper.java",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2015-01-09T08:39:17Z",
       "side": 1,
       "message": "Maybe warn level would be sufficient, since this is not a non-recoverable error and the system continues to work.",
+      "revId": "dc3f517b87f5f607297c845dd564c44b7f2f4cb5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_bd29db38",
+        "filename": "opendaylight/config/config-persister-feature-adapter/src/main/java/org/opendaylight/controller/configpusherfeature/internal/AbstractFeatureWrapper.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2015-02-09T17:54:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_010f8f31",
       "revId": "dc3f517b87f5f607297c845dd564c44b7f2f4cb5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
