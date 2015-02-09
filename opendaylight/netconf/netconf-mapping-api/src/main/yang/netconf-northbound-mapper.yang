@@ -1,0 +1,22 @@
+module netconf-northbound-mapper {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:netconf:north:mapper";
+    prefix "nnm";
+
+    import config { prefix config; revision-date 2013-04-05; }
+
+    description
+        "This module contains the base YANG definitions for
+         mapping services plugged into a netconf northbound server";
+
+    revision "2015-01-14" {
+        description
+            "Initial revision.";
+    }
+
+    identity netconf-northbound-mapper {
+        base "config:service-type";
+        config:java-class "org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory";
+    }
+
+}
