@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_fd67634b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 2508
+      },
+      "writtenOn": "2015-02-09T20:00:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_dddf070c",
+      "revId": "3d529bff0285a84e7568deaaa97f9b64fd76b465",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_fd19a3d7",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
         "patchSetId": 1
@@ -54,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_5d56975d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 2508
+      },
+      "writtenOn": "2015-02-09T20:00:35Z",
+      "side": 1,
+      "message": "Good call - done in patch-set 2.",
+      "parentUuid": "7a96c907_fd19a3d7",
+      "revId": "3d529bff0285a84e7568deaaa97f9b64fd76b465",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_fde443e2",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTransactionTest.java",
         "patchSetId": 1
@@ -65,6 +101,24 @@
       "writtenOn": "2015-02-09T18:54:02Z",
       "side": 1,
       "message": "I\u0027m wondering if we should test expectNoMsg before expectTerminated to confirm that in this scenario CloseTransactionReply is not sent.",
+      "revId": "3d529bff0285a84e7568deaaa97f9b64fd76b465",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_fdce832d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTransactionTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 454,
+      "author": {
+        "id": 2508
+      },
+      "writtenOn": "2015-02-09T20:00:35Z",
+      "side": 1,
+      "message": "When I originally tried expectNoMsg it was counting the Terminated message. With your feedback I switched in patch-set 2 to expectMsgClass to confirm only 1 message (Terminated) is received for RO test case.",
+      "parentUuid": "7a96c907_fde443e2",
       "revId": "3d529bff0285a84e7568deaaa97f9b64fd76b465",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
