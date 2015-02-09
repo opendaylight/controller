@@ -16,7 +16,7 @@ import java.util.Hashtable;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
-import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
+import org.opendaylight.controller.netconf.impl.NetconfServerDispatcherImpl;
 import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFactory;
 import org.opendaylight.controller.netconf.impl.SessionIdProvider;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
@@ -57,9 +57,9 @@ public class NetconfImplActivator implements BundleActivator {
 
         eventLoopGroup = new NioEventLoopGroup();
 
-        NetconfServerDispatcher.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerChannelInitializer(
+        NetconfServerDispatcherImpl.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcherImpl.ServerChannelInitializer(
                 serverNegotiatorFactory);
-        NetconfServerDispatcher dispatch = new NetconfServerDispatcher(serverChannelInitializer, eventLoopGroup, eventLoopGroup);
+        NetconfServerDispatcherImpl dispatch = new NetconfServerDispatcherImpl(serverChannelInitializer, eventLoopGroup, eventLoopGroup);
 
         LocalAddress address = NetconfConfigUtil.getNetconfLocalAddress();
         LOG.trace("Starting local netconf server at {}", address);

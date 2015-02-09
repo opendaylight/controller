@@ -1,0 +1,94 @@
+module netconf-northbound-ssh {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:netconf:northbound:ssh";
+    prefix "nni";
+
+    import netconf-northbound-mapper { prefix nnm; revision-date 2015-01-14; }
+    import netconf-northbound { prefix nn; revision-date 2015-01-14; }
+    import config { prefix config; revision-date 2013-04-05; }
+    import threadpool {prefix th;}
+    import netty {prefix netty;}
+    import ietf-inet-types { prefix inet; revision-date 2010-09-24; }
+
+    organization "Cisco Systems, Inc.";
+
+    description
+        "This module contains the base YANG definitions for
+         a default implementation of netconf northbound server";
+
+    revision "2015-01-14" {
+        description
+            "Initial revision.";
+    }
+
+    identity netconf-northbound-ssh {
+        base config:module-type;
+        config:java-name-prefix NetconfNorthboundSsh;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case netconf-northbound-ssh {
+            when "/config:modules/config:module/config:type = 'netconf-northbound-ssh'";
+
+            leaf port {
+                type inet:port-number;
+                default 2830;
+            }
+
+            leaf binding-address {
+                type inet:ip-address;
+                default "0.0.0.0";
+            }
+
+            container processing-executor {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity th:scheduled-threadpool;
+                    }
+                }
+
+                description "Required by the mina-ssh library used in SSH endpoint";
+            }
+
+            container event-executor {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity netty:netty-event-executor;
+                    }
+                }
+            }
+
+            container worker-thread-group {
+                uses config:service-ref {
+                    refine type {
+                        config:required-identity netty:netty-threadgroup;
+                    }
+                }
+            }
+
+            container dispatcher {
+                uses config:service-ref {
+                    refine type {
+                        config:required-identity nn:netconf-server-dispatcher;
+                    }
+                }
+            }
+
+            // FIXME use auth provider from aaa instead
+            leaf username {
+                description "Specifies username credential";
+                type string;
+            }
+
+            leaf password {
+                description "Specifies password credential";
+                type string;
+            }
+
+
+        }
+    }
+
+}

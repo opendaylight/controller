@@ -36,6 +36,14 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
+      <artifactId>netconf-config</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>netconf-mdsal-config</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
       <artifactId>netconf-auth</artifactId>
     </dependency>
     <dependency>

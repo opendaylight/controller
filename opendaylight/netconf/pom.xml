@@ -34,6 +34,7 @@
     <module>ietf-netconf-notifications</module>
     <module>ietf-netconf-monitoring-extension</module>
     <module>netconf-connector-config</module>
+    <module>netconf-mdsal-config</module>
     <module>netconf-auth</module>
     <module>netconf-usermanager</module>
     <module>netconf-testtool</module>

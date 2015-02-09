@@ -1,0 +1,80 @@
+// vi: set smarttab et sw=4 tabstop=4:
+module netconf-northbound-impl {
+
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:netconf:northbound:impl";
+    prefix "cfg-net-s-i";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import netconf-northbound-mapper { prefix nnm; revision-date 2015-01-14; }
+    import netconf-northbound { prefix nn; revision-date 2015-01-14; }
+    import netty {prefix netty; }
+
+    description
+        "This module contains the base YANG definitions for
+        netconf-server-dispatcher implementation.
+
+        Copyright (c)2013 Cisco Systems, Inc. All rights reserved.;
+
+        This program and the accompanying materials are made available
+        under the terms of the Eclipse Public License v1.0 which
+        accompanies this distribution, and is available at
+        http://www.eclipse.org/legal/epl-v10.html";
+
+    revision "2015-01-12" {
+        description
+            "Initial revision.";
+    }
+
+    identity netconf-server-dispatcher-impl {
+            base config:module-type;
+            config:provided-service nn:netconf-server-dispatcher;
+            config:java-name-prefix NetconfServerDispatcher;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case netconf-server-dispatcher-impl {
+            when "/config:modules/config:module/config:type = 'netconf-server-dispatcher-impl'";
+
+            leaf connection-timeout-millis {
+                description "Specifies timeout in milliseconds after which connection must be established.";
+                type uint32;
+                default 20000;
+            }
+
+            container boss-thread-group {
+                uses config:service-ref {
+                    refine type {
+                        config:required-identity netty:netty-threadgroup;
+                    }
+                }
+            }
+
+            container worker-thread-group {
+                uses config:service-ref {
+                    refine type {
+                        config:required-identity netty:netty-threadgroup;
+                    }
+                }
+            }
+
+            list mappers {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity nnm:netconf-northbound-mapper;
+                    }
+                }
+            }
+
+            container timer {
+                uses config:service-ref {
+                    refine type {
+                        config:required-identity netty:netty-timer;
+                    }
+                }
+            }
+        }
+    }
+
+}

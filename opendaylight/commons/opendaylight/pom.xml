@@ -72,6 +72,7 @@
     <config.xsql.configfile>04-xsql.xml</config.xsql.configfile>
     <config.netconf.client.configfile>01-netconf.xml</config.netconf.client.configfile>
     <config.toaster.configfile>03-toaster-sample.xml</config.toaster.configfile>
+    <config.netconf.mdsal.configfile>08-mdsal-netconf.xml</config.netconf.mdsal.configfile>
     <config.restconf.configfile>10-rest-connector.xml</config.restconf.configfile>
     <config.netconf.connector.configfile>99-netconf-connector.xml</config.netconf.connector.configfile>
     <configuration.implementation.version>0.5.0-SNAPSHOT</configuration.implementation.version>

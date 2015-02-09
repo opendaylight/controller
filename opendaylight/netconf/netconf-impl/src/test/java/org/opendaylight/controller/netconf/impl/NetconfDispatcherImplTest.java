@@ -22,7 +22,7 @@ import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFact
 public class NetconfDispatcherImplTest {
 
     private EventLoopGroup nettyGroup;
-    private NetconfServerDispatcher dispatch;
+    private NetconfServerDispatcherImpl dispatch;
     private DefaultCommitNotificationProducer commitNot;
     private HashedWheelTimer hashedWheelTimer;
 
@@ -40,9 +40,9 @@ public class NetconfDispatcherImplTest {
         NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new NetconfServerSessionNegotiatorFactory(
                 hashedWheelTimer, factoriesListener, idProvider, 5000, commitNot, ConcurrentClientsTest.createMockedMonitoringService());
 
-        NetconfServerDispatcher.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerChannelInitializer(serverNegotiatorFactory);
+        NetconfServerDispatcherImpl.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcherImpl.ServerChannelInitializer(serverNegotiatorFactory);
 
-        dispatch = new NetconfServerDispatcher(
+        dispatch = new NetconfServerDispatcherImpl(
                 serverChannelInitializer, nettyGroup, nettyGroup);
     }
 

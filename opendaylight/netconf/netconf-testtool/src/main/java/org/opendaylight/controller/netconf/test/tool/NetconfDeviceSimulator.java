@@ -57,7 +57,7 @@ import org.apache.sshd.server.session.ServerSession;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfManagementSession;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
-import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
+import org.opendaylight.controller.netconf.impl.NetconfServerDispatcherImpl;
 import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFactory;
 import org.opendaylight.controller.netconf.impl.SessionIdProvider;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfMonitoringServiceImpl;
@@ -116,7 +116,7 @@ public class NetconfDeviceSimulator implements Closeable {
         this.nioExecutor = nioExecutor;
     }
 
-    private NetconfServerDispatcher createDispatcher(final Map<ModuleBuilder, String> moduleBuilders, final boolean exi, final int generateConfigsTimeout) {
+    private NetconfServerDispatcherImpl createDispatcher(final Map<ModuleBuilder, String> moduleBuilders, final boolean exi, final int generateConfigsTimeout) {
 
         final Set<Capability> capabilities = Sets.newHashSet(Collections2.transform(moduleBuilders.keySet(), new Function<ModuleBuilder, Capability>() {
             @Override
@@ -145,9 +145,9 @@ public class NetconfDeviceSimulator implements Closeable {
         final NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new NetconfServerSessionNegotiatorFactory(
                 hashedWheelTimer, simulatedOperationProvider, idProvider, generateConfigsTimeout, commitNotifier, new LoggingMonitoringService(), serverCapabilities);
 
-        final NetconfServerDispatcher.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerChannelInitializer(
+        final NetconfServerDispatcherImpl.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcherImpl.ServerChannelInitializer(
                 serverNegotiatorFactory);
-        return new NetconfServerDispatcher(serverChannelInitializer, nettyThreadgroup, nettyThreadgroup);
+        return new NetconfServerDispatcherImpl(serverChannelInitializer, nettyThreadgroup, nettyThreadgroup);
     }
 
     private Map<ModuleBuilder, String> toModuleBuilders(final Map<SourceIdentifier, Map.Entry<ASTSchemaSource, YangTextSchemaSource>> sources) {
@@ -183,7 +183,7 @@ public class NetconfDeviceSimulator implements Closeable {
 
         final Map<ModuleBuilder, String> moduleBuilders = parseSchemasToModuleBuilders(params);
 
-        final NetconfServerDispatcher dispatcher = createDispatcher(moduleBuilders, params.exi, params.generateConfigsTimeout);
+        final NetconfServerDispatcherImpl dispatcher = createDispatcher(moduleBuilders, params.exi, params.generateConfigsTimeout);
 
         int currentPort = params.startingPort;
 
