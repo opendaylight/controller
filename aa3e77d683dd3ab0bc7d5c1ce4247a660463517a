@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_dda387b0",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 650,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-09T18:09:00Z",
+      "side": 1,
+      "message": "Can you send in two more InstallSnapshotReplies and confirm that when the 3rd InstallSnapshotReply is received we do not send any more InstallSnapshots?",
+      "revId": "aa3e77d683dd3ab0bc7d5c1ce4247a660463517a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
