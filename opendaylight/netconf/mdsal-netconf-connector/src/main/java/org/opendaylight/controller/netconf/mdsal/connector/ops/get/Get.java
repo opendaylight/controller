@@ -12,8 +12,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
@@ -31,7 +29,7 @@ import org.w3c.dom.Element;
 
 public class Get extends AbstractGet {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GetConfig.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Get.class);
 
     private static final String OPERATION_NAME = "get";
 

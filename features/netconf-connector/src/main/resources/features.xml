@@ -42,6 +42,8 @@
         -->
         <feature version='${project.version}'>odl-netconf-connector</feature>
         <feature version='${project.version}'>odl-netconf-connector-ssh</feature>
+
+
     </feature>
     <!--
         Necessary TODO: Define your features.  It is useful to list then in order of dependency.  So if A depends on B, list A first.
@@ -99,6 +101,9 @@
     <feature name='odl-netconf-connector-ssh' version='${project.version}' description="OpenDaylight :: Netconf Connector :: Netconf Connector + Netconf SSH Server + loopback connection configuration">
         <feature version='${netconf.version}'>odl-netconf-ssh</feature>
         <feature version='${project.version}'>odl-netconf-connector</feature>
+
+        <bundle>mvn:org.opendaylight.controller/config-mdsal-connector/${netconf.version}</bundle>
+
         <configfile finalname="${config.configfile.directory}/${config.netconf.connector.configfile}">mvn:org.opendaylight.controller/netconf-connector-config/${netconf.version}/xml/config</configfile>
     </feature>
     <feature name='odl-netconf-ssh' version='${netconf.version}' description="OpenDaylight :: Netconf Connector :: SSH">

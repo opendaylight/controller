@@ -20,7 +20,6 @@ import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorSeverity;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorTag;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
-import org.opendaylight.controller.netconf.confignetconfconnector.exception.NoTransactionFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +67,7 @@ public class TransactionProvider implements AutoCloseable{
 
     public synchronized boolean commitTransaction() throws NetconfDocumentedException {
         if (!getTransaction().isPresent()) {
-            throw new NoTransactionFoundException(NO_TRANSACTION_FOUND_FOR_SESSION + netconfSessionIdForReporting,
+            throw new NetconfDocumentedException(NO_TRANSACTION_FOUND_FOR_SESSION + netconfSessionIdForReporting,
                     ErrorType.application, ErrorTag.operation_failed, ErrorSeverity.error);
         }
 
@@ -76,7 +75,7 @@ public class TransactionProvider implements AutoCloseable{
         try {
             future.checkedGet();
         } catch (TransactionCommitFailedException e) {
-            LOG.debug("Transaction {} failed on {} ", transaction, e);
+            LOG.debug("Transaction {} failed on", transaction, e);
             throw new NetconfDocumentedException("Transaction commit failed on " + e.getMessage() + " " + netconfSessionIdForReporting,
                     ErrorType.application, ErrorTag.operation_failed, ErrorSeverity.error);
         }
