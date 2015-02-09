@@ -16,6 +16,41 @@
       "revId": "3d529bff0285a84e7568deaaa97f9b64fd76b465",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_dddf070c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-09T18:54:02Z",
+      "side": 1,
+      "message": "That comment is outdated. Good to remove.",
+      "parentUuid": "7a96c907_11747e34",
+      "revId": "3d529bff0285a84e7568deaaa97f9b64fd76b465",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_fde443e2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTransactionTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 454,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-09T18:54:02Z",
+      "side": 1,
+      "message": "I\u0027m wondering if we should test expectNoMsg before expectTerminated to confirm that in this scenario CloseTransactionReply is not sent.",
+      "revId": "3d529bff0285a84e7568deaaa97f9b64fd76b465",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
