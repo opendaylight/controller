@@ -110,19 +110,15 @@ public class AppendEntries extends AbstractRaftRPC {
         return replicatedToAllIndex;
     }
 
+
     @Override
     public String toString() {
-        final StringBuilder sb =
-            new StringBuilder("AppendEntries{");
-        sb.append("term=").append(getTerm());
-        sb.append("leaderId='").append(leaderId).append('\'');
-        sb.append(", prevLogIndex=").append(prevLogIndex);
-        sb.append(", prevLogTerm=").append(prevLogTerm);
-        sb.append(", entries=").append(entries);
-        sb.append(", leaderCommit=").append(leaderCommit);
-        sb.append(", replicatedToAllIndex=").append(replicatedToAllIndex);
-        sb.append('}');
-        return sb.toString();
+        StringBuilder builder = new StringBuilder();
+        builder.append("AppendEntries [term=").append(term).append(", leaderId=").append(leaderId)
+                .append(", prevLogIndex=").append(prevLogIndex).append(", prevLogTerm=").append(prevLogTerm)
+                .append(", entries=").append(entries).append(", leaderCommit=").append(leaderCommit)
+                .append(", replicatedToAllIndex=").append(replicatedToAllIndex).append("]");
+        return builder.toString();
     }
 
     public <T extends Object> Object toSerializable() {
