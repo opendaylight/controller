@@ -1,0 +1,48 @@
+module netconf-northbound-impl {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:netconf:northbound:impl";
+    prefix "nni";
+
+    import netconf-northbound-mapper { prefix nnm; revision-date 2015-01-14; }
+    import netconf-northbound { prefix nn; revision-date 2015-01-14; }
+    import config { prefix config; revision-date 2013-04-05; }
+
+    organization "Cisco Systems, Inc.";
+
+    description
+        "This module contains the base YANG definitions for
+         a default implementation of netconf northbound server";
+
+    revision "2015-01-14" {
+        description
+            "Initial revision.";
+    }
+
+    identity netconf-northbound-impl {
+        base config:module-type;
+        config:java-name-prefix NetconfNorthboundImpl;
+        config:provided-service nn:netconf-northbound;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case netconf-northbound-impl {
+            when "/config:modules/config:module/config:type = 'netconf-northbound-impl'";
+
+            list mappers {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity nnm:netconf-northbound-mapper;
+                    }
+                }
+            }
+
+            // TODO use port from ietf models + also binding address
+            leaf port {
+                type uint16;
+            }
+
+        }
+    }
+
+}
