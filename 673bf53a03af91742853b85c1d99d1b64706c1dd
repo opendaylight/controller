@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_c2b9627a",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeChangeListener.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-09T15:30:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_82f83ac4",
+      "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_b4b9f87a",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeChangeService.java",
         "patchSetId": 6
@@ -54,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_82afda29",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeChangeService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-09T15:30:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_b4b9f87a",
+      "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_54b2f494",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeChangeService.java",
         "patchSetId": 6
@@ -65,6 +101,24 @@
       "writtenOn": "2015-02-08T03:57:58Z",
       "side": 1,
       "message": "\"you will receive an initial data change event...",
+      "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_22a8461f",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeChangeService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-09T15:30:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_54b2f494",
       "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -94,6 +148,30 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_e2657e1e",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeChangeService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-09T15:30:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_14a8ec1e",
+      "range": {
+        "startLine": 37,
+        "startChar": 7,
+        "endLine": 37,
+        "endChar": 19
+      },
+      "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_34a5e846",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeChangeService.java",
         "patchSetId": 6
@@ -105,6 +183,24 @@
       "writtenOn": "2015-02-08T03:57:58Z",
       "side": 1,
       "message": "How about:\n\n\u003cb\u003eNote\u003c/b\u003e: you MUST unregister your listener on bundle shutdown - if you fail to do this and your bundle is dynamically restarted in the same OSGi container instance, your stale listener will continue to receive change events.",
+      "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_a26bf6ef",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeChangeService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-09T15:30:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_34a5e846",
       "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -146,6 +242,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_227fe6ac",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeChangeService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-09T15:30:03Z",
+      "side": 1,
+      "message": "Integration with OSGi would require us to add a BundleContext here. Automatic cleanup can be an implementation feature.",
+      "parentUuid": "7a96c907_220126af",
+      "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_f46a20ed",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeChangeService.java",
         "patchSetId": 6
@@ -157,6 +271,24 @@
       "writtenOn": "2015-02-08T03:57:58Z",
       "side": 1,
       "message": "This param is not in the signature.",
+      "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_c27082de",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeChangeService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-09T15:30:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_f46a20ed",
       "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -180,6 +312,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_62796ec7",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeChangeService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-09T15:30:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_b47018dd",
+      "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_547994c6",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeChangeService.java",
         "patchSetId": 6
@@ -191,6 +341,24 @@
       "writtenOn": "2015-02-08T03:57:58Z",
       "side": 1,
       "message": "The type in the signature is DOMDataTreeIdentifier - not YANG Instance Identifier although it contains one. How about:\n\n   identifies the tree and YangInstanceIdentifier path for which to register.",
+      "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_8276fad5",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeChangeService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-09T15:30:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_547994c6",
       "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -232,6 +400,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_e24c9ea0",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStoreTreeChangePublisher.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-09T15:30:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_42feb2af",
+      "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_747610d9",
         "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStoreTreeChangePublisher.java",
         "patchSetId": 6
@@ -249,6 +435,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_c2472276",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStoreTreeChangePublisher.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-09T15:30:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_747610d9",
+      "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_147f8cac",
         "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStoreTreeChangePublisher.java",
         "patchSetId": 6
@@ -260,6 +464,24 @@
       "writtenOn": "2015-02-08T03:57:58Z",
       "side": 1,
       "message": "Same comments from DOMDataTreeChangeService apply in this section as well.",
+      "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_62608e01",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStoreTreeChangePublisher.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-09T15:30:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_147f8cac",
       "revId": "673bf53a03af91742853b85c1d99d1b64706c1dd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
