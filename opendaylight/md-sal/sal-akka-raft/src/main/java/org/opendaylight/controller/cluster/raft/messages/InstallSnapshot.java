@@ -102,4 +102,15 @@ public class InstallSnapshot extends AbstractRaftRPC {
 
         return installSnapshot;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("InstallSnapshot [term=").append(term).append(", leaderId=").append(leaderId)
+                .append(", lastIncludedIndex=").append(lastIncludedIndex).append(", lastIncludedTerm=")
+                .append(lastIncludedTerm).append(", data=").append(data).append(", chunkIndex=").append(chunkIndex)
+                .append(", totalChunks=").append(totalChunks).append(", lastChunkHashCode=").append(lastChunkHashCode)
+                .append("]");
+        return builder.toString();
+    }
 }

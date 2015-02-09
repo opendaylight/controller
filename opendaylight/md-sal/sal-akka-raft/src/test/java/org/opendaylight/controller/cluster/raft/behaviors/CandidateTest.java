@@ -1,5 +1,6 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
+import static org.junit.Assert.assertEquals;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.testkit.JavaTestKit;
@@ -19,10 +20,13 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
-
-import static org.junit.Assert.assertEquals;
+import org.slf4j.impl.SimpleLogger;
 
 public class CandidateTest extends AbstractRaftActorBehaviorTest {
+
+    static {
+        System.setProperty(SimpleLogger.LOG_KEY_PREFIX + MockRaftActorContext.class.getName(), "trace");
+    }
 
     private final ActorRef candidateActor = getSystem().actorOf(Props.create(
         DoNothingActor.class));
@@ -81,12 +85,14 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
         new JavaTestKit(getSystem()) {{
 
             new Within(DefaultConfigParamsImpl.HEART_BEAT_INTERVAL.$times(6)) {
+                @Override
                 protected void run() {
 
                     Candidate candidate = new Candidate(createActorContext(getTestActor()));
 
                     final Boolean out = new ExpectMsg<Boolean>(DefaultConfigParamsImpl.HEART_BEAT_INTERVAL.$times(6), "ElectionTimeout") {
                         // do not put code outside this method, will run afterwards
+                        @Override
                         protected Boolean match(Object in) {
                             if (in instanceof ElectionTimeout) {
                                  return true;
@@ -164,6 +170,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
         new JavaTestKit(getSystem()) {{
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     Candidate candidate = new Candidate(createActorContext(getTestActor()));
@@ -172,6 +179,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
 
                     final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"), "AppendEntriesResponse") {
                         // do not put code outside this method, will run afterwards
+                        @Override
                         protected Boolean match(Object in) {
                             if (in instanceof AppendEntriesReply) {
                                 AppendEntriesReply reply = (AppendEntriesReply) in;
@@ -193,6 +201,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
         new JavaTestKit(getSystem()) {{
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     Candidate candidate = new Candidate(createActorContext(getTestActor()));
@@ -201,6 +210,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
 
                     final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"), "AppendEntriesResponse") {
                         // do not put code outside this method, will run afterwards
+                        @Override
                         protected Boolean match(Object in) {
                             if (in instanceof RequestVoteReply) {
                                 RequestVoteReply reply = (RequestVoteReply) in;
@@ -222,6 +232,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
         new JavaTestKit(getSystem()) {{
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     RaftActorContext context = createActorContext(getTestActor());
@@ -236,6 +247,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
 
                     final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"), "RequestVoteReply") {
                         // do not put code outside this method, will run afterwards
+                        @Override
                         protected Boolean match(Object in) {
                             if (in instanceof RequestVoteReply) {
                                 RequestVoteReply reply = (RequestVoteReply) in;
@@ -257,6 +269,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
         new JavaTestKit(getSystem()) {{
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     RaftActorContext context = createActorContext(getTestActor());
@@ -269,6 +282,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
 
                     final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"), "RequestVoteReply") {
                         // do not put code outside this method, will run afterwards
+                        @Override
                         protected Boolean match(Object in) {
                             if (in instanceof RequestVoteReply) {
                                 RequestVoteReply reply = (RequestVoteReply) in;
