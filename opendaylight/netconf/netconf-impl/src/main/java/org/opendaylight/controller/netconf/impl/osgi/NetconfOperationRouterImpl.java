@@ -31,6 +31,7 @@ import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceSnapshot;
+import org.opendaylight.controller.netconf.mapping.api.SessionAwareNetconfOperation;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -146,6 +147,9 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
             final HandlingPriority handlingPriority = netconfOperation.canHandle(message);
             if (netconfOperation instanceof DefaultNetconfOperation) {
                 ((DefaultNetconfOperation) netconfOperation).setNetconfSession(session);
+            }
+            if(netconfOperation instanceof SessionAwareNetconfOperation) {
+                ((SessionAwareNetconfOperation) netconfOperation).setSession(session);
             }
             if (!handlingPriority.equals(HandlingPriority.CANNOT_HANDLE)) {
 
