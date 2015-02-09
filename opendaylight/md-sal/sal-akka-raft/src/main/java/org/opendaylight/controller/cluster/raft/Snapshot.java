@@ -12,7 +12,8 @@ import java.util.List;
 
 
 public class Snapshot implements Serializable {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -8298574936724056236L;
+
     private final byte[] state;
     private final List<ReplicatedLogEntry> unAppliedEntries;
     private final long lastIndex;

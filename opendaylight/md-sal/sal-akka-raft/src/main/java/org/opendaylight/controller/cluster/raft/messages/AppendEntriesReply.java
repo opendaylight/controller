@@ -12,7 +12,7 @@ package org.opendaylight.controller.cluster.raft.messages;
  * Reply for the AppendEntriesRpc message
  */
 public class AppendEntriesReply extends AbstractRaftRPC {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -7487547356392536683L;
 
     // true if follower contained entry matching
     // prevLogIndex and prevLogTerm
@@ -38,6 +38,7 @@ public class AppendEntriesReply extends AbstractRaftRPC {
         this.logLastTerm = logLastTerm;
     }
 
+    @Override
     public long getTerm() {
         return term;
     }
