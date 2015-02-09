@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_1d748f34",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/FollowerLogInformation.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-02-09T18:23:17Z",
+      "side": 1,
+      "message": "Then we should change name of above two methods as well, This name follows that nomenclature. what do you think?",
+      "parentUuid": "7a96c907_3dfe2baf",
+      "revId": "6a2cd0810f4e7be107a3bb7c93d1605242597f7b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_f406a01c",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
         "patchSetId": 5
@@ -54,6 +72,30 @@
       "side": 1,
       "message": "sendUodatesToFollowers checks isFollowerActive where applicable and will still send a message if not active.  So I don\u0027t think we need (or want) to check it here.",
       "parentUuid": "7a96c907_f406a01c",
+      "range": {
+        "startLine": 423,
+        "startChar": 39,
+        "endLine": 423,
+        "endChar": 55
+      },
+      "revId": "6a2cd0810f4e7be107a3bb7c93d1605242597f7b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3d714b44",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 423,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-02-09T18:23:17Z",
+      "side": 1,
+      "message": "Sure, I\u0027ll have to update some unit test cases then.",
+      "parentUuid": "7a96c907_34ec08f3",
       "range": {
         "startLine": 423,
         "startChar": 39,
@@ -112,6 +154,24 @@
       "writtenOn": "2015-02-09T18:03:36Z",
       "side": 1,
       "message": "Why not use ForwardMessageToBehaviorActor for Leader?",
+      "revId": "6a2cd0810f4e7be107a3bb7c93d1605242597f7b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_dd914748",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 1189,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-02-09T18:23:17Z",
+      "side": 1,
+      "message": "I can use that",
+      "parentUuid": "7a96c907_3decebf2",
       "revId": "6a2cd0810f4e7be107a3bb7c93d1605242597f7b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
