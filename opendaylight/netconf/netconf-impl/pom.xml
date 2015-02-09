@@ -110,7 +110,7 @@
         <configuration>
           <instructions>
             <Bundle-Activator>org.opendaylight.controller.netconf.impl.osgi.NetconfImplActivator</Bundle-Activator>
-            <Import-Package>*</Import-Package>
+            <Export-Package>org.opendaylight.controller.netconf.impl.*</Export-Package>
           </instructions>
         </configuration>
       </plugin>
