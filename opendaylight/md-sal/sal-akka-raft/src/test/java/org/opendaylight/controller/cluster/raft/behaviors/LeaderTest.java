@@ -1,8 +1,5 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
@@ -45,6 +42,10 @@ import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages;
 import scala.concurrent.duration.FiniteDuration;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
@@ -432,6 +433,12 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
             assertEquals(1, cs.getLastAppliedTerm());
             assertEquals(4, cs.getLastIndex());
             assertEquals(2, cs.getLastTerm());
+
+            // if an initiate is started again when first is in progress, it shouldnt initiate Capture
+            raftBehavior = leader.handleMessage(leaderActor, new InitiateInstallSnapshot());
+            List<Object> captureSnapshots = MessageCollectorActor.getAllMatching(leaderActor, CaptureSnapshot.class);
+            assertEquals("CaptureSnapshot should not get invoked when  initiate is in progress", 1, captureSnapshots.size());
+
         }};
     }
 
