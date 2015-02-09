@@ -26,6 +26,7 @@ import io.netty.channel.local.LocalAddress;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.HashedWheelTimer;
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -71,6 +72,14 @@ import org.opendaylight.controller.netconf.monitoring.osgi.NetconfMonitoringOper
 import org.opendaylight.controller.netconf.ssh.SshProxyServer;
 import org.opendaylight.controller.netconf.ssh.SshProxyServerConfiguration;
 import org.opendaylight.controller.netconf.ssh.SshProxyServerConfigurationBuilder;
+import org.opendaylight.controller.netconf.test.tool.rpc.DataList;
+import org.opendaylight.controller.netconf.test.tool.rpc.SimulatedCommit;
+import org.opendaylight.controller.netconf.test.tool.rpc.SimulatedCreateSubscription;
+import org.opendaylight.controller.netconf.test.tool.rpc.SimulatedEditConfig;
+import org.opendaylight.controller.netconf.test.tool.rpc.SimulatedGet;
+import org.opendaylight.controller.netconf.test.tool.rpc.SimulatedGetConfig;
+import org.opendaylight.controller.netconf.test.tool.rpc.SimulatedLock;
+import org.opendaylight.controller.netconf.test.tool.rpc.SimulatedUnLock;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceException;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceRepresentation;
@@ -114,7 +123,7 @@ public class NetconfDeviceSimulator implements Closeable {
         this.nioExecutor = nioExecutor;
     }
 
-    private NetconfServerDispatcher createDispatcher(final Map<ModuleBuilder, String> moduleBuilders, final boolean exi, final int generateConfigsTimeout) {
+    private NetconfServerDispatcher createDispatcher(final Map<ModuleBuilder, String> moduleBuilders, final boolean exi, final int generateConfigsTimeout, final Optional<File> notificationsFile) {
 
         final Set<Capability> capabilities = Sets.newHashSet(Collections2.transform(moduleBuilders.keySet(), new Function<ModuleBuilder, Capability>() {
             @Override
@@ -125,7 +134,7 @@ public class NetconfDeviceSimulator implements Closeable {
 
         final SessionIdProvider idProvider = new SessionIdProvider();
 
-        final SimulatedOperationProvider simulatedOperationProvider = new SimulatedOperationProvider(idProvider, capabilities);
+        final SimulatedOperationProvider simulatedOperationProvider = new SimulatedOperationProvider(idProvider, capabilities, notificationsFile);
         final NetconfMonitoringOperationService monitoringService = new NetconfMonitoringOperationService(new NetconfMonitoringServiceImpl(simulatedOperationProvider));
         simulatedOperationProvider.addService(monitoringService);
 
@@ -176,7 +185,7 @@ public class NetconfDeviceSimulator implements Closeable {
 
         final Map<ModuleBuilder, String> moduleBuilders = parseSchemasToModuleBuilders(params);
 
-        final NetconfServerDispatcher dispatcher = createDispatcher(moduleBuilders, params.exi, params.generateConfigsTimeout);
+        final NetconfServerDispatcher dispatcher = createDispatcher(moduleBuilders, params.exi, params.generateConfigsTimeout, Optional.fromNullable(params.notificationFile));
 
         int currentPort = params.startingPort;
 
@@ -385,9 +394,9 @@ public class NetconfDeviceSimulator implements Closeable {
         private final Set<NetconfOperationService> netconfOperationServices;
 
 
-        public SimulatedOperationProvider(final SessionIdProvider idProvider, final Set<Capability> caps) {
+        public SimulatedOperationProvider(final SessionIdProvider idProvider, final Set<Capability> caps, final Optional<File> notificationsFile) {
             this.idProvider = idProvider;
-            final SimulatedOperationService simulatedOperationService = new SimulatedOperationService(caps, idProvider.getCurrentSessionId());
+            final SimulatedOperationService simulatedOperationService = new SimulatedOperationService(caps, idProvider.getCurrentSessionId(), notificationsFile);
             this.netconfOperationServices = Sets.<NetconfOperationService>newHashSet(simulatedOperationService);
         }
 
@@ -426,10 +435,12 @@ public class NetconfDeviceSimulator implements Closeable {
         static class SimulatedOperationService implements NetconfOperationService {
             private final Set<Capability> capabilities;
             private final long currentSessionId;
+            private final Optional<File> notificationsFile;
 
-            public SimulatedOperationService(final Set<Capability> capabilities, final long currentSessionId) {
+            public SimulatedOperationService(final Set<Capability> capabilities, final long currentSessionId, final Optional<File> notificationsFile) {
                 this.capabilities = capabilities;
                 this.currentSessionId = currentSessionId;
+                this.notificationsFile = notificationsFile;
             }
 
             @Override
@@ -446,7 +457,8 @@ public class NetconfDeviceSimulator implements Closeable {
                 final SimulatedCommit sCommit = new SimulatedCommit(String.valueOf(currentSessionId));
                 final SimulatedLock sLock = new SimulatedLock(String.valueOf(currentSessionId));
                 final SimulatedUnLock sUnlock = new SimulatedUnLock(String.valueOf(currentSessionId));
-                return Sets.<NetconfOperation>newHashSet(sGet,  sGetConfig, sEditConfig, sCommit, sLock, sUnlock);
+                final SimulatedCreateSubscription sCreateSubs = new SimulatedCreateSubscription(String.valueOf(currentSessionId), notificationsFile);
+                return Sets.<NetconfOperation>newHashSet(sGet,  sGetConfig, sEditConfig, sCommit, sLock, sUnlock, sCreateSubs);
             }
 
             @Override

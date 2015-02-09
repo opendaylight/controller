@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.netconf.test.tool;
+package org.opendaylight.controller.netconf.test.tool.rpc;
 
 import com.google.common.base.Optional;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
@@ -19,13 +19,13 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-class SimulatedEditConfig extends AbstractConfigNetconfOperation {
+public class SimulatedEditConfig extends AbstractConfigNetconfOperation {
     private static final String DELETE_EDIT_CONFIG = "delete";
     private static final String OPERATION = "operation";
     private static final String REMOVE_EDIT_CONFIG = "remove";
     private final DataList storage;
 
-    SimulatedEditConfig(final String netconfSessionIdForReporting, final DataList storage) {
+    public SimulatedEditConfig(final String netconfSessionIdForReporting, final DataList storage) {
         super(null, netconfSessionIdForReporting);
         this.storage = storage;
     }

@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.netconf.test.tool;
+package org.opendaylight.controller.netconf.test.tool.rpc;
 
 import com.google.common.base.Optional;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
@@ -17,9 +17,9 @@ import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-class SimulatedCommit extends AbstractConfigNetconfOperation {
+public class SimulatedCommit extends AbstractConfigNetconfOperation {
 
-    SimulatedCommit(final String netconfSessionIdForReporting) {
+    public SimulatedCommit(final String netconfSessionIdForReporting) {
         super(null, netconfSessionIdForReporting);
     }
 
