@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_83011c3a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 426,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-10T20:33:36Z",
+      "side": 1,
+      "message": "Yeah I\u0027ve seen this output in logs - I thought is was from akka. I\u0027m not sure why it was coded it this way. I suspect it was b/c akka doesn\u0027t have a  warning method that takes a Throwable and prints the stack trace (another deficiency in akka\u0027s logging).",
+      "parentUuid": "7a96c907_03818cc3",
+      "revId": "30c200705bad6cd16139de57375f11a29a5cc9d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_c38644db",
         "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/registry/gossip/Gossiper.java",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2015-02-10T19:29:48Z",
       "side": 1,
       "message": "Formatting issue - brace on next line",
+      "revId": "30c200705bad6cd16139de57375f11a29a5cc9d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_039d0c0b",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/registry/gossip/Gossiper.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-10T20:33:36Z",
+      "side": 1,
+      "message": "Again Eclipse did it automatically. Will fix.",
+      "parentUuid": "7a96c907_c38644db",
       "revId": "30c200705bad6cd16139de57375f11a29a5cc9d2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -81,6 +117,24 @@
       "writtenOn": "2015-02-10T19:29:48Z",
       "side": 1,
       "message": "again",
+      "revId": "30c200705bad6cd16139de57375f11a29a5cc9d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_a39d380c",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/registry/gossip/Gossiper.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 405,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-10T20:33:36Z",
+      "side": 1,
+      "message": "Eclipse again and again... :)",
+      "parentUuid": "7a96c907_2375a8f9",
       "revId": "30c200705bad6cd16139de57375f11a29a5cc9d2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

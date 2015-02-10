@@ -16,6 +16,24 @@
       "revId": "3e41a20a52cdc524ada3a7b26b5953584ed891b2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_e397c0ea",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/registry/gossip/Gossiper.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-10T20:33:36Z",
+      "side": 0,
+      "message": "Hmm - I didn\u0027t explicitly. In fact I didn\u0027t even reformat this to add the braces - Eclipse did it (it\u0027s a save action). It must\u0027ve removed the comments as well. I didn\u0027t notice that. I\u0027ll put them back.",
+      "parentUuid": "7a96c907_a381b8c4",
+      "revId": "3e41a20a52cdc524ada3a7b26b5953584ed891b2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
