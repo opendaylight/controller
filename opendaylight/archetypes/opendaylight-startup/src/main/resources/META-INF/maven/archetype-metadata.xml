@@ -28,7 +28,7 @@
 
     <!-- karaf distro -->
     <fileSet filtered="true" encoding="UTF-8">
-        <directory>__artifactId__-karaf</directory>
+        <directory>karaf</directory>
         <includes>
             <include>pom.xml</include>
         </includes>
@@ -37,13 +37,13 @@
     <!-- features -->
 
     <fileSet filtered="true" encoding="UTF-8">
-        <directory>__artifactId__-features</directory>
+        <directory>features</directory>
         <includes>
             <include>pom.xml</include>
         </includes>
     </fileSet>
     <fileSet filtered="true" encoding="UTF-8">
-        <directory>__artifactId__-features/src/main/features</directory>
+        <directory>features/src/main/features</directory>
         <includes>
             <include>**/*.xml</include>
           </includes>
@@ -52,25 +52,25 @@
     <!-- impl -->
 
     <fileSet filtered="true" encoding="UTF-8">
-        <directory>__artifactId__-impl</directory>
+        <directory>impl</directory>
         <includes>
             <include>pom.xml</include>
         </includes>
     </fileSet>
     <fileSet filtered="true" encoding="UTF-8">
-        <directory>__artifactId__-impl/src/main/java</directory>
+        <directory>impl/src/main/java</directory>
         <includes>
             <include>**/*.java</include>
          </includes>
     </fileSet>
     <fileSet filtered="true" encoding="UTF-8">
-        <directory>__artifactId__-impl/src/main/config</directory>
+        <directory>impl/src/main/config</directory>
         <includes>
             <include>**/*.xml</include>
          </includes>
     </fileSet>
     <fileSet filtered="true" encoding="UTF-8">
-       <directory>__artifactId__-impl/src/main/yang</directory>
+       <directory>impl/src/main/yang</directory>
        <includes>
          <include>**/*.yang</include>
        </includes>
@@ -79,13 +79,13 @@
      <!-- api -->
 
      <fileSet filtered="true" encoding="UTF-8">
-       <directory>__artifactId__-api</directory>
+       <directory>api</directory>
        <includes>
          <include>pom.xml</include>
        </includes>
      </fileSet>
      <fileSet filtered="true" encoding="UTF-8">
-       <directory>__artifactId__-api/src/main/yang</directory>
+       <directory>api/src/main/yang</directory>
        <includes>
          <include>**/*.yang</include>
        </includes>
@@ -93,7 +93,7 @@
 
      <!-- artifacts -->
      <fileSet filtered="true" encoding="UTF-8">
-       <directory>__artifactId__-artifacts</directory>
+       <directory>artifacts</directory>
        <includes>
          <include>pom.xml</include>
        </includes>

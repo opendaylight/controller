@@ -16,11 +16,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <maven>3.1.1</maven>
   </prerequisites>
   <modules>
-    <module>${artifactId}-api</module>
-    <module>${artifactId}-impl</module>
-    <module>${artifactId}-karaf</module>
-    <module>${artifactId}-features</module>
-    <module>${artifactId}-artifacts</module>
+    <module>api</module>
+    <module>impl</module>
+    <module>karaf</module>
+    <module>features</module>
+    <module>artifacts</module>
   </modules>
   <!-- DO NOT install or deploy the repo root pom as it's only needed to initiate a build -->
   <build>
