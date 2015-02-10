@@ -140,6 +140,17 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
                 + " in " + runtimeBeans);
     }
 
+    protected RuntimeBeanEntry findFirstByNamePrefix(final Collection<RuntimeBeanEntry> runtimeBeans, final String namePrefix) {
+        for (RuntimeBeanEntry rb : runtimeBeans) {
+            if (namePrefix.equals(rb.getJavaNamePrefix())) {
+                return rb;
+            }
+        }
+
+        throw new IllegalArgumentException("Name prefix not found:" + namePrefix
+            + " in " + runtimeBeans);
+    }
+
     @Test
     public void testGetWhenConditionMatcher() {
         assertMatches("config",
@@ -247,8 +258,8 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
                 assertThat(threadRB.getRpcs().size(), is(2));
             }
             {
-                RuntimeBeanEntry streamRB = findFirstByYangName(runtimeBeans,
-                        "stream");
+                RuntimeBeanEntry streamRB = findFirstByNamePrefix(runtimeBeans,
+                        "ThreadStream");
                 assertNotNull(streamRB);
                 assertFalse(streamRB.getKeyYangName().isPresent());
                 assertFalse(streamRB.getKeyJavaName().isPresent());

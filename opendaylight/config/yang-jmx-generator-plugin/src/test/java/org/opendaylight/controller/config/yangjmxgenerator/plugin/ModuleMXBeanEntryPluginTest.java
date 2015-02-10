@@ -90,8 +90,8 @@ public class ModuleMXBeanEntryPluginTest extends ModuleMXBeanEntryTest {
             assertThat(runtimeBeans.size(), is(4));
 
             {
-                RuntimeBeanEntry streamRB = findFirstByYangName(runtimeBeans,
-                        "stream");
+                RuntimeBeanEntry streamRB = findFirstByNamePrefix(runtimeBeans,
+                        "ThreadStream");
                 assertNotNull(streamRB);
                 assertFalse(streamRB.getKeyYangName().isPresent());
                 assertFalse(streamRB.getKeyJavaName().isPresent());
