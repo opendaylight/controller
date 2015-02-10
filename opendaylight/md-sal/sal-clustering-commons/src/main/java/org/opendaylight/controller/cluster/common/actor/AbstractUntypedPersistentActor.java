@@ -20,8 +20,8 @@ public abstract class AbstractUntypedPersistentActor extends UntypedPersistentAc
     protected final Logger LOG = LoggerFactory.getLogger(getClass());
 
     public AbstractUntypedPersistentActor() {
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Actor created {}", getSelf());
+        if(LOG.isTraceEnabled()) {
+            LOG.trace("Actor created {}", getSelf());
         }
         getContext().
             system().
@@ -33,24 +33,24 @@ public abstract class AbstractUntypedPersistentActor extends UntypedPersistentAc
 
     @Override public void onReceiveCommand(Object message) throws Exception {
         final String messageType = message.getClass().getSimpleName();
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Received message {}", messageType);
+        if(LOG.isTraceEnabled()) {
+            LOG.trace("Received message {}", messageType);
         }
         handleCommand(message);
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Done handling message {}", messageType);
+        if(LOG.isTraceEnabled()) {
+            LOG.trace("Done handling message {}", messageType);
         }
 
     }
 
     @Override public void onReceiveRecover(Object message) throws Exception {
         final String messageType = message.getClass().getSimpleName();
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Received message {}", messageType);
+        if(LOG.isTraceEnabled()) {
+            LOG.trace("Received message {}", messageType);
         }
         handleRecover(message);
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Done handling message {}", messageType);
+        if(LOG.isTraceEnabled()) {
+            LOG.trace("Done handling message {}", messageType);
         }
 
     }

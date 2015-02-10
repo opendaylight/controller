@@ -14,6 +14,7 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
+import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
@@ -60,9 +61,25 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
 
     private long replicatedToAllIndex = -1;
 
-    protected AbstractRaftActorBehavior(RaftActorContext context) {
+    private final String logName;
+
+    private final RaftState state;
+
+    protected AbstractRaftActorBehavior(RaftActorContext context, RaftState state) {
         this.context = context;
+        this.state = state;
         this.LOG = context.getLogger();
+
+        logName = String.format("%s (%s)", context.getId(), state);
+    }
+
+    @Override
+    public RaftState state() {
+        return state;
+    }
+
+    public String logName() {
+        return logName;
     }
 
     @Override
@@ -106,7 +123,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         if (appendEntries.getTerm() < currentTerm()) {
             if(LOG.isDebugEnabled()) {
                 LOG.debug("{}: Cannot append entries because sender term {} is less than {}",
-                        context.getId(), appendEntries.getTerm(), currentTerm());
+                        logName(), appendEntries.getTerm(), currentTerm());
             }
 
             sender.tell(
@@ -143,12 +160,9 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      * @param requestVote
      * @return
      */
-    protected RaftActorBehavior requestVote(ActorRef sender,
-        RequestVote requestVote) {
+    protected RaftActorBehavior requestVote(ActorRef sender, RequestVote requestVote) {
 
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("{}: Received {}", context.getId(), requestVote);
-        }
+        LOG.debug("{}: In requestVote:  {}", logName(), requestVote);
 
         boolean grantVote = false;
 
@@ -184,7 +198,11 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
             }
         }
 
-        sender.tell(new RequestVoteReply(currentTerm(), grantVote), actor());
+        RequestVoteReply reply = new RequestVoteReply(currentTerm(), grantVote);
+
+        LOG.debug("{}: requestVote returning: {}", logName(), reply);
+
+        sender.tell(reply, actor());
 
         return this;
     }
@@ -362,12 +380,12 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
                 // around as the rest wont be present either
                 LOG.warn(
                         "{}: Missing index {} from log. Cannot apply state. Ignoring {} to {}",
-                        context.getId(), i, i, index);
+                        logName(), i, i, index);
                 break;
             }
         }
         if(LOG.isDebugEnabled()) {
-            LOG.debug("{}: Setting last applied to {}", context.getId(), newLastApplied);
+            LOG.debug("{}: Setting last applied to {}", logName(), newLastApplied);
         }
         context.setLastApplied(newLastApplied);
 
@@ -401,11 +419,11 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     }
 
     protected RaftActorBehavior switchBehavior(RaftActorBehavior behavior) {
-        LOG.info("{} :- Switching from behavior {} to {}", context.getId(), this.state(), behavior.state());
+        LOG.info("{} :- Switching from behavior {} to {}", logName(), this.state(), behavior.state());
         try {
             close();
         } catch (Exception e) {
-            LOG.error("{}: Failed to close behavior : {}", context.getId(), this.state(), e);
+            LOG.error("{}: Failed to close behavior : {}", logName(), this.state(), e);
         }
 
         return behavior;
@@ -447,6 +465,9 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         long tempMin = Math.min(snapshotCapturedIndex, (lastApplied > -1 ? lastApplied - 1 : -1));
 
         if (tempMin > -1 && context.getReplicatedLog().isPresent(tempMin))  {
+            LOG.debug("{}: fakeSnapshot purging log to {} for term {}", logName(), tempMin,
+                    context.getTermInformation().getCurrentTerm());
+
             //use the term of the temp-min, since we check for isPresent, entry will not be null
             ReplicatedLogEntry entry = context.getReplicatedLog().get(tempMin);
             context.getReplicatedLog().snapshotPreCommit(tempMin, entry.getTerm());

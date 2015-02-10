@@ -229,10 +229,6 @@ public class Shard extends RaftActor {
 
     @Override
     public void onReceiveCommand(final Object message) throws Exception {
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("{}: onReceiveCommand: Received message {} from {}", persistenceId(), message, getSender());
-        }
-
         if (message.getClass().equals(CreateTransaction.SERIALIZABLE_CLASS)) {
             handleCreateTransaction(message);
         } else if(message instanceof ForwardedReadyTransaction) {
