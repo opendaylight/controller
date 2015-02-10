@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_03818cc3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 426,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-10T19:29:48Z",
+      "side": 1,
+      "message": "I always wanted to fix this by including the message along with the stack trace :)",
+      "revId": "30c200705bad6cd16139de57375f11a29a5cc9d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_c38644db",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/registry/gossip/Gossiper.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-10T19:29:48Z",
+      "side": 1,
+      "message": "Formatting issue - brace on next line",
+      "revId": "30c200705bad6cd16139de57375f11a29a5cc9d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_636f302c",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/registry/gossip/Gossiper.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-10T19:29:48Z",
+      "side": 1,
+      "message": "Formatting issue",
+      "revId": "30c200705bad6cd16139de57375f11a29a5cc9d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_836cbc36",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/registry/gossip/Gossiper.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-10T19:29:48Z",
+      "side": 1,
+      "message": "again",
+      "revId": "30c200705bad6cd16139de57375f11a29a5cc9d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_2375a8f9",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/registry/gossip/Gossiper.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 405,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-10T19:29:48Z",
+      "side": 1,
+      "message": "again",
+      "revId": "30c200705bad6cd16139de57375f11a29a5cc9d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
