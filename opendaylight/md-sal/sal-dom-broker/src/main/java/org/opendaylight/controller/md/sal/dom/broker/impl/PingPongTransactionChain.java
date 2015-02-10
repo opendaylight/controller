@@ -235,7 +235,7 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
          */
         final boolean success = READY_UPDATER.compareAndSet(this, null, tx);
         Preconditions.checkState(success, "Transaction %s collided on ready state", tx, readyTx);
-        LOG.debug("Transaction {} readied");
+        LOG.debug("Transaction {} readied", tx);
 
         /*
          * We do not see a transaction being in-flight, so we need to take care of dispatching
