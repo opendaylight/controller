@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft.behaviors;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.testkit.JavaTestKit;
@@ -18,15 +20,13 @@ import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class IsolatedLeaderTest  extends AbstractRaftActorBehaviorTest {
 
-    private ActorRef leaderActor =
+    private final ActorRef leaderActor =
         getSystem().actorOf(Props.create(DoNothingActor.class));
 
-    private ActorRef senderActor =
+    private final ActorRef senderActor =
         getSystem().actorOf(Props.create(DoNothingActor.class));
 
     @Override
@@ -36,7 +36,7 @@ public class IsolatedLeaderTest  extends AbstractRaftActorBehaviorTest {
     }
 
     @Override
-    protected RaftActorContext createActorContext() {
+    protected MockRaftActorContext createActorContext() {
         return createActorContext(leaderActor);
     }
 
@@ -47,7 +47,7 @@ public class IsolatedLeaderTest  extends AbstractRaftActorBehaviorTest {
             String followerAddress1 = "akka://test/user/$a";
             String followerAddress2 = "akka://test/user/$b";
 
-            MockRaftActorContext leaderActorContext = (MockRaftActorContext) createActorContext();
+            MockRaftActorContext leaderActorContext = createActorContext();
             Map<String, String> peerAddresses = new HashMap<>();
             peerAddresses.put("follower-1", followerAddress1);
             peerAddresses.put("follower-2", followerAddress2);
@@ -80,7 +80,7 @@ public class IsolatedLeaderTest  extends AbstractRaftActorBehaviorTest {
             String followerAddress3 = "akka://test/user/$c";
             String followerAddress4 = "akka://test/user/$d";
 
-            MockRaftActorContext leaderActorContext = (MockRaftActorContext) createActorContext();
+            MockRaftActorContext leaderActorContext = createActorContext();
             Map<String, String> peerAddresses = new HashMap<>();
             peerAddresses.put("follower-1", followerAddress1);
             peerAddresses.put("follower-2", followerAddress2);
@@ -118,7 +118,7 @@ public class IsolatedLeaderTest  extends AbstractRaftActorBehaviorTest {
             String followerAddress1 = "akka://test/user/$a";
             String followerAddress2 = "akka://test/user/$b";
 
-            MockRaftActorContext leaderActorContext = (MockRaftActorContext) createActorContext();
+            MockRaftActorContext leaderActorContext = createActorContext();
             Map<String, String> peerAddresses = new HashMap<>();
             peerAddresses.put("follower-1", followerAddress1);
             peerAddresses.put("follower-2", followerAddress2);

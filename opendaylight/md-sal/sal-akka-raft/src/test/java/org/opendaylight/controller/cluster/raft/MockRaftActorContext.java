@@ -53,7 +53,7 @@ public class MockRaftActorContext implements RaftActorContext {
              * Identifier of the actor whose election term information this is
              */
             private final String id = id1;
-            private long currentTerm = 0;
+            private long currentTerm = 1;
             private String votedFor = "";
 
             @Override
@@ -88,8 +88,9 @@ public class MockRaftActorContext implements RaftActorContext {
 
     public void initReplicatedLog(){
         this.replicatedLog = new SimpleReplicatedLog();
-        this.replicatedLog.append(new MockReplicatedLogEntry(1, 0, new MockPayload("1")));
-        this.replicatedLog.append(new MockReplicatedLogEntry(1, 1, new MockPayload("2")));
+        long term = getTermInformation().getCurrentTerm();
+        this.replicatedLog.append(new MockReplicatedLogEntry(term, 0, new MockPayload("1")));
+        this.replicatedLog.append(new MockReplicatedLogEntry(term, 1, new MockPayload("2")));
     }
 
     @Override public ActorRef actorOf(Props props) {
