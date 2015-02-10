@@ -556,7 +556,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                         // no need to capture snapshot
                         sendSnapshotChunk(followerActor, e.getKey());
 
-                    } else {
+                    } else if (!context.isSnapshotCaptureInitiated()) {
                         initiateCaptureSnapshot();
                         //we just need 1 follower who would need snapshot to be installed.
                         // when we have the snapshot captured, we would again check (in SendInstallSnapshot)
@@ -589,6 +589,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         actor().tell(new CaptureSnapshot(lastIndex(), lastTerm(),
                 lastAppliedIndex, lastAppliedTerm, isInstallSnapshotInitiated),
             actor());
+        context.setSnapshotCaptureInitiated(true);
     }
 
 
@@ -625,8 +626,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                         context.getReplicatedLog().getSnapshotIndex(),
                         context.getReplicatedLog().getSnapshotTerm(),
                         nextSnapshotChunk,
-                        followerToSnapshot.incrementChunkIndex(),
-                        followerToSnapshot.getTotalChunks(),
+                            followerToSnapshot.incrementChunkIndex(),
+                            followerToSnapshot.getTotalChunks(),
                         Optional.of(followerToSnapshot.getLastChunkHashCode())
                     ).toSerializable(),
                     actor()
