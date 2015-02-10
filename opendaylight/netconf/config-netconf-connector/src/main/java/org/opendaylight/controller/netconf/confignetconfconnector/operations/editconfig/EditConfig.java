@@ -37,7 +37,7 @@ import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.AbstractConfigNetconfOperation;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfigXmlParser.EditConfigExecution;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreSnapshot;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreContext;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -52,12 +52,12 @@ public class EditConfig extends AbstractConfigNetconfOperation {
 
     private static final Logger LOG = LoggerFactory.getLogger(EditConfig.class);
 
-    private final YangStoreSnapshot yangStoreSnapshot;
+    private final YangStoreContext yangStoreSnapshot;
 
     private final TransactionProvider transactionProvider;
     private EditConfigXmlParser editConfigXmlParser;
 
-    public EditConfig(YangStoreSnapshot yangStoreSnapshot, TransactionProvider transactionProvider,
+    public EditConfig(YangStoreContext yangStoreSnapshot, TransactionProvider transactionProvider,
             ConfigRegistryClient configRegistryClient, String netconfSessionIdForReporting) {
         super(configRegistryClient, netconfSessionIdForReporting);
         this.yangStoreSnapshot = yangStoreSnapshot;
@@ -204,7 +204,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
         }
     }
 
-    public static Config getConfigMapping(ConfigRegistryClient configRegistryClient, YangStoreSnapshot yangStoreSnapshot) {
+    public static Config getConfigMapping(ConfigRegistryClient configRegistryClient, YangStoreContext yangStoreSnapshot) {
         Map<String, Map<String, ModuleConfig>> factories = transformMbeToModuleConfigs(configRegistryClient,
                 yangStoreSnapshot.getModuleMXBeanEntryMap());
         Map<String, Map<Date, IdentityMapping>> identitiesMap = transformIdentities(yangStoreSnapshot.getModules());
