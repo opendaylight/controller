@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_48bfb3aa",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMRpcImplementation.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-10T04:37:59Z",
+      "side": 1,
+      "message": "DOMRpcResult contains a list of RpcError. How about we include the list of RpcError with the DOMRpcException? Then there wouldn\u0027t be a need for DOMRpcResult, just return NormalizedNode\u003c?, ?\u003e in the CheckedFuture. This would make it consistent with the data broker transaction read and submit methods and, in fact,  DOMRpcException could be derived from OperationFailedException as does TransactionCommitFailedException.",
+      "revId": "1d94bf61cc6d5a157e070d4af01a23599750569e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_e8df9f0b",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/md/sal/dom/spi/DefaultDOMRpcResult.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-10T04:37:59Z",
+      "side": 1,
+      "message": "Is NormalizedNode Serializable?",
+      "revId": "1d94bf61cc6d5a157e070d4af01a23599750569e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
