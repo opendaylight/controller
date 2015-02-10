@@ -13,9 +13,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.google.protobuf.ByteString;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +43,6 @@ import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages;
-import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.FiniteDuration;
 
 public class LeaderTest extends AbstractRaftActorBehaviorTest {
@@ -70,10 +66,6 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
         }
 
         actorFactory.close();
-    }
-
-    private void logStart(String name) {
-        LoggerFactory.getLogger(LeaderTest.class).info("Starting " + name);
     }
 
     @Test
@@ -764,31 +756,6 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
         MockRaftActorContext context = new MockRaftActorContext(id, getSystem(), actorRef);
         context.setConfigParams(configParams);
         return context;
-    }
-
-    private ByteString toByteString(Map<String, String> state) {
-        ByteArrayOutputStream b = null;
-        ObjectOutputStream o = null;
-        try {
-            try {
-                b = new ByteArrayOutputStream();
-                o = new ObjectOutputStream(b);
-                o.writeObject(state);
-                byte[] snapshotBytes = b.toByteArray();
-                return ByteString.copyFrom(snapshotBytes);
-            } finally {
-                if (o != null) {
-                    o.flush();
-                    o.close();
-                }
-                if (b != null) {
-                    b.close();
-                }
-            }
-        } catch (IOException e) {
-            Assert.fail("IOException in converting Hashmap to Bytestring:" + e);
-        }
-        return null;
     }
 
     public static class ForwardMessageToBehaviorActor extends MessageCollectorActor {
