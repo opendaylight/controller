@@ -61,6 +61,10 @@
           <version>1.2.0-SNAPSHOT</version>
       </dependency>
 
+      <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>sal-distributed-datastore</artifactId>
+      </dependency>
 
     <!-- Test Dependencies -->
     <dependency>
