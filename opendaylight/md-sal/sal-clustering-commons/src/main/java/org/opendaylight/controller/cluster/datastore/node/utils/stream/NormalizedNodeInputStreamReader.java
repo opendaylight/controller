@@ -69,6 +69,8 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
 
     private final StringBuilder reusableStringBuilder = new StringBuilder(50);
 
+    private boolean readSignatureMarker = true;
+
     public NormalizedNodeInputStreamReader(InputStream stream) throws IOException {
         Preconditions.checkNotNull(stream);
         input = new DataInputStream(stream);
@@ -80,6 +82,25 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
 
     @Override
     public NormalizedNode<?, ?> readNormalizedNode() throws IOException {
+        readSignatureMarkerAndVersionIfNeeded();
+        return readNormalizedNodeInternal();
+    }
+
+    private void readSignatureMarkerAndVersionIfNeeded() throws IOException {
+        if(readSignatureMarker) {
+            readSignatureMarker = false;
+
+            byte marker = input.readByte();
+            if(marker != NormalizedNodeOutputStreamWriter.SIGNATURE_MARKER) {
+                throw new InvalidNormalizedNodeStreamException(String.format(
+                        "Invalid signature marker: %d", marker));
+            }
+
+            input.readShort(); // read the version - not currently used/needed.
+        }
+    }
+
+    private NormalizedNode<?, ?> readNormalizedNodeInternal() throws IOException {
         // each node should start with a byte
         byte nodeType = input.readByte();
 
@@ -284,7 +305,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
                 return bytes;
 
             case ValueTypes.YANG_IDENTIFIER_TYPE :
-                return readYangInstanceIdentifier();
+                return readYangInstanceIdentifierInternal();
 
             default :
                 return null;
@@ -292,6 +313,11 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
     }
 
     public YangInstanceIdentifier readYangInstanceIdentifier() throws IOException {
+        readSignatureMarkerAndVersionIfNeeded();
+        return readYangInstanceIdentifierInternal();
+    }
+
+    private YangInstanceIdentifier readYangInstanceIdentifierInternal() throws IOException {
         int size = input.readInt();
 
         List<PathArgument> pathArguments = new ArrayList<>(size);
@@ -342,11 +368,11 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
 
         lastLeafSetQName = nodeType;
 
-        LeafSetEntryNode<Object> child = (LeafSetEntryNode<Object>)readNormalizedNode();
+        LeafSetEntryNode<Object> child = (LeafSetEntryNode<Object>)readNormalizedNodeInternal();
 
         while(child != null) {
             builder.withChild(child);
-            child = (LeafSetEntryNode<Object>)readNormalizedNode();
+            child = (LeafSetEntryNode<Object>)readNormalizedNodeInternal();
         }
         return builder;
     }
@@ -356,11 +382,11 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
             NormalizedNodeContainerBuilder builder) throws IOException {
         LOG.debug("Reading data container (leaf nodes) nodes");
 
-        NormalizedNode<?, ?> child = readNormalizedNode();
+        NormalizedNode<?, ?> child = readNormalizedNodeInternal();
 
         while(child != null) {
             builder.addChild(child);
-            child = readNormalizedNode();
+            child = readNormalizedNodeInternal();
         }
         return builder;
     }
