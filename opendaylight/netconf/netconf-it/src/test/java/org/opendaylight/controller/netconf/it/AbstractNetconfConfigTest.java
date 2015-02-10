@@ -52,10 +52,7 @@ import org.opendaylight.controller.netconf.client.SimpleNetconfClientSessionList
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfigurationBuilder;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.NetconfOperationServiceFactoryImpl;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreException;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreService;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreServiceImpl;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreSnapshot;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
 import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFactory;
@@ -67,8 +64,10 @@ import org.opendaylight.controller.netconf.impl.osgi.SessionMonitoringService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
+import org.opendaylight.controller.netconf.notifications.BaseNetconfNotificationListener;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.opendaylight.protocol.framework.NeverReconnectStrategy;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.notifications.rev120206.NetconfCapabilityChange;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
@@ -176,7 +175,7 @@ public abstract class AbstractNetconfConfigTest extends AbstractConfigTest {
         return clientDispatcher;
     }
 
-    private HardcodedYangStoreService getYangStore() throws YangStoreException, IOException {
+    private HardcodedYangStoreService getYangStore() throws IOException {
         final Collection<InputStream> yangDependencies = getBasicYangs();
         return new HardcodedYangStoreService(yangDependencies);
     }
@@ -246,22 +245,35 @@ public abstract class AbstractNetconfConfigTest extends AbstractConfigTest {
         return b.build();
     }
 
-    public static final class HardcodedYangStoreService implements YangStoreService {
+    public static final class HardcodedYangStoreService extends YangStoreService {
+        public HardcodedYangStoreService(final Collection<? extends InputStream> inputStreams) throws IOException {
+            super(new SchemaContextProvider() {
+                @Override
+                public SchemaContext getSchemaContext() {
+                    return getSchema(inputStreams);
+                }
+            }, new BaseNetconfNotificationListener() {
+                @Override
+                public void onCapabilityChanged(final NetconfCapabilityChange capabilityChange) {
+                    // NOOP
+                }
+            });
+        }
 
-        private final List<InputStream> byteArrayInputStreams;
-
-        public HardcodedYangStoreService(final Collection<? extends InputStream> inputStreams) throws YangStoreException, IOException {
-            byteArrayInputStreams = new ArrayList<>();
+        private static SchemaContext getSchema(final Collection<? extends InputStream> inputStreams) {
+            final ArrayList<InputStream> byteArrayInputStreams = new ArrayList<>();
             for (final InputStream inputStream : inputStreams) {
                 assertNotNull(inputStream);
-                final byte[] content = IOUtils.toByteArray(inputStream);
+                final byte[] content;
+                try {
+                    content = IOUtils.toByteArray(inputStream);
+                } catch (IOException e) {
+                    throw new IllegalStateException("Cannot read " + inputStream, e);
+                }
                 final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(content);
                 byteArrayInputStreams.add(byteArrayInputStream);
             }
-        }
 
-        @Override
-        public YangStoreSnapshot getYangStoreSnapshot() throws YangStoreException {
             for (final InputStream inputStream : byteArrayInputStreams) {
                 try {
                     inputStream.reset();
@@ -271,14 +283,7 @@ public abstract class AbstractNetconfConfigTest extends AbstractConfigTest {
             }
 
             final YangParserImpl yangParser = new YangParserImpl();
-            final SchemaContext schemaContext = yangParser.resolveSchemaContext(new HashSet<>(yangParser.parseYangModelsFromStreamsMapped(byteArrayInputStreams).values()));
-            final YangStoreServiceImpl yangStoreService = new YangStoreServiceImpl(new SchemaContextProvider() {
-                @Override
-                public SchemaContext getSchemaContext() {
-                    return schemaContext ;
-                }
-            });
-            return yangStoreService.getYangStoreSnapshot();
+            return yangParser.resolveSchemaContext(new HashSet<>(yangParser.parseYangModelsFromStreamsMapped(byteArrayInputStreams).values()));
         }
     }
 }

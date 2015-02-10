@@ -71,12 +71,17 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
+      <artifactId>netconf-notifications-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-binding-broker-impl</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.yangtools.thirdparty</groupId>
       <artifactId>antlr4-runtime-osgi-nohead</artifactId>
     </dependency>
+
     <!--Compile scopes for all testing dependencies are intentional-->
     <!--This way, all testing dependencies can be transitively used by other integration test modules-->
     <!--If the dependencies are test scoped, they are not visible to other maven modules depending on sal-binding-it-->

@@ -8,18 +8,12 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.osgi;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import org.opendaylight.controller.config.api.LookupRegistry;
 import org.opendaylight.controller.config.util.ConfigRegistryJMXClient;
-import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
 import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
 import org.opendaylight.controller.netconf.mapping.api.Capability;
@@ -28,61 +22,32 @@ import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.yangtools.yang.model.api.Module;
 
 /**
- * Manages life cycle of {@link YangStoreSnapshot}.
+ * Manages life cycle of {@link YangStoreContext}.
  */
 public class NetconfOperationServiceImpl implements NetconfOperationService {
 
-    private final YangStoreSnapshot yangStoreSnapshot;
     private final NetconfOperationProvider operationProvider;
-    private final Set<Capability> capabilities;
     private final TransactionProvider transactionProvider;
+    private final YangStoreService yangStoreService;
 
     public NetconfOperationServiceImpl(final YangStoreService yangStoreService, final ConfigRegistryJMXClient jmxClient,
-            final String netconfSessionIdForReporting) throws YangStoreException {
+            final String netconfSessionIdForReporting) {
 
-        yangStoreSnapshot = yangStoreService.getYangStoreSnapshot();
-        checkConsistencyBetweenYangStoreAndConfig(jmxClient, yangStoreSnapshot);
+        this.yangStoreService = yangStoreService;
 
         transactionProvider = new TransactionProvider(jmxClient, netconfSessionIdForReporting);
-        operationProvider = new NetconfOperationProvider(yangStoreSnapshot, jmxClient, transactionProvider,
+        operationProvider = new NetconfOperationProvider(yangStoreService, jmxClient, transactionProvider,
                 netconfSessionIdForReporting);
-        capabilities = setupCapabilities(yangStoreSnapshot);
-    }
-
-
-    @VisibleForTesting
-    static void checkConsistencyBetweenYangStoreAndConfig(final LookupRegistry jmxClient, final YangStoreSnapshot yangStoreSnapshot) {
-        Set<String> missingModulesFromConfig = Sets.newHashSet();
-
-        Set<String> modulesSeenByConfig = jmxClient.getAvailableModuleFactoryQNames();
-        Map<String, Map<String, ModuleMXBeanEntry>> moduleMXBeanEntryMap = yangStoreSnapshot.getModuleMXBeanEntryMap();
-
-        for (Map<String, ModuleMXBeanEntry> moduleNameToMBE : moduleMXBeanEntryMap.values()) {
-            for (ModuleMXBeanEntry moduleMXBeanEntry : moduleNameToMBE.values()) {
-                String moduleSeenByYangStore = moduleMXBeanEntry.getYangModuleQName().toString();
-                if(!modulesSeenByConfig.contains(moduleSeenByYangStore)){
-                    missingModulesFromConfig.add(moduleSeenByYangStore);
-                }
-            }
-        }
-
-        Preconditions
-                .checkState(
-                        missingModulesFromConfig.isEmpty(),
-                        "There are inconsistencies between configuration subsystem and yangstore in terms of discovered yang modules, yang modules missing from config subsystem but present in yangstore: %s, %sAll modules present in config: %s",
-                        missingModulesFromConfig, System.lineSeparator(), modulesSeenByConfig);
-
     }
 
     @Override
     public void close() {
-        yangStoreSnapshot.close();
         transactionProvider.close();
     }
 
     @Override
     public Set<Capability> getCapabilities() {
-        return capabilities;
+        return setupCapabilities(yangStoreService);
     }
 
     @Override
@@ -90,7 +55,7 @@ public class NetconfOperationServiceImpl implements NetconfOperationService {
         return operationProvider.getOperations();
     }
 
-    private static Set<Capability> setupCapabilities(final YangStoreSnapshot yangStoreSnapshot) {
+    private static Set<Capability> setupCapabilities(final YangStoreContext yangStoreSnapshot) {
         Set<Capability> capabilities = new HashSet<>();
         // [RFC6241] 8.3.  Candidate Configuration Capability
         capabilities.add(new BasicCapability("urn:ietf:params:netconf:capability:candidate:1.0"));
