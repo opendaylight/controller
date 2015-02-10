@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_a8fc3773",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 608,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-10T06:20:34Z",
+      "side": 1,
+      "message": "This shouldn\u0027t be indented. Not a big deal - can be cleaned up later.",
+      "revId": "1a6cfbeec045f1f12ddf82b39345f00b3eeb69f8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
