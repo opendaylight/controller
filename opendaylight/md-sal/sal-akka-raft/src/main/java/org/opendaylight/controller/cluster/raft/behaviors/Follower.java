@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.ByteString;
 import java.util.ArrayList;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
@@ -350,13 +349,14 @@ public class Follower extends AbstractRaftActorBehavior {
         }
     }
 
-    @Override public void close() throws Exception {
+    @Override
+    public void close() throws Exception {
         stopElection();
     }
 
     @VisibleForTesting
-    ByteString getSnapshotChunksCollected(){
-        return snapshotTracker != null ? snapshotTracker.getCollectedChunks() : ByteString.EMPTY;
+    SnapshotTracker getSnapshotTracker(){
+        return snapshotTracker;
     }
 
 

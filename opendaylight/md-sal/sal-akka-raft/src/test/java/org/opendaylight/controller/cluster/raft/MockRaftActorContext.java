@@ -256,6 +256,36 @@ public class MockRaftActorContext implements RaftActorContext {
         public String toString() {
             return value;
         }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((value == null) ? 0 : value.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            MockPayload other = (MockPayload) obj;
+            if (value == null) {
+                if (other.value != null) {
+                    return false;
+                }
+            } else if (!value.equals(other.value)) {
+                return false;
+            }
+            return true;
+        }
     }
 
     public static class MockReplicatedLogEntry implements ReplicatedLogEntry, Serializable {
@@ -287,6 +317,52 @@ public class MockRaftActorContext implements RaftActorContext {
         @Override
         public int size() {
             return getData().size();
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((data == null) ? 0 : data.hashCode());
+            result = prime * result + (int) (index ^ (index >>> 32));
+            result = prime * result + (int) (term ^ (term >>> 32));
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            MockReplicatedLogEntry other = (MockReplicatedLogEntry) obj;
+            if (data == null) {
+                if (other.data != null) {
+                    return false;
+                }
+            } else if (!data.equals(other.data)) {
+                return false;
+            }
+            if (index != other.index) {
+                return false;
+            }
+            if (term != other.term) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            builder.append("MockReplicatedLogEntry [term=").append(term).append(", index=").append(index)
+                    .append(", data=").append(data).append("]");
+            return builder.toString();
         }
     }
 

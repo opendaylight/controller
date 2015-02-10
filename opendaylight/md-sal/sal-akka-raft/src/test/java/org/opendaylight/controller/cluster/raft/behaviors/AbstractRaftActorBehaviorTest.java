@@ -5,8 +5,13 @@ import static org.junit.Assert.assertTrue;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.testkit.JavaTestKit;
+import com.google.protobuf.ByteString;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.AbstractActorTest;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
@@ -20,6 +25,7 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
 
@@ -400,5 +406,19 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
 
     protected Object fromSerializableMessage(Object serializable){
         return SerializationUtils.fromSerializable(serializable);
+    }
+
+    protected ByteString toByteString(Map<String, String> state) {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try(ObjectOutputStream oos = new ObjectOutputStream(bos)) {
+            oos.writeObject(state);
+            return ByteString.copyFrom(bos.toByteArray());
+        } catch (IOException e) {
+            throw new AssertionError("IOException occurred converting Map to Bytestring", e);
+        }
+    }
+
+    protected void logStart(String name) {
+        LoggerFactory.getLogger(LeaderTest.class).info("Starting " + name);
     }
 }
