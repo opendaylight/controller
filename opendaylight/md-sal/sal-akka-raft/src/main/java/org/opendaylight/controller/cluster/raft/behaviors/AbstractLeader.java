@@ -232,6 +232,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             purgeInMemoryLog();
         }
 
+        //Send the next log entry immediately, if possible, no need to wait for heartbeat to trigger that event
+        sendUpdatesToFollower(followerId, followerLogInformation, false);
         return this;
     }
 
@@ -419,67 +421,77 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
     private void sendAppendEntries() {
         // Send an AppendEntries to all followers
-
+        long heartbeatInterval = context.getConfigParams().getHeartBeatInterval().toMillis();
         for (Entry<String, FollowerLogInformation> e : followerToLog.entrySet()) {
             final String followerId = e.getKey();
-            ActorSelection followerActor = context.getPeerActorSelection(followerId);
+            final FollowerLogInformation followerLogInformation = e.getValue();
+            // This checks helps not to send a repeat message to the follower
+            if(followerLogInformation.timeSinceLastActivity() >= heartbeatInterval) {
+                sendUpdatesToFollower(followerId, followerLogInformation, true);
+            }
+        }
+    }
 
-            if (followerActor != null) {
-                FollowerLogInformation followerLogInformation = followerToLog.get(followerId);
-                long followerNextIndex = followerLogInformation.getNextIndex();
-                boolean isFollowerActive = followerLogInformation.isFollowerActive();
+    /**
+     *
+     * This method checks if any update needs to be sent to the given follower. This includes append log entries,
+     * sending next snapshot chunk, and initiating a snapshot.
+     * @return true if any update is sent, false otherwise
+     */
 
-                FollowerToSnapshot followerToSnapshot = mapFollowerToSnapshot.get(followerId);
-                if (followerToSnapshot != null) {
-                    // if install snapshot is in process , then sent next chunk if possible
-                    if (isFollowerActive && followerToSnapshot.canSendNextChunk()) {
-                        sendSnapshotChunk(followerActor, followerId);
-                    } else {
-                        // we send a heartbeat even if we have not received a reply for the last chunk
-                        sendAppendEntriesToFollower(followerActor, followerNextIndex,
-                            Collections.<ReplicatedLogEntry>emptyList(), followerId);
-                    }
+    private void sendUpdatesToFollower(String followerId, FollowerLogInformation followerLogInformation,
+                                          boolean sendHeartbeat) {
 
-                } else {
-                    long leaderLastIndex = context.getReplicatedLog().lastIndex();
-                    long leaderSnapShotIndex = context.getReplicatedLog().getSnapshotIndex();
-                    final List<ReplicatedLogEntry> entries;
+        ActorSelection followerActor = context.getPeerActorSelection(followerId);
+        if (followerActor != null) {
+            long followerNextIndex = followerLogInformation.getNextIndex();
+            boolean isFollowerActive = followerLogInformation.isFollowerActive();
 
-                    LOG.debug("{}: Checking sendAppendEntries for {}, leaderLastIndex: {}, leaderSnapShotIndex: {}",
-                            context.getId(), leaderLastIndex, leaderSnapShotIndex);
-
-                    if (isFollowerActive && context.getReplicatedLog().isPresent(followerNextIndex)) {
-                        LOG.debug("{}: sendAppendEntries: {} is present for {}", context.getId(),
-                                followerNextIndex, followerId);
-
-                        // FIXME : Sending one entry at a time
-                        entries = context.getReplicatedLog().getFrom(followerNextIndex, 1);
-
-                    } else if (isFollowerActive && followerNextIndex >= 0 &&
-                        leaderLastIndex >= followerNextIndex ) {
-                        // if the followers next index is not present in the leaders log, and
-                        // if the follower is just not starting and if leader's index is more than followers index
-                        // then snapshot should be sent
-
-                        if(LOG.isDebugEnabled()) {
-                            LOG.debug(String.format("%s: InitiateInstallSnapshot to follower: %s," +
-                                    "follower-nextIndex: %s, leader-snapshot-index: %s,  " +
-                                    "leader-last-index: %s", context.getId(), followerId,
-                                followerNextIndex, leaderSnapShotIndex, leaderLastIndex));
-                        }
-                        actor().tell(new InitiateInstallSnapshot(), actor());
-
-                        // we would want to sent AE as the capture snapshot might take time
-                        entries =  Collections.<ReplicatedLogEntry>emptyList();
-
-                    } else {
-                        //we send an AppendEntries, even if the follower is inactive
-                        // in-order to update the followers timestamp, in case it becomes active again
-                        entries =  Collections.<ReplicatedLogEntry>emptyList();
-                    }
+            if (mapFollowerToSnapshot.get(followerId) != null) {
+                // if install snapshot is in process , then sent next chunk if possible
+                if (isFollowerActive && mapFollowerToSnapshot.get(followerId).canSendNextChunk()) {
+                    sendSnapshotChunk(followerActor, followerId);
+                } else if(sendHeartbeat) {
+                    // we send a heartbeat even if we have not received a reply for the last chunk
+                    sendAppendEntriesToFollower(followerActor, followerLogInformation.getNextIndex(),
+                        Collections.<ReplicatedLogEntry>emptyList(), followerId);
+                }
+            } else {
+                long leaderLastIndex = context.getReplicatedLog().lastIndex();
+                long leaderSnapShotIndex = context.getReplicatedLog().getSnapshotIndex();
+                if (isFollowerActive &&
+                    context.getReplicatedLog().isPresent(followerNextIndex)) {
+                    // FIXME : Sending one entry at a time
+                    final List<ReplicatedLogEntry> entries = context.getReplicatedLog().getFrom(followerNextIndex, 1);
 
                     sendAppendEntriesToFollower(followerActor, followerNextIndex, entries, followerId);
+
+                } else if (isFollowerActive && followerNextIndex >= 0 &&
+                    leaderLastIndex >= followerNextIndex) {
+                    // if the followers next index is not present in the leaders log, and
+                    // if the follower is just not starting and if leader's index is more than followers index
+                    // then snapshot should be sent
+
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("InitiateInstallSnapshot to follower:{}," +
+                                "follower-nextIndex:{}, leader-snapshot-index:{},  " +
+                                "leader-last-index:{}", followerId,
+                            followerNextIndex, leaderSnapShotIndex, leaderLastIndex
+                        );
+                    }
+                    actor().tell(new InitiateInstallSnapshot(), actor());
+
+                    // Send heartbeat to follower whenever install snapshot is initiated.
+                    sendAppendEntriesToFollower(followerActor, followerLogInformation.getNextIndex(),
+                            Collections.<ReplicatedLogEntry>emptyList(), followerId);
+
+                } else if(sendHeartbeat) {
+                    //we send an AppendEntries, even if the follower is inactive
+                    // in-order to update the followers timestamp, in case it becomes active again
+                    sendAppendEntriesToFollower(followerActor, followerLogInformation.getNextIndex(),
+                        Collections.<ReplicatedLogEntry>emptyList(), followerId);
                 }
+
             }
         }
     }
