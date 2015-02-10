@@ -18,6 +18,8 @@ public interface RemoteDeviceHandler<PREF> extends AutoCloseable {
 
     void onDeviceDisconnected();
 
+    void onDeviceFailed(Throwable throwable);
+
     void onNotification(CompositeNode domNotification);
 
     void close();

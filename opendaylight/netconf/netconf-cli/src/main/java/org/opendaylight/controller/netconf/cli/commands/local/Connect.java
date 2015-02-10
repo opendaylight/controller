@@ -53,11 +53,11 @@ public class Connect extends AbstractCommand {
     @Override
     public Output invoke(final Input inputArgs) {
         final NetconfClientConfigurationBuilder config = getConfig(inputArgs);
-        return invoke(config, getArgument(inputArgs, "address-name", String.class));
+        return invoke(config, getArgument(inputArgs, "address-name", String.class), inputArgs);
     }
 
-    private Output invoke(final NetconfClientConfigurationBuilder config, final String addressName) {
-        final Set<String> remoteCmds = connectManager.connectBlocking(addressName, config);
+    private Output invoke(final NetconfClientConfigurationBuilder config, final String addressName, final Input inputArgs) {
+        final Set<String> remoteCmds = connectManager.connectBlocking(addressName, getAdress(inputArgs), config);
 
         final ArrayList<Node<?>> output = Lists.newArrayList();
         output.add(new SimpleNodeTOImpl<>(QName.create(getCommandId(), "status"), null, "Connection initiated"));
@@ -90,6 +90,17 @@ public class Connect extends AbstractCommand {
                 .withReconnectStrategy(strategy)
                 .withAuthHandler(new LoginPassword(username, passwd))
                 .withProtocol(NetconfClientConfiguration.NetconfClientProtocol.SSH);
+    }
+
+    private InetSocketAddress getAdress(final Input inputArgs) {
+        final String address = getArgument(inputArgs, "address-name", String.class);
+        final InetSocketAddress inetAddress;
+        try {
+            inetAddress = new InetSocketAddress(InetAddress.getByName(address), getArgument(inputArgs, "address-port", Integer.class));
+        } catch (final UnknownHostException e) {
+            throw new IllegalArgumentException("Unable to use address: " + address, e);
+        }
+        return inetAddress;
     }
 
     private <T> Optional<T> getArgumentOpt(final Input inputArgs, final String argName, final Class<T> type) {

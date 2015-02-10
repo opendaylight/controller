@@ -20,6 +20,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -30,10 +31,12 @@ import org.opendaylight.controller.sal.connect.api.MessageTransformer;
 import org.opendaylight.controller.sal.connect.api.RemoteDevice;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceCommunicator;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceHandler;
-import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionCapabilities;
+import org.opendaylight.controller.sal.connect.netconf.listener.NetconfDeviceCapabilities;
+import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionPreferences;
 import org.opendaylight.controller.sal.connect.netconf.sal.NetconfDeviceRpc;
 import org.opendaylight.controller.sal.connect.netconf.schema.NetconfRemoteSchemaYangSourceProvider;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.netconf.node.fields.unavailable.capabilities.UnavailableCapability.FailureReason;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.repo.api.MissingSchemaSourceException;
@@ -51,7 +54,7 @@ import org.slf4j.LoggerFactory;
 /**
  *  This is a mediator between NetconfDeviceCommunicator and NetconfDeviceSalFacade
  */
-public final class NetconfDevice implements RemoteDevice<NetconfSessionCapabilities, NetconfMessage> {
+public final class NetconfDevice implements RemoteDevice<NetconfSessionPreferences, NetconfMessage> {
 
     private static final Logger logger = LoggerFactory.getLogger(NetconfDevice.class);
 
@@ -65,7 +68,7 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionCapabilit
     private final RemoteDeviceId id;
 
     private final SchemaContextFactory schemaContextFactory;
-    private final RemoteDeviceHandler<NetconfSessionCapabilities> salFacade;
+    private final RemoteDeviceHandler<NetconfSessionPreferences> salFacade;
     private final ListeningExecutorService processingExecutor;
     private final SchemaSourceRegistry schemaRegistry;
     private final MessageTransformer<NetconfMessage> messageTransformer;
@@ -73,7 +76,7 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionCapabilit
     private final NotificationHandler notificationHandler;
     private final List<SchemaSourceRegistration<? extends SchemaSourceRepresentation>> sourceRegistrations = Lists.newArrayList();
 
-    public NetconfDevice(final SchemaResourcesDTO schemaResourcesDTO, final RemoteDeviceId id, final RemoteDeviceHandler<NetconfSessionCapabilities> salFacade,
+    public NetconfDevice(final SchemaResourcesDTO schemaResourcesDTO, final RemoteDeviceId id, final RemoteDeviceHandler<NetconfSessionPreferences> salFacade,
                          final ExecutorService globalProcessingExecutor, final MessageTransformer<NetconfMessage> messageTransformer) {
         this.id = id;
         this.schemaRegistry = schemaResourcesDTO.getSchemaRegistry();
@@ -86,7 +89,7 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionCapabilit
     }
 
     @Override
-    public void onRemoteSessionUp(final NetconfSessionCapabilities remoteSessionCapabilities,
+    public void onRemoteSessionUp(final NetconfSessionPreferences remoteSessionCapabilities,
                                   final RemoteDeviceCommunicator<NetconfMessage> listener) {
         // SchemaContext setup has to be performed in a dedicated thread since
         // we are in a netty thread in this method
@@ -119,9 +122,10 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionCapabilit
         };
 
         Futures.addCallback(sourceResolverFuture, resolvedSourceCallback);
+
     }
 
-    private void handleSalInitializationSuccess(final SchemaContext result, final NetconfSessionCapabilities remoteSessionCapabilities, final NetconfDeviceRpc deviceRpc) {
+    private void handleSalInitializationSuccess(final SchemaContext result, final NetconfSessionPreferences remoteSessionCapabilities, final NetconfDeviceRpc deviceRpc) {
         updateMessageTransformer(result);
         salFacade.onDeviceConnected(result, remoteSessionCapabilities, deviceRpc);
         notificationHandler.onRemoteSchemaUp();
@@ -174,6 +178,11 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionCapabilit
     }
 
     @Override
+    public void onRemoteSessionFailed(Throwable throwable) {
+        salFacade.onDeviceFailed(throwable);
+    }
+
+    @Override
     public void onNotification(final NetconfMessage notification) {
         notificationHandler.handleNotification(notification);
     }
@@ -210,11 +219,11 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionCapabilit
      */
     private static class DeviceSourcesResolver implements Callable<DeviceSources> {
         private final NetconfDeviceRpc deviceRpc;
-        private final NetconfSessionCapabilities remoteSessionCapabilities;
+        private final NetconfSessionPreferences remoteSessionCapabilities;
         private final RemoteDeviceId id;
         private final NetconfStateSchemas.NetconfStateSchemasResolver stateSchemasResolver;
 
-        public DeviceSourcesResolver(final NetconfDeviceRpc deviceRpc, final NetconfSessionCapabilities remoteSessionCapabilities, final RemoteDeviceId id, final NetconfStateSchemas.NetconfStateSchemasResolver stateSchemasResolver) {
+        public DeviceSourcesResolver(final NetconfDeviceRpc deviceRpc, final NetconfSessionPreferences remoteSessionCapabilities, final RemoteDeviceId id, final NetconfStateSchemas.NetconfStateSchemasResolver stateSchemasResolver) {
             this.deviceRpc = deviceRpc;
             this.remoteSessionCapabilities = remoteSessionCapabilities;
             this.id = id;
@@ -287,15 +296,17 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionCapabilit
      */
     private final class RecursiveSchemaSetup implements Runnable {
         private final DeviceSources deviceSources;
-        private final NetconfSessionCapabilities remoteSessionCapabilities;
+        private final NetconfSessionPreferences remoteSessionCapabilities;
         private final NetconfDeviceRpc deviceRpc;
         private final RemoteDeviceCommunicator<NetconfMessage> listener;
+        private NetconfDeviceCapabilities capabilities;
 
-        public RecursiveSchemaSetup(final DeviceSources deviceSources, final NetconfSessionCapabilities remoteSessionCapabilities, final NetconfDeviceRpc deviceRpc, final RemoteDeviceCommunicator<NetconfMessage> listener) {
+        public RecursiveSchemaSetup(final DeviceSources deviceSources, final NetconfSessionPreferences remoteSessionCapabilities, final NetconfDeviceRpc deviceRpc, final RemoteDeviceCommunicator<NetconfMessage> listener) {
             this.deviceSources = deviceSources;
             this.remoteSessionCapabilities = remoteSessionCapabilities;
             this.deviceRpc = deviceRpc;
             this.listener = listener;
+            this.capabilities = remoteSessionCapabilities.getNetconfDeviceCapabilities();
         }
 
         @Override
@@ -306,6 +317,7 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionCapabilit
         /**
          * Recursively build schema context, in case of success or final failure notify device
          */
+        // FIXME reimplement without recursion
         private void setUpSchema(final Collection<SourceIdentifier> requiredSources) {
             logger.trace("{}: Trying to build schema context from {}", id, requiredSources);
 
@@ -322,6 +334,9 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionCapabilit
                 @Override
                 public void onSuccess(final SchemaContext result) {
                     logger.debug("{}: Schema context built successfully from {}", id, requiredSources);
+                    Collection<QName> filteredQNames = Sets.difference(remoteSessionCapabilities.getModuleBasedCaps(), capabilities.getUnresolvedCapabilites().keySet());
+                    capabilities.addCapabilities(filteredQNames);
+                    capabilities.addNonModuleBasedCapabilities(remoteSessionCapabilities.getNonModuleCaps());
                     handleSalInitializationSuccess(result, remoteSessionCapabilities, deviceRpc);
                 }
 
@@ -331,12 +346,15 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionCapabilit
                     if (t instanceof MissingSchemaSourceException) {
                         final SourceIdentifier missingSource = ((MissingSchemaSourceException) t).getSourceId();
                         logger.warn("{}: Unable to build schema context, missing source {}, will reattempt without it", id, missingSource);
+                        capabilities.addUnresolvedCapabilities(getQNameFromSourceIdentifiers(Sets.newHashSet(missingSource)), FailureReason.MissingSource);
                         setUpSchema(stripMissingSource(requiredSources, missingSource));
 
                     // In case resolution error, try only with resolved sources
                     } else if (t instanceof SchemaResolutionException) {
                         // TODO check for infinite loop
                         final SchemaResolutionException resolutionException = (SchemaResolutionException) t;
+                        final Set<SourceIdentifier> unresolvedSources = resolutionException.getUnsatisfiedImports().keySet();
+                        capabilities.addUnresolvedCapabilities(getQNameFromSourceIdentifiers(unresolvedSources), FailureReason.UnableToResolve);
                         logger.warn("{}: Unable to build schema context, unsatisfied imports {}, will reattempt with resolved only", id, resolutionException.getUnsatisfiedImports());
                         setUpSchema(resolutionException.getResolvedSources());
                     // unknown error, fail
@@ -354,6 +372,30 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionCapabilit
             final boolean removed = sourceIdentifiers.remove(sIdToRemove);
             Preconditions.checkState(removed, "{}: Trying to remove {} from {} failed", id, sIdToRemove, requiredSources);
             return sourceIdentifiers;
+        }
+
+        private Collection<QName> getQNameFromSourceIdentifiers(Collection<SourceIdentifier> identifiers) {
+            Collection<QName> qNames = new HashSet<>();
+            for (SourceIdentifier source : identifiers) {
+                Optional<QName> qname = getQNameFromSourceIdentifier(source);
+                if (qname.isPresent()) {
+                    qNames.add(qname.get());
+                }
+            }
+            if (qNames.isEmpty()) {
+                logger.debug("Unable to map any source identfiers to a capability reported by device : " + identifiers);
+            }
+            return qNames;
+        }
+
+        private Optional<QName> getQNameFromSourceIdentifier(SourceIdentifier identifier) {
+            for (QName qname : remoteSessionCapabilities.getModuleBasedCaps()) {
+                if (qname.getLocalName().equals(identifier.getName())
+                        && qname.getFormattedRevision().equals(identifier.getRevision())) {
+                    return Optional.of(qname);
+                }
+            }
+            throw new IllegalArgumentException("Unable to map identifier to a devices reported capability: " + identifier);
         }
     }
 }

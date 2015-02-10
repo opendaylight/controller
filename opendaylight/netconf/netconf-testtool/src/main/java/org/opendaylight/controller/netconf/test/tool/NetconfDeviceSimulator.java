@@ -100,6 +100,8 @@ public class NetconfDeviceSimulator implements Closeable {
     private final ScheduledExecutorService minaTimerExecutor;
     private final ExecutorService nioExecutor;
 
+    private boolean sendFakeSchema = false;
+
     public NetconfDeviceSimulator() {
         // TODO make pool size configurable
         this(new NioEventLoopGroup(), new HashedWheelTimer(),
@@ -119,7 +121,12 @@ public class NetconfDeviceSimulator implements Closeable {
         final Set<Capability> capabilities = Sets.newHashSet(Collections2.transform(moduleBuilders.keySet(), new Function<ModuleBuilder, Capability>() {
             @Override
             public Capability apply(final ModuleBuilder input) {
-                return new ModuleBuilderCapability(input, moduleBuilders.get(input));
+                if (sendFakeSchema) {
+                    sendFakeSchema = false;
+                    return new FakeModuleBuilderCapability(input, moduleBuilders.get(input));
+                } else {
+                    return new ModuleBuilderCapability(input, moduleBuilders.get(input));
+                }
             }
         }));
 

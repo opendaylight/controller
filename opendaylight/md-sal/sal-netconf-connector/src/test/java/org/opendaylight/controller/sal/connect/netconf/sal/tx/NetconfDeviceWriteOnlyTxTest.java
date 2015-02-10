@@ -21,7 +21,7 @@ import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizer;
-import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionCapabilities;
+import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionPreferences;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfBaseOps;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
@@ -60,7 +60,7 @@ public class NetconfDeviceWriteOnlyTxTest {
     @Test
     public void testDiscardChanges() {
         final WriteCandidateTx tx = new WriteCandidateTx(id, new NetconfBaseOps(rpc), normalizer,
-                NetconfSessionCapabilities.fromStrings(Collections.<String>emptySet()));
+                NetconfSessionPreferences.fromStrings(Collections.<String>emptySet()));
         final CheckedFuture<Void, TransactionCommitFailedException> submitFuture = tx.submit();
         try {
             submitFuture.checkedGet();
@@ -84,7 +84,7 @@ public class NetconfDeviceWriteOnlyTxTest {
                 .when(rpc).invokeRpc(any(QName.class), any(CompositeNode.class));
 
         final WriteRunningTx tx = new WriteRunningTx(id, new NetconfBaseOps(rpc), normalizer,
-                NetconfSessionCapabilities.fromStrings(Collections.<String>emptySet()));
+                NetconfSessionPreferences.fromStrings(Collections.<String>emptySet()));
         try {
             tx.delete(LogicalDatastoreType.CONFIGURATION, yangIId);
         } catch (final Exception e) {
