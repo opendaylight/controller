@@ -1,5 +1,18 @@
 package org.opendaylight.controller.cluster.raft;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
@@ -61,20 +74,6 @@ import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 public class RaftActorTest extends AbstractActorTest {
 
@@ -907,24 +906,24 @@ public class RaftActorTest extends AbstractActorTest {
             // sleeping for a minimum of 2 seconds, if it spans more its fine.
             Uninterruptibles.sleepUninterruptibly(2, TimeUnit.SECONDS);
 
-            List<Object> matches =  MessageCollectorActor.getAllMatching(notifierActor, RoleChanged.class);
+            List<RoleChanged> matches =  MessageCollectorActor.getAllMatching(notifierActor, RoleChanged.class);
             assertNotNull(matches);
             assertEquals(3, matches.size());
 
             // check if the notifier got a role change from null to Follower
-            RoleChanged raftRoleChanged = (RoleChanged) matches.get(0);
+            RoleChanged raftRoleChanged = matches.get(0);
             assertEquals(id, raftRoleChanged.getMemberId());
             assertNull(raftRoleChanged.getOldRole());
             assertEquals(RaftState.Follower.name(), raftRoleChanged.getNewRole());
 
             // check if the notifier got a role change from Follower to Candidate
-            raftRoleChanged = (RoleChanged) matches.get(1);
+            raftRoleChanged = matches.get(1);
             assertEquals(id, raftRoleChanged.getMemberId());
             assertEquals(RaftState.Follower.name(), raftRoleChanged.getOldRole());
             assertEquals(RaftState.Candidate.name(), raftRoleChanged.getNewRole());
 
             // check if the notifier got a role change from Candidate to Leader
-            raftRoleChanged = (RoleChanged) matches.get(2);
+            raftRoleChanged = matches.get(2);
             assertEquals(id, raftRoleChanged.getMemberId());
             assertEquals(RaftState.Candidate.name(), raftRoleChanged.getOldRole());
             assertEquals(RaftState.Leader.name(), raftRoleChanged.getNewRole());

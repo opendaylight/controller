@@ -17,6 +17,7 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.junit.Assert;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
@@ -59,29 +60,39 @@ public class MessageCollectorActor extends UntypedActor {
      * @return
      */
     public static <T> T getFirstMatching(ActorRef actor, Class<T> clazz) throws Exception {
-        for(int i = 0; i < 50; i++) {
-            List<Object> allMessages = getAllMessages(actor);
+        List<Object> allMessages = getAllMessages(actor);
 
-            for(Object message : allMessages){
-                if(message.getClass().equals(clazz)){
-                    return (T) message;
-                }
+        for(Object message : allMessages){
+            if(message.getClass().equals(clazz)){
+                return (T) message;
             }
-
-            Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
         }
 
         return null;
     }
 
-    public static List<Object> getAllMatching(ActorRef actor, Class<?> clazz) throws Exception {
+    public static <T> T expectFirstMatching(ActorRef actor, Class<T> clazz) throws Exception {
+        for(int i = 0; i < 50; i++) {
+            T message = getFirstMatching(actor, clazz);
+            if(message != null) {
+                return message;
+            }
+
+            Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
+        }
+
+        Assert.fail("Did not receive message of type " + clazz);
+        return null;
+    }
+
+    public static <T> List<T> getAllMatching(ActorRef actor, Class<T> clazz) throws Exception {
         List<Object> allMessages = getAllMessages(actor);
 
-        List<Object> output = Lists.newArrayList();
+        List<T> output = Lists.newArrayList();
 
         for(Object message : allMessages){
             if(message.getClass().equals(clazz)){
-                output.add(message);
+                output.add((T) message);
             }
         }
 
