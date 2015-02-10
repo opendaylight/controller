@@ -1,25 +1,23 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import akka.actor.ActorRef;
 import akka.actor.Props;
-import akka.testkit.JavaTestKit;
+import akka.testkit.TestActorRef;
 import com.google.protobuf.ByteString;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import org.junit.After;
+import org.junit.Assert;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.Snapshot;
+import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
@@ -28,16 +26,31 @@ import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
-import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 
 public class FollowerTest extends AbstractRaftActorBehaviorTest {
 
-    private final ActorRef followerActor = getSystem().actorOf(Props.create(
-        DoNothingActor.class));
+    private final TestActorFactory actorFactory = new TestActorFactory(getSystem());
 
+    private final TestActorRef<MessageCollectorActor> followerActor = actorFactory.createTestActor(
+            Props.create(MessageCollectorActor.class), actorFactory.generateActorId("follower"));
 
-    @Override protected RaftActorBehavior createBehavior(RaftActorContext actorContext) {
+    private final TestActorRef<MessageCollectorActor> leaderActor = actorFactory.createTestActor(
+            Props.create(MessageCollectorActor.class), actorFactory.generateActorId("leader"));
+
+    private RaftActorBehavior follower;
+
+    @After
+    public void tearDown() throws Exception {
+        if(follower != null) {
+            follower.close();
+        }
+
+        actorFactory.close();
+    }
+
+    @Override
+    protected RaftActorBehavior createBehavior(RaftActorContext actorContext) {
         return new Follower(actorContext);
     }
 
@@ -48,117 +61,62 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
 
     @Override
     protected  MockRaftActorContext createActorContext(ActorRef actorRef){
-        return new MockRaftActorContext("test", getSystem(), actorRef);
+        return new MockRaftActorContext("follower", getSystem(), actorRef);
     }
 
     @Test
     public void testThatAnElectionTimeoutIsTriggered(){
-        new JavaTestKit(getSystem()) {{
+        MockRaftActorContext actorContext = createActorContext();
+        follower = new Follower(actorContext);
 
-            new Within(DefaultConfigParamsImpl.HEART_BEAT_INTERVAL.$times(6)) {
-                @Override
-                protected void run() {
-
-                    Follower follower = new Follower(createActorContext(getTestActor()));
-
-                    final Boolean out = new ExpectMsg<Boolean>(DefaultConfigParamsImpl.HEART_BEAT_INTERVAL.$times(6), "ElectionTimeout") {
-                        // do not put code outside this method, will run afterwards
-                        @Override
-                        protected Boolean match(Object in) {
-                            if (in instanceof ElectionTimeout) {
-                                return true;
-                            } else {
-                                throw noMatch();
-                            }
-                        }
-                    }.get();
-
-                    assertEquals(true, out);
-                }
-            };
-        }};
+        MessageCollectorActor.expectFirstMatching(followerActor, ElectionTimeout.class,
+                actorContext.getConfigParams().getElectionTimeOutInterval().$times(6).toMillis());
     }
 
     @Test
     public void testHandleElectionTimeout(){
-        RaftActorContext raftActorContext = createActorContext();
-        Follower follower =
-            new Follower(raftActorContext);
+        logStart("testHandleElectionTimeout");
 
-        RaftActorBehavior raftBehavior =
-            follower.handleMessage(followerActor, new ElectionTimeout());
+        follower = new Follower(createActorContext());
+
+        RaftActorBehavior raftBehavior = follower.handleMessage(followerActor, new ElectionTimeout());
 
         assertTrue(raftBehavior instanceof Candidate);
     }
 
     @Test
     public void testHandleRequestVoteWhenSenderTermEqualToCurrentTermAndVotedForIsNull(){
-        new JavaTestKit(getSystem()) {{
+        logStart("testHandleRequestVoteWhenSenderTermEqualToCurrentTermAndVotedForIsNull");
 
-            new Within(duration("1 seconds")) {
-                @Override
-                protected void run() {
+        RaftActorContext context = createActorContext();
+        long term = 1000;
+        context.getTermInformation().update(term, null);
 
-                    RaftActorContext context = createActorContext(getTestActor());
+        follower = createBehavior(context);
 
-                    context.getTermInformation().update(1000, null);
+        follower.handleMessage(leaderActor, new RequestVote(term, "test", 10000, 999));
 
-                    RaftActorBehavior follower = createBehavior(context);
+        RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, RequestVoteReply.class);
 
-                    follower.handleMessage(getTestActor(), new RequestVote(1000, "test", 10000, 999));
-
-                    final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"), "RequestVoteReply") {
-                        // do not put code outside this method, will run afterwards
-                        @Override
-                        protected Boolean match(Object in) {
-                            if (in instanceof RequestVoteReply) {
-                                RequestVoteReply reply = (RequestVoteReply) in;
-                                return reply.isVoteGranted();
-                            } else {
-                                throw noMatch();
-                            }
-                        }
-                    }.get();
-
-                    assertEquals(true, out);
-                }
-            };
-        }};
+        assertEquals("isVoteGranted", true, reply.isVoteGranted());
+        assertEquals("getTerm", term, reply.getTerm());
     }
 
     @Test
     public void testHandleRequestVoteWhenSenderTermEqualToCurrentTermAndVotedForIsNotTheSameAsCandidateId(){
-        new JavaTestKit(getSystem()) {{
+        logStart("testHandleRequestVoteWhenSenderTermEqualToCurrentTermAndVotedForIsNotTheSameAsCandidateId");
 
-            new Within(duration("1 seconds")) {
-                @Override
-                protected void run() {
+        RaftActorContext context = createActorContext();
+        long term = 1000;
+        context.getTermInformation().update(term, "test");
 
-                    RaftActorContext context = createActorContext(getTestActor());
+        follower = createBehavior(context);
 
-                    context.getTermInformation().update(1000, "test");
+        follower.handleMessage(leaderActor, new RequestVote(term, "candidate", 10000, 999));
 
-                    RaftActorBehavior follower = createBehavior(context);
+        RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, RequestVoteReply.class);
 
-                    follower.handleMessage(getTestActor(), new RequestVote(1000, "candidate", 10000, 999));
-
-                    final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"), "RequestVoteReply") {
-                        // do not put code outside this method, will run afterwards
-                        @Override
-                        protected Boolean match(Object in) {
-                            if (in instanceof RequestVoteReply) {
-                                RequestVoteReply reply = (RequestVoteReply) in;
-                                return reply.isVoteGranted();
-                            } else {
-                                throw noMatch();
-                            }
-                        }
-                    }.get();
-
-                    assertEquals(false, out);
-                }
-            };
-        }};
+        assertEquals("isVoteGranted", false, reply.isVoteGranted());
     }
 
     /**
@@ -171,32 +129,25 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
      */
     @Test
     public void testHandleAppendEntriesWithNewerCommitIndex() throws Exception {
-        new JavaTestKit(getSystem()) {{
+        logStart("testHandleAppendEntriesWithNewerCommitIndex");
 
-            RaftActorContext context =
-                createActorContext();
+        MockRaftActorContext context = createActorContext();
 
-            context.setLastApplied(100);
-            setLastLogEntry((MockRaftActorContext) context, 1, 100,
+        context.setLastApplied(100);
+        setLastLogEntry(context, 1, 100,
                 new MockRaftActorContext.MockPayload(""));
-            ((MockRaftActorContext) context).getReplicatedLog().setSnapshotIndex(99);
+        context.getReplicatedLog().setSnapshotIndex(99);
 
-            List<ReplicatedLogEntry> entries =
-                Arrays.asList(
-                        (ReplicatedLogEntry) new MockRaftActorContext.MockReplicatedLogEntry(2, 101,
-                                new MockRaftActorContext.MockPayload("foo"))
-                );
+        List<ReplicatedLogEntry> entries = Arrays.<ReplicatedLogEntry>asList(
+                newReplicatedLogEntry(2, 101, "foo"));
 
-            // The new commitIndex is 101
-            AppendEntries appendEntries =
-                new AppendEntries(2, "leader-1", 100, 1, entries, 101, 100);
+        // The new commitIndex is 101
+        AppendEntries appendEntries = new AppendEntries(2, "leader-1", 100, 1, entries, 101, 100);
 
-            RaftActorBehavior raftBehavior =
-                createBehavior(context).handleMessage(getRef(), appendEntries);
+        follower = createBehavior(context);
+        follower.handleMessage(leaderActor, appendEntries);
 
-            assertEquals(101L, context.getLastApplied());
-
-        }};
+        assertEquals("getLastApplied", 101L, context.getLastApplied());
     }
 
     /**
@@ -207,57 +158,29 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
      * @throws Exception
      */
     @Test
-    public void testHandleAppendEntriesSenderPrevLogTermNotSameAsReceiverPrevLogTerm()
-        throws Exception {
-        new JavaTestKit(getSystem()) {{
+    public void testHandleAppendEntriesSenderPrevLogTermNotSameAsReceiverPrevLogTerm() {
+        logStart("testHandleAppendEntriesSenderPrevLogTermNotSameAsReceiverPrevLogTerm");
 
-            MockRaftActorContext context = createActorContext();
+        MockRaftActorContext context = createActorContext();
 
-            // First set the receivers term to lower number
-            context.getTermInformation().update(95, "test");
+        // First set the receivers term to lower number
+        context.getTermInformation().update(95, "test");
 
-            // Set the last log entry term for the receiver to be greater than
-            // what we will be sending as the prevLogTerm in AppendEntries
-            MockRaftActorContext.SimpleReplicatedLog mockReplicatedLog =
-                setLastLogEntry(context, 20, 0, new MockRaftActorContext.MockPayload(""));
+        // AppendEntries is now sent with a bigger term
+        // this will set the receivers term to be the same as the sender's term
+        AppendEntries appendEntries = new AppendEntries(100, "leader", 0, 0, null, 101, -1);
 
-            // AppendEntries is now sent with a bigger term
-            // this will set the receivers term to be the same as the sender's term
-            AppendEntries appendEntries =
-                new AppendEntries(100, "leader-1", 0, 0, null, 101, -1);
+        follower = createBehavior(context);
 
-            RaftActorBehavior behavior = createBehavior(context);
+        RaftActorBehavior newBehavior = follower.handleMessage(leaderActor, appendEntries);
 
-            // Send an unknown message so that the state of the RaftActor remains unchanged
-            RaftActorBehavior expected = behavior.handleMessage(getRef(), "unknown");
+        Assert.assertSame(follower, newBehavior);
 
-            RaftActorBehavior raftBehavior =
-                behavior.handleMessage(getRef(), appendEntries);
+        AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor,
+                AppendEntriesReply.class);
 
-            assertEquals(expected, raftBehavior);
-
-            // Also expect an AppendEntriesReply to be sent where success is false
-            final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"),
-                "AppendEntriesReply") {
-                // do not put code outside this method, will run afterwards
-                @Override
-                protected Boolean match(Object in) {
-                    if (in instanceof AppendEntriesReply) {
-                        AppendEntriesReply reply = (AppendEntriesReply) in;
-                        return reply.isSuccess();
-                    } else {
-                        throw noMatch();
-                    }
-                }
-            }.get();
-
-            assertEquals(false, out);
-
-
-        }};
+        assertEquals("isSuccess", false, reply.isSuccess());
     }
-
-
 
     /**
      * This test verifies that when a new AppendEntries message is received with
@@ -268,278 +191,201 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
      * @throws Exception
      */
     @Test
-    public void testHandleAppendEntriesAddNewEntries() throws Exception {
-        new JavaTestKit(getSystem()) {{
+    public void testHandleAppendEntriesAddNewEntries() {
+        logStart("testHandleAppendEntriesAddNewEntries");
 
-            MockRaftActorContext context = createActorContext();
+        MockRaftActorContext context = createActorContext();
 
-            // First set the receivers term to lower number
-            context.getTermInformation().update(1, "test");
+        // First set the receivers term to lower number
+        context.getTermInformation().update(1, "test");
 
-            // Prepare the receivers log
-            MockRaftActorContext.SimpleReplicatedLog log =
-                new MockRaftActorContext.SimpleReplicatedLog();
-            log.append(
-                new MockRaftActorContext.MockReplicatedLogEntry(1, 0, new MockRaftActorContext.MockPayload("zero")));
-            log.append(
-                new MockRaftActorContext.MockReplicatedLogEntry(1, 1, new MockRaftActorContext.MockPayload("one")));
-            log.append(
-                new MockRaftActorContext.MockReplicatedLogEntry(1, 2, new MockRaftActorContext.MockPayload("two")));
+        // Prepare the receivers log
+        MockRaftActorContext.SimpleReplicatedLog log = new MockRaftActorContext.SimpleReplicatedLog();
+        log.append(newReplicatedLogEntry(1, 0, "zero"));
+        log.append(newReplicatedLogEntry(1, 1, "one"));
+        log.append(newReplicatedLogEntry(1, 2, "two"));
 
-            context.setReplicatedLog(log);
+        context.setReplicatedLog(log);
 
-            // Prepare the entries to be sent with AppendEntries
-            List<ReplicatedLogEntry> entries = new ArrayList<>();
-            entries.add(
-                new MockRaftActorContext.MockReplicatedLogEntry(1, 3, new MockRaftActorContext.MockPayload("three")));
-            entries.add(
-                new MockRaftActorContext.MockReplicatedLogEntry(1, 4, new MockRaftActorContext.MockPayload("four")));
+        // Prepare the entries to be sent with AppendEntries
+        List<ReplicatedLogEntry> entries = new ArrayList<>();
+        entries.add(newReplicatedLogEntry(1, 3, "three"));
+        entries.add(newReplicatedLogEntry(1, 4, "four"));
 
-            // Send appendEntries with the same term as was set on the receiver
-            // before the new behavior was created (1 in this case)
-            // This will not work for a Candidate because as soon as a Candidate
-            // is created it increments the term
-            AppendEntries appendEntries =
-                new AppendEntries(1, "leader-1", 2, 1, entries, 4, -1);
+        // Send appendEntries with the same term as was set on the receiver
+        // before the new behavior was created (1 in this case)
+        // This will not work for a Candidate because as soon as a Candidate
+        // is created it increments the term
+        AppendEntries appendEntries = new AppendEntries(1, "leader-1", 2, 1, entries, 4, -1);
 
-            RaftActorBehavior behavior = createBehavior(context);
+        follower = createBehavior(context);
 
-            // Send an unknown message so that the state of the RaftActor remains unchanged
-            RaftActorBehavior expected = behavior.handleMessage(getRef(), "unknown");
+        RaftActorBehavior newBehavior = follower.handleMessage(leaderActor, appendEntries);
 
-            RaftActorBehavior raftBehavior =
-                behavior.handleMessage(getRef(), appendEntries);
+        Assert.assertSame(follower, newBehavior);
 
-            assertEquals(expected, raftBehavior);
-            assertEquals(5, log.last().getIndex() + 1);
-            assertNotNull(log.get(3));
-            assertNotNull(log.get(4));
+        assertEquals("Next index", 5, log.last().getIndex() + 1);
+        assertEquals("Entry 3", entries.get(0), log.get(3));
+        assertEquals("Entry 4", entries.get(1), log.get(4));
 
-            // Also expect an AppendEntriesReply to be sent where success is false
-            final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"),
-                "AppendEntriesReply") {
-                // do not put code outside this method, will run afterwards
-                @Override
-                protected Boolean match(Object in) {
-                    if (in instanceof AppendEntriesReply) {
-                        AppendEntriesReply reply = (AppendEntriesReply) in;
-                        return reply.isSuccess();
-                    } else {
-                        throw noMatch();
-                    }
-                }
-            }.get();
-
-            assertEquals(true, out);
-
-
-        }};
+        expectAndVerifyAppendEntriesReply(1, true, context.getId(), 1, 4);
     }
-
-
 
     /**
      * This test verifies that when a new AppendEntries message is received with
      * new entries and the logs of the sender and receiver are out-of-sync that
      * the log is first corrected by removing the out of sync entries from the
      * log and then adding in the new entries sent with the AppendEntries message
-     *
-     * @throws Exception
      */
     @Test
-    public void testHandleAppendEntriesCorrectReceiverLogEntries()
-        throws Exception {
-        new JavaTestKit(getSystem()) {{
+    public void testHandleAppendEntriesCorrectReceiverLogEntries() {
+        logStart("testHandleAppendEntriesCorrectReceiverLogEntries");
 
-            MockRaftActorContext context = createActorContext();
+        MockRaftActorContext context = createActorContext();
 
-            // First set the receivers term to lower number
-            context.getTermInformation().update(2, "test");
+        // First set the receivers term to lower number
+        context.getTermInformation().update(1, "test");
 
-            // Prepare the receivers log
-            MockRaftActorContext.SimpleReplicatedLog log =
-                new MockRaftActorContext.SimpleReplicatedLog();
-            log.append(
-                new MockRaftActorContext.MockReplicatedLogEntry(1, 0, new MockRaftActorContext.MockPayload("zero")));
-            log.append(
-                new MockRaftActorContext.MockReplicatedLogEntry(1, 1, new MockRaftActorContext.MockPayload("one")));
-            log.append(
-                new MockRaftActorContext.MockReplicatedLogEntry(1, 2, new MockRaftActorContext.MockPayload("two")));
+        // Prepare the receivers log
+        MockRaftActorContext.SimpleReplicatedLog log = new MockRaftActorContext.SimpleReplicatedLog();
+        log.append(newReplicatedLogEntry(1, 0, "zero"));
+        log.append(newReplicatedLogEntry(1, 1, "one"));
+        log.append(newReplicatedLogEntry(1, 2, "two"));
 
-            context.setReplicatedLog(log);
+        context.setReplicatedLog(log);
 
-            // Prepare the entries to be sent with AppendEntries
-            List<ReplicatedLogEntry> entries = new ArrayList<>();
-            entries.add(
-                new MockRaftActorContext.MockReplicatedLogEntry(2, 2, new MockRaftActorContext.MockPayload("two-1")));
-            entries.add(
-                new MockRaftActorContext.MockReplicatedLogEntry(2, 3, new MockRaftActorContext.MockPayload("three")));
+        // Prepare the entries to be sent with AppendEntries
+        List<ReplicatedLogEntry> entries = new ArrayList<>();
+        entries.add(newReplicatedLogEntry(2, 2, "two-1"));
+        entries.add(newReplicatedLogEntry(2, 3, "three"));
 
-            // Send appendEntries with the same term as was set on the receiver
-            // before the new behavior was created (1 in this case)
-            // This will not work for a Candidate because as soon as a Candidate
-            // is created it increments the term
-            AppendEntries appendEntries =
-                new AppendEntries(2, "leader-1", 1, 1, entries, 3, -1);
+        // Send appendEntries with the same term as was set on the receiver
+        // before the new behavior was created (1 in this case)
+        // This will not work for a Candidate because as soon as a Candidate
+        // is created it increments the term
+        AppendEntries appendEntries = new AppendEntries(2, "leader", 1, 1, entries, 3, -1);
 
-            RaftActorBehavior behavior = createBehavior(context);
+        follower = createBehavior(context);
 
-            // Send an unknown message so that the state of the RaftActor remains unchanged
-            RaftActorBehavior expected = behavior.handleMessage(getRef(), "unknown");
+        RaftActorBehavior newBehavior = follower.handleMessage(leaderActor, appendEntries);
 
-            RaftActorBehavior raftBehavior =
-                behavior.handleMessage(getRef(), appendEntries);
+        Assert.assertSame(follower, newBehavior);
 
-            assertEquals(expected, raftBehavior);
+        // The entry at index 2 will be found out-of-sync with the leader
+        // and will be removed
+        // Then the two new entries will be added to the log
+        // Thus making the log to have 4 entries
+        assertEquals("Next index", 4, log.last().getIndex() + 1);
+        //assertEquals("Entry 2", entries.get(0), log.get(2));
 
-            // The entry at index 2 will be found out-of-sync with the leader
-            // and will be removed
-            // Then the two new entries will be added to the log
-            // Thus making the log to have 4 entries
-            assertEquals(4, log.last().getIndex() + 1);
-            assertNotNull(log.get(2));
+        assertEquals("Entry 1 data", "one", log.get(1).getData().toString());
 
-            assertEquals("one", log.get(1).getData().toString());
+        // Check that the entry at index 2 has the new data
+        assertEquals("Entry 2", entries.get(0), log.get(2));
 
-            // Check that the entry at index 2 has the new data
-            assertEquals("two-1", log.get(2).getData().toString());
+        assertEquals("Entry 3", entries.get(1), log.get(3));
 
-            assertEquals("three", log.get(3).getData().toString());
-
-            assertNotNull(log.get(3));
-
-            // Also expect an AppendEntriesReply to be sent where success is false
-            final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"),
-                "AppendEntriesReply") {
-                // do not put code outside this method, will run afterwards
-                @Override
-                protected Boolean match(Object in) {
-                    if (in instanceof AppendEntriesReply) {
-                        AppendEntriesReply reply = (AppendEntriesReply) in;
-                        return reply.isSuccess();
-                    } else {
-                        throw noMatch();
-                    }
-                }
-            }.get();
-
-            assertEquals(true, out);
-
-
-        }};
+        expectAndVerifyAppendEntriesReply(2, true, context.getId(), 2, 3);
     }
 
     @Test
     public void testHandleAppendEntriesPreviousLogEntryMissing(){
-        new JavaTestKit(getSystem()) {{
+        logStart("testHandleAppendEntriesPreviousLogEntryMissing");
 
-            MockRaftActorContext context = createActorContext();
+        MockRaftActorContext context = createActorContext();
 
-            // Prepare the receivers log
-            MockRaftActorContext.SimpleReplicatedLog log =
-                    new MockRaftActorContext.SimpleReplicatedLog();
-            log.append(
-                    new MockRaftActorContext.MockReplicatedLogEntry(1, 0, new MockRaftActorContext.MockPayload("zero")));
-            log.append(
-                    new MockRaftActorContext.MockReplicatedLogEntry(1, 1, new MockRaftActorContext.MockPayload("one")));
-            log.append(
-                    new MockRaftActorContext.MockReplicatedLogEntry(1, 2, new MockRaftActorContext.MockPayload("two")));
+        // Prepare the receivers log
+        MockRaftActorContext.SimpleReplicatedLog log = new MockRaftActorContext.SimpleReplicatedLog();
+        log.append(newReplicatedLogEntry(1, 0, "zero"));
+        log.append(newReplicatedLogEntry(1, 1, "one"));
+        log.append(newReplicatedLogEntry(1, 2, "two"));
 
-            context.setReplicatedLog(log);
+        context.setReplicatedLog(log);
 
-            // Prepare the entries to be sent with AppendEntries
-            List<ReplicatedLogEntry> entries = new ArrayList<>();
-            entries.add(
-                    new MockRaftActorContext.MockReplicatedLogEntry(1, 4, new MockRaftActorContext.MockPayload("two-1")));
+        // Prepare the entries to be sent with AppendEntries
+        List<ReplicatedLogEntry> entries = new ArrayList<>();
+        entries.add(newReplicatedLogEntry(1, 4, "four"));
 
-            AppendEntries appendEntries =
-                    new AppendEntries(1, "leader-1", 3, 1, entries, 4, -1);
+        AppendEntries appendEntries = new AppendEntries(1, "leader", 3, 1, entries, 4, -1);
 
-            RaftActorBehavior behavior = createBehavior(context);
+        follower = createBehavior(context);
 
-            // Send an unknown message so that the state of the RaftActor remains unchanged
-            RaftActorBehavior expected = behavior.handleMessage(getRef(), "unknown");
+        RaftActorBehavior newBehavior = follower.handleMessage(leaderActor, appendEntries);
 
-            RaftActorBehavior raftBehavior =
-                    behavior.handleMessage(getRef(), appendEntries);
+        Assert.assertSame(follower, newBehavior);
 
-            assertEquals(expected, raftBehavior);
+        expectAndVerifyAppendEntriesReply(1, false, context.getId(), 1, 2);
+    }
 
-            // Also expect an AppendEntriesReply to be sent where success is false
-            final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"),
-                    "AppendEntriesReply") {
-                // do not put code outside this method, will run afterwards
-                @Override
-                protected Boolean match(Object in) {
-                    if (in instanceof AppendEntriesReply) {
-                        AppendEntriesReply reply = (AppendEntriesReply) in;
-                        return reply.isSuccess();
-                    } else {
-                        throw noMatch();
-                    }
-                }
-            }.get();
+    @Test
+    public void testHandleAppendEntriesWithExistingLogEntry() {
+        logStart("testHandleAppendEntriesWithExistingLogEntry");
 
-            assertEquals(false, out);
+        MockRaftActorContext context = createActorContext();
 
-        }};
+        context.getTermInformation().update(1, "test");
 
+        // Prepare the receivers log
+        MockRaftActorContext.SimpleReplicatedLog log = new MockRaftActorContext.SimpleReplicatedLog();
+        log.append(newReplicatedLogEntry(1, 0, "zero"));
+        log.append(newReplicatedLogEntry(1, 1, "one"));
+
+        context.setReplicatedLog(log);
+
+        // Send the last entry again.
+        List<ReplicatedLogEntry> entries = Arrays.asList(newReplicatedLogEntry(1, 1, "one"));
+
+        follower = createBehavior(context);
+
+        follower.handleMessage(leaderActor, new AppendEntries(1, "leader", 0, 1, entries, 1, -1));
+
+        assertEquals("Next index", 2, log.last().getIndex() + 1);
+        assertEquals("Entry 1", entries.get(0), log.get(1));
+
+        expectAndVerifyAppendEntriesReply(1, true, context.getId(), 1, 1);
+
+        // Send the last entry again and also a new one.
+
+        entries = Arrays.asList(newReplicatedLogEntry(1, 1, "one"), newReplicatedLogEntry(1, 2, "two"));
+
+        leaderActor.underlyingActor().clear();
+        follower.handleMessage(leaderActor, new AppendEntries(1, "leader", 0, 1, entries, 2, -1));
+
+        assertEquals("Next index", 3, log.last().getIndex() + 1);
+        assertEquals("Entry 1", entries.get(0), log.get(1));
+        assertEquals("Entry 2", entries.get(1), log.get(2));
+
+        expectAndVerifyAppendEntriesReply(1, true, context.getId(), 1, 2);
     }
 
     @Test
     public void testHandleAppendAfterInstallingSnapshot(){
-        new JavaTestKit(getSystem()) {{
+        logStart("testHandleAppendAfterInstallingSnapshot");
 
-            MockRaftActorContext context = createActorContext();
+        MockRaftActorContext context = createActorContext();
 
+        // Prepare the receivers log
+        MockRaftActorContext.SimpleReplicatedLog log = new MockRaftActorContext.SimpleReplicatedLog();
 
-            // Prepare the receivers log
-            MockRaftActorContext.SimpleReplicatedLog log =
-                    new MockRaftActorContext.SimpleReplicatedLog();
+        // Set up a log as if it has been snapshotted
+        log.setSnapshotIndex(3);
+        log.setSnapshotTerm(1);
 
-            // Set up a log as if it has been snapshotted
-            log.setSnapshotIndex(3);
-            log.setSnapshotTerm(1);
+        context.setReplicatedLog(log);
 
-            context.setReplicatedLog(log);
+        // Prepare the entries to be sent with AppendEntries
+        List<ReplicatedLogEntry> entries = new ArrayList<>();
+        entries.add(newReplicatedLogEntry(1, 4, "four"));
 
-            // Prepare the entries to be sent with AppendEntries
-            List<ReplicatedLogEntry> entries = new ArrayList<>();
-            entries.add(
-                    new MockRaftActorContext.MockReplicatedLogEntry(1, 4, new MockRaftActorContext.MockPayload("two-1")));
+        AppendEntries appendEntries = new AppendEntries(1, "leader", 3, 1, entries, 4, 3);
 
-            AppendEntries appendEntries =
-                    new AppendEntries(1, "leader-1", 3, 1, entries, 4, 3);
+        follower = createBehavior(context);
 
-            RaftActorBehavior behavior = createBehavior(context);
+        RaftActorBehavior newBehavior = follower.handleMessage(leaderActor, appendEntries);
 
-            // Send an unknown message so that the state of the RaftActor remains unchanged
-            RaftActorBehavior expected = behavior.handleMessage(getRef(), "unknown");
+        Assert.assertSame(follower, newBehavior);
 
-            RaftActorBehavior raftBehavior =
-                    behavior.handleMessage(getRef(), appendEntries);
-
-            assertEquals(expected, raftBehavior);
-
-            // Also expect an AppendEntriesReply to be sent where success is false
-            final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"),
-                    "AppendEntriesReply") {
-                // do not put code outside this method, will run afterwards
-                @Override
-                protected Boolean match(Object in) {
-                    if (in instanceof AppendEntriesReply) {
-                        AppendEntriesReply reply = (AppendEntriesReply) in;
-                        return reply.isSuccess();
-                    } else {
-                        throw noMatch();
-                    }
-                }
-            }.get();
-
-            assertEquals(true, out);
-
-        }};
-
+        expectAndVerifyAppendEntriesReply(1, true, context.getId(), 1, 4);
     }
 
 
@@ -551,180 +397,121 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
      */
     @Test
     public void testHandleInstallSnapshot() throws Exception {
-        JavaTestKit javaTestKit = new JavaTestKit(getSystem()) {{
+        logStart("testHandleInstallSnapshot");
 
-            ActorRef leaderActor = getSystem().actorOf(Props.create(
-                MessageCollectorActor.class));
+        MockRaftActorContext context = createActorContext();
 
-            MockRaftActorContext context = createActorContext(getRef());
+        follower = createBehavior(context);
 
-            Follower follower = (Follower)createBehavior(context);
+        HashMap<String, String> followerSnapshot = new HashMap<>();
+        followerSnapshot.put("1", "A");
+        followerSnapshot.put("2", "B");
+        followerSnapshot.put("3", "C");
 
-            HashMap<String, String> followerSnapshot = new HashMap<>();
-            followerSnapshot.put("1", "A");
-            followerSnapshot.put("2", "B");
-            followerSnapshot.put("3", "C");
+        ByteString bsSnapshot  = toByteString(followerSnapshot);
+        int offset = 0;
+        int snapshotLength = bsSnapshot.size();
+        int chunkSize = 50;
+        int totalChunks = (snapshotLength / chunkSize) + ((snapshotLength % chunkSize) > 0 ? 1 : 0);
+        int lastIncludedIndex = 1;
+        int chunkIndex = 1;
+        InstallSnapshot lastInstallSnapshot = null;
 
-            ByteString bsSnapshot  = toByteString(followerSnapshot);
-            ByteString chunkData = ByteString.EMPTY;
-            int offset = 0;
-            int snapshotLength = bsSnapshot.size();
-            int i = 1;
-            int chunkIndex = 1;
+        for(int i = 0; i < totalChunks; i++) {
+            ByteString chunkData = getNextChunk(bsSnapshot, offset, chunkSize);
+            lastInstallSnapshot = new InstallSnapshot(1, "leader", lastIncludedIndex, 1,
+                    chunkData, chunkIndex, totalChunks);
+            follower.handleMessage(leaderActor, lastInstallSnapshot);
+            offset = offset + 50;
+            lastIncludedIndex++;
+            chunkIndex++;
+        }
 
-            do {
-                chunkData = getNextChunk(bsSnapshot, offset);
-                final InstallSnapshot installSnapshot =
-                    new InstallSnapshot(1, "leader-1", i, 1,
-                        chunkData, chunkIndex, 3);
-                follower.handleMessage(leaderActor, installSnapshot);
-                offset = offset + 50;
-                i++;
-                chunkIndex++;
-            } while ((offset+50) < snapshotLength);
+        ApplySnapshot applySnapshot = MessageCollectorActor.expectFirstMatching(followerActor,
+                ApplySnapshot.class);
+        Snapshot snapshot = applySnapshot.getSnapshot();
+        assertEquals("getLastIndex", lastInstallSnapshot.getLastIncludedIndex(), snapshot.getLastIndex());
+        assertEquals("getLastIncludedTerm", lastInstallSnapshot.getLastIncludedTerm(),
+                snapshot.getLastAppliedTerm());
+        assertEquals("getLastAppliedIndex", lastInstallSnapshot.getLastIncludedIndex(),
+                snapshot.getLastAppliedIndex());
+        assertEquals("getLastTerm", lastInstallSnapshot.getLastIncludedTerm(), snapshot.getLastTerm());
+        Assert.assertArrayEquals("getState", bsSnapshot.toByteArray(), snapshot.getState());
 
-            final InstallSnapshot installSnapshot3 = new InstallSnapshot(1, "leader-1", 3, 1, chunkData, chunkIndex, 3);
-            follower.handleMessage(leaderActor, installSnapshot3);
+        List<InstallSnapshotReply> replies = MessageCollectorActor.getAllMatching(
+                leaderActor, InstallSnapshotReply.class);
+        assertEquals("InstallSnapshotReply count", totalChunks, replies.size());
 
-            String[] matches = new ReceiveWhile<String>(String.class, duration("2 seconds")) {
-                @Override
-                protected String match(Object o) throws Exception {
-                    if (o instanceof ApplySnapshot) {
-                        ApplySnapshot as = (ApplySnapshot)o;
-                        if (as.getSnapshot().getLastIndex() != installSnapshot3.getLastIncludedIndex()) {
-                            return "applySnapshot-lastIndex-mismatch";
-                        }
-                        if (as.getSnapshot().getLastAppliedTerm() != installSnapshot3.getLastIncludedTerm()) {
-                            return "applySnapshot-lastAppliedTerm-mismatch";
-                        }
-                        if (as.getSnapshot().getLastAppliedIndex() != installSnapshot3.getLastIncludedIndex()) {
-                            return "applySnapshot-lastAppliedIndex-mismatch";
-                        }
-                        if (as.getSnapshot().getLastTerm() != installSnapshot3.getLastIncludedTerm()) {
-                            return "applySnapshot-lastTerm-mismatch";
-                        }
-                        return "applySnapshot";
-                    }
+        chunkIndex = 1;
+        for(InstallSnapshotReply reply: replies) {
+            assertEquals("getChunkIndex", chunkIndex++, reply.getChunkIndex());
+            assertEquals("getTerm", 1, reply.getTerm());
+            assertEquals("isSuccess", true, reply.isSuccess());
+            assertEquals("getFollowerId", context.getId(), reply.getFollowerId());
+        }
 
-                    return "ignoreCase";
-                }
-            }.get();
-
-            // Verify that after a snapshot is successfully applied the collected snapshot chunks is reset to empty
-            assertEquals(ByteString.EMPTY, follower.getSnapshotChunksCollected());
-
-            String applySnapshotMatch = "";
-            for (String reply: matches) {
-                if (reply.startsWith("applySnapshot")) {
-                    applySnapshotMatch = reply;
-                }
-            }
-
-            assertEquals("applySnapshot", applySnapshotMatch);
-
-            Object messages = executeLocalOperation(leaderActor, "get-all-messages");
-
-            assertNotNull(messages);
-            assertTrue(messages instanceof List);
-            List<Object> listMessages = (List<Object>) messages;
-
-            int installSnapshotReplyReceivedCount = 0;
-            for (Object message: listMessages) {
-                if (message instanceof InstallSnapshotReply) {
-                    ++installSnapshotReplyReceivedCount;
-                }
-            }
-
-            assertEquals(3, installSnapshotReplyReceivedCount);
-
-        }};
+        Assert.assertNull("Expected null SnapshotTracker", ((Follower)follower).getSnapshotTracker());
     }
 
     @Test
     public void testHandleOutOfSequenceInstallSnapshot() throws Exception {
-        JavaTestKit javaTestKit = new JavaTestKit(getSystem()) {
-            {
+        logStart("testHandleOutOfSequenceInstallSnapshot");
 
-                ActorRef leaderActor = getSystem().actorOf(Props.create(
-                        MessageCollectorActor.class));
+        MockRaftActorContext context = createActorContext();
 
-                MockRaftActorContext context = createActorContext(getRef());
+        follower = createBehavior(context);
 
-                Follower follower = (Follower) createBehavior(context);
+        HashMap<String, String> followerSnapshot = new HashMap<>();
+        followerSnapshot.put("1", "A");
+        followerSnapshot.put("2", "B");
+        followerSnapshot.put("3", "C");
 
-                HashMap<String, String> followerSnapshot = new HashMap<>();
-                followerSnapshot.put("1", "A");
-                followerSnapshot.put("2", "B");
-                followerSnapshot.put("3", "C");
+        ByteString bsSnapshot = toByteString(followerSnapshot);
 
-                ByteString bsSnapshot = toByteString(followerSnapshot);
+        InstallSnapshot installSnapshot = new InstallSnapshot(1, "leader", 3, 1,
+                getNextChunk(bsSnapshot, 10, 50), 3, 3);
+        follower.handleMessage(leaderActor, installSnapshot);
 
-                final InstallSnapshot installSnapshot = new InstallSnapshot(1, "leader-1", 3, 1, getNextChunk(bsSnapshot, 10), 3, 3);
-                follower.handleMessage(leaderActor, installSnapshot);
+        InstallSnapshotReply reply = MessageCollectorActor.expectFirstMatching(leaderActor,
+                InstallSnapshotReply.class);
 
-                Object messages = executeLocalOperation(leaderActor, "get-all-messages");
+        assertEquals("isSuccess", false, reply.isSuccess());
+        assertEquals("getChunkIndex", -1, reply.getChunkIndex());
+        assertEquals("getTerm", 1, reply.getTerm());
+        assertEquals("getFollowerId", context.getId(), reply.getFollowerId());
 
-                assertNotNull(messages);
-                assertTrue(messages instanceof List);
-                List<Object> listMessages = (List<Object>) messages;
-
-                int installSnapshotReplyReceivedCount = 0;
-                for (Object message: listMessages) {
-                    if (message instanceof InstallSnapshotReply) {
-                        ++installSnapshotReplyReceivedCount;
-                    }
-                }
-
-                assertEquals(1, installSnapshotReplyReceivedCount);
-                InstallSnapshotReply reply = (InstallSnapshotReply) listMessages.get(0);
-                assertEquals(false, reply.isSuccess());
-                assertEquals(-1, reply.getChunkIndex());
-                assertEquals(ByteString.EMPTY, follower.getSnapshotChunksCollected());
-
-
-            }};
+        Assert.assertNull("Expected null SnapshotTracker", ((Follower)follower).getSnapshotTracker());
     }
 
-    public Object executeLocalOperation(ActorRef actor, Object message) throws Exception {
-        return MessageCollectorActor.getAllMessages(actor);
-    }
-
-    public ByteString getNextChunk (ByteString bs, int offset){
+    public ByteString getNextChunk (ByteString bs, int offset, int chunkSize){
         int snapshotLength = bs.size();
         int start = offset;
-        int size = 50;
-        if (50 > snapshotLength) {
+        int size = chunkSize;
+        if (chunkSize > snapshotLength) {
             size = snapshotLength;
         } else {
-            if ((start + 50) > snapshotLength) {
+            if ((start + chunkSize) > snapshotLength) {
                 size = snapshotLength - start;
             }
         }
         return bs.substring(start, start + size);
     }
 
-    private ByteString toByteString(Map<String, String> state) {
-        ByteArrayOutputStream b = null;
-        ObjectOutputStream o = null;
-        try {
-            try {
-                b = new ByteArrayOutputStream();
-                o = new ObjectOutputStream(b);
-                o.writeObject(state);
-                byte[] snapshotBytes = b.toByteArray();
-                return ByteString.copyFrom(snapshotBytes);
-            } finally {
-                if (o != null) {
-                    o.flush();
-                    o.close();
-                }
-                if (b != null) {
-                    b.close();
-                }
-            }
-        } catch (IOException e) {
-            org.junit.Assert.fail("IOException in converting Hashmap to Bytestring:" + e);
-        }
-        return null;
+    private void expectAndVerifyAppendEntriesReply(int expTerm, boolean expSuccess,
+            String expFollowerId, long expLogLastTerm, long expLogLastIndex) {
+
+        AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor,
+                AppendEntriesReply.class);
+
+        assertEquals("isSuccess", expSuccess, reply.isSuccess());
+        assertEquals("getTerm", expTerm, reply.getTerm());
+        assertEquals("getFollowerId", expFollowerId, reply.getFollowerId());
+        assertEquals("getLogLastTerm", expLogLastTerm, reply.getLogLastTerm());
+        assertEquals("getLogLastIndex", expLogLastIndex, reply.getLogLastIndex());
+    }
+
+    private ReplicatedLogEntry newReplicatedLogEntry(long term, long index, String data) {
+        return new MockRaftActorContext.MockReplicatedLogEntry(term, index,
+                new MockRaftActorContext.MockPayload(data));
     }
 }
