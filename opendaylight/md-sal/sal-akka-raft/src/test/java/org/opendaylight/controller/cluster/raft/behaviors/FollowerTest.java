@@ -41,11 +41,13 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         return new Follower(actorContext);
     }
 
-    @Override protected  RaftActorContext createActorContext() {
+    @Override
+    protected  MockRaftActorContext createActorContext() {
         return createActorContext(followerActor);
     }
 
-    protected  RaftActorContext createActorContext(ActorRef actorRef){
+    @Override
+    protected  MockRaftActorContext createActorContext(ActorRef actorRef){
         return new MockRaftActorContext("test", getSystem(), actorRef);
     }
 
@@ -54,12 +56,14 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         new JavaTestKit(getSystem()) {{
 
             new Within(DefaultConfigParamsImpl.HEART_BEAT_INTERVAL.$times(6)) {
+                @Override
                 protected void run() {
 
                     Follower follower = new Follower(createActorContext(getTestActor()));
 
                     final Boolean out = new ExpectMsg<Boolean>(DefaultConfigParamsImpl.HEART_BEAT_INTERVAL.$times(6), "ElectionTimeout") {
                         // do not put code outside this method, will run afterwards
+                        @Override
                         protected Boolean match(Object in) {
                             if (in instanceof ElectionTimeout) {
                                 return true;
@@ -92,6 +96,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         new JavaTestKit(getSystem()) {{
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     RaftActorContext context = createActorContext(getTestActor());
@@ -104,6 +109,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
 
                     final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"), "RequestVoteReply") {
                         // do not put code outside this method, will run afterwards
+                        @Override
                         protected Boolean match(Object in) {
                             if (in instanceof RequestVoteReply) {
                                 RequestVoteReply reply = (RequestVoteReply) in;
@@ -125,6 +131,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         new JavaTestKit(getSystem()) {{
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     RaftActorContext context = createActorContext(getTestActor());
@@ -137,6 +144,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
 
                     final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"), "RequestVoteReply") {
                         // do not put code outside this method, will run afterwards
+                        @Override
                         protected Boolean match(Object in) {
                             if (in instanceof RequestVoteReply) {
                                 RequestVoteReply reply = (RequestVoteReply) in;
@@ -203,8 +211,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         throws Exception {
         new JavaTestKit(getSystem()) {{
 
-            MockRaftActorContext context = (MockRaftActorContext)
-                createActorContext();
+            MockRaftActorContext context = createActorContext();
 
             // First set the receivers term to lower number
             context.getTermInformation().update(95, "test");
@@ -233,6 +240,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"),
                 "AppendEntriesReply") {
                 // do not put code outside this method, will run afterwards
+                @Override
                 protected Boolean match(Object in) {
                     if (in instanceof AppendEntriesReply) {
                         AppendEntriesReply reply = (AppendEntriesReply) in;
@@ -263,8 +271,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
     public void testHandleAppendEntriesAddNewEntries() throws Exception {
         new JavaTestKit(getSystem()) {{
 
-            MockRaftActorContext context = (MockRaftActorContext)
-                createActorContext();
+            MockRaftActorContext context = createActorContext();
 
             // First set the receivers term to lower number
             context.getTermInformation().update(1, "test");
@@ -312,6 +319,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"),
                 "AppendEntriesReply") {
                 // do not put code outside this method, will run afterwards
+                @Override
                 protected Boolean match(Object in) {
                     if (in instanceof AppendEntriesReply) {
                         AppendEntriesReply reply = (AppendEntriesReply) in;
@@ -343,8 +351,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         throws Exception {
         new JavaTestKit(getSystem()) {{
 
-            MockRaftActorContext context = (MockRaftActorContext)
-                createActorContext();
+            MockRaftActorContext context = createActorContext();
 
             // First set the receivers term to lower number
             context.getTermInformation().update(2, "test");
@@ -405,6 +412,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"),
                 "AppendEntriesReply") {
                 // do not put code outside this method, will run afterwards
+                @Override
                 protected Boolean match(Object in) {
                     if (in instanceof AppendEntriesReply) {
                         AppendEntriesReply reply = (AppendEntriesReply) in;
@@ -425,8 +433,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
     public void testHandleAppendEntriesPreviousLogEntryMissing(){
         new JavaTestKit(getSystem()) {{
 
-            MockRaftActorContext context = (MockRaftActorContext)
-                    createActorContext();
+            MockRaftActorContext context = createActorContext();
 
             // Prepare the receivers log
             MockRaftActorContext.SimpleReplicatedLog log =
@@ -462,6 +469,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"),
                     "AppendEntriesReply") {
                 // do not put code outside this method, will run afterwards
+                @Override
                 protected Boolean match(Object in) {
                     if (in instanceof AppendEntriesReply) {
                         AppendEntriesReply reply = (AppendEntriesReply) in;
@@ -482,8 +490,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
     public void testHandleAppendAfterInstallingSnapshot(){
         new JavaTestKit(getSystem()) {{
 
-            MockRaftActorContext context = (MockRaftActorContext)
-                    createActorContext();
+            MockRaftActorContext context = createActorContext();
 
 
             // Prepare the receivers log
@@ -518,6 +525,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"),
                     "AppendEntriesReply") {
                 // do not put code outside this method, will run afterwards
+                @Override
                 protected Boolean match(Object in) {
                     if (in instanceof AppendEntriesReply) {
                         AppendEntriesReply reply = (AppendEntriesReply) in;
@@ -548,8 +556,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             ActorRef leaderActor = getSystem().actorOf(Props.create(
                 MessageCollectorActor.class));
 
-            MockRaftActorContext context = (MockRaftActorContext)
-                createActorContext(getRef());
+            MockRaftActorContext context = createActorContext(getRef());
 
             Follower follower = (Follower)createBehavior(context);
 
@@ -641,8 +648,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
                 ActorRef leaderActor = getSystem().actorOf(Props.create(
                         MessageCollectorActor.class));
 
-                MockRaftActorContext context = (MockRaftActorContext)
-                        createActorContext(getRef());
+                MockRaftActorContext context = createActorContext(getRef());
 
                 Follower follower = (Follower) createBehavior(context);
 

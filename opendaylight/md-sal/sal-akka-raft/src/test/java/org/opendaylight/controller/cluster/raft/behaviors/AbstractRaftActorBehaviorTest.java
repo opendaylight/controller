@@ -1,8 +1,12 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.testkit.JavaTestKit;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.AbstractActorTest;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
@@ -16,12 +20,6 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
 
@@ -67,8 +65,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
         throws Exception {
         new JavaTestKit(getSystem()) {{
 
-            MockRaftActorContext context = (MockRaftActorContext)
-                createActorContext();
+            MockRaftActorContext context = createActorContext();
 
             // First set the receivers term to a high number (1000)
             context.getTermInformation().update(1000, "test");
@@ -90,6 +87,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
             final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"),
                 "AppendEntriesReply") {
                 // do not put code outside this method, will run afterwards
+                @Override
                 protected Boolean match(Object in) {
                     if (in instanceof AppendEntriesReply) {
                         AppendEntriesReply reply = (AppendEntriesReply) in;
@@ -112,8 +110,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {
             {
 
-                MockRaftActorContext context = (MockRaftActorContext)
-                    createActorContext();
+                MockRaftActorContext context = createActorContext();
 
                 // First set the receivers term to lower number
                 context.getTermInformation().update(2, "test");
@@ -169,6 +166,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     RaftActorBehavior behavior = createBehavior(
@@ -185,6 +183,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
                             new ExpectMsg<Boolean>(duration("1 seconds"),
                                 "RequestVoteReply") {
                                 // do not put code outside this method, will run afterwards
+                                @Override
                                 protected Boolean match(Object in) {
                                     if (in instanceof RequestVoteReply) {
                                         RequestVoteReply reply =
@@ -213,6 +212,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     RaftActorContext actorContext =
@@ -238,6 +238,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
                             new ExpectMsg<Boolean>(duration("1 seconds"),
                                 "RequestVoteReply") {
                                 // do not put code outside this method, will run afterwards
+                                @Override
                                 protected Boolean match(Object in) {
                                     if (in instanceof RequestVoteReply) {
                                         RequestVoteReply reply =
@@ -268,6 +269,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     RaftActorContext context =
@@ -284,6 +286,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
                         new ExpectMsg<Boolean>(duration("1 seconds"),
                             "RequestVoteReply") {
                             // do not put code outside this method, will run afterwards
+                            @Override
                             protected Boolean match(Object in) {
                                 if (in instanceof RequestVoteReply) {
                                     RequestVoteReply reply =
@@ -371,11 +374,11 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
         return createBehavior(createActorContext());
     }
 
-    protected RaftActorContext createActorContext() {
+    protected MockRaftActorContext createActorContext() {
         return new MockRaftActorContext();
     }
 
-    protected RaftActorContext createActorContext(ActorRef actor) {
+    protected MockRaftActorContext createActorContext(ActorRef actor) {
         return new MockRaftActorContext("test", getSystem(), actor);
     }
 
