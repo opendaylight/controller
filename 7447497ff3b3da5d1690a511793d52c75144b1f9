@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_48d6d3f2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxyTest.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 336,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-10T05:06:40Z",
+      "side": 1,
+      "message": "Can we make this deterministic with a CountDownLatch instead of an artificial sleep? Eg,\n\nfinal CountDownLatch setTxCreationLimitLatch \u003d new CountDownLatch(1);\n\nAnswer\u003cVoid\u003e answer \u003d new Answer\u003cVoid\u003e() {\n    @Override\n    public Void answer(InvocationOnMock invocation) {\n        setTxCreationLimitLatch.countDown();\n        return null;\n    }\n};\n        \ndoAnswer(answer).when(actorContext).setTxCreationLimitLatch(0.5);\n\n...\n\nassertEquals(\"setTxCreationLimitLatch was not invoked\",true,\n    Uninterruptibles.awaitUninterruptibly(\n         setTxCreationLimitLatch, 5, TimeUnit.SECONDS));",
+      "revId": "7447497ff3b3da5d1690a511793d52c75144b1f9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
