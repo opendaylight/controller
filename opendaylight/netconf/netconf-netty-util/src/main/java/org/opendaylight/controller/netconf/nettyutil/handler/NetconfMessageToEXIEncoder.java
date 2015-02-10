@@ -30,22 +30,28 @@ public final class NetconfMessageToEXIEncoder extends MessageToByteEncoder<Netco
     private static final Logger LOG = LoggerFactory.getLogger(NetconfMessageToEXIEncoder.class);
     /**
      * This class is not marked as shared, so it can be attached to only a single channel,
-     * which means that {@link #encode(ChannelHandlerContext, NetconfMessage, ByteBuf)}
+     * which means that {@link #encode(io.netty.channel.ChannelHandlerContext, org.opendaylight.controller.netconf.api.NetconfMessage, io.netty.buffer.ByteBuf)}
      * cannot be invoked concurrently. Hence we can reuse the transmogrifier.
      */
-    private final Transmogrifier transmogrifier;
+    private final NetconfEXICodec codec;
 
-    private NetconfMessageToEXIEncoder(final Transmogrifier transmogrifier) {
-        this.transmogrifier = Preconditions.checkNotNull(transmogrifier);
+    private NetconfMessageToEXIEncoder(final NetconfEXICodec codec) {
+        this.codec = Preconditions.checkNotNull(codec);
     }
 
     public static NetconfMessageToEXIEncoder create(final NetconfEXICodec codec) throws EXIOptionsException, TransmogrifierException {
-        return new NetconfMessageToEXIEncoder(codec.getTransmogrifier());
+        return new NetconfMessageToEXIEncoder(codec);
     }
 
     @Override
     protected void encode(final ChannelHandlerContext ctx, final NetconfMessage msg, final ByteBuf out) throws EXIOptionsException, IOException, TransformerException, TransmogrifierException {
         LOG.trace("Sent to encode : {}", msg);
+
+        // TODO Workaround for bug 2679, recreate transmogrifier every time
+        // If the transmogrifier is reused, encoded xml can become non valid according to EXI decoder
+        // Seems like a bug in the nagasena library (try newer version of the library or fix the bug inside of it)
+        // Related bugs 2459: reuse nagasena resources, 2458: upgrade nagasena to newest version
+        final Transmogrifier transmogrifier = codec.getTransmogrifier();
 
         try (final OutputStream os = new ByteBufOutputStream(out)) {
             transmogrifier.setOutputStream(os);
