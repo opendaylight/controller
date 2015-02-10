@@ -59,15 +59,12 @@ public class AppendEntriesReply extends AbstractRaftRPC {
         return followerId;
     }
 
-    @Override public String toString() {
-        final StringBuilder sb =
-            new StringBuilder("AppendEntriesReply{");
-        sb.append("term=").append(term);
-        sb.append(", success=").append(success);
-        sb.append(", logLastIndex=").append(logLastIndex);
-        sb.append(", logLastTerm=").append(logLastTerm);
-        sb.append(", followerId='").append(followerId).append('\'');
-        sb.append('}');
-        return sb.toString();
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("AppendEntriesReply [term=").append(term).append(", success=").append(success)
+                .append(", logLastIndex=").append(logLastIndex).append(", logLastTerm=").append(logLastTerm)
+                .append(", followerId=").append(followerId).append("]");
+        return builder.toString();
     }
 }
