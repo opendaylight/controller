@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import akka.event.LoggingAdapter;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.Collection;
@@ -22,6 +21,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.slf4j.Logger;
 
 /**
  * Coordinates persistence recovery of journal log entries and snapshots for a shard. Each snapshot
@@ -40,10 +40,10 @@ class ShardRecoveryCoordinator {
     private final SchemaContext schemaContext;
     private final String shardName;
     private final ExecutorService executor;
-    private final LoggingAdapter log;
+    private final Logger log;
     private final String name;
 
-    ShardRecoveryCoordinator(String shardName, SchemaContext schemaContext, LoggingAdapter log,
+    ShardRecoveryCoordinator(String shardName, SchemaContext schemaContext, Logger log,
             String name) {
         this.schemaContext = schemaContext;
         this.shardName = shardName;
