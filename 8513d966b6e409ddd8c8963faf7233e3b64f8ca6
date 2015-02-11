@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_d8d4f2be",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/AbstractUntypedPersistentActor.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-11T17:26:27Z",
+      "side": 1,
+      "message": "Should we use the derived actor\u0027s class here (e.g. Shard)? This results in a lot of duplicate logging as RaftActor and Shard pretty much log something on every message. This particularly produces a lot of unnecessary extra output with heartbeats.\nMaybe we should use the AbstractUntypedPersistentActor class here and print the actor name in each log message for identification.",
+      "revId": "8513d966b6e409ddd8c8963faf7233e3b64f8ca6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
