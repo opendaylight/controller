@@ -10,7 +10,7 @@
  */
 package org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.${artifactId}.impl.rev141210;
 
-import ${package}.${classPrefix}Provider;
+import ${package}.impl.${classPrefix}Provider;
 
 public class ${classPrefix}ImplModule extends org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.${artifactId}.impl.rev141210.Abstract${classPrefix}ImplModule {
     public ${classPrefix}ImplModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
