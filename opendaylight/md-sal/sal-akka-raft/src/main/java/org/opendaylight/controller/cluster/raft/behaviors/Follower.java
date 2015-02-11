@@ -255,7 +255,8 @@ public class Follower extends AbstractRaftActorBehavior {
             lastIndex(), lastTerm()), actor());
 
         if (!context.isSnapshotCaptureInitiated()) {
-            fakeSnapshot(appendEntries.getReplicatedToAllIndex(), appendEntries.getReplicatedToAllIndex());
+            context.getReplicatedLog().fakeSnapshot(appendEntries.getReplicatedToAllIndex(), context.getLastApplied(),
+                    context.getTermInformation().getCurrentTerm());
         }
 
         return this;
