@@ -99,6 +99,16 @@ public class TestActorFactory implements AutoCloseable {
         return actorRef;
     }
 
+    public ActorRef createActor(Class<?> actorClass, String actorId) {
+        ActorRef actorRef = system.actorOf(Props.create(actorClass), actorId);
+        createdActors.add(actorRef);
+        return actorRef;
+    }
+
+    public void addActor(ActorRef actorRef) {
+        createdActors.add(actorRef);
+    }
+
     /**
      * Generate a friendly but unique actor id/name
      * @param prefix
