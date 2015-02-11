@@ -151,6 +151,6 @@ public interface RestconfService {
     @Path("/streams")
     @Produces({ Draft02.MediaTypes.API + JSON, Draft02.MediaTypes.API + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public StructuredData getAvailableStreams(@Context UriInfo uriInfo);
+    public NormalizedNodeContext getAvailableStreams(@Context UriInfo uriInfo);
 
 }
