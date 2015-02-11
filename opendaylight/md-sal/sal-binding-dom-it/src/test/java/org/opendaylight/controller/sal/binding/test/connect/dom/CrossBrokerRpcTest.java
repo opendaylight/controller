@@ -12,7 +12,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
-import java.math.BigInteger;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.Future;
@@ -25,19 +24,18 @@ import org.opendaylight.controller.sal.binding.test.util.BindingBrokerTestFactor
 import org.opendaylight.controller.sal.binding.test.util.BindingTestContext;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.NodeFlowRemoved;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeContext;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.KnockKnockInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.KnockKnockInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.KnockKnockOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.KnockKnockOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.OpendaylightOfMigrationTestModelService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.List1;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.rpc.routing.rev140701.TestContext;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -57,7 +55,7 @@ public class CrossBrokerRpcTest {
     protected RpcProvisionRegistry biRpcRegistry;
     private BindingTestContext testContext;
     private RpcImplementation biRpcInvoker;
-    private MessageCapturingFlowService flowService;
+    private MessageCapturingFlowService knockService;
 
     public static final NodeId NODE_A = new NodeId("a");
     public static final NodeId NODE_B = new NodeId("b");
@@ -65,7 +63,7 @@ public class CrossBrokerRpcTest {
     public static final NodeId NODE_D = new NodeId("d");
 
     private static final QName NODE_ID_QNAME = QName.create(Node.QNAME, "id");
-    private static final QName ADD_FLOW_QNAME = QName.create(NodeFlowRemoved.QNAME, "add-flow");
+    private static final QName KNOCK_KNOCK_QNAME = QName.create(List1.QNAME, "knock-knock");
 
     public static final InstanceIdentifier<Node> BA_NODE_A_ID = createBANodeIdentifier(NODE_A);
     public static final InstanceIdentifier<Node> BA_NODE_B_ID = createBANodeIdentifier(NODE_B);
@@ -93,42 +91,43 @@ public class CrossBrokerRpcTest {
         assertNotNull(baRpcRegistry);
         assertNotNull(biRpcRegistry);
 
-        flowService = MessageCapturingFlowService.create(baRpcRegistry);
+        knockService = MessageCapturingFlowService.create(baRpcRegistry);
 
     }
 
     @Test
     public void bindingRoutedRpcProvider_DomInvokerTest() throws Exception {
 
-        flowService//
-                .registerPath(NodeContext.class, BA_NODE_A_ID) //
-                .registerPath(NodeContext.class, BA_NODE_B_ID) //
-                .setAddFlowResult(addFlowResult(true, 10));
+        knockService//
+                .registerPath(TestContext.class, BA_NODE_A_ID) //
+                .registerPath(TestContext.class, BA_NODE_B_ID) //
+                .setKnockKnockResult(knockResult(true, "open"));
 
-        SalFlowService baFlowInvoker = baRpcRegistry.getRpcService(SalFlowService.class);
-        assertNotSame(flowService, baFlowInvoker);
+        OpendaylightOfMigrationTestModelService baKnockInvoker =
+                baRpcRegistry.getRpcService(OpendaylightOfMigrationTestModelService.class);
+        assertNotSame(knockService, baKnockInvoker);
 
-        AddFlowInput addFlowA = addFlow(BA_NODE_A_ID) //
-                .setPriority(100).setBarrier(true).build();
+        KnockKnockInput knockKnockA = knockKnock(BA_NODE_A_ID) //
+                .setQuestion("who's there?").build();
 
-        CompositeNode addFlowDom = toDomRpc(ADD_FLOW_QNAME, addFlowA);
-        assertNotNull(addFlowDom);
-        RpcResult<CompositeNode> domResult = biRpcInvoker.invokeRpc(ADD_FLOW_QNAME, addFlowDom).get();
+        CompositeNode knockKnockDom = toDomRpc(KNOCK_KNOCK_QNAME, knockKnockA);
+        assertNotNull(knockKnockDom);
+        RpcResult<CompositeNode> domResult = biRpcInvoker.invokeRpc(KNOCK_KNOCK_QNAME, knockKnockDom).get();
         assertNotNull(domResult);
         assertTrue("DOM result is successful.", domResult.isSuccessful());
-        assertTrue("Bidning Add Flow RPC was captured.", flowService.getReceivedAddFlows().containsKey(BA_NODE_A_ID));
-        assertEquals(addFlowA, flowService.getReceivedAddFlows().get(BA_NODE_A_ID).iterator().next());
+        assertTrue("Bidning Add Flow RPC was captured.", knockService.getReceivedKnocks().containsKey(BA_NODE_A_ID));
+        assertEquals(knockKnockA, knockService.getReceivedKnocks().get(BA_NODE_A_ID).iterator().next());
     }
 
     @Test
     public void bindingRpcInvoker_DomRoutedProviderTest() throws Exception {
-        AddFlowOutputBuilder builder = new AddFlowOutputBuilder();
-        builder.setTransactionId(new TransactionId(BigInteger.valueOf(10)));
-        final AddFlowOutput output = builder.build();
-        org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration registration = biRpcRegistry.addRoutedRpcImplementation(ADD_FLOW_QNAME, new RpcImplementation() {
+        KnockKnockOutputBuilder builder = new KnockKnockOutputBuilder();
+        builder.setAnswer("open");
+        final KnockKnockOutput output = builder.build();
+        org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration registration = biRpcRegistry.addRoutedRpcImplementation(KNOCK_KNOCK_QNAME, new RpcImplementation() {
             @Override
             public Set<QName> getSupportedRpcs() {
-                return ImmutableSet.of(ADD_FLOW_QNAME);
+                return ImmutableSet.of(KNOCK_KNOCK_QNAME);
             }
 
             @Override
@@ -139,8 +138,9 @@ public class CrossBrokerRpcTest {
         });
         registration.registerPath(NodeContext.QNAME, BI_NODE_C_ID);
 
-        SalFlowService baFlowInvoker = baRpcRegistry.getRpcService(SalFlowService.class);
-        Future<RpcResult<AddFlowOutput>> baResult = baFlowInvoker.addFlow(addFlow(BA_NODE_C_ID).setPriority(500).build());
+        OpendaylightOfMigrationTestModelService baKnockInvoker =
+                baRpcRegistry.getRpcService(OpendaylightOfMigrationTestModelService.class);
+        Future<RpcResult<KnockKnockOutput>> baResult = baKnockInvoker.knockKnock((knockKnock(BA_NODE_C_ID).setQuestion("Who's there?").build()));
         assertNotNull(baResult);
         assertEquals(output,baResult.get().getResult());
     }
@@ -163,21 +163,21 @@ public class CrossBrokerRpcTest {
                 .nodeWithKey(Node.QNAME, NODE_ID_QNAME, node.getValue()).toInstance();
     }
 
-    private Future<RpcResult<AddFlowOutput>> addFlowResult(boolean success, long xid) {
-        AddFlowOutput output = new AddFlowOutputBuilder() //
-                .setTransactionId(new TransactionId(BigInteger.valueOf(xid))).build();
-        RpcResult<AddFlowOutput> result = RpcResultBuilder.<AddFlowOutput>status(success).withResult(output).build();
+    private Future<RpcResult<KnockKnockOutput>> knockResult(boolean success, String answer) {
+        KnockKnockOutput output = new KnockKnockOutputBuilder() //
+                .setAnswer(answer).build();
+        RpcResult<KnockKnockOutput> result = RpcResultBuilder.<KnockKnockOutput>status(success).withResult(output).build();
         return Futures.immediateFuture(result);
     }
 
-    private static AddFlowInputBuilder addFlow(InstanceIdentifier<Node> nodeId) {
-        AddFlowInputBuilder builder = new AddFlowInputBuilder();
-        builder.setNode(new NodeRef(nodeId));
+    private static KnockKnockInputBuilder knockKnock(InstanceIdentifier<Node> nodeId) {
+        KnockKnockInputBuilder builder = new KnockKnockInputBuilder();
+        builder.setKnockerId(nodeId);
         return builder;
     }
 
-    private CompositeNode toDomRpc(QName rpcName, AddFlowInput addFlowA) {
+    private CompositeNode toDomRpc(QName rpcName, KnockKnockInput knockInput) {
         return new CompositeNodeTOImpl(rpcName, null,
-                Collections.<org.opendaylight.yangtools.yang.data.api.Node<?>> singletonList(toDomRpcInput(addFlowA)));
+                Collections.<org.opendaylight.yangtools.yang.data.api.Node<?>> singletonList(toDomRpcInput(knockInput)));
     }
 }

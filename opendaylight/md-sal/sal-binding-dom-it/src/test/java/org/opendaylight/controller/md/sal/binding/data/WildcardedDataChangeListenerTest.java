@@ -22,21 +22,19 @@ import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.table.types.rev131026.table.features.TableFeatures;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.table.types.rev131026.table.features.TableFeaturesBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.table.types.rev131026.table.features.TableFeaturesKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.TllComplexAugment;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.List1;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.List1Builder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.List1Key;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.list1.List11;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.list1.List11Builder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.list1.List11Key;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.list1.List12;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.list1.List12Builder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.list1.List12Key;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.Top;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListKey;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
@@ -49,50 +47,50 @@ import com.google.common.util.concurrent.SettableFuture;
 @SuppressWarnings("deprecation")
 public class WildcardedDataChangeListenerTest extends AbstractDataServiceTest {
 
-    private static final NodeKey NODE_0_KEY = new NodeKey(new NodeId("test:0"));
-    private static final NodeKey NODE_1_KEY = new NodeKey(new NodeId("test:1"));
+    private static final TopLevelListKey FOO_KEY = new TopLevelListKey("foo");
+    private static final TopLevelListKey BAR_KEY = new TopLevelListKey("bar");
 
-    public static final InstanceIdentifier<Flow> DEEP_WILDCARDED_PATH = InstanceIdentifier.builder(Nodes.class)
-            .child(Node.class) //
-            .augmentation(FlowCapableNode.class) //
-            .child(Table.class) //
-            .child(Flow.class) //
+    public static final InstanceIdentifier<List11> DEEP_WILDCARDED_PATH = InstanceIdentifier.builder(Top.class)
+            .child(TopLevelList.class) //
+            .augmentation(TllComplexAugment.class) //
+            .child(List1.class) //
+            .child(List11.class)
             .build();
 
-    private static final TableKey TABLE_0_KEY = new TableKey((short) 0);
-    private static final TableFeaturesKey TABLE_FEATURES_KEY = new TableFeaturesKey((short) 0);
+    private static final List1Key LIST1_KEY = new List1Key("one");
+    private static final List12Key LIST12_KEY = new List12Key(0);
 
-    private static final InstanceIdentifier<Table> NODE_0_TABLE_PATH = InstanceIdentifier.builder(Nodes.class)
-            .child(Node.class, NODE_0_KEY) //
-            .augmentation(FlowCapableNode.class) //
-            .child(Table.class, TABLE_0_KEY) //
+    private static final InstanceIdentifier<List1> FOO_LIST1_PATH = InstanceIdentifier.builder(Top.class)
+            .child(TopLevelList.class, FOO_KEY) //
+            .augmentation(TllComplexAugment.class) //
+            .child(List1.class) //
             .build();
 
-    private static final InstanceIdentifier<Table> NODE_1_TABLE_PATH = InstanceIdentifier.builder(Nodes.class)
-            .child(Node.class, NODE_1_KEY) //
-            .augmentation(FlowCapableNode.class) //
-            .child(Table.class, TABLE_0_KEY) //
+    private static final InstanceIdentifier<List1> BAR_LIST1_PATH = InstanceIdentifier.builder(Top.class)
+            .child(TopLevelList.class, BAR_KEY) //
+            .augmentation(TllComplexAugment.class) //
+            .child(List1.class) //
             .build();
 
-    private static final FlowKey FLOW_KEY = new FlowKey(new FlowId("test"));
+    private static final List11Key LIST11_KEY = new List11Key(0);
 
-    private static final InstanceIdentifier<Flow> NODE_0_FLOW_PATH = NODE_0_TABLE_PATH.child(Flow.class, FLOW_KEY);
+    private static final InstanceIdentifier<List11> FOO_LIST11_PATH =
+            FOO_LIST1_PATH.child(List11.class, LIST11_KEY);
 
-    private static final InstanceIdentifier<Flow> NODE_1_FLOW_PATH = NODE_1_TABLE_PATH.child(Flow.class, FLOW_KEY);
+    private static final InstanceIdentifier<List11> BAR_LIST11_PATH =
+            BAR_LIST1_PATH.child(List11.class, LIST11_KEY);
 
-    private static final InstanceIdentifier<TableFeatures> NODE_0_TABLE_FEATURES_PATH =
-            NODE_0_TABLE_PATH.child(TableFeatures.class, TABLE_FEATURES_KEY);
+    private static final InstanceIdentifier<List12> FOO_LIST12_PATH =
+            FOO_LIST1_PATH.child(List12.class, LIST12_KEY);
 
-    private static final TableFeatures TABLE_FEATURES = new TableFeaturesBuilder()//
-            .setKey(TABLE_FEATURES_KEY) //
-            .setName("Foo") //
-            .setMaxEntries(1000L) //
+    private static final List12 LIST12 = new List12Builder()//
+            .setKey(LIST12_KEY) //
+            .setAttrStr("Foo") //
             .build();
 
-    private static final Flow FLOW = new FlowBuilder() //
-            .setKey(FLOW_KEY) //
-            .setBarrier(true) //
-            .setStrict(true) //
+    private static final List11 LIST11 = new List11Builder() //
+            .setKey(LIST11_KEY) //
+            .setAttrStr("nested") //
             .build();
 
     @Test
@@ -110,9 +108,8 @@ public class WildcardedDataChangeListenerTest extends AbstractDataServiceTest {
         });
 
         DataModificationTransaction transaction = dataBroker.beginTransaction();
-        transaction.putOperationalData(NODE_0_TABLE_FEATURES_PATH, TABLE_FEATURES);
-        transaction.putOperationalData(NODE_0_FLOW_PATH, FLOW);
-        transaction.putOperationalData(NODE_1_FLOW_PATH, FLOW);
+        transaction.putOperationalData(FOO_LIST11_PATH, LIST11);
+        transaction.putOperationalData(BAR_LIST11_PATH, LIST11);
         transaction.commit().get();
 
         DataChangeEvent<InstanceIdentifier<?>, DataObject> event = eventFuture.get(1000, TimeUnit.MILLISECONDS);
@@ -135,20 +132,20 @@ public class WildcardedDataChangeListenerTest extends AbstractDataServiceTest {
         });
 
         DataModificationTransaction tableTx = dataBroker.beginTransaction();
-        tableTx.putOperationalData(NODE_0_TABLE_FEATURES_PATH, TABLE_FEATURES);
+        tableTx.putOperationalData(FOO_LIST12_PATH, LIST12);
         tableTx.commit().get();
 
         assertFalse(eventFuture.isDone());
 
         DataModificationTransaction flowTx = dataBroker.beginTransaction();
 
-        Table table = new TableBuilder() //
-                .setKey(TABLE_0_KEY) //
-                .setFlow(Collections.singletonList(FLOW)) //
+        List1 listViaUses = new List1Builder() //
+                .setKey(LIST1_KEY) //
+                .setList11(Collections.singletonList(LIST11)) //
                 .build();
 
-        flowTx.putOperationalData(NODE_0_TABLE_PATH, table);
-        flowTx.putOperationalData(NODE_1_FLOW_PATH, FLOW);
+        flowTx.putOperationalData(FOO_LIST1_PATH, listViaUses);
+        flowTx.putOperationalData(BAR_LIST11_PATH, LIST11);
         flowTx.commit().get();
 
         validateEvent(eventFuture.get(1000, TimeUnit.MILLISECONDS));
@@ -161,7 +158,7 @@ public class WildcardedDataChangeListenerTest extends AbstractDataServiceTest {
 
         // We wrote initial state NODE_0_FLOW
         DataModificationTransaction transaction = dataBroker.beginTransaction();
-        transaction.putOperationalData(NODE_0_FLOW_PATH, FLOW);
+        transaction.putOperationalData(FOO_LIST11_PATH, LIST11);
         transaction.commit().get();
 
         // We registered DataChangeListener
@@ -176,23 +173,23 @@ public class WildcardedDataChangeListenerTest extends AbstractDataServiceTest {
         assertFalse(eventFuture.isDone());
 
         DataModificationTransaction secondTx = dataBroker.beginTransaction();
-        secondTx.putOperationalData(NODE_0_FLOW_PATH, FLOW);
-        secondTx.putOperationalData(NODE_1_FLOW_PATH, FLOW);
+        secondTx.putOperationalData(FOO_LIST11_PATH, LIST11);
+        secondTx.putOperationalData(BAR_LIST11_PATH, LIST11);
         secondTx.commit().get();
 
         DataChangeEvent<InstanceIdentifier<?>, DataObject> event = (eventFuture.get(1000, TimeUnit.MILLISECONDS));
         assertNotNull(event);
         // Data change should contains NODE_1 Flow - which was added
-        assertTrue(event.getCreatedOperationalData().containsKey(NODE_1_FLOW_PATH));
+        assertTrue(event.getCreatedOperationalData().containsKey(BAR_LIST11_PATH));
         // Data change must not containe NODE_0 Flow which was replaced with same value.
-        assertFalse(event.getUpdatedOperationalData().containsKey(NODE_0_FLOW_PATH));
+        assertFalse(event.getUpdatedOperationalData().containsKey(FOO_LIST11_PATH));
     }
 
     private static void validateEvent(final DataChangeEvent<InstanceIdentifier<?>, DataObject> event) {
         assertNotNull(event);
-        assertTrue(event.getCreatedOperationalData().containsKey(NODE_1_FLOW_PATH));
-        assertTrue(event.getCreatedOperationalData().containsKey(NODE_0_FLOW_PATH));
-        assertFalse(event.getCreatedOperationalData().containsKey(NODE_0_TABLE_FEATURES_PATH));
+        assertTrue(event.getCreatedOperationalData().containsKey(BAR_LIST11_PATH));
+        assertTrue(event.getCreatedOperationalData().containsKey(FOO_LIST11_PATH));
+        assertFalse(event.getCreatedOperationalData().containsKey(FOO_LIST12_PATH));
     }
 
 }
