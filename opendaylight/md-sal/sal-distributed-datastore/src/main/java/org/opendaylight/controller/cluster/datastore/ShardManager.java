@@ -271,7 +271,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
         if(newModules.containsAll(knownModules)) {
 
-            LOG.info("New SchemaContext has a super set of current knownModules - persisting info");
+            LOG.debug("New SchemaContext has a super set of current knownModules - persisting info");
 
             knownModules = ImmutableSet.copyOf(newModules);
 
@@ -279,7 +279,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
                 @Override
                 public void apply(SchemaContextModules param) throws Exception {
-                    LOG.info("Sending new SchemaContext to Shards");
+                    LOG.debug("Sending new SchemaContext to Shards");
                     for (ShardInformation info : localShards.values()) {
                         if (info.getActor() == null) {
                             info.setActor(getContext().actorOf(Shard.props(info.getShardId(),
@@ -293,7 +293,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
             });
         } else {
-            LOG.info("Rejecting schema context update because it is not a super set of previously known modules");
+            LOG.debug("Rejecting schema context update - not a super set of previously known modules:\nUPDATE: {}\nKNOWN: {}",
+                    newModules, knownModules);
         }
 
     }
