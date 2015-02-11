@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_8be61214",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 472,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-11T20:54:07Z",
+      "side": 1,
+      "message": "Line\u0027s a little too long but that can be cleaned up later.",
+      "revId": "122ee6a8b24794b6fd7a07977afa6cd777ca50b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
