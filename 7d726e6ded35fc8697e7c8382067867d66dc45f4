@@ -22,6 +22,30 @@
       "revId": "7d726e6ded35fc8697e7c8382067867d66dc45f4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_f5a3f7af",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 437,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-11T02:10:43Z",
+      "side": 1,
+      "message": "OK - so a combination of your patch and mine. I can add the !isFollowerActive check.",
+      "parentUuid": "7a96c907_b5db2f4e",
+      "range": {
+        "startLine": 437,
+        "startChar": 0,
+        "endLine": 437,
+        "endChar": 12
+      },
+      "revId": "7d726e6ded35fc8697e7c8382067867d66dc45f4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
