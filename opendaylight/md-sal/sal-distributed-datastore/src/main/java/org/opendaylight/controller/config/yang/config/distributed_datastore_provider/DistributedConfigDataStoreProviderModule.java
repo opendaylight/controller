@@ -41,7 +41,7 @@ public class DistributedConfigDataStoreProviderModule extends
         }
 
         DatastoreContext datastoreContext = DatastoreContext.newBuilder()
-                .dataStoreMXBeanType("DistributedConfigDatastore")
+                .dataStoreType("config")
                 .dataStoreProperties(InMemoryDOMDataStoreConfigProperties.create(
                         props.getMaxShardDataChangeExecutorPoolSize().getValue().intValue(),
                         props.getMaxShardDataChangeExecutorQueueSize().getValue().intValue(),
@@ -67,9 +67,10 @@ public class DistributedConfigDataStoreProviderModule extends
                 .shardIsolatedLeaderCheckIntervalInMillis(
                     props.getShardIsolatedLeaderCheckIntervalInMillis().getValue())
                 .shardElectionTimeoutFactor(props.getShardElectionTimeoutFactor().getValue())
+                .transactionCreationInitialRateLimit(props.getTxCreationInitialRateLimit().getValue())
                 .build();
 
-        return DistributedDataStoreFactory.createInstance("config", getConfigSchemaServiceDependency(),
+        return DistributedDataStoreFactory.createInstance(getConfigSchemaServiceDependency(),
                 datastoreContext, bundleContext);
     }
 
