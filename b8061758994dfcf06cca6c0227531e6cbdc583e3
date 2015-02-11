@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_3804f616",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 480,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-11T19:25:57Z",
+      "side": 1,
+      "message": "This code should normally get executed for a slow follower which comes with a nextIndex which has been removed from the log.\nBut NOW we only remove from the log, once its replicated to all.\n\nSo it *should* never happen that the nextIndex is equal to the log\u0027s lastIndex AND that index is not present in the log.\n\nHence the removal.\n\nAlso we would want to be less eager in initiating a snapshot install.",
+      "parentUuid": "7a96c907_9812ea55",
+      "revId": "b8061758994dfcf06cca6c0227531e6cbdc583e3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_78159e3e",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-02-11T13:38:10Z",
       "side": 1,
       "message": "Indented too much",
+      "revId": "b8061758994dfcf06cca6c0227531e6cbdc583e3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_eb01d605",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 491,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-11T19:25:57Z",
+      "side": 1,
+      "message": "Hmm..rebase did it i guess.. fixed it.",
+      "parentUuid": "7a96c907_78159e3e",
       "revId": "b8061758994dfcf06cca6c0227531e6cbdc583e3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_cb5ada29",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/AbstractReplicatedLogImplTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-11T19:25:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_d82392a5",
+      "revId": "b8061758994dfcf06cca6c0227531e6cbdc583e3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_783cbec8",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2015-02-11T13:38:10Z",
       "side": 1,
       "message": "Same thing with statics as in Follower.",
+      "revId": "b8061758994dfcf06cca6c0227531e6cbdc583e3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_8b405235",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-11T19:25:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_783cbec8",
       "revId": "b8061758994dfcf06cca6c0227531e6cbdc583e3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
