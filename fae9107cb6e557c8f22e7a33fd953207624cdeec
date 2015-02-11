@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_cbf65af9",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ReplicatedLog.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-02-11T20:11:33Z",
+      "side": 1,
+      "message": "Not a major thing, could be done in another patch, but can you add some javadoc on top of it, explaining what this is for?",
+      "range": {
+        "startLine": 184,
+        "startChar": 9,
+        "endLine": 184,
+        "endChar": 21
+      },
+      "revId": "fae9107cb6e557c8f22e7a33fd953207624cdeec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
