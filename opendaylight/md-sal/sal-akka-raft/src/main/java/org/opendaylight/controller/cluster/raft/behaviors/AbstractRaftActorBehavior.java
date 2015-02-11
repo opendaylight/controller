@@ -422,18 +422,4 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         return numMajority;
 
     }
-
-    protected long fakeSnapshot(final long minReplicatedToAllIndex, final long currentReplicatedIndex) {
-
-        //  we would want to keep the lastApplied as its used while capturing snapshots
-        long tempMin = Math.min(minReplicatedToAllIndex,
-                (context.getLastApplied() > -1 ? context.getLastApplied() - 1 : -1));
-
-        if (tempMin > -1 && context.getReplicatedLog().isPresent(tempMin))  {
-            context.getReplicatedLog().snapshotPreCommit(tempMin, context.getTermInformation().getCurrentTerm());
-            context.getReplicatedLog().snapshotCommit();
-            return tempMin;
-        }
-        return currentReplicatedIndex;
-    }
 }

@@ -670,12 +670,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         LOG.info("{}: Persisting of snapshot done:{}", persistenceId(), sn.getLogMessage());
 
-        //be greedy and remove entries from in-mem journal which are in the snapshot
+        //be greedy and remove entries from in-mem journal which are in the snapshot and which are replicated to all
         // and update snapshotIndex and snapshotTerm without waiting for the success,
-
-        context.getReplicatedLog().snapshotPreCommit(
-            captureSnapshot.getLastAppliedIndex(),
+        context.getReplicatedLog().snapshotPreCommit(captureSnapshot.getReplicatedToAllIndex(),
             captureSnapshot.getLastAppliedTerm());
+        context.getReplicatedLog().setReplicatedToAllIndex(captureSnapshot.getReplicatedToAllIndex());
 
         LOG.info("{}: Removed in-memory snapshotted entries, adjusted snaphsotIndex:{} " +
             "and term:{}", persistenceId(), captureSnapshot.getLastAppliedIndex(),
@@ -820,7 +819,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
                             // send a CaptureSnapshot to self to make the expensive operation async.
                             getSelf().tell(new CaptureSnapshot(
-                                lastIndex(), lastTerm(), lastAppliedIndex, lastAppliedTerm),
+                                lastIndex(), lastTerm(), lastAppliedIndex, lastAppliedTerm,
+                                context.getReplicatedLog().getReplicatedToAllIndex()),
                                 null);
                             context.setSnapshotCaptureInitiated(true);
                         }

@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockReplicatedLogEntry;
+
 /**
 *
 */
@@ -153,6 +154,73 @@ public class AbstractReplicatedLogImplTest {
         assertEquals(7, replicatedLogImpl.getSnapshotIndex());
 
 
+    }
+
+    @Test
+    public void testFakeSnapshots() {
+        //entry with 1 index=0 entry with replicatedToAllIndex = 0, does not do anything
+        replicatedLogImpl = new MockAbstractReplicatedLogImpl();
+        replicatedLogImpl.append(new MockReplicatedLogEntry(1, 0, new MockPayload("A")));
+        replicatedLogImpl.fakeSnapshot(0, 0, 1);
+        assertEquals(-1, replicatedLogImpl.getReplicatedToAllIndex());
+        assertEquals(1, replicatedLogImpl.size());
+
+        //2 entries, lastApplied still 0, no purging.
+        replicatedLogImpl.append(new MockReplicatedLogEntry(1, 1, new MockPayload("B")));
+        replicatedLogImpl.fakeSnapshot(0, 0, 1);
+        assertEquals(-1, replicatedLogImpl.getReplicatedToAllIndex());
+        assertEquals(2, replicatedLogImpl.size());
+
+        //2 entries, lastApplied = 1
+        replicatedLogImpl.fakeSnapshot(0, 1, 1);
+        assertEquals(0, replicatedLogImpl.getReplicatedToAllIndex());
+        assertEquals(1, replicatedLogImpl.size());
+
+        //5 entries, lastApplied =2 and replicatedIndex = 3, but since we want to keep the lastapplied, indices 0 and 1 will only get purged
+        replicatedLogImpl = new MockAbstractReplicatedLogImpl();
+        replicatedLogImpl.append(new MockReplicatedLogEntry(1, 0, new MockPayload("A")));
+        replicatedLogImpl.append(new MockReplicatedLogEntry(1, 1, new MockPayload("B")));
+        replicatedLogImpl.append(new MockReplicatedLogEntry(1, 2, new MockPayload("C")));
+        replicatedLogImpl.append(new MockReplicatedLogEntry(1, 3, new MockPayload("D")));
+        replicatedLogImpl.append(new MockReplicatedLogEntry(1, 4, new MockPayload("E")));
+        replicatedLogImpl.fakeSnapshot(3, 2, 1);
+        assertEquals(1, replicatedLogImpl.getReplicatedToAllIndex());
+        assertEquals(3, replicatedLogImpl.size());
+
+        // scenario where Last applied > Replicated to all index (becoz of a slow follower)
+        replicatedLogImpl = new MockAbstractReplicatedLogImpl();
+        replicatedLogImpl.append(new MockReplicatedLogEntry(1, 0, new MockPayload("A")));
+        replicatedLogImpl.append(new MockReplicatedLogEntry(1, 1, new MockPayload("B")));
+        replicatedLogImpl.append(new MockReplicatedLogEntry(1, 2, new MockPayload("C")));
+        replicatedLogImpl.fakeSnapshot(1, 2, 1);
+        assertEquals(1, replicatedLogImpl.getReplicatedToAllIndex());
+        assertEquals(1, replicatedLogImpl.size());
+
+    }
+
+    @Test
+    public void testIsPresent() {
+        assertTrue(replicatedLogImpl.isPresent(0));
+        assertTrue(replicatedLogImpl.isPresent(1));
+        assertTrue(replicatedLogImpl.isPresent(2));
+        assertTrue(replicatedLogImpl.isPresent(3));
+
+        replicatedLogImpl.append(new MockReplicatedLogEntry(2, 4, new MockPayload("D")));
+        replicatedLogImpl.snapshotPreCommit(3, 2); //snapshot on 3
+        replicatedLogImpl.snapshotCommit();
+
+        assertFalse(replicatedLogImpl.isPresent(0));
+        assertFalse(replicatedLogImpl.isPresent(1));
+        assertFalse(replicatedLogImpl.isPresent(2));
+        assertFalse(replicatedLogImpl.isPresent(3));
+        assertTrue(replicatedLogImpl.isPresent(4));
+
+        replicatedLogImpl.snapshotPreCommit(4, 2); //snapshot on 4
+        replicatedLogImpl.snapshotCommit();
+        assertFalse(replicatedLogImpl.isPresent(4));
+
+        replicatedLogImpl.append(new MockReplicatedLogEntry(2, 5, new MockPayload("D")));
+        assertTrue(replicatedLogImpl.isPresent(5));
     }
 
     // create a snapshot for test
