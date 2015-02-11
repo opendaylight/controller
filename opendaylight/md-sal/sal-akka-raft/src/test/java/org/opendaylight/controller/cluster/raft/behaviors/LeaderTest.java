@@ -425,8 +425,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
         assertEquals(snapshotIndex, installSnapshot.getLastIncludedIndex());
         assertEquals(snapshotTerm, installSnapshot.getLastIncludedTerm());
 
-        // FIXME - we don't set the term in the serialized message.
-        //assertEquals(currentTerm, installSnapshot.getTerm());
+        assertEquals(currentTerm, installSnapshot.getTerm());
     }
 
     @Test
