@@ -1,8 +1,12 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.testkit.JavaTestKit;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.AbstractActorTest;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
@@ -16,12 +20,6 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
 
@@ -302,37 +300,47 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testFakeSnapshots() {
+    public void testPerformSnapshot() {
         MockRaftActorContext context = new MockRaftActorContext("test", getSystem(), behaviorActor);
         AbstractRaftActorBehavior behavior = new Leader(context);
         context.getTermInformation().update(1, "leader");
 
-        //entry with 1 index=0 entry with replicatedToAllIndex = 0, does not do anything, returns the
+        //log has 1 entry with replicatedToAllIndex = 0, does not do anything, returns the
         context.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 1, 1).build());
         context.setLastApplied(0);
-        assertEquals(-1, behavior.fakeSnapshot(0, -1));
+        behavior.performSnapshotWithoutCapture(0);
+        assertEquals(-1, context.getReplicatedLog().getReplicatedToAllIndex());
         assertEquals(1, context.getReplicatedLog().size());
 
         //2 entries, lastApplied still 0, no purging.
         context.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0,2,1).build());
         context.setLastApplied(0);
-        assertEquals(-1, behavior.fakeSnapshot(0, -1));
+        behavior.performSnapshotWithoutCapture(0);
+        assertEquals(-1, context.getReplicatedLog().getReplicatedToAllIndex());
         assertEquals(2, context.getReplicatedLog().size());
 
         //2 entries, lastApplied still 0, no purging.
         context.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0,2,1).build());
         context.setLastApplied(1);
-        assertEquals(0, behavior.fakeSnapshot(0, -1));
+        behavior.performSnapshotWithoutCapture(0);
+        assertEquals(0, context.getReplicatedLog().getReplicatedToAllIndex());
         assertEquals(1, context.getReplicatedLog().size());
 
         //5 entries, lastApplied =2 and replicatedIndex = 3, but since we want to keep the lastapplied, indices 0 and 1 will only get purged
-        context.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0,5,1).build());
+        context.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 5, 1).build());
         context.setLastApplied(2);
-        assertEquals(1, behavior.fakeSnapshot(3, 1));
+        behavior.performSnapshotWithoutCapture(3);
+        assertEquals(1, context.getReplicatedLog().getReplicatedToAllIndex());
         assertEquals(3, context.getReplicatedLog().size());
 
-
+        // scenario where Last applied > Replicated to all index (becoz of a slow follower)
+        context.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 3, 1).build());
+        context.setLastApplied(2);
+        behavior.performSnapshotWithoutCapture(1);
+        assertEquals(1, context.getReplicatedLog().getReplicatedToAllIndex());
+        assertEquals(1, context.getReplicatedLog().size());
     }
+
 
     protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(
         ActorRef actorRef, RaftRPC rpc) {

@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockReplicatedLogEntry;
+
 /**
 *
 */
@@ -153,6 +154,31 @@ public class AbstractReplicatedLogImplTest {
         assertEquals(7, replicatedLogImpl.getSnapshotIndex());
 
 
+    }
+
+    @Test
+    public void testIsPresent() {
+        assertTrue(replicatedLogImpl.isPresent(0));
+        assertTrue(replicatedLogImpl.isPresent(1));
+        assertTrue(replicatedLogImpl.isPresent(2));
+        assertTrue(replicatedLogImpl.isPresent(3));
+
+        replicatedLogImpl.append(new MockReplicatedLogEntry(2, 4, new MockPayload("D")));
+        replicatedLogImpl.snapshotPreCommit(3, 2); //snapshot on 3
+        replicatedLogImpl.snapshotCommit();
+
+        assertFalse(replicatedLogImpl.isPresent(0));
+        assertFalse(replicatedLogImpl.isPresent(1));
+        assertFalse(replicatedLogImpl.isPresent(2));
+        assertFalse(replicatedLogImpl.isPresent(3));
+        assertTrue(replicatedLogImpl.isPresent(4));
+
+        replicatedLogImpl.snapshotPreCommit(4, 2); //snapshot on 4
+        replicatedLogImpl.snapshotCommit();
+        assertFalse(replicatedLogImpl.isPresent(4));
+
+        replicatedLogImpl.append(new MockReplicatedLogEntry(2, 5, new MockPayload("D")));
+        assertTrue(replicatedLogImpl.isPresent(5));
     }
 
     // create a snapshot for test

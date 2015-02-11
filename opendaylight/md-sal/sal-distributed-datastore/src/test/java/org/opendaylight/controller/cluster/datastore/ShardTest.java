@@ -1467,7 +1467,7 @@ public class ShardTest extends AbstractActorTest {
 
             NormalizedNode<?,?> expectedRoot = readStore(shard, YangInstanceIdentifier.builder().build());
 
-            CaptureSnapshot capture = new CaptureSnapshot(-1, -1, -1, -1);
+            CaptureSnapshot capture = new CaptureSnapshot(-1, -1, -1, -1, -1, -1);
             shard.tell(capture, getRef());
 
             assertEquals("Snapshot saved", true, latch.get().await(5, TimeUnit.SECONDS));
