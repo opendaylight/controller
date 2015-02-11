@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_b5db2f4e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 437,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-02-11T01:55:17Z",
+      "side": 1,
+      "message": "If follower becomes inactive, because of say timeout issue (not sure if its possible in real world), then we will never be able to send heartbeat message.",
+      "range": {
+        "startLine": 437,
+        "startChar": 0,
+        "endLine": 437,
+        "endChar": 12
+      },
+      "revId": "7d726e6ded35fc8697e7c8382067867d66dc45f4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
