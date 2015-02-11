@@ -21,9 +21,9 @@ import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
 import org.opendaylight.controller.sal.binding.test.util.BindingBrokerTestFactory;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodesBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.Top;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.TopBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
@@ -33,7 +33,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 @SuppressWarnings("deprecation")
 public class DOMCodecBug02Test extends AbstractDataServiceTest {
 
-    private static final InstanceIdentifier<Nodes> NODES_INSTANCE_ID_BA = InstanceIdentifier.builder(Nodes.class) //
+    private static final InstanceIdentifier<Top> TOP_INSTANCE_ID_BA = InstanceIdentifier.builder(Top.class) //
             .toInstance();
 
     /**
@@ -66,10 +66,10 @@ public class DOMCodecBug02Test extends AbstractDataServiceTest {
                 .submit(new Callable<Future<RpcResult<TransactionStatus>>>() {
                     @Override
                     public Future<RpcResult<TransactionStatus>> call() throws Exception {
-                        NodesBuilder nodesBuilder = new NodesBuilder();
-                        nodesBuilder.setNode(Collections.<Node> emptyList());
+                        TopBuilder topBuilder = new TopBuilder();
+                        topBuilder.setTopLevelList(Collections.<TopLevelList> emptyList());
                         DataModificationTransaction transaction = baDataService.beginTransaction();
-                        transaction.putOperationalData(NODES_INSTANCE_ID_BA, nodesBuilder.build());
+                        transaction.putOperationalData(TOP_INSTANCE_ID_BA, topBuilder.build());
                         return transaction.commit();
                     }
                 });
@@ -77,13 +77,13 @@ public class DOMCodecBug02Test extends AbstractDataServiceTest {
         RpcResult<TransactionStatus> result = future.get().get();
         assertEquals(TransactionStatus.COMMITED, result.getResult());
 
-        Nodes nodes = checkForNodes();
-        assertNotNull(nodes);
+        Top top = checkForTop();
+        assertNotNull(top);
 
     }
 
-    private Nodes checkForNodes() {
-        return (Nodes) baDataService.readOperationalData(NODES_INSTANCE_ID_BA);
+    private Top checkForTop() {
+        return (Top) baDataService.readOperationalData(TOP_INSTANCE_ID_BA);
 
     }
 
