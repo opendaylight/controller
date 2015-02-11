@@ -22,6 +22,7 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
 
     private long snapshotIndex = -1;
     private long snapshotTerm = -1;
+    private long replicatedToAllIndex = -1;
 
     // to be used for rollback during save snapshot failure
     private ArrayList<ReplicatedLogEntry> snapshottedJournal;
@@ -41,7 +42,7 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     }
 
     protected int adjustedIndex(long logEntryIndex) {
-        if(snapshotIndex < 0){
+        if (snapshotIndex < 0) {
             return (int) logEntryIndex;
         }
         return (int) (logEntryIndex - (snapshotIndex + 1));
