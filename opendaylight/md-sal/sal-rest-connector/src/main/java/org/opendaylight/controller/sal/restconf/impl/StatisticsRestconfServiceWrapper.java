@@ -91,7 +91,7 @@ public class StatisticsRestconfServiceWrapper implements RestconfService {
     }
 
     @Override
-    public Response updateConfigurationData(final String identifier, final Node<?> payload) {
+    public Response updateConfigurationData(final String identifier, final NormalizedNodeContext payload) {
         configPut.incrementAndGet();
         return delegate.updateConfigurationData(identifier, payload);
     }
