@@ -9,21 +9,17 @@ import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
 import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.FlowStatisticsData;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.FlowStatisticsDataBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.flow.statistics.FlowStatisticsBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.List11SimpleAugment;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.List11SimpleAugmentBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.TllComplexAugment;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.List1;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.List1Key;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.list1.List11;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.list1.List11Builder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.list1.List11Key;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.Top;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListKey;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
@@ -32,20 +28,20 @@ import com.google.common.util.concurrent.SettableFuture;
 @SuppressWarnings("deprecation")
 public class DeleteNestedAugmentationListenParentTest extends AbstractDataServiceTest {
 
-    private static final NodeKey NODE_KEY = new NodeKey(new NodeId("foo"));
+    private static final TopLevelListKey FOO_KEY = new TopLevelListKey("foo");
 
-    private static final TableKey TABLE_KEY = new TableKey((short) 0);
+    private static final List1Key LIST1_KEY = new List1Key("one");
 
-    private static final FlowKey FLOW_KEY = new FlowKey(new FlowId("100"));
+    private static final List11Key LIST11_KEY = new List11Key(100);
 
-    private static final InstanceIdentifier<FlowCapableNode> NODE_AUGMENT_PATH = InstanceIdentifier.builder(Nodes.class)
-            .child(Node.class,NODE_KEY)
-            .augmentation(FlowCapableNode.class)
+    private static final InstanceIdentifier<TllComplexAugment> TLL_COMPLEX_AUGMENT_PATH = InstanceIdentifier.builder(Top.class)
+            .child(TopLevelList.class,FOO_KEY)
+            .augmentation(TllComplexAugment.class)
             .build();
 
-    private static final InstanceIdentifier<Flow> FLOW_PATH = NODE_AUGMENT_PATH.builder()
-            .child(Table.class,TABLE_KEY)
-            .child(Flow.class,FLOW_KEY)
+    private static final InstanceIdentifier<List11> LIST11_PATH = TLL_COMPLEX_AUGMENT_PATH.builder()
+            .child(List1.class,LIST1_KEY)
+            .child(List11.class,LIST11_KEY)
             .build();
 
 
@@ -53,12 +49,12 @@ public class DeleteNestedAugmentationListenParentTest extends AbstractDataServic
     public void deleteChildListenParent() throws InterruptedException, ExecutionException {
         DataModificationTransaction initTx = baDataService.beginTransaction();
 
-        initTx.putOperationalData(FLOW_PATH, flow());
+        initTx.putOperationalData(LIST11_PATH, createList11());
         initTx.commit().get();
 
         final SettableFuture<DataChangeEvent<InstanceIdentifier<?>, DataObject>> event = SettableFuture.create();
 
-        baDataService.registerDataChangeListener(FLOW_PATH, new DataChangeListener() {
+        baDataService.registerDataChangeListener(LIST11_PATH, new DataChangeListener() {
 
             @Override
             public void onDataChanged(final DataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
@@ -67,23 +63,19 @@ public class DeleteNestedAugmentationListenParentTest extends AbstractDataServic
         });
 
         DataModificationTransaction deleteTx = baDataService.beginTransaction();
-        deleteTx.removeOperationalData(FLOW_PATH.augmentation(FlowStatisticsData.class));
+        deleteTx.removeOperationalData(LIST11_PATH.augmentation(List11SimpleAugment.class));
         deleteTx.commit().get();
 
         DataChangeEvent<InstanceIdentifier<?>, DataObject> receivedEvent = event.get();
-        assertFalse(receivedEvent.getRemovedOperationalData().contains(NODE_AUGMENT_PATH));
+        assertFalse(receivedEvent.getRemovedOperationalData().contains(TLL_COMPLEX_AUGMENT_PATH));
     }
 
-    private Flow flow() {
-        FlowBuilder builder = new FlowBuilder()
-            .setKey(FLOW_KEY)
-            .addAugmentation(FlowStatisticsData.class,new FlowStatisticsDataBuilder()
-                    .setFlowStatistics(new FlowStatisticsBuilder().build())
-                    .build())
-            .setBarrier(true)
-            .setMatch(new MatchBuilder()
-            .build())
-        ;
+    private List11 createList11() {
+        List11Builder builder = new List11Builder()
+            .setKey(LIST11_KEY)
+            .addAugmentation(List11SimpleAugment.class,new List11SimpleAugmentBuilder()
+                    .setAttrStr2("bad").build())
+            .setAttrStr("good");
         return builder.build();
     }
 

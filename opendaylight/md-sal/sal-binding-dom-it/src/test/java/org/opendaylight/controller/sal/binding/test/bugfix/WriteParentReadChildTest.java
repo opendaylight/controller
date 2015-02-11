@@ -16,24 +16,16 @@ import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.VlanMatchBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.vlan.match.fields.VlanIdBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.TllComplexAugment;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.List1;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.List1Builder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.List1Key;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.list1.List11;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.list1.List11Builder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.list1.List11Key;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.Top;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListKey;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -43,23 +35,23 @@ import com.google.common.collect.ImmutableList;
 @SuppressWarnings("deprecation")
 public class WriteParentReadChildTest extends AbstractDataServiceTest {
 
-    private static final String FLOW_ID = "1234";
-    private static final short TABLE_ID = (short) 0;
-    private static final String NODE_ID = "node:1";
+    private static final int LIST11_ID = 1234;
+    private static final String LIST1_NAME = "bar";
+    private static final String TLL_NAME = "foo";
 
-    private static final NodeKey NODE_KEY = new NodeKey(new NodeId(NODE_ID));
-    private static final FlowKey FLOW_KEY = new FlowKey(new FlowId(FLOW_ID));
-    private static final TableKey TABLE_KEY = new TableKey(TABLE_ID);
+    private static final TopLevelListKey TLL_KEY = new TopLevelListKey(TLL_NAME);
+    private static final List11Key LIST11_KEY = new List11Key(LIST11_ID);
+    private static final List1Key LIST1_KEY = new List1Key(LIST1_NAME);
 
-    private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA = InstanceIdentifier.builder(Nodes.class) //
-            .child(Node.class, NODE_KEY).toInstance();
+    private static final InstanceIdentifier<TopLevelList> TLL_INSTANCE_ID_BA = InstanceIdentifier.builder(Top.class) //
+            .child(TopLevelList.class, TLL_KEY).toInstance();
 
-    private static final InstanceIdentifier<Table> TABLE_INSTANCE_ID_BA = //
-            NODE_INSTANCE_ID_BA.builder() //
-            .augmentation(FlowCapableNode.class).child(Table.class, TABLE_KEY).build();
+    private static final InstanceIdentifier<List1> LIST1_INSTANCE_ID_BA = //
+            TLL_INSTANCE_ID_BA.builder() //
+            .augmentation(TllComplexAugment.class).child(List1.class, LIST1_KEY).build();
 
-    private static final InstanceIdentifier<? extends DataObject> FLOW_INSTANCE_ID_BA = //
-            TABLE_INSTANCE_ID_BA.child(Flow.class, FLOW_KEY);
+    private static final InstanceIdentifier<? extends DataObject> LIST11_INSTANCE_ID_BA = //
+            LIST1_INSTANCE_ID_BA.child(List11.class, LIST11_KEY);
     /**
      *
      * The scenario tests writing parent node, which also contains child items
@@ -70,43 +62,33 @@ public class WriteParentReadChildTest extends AbstractDataServiceTest {
      * @throws Exception
      */
     @Test
-    public void writeTableReadFlow() throws Exception {
+    public void writeParentReadChild() throws Exception {
 
         DataModificationTransaction modification = baDataService.beginTransaction();
 
-        Flow flow = new FlowBuilder() //
-                .setKey(FLOW_KEY) //
-                .setMatch(new MatchBuilder() //
-                        .setVlanMatch(new VlanMatchBuilder() //
-                                .setVlanId(new VlanIdBuilder() //
-                                        .setVlanId(new VlanId(10)) //
-                                        .build()) //
-                                .build()) //
-                        .build()) //
-                        .setInstructions(new InstructionsBuilder() //
-                            .setInstruction(ImmutableList.<Instruction>builder() //
-                                    .build()) //
-                        .build()) //
+        List11 list11 = new List11Builder() //
+                .setKey(LIST11_KEY) //
+                .setAttrStr("primary")
                 .build();
 
-        Table table = new TableBuilder()
-            .setKey(TABLE_KEY)
-            .setFlow(ImmutableList.of(flow))
+        List1 list1 = new List1Builder()
+            .setKey(LIST1_KEY)
+            .setList11(ImmutableList.of(list11))
         .build();
 
-        modification.putConfigurationData(TABLE_INSTANCE_ID_BA, table);
+        modification.putConfigurationData(LIST1_INSTANCE_ID_BA, list1);
         RpcResult<TransactionStatus> ret = modification.commit().get();
         assertNotNull(ret);
         assertEquals(TransactionStatus.COMMITED, ret.getResult());
 
-        DataObject readedTable = baDataService.readConfigurationData(TABLE_INSTANCE_ID_BA);
-        assertNotNull("Readed table should not be nul.", readedTable);
-        assertTrue(readedTable instanceof Table);
+        DataObject readList1 = baDataService.readConfigurationData(LIST1_INSTANCE_ID_BA);
+        assertNotNull("Readed table should not be nul.", readList1);
+        assertTrue(readList1 instanceof List1);
 
-        DataObject readedFlow = baDataService.readConfigurationData(FLOW_INSTANCE_ID_BA);
-        assertNotNull("Readed flow should not be null.",readedFlow);
-        assertTrue(readedFlow instanceof Flow);
-        assertEquals(flow, readedFlow);
+        DataObject readList11 = baDataService.readConfigurationData(LIST11_INSTANCE_ID_BA);
+        assertNotNull("Readed flow should not be null.",readList11);
+        assertTrue(readList11 instanceof List11);
+        assertEquals(list11, readList11);
 
     }
 }

@@ -28,12 +28,11 @@ import org.opendaylight.controller.sal.binding.test.util.BindingTestContext;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionInstance;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.bi.ba.rpcservice.rev140701.OpendaylightTestRpcServiceService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.bi.ba.rpcservice.rev140701.RockTheHouseInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.Top;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -64,11 +63,11 @@ public class DOMRpcServiceTestBugfix560 {
     private final static QName RPC_NAME = QName.create(RPC_SERVICE_NAMESPACE,
             REVISION_DATE, "rock-the-house");
 
-    private static final NodeId MOUNT_NODE = new NodeId("id");
-    private static final QName NODE_ID_QNAME = QName.create(Node.QNAME, "id");
+    private static final String TLL_NAME = "id";
+    private static final QName TLL_NAME_QNAME = QName.create(TopLevelList.QNAME, "name");
 
-    private static final InstanceIdentifier<Node> BA_MOUNT_ID = createBANodeIdentifier(MOUNT_NODE);
-    private static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier BI_MOUNT_ID = createBINodeIdentifier(MOUNT_NODE);
+    private static final InstanceIdentifier<TopLevelList> BA_MOUNT_ID = createBATllIdentifier(TLL_NAME);
+    private static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier BI_MOUNT_ID = createBITllIdentifier(TLL_NAME);
 
     private BindingTestContext testContext;
     private MountProvisionService domMountPointService;
@@ -104,18 +103,18 @@ public class DOMRpcServiceTestBugfix560 {
         schemaContext = mountSchemaContext;
     }
 
-    private static org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier createBINodeIdentifier(
-            final NodeId mountNode) {
+    private static org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier createBITllIdentifier(
+            final String mount) {
         return org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier
-                .builder().node(Nodes.QNAME)
-                .nodeWithKey(Node.QNAME, NODE_ID_QNAME, mountNode.getValue())
+                .builder().node(Top.QNAME)
+                .nodeWithKey(TopLevelList.QNAME, TLL_NAME_QNAME, mount)
                 .toInstance();
     }
 
-    private static InstanceIdentifier<Node> createBANodeIdentifier(
-            final NodeId mountNode) {
-        return InstanceIdentifier.builder(Nodes.class)
-                .child(Node.class, new NodeKey(mountNode)).toInstance();
+    private static InstanceIdentifier<TopLevelList> createBATllIdentifier(
+            final String mount) {
+        return InstanceIdentifier.builder(Top.class)
+                .child(TopLevelList.class, new TopLevelListKey(mount)).toInstance();
     }
 
     @SuppressWarnings("deprecation")
