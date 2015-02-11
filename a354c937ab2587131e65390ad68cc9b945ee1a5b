@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_78603e01",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-11T18:29:34Z",
+      "side": 1,
+      "message": "OK - this is done to turn on debugging for the tests since we moved away from akka logging. This really should\u0027ve been done in the other patch. I needed debug on when debugging test failures.",
+      "parentUuid": "7a96c907_f8652e1e",
+      "revId": "a354c937ab2587131e65390ad68cc9b945ee1a5b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_186b3af3",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2015-02-11T18:09:47Z",
       "side": 1,
       "message": "Too much refactoring :) We really need to split our refactoring and fix patches. I\u0027d hate to hold up a fix because I couldn\u0027t wade through the refactoring fast enough. If it\u0027s not too much trouble could you please split this.",
+      "revId": "a354c937ab2587131e65390ad68cc9b945ee1a5b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_f833ee11",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-11T18:29:34Z",
+      "side": 1,
+      "message": "I can try. I didn\u0027t really have to touch this test but most of the others I had to b/c they failed with my changes.",
+      "parentUuid": "7a96c907_186b3af3",
       "revId": "a354c937ab2587131e65390ad68cc9b945ee1a5b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
