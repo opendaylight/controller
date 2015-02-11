@@ -19,6 +19,47 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_abae6e7f",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMRpcImplementation.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-02-11T21:12:30Z",
+      "side": 1,
+      "message": "Actually if you look into YANG netconf examples more closely - there are two types of RpcErrors:\nERROR - which means RPC failure (output / result is not available)\nWARNING - result is available, but you have also set of RpcErrors with warning level (e.g. you are filling in deprecated node in RPC input...)\n\nIn order to have eg. Restconf to Netconf nicely working and not loosing information we also need to keep these.",
+      "parentUuid": "7a96c907_48bfb3aa",
+      "revId": "1d94bf61cc6d5a157e070d4af01a23599750569e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_4ba80a77",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/md/sal/dom/spi/DefaultDOMRpcResult.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-02-11T21:12:30Z",
+      "side": 1,
+      "message": "Is there any particular reason for having DefaultDOMRpcResult as serializable?",
+      "range": {
+        "startLine": 27,
+        "startChar": 74,
+        "endLine": 27,
+        "endChar": 87
+      },
+      "revId": "1d94bf61cc6d5a157e070d4af01a23599750569e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_e8df9f0b",
         "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/md/sal/dom/spi/DefaultDOMRpcResult.java",
         "patchSetId": 12
