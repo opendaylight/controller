@@ -24,7 +24,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <maven>3.1.1</maven>
   </prerequisites>
   <properties>
-    <karaf.localFeature>odl-${artifactId}-impl-ui</karaf.localFeature>
+    <karaf.localFeature>odl-${artifactId}-ui</karaf.localFeature>
   </properties>
   <dependencyManagement>
     <dependencies>
