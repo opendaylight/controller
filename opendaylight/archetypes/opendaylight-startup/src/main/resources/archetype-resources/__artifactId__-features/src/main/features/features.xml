@@ -16,22 +16,22 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <repository>mvn:org.opendaylight.yangtools/features-yangtools/${symbol_dollar}{yangtools.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.controller/features-mdsal/${symbol_dollar}{mdsal.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.controller/features-restconf/${symbol_dollar}{mdsal.version}/xml/features</repository>
-  <feature name='odl-${artifactId}-api' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${artifactId} :: api '>
+  <feature name='odl-${artifactId}-api' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${artifactId} :: api'>
     <feature version='${symbol_dollar}{yangtools.version}'>odl-yangtools-models</feature>
     <bundle>mvn:${groupId}/${artifactId}-api/${symbol_dollar}{project.version}</bundle>
   </feature>
-  <feature name='odl-${artifactId}-impl' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${artifactId} :: impl '>
+  <feature name='odl-${artifactId}' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${artifactId}'>
     <feature version='${symbol_dollar}{mdsal.version}'>odl-mdsal-broker</feature>
     <feature version='${symbol_dollar}{project.version}'>odl-${artifactId}-api</feature>
     <bundle>mvn:${groupId}/${artifactId}-impl/${symbol_dollar}{project.version}</bundle>
-    <configfile finalname="${artifactId}-impl-default-config.xml">mvn:${groupId}/${artifactId}-impl/${symbol_dollar}{project.version}/xml/config</configfile>
+    <configfile finalname="${configfile.directory}/${artifactId}.xml">mvn:${groupId}/${artifactId}-impl/${symbol_dollar}{project.version}/xml/config</configfile>
   </feature>
-  <feature name='odl-${artifactId}-impl-rest' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${artifactId} :: impl :: REST '>
-    <feature version="${symbol_dollar}{project.version}">odl-${artifactId}-impl</feature>
+  <feature name='odl-${artifactId}-rest' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${artifactId} :: REST '>
+    <feature version="${symbol_dollar}{project.version}">odl-${artifactId}</feature>
     <feature version="${symbol_dollar}{mdsal.version}">odl-restconf</feature>
   </feature>
-  <feature name='odl-${artifactId}-impl-ui' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${artifactId} :: impl :: UI'>
-    <feature version="${symbol_dollar}{project.version}">odl-${artifactId}-impl-rest</feature>
+  <feature name='odl-${artifactId}-ui' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${artifactId} :: UI'>
+    <feature version="${symbol_dollar}{project.version}">odl-${artifactId}-rest</feature>
     <feature version="${symbol_dollar}{mdsal.version}">odl-mdsal-apidocs</feature>
     <feature version="${symbol_dollar}{mdsal.version}">odl-mdsal-xsql</feature>
   </feature>
