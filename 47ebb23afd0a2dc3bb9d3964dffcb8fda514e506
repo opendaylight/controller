@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_f5d2175b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/CandidateTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-11T01:17:12Z",
+      "side": 1,
+      "message": "Note this was done so we see debug output for the tests like we did when we were using akka logging. This should\u0027ve been done in the other patch that converted to slf4j logging but I didn\u0027t realize it.",
+      "revId": "47ebb23afd0a2dc3bb9d3964dffcb8fda514e506",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_15d8e379",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/FollowerTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-11T01:17:12Z",
+      "side": 1,
+      "message": "Note this was done so we see debug output for the tests like we did when we were using akka logging. This should\u0027ve been done in the other patch that converted to slf4j logging but I didn\u0027t realize it.",
+      "revId": "47ebb23afd0a2dc3bb9d3964dffcb8fda514e506",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_b5c80fa9",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-11T01:17:12Z",
+      "side": 1,
+      "message": "Note this was done so we see debug output for the tests like we did when we were using akka logging. This should\u0027ve been done in the other patch that converted to slf4j logging but I didn\u0027t realize it.",
+      "revId": "47ebb23afd0a2dc3bb9d3964dffcb8fda514e506",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_954ab324",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/AbstractUntypedPersistentActor.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-11T01:17:12Z",
+      "side": 1,
+      "message": "Should we use the derived actor\u0027s class here (e.g. Shard)? This results in a lot of duplicate logging as RaftActor and Shard pretty much log something on every message. This particularly produces a lot of unnecessary extra output with heartbeats.\n\nMaybe we should use the AbstractUntypedPersistentActor class here and print the actor name in each log message for identification.",
+      "revId": "47ebb23afd0a2dc3bb9d3964dffcb8fda514e506",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
