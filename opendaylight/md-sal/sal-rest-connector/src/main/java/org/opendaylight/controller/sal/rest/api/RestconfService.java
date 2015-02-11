@@ -131,7 +131,7 @@ public interface RestconfService {
     @Path("/config/{identifier:.+}")
     @Consumes({ Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Response createConfigurationData(@Encoded @PathParam("identifier") String identifier, Node<?> payload);
+    public Response createConfigurationData(@Encoded @PathParam("identifier") String identifier, NormalizedNodeContext payload);
 
     @POST
     @Path("/config")
