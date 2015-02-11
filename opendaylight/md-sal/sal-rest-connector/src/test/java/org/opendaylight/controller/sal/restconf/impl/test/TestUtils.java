@@ -12,7 +12,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.io.BufferedReader;
@@ -47,10 +46,13 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
+import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
 import org.opendaylight.controller.sal.restconf.impl.NodeWrapper;
+import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
@@ -165,17 +167,26 @@ public final class TestUtils {
     }
 
     /**
+     * @deprecated method will be removed in Lithium release
+     *      we don't wish to use Node and CompositeNode anywhere -
      *
      * Fill missing data (namespaces) and build correct data type in {@code compositeNode} according to
      * {@code dataSchemaNode}. The method {@link RestconfImpl#createConfigurationData createConfigurationData} is used
      * because it contains calling of method {code normalizeNode}
      */
+    @Deprecated
     public static void normalizeCompositeNode(final Node<?> node, final Set<Module> modules, final String schemaNodePath) {
         final RestconfImpl restconf = RestconfImpl.getInstance();
         ControllerContext.getInstance().setSchemas(TestUtils.loadSchemaContext(modules));
-
         prepareMocksForRestconf(modules, restconf);
-        restconf.updateConfigurationData(schemaNodePath, node);
+
+        final InstanceIdentifierContext iiContext = ControllerContext.getInstance().toInstanceIdentifier(schemaNodePath);
+        final DOMMountPoint mountPoint = iiContext.getMountPoint();
+        final CompositeNode value = RestconfImpl.getInstance().normalizeNode(node, iiContext.getSchemaNode(), mountPoint);
+        final NormalizedNode<?, ?> normNodePayload = compositeNodeToDatastoreNormalizedNode(value, iiContext.getSchemaNode());
+        final NormalizedNodeContext normlNodeContext = new NormalizedNodeContext(iiContext, normNodePayload);
+
+        restconf.updateConfigurationData(schemaNodePath, normlNodeContext);
     }
 
     /**
