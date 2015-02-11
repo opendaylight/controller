@@ -41,7 +41,7 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     }
 
     protected int adjustedIndex(long logEntryIndex) {
-        if(snapshotIndex < 0){
+        if (snapshotIndex < 0) {
             return (int) logEntryIndex;
         }
         return (int) (logEntryIndex - (snapshotIndex + 1));
@@ -135,6 +135,11 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     }
 
     @Override
+    public int dataSize() {
+        return dataSize;
+    }
+
+    @Override
     public boolean isPresent(long logEntryIndex) {
         if (logEntryIndex > lastIndex()) {
             // if the request logical index is less than the last present in the list
@@ -200,6 +205,11 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
         previousSnapshotIndex = -1;
         previousSnapshotTerm = -1;
         dataSize = 0;
+        // need to recalc the datasize based on the entries left after precommit.
+        for(ReplicatedLogEntry logEntry : journal) {
+            dataSize += logEntry.size();
+        }
+
     }
 
     @Override
