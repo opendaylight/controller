@@ -85,6 +85,8 @@
   </feature>
   <feature name='odl-netconf-notifications-impl' version='${project.version}' description="OpenDaylight :: Netconf :: Monitoring :: Impl">
     <feature version='${project.version}'>odl-netconf-notifications-api</feature>
+    <feature version='${project.version}'>odl-netconf-util</feature>
+    <feature version='${yangtools.version}'>odl-yangtools-binding-generator</feature>
     <bundle>mvn:org.opendaylight.controller/netconf-notifications-impl/${project.version}</bundle>
   </feature>
 

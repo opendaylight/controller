@@ -9,7 +9,7 @@
   </parent>
   <artifactId>features-netconf</artifactId>
 
-  <packaging>pom</packaging>
+  <packaging>jar</packaging>
 
   <properties>
     <features.file>features.xml</features.file>
@@ -140,6 +140,20 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>netconf-monitoring</artifactId>
     </dependency>
+    <!-- test to validate features.xml -->
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>features-test</artifactId>
+      <version>${yangtools.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- dependency for opendaylight-karaf-empty for use by testing -->
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>opendaylight-karaf-empty</artifactId>
+      <version>${commons.opendaylight.version}</version>
+      <type>zip</type>
+    </dependency>
   </dependencies>
 
   <build>
@@ -184,6 +198,21 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${surefire.version}</version>
+        <configuration>
+          <systemPropertyVariables>
+            <karaf.distro.groupId>org.opendaylight.controller</karaf.distro.groupId>
+            <karaf.distro.artifactId>opendaylight-karaf-empty</karaf.distro.artifactId>
+            <karaf.distro.version>${commons.opendaylight.version}</karaf.distro.version>
+          </systemPropertyVariables>
+          <dependenciesToScan>
+            <dependency>org.opendaylight.yangtools:features-test</dependency>
+          </dependenciesToScan>
+        </configuration>
       </plugin>
     </plugins>
   </build>
