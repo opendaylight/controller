@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_0b344291",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-11T20:44:47Z",
+      "side": 1,
+      "message": "Need to have Kamal and Harman use the same sorting as us. Statics keep flip-flopping.",
+      "revId": "6cfad84c01fee46df8a33a495d4f8bdc27caa3f0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
