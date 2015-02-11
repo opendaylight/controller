@@ -435,10 +435,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         for (Entry<String, FollowerLogInformation> e : followerToLog.entrySet()) {
             final String followerId = e.getKey();
             final FollowerLogInformation followerLogInformation = e.getValue();
-            // This checks helps not to send a repeat message to the follower
-            if(followerLogInformation.timeSinceLastActivity() >= heartbeatInterval) {
-                sendUpdatesToFollower(followerId, followerLogInformation, true);
-            }
+            sendUpdatesToFollower(followerId, followerLogInformation, true);
         }
     }
 
