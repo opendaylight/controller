@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_9812ea55",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 480,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-11T13:38:10Z",
+      "side": 1,
+      "message": "Why was this changed? Not saying it shouldn\u0027t be- Just curious...",
+      "revId": "b8061758994dfcf06cca6c0227531e6cbdc583e3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_78159e3e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 491,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-11T13:38:10Z",
+      "side": 1,
+      "message": "Indented too much",
+      "revId": "b8061758994dfcf06cca6c0227531e6cbdc583e3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_d82392a5",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/AbstractReplicatedLogImplTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-11T13:38:10Z",
+      "side": 1,
+      "message": "Hmm - we seem to be flip-flopping statics we should be consistent. My settings puts them at the top. I believe Moiz\u0027s does as well. If not I can change mine.",
+      "revId": "b8061758994dfcf06cca6c0227531e6cbdc583e3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_783cbec8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-11T13:38:10Z",
+      "side": 1,
+      "message": "Same thing with statics as in Follower.",
+      "revId": "b8061758994dfcf06cca6c0227531e6cbdc583e3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
