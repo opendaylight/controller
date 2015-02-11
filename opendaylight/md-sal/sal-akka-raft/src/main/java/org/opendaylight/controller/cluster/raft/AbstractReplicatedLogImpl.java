@@ -22,6 +22,7 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
 
     private long snapshotIndex = -1;
     private long snapshotTerm = -1;
+    private long replicatedToAllIndex = -1;
 
     // to be used for rollback during save snapshot failure
     private ArrayList<ReplicatedLogEntry> snapshottedJournal;
@@ -41,7 +42,7 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     }
 
     protected int adjustedIndex(long logEntryIndex) {
-        if(snapshotIndex < 0){
+        if (snapshotIndex < 0) {
             return (int) logEntryIndex;
         }
         return (int) (logEntryIndex - (snapshotIndex + 1));
@@ -176,6 +177,16 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     }
 
     @Override
+    public long getReplicatedToAllIndex() {
+        return replicatedToAllIndex;
+    }
+
+    @Override
+    public void setReplicatedToAllIndex(long index) {
+        this.replicatedToAllIndex = index;
+    }
+
+    @Override
     public void clear(int startIndex, int endIndex) {
         journal.subList(startIndex, endIndex).clear();
     }
@@ -213,5 +224,17 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
 
         snapshotTerm = previousSnapshotTerm;
         previousSnapshotTerm = -1;
+    }
+
+    @Override
+    public void fakeSnapshot(final long minReplicatedToAllIndex, long lastApplied, long term) {
+        //  we would want to keep the lastApplied as its used while capturing snapshots
+        long tempMin = Math.min(minReplicatedToAllIndex, (lastApplied > -1 ? lastApplied - 1 : -1));
+
+        if (tempMin > -1 && isPresent(tempMin))  {
+            snapshotPreCommit(tempMin, term);
+            snapshotCommit();
+            setReplicatedToAllIndex(tempMin);
+        }
     }
 }

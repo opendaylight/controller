@@ -145,14 +145,14 @@ public interface ReplicatedLog {
      * sets snapshot term
      * @param snapshotTerm
      */
-    public void setSnapshotTerm(long snapshotTerm);
+    void setSnapshotTerm(long snapshotTerm);
 
     /**
      * Clears the journal entries with startIndex(inclusive) and endIndex (exclusive)
      * @param startIndex
      * @param endIndex
      */
-    public void clear(int startIndex, int endIndex);
+    void clear(int startIndex, int endIndex);
 
     /**
      * Handles all the bookkeeping in order to perform a rollback in the
@@ -160,20 +160,26 @@ public interface ReplicatedLog {
      * @param snapshotCapturedIndex
      * @param snapshotCapturedTerm
      */
-    public void snapshotPreCommit(long snapshotCapturedIndex, long snapshotCapturedTerm);
+    void snapshotPreCommit(long snapshotCapturedIndex, long snapshotCapturedTerm);
 
     /**
      * Sets the Replicated log to state after snapshot success.
      */
-    public void snapshotCommit();
+    void snapshotCommit();
 
     /**
      * Restores the replicated log to a state in the event of a save snapshot failure
      */
-    public void snapshotRollback();
+    void snapshotRollback();
 
     /**
      * Size of the data in the log (in bytes)
      */
-    public int dataSize();
+    int dataSize();
+
+    long getReplicatedToAllIndex();
+
+    void setReplicatedToAllIndex(long index);
+
+    void fakeSnapshot(final long minReplicatedToAllIndex, long lastApplied, long term);
 }

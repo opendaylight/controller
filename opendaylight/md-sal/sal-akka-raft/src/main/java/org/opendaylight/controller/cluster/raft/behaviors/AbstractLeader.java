@@ -93,8 +93,6 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
     private Optional<ByteString> snapshot;
 
-    private long replicatedToAllIndex = -1;
-
     public AbstractLeader(RaftActorContext context) {
         super(context);
 
@@ -238,15 +236,17 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     }
 
     private void purgeInMemoryLog() {
-        //find the lowest index across followers which has been replicated to all. -1 if there are no followers.
+        //find the lowest index across followers which has been replicated to all.
+        // lastApplied if there are no followers, so that we keep clearing the log for single-node
         // we would delete the in-mem log from that index on, in-order to minimize mem usage
         // we would also share this info thru AE with the followers so that they can delete their log entries as well.
-        long minReplicatedToAllIndex = followerToLog.isEmpty() ? -1 : Long.MAX_VALUE;
+        long minReplicatedToAllIndex = followerToLog.isEmpty() ? context.getLastApplied() : Long.MAX_VALUE;
         for (FollowerLogInformation info : followerToLog.values()) {
             minReplicatedToAllIndex = Math.min(minReplicatedToAllIndex, info.getMatchIndex());
         }
 
-        replicatedToAllIndex = fakeSnapshot(minReplicatedToAllIndex, replicatedToAllIndex);
+        context.getReplicatedLog().fakeSnapshot(minReplicatedToAllIndex, context.getLastApplied(),
+                context.getTermInformation().getCurrentTerm());
     }
 
     @Override
@@ -477,7 +477,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                     sendAppendEntriesToFollower(followerActor, followerNextIndex, entries, followerId);
 
                 } else if (isFollowerActive && followerNextIndex >= 0 &&
-                    leaderLastIndex >= followerNextIndex) {
+                    leaderLastIndex > followerNextIndex && !context.isSnapshotCaptureInitiated()) {
                     // if the followers next index is not present in the leaders log, and
                     // if the follower is just not starting and if leader's index is more than followers index
                     // then snapshot should be sent
@@ -511,7 +511,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         AppendEntries appendEntries = new AppendEntries(currentTerm(), context.getId(),
             prevLogIndex(followerNextIndex),
             prevLogTerm(followerNextIndex), entries,
-            context.getCommitIndex(), replicatedToAllIndex);
+            context.getCommitIndex(), context.getReplicatedLog().getReplicatedToAllIndex());
 
         if(!entries.isEmpty()) {
             LOG.debug("{}: Sending AppendEntries to follower {}: {}", context.getId(), followerId,
@@ -550,7 +550,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
                 if (!context.getReplicatedLog().isPresent(nextIndex) &&
                         context.getReplicatedLog().isInSnapshot(nextIndex)) {
-                    LOG.info("{}: {} follower needs a snapshot install", context.getId(), e.getKey());
+                    LOG.debug("{}: {} follower needs a snapshot install", context.getId(), e.getKey());
                     if (snapshot.isPresent()) {
                         // if a snapshot is present in the memory, most likely another install is in progress
                         // no need to capture snapshot
@@ -587,7 +587,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
         boolean isInstallSnapshotInitiated = true;
         actor().tell(new CaptureSnapshot(lastIndex(), lastTerm(),
-                lastAppliedIndex, lastAppliedTerm, isInstallSnapshotInitiated),
+                lastAppliedIndex, lastAppliedTerm, context.getReplicatedLog().getReplicatedToAllIndex(),
+                isInstallSnapshotInitiated),
             actor());
         context.setSnapshotCaptureInitiated(true);
     }
@@ -626,8 +627,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                         context.getReplicatedLog().getSnapshotIndex(),
                         context.getReplicatedLog().getSnapshotTerm(),
                         nextSnapshotChunk,
-                            followerToSnapshot.incrementChunkIndex(),
-                            followerToSnapshot.getTotalChunks(),
+                        followerToSnapshot.incrementChunkIndex(),
+                        followerToSnapshot.getTotalChunks(),
                         Optional.of(followerToSnapshot.getLastChunkHashCode())
                     ).toSerializable(),
                     actor()
