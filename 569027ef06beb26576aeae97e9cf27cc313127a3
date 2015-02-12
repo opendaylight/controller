@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_4401d7ad",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 340,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-12T20:45:22Z",
+      "side": 1,
+      "message": "Instead of creating a factory locally in a try block, we could create it as a class member and close it in @After method. That way each test doesn\u0027t have to create one and less code indentation. Either way is fine though.",
+      "revId": "569027ef06beb26576aeae97e9cf27cc313127a3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
