@@ -228,12 +228,38 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
                 NetconfMessageTransformUtil.checkValidReply( request.request, message );
             }
             catch (final NetconfDocumentedException e) {
+
                 logger.warn( "{}: Invalid request-reply match, reply message contains different message-id, request: {}, response: {}",
-                             id, msgToS( request.request ), msgToS( message ), e );
+                        id, msgToS( request.request ), msgToS( message ), e );
 
                 request.future.set( RpcResultBuilder.<NetconfMessage>failed()
                         .withRpcError( NetconfMessageTransformUtil.toRpcError( e ) ).build() );
-                return;
+
+                //check if eventually next requests doesn't match message (first message is lost)
+                sessionLock.lock();
+
+                boolean responseRequestEq = false;
+
+                while(requests.peek()!=null && !responseRequestEq){
+
+                    logger.warn( "{}: Invalid request-reply match, reply message contains different message-id, request: {}, response: {}",
+                            id, msgToS( request.request ), msgToS( message ), e );
+
+                    request.future.set( RpcResultBuilder.<NetconfMessage>failed()
+                            .withRpcError( NetconfMessageTransformUtil.toRpcError( e ) ).build() );
+
+                    request = requests.poll();
+
+                    responseRequestEq = NetconfMessageTransformUtil.checkValidReplyBoolean( request.request, message );
+
+                }
+
+                sessionLock.unlock();
+
+                if(!responseRequestEq) {
+                    return;
+                }
+
             }
 
             try {

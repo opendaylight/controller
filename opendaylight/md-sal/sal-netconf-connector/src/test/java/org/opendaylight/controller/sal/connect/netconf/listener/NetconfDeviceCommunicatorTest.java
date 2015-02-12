@@ -297,6 +297,27 @@ public class NetconfDeviceCommunicatorTest {
         return new NetconfMessage( doc );
     }
 
+    //Test scenario verifying whether missing message is handled
+    @Test
+    public void testOnMissingResponseMessage() throws Exception {
+
+        setupSession();
+
+        String messageID1 = UUID.randomUUID().toString();
+        ListenableFuture<RpcResult<NetconfMessage>> resultFuture1 = sendRequest( messageID1 );
+
+        String messageID2 = UUID.randomUUID().toString();
+        ListenableFuture<RpcResult<NetconfMessage>> resultFuture2 = sendRequest( messageID2 );
+
+        String messageID3 = UUID.randomUUID().toString();
+        ListenableFuture<RpcResult<NetconfMessage>> resultFuture3 = sendRequest( messageID3 );
+
+        //response messages 1,2 are omitted
+        communicator.onMessage( mockSession, createSuccessResponseMessage( messageID3 ) );
+
+        verifyResponseMessage( resultFuture3.get(), messageID3 );
+    }
+
     @Test
     public void testOnSuccessfulResponseMessage() throws Exception {
         setupSession();

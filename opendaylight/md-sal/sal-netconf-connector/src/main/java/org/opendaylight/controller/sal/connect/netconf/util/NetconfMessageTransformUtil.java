@@ -132,6 +132,14 @@ public class NetconfMessageTransformUtil {
         return new CompositeNodeTOImpl(argument.getNodeType(), null, list);
     }
 
+    public static boolean checkValidReplyBoolean(final NetconfMessage input, final NetconfMessage output ) {
+
+        final String inputMsgId = input.getDocument().getDocumentElement().getAttribute(MESSAGE_ID_ATTR);
+        final String outputMsgId = output.getDocument().getDocumentElement().getAttribute(MESSAGE_ID_ATTR);
+
+        return inputMsgId.equals(outputMsgId);
+    }
+
     public static void checkValidReply(final NetconfMessage input, final NetconfMessage output)
             throws NetconfDocumentedException {
         final String inputMsgId = input.getDocument().getDocumentElement().getAttribute(MESSAGE_ID_ATTR);
