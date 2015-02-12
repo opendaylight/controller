@@ -70,13 +70,13 @@ import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payloa
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.controller.cluster.raft.utils.MockAkkaJournal;
 import org.opendaylight.controller.cluster.raft.utils.MockSnapshotStore;
+import org.opendaylight.controller.cluster.test.TestActorFactory;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
 public class RaftActorTest extends AbstractActorTest {
-
 
     @After
     public void tearDown() {
@@ -337,81 +337,83 @@ public class RaftActorTest extends AbstractActorTest {
     @Test
     public void testRaftActorRecovery() throws Exception {
         new JavaTestKit(getSystem()) {{
-            String persistenceId = "follower10";
+            try(TestActorFactory factory = new TestActorFactory(getSystem())) {
+                String persistenceId = factory.generateActorId("follower-");
 
-            DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
-            // Set the heartbeat interval high to essentially disable election otherwise the test
-            // may fail if the actor is switched to Leader and the commitIndex is set to the last
-            // log entry.
-            config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+                DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+                // Set the heartbeat interval high to essentially disable election otherwise the test
+                // may fail if the actor is switched to Leader and the commitIndex is set to the last
+                // log entry.
+                config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
 
-            ActorRef followerActor = getSystem().actorOf(MockRaftActor.props(persistenceId,
-                    Collections.<String,String>emptyMap(), Optional.<ConfigParams>of(config)), persistenceId);
+                ActorRef followerActor = factory.createActor(MockRaftActor.props(persistenceId,
+                        Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config)), persistenceId);
 
-            watch(followerActor);
+                watch(followerActor);
 
-            List<ReplicatedLogEntry> snapshotUnappliedEntries = new ArrayList<>();
-            ReplicatedLogEntry entry1 = new MockRaftActorContext.MockReplicatedLogEntry(1, 4,
-                    new MockRaftActorContext.MockPayload("E"));
-            snapshotUnappliedEntries.add(entry1);
+                List<ReplicatedLogEntry> snapshotUnappliedEntries = new ArrayList<>();
+                ReplicatedLogEntry entry1 = new MockRaftActorContext.MockReplicatedLogEntry(1, 4,
+                        new MockRaftActorContext.MockPayload("E"));
+                snapshotUnappliedEntries.add(entry1);
 
-            int lastAppliedDuringSnapshotCapture = 3;
-            int lastIndexDuringSnapshotCapture = 4;
+                int lastAppliedDuringSnapshotCapture = 3;
+                int lastIndexDuringSnapshotCapture = 4;
 
                 // 4 messages as part of snapshot, which are applied to state
-            ByteString snapshotBytes  = fromObject(Arrays.asList(
-                    new MockRaftActorContext.MockPayload("A"),
-                    new MockRaftActorContext.MockPayload("B"),
-                    new MockRaftActorContext.MockPayload("C"),
-                    new MockRaftActorContext.MockPayload("D")));
+                ByteString snapshotBytes = fromObject(Arrays.asList(
+                        new MockRaftActorContext.MockPayload("A"),
+                        new MockRaftActorContext.MockPayload("B"),
+                        new MockRaftActorContext.MockPayload("C"),
+                        new MockRaftActorContext.MockPayload("D")));
 
-            Snapshot snapshot = Snapshot.create(snapshotBytes.toByteArray(),
-                    snapshotUnappliedEntries, lastIndexDuringSnapshotCapture, 1 ,
-                    lastAppliedDuringSnapshotCapture, 1);
-            MockSnapshotStore.setMockSnapshot(snapshot);
-            MockSnapshotStore.setPersistenceId(persistenceId);
+                Snapshot snapshot = Snapshot.create(snapshotBytes.toByteArray(),
+                        snapshotUnappliedEntries, lastIndexDuringSnapshotCapture, 1,
+                        lastAppliedDuringSnapshotCapture, 1);
+                MockSnapshotStore.setMockSnapshot(snapshot);
+                MockSnapshotStore.setPersistenceId(persistenceId);
 
-            // add more entries after snapshot is taken
-            List<ReplicatedLogEntry> entries = new ArrayList<>();
-            ReplicatedLogEntry entry2 = new MockRaftActorContext.MockReplicatedLogEntry(1, 5,
-                    new MockRaftActorContext.MockPayload("F"));
-            ReplicatedLogEntry entry3 = new MockRaftActorContext.MockReplicatedLogEntry(1, 6,
-                    new MockRaftActorContext.MockPayload("G"));
-            ReplicatedLogEntry entry4 = new MockRaftActorContext.MockReplicatedLogEntry(1, 7,
-                    new MockRaftActorContext.MockPayload("H"));
-            entries.add(entry2);
-            entries.add(entry3);
-            entries.add(entry4);
+                // add more entries after snapshot is taken
+                List<ReplicatedLogEntry> entries = new ArrayList<>();
+                ReplicatedLogEntry entry2 = new MockRaftActorContext.MockReplicatedLogEntry(1, 5,
+                        new MockRaftActorContext.MockPayload("F"));
+                ReplicatedLogEntry entry3 = new MockRaftActorContext.MockReplicatedLogEntry(1, 6,
+                        new MockRaftActorContext.MockPayload("G"));
+                ReplicatedLogEntry entry4 = new MockRaftActorContext.MockReplicatedLogEntry(1, 7,
+                        new MockRaftActorContext.MockPayload("H"));
+                entries.add(entry2);
+                entries.add(entry3);
+                entries.add(entry4);
 
-            int lastAppliedToState = 5;
-            int lastIndex = 7;
+                int lastAppliedToState = 5;
+                int lastIndex = 7;
 
-            MockAkkaJournal.addToJournal(5, entry2);
-            // 2 entries are applied to state besides the 4 entries in snapshot
-            MockAkkaJournal.addToJournal(6, new ApplyLogEntries(lastAppliedToState));
-            MockAkkaJournal.addToJournal(7, entry3);
-            MockAkkaJournal.addToJournal(8, entry4);
+                MockAkkaJournal.addToJournal(5, entry2);
+                // 2 entries are applied to state besides the 4 entries in snapshot
+                MockAkkaJournal.addToJournal(6, new ApplyLogEntries(lastAppliedToState));
+                MockAkkaJournal.addToJournal(7, entry3);
+                MockAkkaJournal.addToJournal(8, entry4);
 
-            // kill the actor
-            followerActor.tell(PoisonPill.getInstance(), null);
-            expectMsgClass(duration("5 seconds"), Terminated.class);
+                // kill the actor
+                followerActor.tell(PoisonPill.getInstance(), null);
+                expectMsgClass(duration("5 seconds"), Terminated.class);
 
-            unwatch(followerActor);
+                unwatch(followerActor);
 
-            //reinstate the actor
-            TestActorRef<MockRaftActor> ref = TestActorRef.create(getSystem(),
-                    MockRaftActor.props(persistenceId, Collections.<String,String>emptyMap(),
-                            Optional.<ConfigParams>of(config)));
+                //reinstate the actor
+                TestActorRef<MockRaftActor> ref = factory.createTestActor(
+                        MockRaftActor.props(persistenceId, Collections.<String, String>emptyMap(),
+                                Optional.<ConfigParams>of(config)));
 
-            ref.underlyingActor().waitForRecoveryComplete();
+                ref.underlyingActor().waitForRecoveryComplete();
 
-            RaftActorContext context = ref.underlyingActor().getRaftActorContext();
-            assertEquals("Journal log size", snapshotUnappliedEntries.size() + entries.size(),
-                    context.getReplicatedLog().size());
-            assertEquals("Last index", lastIndex, context.getReplicatedLog().lastIndex());
-            assertEquals("Last applied", lastAppliedToState, context.getLastApplied());
-            assertEquals("Commit index", lastAppliedToState, context.getCommitIndex());
-            assertEquals("Recovered state size", 6, ref.underlyingActor().getState().size());
+                RaftActorContext context = ref.underlyingActor().getRaftActorContext();
+                assertEquals("Journal log size", snapshotUnappliedEntries.size() + entries.size(),
+                        context.getReplicatedLog().size());
+                assertEquals("Last index", lastIndex, context.getReplicatedLog().lastIndex());
+                assertEquals("Last applied", lastAppliedToState, context.getLastApplied());
+                assertEquals("Commit index", lastAppliedToState, context.getCommitIndex());
+                assertEquals("Recovered state size", 6, ref.underlyingActor().getState().size());
+            }
         }};
     }
 
@@ -426,61 +428,62 @@ public class RaftActorTest extends AbstractActorTest {
     public void testHandleRecoveryWhenDataPersistenceRecoveryApplicable() throws Exception {
         new JavaTestKit(getSystem()) {
             {
-                String persistenceId = "testHandleRecoveryWhenDataPersistenceRecoveryApplicable";
+                try(TestActorFactory factory = new TestActorFactory(getSystem())) {
+                    String persistenceId = factory.generateActorId("leader-");
 
-                DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+                    DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
 
-                config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+                    config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
 
-                TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(), MockRaftActor.props(persistenceId,
-                        Collections.<String,String>emptyMap(), Optional.<ConfigParams>of(config)), persistenceId);
+                    TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
+                            Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config)), persistenceId);
 
-                MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
+                    MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 
-                // Wait for akka's recovery to complete so it doesn't interfere.
-                mockRaftActor.waitForRecoveryComplete();
+                    // Wait for akka's recovery to complete so it doesn't interfere.
+                    mockRaftActor.waitForRecoveryComplete();
 
-                ByteString snapshotBytes  = fromObject(Arrays.asList(
-                        new MockRaftActorContext.MockPayload("A"),
-                        new MockRaftActorContext.MockPayload("B"),
-                        new MockRaftActorContext.MockPayload("C"),
-                        new MockRaftActorContext.MockPayload("D")));
+                    ByteString snapshotBytes = fromObject(Arrays.asList(
+                            new MockRaftActorContext.MockPayload("A"),
+                            new MockRaftActorContext.MockPayload("B"),
+                            new MockRaftActorContext.MockPayload("C"),
+                            new MockRaftActorContext.MockPayload("D")));
 
-                Snapshot snapshot = Snapshot.create(snapshotBytes.toByteArray(),
-                        Lists.<ReplicatedLogEntry>newArrayList(), 3, 1 ,3, 1);
+                    Snapshot snapshot = Snapshot.create(snapshotBytes.toByteArray(),
+                            Lists.<ReplicatedLogEntry>newArrayList(), 3, 1, 3, 1);
 
-                mockRaftActor.onReceiveRecover(new SnapshotOffer(new SnapshotMetadata(persistenceId, 100, 100), snapshot));
+                    mockRaftActor.onReceiveRecover(new SnapshotOffer(new SnapshotMetadata(persistenceId, 100, 100), snapshot));
 
-                verify(mockRaftActor.delegate).applyRecoverySnapshot(eq(snapshotBytes.toByteArray()));
+                    verify(mockRaftActor.delegate).applyRecoverySnapshot(eq(snapshotBytes.toByteArray()));
 
-                mockRaftActor.onReceiveRecover(new ReplicatedLogImplEntry(0, 1, new MockRaftActorContext.MockPayload("A")));
+                    mockRaftActor.onReceiveRecover(new ReplicatedLogImplEntry(0, 1, new MockRaftActorContext.MockPayload("A")));
 
-                ReplicatedLog replicatedLog = mockRaftActor.getReplicatedLog();
+                    ReplicatedLog replicatedLog = mockRaftActor.getReplicatedLog();
 
-                assertEquals("add replicated log entry", 1, replicatedLog.size());
+                    assertEquals("add replicated log entry", 1, replicatedLog.size());
 
-                mockRaftActor.onReceiveRecover(new ReplicatedLogImplEntry(1, 1, new MockRaftActorContext.MockPayload("A")));
+                    mockRaftActor.onReceiveRecover(new ReplicatedLogImplEntry(1, 1, new MockRaftActorContext.MockPayload("A")));
 
-                assertEquals("add replicated log entry", 2, replicatedLog.size());
+                    assertEquals("add replicated log entry", 2, replicatedLog.size());
 
-                mockRaftActor.onReceiveRecover(new ApplyLogEntries(1));
+                    mockRaftActor.onReceiveRecover(new ApplyLogEntries(1));
 
-                assertEquals("commit index 1", 1, mockRaftActor.getRaftActorContext().getCommitIndex());
+                    assertEquals("commit index 1", 1, mockRaftActor.getRaftActorContext().getCommitIndex());
 
-                // The snapshot had 4 items + we added 2 more items during the test
-                // We start removing from 5 and we should get 1 item in the replicated log
-                mockRaftActor.onReceiveRecover(new RaftActor.DeleteEntries(5));
+                    // The snapshot had 4 items + we added 2 more items during the test
+                    // We start removing from 5 and we should get 1 item in the replicated log
+                    mockRaftActor.onReceiveRecover(new RaftActor.DeleteEntries(5));
 
-                assertEquals("remove log entries", 1, replicatedLog.size());
+                    assertEquals("remove log entries", 1, replicatedLog.size());
 
-                mockRaftActor.onReceiveRecover(new RaftActor.UpdateElectionTerm(10, "foobar"));
+                    mockRaftActor.onReceiveRecover(new RaftActor.UpdateElectionTerm(10, "foobar"));
 
-                assertEquals("election term", 10, mockRaftActor.getRaftActorContext().getTermInformation().getCurrentTerm());
-                assertEquals("voted for", "foobar", mockRaftActor.getRaftActorContext().getTermInformation().getVotedFor());
+                    assertEquals("election term", 10, mockRaftActor.getRaftActorContext().getTermInformation().getCurrentTerm());
+                    assertEquals("voted for", "foobar", mockRaftActor.getRaftActorContext().getTermInformation().getVotedFor());
 
-                mockRaftActor.onReceiveRecover(mock(RecoveryCompleted.class));
+                    mockRaftActor.onReceiveRecover(mock(RecoveryCompleted.class));
 
-                mockActorRef.tell(PoisonPill.getInstance(), getRef());
+                }
 
             }};
     }
@@ -495,59 +498,60 @@ public class RaftActorTest extends AbstractActorTest {
     public void testHandleRecoveryWhenDataPersistenceRecoveryNotApplicable() throws Exception {
         new JavaTestKit(getSystem()) {
             {
-                String persistenceId = "testHandleRecoveryWhenDataPersistenceRecoveryNotApplicable";
+                try(TestActorFactory factory = new TestActorFactory(getSystem())) {
+                    String persistenceId = factory.generateActorId("leader-");
 
-                DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+                    DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
 
-                config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+                    config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
 
-                TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(), MockRaftActor.props(persistenceId,
-                        Collections.<String,String>emptyMap(), Optional.<ConfigParams>of(config), new DataPersistenceProviderMonitor()), persistenceId);
+                    TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
+                            Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config), new DataPersistenceProviderMonitor()), persistenceId);
 
-                MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
+                    MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 
-                // Wait for akka's recovery to complete so it doesn't interfere.
-                mockRaftActor.waitForRecoveryComplete();
+                    // Wait for akka's recovery to complete so it doesn't interfere.
+                    mockRaftActor.waitForRecoveryComplete();
 
-                ByteString snapshotBytes  = fromObject(Arrays.asList(
-                        new MockRaftActorContext.MockPayload("A"),
-                        new MockRaftActorContext.MockPayload("B"),
-                        new MockRaftActorContext.MockPayload("C"),
-                        new MockRaftActorContext.MockPayload("D")));
+                    ByteString snapshotBytes = fromObject(Arrays.asList(
+                            new MockRaftActorContext.MockPayload("A"),
+                            new MockRaftActorContext.MockPayload("B"),
+                            new MockRaftActorContext.MockPayload("C"),
+                            new MockRaftActorContext.MockPayload("D")));
 
-                Snapshot snapshot = Snapshot.create(snapshotBytes.toByteArray(),
-                        Lists.<ReplicatedLogEntry>newArrayList(), 3, 1 ,3, 1);
+                    Snapshot snapshot = Snapshot.create(snapshotBytes.toByteArray(),
+                            Lists.<ReplicatedLogEntry>newArrayList(), 3, 1, 3, 1);
 
-                mockRaftActor.onReceiveRecover(new SnapshotOffer(new SnapshotMetadata(persistenceId, 100, 100), snapshot));
+                    mockRaftActor.onReceiveRecover(new SnapshotOffer(new SnapshotMetadata(persistenceId, 100, 100), snapshot));
 
-                verify(mockRaftActor.delegate, times(0)).applyRecoverySnapshot(any(byte[].class));
+                    verify(mockRaftActor.delegate, times(0)).applyRecoverySnapshot(any(byte[].class));
 
-                mockRaftActor.onReceiveRecover(new ReplicatedLogImplEntry(0, 1, new MockRaftActorContext.MockPayload("A")));
+                    mockRaftActor.onReceiveRecover(new ReplicatedLogImplEntry(0, 1, new MockRaftActorContext.MockPayload("A")));
 
-                ReplicatedLog replicatedLog = mockRaftActor.getReplicatedLog();
+                    ReplicatedLog replicatedLog = mockRaftActor.getReplicatedLog();
 
-                assertEquals("add replicated log entry", 0, replicatedLog.size());
+                    assertEquals("add replicated log entry", 0, replicatedLog.size());
 
-                mockRaftActor.onReceiveRecover(new ReplicatedLogImplEntry(1, 1, new MockRaftActorContext.MockPayload("A")));
+                    mockRaftActor.onReceiveRecover(new ReplicatedLogImplEntry(1, 1, new MockRaftActorContext.MockPayload("A")));
 
-                assertEquals("add replicated log entry", 0, replicatedLog.size());
+                    assertEquals("add replicated log entry", 0, replicatedLog.size());
 
-                mockRaftActor.onReceiveRecover(new ApplyLogEntries(1));
+                    mockRaftActor.onReceiveRecover(new ApplyLogEntries(1));
 
-                assertEquals("commit index -1", -1, mockRaftActor.getRaftActorContext().getCommitIndex());
+                    assertEquals("commit index -1", -1, mockRaftActor.getRaftActorContext().getCommitIndex());
 
-                mockRaftActor.onReceiveRecover(new RaftActor.DeleteEntries(2));
+                    mockRaftActor.onReceiveRecover(new RaftActor.DeleteEntries(2));
 
-                assertEquals("remove log entries", 0, replicatedLog.size());
+                    assertEquals("remove log entries", 0, replicatedLog.size());
 
-                mockRaftActor.onReceiveRecover(new RaftActor.UpdateElectionTerm(10, "foobar"));
+                    mockRaftActor.onReceiveRecover(new RaftActor.UpdateElectionTerm(10, "foobar"));
 
-                assertNotEquals("election term", 10, mockRaftActor.getRaftActorContext().getTermInformation().getCurrentTerm());
-                assertNotEquals("voted for", "foobar", mockRaftActor.getRaftActorContext().getTermInformation().getVotedFor());
+                    assertNotEquals("election term", 10, mockRaftActor.getRaftActorContext().getTermInformation().getCurrentTerm());
+                    assertNotEquals("voted for", "foobar", mockRaftActor.getRaftActorContext().getTermInformation().getVotedFor());
 
-                mockRaftActor.onReceiveRecover(mock(RecoveryCompleted.class));
+                    mockRaftActor.onReceiveRecover(mock(RecoveryCompleted.class));
 
-                mockActorRef.tell(PoisonPill.getInstance(), getRef());
+                }
             }};
     }
 
@@ -556,26 +560,27 @@ public class RaftActorTest extends AbstractActorTest {
     public void testUpdatingElectionTermCallsDataPersistence() throws Exception {
         new JavaTestKit(getSystem()) {
             {
-                String persistenceId = "testUpdatingElectionTermCallsDataPersistence";
+                try(TestActorFactory factory = new TestActorFactory(getSystem())) {
+                    String persistenceId = factory.generateActorId("leader-");
 
-                DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+                    DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
 
-                config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+                    config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
 
-                CountDownLatch persistLatch = new CountDownLatch(1);
-                DataPersistenceProviderMonitor dataPersistenceProviderMonitor = new DataPersistenceProviderMonitor();
-                dataPersistenceProviderMonitor.setPersistLatch(persistLatch);
+                    CountDownLatch persistLatch = new CountDownLatch(1);
+                    DataPersistenceProviderMonitor dataPersistenceProviderMonitor = new DataPersistenceProviderMonitor();
+                    dataPersistenceProviderMonitor.setPersistLatch(persistLatch);
 
-                TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(), MockRaftActor.props(persistenceId,
-                        Collections.<String,String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProviderMonitor), persistenceId);
+                    TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
+                            Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProviderMonitor), persistenceId);
 
-                MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
+                    MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 
-                mockRaftActor.getRaftActorContext().getTermInformation().updateAndPersist(10, "foobar");
+                    mockRaftActor.getRaftActorContext().getTermInformation().updateAndPersist(10, "foobar");
 
-                assertEquals("Persist called", true, persistLatch.await(5, TimeUnit.SECONDS));
+                    assertEquals("Persist called", true, persistLatch.await(5, TimeUnit.SECONDS));
 
-                mockActorRef.tell(PoisonPill.getInstance(), getRef());
+                }
 
             }
         };
@@ -585,26 +590,27 @@ public class RaftActorTest extends AbstractActorTest {
     public void testAddingReplicatedLogEntryCallsDataPersistence() throws Exception {
         new JavaTestKit(getSystem()) {
             {
-                String persistenceId = "testAddingReplicatedLogEntryCallsDataPersistence";
+                try(TestActorFactory factory = new TestActorFactory(getSystem())) {
+                    String persistenceId = factory.generateActorId("leader-");
 
-                DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+                    DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
 
-                config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+                    config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
 
-                DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
+                    DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
 
-                TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(), MockRaftActor.props(persistenceId,
-                        Collections.<String,String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
+                    TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
+                            Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
 
-                MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
+                    MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 
-                MockRaftActorContext.MockReplicatedLogEntry logEntry = new MockRaftActorContext.MockReplicatedLogEntry(10, 10, mock(Payload.class));
+                    MockRaftActorContext.MockReplicatedLogEntry logEntry = new MockRaftActorContext.MockReplicatedLogEntry(10, 10, mock(Payload.class));
 
-                mockRaftActor.getRaftActorContext().getReplicatedLog().appendAndPersist(logEntry);
+                    mockRaftActor.getRaftActorContext().getReplicatedLog().appendAndPersist(logEntry);
 
-                verify(dataPersistenceProvider).persist(eq(logEntry), any(Procedure.class));
+                    verify(dataPersistenceProvider).persist(eq(logEntry), any(Procedure.class));
 
-                mockActorRef.tell(PoisonPill.getInstance(), getRef());
+                }
 
             }
         };
@@ -614,26 +620,27 @@ public class RaftActorTest extends AbstractActorTest {
     public void testRemovingReplicatedLogEntryCallsDataPersistence() throws Exception {
         new JavaTestKit(getSystem()) {
             {
-                String persistenceId = "testRemovingReplicatedLogEntryCallsDataPersistence";
+                try(TestActorFactory factory = new TestActorFactory(getSystem())) {
+                    String persistenceId = factory.generateActorId("leader-");
 
-                DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+                    DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
 
-                config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+                    config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
 
-                DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
+                    DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
 
-                TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(), MockRaftActor.props(persistenceId,
-                        Collections.<String,String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
+                    TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
+                            Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
 
-                MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
+                    MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 
-                mockRaftActor.getReplicatedLog().appendAndPersist(new MockRaftActorContext.MockReplicatedLogEntry(1, 0, mock(Payload.class)));
+                    mockRaftActor.getReplicatedLog().appendAndPersist(new MockRaftActorContext.MockReplicatedLogEntry(1, 0, mock(Payload.class)));
 
-                mockRaftActor.getRaftActorContext().getReplicatedLog().removeFromAndPersist(0);
+                    mockRaftActor.getRaftActorContext().getReplicatedLog().removeFromAndPersist(0);
 
-                verify(dataPersistenceProvider, times(2)).persist(anyObject(), any(Procedure.class));
+                    verify(dataPersistenceProvider, times(2)).persist(anyObject(), any(Procedure.class));
 
-                mockActorRef.tell(PoisonPill.getInstance(), getRef());
+                }
 
             }
         };
@@ -643,24 +650,25 @@ public class RaftActorTest extends AbstractActorTest {
     public void testApplyLogEntriesCallsDataPersistence() throws Exception {
         new JavaTestKit(getSystem()) {
             {
-                String persistenceId = "testApplyLogEntriesCallsDataPersistence";
+                try(TestActorFactory factory = new TestActorFactory(getSystem())) {
+                    String persistenceId = factory.generateActorId("leader-");
 
-                DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+                    DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
 
-                config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+                    config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
 
-                DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
+                    DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
 
-                TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(), MockRaftActor.props(persistenceId,
-                        Collections.<String,String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
+                    TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
+                            Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
 
-                MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
+                    MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 
-                mockRaftActor.onReceiveCommand(new ApplyLogEntries(10));
+                    mockRaftActor.onReceiveCommand(new ApplyLogEntries(10));
 
-                verify(dataPersistenceProvider, times(1)).persist(anyObject(), any(Procedure.class));
+                    verify(dataPersistenceProvider, times(1)).persist(anyObject(), any(Procedure.class));
 
-                mockActorRef.tell(PoisonPill.getInstance(), getRef());
+                }
 
             }
         };
@@ -670,38 +678,38 @@ public class RaftActorTest extends AbstractActorTest {
     public void testCaptureSnapshotReplyCallsDataPersistence() throws Exception {
         new JavaTestKit(getSystem()) {
             {
-                String persistenceId = "testCaptureSnapshotReplyCallsDataPersistence";
+                try(TestActorFactory factory = new TestActorFactory(getSystem())) {
+                    String persistenceId = factory.generateActorId("leader-");
 
-                DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+                    DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
 
-                config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+                    config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
 
-                DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
+                    DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
 
-                TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(),
-                    MockRaftActor.props(persistenceId,Collections.<String,String>emptyMap(),
-                        Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
+                    TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(
+                            MockRaftActor.props(persistenceId, Collections.<String, String>emptyMap(),
+                                    Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
 
-                MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
+                    MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 
-                ByteString snapshotBytes  = fromObject(Arrays.asList(
-                        new MockRaftActorContext.MockPayload("A"),
-                        new MockRaftActorContext.MockPayload("B"),
-                        new MockRaftActorContext.MockPayload("C"),
-                        new MockRaftActorContext.MockPayload("D")));
+                    ByteString snapshotBytes = fromObject(Arrays.asList(
+                            new MockRaftActorContext.MockPayload("A"),
+                            new MockRaftActorContext.MockPayload("B"),
+                            new MockRaftActorContext.MockPayload("C"),
+                            new MockRaftActorContext.MockPayload("D")));
 
-                mockRaftActor.onReceiveCommand(new CaptureSnapshot(-1,1,-1,1));
+                    mockRaftActor.onReceiveCommand(new CaptureSnapshot(-1, 1, -1, 1));
 
-                RaftActorContext raftActorContext = mockRaftActor.getRaftActorContext();
+                    RaftActorContext raftActorContext = mockRaftActor.getRaftActorContext();
 
-                mockRaftActor.setCurrentBehavior(new Leader(raftActorContext));
+                    mockRaftActor.setCurrentBehavior(new Leader(raftActorContext));
 
-                mockRaftActor.onReceiveCommand(new CaptureSnapshotReply(snapshotBytes.toByteArray()));
+                    mockRaftActor.onReceiveCommand(new CaptureSnapshotReply(snapshotBytes.toByteArray()));
 
-                verify(dataPersistenceProvider).saveSnapshot(anyObject());
+                    verify(dataPersistenceProvider).saveSnapshot(anyObject());
 
-                mockActorRef.tell(PoisonPill.getInstance(), getRef());
-
+                }
             }
         };
     }
@@ -710,55 +718,56 @@ public class RaftActorTest extends AbstractActorTest {
     public void testSaveSnapshotSuccessCallsDataPersistence() throws Exception {
         new JavaTestKit(getSystem()) {
             {
-                String persistenceId = "testSaveSnapshotSuccessCallsDataPersistence";
+                try(TestActorFactory factory = new TestActorFactory(getSystem())) {
+                    String persistenceId = factory.generateActorId("leader-");
 
-                DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+                    DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
 
-                config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+                    config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
 
-                DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
+                    DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
 
-                TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(), MockRaftActor.props(persistenceId,
-                        Collections.<String,String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
+                    TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
+                            Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
 
-                MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
+                    MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 
-                mockRaftActor.getReplicatedLog().append(new MockRaftActorContext.MockReplicatedLogEntry(1,0, mock(Payload.class)));
-                mockRaftActor.getReplicatedLog().append(new MockRaftActorContext.MockReplicatedLogEntry(1,1, mock(Payload.class)));
-                mockRaftActor.getReplicatedLog().append(new MockRaftActorContext.MockReplicatedLogEntry(1,2, mock(Payload.class)));
-                mockRaftActor.getReplicatedLog().append(new MockRaftActorContext.MockReplicatedLogEntry(1,3, mock(Payload.class)));
-                mockRaftActor.getReplicatedLog().append(new MockRaftActorContext.MockReplicatedLogEntry(1,4, mock(Payload.class)));
+                    mockRaftActor.getReplicatedLog().append(new MockRaftActorContext.MockReplicatedLogEntry(1, 0, mock(Payload.class)));
+                    mockRaftActor.getReplicatedLog().append(new MockRaftActorContext.MockReplicatedLogEntry(1, 1, mock(Payload.class)));
+                    mockRaftActor.getReplicatedLog().append(new MockRaftActorContext.MockReplicatedLogEntry(1, 2, mock(Payload.class)));
+                    mockRaftActor.getReplicatedLog().append(new MockRaftActorContext.MockReplicatedLogEntry(1, 3, mock(Payload.class)));
+                    mockRaftActor.getReplicatedLog().append(new MockRaftActorContext.MockReplicatedLogEntry(1, 4, mock(Payload.class)));
 
-                ByteString snapshotBytes = fromObject(Arrays.asList(
-                        new MockRaftActorContext.MockPayload("A"),
-                        new MockRaftActorContext.MockPayload("B"),
-                        new MockRaftActorContext.MockPayload("C"),
-                        new MockRaftActorContext.MockPayload("D")));
+                    ByteString snapshotBytes = fromObject(Arrays.asList(
+                            new MockRaftActorContext.MockPayload("A"),
+                            new MockRaftActorContext.MockPayload("B"),
+                            new MockRaftActorContext.MockPayload("C"),
+                            new MockRaftActorContext.MockPayload("D")));
 
-                RaftActorContext raftActorContext = mockRaftActor.getRaftActorContext();
-                mockRaftActor.setCurrentBehavior(new Follower(raftActorContext));
+                    RaftActorContext raftActorContext = mockRaftActor.getRaftActorContext();
+                    mockRaftActor.setCurrentBehavior(new Follower(raftActorContext));
 
-                mockRaftActor.onReceiveCommand(new CaptureSnapshot(-1, 1, 2, 1));
+                    mockRaftActor.onReceiveCommand(new CaptureSnapshot(-1, 1, 2, 1));
 
-                verify(mockRaftActor.delegate).createSnapshot();
+                    verify(mockRaftActor.delegate).createSnapshot();
 
-                mockRaftActor.onReceiveCommand(new CaptureSnapshotReply(snapshotBytes.toByteArray()));
+                    mockRaftActor.onReceiveCommand(new CaptureSnapshotReply(snapshotBytes.toByteArray()));
 
-                mockRaftActor.onReceiveCommand(new SaveSnapshotSuccess(new SnapshotMetadata("foo", 100, 100)));
+                    mockRaftActor.onReceiveCommand(new SaveSnapshotSuccess(new SnapshotMetadata("foo", 100, 100)));
 
-                verify(dataPersistenceProvider).deleteSnapshots(any(SnapshotSelectionCriteria.class));
+                    verify(dataPersistenceProvider).deleteSnapshots(any(SnapshotSelectionCriteria.class));
 
-                verify(dataPersistenceProvider).deleteMessages(100);
+                    verify(dataPersistenceProvider).deleteMessages(100);
 
-                assertEquals(2, mockRaftActor.getReplicatedLog().size());
+                    assertEquals(2, mockRaftActor.getReplicatedLog().size());
 
-                assertNotNull(mockRaftActor.getReplicatedLog().get(3));
-                assertNotNull(mockRaftActor.getReplicatedLog().get(4));
+                    assertNotNull(mockRaftActor.getReplicatedLog().get(3));
+                    assertNotNull(mockRaftActor.getReplicatedLog().get(4));
 
-                // Index 2 will not be in the log because it was removed due to snapshotting
-                assertNull(mockRaftActor.getReplicatedLog().get(2));
+                    // Index 2 will not be in the log because it was removed due to snapshotting
+                    assertNull(mockRaftActor.getReplicatedLog().get(2));
 
-                mockActorRef.tell(PoisonPill.getInstance(), getRef());
+                }
 
             }
         };
@@ -769,27 +778,28 @@ public class RaftActorTest extends AbstractActorTest {
 
         new JavaTestKit(getSystem()) {
             {
-                String persistenceId = "testApplyState";
+                try(TestActorFactory factory = new TestActorFactory(getSystem())) {
+                    String persistenceId = factory.generateActorId("leader-");
 
-                DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+                    DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
 
-                config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+                    config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
 
-                DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
+                    DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
 
-                TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(), MockRaftActor.props(persistenceId,
-                        Collections.<String,String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
+                    TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
+                            Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
 
-                MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
+                    MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 
-                ReplicatedLogEntry entry = new MockRaftActorContext.MockReplicatedLogEntry(1, 5,
-                        new MockRaftActorContext.MockPayload("F"));
+                    ReplicatedLogEntry entry = new MockRaftActorContext.MockReplicatedLogEntry(1, 5,
+                            new MockRaftActorContext.MockPayload("F"));
 
-                mockRaftActor.onReceiveCommand(new ApplyState(mockActorRef, "apply-state", entry));
+                    mockRaftActor.onReceiveCommand(new ApplyState(mockActorRef, "apply-state", entry));
 
-                verify(mockRaftActor.delegate).applyState(eq(mockActorRef), eq("apply-state"), anyObject());
+                    verify(mockRaftActor.delegate).applyState(eq(mockActorRef), eq("apply-state"), anyObject());
 
-                mockActorRef.tell(PoisonPill.getInstance(), getRef());
+                }
 
             }
         };
@@ -799,53 +809,53 @@ public class RaftActorTest extends AbstractActorTest {
     public void testApplySnapshot() throws Exception {
         new JavaTestKit(getSystem()) {
             {
-                String persistenceId = "testApplySnapshot";
+                try(TestActorFactory factory = new TestActorFactory(getSystem())) {
+                    String persistenceId = factory.generateActorId("leader-");
 
-                DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+                    DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
 
-                config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+                    config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
 
-                DataPersistenceProviderMonitor dataPersistenceProviderMonitor = new DataPersistenceProviderMonitor();
+                    DataPersistenceProviderMonitor dataPersistenceProviderMonitor = new DataPersistenceProviderMonitor();
 
-                TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(), MockRaftActor.props(persistenceId,
-                        Collections.<String,String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProviderMonitor), persistenceId);
+                    TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
+                            Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProviderMonitor), persistenceId);
 
-                MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
+                    MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 
-                ReplicatedLog oldReplicatedLog = mockRaftActor.getReplicatedLog();
+                    ReplicatedLog oldReplicatedLog = mockRaftActor.getReplicatedLog();
 
-                oldReplicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1,0,mock(Payload.class)));
-                oldReplicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1,1,mock(Payload.class)));
-                oldReplicatedLog.append(
-                    new MockRaftActorContext.MockReplicatedLogEntry(1, 2,
-                        mock(Payload.class)));
+                    oldReplicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1, 0, mock(Payload.class)));
+                    oldReplicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1, 1, mock(Payload.class)));
+                    oldReplicatedLog.append(
+                            new MockRaftActorContext.MockReplicatedLogEntry(1, 2,
+                                    mock(Payload.class)));
 
-                ByteString snapshotBytes = fromObject(Arrays.asList(
-                    new MockRaftActorContext.MockPayload("A"),
-                    new MockRaftActorContext.MockPayload("B"),
-                    new MockRaftActorContext.MockPayload("C"),
-                    new MockRaftActorContext.MockPayload("D")));
+                    ByteString snapshotBytes = fromObject(Arrays.asList(
+                            new MockRaftActorContext.MockPayload("A"),
+                            new MockRaftActorContext.MockPayload("B"),
+                            new MockRaftActorContext.MockPayload("C"),
+                            new MockRaftActorContext.MockPayload("D")));
 
-                Snapshot snapshot = mock(Snapshot.class);
+                    Snapshot snapshot = mock(Snapshot.class);
 
-                doReturn(snapshotBytes.toByteArray()).when(snapshot).getState();
+                    doReturn(snapshotBytes.toByteArray()).when(snapshot).getState();
 
-                doReturn(3L).when(snapshot).getLastAppliedIndex();
+                    doReturn(3L).when(snapshot).getLastAppliedIndex();
 
-                mockRaftActor.onReceiveCommand(new ApplySnapshot(snapshot));
+                    mockRaftActor.onReceiveCommand(new ApplySnapshot(snapshot));
 
-                verify(mockRaftActor.delegate).applySnapshot(eq(snapshot.getState()));
+                    verify(mockRaftActor.delegate).applySnapshot(eq(snapshot.getState()));
 
-                assertTrue("The replicatedLog should have changed",
-                    oldReplicatedLog != mockRaftActor.getReplicatedLog());
+                    assertTrue("The replicatedLog should have changed",
+                            oldReplicatedLog != mockRaftActor.getReplicatedLog());
 
-                assertEquals("lastApplied should be same as in the snapshot",
-                    (Long) 3L, mockRaftActor.getLastApplied());
+                    assertEquals("lastApplied should be same as in the snapshot",
+                            (Long) 3L, mockRaftActor.getLastApplied());
 
-                assertEquals(0, mockRaftActor.getReplicatedLog().size());
+                    assertEquals(0, mockRaftActor.getReplicatedLog().size());
 
-                mockActorRef.tell(PoisonPill.getInstance(), getRef());
-
+                }
             }
         };
     }
@@ -854,40 +864,41 @@ public class RaftActorTest extends AbstractActorTest {
     public void testSaveSnapshotFailure() throws Exception {
         new JavaTestKit(getSystem()) {
             {
-                String persistenceId = "testSaveSnapshotFailure";
+                try(TestActorFactory factory = new TestActorFactory(getSystem())) {
+                    String persistenceId = factory.generateActorId("leader-");
 
-                DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+                    DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
 
-                config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+                    config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
 
-                DataPersistenceProviderMonitor dataPersistenceProviderMonitor = new DataPersistenceProviderMonitor();
+                    DataPersistenceProviderMonitor dataPersistenceProviderMonitor = new DataPersistenceProviderMonitor();
 
-                TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(), MockRaftActor.props(persistenceId,
-                        Collections.<String,String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProviderMonitor), persistenceId);
+                    TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
+                            Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProviderMonitor), persistenceId);
 
-                MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
+                    MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 
-                ByteString snapshotBytes  = fromObject(Arrays.asList(
-                        new MockRaftActorContext.MockPayload("A"),
-                        new MockRaftActorContext.MockPayload("B"),
-                        new MockRaftActorContext.MockPayload("C"),
-                        new MockRaftActorContext.MockPayload("D")));
+                    ByteString snapshotBytes = fromObject(Arrays.asList(
+                            new MockRaftActorContext.MockPayload("A"),
+                            new MockRaftActorContext.MockPayload("B"),
+                            new MockRaftActorContext.MockPayload("C"),
+                            new MockRaftActorContext.MockPayload("D")));
 
-                RaftActorContext raftActorContext = mockRaftActor.getRaftActorContext();
+                    RaftActorContext raftActorContext = mockRaftActor.getRaftActorContext();
 
-                mockRaftActor.setCurrentBehavior(new Leader(raftActorContext));
+                    mockRaftActor.setCurrentBehavior(new Leader(raftActorContext));
 
-                mockRaftActor.onReceiveCommand(new CaptureSnapshot(-1,1,-1,1));
+                    mockRaftActor.onReceiveCommand(new CaptureSnapshot(-1, 1, -1, 1));
 
-                mockRaftActor.onReceiveCommand(new CaptureSnapshotReply(snapshotBytes.toByteArray()));
+                    mockRaftActor.onReceiveCommand(new CaptureSnapshotReply(snapshotBytes.toByteArray()));
 
-                mockRaftActor.onReceiveCommand(new SaveSnapshotFailure(new SnapshotMetadata("foobar", 10L, 1234L),
-                        new Exception()));
+                    mockRaftActor.onReceiveCommand(new SaveSnapshotFailure(new SnapshotMetadata("foobar", 10L, 1234L),
+                            new Exception()));
 
-                assertEquals("Snapshot index should not have advanced because save snapshot failed", -1,
-                        mockRaftActor.getReplicatedLog().getSnapshotIndex());
+                    assertEquals("Snapshot index should not have advanced because save snapshot failed", -1,
+                            mockRaftActor.getReplicatedLog().getSnapshotIndex());
 
-                mockActorRef.tell(PoisonPill.getInstance(), getRef());
+                }
 
             }
         };
@@ -896,37 +907,39 @@ public class RaftActorTest extends AbstractActorTest {
     @Test
     public void testRaftRoleChangeNotifier() throws Exception {
         new JavaTestKit(getSystem()) {{
-            ActorRef notifierActor = getSystem().actorOf(Props.create(MessageCollectorActor.class));
-            DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
-            String id = "testRaftRoleChangeNotifier";
+            try(TestActorFactory factory = new TestActorFactory(getSystem())) {
+                ActorRef notifierActor = factory.createActor(Props.create(MessageCollectorActor.class));
+                DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+                String persistenceId = factory.generateActorId("notifier-");
 
-            TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(), MockRaftActor.props(id,
-                Collections.<String,String>emptyMap(), Optional.<ConfigParams>of(config), notifierActor), id);
+                factory.createTestActor(MockRaftActor.props(persistenceId,
+                        Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config), notifierActor), persistenceId);
 
-            // sleeping for a minimum of 2 seconds, if it spans more its fine.
-            Uninterruptibles.sleepUninterruptibly(2, TimeUnit.SECONDS);
+                // sleeping for a minimum of 2 seconds, if it spans more its fine.
+                Uninterruptibles.sleepUninterruptibly(2, TimeUnit.SECONDS);
 
-            List<Object> matches =  MessageCollectorActor.getAllMatching(notifierActor, RoleChanged.class);
-            assertNotNull(matches);
-            assertEquals(3, matches.size());
+                List<Object> matches = MessageCollectorActor.getAllMatching(notifierActor, RoleChanged.class);
+                assertNotNull(matches);
+                assertEquals(3, matches.size());
 
-            // check if the notifier got a role change from null to Follower
-            RoleChanged raftRoleChanged = (RoleChanged) matches.get(0);
-            assertEquals(id, raftRoleChanged.getMemberId());
-            assertNull(raftRoleChanged.getOldRole());
-            assertEquals(RaftState.Follower.name(), raftRoleChanged.getNewRole());
+                // check if the notifier got a role change from null to Follower
+                RoleChanged raftRoleChanged = (RoleChanged) matches.get(0);
+                assertEquals(persistenceId, raftRoleChanged.getMemberId());
+                assertNull(raftRoleChanged.getOldRole());
+                assertEquals(RaftState.Follower.name(), raftRoleChanged.getNewRole());
 
-            // check if the notifier got a role change from Follower to Candidate
-            raftRoleChanged = (RoleChanged) matches.get(1);
-            assertEquals(id, raftRoleChanged.getMemberId());
-            assertEquals(RaftState.Follower.name(), raftRoleChanged.getOldRole());
-            assertEquals(RaftState.Candidate.name(), raftRoleChanged.getNewRole());
+                // check if the notifier got a role change from Follower to Candidate
+                raftRoleChanged = (RoleChanged) matches.get(1);
+                assertEquals(persistenceId, raftRoleChanged.getMemberId());
+                assertEquals(RaftState.Follower.name(), raftRoleChanged.getOldRole());
+                assertEquals(RaftState.Candidate.name(), raftRoleChanged.getNewRole());
 
-            // check if the notifier got a role change from Candidate to Leader
-            raftRoleChanged = (RoleChanged) matches.get(2);
-            assertEquals(id, raftRoleChanged.getMemberId());
-            assertEquals(RaftState.Candidate.name(), raftRoleChanged.getOldRole());
-            assertEquals(RaftState.Leader.name(), raftRoleChanged.getNewRole());
+                // check if the notifier got a role change from Candidate to Leader
+                raftRoleChanged = (RoleChanged) matches.get(2);
+                assertEquals(persistenceId, raftRoleChanged.getMemberId());
+                assertEquals(RaftState.Candidate.name(), raftRoleChanged.getOldRole());
+                assertEquals(RaftState.Leader.name(), raftRoleChanged.getNewRole());
+            }
         }};
     }
 
@@ -934,86 +947,88 @@ public class RaftActorTest extends AbstractActorTest {
     public void testFakeSnapshotsForLeaderWithInRealSnapshots() throws Exception {
         new JavaTestKit(getSystem()) {
             {
-                String persistenceId = "leader1";
+                try(TestActorFactory factory = new TestActorFactory(getSystem())) {
+                    String persistenceId = factory.generateActorId("leader-");
+                    String follower1Id = factory.generateActorId("follower-");
 
-                ActorRef followerActor1 =
-                        getSystem().actorOf(Props.create(MessageCollectorActor.class));
+                    ActorRef followerActor1 =
+                            factory.createActor(Props.create(MessageCollectorActor.class));
 
-                DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
-                config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
-                config.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
+                    DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+                    config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+                    config.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
 
-                DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
+                    DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
 
-                Map<String, String> peerAddresses = new HashMap<>();
-                peerAddresses.put("follower-1", followerActor1.path().toString());
+                    Map<String, String> peerAddresses = new HashMap<>();
+                    peerAddresses.put(follower1Id, followerActor1.path().toString());
 
-                TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(),
-                        MockRaftActor.props(persistenceId, peerAddresses,
-                                Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
+                    TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(),
+                            MockRaftActor.props(persistenceId, peerAddresses,
+                                    Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
 
-                MockRaftActor leaderActor = mockActorRef.underlyingActor();
-                leaderActor.getRaftActorContext().setCommitIndex(4);
-                leaderActor.getRaftActorContext().setLastApplied(4);
-                leaderActor.getRaftActorContext().getTermInformation().update(1, persistenceId);
+                    MockRaftActor leaderActor = mockActorRef.underlyingActor();
+                    leaderActor.getRaftActorContext().setCommitIndex(4);
+                    leaderActor.getRaftActorContext().setLastApplied(4);
+                    leaderActor.getRaftActorContext().getTermInformation().update(1, persistenceId);
 
-                leaderActor.waitForInitializeBehaviorComplete();
+                    leaderActor.waitForInitializeBehaviorComplete();
 
-                // create 8 entries in the log - 0 to 4 are applied and will get picked up as part of the capture snapshot
+                    // create 8 entries in the log - 0 to 4 are applied and will get picked up as part of the capture snapshot
 
-                Leader leader = new Leader(leaderActor.getRaftActorContext());
-                leaderActor.setCurrentBehavior(leader);
-                assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
+                    Leader leader = new Leader(leaderActor.getRaftActorContext());
+                    leaderActor.setCurrentBehavior(leader);
+                    assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
 
-                MockRaftActorContext.MockReplicatedLogBuilder logBuilder = new MockRaftActorContext.MockReplicatedLogBuilder();
-                leaderActor.getRaftActorContext().setReplicatedLog(logBuilder.createEntries(0, 8, 1).build());
+                    MockRaftActorContext.MockReplicatedLogBuilder logBuilder = new MockRaftActorContext.MockReplicatedLogBuilder();
+                    leaderActor.getRaftActorContext().setReplicatedLog(logBuilder.createEntries(0, 8, 1).build());
 
-                assertEquals(8, leaderActor.getReplicatedLog().size());
+                    assertEquals(8, leaderActor.getReplicatedLog().size());
 
-                leaderActor.onReceiveCommand(new CaptureSnapshot(6,1,4,1));
-                leaderActor.getRaftActorContext().setSnapshotCaptureInitiated(true);
-                verify(leaderActor.delegate).createSnapshot();
+                    leaderActor.onReceiveCommand(new CaptureSnapshot(6, 1, 4, 1));
+                    leaderActor.getRaftActorContext().setSnapshotCaptureInitiated(true);
+                    verify(leaderActor.delegate).createSnapshot();
 
-                assertEquals(8, leaderActor.getReplicatedLog().size());
+                    assertEquals(8, leaderActor.getReplicatedLog().size());
 
-                assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
-                //fake snapshot on index 5
-                leaderActor.onReceiveCommand(new AppendEntriesReply("follower-1", 1, true, 5, 1));
+                    assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
+                    //fake snapshot on index 5
+                    leaderActor.onReceiveCommand(new AppendEntriesReply(follower1Id, 1, true, 5, 1));
 
-                assertEquals(8, leaderActor.getReplicatedLog().size());
+                    assertEquals(8, leaderActor.getReplicatedLog().size());
 
-                //fake snapshot on index 6
-                assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
-                leaderActor.onReceiveCommand(new AppendEntriesReply("follower-1", 1, true, 6, 1));
-                assertEquals(8, leaderActor.getReplicatedLog().size());
+                    //fake snapshot on index 6
+                    assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
+                    leaderActor.onReceiveCommand(new AppendEntriesReply(follower1Id, 1, true, 6, 1));
+                    assertEquals(8, leaderActor.getReplicatedLog().size());
 
-                assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
+                    assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
 
-                assertEquals(8, leaderActor.getReplicatedLog().size());
+                    assertEquals(8, leaderActor.getReplicatedLog().size());
 
-                ByteString snapshotBytes  = fromObject(Arrays.asList(
-                        new MockRaftActorContext.MockPayload("foo-0"),
-                        new MockRaftActorContext.MockPayload("foo-1"),
-                        new MockRaftActorContext.MockPayload("foo-2"),
-                        new MockRaftActorContext.MockPayload("foo-3"),
-                        new MockRaftActorContext.MockPayload("foo-4")));
-                leaderActor.onReceiveCommand(new CaptureSnapshotReply(snapshotBytes.toByteArray()));
-                assertFalse(leaderActor.getRaftActorContext().isSnapshotCaptureInitiated());
+                    ByteString snapshotBytes = fromObject(Arrays.asList(
+                            new MockRaftActorContext.MockPayload("foo-0"),
+                            new MockRaftActorContext.MockPayload("foo-1"),
+                            new MockRaftActorContext.MockPayload("foo-2"),
+                            new MockRaftActorContext.MockPayload("foo-3"),
+                            new MockRaftActorContext.MockPayload("foo-4")));
+                    leaderActor.onReceiveCommand(new CaptureSnapshotReply(snapshotBytes.toByteArray()));
+                    assertFalse(leaderActor.getRaftActorContext().isSnapshotCaptureInitiated());
 
-                // capture snapshot reply should remove the snapshotted entries only
-                assertEquals(3, leaderActor.getReplicatedLog().size());
-                assertEquals(7, leaderActor.getReplicatedLog().lastIndex());
+                    // capture snapshot reply should remove the snapshotted entries only
+                    assertEquals(3, leaderActor.getReplicatedLog().size());
+                    assertEquals(7, leaderActor.getReplicatedLog().lastIndex());
 
-                // add another non-replicated entry
-                leaderActor.getReplicatedLog().append(
-                        new ReplicatedLogImplEntry(8, 1, new MockRaftActorContext.MockPayload("foo-8")));
+                    // add another non-replicated entry
+                    leaderActor.getReplicatedLog().append(
+                            new ReplicatedLogImplEntry(8, 1, new MockRaftActorContext.MockPayload("foo-8")));
 
-                //fake snapshot on index 7, since lastApplied = 7 , we would keep the last applied
-                leaderActor.onReceiveCommand(new AppendEntriesReply("follower-1", 1, true, 7, 1));
-                assertEquals(2, leaderActor.getReplicatedLog().size());
-                assertEquals(8, leaderActor.getReplicatedLog().lastIndex());
+                    //fake snapshot on index 7, since lastApplied = 7 , we would keep the last applied
+                    leaderActor.onReceiveCommand(new AppendEntriesReply(follower1Id, 1, true, 7, 1));
+                    assertEquals(2, leaderActor.getReplicatedLog().size());
+                    assertEquals(8, leaderActor.getReplicatedLog().lastIndex());
 
-                mockActorRef.tell(PoisonPill.getInstance(), getRef());
+                }
 
             }
         };
@@ -1023,97 +1038,100 @@ public class RaftActorTest extends AbstractActorTest {
     public void testFakeSnapshotsForFollowerWithInRealSnapshots() throws Exception {
         new JavaTestKit(getSystem()) {
             {
-                String persistenceId = "follower1";
-
-                ActorRef leaderActor1 =
-                        getSystem().actorOf(Props.create(MessageCollectorActor.class));
-
-                DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
-                config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
-                config.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
-
-                DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
-
-                Map<String, String> peerAddresses = new HashMap<>();
-                peerAddresses.put("leader", leaderActor1.path().toString());
-
-                TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(),
-                        MockRaftActor.props(persistenceId, peerAddresses,
-                                Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
-
-                MockRaftActor followerActor = mockActorRef.underlyingActor();
-                followerActor.getRaftActorContext().setCommitIndex(4);
-                followerActor.getRaftActorContext().setLastApplied(4);
-                followerActor.getRaftActorContext().getTermInformation().update(1, persistenceId);
-
-                followerActor.waitForInitializeBehaviorComplete();
-
-                // create 8 entries in the log - 0 to 4 are applied and will get picked up as part of the capture snapshot
-                Follower follower = new Follower(followerActor.getRaftActorContext());
-                followerActor.setCurrentBehavior(follower);
-                assertEquals(RaftState.Follower, followerActor.getCurrentBehavior().state());
-
-                MockRaftActorContext.MockReplicatedLogBuilder logBuilder = new MockRaftActorContext.MockReplicatedLogBuilder();
-                followerActor.getRaftActorContext().setReplicatedLog(logBuilder.createEntries(0, 6, 1).build());
-
-                // log as indices 0-5
-                assertEquals(6, followerActor.getReplicatedLog().size());
-
-                //snapshot on 4
-                followerActor.onReceiveCommand(new CaptureSnapshot(5,1,4,1));
-                followerActor.getRaftActorContext().setSnapshotCaptureInitiated(true);
-                verify(followerActor.delegate).createSnapshot();
-
-                assertEquals(6, followerActor.getReplicatedLog().size());
-
-                //fake snapshot on index 6
-                List<ReplicatedLogEntry> entries =
-                        Arrays.asList(
-                                (ReplicatedLogEntry) new MockRaftActorContext.MockReplicatedLogEntry(1, 6,
-                                        new MockRaftActorContext.MockPayload("foo-6"))
-                        );
-                followerActor.onReceiveCommand(new AppendEntries(1, "leader", 5, 1, entries , 5, 5));
-                assertEquals(7, followerActor.getReplicatedLog().size());
-
-                //fake snapshot on index 7
-                assertEquals(RaftState.Follower, followerActor.getCurrentBehavior().state());
-
-                entries =
-                        Arrays.asList(
-                                (ReplicatedLogEntry) new MockRaftActorContext.MockReplicatedLogEntry(1, 7,
-                                        new MockRaftActorContext.MockPayload("foo-7"))
-                        );
-                followerActor.onReceiveCommand(new AppendEntries(1, "leader", 6, 1, entries, 6, 6));
-                assertEquals(8, followerActor.getReplicatedLog().size());
-
-                assertEquals(RaftState.Follower, followerActor.getCurrentBehavior().state());
+                try(TestActorFactory factory = new TestActorFactory(getSystem())) {
+                    String persistenceId = factory.generateActorId("follower-");
+                    String leaderId = factory.generateActorId("leader-");
 
 
-                ByteString snapshotBytes  = fromObject(Arrays.asList(
-                        new MockRaftActorContext.MockPayload("foo-0"),
-                        new MockRaftActorContext.MockPayload("foo-1"),
-                        new MockRaftActorContext.MockPayload("foo-2"),
-                        new MockRaftActorContext.MockPayload("foo-3"),
-                        new MockRaftActorContext.MockPayload("foo-4")));
-                followerActor.onReceiveCommand(new CaptureSnapshotReply(snapshotBytes.toByteArray()));
-                assertFalse(followerActor.getRaftActorContext().isSnapshotCaptureInitiated());
+                    ActorRef leaderActor1 =
+                            factory.createActor(Props.create(MessageCollectorActor.class));
 
-                // capture snapshot reply should remove the snapshotted entries only
-                assertEquals(3, followerActor.getReplicatedLog().size()); //indexes 5,6,7 left in the log
-                assertEquals(7, followerActor.getReplicatedLog().lastIndex());
+                    DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+                    config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+                    config.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
 
-                entries =
-                        Arrays.asList(
-                                (ReplicatedLogEntry) new MockRaftActorContext.MockReplicatedLogEntry(1, 8,
-                                        new MockRaftActorContext.MockPayload("foo-7"))
-                        );
-                // send an additional entry 8 with leaderCommit = 7
-                followerActor.onReceiveCommand(new AppendEntries(1, "leader", 7, 1, entries , 7, 7));
+                    DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
 
-                // 7 and 8, as lastapplied is 7
-                assertEquals(2, followerActor.getReplicatedLog().size());
+                    Map<String, String> peerAddresses = new HashMap<>();
+                    peerAddresses.put(leaderId, leaderActor1.path().toString());
 
-                mockActorRef.tell(PoisonPill.getInstance(), getRef());
+                    TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(),
+                            MockRaftActor.props(persistenceId, peerAddresses,
+                                    Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
+
+                    MockRaftActor followerActor = mockActorRef.underlyingActor();
+                    followerActor.getRaftActorContext().setCommitIndex(4);
+                    followerActor.getRaftActorContext().setLastApplied(4);
+                    followerActor.getRaftActorContext().getTermInformation().update(1, persistenceId);
+
+                    followerActor.waitForInitializeBehaviorComplete();
+
+                    // create 8 entries in the log - 0 to 4 are applied and will get picked up as part of the capture snapshot
+                    Follower follower = new Follower(followerActor.getRaftActorContext());
+                    followerActor.setCurrentBehavior(follower);
+                    assertEquals(RaftState.Follower, followerActor.getCurrentBehavior().state());
+
+                    MockRaftActorContext.MockReplicatedLogBuilder logBuilder = new MockRaftActorContext.MockReplicatedLogBuilder();
+                    followerActor.getRaftActorContext().setReplicatedLog(logBuilder.createEntries(0, 6, 1).build());
+
+                    // log as indices 0-5
+                    assertEquals(6, followerActor.getReplicatedLog().size());
+
+                    //snapshot on 4
+                    followerActor.onReceiveCommand(new CaptureSnapshot(5, 1, 4, 1));
+                    followerActor.getRaftActorContext().setSnapshotCaptureInitiated(true);
+                    verify(followerActor.delegate).createSnapshot();
+
+                    assertEquals(6, followerActor.getReplicatedLog().size());
+
+                    //fake snapshot on index 6
+                    List<ReplicatedLogEntry> entries =
+                            Arrays.asList(
+                                    (ReplicatedLogEntry) new MockRaftActorContext.MockReplicatedLogEntry(1, 6,
+                                            new MockRaftActorContext.MockPayload("foo-6"))
+                            );
+                    followerActor.onReceiveCommand(new AppendEntries(1, leaderId, 5, 1, entries, 5, 5));
+                    assertEquals(7, followerActor.getReplicatedLog().size());
+
+                    //fake snapshot on index 7
+                    assertEquals(RaftState.Follower, followerActor.getCurrentBehavior().state());
+
+                    entries =
+                            Arrays.asList(
+                                    (ReplicatedLogEntry) new MockRaftActorContext.MockReplicatedLogEntry(1, 7,
+                                            new MockRaftActorContext.MockPayload("foo-7"))
+                            );
+                    followerActor.onReceiveCommand(new AppendEntries(1, leaderId, 6, 1, entries, 6, 6));
+                    assertEquals(8, followerActor.getReplicatedLog().size());
+
+                    assertEquals(RaftState.Follower, followerActor.getCurrentBehavior().state());
+
+
+                    ByteString snapshotBytes = fromObject(Arrays.asList(
+                            new MockRaftActorContext.MockPayload("foo-0"),
+                            new MockRaftActorContext.MockPayload("foo-1"),
+                            new MockRaftActorContext.MockPayload("foo-2"),
+                            new MockRaftActorContext.MockPayload("foo-3"),
+                            new MockRaftActorContext.MockPayload("foo-4")));
+                    followerActor.onReceiveCommand(new CaptureSnapshotReply(snapshotBytes.toByteArray()));
+                    assertFalse(followerActor.getRaftActorContext().isSnapshotCaptureInitiated());
+
+                    // capture snapshot reply should remove the snapshotted entries only
+                    assertEquals(3, followerActor.getReplicatedLog().size()); //indexes 5,6,7 left in the log
+                    assertEquals(7, followerActor.getReplicatedLog().lastIndex());
+
+                    entries =
+                            Arrays.asList(
+                                    (ReplicatedLogEntry) new MockRaftActorContext.MockReplicatedLogEntry(1, 8,
+                                            new MockRaftActorContext.MockPayload("foo-7"))
+                            );
+                    // send an additional entry 8 with leaderCommit = 7
+                    followerActor.onReceiveCommand(new AppendEntries(1, leaderId, 7, 1, entries, 7, 7));
+
+                    // 7 and 8, as lastapplied is 7
+                    assertEquals(2, followerActor.getReplicatedLog().size());
+
+                }
 
             }
         };
@@ -1123,86 +1141,86 @@ public class RaftActorTest extends AbstractActorTest {
     public void testFakeSnapshotsForLeaderWithInInitiateSnapshots() throws Exception {
         new JavaTestKit(getSystem()) {
             {
-                String persistenceId = "leader1";
+                try(TestActorFactory factory = new TestActorFactory(getSystem())) {
+                    String persistenceId = factory.generateActorId("leader-");
+                    String follower1Id = factory.generateActorId("follower-");
+                    String follower2Id = factory.generateActorId("follower-");
 
-                ActorRef followerActor1 =
-                        getSystem().actorOf(Props.create(MessageCollectorActor.class));
-                ActorRef followerActor2 =
-                        getSystem().actorOf(Props.create(MessageCollectorActor.class));
+                    ActorRef followerActor1 =
+                            factory.createActor(Props.create(MessageCollectorActor.class), follower1Id);
+                    ActorRef followerActor2 =
+                            factory.createActor(Props.create(MessageCollectorActor.class), follower2Id);
 
-                DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
-                config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
-                config.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
+                    DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+                    config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+                    config.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
 
-                DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
+                    DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
 
-                Map<String, String> peerAddresses = new HashMap<>();
-                peerAddresses.put("follower-1", followerActor1.path().toString());
-                peerAddresses.put("follower-2", followerActor2.path().toString());
+                    Map<String, String> peerAddresses = new HashMap<>();
+                    peerAddresses.put(follower1Id, followerActor1.path().toString());
+                    peerAddresses.put(follower2Id, followerActor2.path().toString());
 
-                TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(),
-                        MockRaftActor.props(persistenceId, peerAddresses,
-                                Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
+                    TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(
+                            MockRaftActor.props(persistenceId, peerAddresses,
+                                    Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
 
-                MockRaftActor leaderActor = mockActorRef.underlyingActor();
-                leaderActor.getRaftActorContext().setCommitIndex(9);
-                leaderActor.getRaftActorContext().setLastApplied(9);
-                leaderActor.getRaftActorContext().getTermInformation().update(1, persistenceId);
+                    MockRaftActor leaderActor = mockActorRef.underlyingActor();
+                    leaderActor.getRaftActorContext().setCommitIndex(9);
+                    leaderActor.getRaftActorContext().setLastApplied(9);
+                    leaderActor.getRaftActorContext().getTermInformation().update(1, persistenceId);
 
-                leaderActor.waitForInitializeBehaviorComplete();
+                    leaderActor.waitForInitializeBehaviorComplete();
 
-                Leader leader = new Leader(leaderActor.getRaftActorContext());
-                leaderActor.setCurrentBehavior(leader);
-                assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
+                    Leader leader = new Leader(leaderActor.getRaftActorContext());
+                    leaderActor.setCurrentBehavior(leader);
+                    assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
 
-                // create 5 entries in the log
-                MockRaftActorContext.MockReplicatedLogBuilder logBuilder = new MockRaftActorContext.MockReplicatedLogBuilder();
-                leaderActor.getRaftActorContext().setReplicatedLog(logBuilder.createEntries(5, 10, 1).build());
-                //set the snapshot index to 4 , 0 to 4 are snapshotted
-                leaderActor.getRaftActorContext().getReplicatedLog().setSnapshotIndex(4);
-                assertEquals(5, leaderActor.getReplicatedLog().size());
+                    // create 5 entries in the log
+                    MockRaftActorContext.MockReplicatedLogBuilder logBuilder = new MockRaftActorContext.MockReplicatedLogBuilder();
+                    leaderActor.getRaftActorContext().setReplicatedLog(logBuilder.createEntries(5, 10, 1).build());
+                    //set the snapshot index to 4 , 0 to 4 are snapshotted
+                    leaderActor.getRaftActorContext().getReplicatedLog().setSnapshotIndex(4);
+                    assertEquals(5, leaderActor.getReplicatedLog().size());
 
-                leaderActor.onReceiveCommand(new AppendEntriesReply("follower-1", 1, true, 9, 1));
-                assertEquals(5, leaderActor.getReplicatedLog().size());
+                    leaderActor.onReceiveCommand(new AppendEntriesReply(follower1Id, 1, true, 9, 1));
+                    assertEquals(5, leaderActor.getReplicatedLog().size());
 
-                // set the 2nd follower nextIndex to 1 which has been snapshotted
-                leaderActor.onReceiveCommand(new AppendEntriesReply("follower-2", 1, true, 0, 1));
-                assertEquals(5, leaderActor.getReplicatedLog().size());
+                    // set the 2nd follower nextIndex to 1 which has been snapshotted
+                    leaderActor.onReceiveCommand(new AppendEntriesReply(follower2Id, 1, true, 0, 1));
+                    assertEquals(5, leaderActor.getReplicatedLog().size());
 
-                // simulate a real snapshot
-                leaderActor.onReceiveCommand(new InitiateInstallSnapshot());
-                assertEquals(5, leaderActor.getReplicatedLog().size());
-                assertEquals(String.format("expected to be Leader but was %s. Current Leader = %s ",
-                        leaderActor.getCurrentBehavior().state(),leaderActor.getLeaderId())
-                        , RaftState.Leader, leaderActor.getCurrentBehavior().state());
+                    // simulate a real snapshot
+                    leaderActor.onReceiveCommand(new InitiateInstallSnapshot());
+                    assertEquals(5, leaderActor.getReplicatedLog().size());
+                    assertEquals(String.format("expected to be Leader but was %s. Current Leader = %s ",
+                            leaderActor.getCurrentBehavior().state(), leaderActor.getLeaderId())
+                            , RaftState.Leader, leaderActor.getCurrentBehavior().state());
 
 
-                //reply from a slow follower does not initiate a fake snapshot
-                leaderActor.onReceiveCommand(new AppendEntriesReply("follower-2", 1, true, 9, 1));
-                assertEquals("Fake snapshot should not happen when Initiate is in progress", 5, leaderActor.getReplicatedLog().size());
+                    //reply from a slow follower does not initiate a fake snapshot
+                    leaderActor.onReceiveCommand(new AppendEntriesReply(follower2Id, 1, true, 9, 1));
+                    assertEquals("Fake snapshot should not happen when Initiate is in progress", 5, leaderActor.getReplicatedLog().size());
 
-                ByteString snapshotBytes  = fromObject(Arrays.asList(
-                        new MockRaftActorContext.MockPayload("foo-0"),
-                        new MockRaftActorContext.MockPayload("foo-1"),
-                        new MockRaftActorContext.MockPayload("foo-2"),
-                        new MockRaftActorContext.MockPayload("foo-3"),
-                        new MockRaftActorContext.MockPayload("foo-4")));
-                leaderActor.onReceiveCommand(new CaptureSnapshotReply(snapshotBytes.toByteArray()));
-                assertFalse(leaderActor.getRaftActorContext().isSnapshotCaptureInitiated());
+                    ByteString snapshotBytes = fromObject(Arrays.asList(
+                            new MockRaftActorContext.MockPayload("foo-0"),
+                            new MockRaftActorContext.MockPayload("foo-1"),
+                            new MockRaftActorContext.MockPayload("foo-2"),
+                            new MockRaftActorContext.MockPayload("foo-3"),
+                            new MockRaftActorContext.MockPayload("foo-4")));
+                    leaderActor.onReceiveCommand(new CaptureSnapshotReply(snapshotBytes.toByteArray()));
+                    assertFalse(leaderActor.getRaftActorContext().isSnapshotCaptureInitiated());
 
-                assertEquals("Real snapshot didn't clear the log till lastApplied", 0, leaderActor.getReplicatedLog().size());
+                    assertEquals("Real snapshot didn't clear the log till lastApplied", 0, leaderActor.getReplicatedLog().size());
 
-                //reply from a slow follower after should not raise errors
-                leaderActor.onReceiveCommand(new AppendEntriesReply("follower-2", 1, true, 5, 1));
-                assertEquals(0, leaderActor.getReplicatedLog().size());
-
-                mockActorRef.tell(PoisonPill.getInstance(), getRef());
+                    //reply from a slow follower after should not raise errors
+                    leaderActor.onReceiveCommand(new AppendEntriesReply(follower2Id, 1, true, 5, 1));
+                    assertEquals(0, leaderActor.getReplicatedLog().size());
+                }
 
             }
         };
     }
-
-
 
     private ByteString fromObject(Object snapshot) throws Exception {
         ByteArrayOutputStream b = null;
@@ -1223,4 +1241,5 @@ public class RaftActorTest extends AbstractActorTest {
             }
         }
     }
+
 }
