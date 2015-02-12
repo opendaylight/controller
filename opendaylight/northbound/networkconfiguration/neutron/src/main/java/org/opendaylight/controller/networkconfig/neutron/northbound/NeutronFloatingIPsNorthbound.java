@@ -247,12 +247,18 @@ public class NeutronFloatingIPsNorthbound {
             }
             Object[] instances = ServiceHelper.getGlobalInstances(INeutronFloatingIPAware.class, this, null);
             if (instances != null) {
-                for (Object instance : instances) {
-                    INeutronFloatingIPAware service = (INeutronFloatingIPAware) instance;
-                    int status = service.canCreateFloatingIP(singleton);
-                    if (status < 200 || status > 299)
-                        return Response.status(status).build();
+                if (instances.length > 0) {
+                    for (Object instance : instances) {
+                        INeutronFloatingIPAware service = (INeutronFloatingIPAware) instance;
+                        int status = service.canCreateFloatingIP(singleton);
+                        if (status < 200 || status > 299)
+                            return Response.status(status).build();
+                    }
+                } else {
+                    throw new ServiceUnavailableException("No providers registered.  Please try again later");
                 }
+            } else {
+                throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
             }
             floatingIPInterface.addFloatingIP(singleton);
             if (instances != null) {
@@ -368,12 +374,18 @@ public class NeutronFloatingIPsNorthbound {
         NeutronFloatingIP target = floatingIPInterface.getFloatingIP(floatingipUUID);
         Object[] instances = ServiceHelper.getGlobalInstances(INeutronFloatingIPAware.class, this, null);
         if (instances != null) {
-            for (Object instance : instances) {
-                INeutronFloatingIPAware service = (INeutronFloatingIPAware) instance;
-                int status = service.canUpdateFloatingIP(singleton, target);
-                if (status < 200 || status > 299)
-                    return Response.status(status).build();
+            if (instances.length > 0) {
+                for (Object instance : instances) {
+                    INeutronFloatingIPAware service = (INeutronFloatingIPAware) instance;
+                    int status = service.canUpdateFloatingIP(singleton, target);
+                    if (status < 200 || status > 299)
+                        return Response.status(status).build();
+                }
+            } else {
+                throw new ServiceUnavailableException("No providers registered.  Please try again later");
             }
+        } else {
+            throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
         }
         floatingIPInterface.updateFloatingIP(floatingipUUID, singleton);
         target = floatingIPInterface.getFloatingIP(floatingipUUID);
@@ -411,12 +423,18 @@ public class NeutronFloatingIPsNorthbound {
         NeutronFloatingIP singleton = floatingIPInterface.getFloatingIP(floatingipUUID);
         Object[] instances = ServiceHelper.getGlobalInstances(INeutronFloatingIPAware.class, this, null);
         if (instances != null) {
-            for (Object instance : instances) {
-                INeutronFloatingIPAware service = (INeutronFloatingIPAware) instance;
-                int status = service.canDeleteFloatingIP(singleton);
-                if (status < 200 || status > 299)
-                    return Response.status(status).build();
+            if (instances.length > 0) {
+                for (Object instance : instances) {
+                    INeutronFloatingIPAware service = (INeutronFloatingIPAware) instance;
+                    int status = service.canDeleteFloatingIP(singleton);
+                    if (status < 200 || status > 299)
+                        return Response.status(status).build();
+                }
+            } else {
+                throw new ServiceUnavailableException("No providers registered.  Please try again later");
             }
+        } else {
+            throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
         }
         floatingIPInterface.removeFloatingIP(floatingipUUID);
         if (instances != null) {
