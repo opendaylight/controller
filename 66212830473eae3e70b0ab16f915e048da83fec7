@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_eef00469",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/listener/NetconfDeviceCommunicator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-02-12T11:54:12Z",
+      "side": 1,
+      "message": "what if instead of a loop, onMessage would be called recursively here ?",
+      "revId": "66212830473eae3e70b0ab16f915e048da83fec7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
