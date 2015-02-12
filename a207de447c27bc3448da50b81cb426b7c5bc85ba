@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_29902649",
+        "filename": "opendaylight/netconf/netconf-api/src/main/java/org/opendaylight/controller/netconf/api/util/NetconfConstants.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-02-12T15:30:38Z",
+      "side": 1,
+      "message": "We need to find more suitable place for the constants outside of netconf-api. Also the property key \"name\" should be extracted somewhere. \n\nThinking of a better solution to this problem: What if we defined a marker interface (or a subinterface of NetconfOperationServiceFactory) somewhere in mapping-api and the serviceFactories intended for config subsystem would implement that. Check would be then performed using instanceof.\n\nPlease add a TODO here so we can deal with it later.",
+      "revId": "a207de447c27bc3448da50b81cb426b7c5bc85ba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
