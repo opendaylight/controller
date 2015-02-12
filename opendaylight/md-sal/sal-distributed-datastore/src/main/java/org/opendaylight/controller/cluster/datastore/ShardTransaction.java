@@ -124,29 +124,20 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
 
     protected void readData(DOMStoreReadTransaction transaction, ReadData message,
             final boolean returnSerialized) {
-        final ActorRef sender = getSender();
-        final ActorRef self = getSelf();
         final YangInstanceIdentifier path = message.getPath();
-        final CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> future =
-                transaction.read(path);
+        final CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> future = transaction.read(path);
 
-        future.addListener(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Optional<NormalizedNode<?, ?>> optional = future.checkedGet();
-                    ReadDataReply readDataReply = new ReadDataReply(optional.orNull());
+        try {
+            Optional<NormalizedNode<?, ?>> optional = future.checkedGet();
+            ReadDataReply readDataReply = new ReadDataReply(optional.orNull());
 
-                    sender.tell((returnSerialized ? readDataReply.toSerializable(clientTxVersion):
-                        readDataReply), self);
+            sender().tell((returnSerialized ? readDataReply.toSerializable(clientTxVersion): readDataReply), self());
 
-                } catch (Exception e) {
-                    shardStats.incrementFailedReadTransactionsCount();
-                    sender.tell(new akka.actor.Status.Failure(e), self);
-                }
-
-            }
-        }, getContext().dispatcher());
+        } catch (Exception e) {
+            LOG.error("Unexpected exception occurred", e);
+            shardStats.incrementFailedReadTransactionsCount();
+            sender().tell(new akka.actor.Status.Failure(e), self());
+        }
     }
 
     protected void dataExists(DOMStoreReadTransaction transaction, DataExists message,
