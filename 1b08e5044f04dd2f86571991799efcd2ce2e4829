@@ -131,6 +131,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_64b97314",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ReplicatedLog.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-12T19:57:45Z",
+      "side": 1,
+      "message": "replicatedToAllIndex is used for both Leader and follower.\n\nInitiatlly i had it as a local variable within Leader but now we are capturing snapshots with this index.\nThe capture happens in RaftActor.\n\nHence i moved it to a place where it can be accessed both by the RaftActor and its behaviour (Leader or follower).\n\nRaftActorContext was first choice but felt log to be appropriate as other indices are there.",
+      "parentUuid": "7a96c907_04ec2f29",
+      "revId": "1b08e5044f04dd2f86571991799efcd2ce2e4829",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_69a5ce45",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ReplicatedLog.java",
         "patchSetId": 3
@@ -178,6 +196,24 @@
       "side": 1,
       "message": "\"fakeSnapshot\" is a helper method to do a snapshot commit - that is how I think about it so to me snapshotCommit as a method name makes sense",
       "parentUuid": "7a96c907_64b41335",
+      "revId": "1b08e5044f04dd2f86571991799efcd2ce2e4829",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_043aef98",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ReplicatedLog.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-12T19:57:45Z",
+      "side": 1,
+      "message": "ok...will make it as snapshotCommit(...)",
+      "parentUuid": "7a96c907_24f12b02",
       "revId": "1b08e5044f04dd2f86571991799efcd2ce2e4829",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
