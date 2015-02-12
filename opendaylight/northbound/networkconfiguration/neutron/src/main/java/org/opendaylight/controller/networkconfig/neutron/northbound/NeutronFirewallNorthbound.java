@@ -192,13 +192,19 @@ public class NeutronFirewallNorthbound {
             firewallInterface.addNeutronFirewall(singleton);
             Object[] instances = ServiceHelper.getGlobalInstances(INeutronFirewallAware.class, this, null);
             if (instances != null) {
-                for (Object instance : instances) {
-                    INeutronFirewallAware service = (INeutronFirewallAware) instance;
-                    int status = service.canCreateNeutronFirewall(singleton);
-                    if (status < 200 || status > 299) {
-                        return Response.status(status).build();
+                if (instances.length > 0) {
+                    for (Object instance : instances) {
+                        INeutronFirewallAware service = (INeutronFirewallAware) instance;
+                        int status = service.canCreateNeutronFirewall(singleton);
+                        if (status < 200 || status > 299) {
+                            return Response.status(status).build();
+                        }
                     }
+                } else {
+                    throw new ServiceUnavailableException("No providers registered.  Please try again later");
                 }
+            } else {
+                throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
             }
             firewallInterface.addNeutronFirewall(singleton);
             if (instances != null) {
@@ -225,13 +231,19 @@ public class NeutronFirewallNorthbound {
                     throw new BadRequestException("Firewall UUID already exists");
                 }
                 if (instances != null) {
-                    for (Object instance : instances) {
-                        INeutronFirewallAware service = (INeutronFirewallAware) instance;
-                        int status = service.canCreateNeutronFirewall(test);
-                        if (status < 200 || status > 299) {
-                            return Response.status(status).build();
+                    if (instances.length > 0) {
+                        for (Object instance : instances) {
+                            INeutronFirewallAware service = (INeutronFirewallAware) instance;
+                            int status = service.canCreateNeutronFirewall(test);
+                            if (status < 200 || status > 299) {
+                                return Response.status(status).build();
+                            }
                         }
+                    } else {
+                        throw new ServiceUnavailableException("No providers registered.  Please try again later");
                     }
+                } else {
+                    throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
                 }
             }
 
@@ -303,13 +315,19 @@ public class NeutronFirewallNorthbound {
 
         Object[] instances = ServiceHelper.getGlobalInstances(INeutronFirewallAware.class, this, null);
         if (instances != null) {
-            for (Object instance : instances) {
-                INeutronFirewallAware service = (INeutronFirewallAware) instance;
-                int status = service.canUpdateNeutronFirewall(delta, original);
-                if (status < 200 || status > 299) {
-                    return Response.status(status).build();
+            if (instances.length > 0) {
+                for (Object instance : instances) {
+                    INeutronFirewallAware service = (INeutronFirewallAware) instance;
+                    int status = service.canUpdateNeutronFirewall(delta, original);
+                    if (status < 200 || status > 299) {
+                        return Response.status(status).build();
+                    }
                 }
+            } else {
+                throw new ServiceUnavailableException("No providers registered.  Please try again later");
             }
+        } else {
+            throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
         }
 
         /*
@@ -357,13 +375,19 @@ public class NeutronFirewallNorthbound {
         NeutronFirewall singleton = firewallInterface.getNeutronFirewall(firewallUUID);
         Object[] instances = ServiceHelper.getGlobalInstances(INeutronFirewallAware.class, this, null);
         if (instances != null) {
-            for (Object instance : instances) {
-                INeutronFirewallAware service = (INeutronFirewallAware) instance;
-                int status = service.canDeleteNeutronFirewall(singleton);
-                if (status < 200 || status > 299) {
-                    return Response.status(status).build();
+            if (instances.length > 0) {
+                for (Object instance : instances) {
+                    INeutronFirewallAware service = (INeutronFirewallAware) instance;
+                    int status = service.canDeleteNeutronFirewall(singleton);
+                    if (status < 200 || status > 299) {
+                        return Response.status(status).build();
+                    }
                 }
+            } else {
+                throw new ServiceUnavailableException("No providers registered.  Please try again later");
             }
+        } else {
+            throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
         }
 
         /*
