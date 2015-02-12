@@ -13,6 +13,7 @@ import akka.actor.UntypedActor;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -23,7 +24,7 @@ import scala.concurrent.duration.FiniteDuration;
 
 
 public class MessageCollectorActor extends UntypedActor {
-    private List<Object> messages = new ArrayList<>();
+    private final List<Object> messages = new ArrayList<>();
 
     @Override public void onReceive(Object message) throws Exception {
         if(message instanceof String){
@@ -33,6 +34,10 @@ public class MessageCollectorActor extends UntypedActor {
         } else {
             messages.add(message);
         }
+    }
+
+    public void clear() {
+        messages.clear();
     }
 
     public static List<Object> getAllMessages(ActorRef actor) throws Exception {
@@ -53,13 +58,17 @@ public class MessageCollectorActor extends UntypedActor {
      * @param clazz
      * @return
      */
-    public static Object getFirstMatching(ActorRef actor, Class<?> clazz) throws Exception {
-        List<Object> allMessages = getAllMessages(actor);
+    public static <T> T getFirstMatching(ActorRef actor, Class<T> clazz) throws Exception {
+        for(int i = 0; i < 50; i++) {
+            List<Object> allMessages = getAllMessages(actor);
 
-        for(Object message : allMessages){
-            if(message.getClass().equals(clazz)){
-                return message;
+            for(Object message : allMessages){
+                if(message.getClass().equals(clazz)){
+                    return (T) message;
+                }
             }
+
+            Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
         }
 
         return null;

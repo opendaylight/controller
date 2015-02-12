@@ -26,7 +26,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
 import org.opendaylight.controller.cluster.raft.ClientRequestTrackerImpl;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
@@ -129,7 +128,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         // Upon election: send initial empty AppendEntries RPCs
         // (heartbeat) to each server; repeat during idle periods to
         // prevent election timeouts (§5.2)
-        scheduleHeartBeat(new FiniteDuration(0, TimeUnit.SECONDS));
+        sendAppendEntries(0);
     }
 
     /**
@@ -425,18 +424,18 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             context.setCommitIndex(logIndex);
             applyLogToStateMachine(logIndex);
         } else {
-            sendAppendEntries();
+            sendAppendEntries(0);
         }
     }
 
-    private void sendAppendEntries() {
+    private void sendAppendEntries(long timeSinceLastActivityInterval) {
         // Send an AppendEntries to all followers
-        long heartbeatInterval = context.getConfigParams().getHeartBeatInterval().toMillis();
         for (Entry<String, FollowerLogInformation> e : followerToLog.entrySet()) {
             final String followerId = e.getKey();
             final FollowerLogInformation followerLogInformation = e.getValue();
             // This checks helps not to send a repeat message to the follower
-            if(followerLogInformation.timeSinceLastActivity() >= heartbeatInterval) {
+            if(!followerLogInformation.isFollowerActive() ||
+                    followerLogInformation.timeSinceLastActivity() >= timeSinceLastActivityInterval) {
                 sendUpdatesToFollower(followerId, followerLogInformation, true);
             }
         }
@@ -661,7 +660,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
     private void sendHeartBeat() {
         if (!followerToLog.isEmpty()) {
-            sendAppendEntries();
+            sendAppendEntries(context.getConfigParams().getHeartBeatInterval().toMillis());
         }
     }
 
