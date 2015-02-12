@@ -69,6 +69,24 @@
       "revId": "8002383017f1af7b765753171a683388799ab75e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_642f3389",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-12T18:15:24Z",
+      "side": 1,
+      "message": "Looking at the documentation I think I need to format the message myself to log the exception.",
+      "parentUuid": "7a96c907_242e0b93",
+      "revId": "8002383017f1af7b765753171a683388799ab75e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
