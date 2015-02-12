@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.netconf.impl.osgi;
 
+import org.opendaylight.controller.netconf.api.util.NetconfConstants;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -24,15 +25,23 @@ class NetconfOperationServiceFactoryTracker extends
 
     @Override
     public NetconfOperationServiceFactory addingService(ServiceReference<NetconfOperationServiceFactory> reference) {
-        NetconfOperationServiceFactory netconfOperationServiceFactory = super.addingService(reference);
-        factoriesListener.onAddNetconfOperationServiceFactory(netconfOperationServiceFactory);
-        return netconfOperationServiceFactory;
+        Object property = reference.getProperty("name");
+        if (property != null
+                && (property.equals(NetconfConstants.CONFIG_NETCONF_CONNECTOR)
+                || property.equals(NetconfConstants.NETCONF_MONITORING))) {
+            NetconfOperationServiceFactory netconfOperationServiceFactory = super.addingService(reference);
+            factoriesListener.onAddNetconfOperationServiceFactory(netconfOperationServiceFactory);
+            return netconfOperationServiceFactory;
+        }
+
+        return null;
     }
 
     @Override
     public void removedService(ServiceReference<NetconfOperationServiceFactory> reference,
             NetconfOperationServiceFactory netconfOperationServiceFactory) {
-        factoriesListener.onRemoveNetconfOperationServiceFactory(netconfOperationServiceFactory);
+        if (netconfOperationServiceFactory != null)
+            factoriesListener.onRemoveNetconfOperationServiceFactory(netconfOperationServiceFactory);
     }
 
 }
