@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_04298f89",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-12T18:10:52Z",
+      "side": 1,
+      "message": "Will do.",
+      "parentUuid": "7a96c907_8927fac9",
+      "revId": "8002383017f1af7b765753171a683388799ab75e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_a92436c5",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-02-12T17:47:16Z",
       "side": 1,
       "message": "Can we add context to this message, i.e. the path being read:\n\n   \"Unexpected error reading path {}\"",
+      "revId": "8002383017f1af7b765753171a683388799ab75e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_242e0b93",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-12T18:10:52Z",
+      "side": 1,
+      "message": "Question. If I log like this will the exception be logged correctly?\n\nLOG.error(\"Unexpected error reading path {}\", path, e);",
+      "parentUuid": "7a96c907_a92436c5",
       "revId": "8002383017f1af7b765753171a683388799ab75e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
