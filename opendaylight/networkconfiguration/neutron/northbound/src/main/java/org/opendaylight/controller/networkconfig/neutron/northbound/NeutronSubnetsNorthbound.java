@@ -219,13 +219,19 @@ public class NeutronSubnetsNorthbound {
             }
             Object[] instances = NeutronUtil.getInstances(INeutronSubnetAware.class, this);
             if (instances != null) {
-                for (Object instance : instances) {
-                    INeutronSubnetAware service = (INeutronSubnetAware) instance;
-                    int status = service.canCreateSubnet(singleton);
-                    if (status < 200 || status > 299) {
-                        return Response.status(status).build();
+                if (instances.length > 0) {
+                    for (Object instance : instances) {
+                        INeutronSubnetAware service = (INeutronSubnetAware) instance;
+                        int status = service.canCreateSubnet(singleton);
+                        if (status < 200 || status > 299) {
+                            return Response.status(status).build();
+                        }
                     }
+                } else {
+                    throw new ServiceUnavailableException("No providers registered.  Please try again later");
                 }
+            } else {
+                throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
             }
             subnetInterface.addSubnet(singleton);
             if (instances != null) {
@@ -269,13 +275,19 @@ public class NeutronSubnetsNorthbound {
                     throw new ResourceConflictException("IP pool overlaps with gateway");
                 }
                 if (instances != null) {
-                    for (Object instance : instances) {
-                        INeutronSubnetAware service = (INeutronSubnetAware) instance;
-                        int status = service.canCreateSubnet(test);
-                        if (status < 200 || status > 299) {
-                            return Response.status(status).build();
+                    if (instances.length > 0) {
+                        for (Object instance : instances) {
+                            INeutronSubnetAware service = (INeutronSubnetAware) instance;
+                            int status = service.canCreateSubnet(test);
+                            if (status < 200 || status > 299) {
+                                return Response.status(status).build();
+                            }
                         }
+                    } else {
+                        throw new ServiceUnavailableException("No providers registered.  Please try again later");
                     }
+                } else {
+                    throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
                 }
             }
 
@@ -344,13 +356,19 @@ public class NeutronSubnetsNorthbound {
 
         Object[] instances = NeutronUtil.getInstances(INeutronSubnetAware.class, this);
         if (instances != null) {
-            for (Object instance : instances) {
-                INeutronSubnetAware service = (INeutronSubnetAware) instance;
-                int status = service.canUpdateSubnet(delta, original);
-                if (status < 200 || status > 299) {
-                    return Response.status(status).build();
+            if (instances.length > 0) {
+                for (Object instance : instances) {
+                    INeutronSubnetAware service = (INeutronSubnetAware) instance;
+                    int status = service.canUpdateSubnet(delta, original);
+                    if (status < 200 || status > 299) {
+                        return Response.status(status).build();
+                    }
                 }
+            } else {
+                throw new ServiceUnavailableException("No providers registered.  Please try again later");
             }
+        } else {
+            throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
         }
 
         /*
@@ -399,13 +417,19 @@ public class NeutronSubnetsNorthbound {
         NeutronSubnet singleton = subnetInterface.getSubnet(subnetUUID);
         Object[] instances = NeutronUtil.getInstances(INeutronSubnetAware.class, this);
         if (instances != null) {
-            for (Object instance : instances) {
-                INeutronSubnetAware service = (INeutronSubnetAware) instance;
-                int status = service.canDeleteSubnet(singleton);
-                if (status < 200 || status > 299) {
-                    return Response.status(status).build();
+            if (instances.length > 0) {
+                for (Object instance : instances) {
+                    INeutronSubnetAware service = (INeutronSubnetAware) instance;
+                    int status = service.canDeleteSubnet(singleton);
+                    if (status < 200 || status > 299) {
+                        return Response.status(status).build();
+                    }
                 }
+            } else {
+                throw new ServiceUnavailableException("No providers registered.  Please try again later");
             }
+        } else {
+            throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
         }
 
         /*

@@ -200,14 +200,21 @@ public Response createLoadBalancerPoolMember(
 
         Object[] instances = NeutronUtil.getInstances(INeutronLoadBalancerPoolMemberAware.class, this);
         if (instances != null) {
-            for (Object instance : instances) {
-                INeutronLoadBalancerPoolMemberAware service = (INeutronLoadBalancerPoolMemberAware) instance;
-                int status = service.canCreateNeutronLoadBalancerPoolMember(singleton);
-                if (status < 200 || status > 299) {
-                    return Response.status(status).build();
+            if (instances.length > 0) {
+                for (Object instance : instances) {
+                    INeutronLoadBalancerPoolMemberAware service = (INeutronLoadBalancerPoolMemberAware) instance;
+                    int status = service.canCreateNeutronLoadBalancerPoolMember(singleton);
+                    if (status < 200 || status > 299) {
+                        return Response.status(status).build();
+                    }
                 }
+            } else {
+                throw new ServiceUnavailableException("No providers registered.  Please try again later");
             }
+        } else {
+            throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
         }
+
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronLoadBalancerPoolMemberAware service = (INeutronLoadBalancerPoolMemberAware) instance;
@@ -242,13 +249,19 @@ public Response createLoadBalancerPoolMember(
                 throw new BadRequestException("Load Balancer PoolMember UUID already exists");
             }
             if (instances != null) {
-                for (Object instance : instances) {
-                    INeutronLoadBalancerPoolMemberAware service = (INeutronLoadBalancerPoolMemberAware) instance;
-                    int status = service.canCreateNeutronLoadBalancerPoolMember(test);
-                    if (status < 200 || status > 299) {
-                        return Response.status(status).build();
+                if (instances.length > 0) {
+                    for (Object instance : instances) {
+                        INeutronLoadBalancerPoolMemberAware service = (INeutronLoadBalancerPoolMemberAware) instance;
+                        int status = service.canCreateNeutronLoadBalancerPoolMember(test);
+                        if (status < 200 || status > 299) {
+                            return Response.status(status).build();
+                        }
                     }
+                } else {
+                    throw new ServiceUnavailableException("No providers registered.  Please try again later");
                 }
+            } else {
+                throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
             }
         }
         /*
@@ -334,13 +347,19 @@ public Response deleteLoadBalancerPoolMember(
 
     Object[] instances = NeutronUtil.getInstances(INeutronLoadBalancerPoolMemberAware.class, this);
     if (instances != null) {
-        for (Object instance : instances) {
-            INeutronLoadBalancerPoolMemberAware service = (INeutronLoadBalancerPoolMemberAware) instance;
-            int status = service.canDeleteNeutronLoadBalancerPoolMember(singleton);
-            if (status < 200 || status > 299) {
-                return Response.status(status).build();
+        if (instances.length > 0) {
+            for (Object instance : instances) {
+                INeutronLoadBalancerPoolMemberAware service = (INeutronLoadBalancerPoolMemberAware) instance;
+                int status = service.canDeleteNeutronLoadBalancerPoolMember(singleton);
+                if (status < 200 || status > 299) {
+                    return Response.status(status).build();
+                }
             }
+        } else {
+            throw new ServiceUnavailableException("No providers registered.  Please try again later");
         }
+    } else {
+        throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
     }
 
     if (instances != null) {

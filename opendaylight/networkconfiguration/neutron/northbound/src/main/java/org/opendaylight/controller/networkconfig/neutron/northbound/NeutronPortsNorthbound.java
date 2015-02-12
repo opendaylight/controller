@@ -259,15 +259,20 @@ public class NeutronPortsNorthbound {
 
             Object[] instances = NeutronUtil.getInstances(INeutronPortAware.class, this);
             if (instances != null) {
-                for (Object instance : instances) {
-                    INeutronPortAware service = (INeutronPortAware) instance;
-                    int status = service.canCreatePort(singleton);
-                    if (status < 200 || status > 299) {
-                        return Response.status(status).build();
+                if (instances.length > 0) {
+                    for (Object instance : instances) {
+                        INeutronPortAware service = (INeutronPortAware) instance;
+                        int status = service.canCreatePort(singleton);
+                        if (status < 200 || status > 299) {
+                            return Response.status(status).build();
+                        }
                     }
+                } else {
+                    throw new ServiceUnavailableException("No providers registered.  Please try again later");
                 }
+            } else {
+                throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
             }
-
 
             // add the port to the cache
             portInterface.addPort(singleton);
@@ -353,13 +358,19 @@ public class NeutronPortsNorthbound {
                     }
                 }
                 if (instances != null) {
-                    for (Object instance : instances) {
-                        INeutronPortAware service = (INeutronPortAware) instance;
-                        int status = service.canCreatePort(test);
-                        if (status < 200 || status > 299) {
-                            return Response.status(status).build();
+                    if (instances.length > 0) {
+                        for (Object instance : instances) {
+                            INeutronPortAware service = (INeutronPortAware) instance;
+                            int status = service.canCreatePort(test);
+                            if (status < 200 || status > 299) {
+                                return Response.status(status).build();
+                            }
                         }
+                    } else {
+                        throw new ServiceUnavailableException("No providers registered.  Please try again later");
                     }
+                } else {
+                    throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
                 }
             }
 
@@ -429,13 +440,19 @@ public class NeutronPortsNorthbound {
 
         Object[] instances = NeutronUtil.getInstances(INeutronPortAware.class, this);
         if (instances != null) {
-            for (Object instance : instances) {
-                INeutronPortAware service = (INeutronPortAware) instance;
-                int status = service.canUpdatePort(singleton, original);
-                if (status < 200 || status > 299) {
-                    return Response.status(status).build();
+            if (instances.length > 0) {
+                for (Object instance : instances) {
+                    INeutronPortAware service = (INeutronPortAware) instance;
+                    int status = service.canUpdatePort(singleton, original);
+                    if (status < 200 || status > 299) {
+                        return Response.status(status).build();
+                    }
                 }
+            } else {
+                throw new ServiceUnavailableException("No providers registered.  Please try again later");
             }
+        } else {
+            throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
         }
 
         // Verify the new fixed ips are valid
@@ -511,13 +528,19 @@ public class NeutronPortsNorthbound {
         NeutronPort singleton = portInterface.getPort(portUUID);
         Object[] instances = NeutronUtil.getInstances(INeutronPortAware.class, this);
         if (instances != null) {
-            for (Object instance : instances) {
-                INeutronPortAware service = (INeutronPortAware) instance;
-                int status = service.canDeletePort(singleton);
-                if (status < 200 || status > 299) {
-                    return Response.status(status).build();
+            if (instances.length > 0) {
+                for (Object instance : instances) {
+                    INeutronPortAware service = (INeutronPortAware) instance;
+                    int status = service.canDeletePort(singleton);
+                    if (status < 200 || status > 299) {
+                        return Response.status(status).build();
+                    }
                 }
+            } else {
+                throw new ServiceUnavailableException("No providers registered.  Please try again later");
             }
+        } else {
+            throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
         }
         portInterface.removePort(portUUID);
         if (instances != null) {

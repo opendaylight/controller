@@ -178,13 +178,19 @@ public class NeutronSecurityGroupsNorthbound {
 
             Object[] instances = NeutronUtil.getInstances(INeutronSecurityGroupAware.class, this);
             if (instances != null) {
-                for (Object instance : instances) {
-                    INeutronSecurityGroupAware service = (INeutronSecurityGroupAware) instance;
-                    int status = service.canCreateNeutronSecurityGroup(singleton);
-                    if (status < 200 || status > 299) {
-                        return Response.status(status).build();
+                if (instances.length > 0) {
+                    for (Object instance : instances) {
+                        INeutronSecurityGroupAware service = (INeutronSecurityGroupAware) instance;
+                        int status = service.canCreateNeutronSecurityGroup(singleton);
+                        if (status < 200 || status > 299) {
+                            return Response.status(status).build();
+                        }
                     }
+                } else {
+                    throw new ServiceUnavailableException("No providers registered.  Please try again later");
                 }
+            } else {
+                throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
             }
             // Add to Neutron cache
             securityGroupInterface.addNeutronSecurityGroup(singleton);
@@ -209,10 +215,18 @@ public class NeutronSecurityGroupsNorthbound {
                 if (securityGroupInterface.neutronSecurityGroupExists(test.getSecurityGroupUUID())) {
                     throw new BadRequestException("Security Group UUID already is already created");
                 }
-                if (instances != null) for (Object instance : instances) {
-                    INeutronSecurityGroupAware service = (INeutronSecurityGroupAware) instance;
-                    int status = service.canCreateNeutronSecurityGroup(test);
-                    if ((status < 200) || (status > 299)) return Response.status(status).build();
+                if (instances != null) {
+                    if (instances.length > 0) {
+                        for (Object instance : instances) {
+                            INeutronSecurityGroupAware service = (INeutronSecurityGroupAware) instance;
+                            int status = service.canCreateNeutronSecurityGroup(test);
+                            if ((status < 200) || (status > 299)) return Response.status(status).build();
+                        }
+                    } else {
+                        throw new BadRequestException("No providers registered.  Please try again later");
+                    }
+                } else {
+                    throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
                 }
             }
 
@@ -278,13 +292,19 @@ public class NeutronSecurityGroupsNorthbound {
 
         Object[] instances =  NeutronUtil.getInstances(INeutronSecurityGroupAware.class, this);
         if (instances != null) {
-            for (Object instance : instances) {
-                INeutronSecurityGroupAware service = (INeutronSecurityGroupAware) instance;
-                int status = service.canUpdateNeutronSecurityGroup(delta, original);
-                if (status < 200 || status > 299) {
-                    return Response.status(status).build();
+            if (instances.length > 0) {
+                for (Object instance : instances) {
+                    INeutronSecurityGroupAware service = (INeutronSecurityGroupAware) instance;
+                    int status = service.canUpdateNeutronSecurityGroup(delta, original);
+                    if (status < 200 || status > 299) {
+                        return Response.status(status).build();
+                    }
                 }
+            } else {
+                throw new ServiceUnavailableException("No providers registered.  Please try again later");
             }
+        } else {
+            throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
         }
 
         /*
@@ -333,13 +353,19 @@ public class NeutronSecurityGroupsNorthbound {
         NeutronSecurityGroup singleton = securityGroupInterface.getNeutronSecurityGroup(securityGroupUUID);
         Object[] instances = NeutronUtil.getInstances(INeutronSecurityGroupAware.class, this);
         if (instances != null) {
-            for (Object instance : instances) {
-                INeutronSecurityGroupAware service = (INeutronSecurityGroupAware) instance;
-                int status = service.canDeleteNeutronSecurityGroup(singleton);
-                if ((status < 200) || (status > 299)) {
-                    return Response.status(status).build();
+            if (instances.length > 0) {
+                for (Object instance : instances) {
+                    INeutronSecurityGroupAware service = (INeutronSecurityGroupAware) instance;
+                    int status = service.canDeleteNeutronSecurityGroup(singleton);
+                    if ((status < 200) || (status > 299)) {
+                        return Response.status(status).build();
+                    }
                 }
+            } else {
+                throw new ServiceUnavailableException("No providers registered.  Please try again later");
             }
+        } else {
+            throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
         }
 
         /*
