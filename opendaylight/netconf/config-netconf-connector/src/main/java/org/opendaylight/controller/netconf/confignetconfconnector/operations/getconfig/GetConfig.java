@@ -20,7 +20,7 @@ import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.AbstractConfigNetconfOperation;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Datastore;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreSnapshot;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreContext;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
 import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
 import org.opendaylight.controller.netconf.util.exception.UnexpectedElementException;
@@ -36,14 +36,14 @@ public class GetConfig extends AbstractConfigNetconfOperation {
 
     public static final String GET_CONFIG = "get-config";
 
-    private final YangStoreSnapshot yangStoreSnapshot;
+    private final YangStoreContext yangStoreSnapshot;
     private final Optional<String> maybeNamespace;
 
     private final TransactionProvider transactionProvider;
 
     private static final Logger LOG = LoggerFactory.getLogger(GetConfig.class);
 
-    public GetConfig(YangStoreSnapshot yangStoreSnapshot, Optional<String> maybeNamespace,
+    public GetConfig(YangStoreContext yangStoreSnapshot, Optional<String> maybeNamespace,
             TransactionProvider transactionProvider, ConfigRegistryClient configRegistryClient,
             String netconfSessionIdForReporting) {
         super(configRegistryClient, netconfSessionIdForReporting);

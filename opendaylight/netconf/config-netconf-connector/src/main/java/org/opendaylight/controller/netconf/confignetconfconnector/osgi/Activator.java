@@ -43,7 +43,7 @@ public class Activator implements BundleActivator {
 
                 SchemaContextProvider schemaContextProvider = reference.getBundle().getBundleContext().getService(reference);
 
-                YangStoreServiceImpl yangStoreService = new YangStoreServiceImpl(schemaContextProvider);
+                YangStoreService yangStoreService = new YangStoreService(schemaContextProvider, context);
                 configRegistryLookup = new ConfigRegistryLookupThread(yangStoreService);
                 configRegistryLookup.start();
                 return configRegistryLookup;
@@ -79,9 +79,9 @@ public class Activator implements BundleActivator {
     }
 
     private class ConfigRegistryLookupThread extends Thread {
-        private final YangStoreServiceImpl yangStoreService;
+        private final YangStoreService yangStoreService;
 
-        private ConfigRegistryLookupThread(YangStoreServiceImpl yangStoreService) {
+        private ConfigRegistryLookupThread(YangStoreService yangStoreService) {
             super("config-registry-lookup");
             this.yangStoreService = yangStoreService;
         }
