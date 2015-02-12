@@ -16,6 +16,24 @@
       "revId": "32481f250fdc7ba580f62fac665a49cb9924a506",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_04666f2a",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/AbstractUntypedPersistentActor.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-12T23:53:36Z",
+      "side": 1,
+      "message": "I think this logging would be too much to be useful. I\u0027m ok to remove it even. Something more targeted like logging a message that took an excessive amount of time may be useful.",
+      "parentUuid": "7a96c907_58e0e295",
+      "revId": "32481f250fdc7ba580f62fac665a49cb9924a506",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
