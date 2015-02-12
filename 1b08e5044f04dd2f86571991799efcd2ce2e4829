@@ -25,6 +25,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_846a7fb1",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 676,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-12T19:16:52Z",
+      "side": 1,
+      "message": "Ok...will have the lastAppliedTerm in capture as well.",
+      "parentUuid": "7a96c907_2e9d8c66",
+      "revId": "1b08e5044f04dd2f86571991799efcd2ce2e4829",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_69538e39",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ReplicatedLog.java",
         "patchSetId": 3
@@ -36,6 +54,24 @@
       "writtenOn": "2015-02-12T18:03:40Z",
       "side": 1,
       "message": "I think we can improve this API by returning an object on commit to hold the state and then call commit on that object instead of calling snapshotCommit. This is not for this patch but for a future refactoring to make this sane.",
+      "revId": "1b08e5044f04dd2f86571991799efcd2ce2e4829",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_a4677be8",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ReplicatedLog.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-12T19:16:52Z",
+      "side": 1,
+      "message": "ok...will note it.",
+      "parentUuid": "7a96c907_69538e39",
       "revId": "1b08e5044f04dd2f86571991799efcd2ce2e4829",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -59,6 +95,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_4460f7ce",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ReplicatedLog.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-12T19:16:52Z",
+      "side": 1,
+      "message": "Why.? As far as i see its no different than a snapshotIndex. Denotes an index within this log which has been replicated to all followers.\n\nAlso on a behaviour change, since we pass in the context and the context holds the log, we have the same index, till the new leader gives us a new one.\n\nMy idea was to when this \u0027fake\u0027 and real gets refactored to one logic, the replicatedToAllIndex should be never have to set from outside the ReplicatedLog. Now its being done once from CaptureSnapshotReply\n\nWhr do you think it should reside , context?",
+      "parentUuid": "7a96c907_2407eb1a",
+      "revId": "1b08e5044f04dd2f86571991799efcd2ce2e4829",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_69a5ce45",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ReplicatedLog.java",
         "patchSetId": 3
@@ -70,6 +124,24 @@
       "writtenOn": "2015-02-12T18:03:40Z",
       "side": 1,
       "message": "Document this method please.\n\nThis method should be called snapshotCommit (overloaded and should take an index and term just like snapshotPreCommit) I think that is a sane API. As far as the replicated log is concerned there is nothing fake about this snapshot :)",
+      "revId": "1b08e5044f04dd2f86571991799efcd2ce2e4829",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_64b41335",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ReplicatedLog.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-12T19:16:52Z",
+      "side": 1,
+      "message": "Yes...will document the methods.\n\nIf we name this snapshotCommit(...) , wont it be confusiing? snapshotPrecommit and commit are two operations of taking a snapshot.\nIn this method we do both in one.\nSo can i call it doSnapshot() or takeSnapshot()?\n\nI agree the \u0027fake\u0027 can go.",
+      "parentUuid": "7a96c907_69a5ce45",
       "revId": "1b08e5044f04dd2f86571991799efcd2ce2e4829",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -93,6 +165,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_c47ac776",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-12T19:16:52Z",
+      "side": 1,
+      "message": "will do.",
+      "parentUuid": "7a96c907_296b46f3",
+      "revId": "1b08e5044f04dd2f86571991799efcd2ce2e4829",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_e93ebed9",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/AbstractReplicatedLogImplTest.java",
         "patchSetId": 3
@@ -104,6 +194,24 @@
       "writtenOn": "2015-02-12T18:03:40Z",
       "side": 1,
       "message": "comment is confusing",
+      "revId": "1b08e5044f04dd2f86571991799efcd2ce2e4829",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_e47fc364",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/AbstractReplicatedLogImplTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-12T19:16:52Z",
+      "side": 1,
+      "message": "will fix",
+      "parentUuid": "7a96c907_e93ebed9",
       "revId": "1b08e5044f04dd2f86571991799efcd2ce2e4829",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
