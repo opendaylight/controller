@@ -105,6 +105,11 @@ public final class NetconfSessionPreferences {
         return containsNonModuleCapability(NetconfMessageTransformUtil.NETCONF_RUNNING_WRITABLE_URI.toString());
     }
 
+    public boolean isNotificationsSupported() {
+        return containsNonModuleCapability(NetconfMessageTransformUtil.NETCONF_NOTIFICATONS_URI.toString())
+                || containsModuleCapability(NetconfMessageTransformUtil.IETF_NETCONF_NOTIFICATIONS);
+    }
+
     public boolean isMonitoringSupported() {
         return containsModuleCapability(NetconfMessageTransformUtil.IETF_NETCONF_MONITORING)
                 || containsNonModuleCapability(NetconfMessageTransformUtil.IETF_NETCONF_MONITORING.getNamespace().toString());
