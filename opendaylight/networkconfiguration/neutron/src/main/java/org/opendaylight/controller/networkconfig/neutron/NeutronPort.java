@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.networkconfig.neutron;
 
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,6 +62,16 @@ public class NeutronPort implements Serializable, INeutronObject {
 
     @XmlElement (name="security_groups")
     List<NeutronSecurityGroup> securityGroups;
+
+    @XmlElement (namespace= "binding", name="host_id")
+    String bindinghostID;
+
+    @XmlElement (namespace= "binding", name="vnic_type")
+    String bindingvnicType;
+
+    @XmlElement (namespace= "binding", name="vif_type")
+    String bindingvifType;
+
 
     /* this attribute stores the floating IP address assigned to
      * each fixed IP address
@@ -169,6 +180,30 @@ public class NeutronPort implements Serializable, INeutronObject {
         this.securityGroups = securityGroups;
     }
 
+    public String getBindinghostID() {
+      return bindinghostID;
+    }
+
+    public void setBindinghostID(String bindinghostID) {
+      this.bindinghostID = bindinghostID;
+    }
+
+  public String getBindingvnicType() {
+    return bindingvnicType;
+  }
+
+  public void setBindingvnicType(String bindingvnicType) {
+    this.bindingvnicType = bindingvnicType;
+  }
+
+  public String getBindingvifType() {
+    return bindingvifType;
+  }
+
+  public void setBindingvifType(String bindingvifType) {
+    this.bindingvifType = bindingvifType;
+  }
+
     public NeutronFloatingIP getFloatingIP(String key) {
         if (!floatingIPMap.containsKey(key)) {
             return null;
@@ -271,6 +306,8 @@ public class NeutronPort implements Serializable, INeutronObject {
         return "NeutronPort [portUUID=" + portUUID + ", networkUUID=" + networkUUID + ", name=" + name
                 + ", adminStateUp=" + adminStateUp + ", status=" + status + ", macAddress=" + macAddress
                 + ", fixedIPs=" + fixedIPs + ", deviceID=" + deviceID + ", deviceOwner=" + deviceOwner + ", tenantID="
-                + tenantID + ", floatingIPMap=" + floatingIPMap + ", securityGroups=" + securityGroups + "]";
+                + tenantID + ", floatingIPMap=" + floatingIPMap + ", securityGroups=" + securityGroups
+                + ", bindinghostID=" + bindinghostID + ", bindingvnicType=" + bindingvnicType
+                + ", bindingvnicType=" + bindingvnicType + "]";
     }
 }
