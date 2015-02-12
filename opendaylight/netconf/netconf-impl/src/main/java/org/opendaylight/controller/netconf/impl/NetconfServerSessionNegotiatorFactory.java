@@ -44,7 +44,7 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
     private final SessionIdProvider idProvider;
     private final NetconfOperationProvider netconfOperationProvider;
     private final long connectionTimeoutMillis;
-    private final DefaultCommitNotificationProducer commitNotificationProducer;
+    private final CommitNotifier commitNotificationProducer;
     private final SessionMonitoringService monitoringService;
     private static final Logger LOG = LoggerFactory.getLogger(NetconfServerSessionNegotiatorFactory.class);
     private final Set<String> baseCapabilities;
@@ -52,7 +52,7 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
     // TODO too many params, refactor
     public NetconfServerSessionNegotiatorFactory(Timer timer, NetconfOperationProvider netconfOperationProvider,
                                                  SessionIdProvider idProvider, long connectionTimeoutMillis,
-                                                 DefaultCommitNotificationProducer commitNot,
+                                                 CommitNotifier commitNot,
                                                  SessionMonitoringService monitoringService) {
         this(timer, netconfOperationProvider, idProvider, connectionTimeoutMillis, commitNot, monitoringService, DEFAULT_BASE_CAPABILITIES);
     }
@@ -60,7 +60,7 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
     // TODO too many params, refactor
     public NetconfServerSessionNegotiatorFactory(Timer timer, NetconfOperationProvider netconfOperationProvider,
                                                  SessionIdProvider idProvider, long connectionTimeoutMillis,
-                                                 DefaultCommitNotificationProducer commitNot,
+                                                 CommitNotifier commitNot,
                                                  SessionMonitoringService monitoringService, Set<String> baseCapabilities) {
         this.timer = timer;
         this.netconfOperationProvider = netconfOperationProvider;

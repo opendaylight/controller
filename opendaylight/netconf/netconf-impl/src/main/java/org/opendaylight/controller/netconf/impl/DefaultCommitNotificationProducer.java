@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
 public class DefaultCommitNotificationProducer extends NotificationBroadcasterSupport implements
-        DefaultCommitOperationMXBean, AutoCloseable {
+        DefaultCommitOperationMXBean, AutoCloseable, CommitNotifier {
 
     private static final Logger LOG = LoggerFactory.getLogger(DefaultCommitNotificationProducer.class);
 
@@ -46,6 +46,7 @@ public class DefaultCommitNotificationProducer extends NotificationBroadcasterSu
         }
     }
 
+    @Override
     public void sendCommitNotification(String message, Element cfgSnapshot, Set<String> capabilities) {
         CommitJMXNotification notif = NetconfJMXNotification.afterCommit(this, message, cfgSnapshot, capabilities);
         LOG.debug("Notification about commit {} sent", notif);

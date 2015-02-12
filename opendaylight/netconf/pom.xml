@@ -20,6 +20,7 @@
     <module>netconf-config</module>
     <module>netconf-impl</module>
     <module>config-netconf-connector</module>
+    <module>mdsal-netconf-connector</module>
     <module>netconf-util</module>
     <module>netconf-netty-util</module>
     <module>config-persister-impl</module>
