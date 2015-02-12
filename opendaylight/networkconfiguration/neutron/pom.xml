@@ -10,9 +10,6 @@
   <artifactId>networkconfig.neutron</artifactId>
   <version>0.5.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
-  <properties>
-    <enunciate.version>1.26.2</enunciate.version>
-  </properties>
   <dependencies>
     <dependency>
       <groupId>commons-net</groupId>
