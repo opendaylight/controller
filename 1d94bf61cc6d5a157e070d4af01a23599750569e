@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_8ec9405b",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMRpcImplementation.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-12T08:16:12Z",
+      "side": 1,
+      "message": "Warning set may include information about some part of the data request being ignored, etc. For DOM-level API we really do not want to lose any information. For BA it is probably fine to just log it.",
+      "parentUuid": "7a96c907_abae6e7f",
+      "revId": "1d94bf61cc6d5a157e070d4af01a23599750569e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_4ba80a77",
         "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/md/sal/dom/spi/DefaultDOMRpcResult.java",
         "patchSetId": 12
@@ -60,6 +78,30 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_6eccf46a",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/md/sal/dom/spi/DefaultDOMRpcResult.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-12T08:16:12Z",
+      "side": 1,
+      "message": "Not really.",
+      "parentUuid": "7a96c907_4ba80a77",
+      "range": {
+        "startLine": 27,
+        "startChar": 74,
+        "endLine": 27,
+        "endChar": 87
+      },
+      "revId": "1d94bf61cc6d5a157e070d4af01a23599750569e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_e8df9f0b",
         "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/md/sal/dom/spi/DefaultDOMRpcResult.java",
         "patchSetId": 12
@@ -71,6 +113,24 @@
       "writtenOn": "2015-02-10T04:37:59Z",
       "side": 1,
       "message": "Is NormalizedNode Serializable?",
+      "revId": "1d94bf61cc6d5a157e070d4af01a23599750569e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_ceb3c8e7",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/md/sal/dom/spi/DefaultDOMRpcResult.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-12T08:16:12Z",
+      "side": 1,
+      "message": "Depends on implementation.",
+      "parentUuid": "7a96c907_e8df9f0b",
       "revId": "1d94bf61cc6d5a157e070d4af01a23599750569e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
