@@ -8,7 +8,6 @@
 package org.opendaylight.controller.config.manager.impl.util;
 
 import static org.junit.Assert.assertEquals;
-
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import java.util.Collections;
@@ -25,37 +24,37 @@ import org.opendaylight.yangtools.concepts.Identifiable;
 
 public class InterfacesHelperTest {
 
-    interface SuperA {
+    public interface SuperA {
 
     }
 
-    interface SuperBMXBean {
+    public interface SuperBMXBean {
 
     }
 
-    interface SuperC extends SuperA, SuperBMXBean {
+    public interface SuperC extends SuperA, SuperBMXBean {
 
     }
 
-    class SuperClass implements SuperC {
+    public class SuperClass implements SuperC {
 
     }
 
     @MXBean
-    interface SubA {
+    public interface SubA {
 
     }
 
     @ServiceInterfaceAnnotation(value = "a", osgiRegistrationType = SuperA.class, namespace = "n", revision = "r", localName = "l")
-    interface Service extends AbstractServiceInterface{}
+    public interface Service extends AbstractServiceInterface{}
     @ServiceInterfaceAnnotation(value = "b", osgiRegistrationType = SuperC.class, namespace = "n", revision = "r", localName = "l")
-    interface SubService extends Service{}
+    public interface SubService extends Service{}
 
-    abstract class SubClass extends SuperClass implements SubA, Module {
+    public abstract class SubClass extends SuperClass implements SubA, Module {
 
     }
 
-    abstract class SubClassWithService implements SubService, Module {
+    public abstract class SubClassWithService implements SubService, Module {
 
     }
 
