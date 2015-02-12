@@ -1,0 +1,112 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_2e9d8c66",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 676,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-12T18:03:40Z",
+      "side": 1,
+      "message": "This seems to be wrong. LastAppliedTerm does not neccesary need to be the term of the replicatedToAllIndex.",
+      "range": {
+        "startLine": 676,
+        "startChar": 28,
+        "endLine": 676,
+        "endChar": 46
+      },
+      "revId": "1b08e5044f04dd2f86571991799efcd2ce2e4829",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_69538e39",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ReplicatedLog.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-12T18:03:40Z",
+      "side": 1,
+      "message": "I think we can improve this API by returning an object on commit to hold the state and then call commit on that object instead of calling snapshotCommit. This is not for this patch but for a future refactoring to make this sane.",
+      "revId": "1b08e5044f04dd2f86571991799efcd2ce2e4829",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_2407eb1a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ReplicatedLog.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-12T18:03:40Z",
+      "side": 1,
+      "message": "I am not comfortable with ReplicateToAllIndex being a property of ReplicatedLog.",
+      "revId": "1b08e5044f04dd2f86571991799efcd2ce2e4829",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_69a5ce45",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ReplicatedLog.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-12T18:03:40Z",
+      "side": 1,
+      "message": "Document this method please.\n\nThis method should be called snapshotCommit (overloaded and should take an index and term just like snapshotPreCommit) I think that is a sane API. As far as the replicated log is concerned there is nothing fake about this snapshot :)",
+      "revId": "1b08e5044f04dd2f86571991799efcd2ce2e4829",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_296b46f3",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-12T18:03:40Z",
+      "side": 1,
+      "message": "term should correspond to index",
+      "revId": "1b08e5044f04dd2f86571991799efcd2ce2e4829",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_e93ebed9",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/AbstractReplicatedLogImplTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-12T18:03:40Z",
+      "side": 1,
+      "message": "comment is confusing",
+      "revId": "1b08e5044f04dd2f86571991799efcd2ce2e4829",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
