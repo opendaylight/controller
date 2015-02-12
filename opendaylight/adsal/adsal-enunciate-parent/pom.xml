@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- vi: set et smarttab sw=4 tabstop=4: -->
+<!--
+ copyright (c) 2015 cisco systems, inc. and others.  all rights reserved.
+
+ this program and the accompanying materials are made available under the
+ terms of the eclipse public license v1.0 which accompanies this distribution,
+ and is available at http://www.eclipse.org/legal/epl-v10.html
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <parent>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>enunciate-parent</artifactId>
+        <version>1.5.0-SNAPSHOT</version>
+        <relativePath>../../commons/enunciate-parent</relativePath>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>adsal-enunciate-parent</artifactId>
+    <packaging>pom</packaging>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.codehaus.enunciate</groupId>
+                    <artifactId>maven-enunciate-plugin</artifactId>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.opendaylight.controller</groupId>
+                            <artifactId>sal</artifactId>
+                            <version>${sal.version}</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>
+

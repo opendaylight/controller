@@ -3,9 +3,9 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>commons.opendaylight</artifactId>
+    <artifactId>adsal-enunciate-parent</artifactId>
     <version>1.5.0-SNAPSHOT</version>
-    <relativePath>../../../commons/opendaylight</relativePath>
+    <relativePath>../../adsal-enunciate-parent</relativePath>
   </parent>
 
   <artifactId>topology.northbound</artifactId>
@@ -77,17 +77,6 @@
           </instructions>
           <manifestLocation>${project.basedir}/src/main/resources/META-INF</manifestLocation>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.enunciate</groupId>
-        <artifactId>maven-enunciate-plugin</artifactId>
-        <dependencies>
-          <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>sal</artifactId>
-            <version>${sal.version}</version>
-          </dependency>
-        </dependencies>
       </plugin>
     </plugins>
   </build>
