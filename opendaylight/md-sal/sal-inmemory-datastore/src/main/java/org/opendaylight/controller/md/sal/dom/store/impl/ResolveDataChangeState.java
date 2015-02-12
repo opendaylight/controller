@@ -7,11 +7,6 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Multimap;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -22,7 +17,7 @@ import java.util.Map.Entry;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent.Builder;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree.Node;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
@@ -31,6 +26,11 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgum
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Multimap;
 
 /**
  * Recursion state used in {@link ResolveDataChangeEventsTask}. Instances of this
@@ -49,7 +49,7 @@ final class ResolveDataChangeState {
      */
     private final Collection<Builder> inheritedOne;
     private final YangInstanceIdentifier nodeId;
-    private final Collection<Node> nodes;
+    private final Collection<ListenerNode> nodes;
 
     private final Map<DataChangeListenerRegistration<?>, Builder> subBuilders;
     private final Map<DataChangeListenerRegistration<?>, Builder> oneBuilders;
@@ -57,7 +57,7 @@ final class ResolveDataChangeState {
 
     private ResolveDataChangeState(final YangInstanceIdentifier nodeId,
             final Iterable<Builder> inheritedSub, final Collection<Builder> inheritedOne,
-            final Collection<Node> nodes) {
+            final Collection<ListenerNode> nodes) {
         this.nodeId = Preconditions.checkNotNull(nodeId);
         this.nodes = Preconditions.checkNotNull(nodes);
         this.inheritedSub = Preconditions.checkNotNull(inheritedSub);
@@ -69,7 +69,7 @@ final class ResolveDataChangeState {
         final Map<DataChangeListenerRegistration<?>, Builder> sub = new HashMap<>();
         final Map<DataChangeListenerRegistration<?>, Builder> one = new HashMap<>();
         final Map<DataChangeListenerRegistration<?>, Builder> base = new HashMap<>();
-        for (Node n : nodes) {
+        for (ListenerNode n : nodes) {
             for (DataChangeListenerRegistration<?> l : n.getListeners()) {
                 final Builder b = DOMImmutableDataChangeEvent.builder(DataChangeScope.BASE);
                 switch (l.getScope()) {
@@ -105,7 +105,7 @@ final class ResolveDataChangeState {
      * @param root root node
      * @return
      */
-    public static ResolveDataChangeState initial(final YangInstanceIdentifier rootId, final Node root) {
+    public static ResolveDataChangeState initial(final YangInstanceIdentifier rootId, final ListenerNode root) {
         return new ResolveDataChangeState(rootId, Collections.<Builder>emptyList(),
             Collections.<Builder>emptyList(), Collections.singletonList(root));
     }
@@ -257,13 +257,13 @@ final class ResolveDataChangeState {
         LOG.trace("Collected events {}", map);
     }
 
-    private static Collection<Node> getListenerChildrenWildcarded(final Collection<Node> parentNodes,
+    private static Collection<ListenerNode> getListenerChildrenWildcarded(final Collection<ListenerNode> parentNodes,
             final PathArgument child) {
         if (parentNodes.isEmpty()) {
             return Collections.emptyList();
         }
 
-        final List<Node> result = new ArrayList<>();
+        final List<ListenerNode> result = new ArrayList<>();
         if (child instanceof NodeWithValue || child instanceof NodeIdentifierWithPredicates) {
             NodeIdentifier wildcardedIdentifier = new NodeIdentifier(child.getNodeType());
             addChildNodes(result, parentNodes, wildcardedIdentifier);
@@ -272,9 +272,9 @@ final class ResolveDataChangeState {
         return result;
     }
 
-    private static void addChildNodes(final List<Node> result, final Collection<Node> parentNodes, final PathArgument childIdentifier) {
-        for (Node node : parentNodes) {
-            Optional<Node> child = node.getChild(childIdentifier);
+    private static void addChildNodes(final List<ListenerNode> result, final Collection<ListenerNode> parentNodes, final PathArgument childIdentifier) {
+        for (ListenerNode node : parentNodes) {
+            Optional<ListenerNode> child = node.getChild(childIdentifier);
             if (child.isPresent()) {
                 result.add(child.get());
             }
