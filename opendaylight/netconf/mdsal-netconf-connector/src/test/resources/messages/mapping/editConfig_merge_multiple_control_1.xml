@@ -1,0 +1,22 @@
+<!--
+  ~ Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+  ~
+  ~ This program and the accompanying materials are made available under the
+  ~ terms of the Eclipse Public License v1.0 which accompanies this distribution,
+  ~ and is available at http://www.eclipse.org/legal/epl-v10.html
+  -->
+
+<rpc-reply a="64" id="a" message-id="101" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlnx="a:b:c:d">
+    <data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+        <mapping-nodes xmlns="urn:opendaylight:mdsal:mapping:test">
+            <mapping-node>
+                <id>node1-merge</id>
+                <content>merged content node 1</content>
+            </mapping-node>
+            <mapping-node>
+                <id>node2-merge</id>
+                <content>merged content node 2</content>
+            </mapping-node>
+        </mapping-nodes>
+    </data>
+</rpc-reply>
