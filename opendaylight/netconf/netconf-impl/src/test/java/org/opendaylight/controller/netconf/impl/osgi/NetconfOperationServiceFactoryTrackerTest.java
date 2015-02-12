@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.opendaylight.controller.netconf.api.util.NetconfConstants;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
@@ -46,6 +47,7 @@ public class NetconfOperationServiceFactoryTrackerTest {
         doNothing().when(listener).onRemoveNetconfOperationServiceFactory(any(NetconfOperationServiceFactory.class));
         doReturn(filter).when(context).createFilter(anyString());
         doReturn("").when(reference).toString();
+        doReturn(NetconfConstants.CONFIG_NETCONF_CONNECTOR).when(reference).getProperty(NetconfConstants.SERVICE_NAME);
         doReturn(factory).when(context).getService(any(ServiceReference.class));
         doReturn("").when(factory).toString();
         doNothing().when(listener).onAddNetconfOperationServiceFactory(any(NetconfOperationServiceFactory.class));

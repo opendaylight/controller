@@ -8,8 +8,10 @@
 package org.opendaylight.controller.netconf.monitoring.osgi;
 
 import com.google.common.base.Preconditions;
+import java.util.Dictionary;
 import java.util.Hashtable;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
+import org.opendaylight.controller.netconf.api.util.NetconfConstants;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -39,7 +41,9 @@ public class NetconfMonitoringServiceTracker extends ServiceTracker<NetconfMonit
         final NetconfOperationServiceFactory factory = new NetconfMonitoringActivator.NetconfMonitoringOperationServiceFactory(
                 operationService);
 
-        reg = context.registerService(NetconfOperationServiceFactory.class, factory, new Hashtable<String, Object>());
+        Dictionary<String, String> properties = new Hashtable<>();
+        properties.put(NetconfConstants.SERVICE_NAME, NetconfConstants.NETCONF_MONITORING);
+        reg = context.registerService(NetconfOperationServiceFactory.class, factory, properties);
 
         return netconfMonitoringService;
     }
