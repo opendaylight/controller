@@ -12,7 +12,6 @@ import akka.actor.Cancellable;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
-import org.opendaylight.controller.cluster.raft.base.messages.InitiateInstallSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.IsolatedLeaderCheck;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -45,8 +44,6 @@ public class Leader extends AbstractLeader {
     public Leader(RaftActorContext context) {
         super(context);
 
-        scheduleInstallSnapshotCheck(context.getConfigParams().getIsolatedCheckInterval());
-
         scheduleIsolatedLeaderCheck(
             new FiniteDuration(context.getConfigParams().getHeartBeatInterval().length() * 10,
                 context.getConfigParams().getHeartBeatInterval().unit()));
@@ -66,30 +63,6 @@ public class Leader extends AbstractLeader {
         return super.handleMessage(sender, originalMessage);
     }
 
-    protected void stopInstallSnapshotSchedule() {
-        if (installSnapshotSchedule != null && !installSnapshotSchedule.isCancelled()) {
-            installSnapshotSchedule.cancel();
-        }
-    }
-
-    protected void scheduleInstallSnapshotCheck(FiniteDuration interval) {
-        if (getFollowerIds().isEmpty()) {
-            // Optimization - do not bother scheduling a heartbeat as there are
-            // no followers
-            return;
-        }
-
-        stopInstallSnapshotSchedule();
-
-        // Schedule a message to send append entries to followers that can
-        // accept an append entries with some data in it
-        installSnapshotSchedule =
-            context.getActorSystem().scheduler().scheduleOnce(
-                interval,
-                context.getActor(), new InitiateInstallSnapshot(),
-                context.getActorSystem().dispatcher(), context.getActor());
-    }
-
     protected void stopIsolatedLeaderCheckSchedule() {
         if (isolatedLeaderCheckSchedule != null && !isolatedLeaderCheckSchedule.isCancelled()) {
             isolatedLeaderCheckSchedule.cancel();
@@ -104,7 +77,6 @@ public class Leader extends AbstractLeader {
 
     @Override
     public void close() throws Exception {
-        stopInstallSnapshotSchedule();
         stopIsolatedLeaderCheckSchedule();
         super.close();
     }
