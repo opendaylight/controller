@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.config.manager.impl.dynamicmbean;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -29,9 +31,9 @@ public class AnnotationsHelper {
      * @return list of found annotations
      */
     static <T extends Annotation> List<T> findMethodAnnotationInSuperClassesAndIfcs(
-            final Method setter, Class<T> annotationType,
-            Set<Class<?>> inspectedInterfaces) {
-        List<T> result = new ArrayList<T>();
+            final Method setter, final Class<T> annotationType,
+            final Set<Class<?>> inspectedInterfaces) {
+        Builder<T> result = ImmutableSet.builder();
         Class<?> inspectedClass = setter.getDeclaringClass();
         do {
             try {
@@ -46,7 +48,8 @@ public class AnnotationsHelper {
             } catch (NoSuchMethodException e) {
                 inspectedClass = Object.class; // no need to go further
             }
-        } while (inspectedClass.equals(Object.class) == false);
+        } while (!inspectedClass.equals(Object.class));
+
         // inspect interfaces
         for (Class<?> ifc : inspectedInterfaces) {
             if (ifc.isInterface() == false) {
@@ -63,7 +66,7 @@ public class AnnotationsHelper {
 
             }
         }
-        return result;
+        return new ArrayList<>(result.build());
     }
 
     /**
@@ -74,7 +77,7 @@ public class AnnotationsHelper {
      * @return list of found annotations
      */
     static <T extends Annotation> List<T> findClassAnnotationInSuperClassesAndIfcs(
-            Class<?> clazz, Class<T> annotationType, Set<Class<?>> interfaces) {
+            final Class<?> clazz, final Class<T> annotationType, final Set<Class<?>> interfaces) {
         List<T> result = new ArrayList<T>();
         Class<?> declaringClass = clazz;
         do {
@@ -101,7 +104,7 @@ public class AnnotationsHelper {
      * @return empty string if no annotation is found, or list of descriptions
      *         separated by newline
      */
-    static String aggregateDescriptions(List<Description> descriptions) {
+    static String aggregateDescriptions(final List<Description> descriptions) {
         StringBuilder builder = new StringBuilder();
         for (Description d : descriptions) {
             if (builder.length() != 0) {
