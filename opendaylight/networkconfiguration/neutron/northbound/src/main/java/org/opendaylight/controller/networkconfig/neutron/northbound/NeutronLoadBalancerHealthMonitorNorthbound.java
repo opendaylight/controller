@@ -210,13 +210,19 @@ public class NeutronLoadBalancerHealthMonitorNorthbound {
 
             Object[] instances = NeutronUtil.getInstances(INeutronLoadBalancerHealthMonitorAware.class, this);
             if (instances != null) {
-                for (Object instance : instances) {
-                    INeutronLoadBalancerHealthMonitorAware service = (INeutronLoadBalancerHealthMonitorAware) instance;
-                    int status = service.canCreateNeutronLoadBalancerHealthMonitor(singleton);
-                    if (status < 200 || status > 299) {
-                        return Response.status(status).build();
+                if (instances.length > 0) {
+                    for (Object instance : instances) {
+                        INeutronLoadBalancerHealthMonitorAware service = (INeutronLoadBalancerHealthMonitorAware) instance;
+                        int status = service.canCreateNeutronLoadBalancerHealthMonitor(singleton);
+                        if (status < 200 || status > 299) {
+                            return Response.status(status).build();
+                        }
                     }
+                } else {
+                    throw new ServiceUnavailableException("No providers registered.  Please try again later");
                 }
+            } else {
+                throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
             }
             loadBalancerHealthMonitorInterface.addNeutronLoadBalancerHealthMonitor(singleton);
             if (instances != null) {
@@ -245,13 +251,19 @@ public class NeutronLoadBalancerHealthMonitorNorthbound {
                     throw new BadRequestException("LoadBalancerHealthMonitor UUID already exists");
                 }
                 if (instances != null) {
-                    for (Object instance : instances) {
-                        INeutronLoadBalancerHealthMonitorAware service = (INeutronLoadBalancerHealthMonitorAware) instance;
-                        int status = service.canCreateNeutronLoadBalancerHealthMonitor(test);
-                        if (status < 200 || status > 299) {
-                            return Response.status(status).build();
+                    if (instances.length > 0) {
+                        for (Object instance : instances) {
+                            INeutronLoadBalancerHealthMonitorAware service = (INeutronLoadBalancerHealthMonitorAware) instance;
+                            int status = service.canCreateNeutronLoadBalancerHealthMonitor(test);
+                            if (status < 200 || status > 299) {
+                                return Response.status(status).build();
+                            }
                         }
+                    } else {
+                        throw new ServiceUnavailableException("No providers registered.  Please try again later");
                     }
+                } else {
+                    throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
                 }
             }
             /*
@@ -328,13 +340,19 @@ public class NeutronLoadBalancerHealthMonitorNorthbound {
 
         Object[] instances = NeutronUtil.getInstances(INeutronLoadBalancerHealthMonitorAware.class, this);
         if (instances != null) {
-            for (Object instance : instances) {
-                INeutronLoadBalancerHealthMonitorAware service = (INeutronLoadBalancerHealthMonitorAware) instance;
-                int status = service.canUpdateNeutronLoadBalancerHealthMonitor(delta, original);
-                if (status < 200 || status > 299) {
-                    return Response.status(status).build();
+            if (instances.length > 0) {
+                for (Object instance : instances) {
+                    INeutronLoadBalancerHealthMonitorAware service = (INeutronLoadBalancerHealthMonitorAware) instance;
+                    int status = service.canUpdateNeutronLoadBalancerHealthMonitor(delta, original);
+                    if (status < 200 || status > 299) {
+                        return Response.status(status).build();
+                    }
                 }
+            } else {
+                throw new ServiceUnavailableException("No providers registered.  Please try again later");
             }
+        } else {
+            throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
         }
 
         /*
@@ -386,13 +404,19 @@ public class NeutronLoadBalancerHealthMonitorNorthbound {
         NeutronLoadBalancerHealthMonitor singleton = loadBalancerHealthMonitorInterface.getNeutronLoadBalancerHealthMonitor(loadBalancerHealthMonitorID);
         Object[] instances = NeutronUtil.getInstances(INeutronLoadBalancerHealthMonitorAware.class, this);
         if (instances != null) {
-            for (Object instance : instances) {
-                INeutronLoadBalancerHealthMonitorAware service = (INeutronLoadBalancerHealthMonitorAware) instance;
-                int status = service.canDeleteNeutronLoadBalancerHealthMonitor(singleton);
-                if (status < 200 || status > 299) {
-                    return Response.status(status).build();
+            if (instances.length > 0) {
+                for (Object instance : instances) {
+                    INeutronLoadBalancerHealthMonitorAware service = (INeutronLoadBalancerHealthMonitorAware) instance;
+                    int status = service.canDeleteNeutronLoadBalancerHealthMonitor(singleton);
+                    if (status < 200 || status > 299) {
+                        return Response.status(status).build();
+                    }
                 }
+            } else {
+                throw new ServiceUnavailableException("No providers registered.  Please try again later");
             }
+        } else {
+            throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
         }
         loadBalancerHealthMonitorInterface.removeNeutronLoadBalancerHealthMonitor(loadBalancerHealthMonitorID);
         if (instances != null) {

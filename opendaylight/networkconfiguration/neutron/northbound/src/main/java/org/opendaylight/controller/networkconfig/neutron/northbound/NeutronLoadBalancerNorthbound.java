@@ -186,14 +186,21 @@ public class NeutronLoadBalancerNorthbound {
             }
             Object[] instances = NeutronUtil.getInstances(INeutronLoadBalancerAware.class, this);
             if (instances != null) {
-                for (Object instance : instances) {
-                    INeutronLoadBalancerAware service = (INeutronLoadBalancerAware) instance;
-                    int status = service.canCreateNeutronLoadBalancer(singleton);
-                    if (status < 200 || status > 299) {
-                        return Response.status(status).build();
+                if (instances.length > 0) {
+                    for (Object instance : instances) {
+                        INeutronLoadBalancerAware service = (INeutronLoadBalancerAware) instance;
+                        int status = service.canCreateNeutronLoadBalancer(singleton);
+                        if (status < 200 || status > 299) {
+                            return Response.status(status).build();
+                        }
                     }
+                } else {
+                    throw new ServiceUnavailableException("No providers registered.  Please try again later");
                 }
+            } else {
+                throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
             }
+
             loadBalancerInterface.addNeutronLoadBalancer(singleton);
             if (instances != null) {
                 for (Object instance : instances) {
@@ -220,13 +227,19 @@ public class NeutronLoadBalancerNorthbound {
                     throw new BadRequestException("Load Balancer Pool UUID already exists");
                 }
                 if (instances != null) {
-                    for (Object instance : instances) {
-                        INeutronLoadBalancerAware service = (INeutronLoadBalancerAware) instance;
-                        int status = service.canCreateNeutronLoadBalancer(test);
-                        if (status < 200 || status > 299) {
-                            return Response.status(status).build();
+                    if (instances.length > 0) {
+                        for (Object instance : instances) {
+                            INeutronLoadBalancerAware service = (INeutronLoadBalancerAware) instance;
+                            int status = service.canCreateNeutronLoadBalancer(test);
+                            if (status < 200 || status > 299) {
+                                return Response.status(status).build();
+                            }
                         }
+                    } else {
+                        throw new ServiceUnavailableException("No providers registered.  Please try again later");
                     }
+                } else {
+                    throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
                 }
             }
             /*
@@ -298,13 +311,19 @@ public class NeutronLoadBalancerNorthbound {
 
         Object[] instances = NeutronUtil.getInstances(INeutronLoadBalancerAware.class, this);
         if (instances != null) {
-            for (Object instance : instances) {
-                INeutronLoadBalancerAware service = (INeutronLoadBalancerAware) instance;
-                int status = service.canUpdateNeutronLoadBalancer(delta, original);
-                if (status < 200 || status > 299) {
-                    return Response.status(status).build();
+            if (instances.length > 0) {
+                for (Object instance : instances) {
+                    INeutronLoadBalancerAware service = (INeutronLoadBalancerAware) instance;
+                    int status = service.canUpdateNeutronLoadBalancer(delta, original);
+                    if (status < 200 || status > 299) {
+                        return Response.status(status).build();
+                    }
                 }
+            } else {
+                throw new ServiceUnavailableException("No providers registered.  Please try again later");
             }
+        } else {
+            throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
         }
 
         /*
@@ -355,14 +374,21 @@ public class NeutronLoadBalancerNorthbound {
         NeutronLoadBalancer singleton = loadBalancerInterface.getNeutronLoadBalancer(loadBalancerID);
         Object[] instances = NeutronUtil.getInstances(INeutronLoadBalancerAware.class, this);
         if (instances != null) {
-            for (Object instance : instances) {
-                INeutronLoadBalancerAware service = (INeutronLoadBalancerAware) instance;
-                int status = service.canDeleteNeutronLoadBalancer(singleton);
-                if (status < 200 || status > 299) {
-                    return Response.status(status).build();
+            if (instances.length > 0) {
+                for (Object instance : instances) {
+                    INeutronLoadBalancerAware service = (INeutronLoadBalancerAware) instance;
+                    int status = service.canDeleteNeutronLoadBalancer(singleton);
+                    if (status < 200 || status > 299) {
+                        return Response.status(status).build();
+                    }
                 }
+            } else {
+                throw new ServiceUnavailableException("No providers registered.  Please try again later");
             }
+        } else {
+            throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
         }
+
 
         loadBalancerInterface.removeNeutronLoadBalancer(loadBalancerID);
         if (instances != null) {

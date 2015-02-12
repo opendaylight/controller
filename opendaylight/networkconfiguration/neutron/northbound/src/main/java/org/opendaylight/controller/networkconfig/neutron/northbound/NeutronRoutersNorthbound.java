@@ -194,12 +194,18 @@ public class NeutronRoutersNorthbound {
             }
             Object[] instances = NeutronUtil.getInstances(INeutronRouterAware.class, this);
             if (instances != null) {
-                for (Object instance : instances) {
-                    INeutronRouterAware service = (INeutronRouterAware) instance;
-                    int status = service.canCreateRouter(singleton);
-                    if (status < 200 || status > 299)
-                        return Response.status(status).build();
+                if (instances.length > 0) {
+                    for (Object instance : instances) {
+                        INeutronRouterAware service = (INeutronRouterAware) instance;
+                        int status = service.canCreateRouter(singleton);
+                        if (status < 200 || status > 299)
+                            return Response.status(status).build();
+                    }
+                } else {
+                    throw new ServiceUnavailableException("No providers registered.  Please try again later");
                 }
+            } else {
+                throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
             }
 
             /*
@@ -270,12 +276,18 @@ public class NeutronRoutersNorthbound {
 
         Object[] instances = NeutronUtil.getInstances(INeutronRouterAware.class, this);
         if (instances != null) {
-            for (Object instance : instances) {
-                INeutronRouterAware service = (INeutronRouterAware) instance;
-                int status = service.canUpdateRouter(singleton, original);
-                if (status < 200 || status > 299)
-                    return Response.status(status).build();
+            if (instances.length > 0) {
+                for (Object instance : instances) {
+                    INeutronRouterAware service = (INeutronRouterAware) instance;
+                    int status = service.canUpdateRouter(singleton, original);
+                    if (status < 200 || status > 299)
+                        return Response.status(status).build();
+                }
+            } else {
+                throw new ServiceUnavailableException("No providers registered.  Please try again later");
             }
+        } else {
+            throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
         }
         /*
          * if the external gateway info is being changed, verify that the new network
@@ -335,12 +347,18 @@ public class NeutronRoutersNorthbound {
         NeutronRouter singleton = routerInterface.getRouter(routerUUID);
         Object[] instances = NeutronUtil.getInstances(INeutronRouterAware.class, this);
         if (instances != null) {
-            for (Object instance : instances) {
-                INeutronRouterAware service = (INeutronRouterAware) instance;
-                int status = service.canDeleteRouter(singleton);
-                if (status < 200 || status > 299)
-                    return Response.status(status).build();
+            if (instances.length > 0) {
+                for (Object instance : instances) {
+                    INeutronRouterAware service = (INeutronRouterAware) instance;
+                    int status = service.canDeleteRouter(singleton);
+                    if (status < 200 || status > 299)
+                        return Response.status(status).build();
+                }
+            } else {
+                throw new ServiceUnavailableException("No providers registered.  Please try again later");
             }
+        } else {
+            throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
         }
         routerInterface.removeRouter(routerUUID);
         if (instances != null) {
@@ -415,12 +433,18 @@ public class NeutronRoutersNorthbound {
             throw new ResourceConflictException("Target Port already allocated");
         Object[] instances = NeutronUtil.getInstances(INeutronRouterAware.class, this);
         if (instances != null) {
-            for (Object instance : instances) {
-                INeutronRouterAware service = (INeutronRouterAware) instance;
-                int status = service.canAttachInterface(target, input);
-                if (status < 200 || status > 299)
-                    return Response.status(status).build();
+            if (instances.length > 0) {
+                for (Object instance : instances) {
+                    INeutronRouterAware service = (INeutronRouterAware) instance;
+                    int status = service.canAttachInterface(target, input);
+                    if (status < 200 || status > 299)
+                        return Response.status(status).build();
+                }
+            } else {
+                throw new ServiceUnavailableException("No providers registered.  Please try again later");
             }
+        } else {
+            throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
         }
 
         //mark the port device id and device owner fields
@@ -493,12 +517,18 @@ public class NeutronRoutersNorthbound {
 
             Object[] instances = NeutronUtil.getInstances(INeutronRouterAware.class, this);
             if (instances != null) {
-                for (Object instance : instances) {
-                    INeutronRouterAware service = (INeutronRouterAware) instance;
-                    int status = service.canDetachInterface(target, input);
-                    if (status < 200 || status > 299)
-                        return Response.status(status).build();
+                if (instances.length > 0) {
+                    for (Object instance : instances) {
+                        INeutronRouterAware service = (INeutronRouterAware) instance;
+                        int status = service.canDetachInterface(target, input);
+                        if (status < 200 || status > 299)
+                            return Response.status(status).build();
+                    }
+                } else {
+                    throw new ServiceUnavailableException("No providers registered.  Please try again later");
                 }
+            } else {
+                throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
             }
 
             // reset the port ownership
@@ -528,11 +558,25 @@ public class NeutronRoutersNorthbound {
             input.setSubnetUUID(targetInterface.getSubnetUUID());
             input.setID(target.getID());
             input.setTenantID(target.getTenantID());
+            Object[] instances = NeutronUtil.getInstances(INeutronRouterAware.class, this);
+            if (instances != null) {
+                if (instances.length > 0) {
+                    for (Object instance : instances) {
+                        INeutronRouterAware service = (INeutronRouterAware) instance;
+                        int status = service.canDetachInterface(target, input);
+                        if (status < 200 || status > 299)
+                            return Response.status(status).build();
+                    }
+                } else {
+                    throw new ServiceUnavailableException("No providers registered.  Please try again later");
+                }
+            } else {
+                throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
+            }
             NeutronPort port = portInterface.getPort(input.getPortUUID());
             port.setDeviceID(null);
             port.setDeviceOwner(null);
             target.removeInterface(input.getPortUUID());
-            Object[] instances = NeutronUtil.getInstances(INeutronRouterAware.class, this);
             for (Object instance : instances) {
                 INeutronRouterAware service = (INeutronRouterAware) instance;
                 service.neutronRouterInterfaceDetached(target, input);
@@ -560,19 +604,32 @@ public class NeutronRoutersNorthbound {
             }
             if (!subnet.isValidIP(port.getFixedIPs().get(0).getIpAddress()))
                 throw new ResourceConflictException("Target Port IP not in Target Subnet");
+            Object[] instances = NeutronUtil.getInstances(INeutronRouterAware.class, this);
+            if (instances != null) {
+                if (instances.length > 0) {
+                    for (Object instance : instances) {
+                        INeutronRouterAware service = (INeutronRouterAware) instance;
+                        int status = service.canDetachInterface(target, input);
+                        if (status < 200 || status > 299)
+                            return Response.status(status).build();
+                    }
+                } else {
+                    throw new ServiceUnavailableException("No providers registered.  Please try again later");
+                }
+            } else {
+                throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
+            }
             input.setID(target.getID());
             input.setTenantID(target.getTenantID());
-            Object[] instances = NeutronUtil.getInstances(INeutronRouterAware.class, this);
+            port.setDeviceID(null);
+            port.setDeviceOwner(null);
+            target.removeInterface(input.getPortUUID());
             if (instances != null) {
                 for (Object instance : instances) {
                     INeutronRouterAware service = (INeutronRouterAware) instance;
                     service.canDetachInterface(target, input);
                 }
-            }
-            port.setDeviceID(null);
-            port.setDeviceOwner(null);
-            target.removeInterface(input.getPortUUID());
-            for (Object instance : instances) {
+            }            for (Object instance : instances) {
                 INeutronRouterAware service = (INeutronRouterAware) instance;
                 service.neutronRouterInterfaceDetached(target, input);
             }
