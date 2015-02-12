@@ -113,6 +113,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_04ec2f29",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ReplicatedLog.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-12T19:43:10Z",
+      "side": 1,
+      "message": "SnapshotIndex is used to calculate the logicalIndex so it is relevant. ReplicatedLogIndex is just stored and is not used within the ReplicatedLog.\n\nBTW, I don\u0027t much like the fact that we allow snapshot index to be set. In general setters should be used sparingly because they break encapsulation.\n\nreplicatedToAllIndex should be ideally on the Leader. That is the only place where it seems to make sense.",
+      "parentUuid": "7a96c907_4460f7ce",
+      "revId": "1b08e5044f04dd2f86571991799efcd2ce2e4829",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_69a5ce45",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ReplicatedLog.java",
         "patchSetId": 3
@@ -142,6 +160,24 @@
       "side": 1,
       "message": "Yes...will document the methods.\n\nIf we name this snapshotCommit(...) , wont it be confusiing? snapshotPrecommit and commit are two operations of taking a snapshot.\nIn this method we do both in one.\nSo can i call it doSnapshot() or takeSnapshot()?\n\nI agree the \u0027fake\u0027 can go.",
       "parentUuid": "7a96c907_69a5ce45",
+      "revId": "1b08e5044f04dd2f86571991799efcd2ce2e4829",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_24f12b02",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ReplicatedLog.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-12T19:43:10Z",
+      "side": 1,
+      "message": "\"fakeSnapshot\" is a helper method to do a snapshot commit - that is how I think about it so to me snapshotCommit as a method name makes sense",
+      "parentUuid": "7a96c907_64b41335",
       "revId": "1b08e5044f04dd2f86571991799efcd2ce2e4829",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
