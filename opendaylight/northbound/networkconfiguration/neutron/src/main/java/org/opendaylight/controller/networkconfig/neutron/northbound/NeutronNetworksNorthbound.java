@@ -211,13 +211,19 @@ public class NeutronNetworksNorthbound {
 
             Object[] instances = ServiceHelper.getGlobalInstances(INeutronNetworkAware.class, this, null);
             if (instances != null) {
-                for (Object instance : instances) {
-                    INeutronNetworkAware service = (INeutronNetworkAware) instance;
-                    int status = service.canCreateNetwork(singleton);
-                    if (status < 200 || status > 299) {
-                        return Response.status(status).build();
+                if (instances.length > 0) {
+                    for (Object instance : instances) {
+                        INeutronNetworkAware service = (INeutronNetworkAware) instance;
+                        int status = service.canCreateNetwork(singleton);
+                        if (status < 200 || status > 299) {
+                            return Response.status(status).build();
+                        }
                     }
+                } else {
+                    throw new ServiceUnavailableException("No providers registered.  Please try again later");
                 }
+            } else {
+                throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
             }
 
             // add network to cache
@@ -249,13 +255,19 @@ public class NeutronNetworksNorthbound {
                     throw new BadRequestException("network UUID already exists");
                 }
                 if (instances != null) {
-                    for (Object instance: instances) {
-                        INeutronNetworkAware service = (INeutronNetworkAware) instance;
-                        int status = service.canCreateNetwork(test);
-                        if (status < 200 || status > 299) {
-                            return Response.status(status).build();
+                    if (instances.length > 0) {
+                        for (Object instance: instances) {
+                            INeutronNetworkAware service = (INeutronNetworkAware) instance;
+                            int status = service.canCreateNetwork(test);
+                            if (status < 200 || status > 299) {
+                                return Response.status(status).build();
+                            }
                         }
+                    } else {
+                        throw new ServiceUnavailableException("No providers registered.  Please try again later");
                     }
+                } else {
+                    throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
                 }
                 testMap.put(test.getID(),test);
             }
@@ -319,14 +331,20 @@ public class NeutronNetworksNorthbound {
 
         Object[] instances = ServiceHelper.getGlobalInstances(INeutronNetworkAware.class, this, null);
         if (instances != null) {
-            for (Object instance : instances) {
-                INeutronNetworkAware service = (INeutronNetworkAware) instance;
-                NeutronNetwork original = networkInterface.getNetwork(netUUID);
-                int status = service.canUpdateNetwork(delta, original);
-                if (status < 200 || status > 299) {
-                    return Response.status(status).build();
+            if (instances.length > 0) {
+                for (Object instance : instances) {
+                    INeutronNetworkAware service = (INeutronNetworkAware) instance;
+                    NeutronNetwork original = networkInterface.getNetwork(netUUID);
+                    int status = service.canUpdateNetwork(delta, original);
+                    if (status < 200 || status > 299) {
+                        return Response.status(status).build();
+                    }
                 }
+            } else {
+                throw new ServiceUnavailableException("No providers registered.  Please try again later");
             }
+        } else {
+            throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
         }
 
         // update network object and return the modified object
@@ -373,13 +391,19 @@ public class NeutronNetworksNorthbound {
         NeutronNetwork singleton = networkInterface.getNetwork(netUUID);
         Object[] instances = ServiceHelper.getGlobalInstances(INeutronNetworkAware.class, this, null);
         if (instances != null) {
-            for (Object instance : instances) {
-                INeutronNetworkAware service = (INeutronNetworkAware) instance;
-                int status = service.canDeleteNetwork(singleton);
-                if (status < 200 || status > 299) {
-                    return Response.status(status).build();
+            if (instances.length > 0) {
+                for (Object instance : instances) {
+                    INeutronNetworkAware service = (INeutronNetworkAware) instance;
+                    int status = service.canDeleteNetwork(singleton);
+                    if (status < 200 || status > 299) {
+                        return Response.status(status).build();
+                    }
                 }
+            } else {
+                throw new ServiceUnavailableException("No providers registered.  Please try again later");
             }
+        } else {
+            throw new ServiceUnavailableException("Couldn't get providers list.  Please try again later");
         }
         networkInterface.removeNetwork(netUUID);
         if (instances != null) {
