@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!-- vi: set et smarttab sw=4 tabstop=4: -->
+<!--
+ copyright (c) 2015 cisco systems, inc. and others.  all rights reserved.
+
+ this program and the accompanying materials are made available under the
+ terms of the eclipse public license v1.0 which accompanies this distribution,
+ and is available at http://www.eclipse.org/legal/epl-v10.html
+-->
+<enunciate label="full" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.28.xsd">
+</enunciate>
+

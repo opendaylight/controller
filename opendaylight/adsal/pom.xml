@@ -95,6 +95,7 @@
     <module>samples/northbound/loadbalancer</module>
 
     <module>dummy-console</module>
+    <module>adsal-enunciate-parent</module>
 
     <!-- features -->
     <module>features/base</module>

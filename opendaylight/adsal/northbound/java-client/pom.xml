@@ -3,9 +3,9 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>commons.opendaylight</artifactId>
+    <artifactId>enunciate-parent</artifactId>
     <version>1.5.0-SNAPSHOT</version>
-    <relativePath>../../../commons/opendaylight</relativePath>
+    <relativePath>../../../commons/enunciate-parent</relativePath>
   </parent>
 
   <artifactId>northbound.client</artifactId>
@@ -158,10 +158,6 @@
             <phase>package</phase>
           </execution>
         </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.enunciate</groupId>
-        <artifactId>maven-enunciate-plugin</artifactId>
       </plugin>
 
       <plugin>
