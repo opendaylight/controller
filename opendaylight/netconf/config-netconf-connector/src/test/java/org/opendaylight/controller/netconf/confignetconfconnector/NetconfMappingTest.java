@@ -95,8 +95,8 @@ import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStore
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreService;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
 import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultCloseSession;
+import org.opendaylight.controller.netconf.impl.osgi.AggregatedNetconfOperationServiceFactory;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouter;
-import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceSnapshotImpl;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
@@ -141,7 +141,9 @@ public class NetconfMappingTest extends AbstractConfigTest {
     @Mock
     NetconfOperationRouter netconfOperationRouter;
     @Mock
-    NetconfOperationServiceSnapshotImpl netconfOperationServiceSnapshot;
+    AggregatedNetconfOperationServiceFactory netconfOperationServiceSnapshot;
+    @Mock
+    private AutoCloseable sessionCloseable;
 
     private TransactionProvider transactionProvider;
 
@@ -157,13 +159,12 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
         doReturn(getMbes()).when(this.yangStoreSnapshot).getModuleMXBeanEntryMap();
         doReturn(getModules()).when(this.yangStoreSnapshot).getModules();
-        doNothing().when(netconfOperationServiceSnapshot).close();
 
         this.factory = new NetconfTestImplModuleFactory();
         this.factory2 = new DepTestImplModuleFactory();
         this.factory3 = new IdentityTestModuleFactory();
         factory4 = new TestImplModuleFactory();
-
+        doNothing().when(sessionCloseable).close();
 
         super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext, this.factory, this.factory2,
                 this.factory3, factory4));
@@ -376,7 +377,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
         edit("netconfMessages/editConfig_none.xml");
         closeSession();
-        verify(netconfOperationServiceSnapshot).close();
+        verify(sessionCloseable).close();
         verifyNoMoreInteractions(netconfOperationRouter);
         verifyNoMoreInteractions(netconfOperationServiceSnapshot);
     }
@@ -390,7 +391,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
     private void closeSession() throws NetconfDocumentedException, ParserConfigurationException, SAXException,
             IOException {
-        DefaultCloseSession closeOp = new DefaultCloseSession(NETCONF_SESSION_ID, netconfOperationServiceSnapshot);
+        DefaultCloseSession closeOp = new DefaultCloseSession(NETCONF_SESSION_ID, sessionCloseable);
         executeOp(closeOp, "netconfMessages/closeSession.xml");
     }
 

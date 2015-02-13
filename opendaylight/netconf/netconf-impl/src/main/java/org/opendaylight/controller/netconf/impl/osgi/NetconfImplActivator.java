@@ -19,7 +19,6 @@ import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProduce
 import org.opendaylight.controller.netconf.impl.NetconfServerDispatcherImpl;
 import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFactory;
 import org.opendaylight.controller.netconf.impl.SessionIdProvider;
-import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
 import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -40,7 +39,7 @@ public class NetconfImplActivator implements BundleActivator {
     @Override
     public void start(final BundleContext context)  {
 
-        NetconfOperationServiceFactoryListenerImpl factoriesListener = new NetconfOperationServiceFactoryListenerImpl();
+        AggregatedNetconfOperationServiceFactory factoriesListener = new AggregatedNetconfOperationServiceFactory();
         startOperationServiceFactoryTracker(context, factoriesListener);
 
         SessionIdProvider idProvider = new SessionIdProvider();
@@ -50,7 +49,7 @@ public class NetconfImplActivator implements BundleActivator {
 
         commitNot = new DefaultCommitNotificationProducer(ManagementFactory.getPlatformMBeanServer());
 
-        SessionMonitoringService monitoringService = startMonitoringService(context, factoriesListener);
+        NetconfMonitoringService monitoringService = startMonitoringService(context, factoriesListener);
 
         NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new NetconfServerSessionNegotiatorFactory(
                 timer, factoriesListener, idProvider, connectionTimeoutMillis, commitNot, monitoringService);
@@ -64,17 +63,14 @@ public class NetconfImplActivator implements BundleActivator {
         LocalAddress address = NetconfConfigUtil.getNetconfLocalAddress();
         LOG.trace("Starting local netconf server at {}", address);
         dispatch.createLocalServer(address);
-
-        context.registerService(NetconfOperationProvider.class, factoriesListener, null);
-
     }
 
-    private void startOperationServiceFactoryTracker(BundleContext context, NetconfOperationServiceFactoryListenerImpl factoriesListener) {
+    private void startOperationServiceFactoryTracker(BundleContext context, NetconfOperationServiceFactoryListener factoriesListener) {
         factoriesTracker = new NetconfOperationServiceFactoryTracker(context, factoriesListener);
         factoriesTracker.open();
     }
 
-    private NetconfMonitoringServiceImpl startMonitoringService(BundleContext context, NetconfOperationServiceFactoryListenerImpl factoriesListener) {
+    private NetconfMonitoringServiceImpl startMonitoringService(BundleContext context, AggregatedNetconfOperationServiceFactory factoriesListener) {
         NetconfMonitoringServiceImpl netconfMonitoringServiceImpl = new NetconfMonitoringServiceImpl(factoriesListener);
         Dictionary<String, ?> dic = new Hashtable<>();
         regMonitoring = context.registerService(NetconfMonitoringService.class, netconfMonitoringServiceImpl, dic);

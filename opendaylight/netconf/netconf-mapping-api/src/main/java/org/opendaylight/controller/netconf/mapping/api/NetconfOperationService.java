@@ -16,11 +16,6 @@ import java.util.Set;
 public interface NetconfOperationService extends AutoCloseable {
 
     /**
-     * Get capabilities announced by server hello message.
-     */
-    Set<Capability> getCapabilities();
-
-    /**
      * Get set of netconf operations that are handled by this service.
      */
     Set<NetconfOperation> getNetconfOperations();

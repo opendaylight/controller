@@ -1,19 +1,19 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.netconf.impl.mapping.operations;
+package org.opendaylight.controller.netconf.monitoring;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import java.util.Map;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
-import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
 import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
 import org.opendaylight.controller.netconf.util.mapping.AbstractLastNetconfOperation;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
@@ -23,16 +23,16 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-public final class DefaultGetSchema extends AbstractLastNetconfOperation {
+public class GetSchema extends AbstractLastNetconfOperation {
     public static final String GET_SCHEMA = "get-schema";
     public static final String IDENTIFIER = "identifier";
     public static final String VERSION = "version";
 
-    private static final Logger LOG = LoggerFactory.getLogger(DefaultGetSchema.class);
-    private final CapabilityProvider cap;
+    private static final Logger LOG = LoggerFactory.getLogger(GetSchema.class);
+    private final NetconfMonitoringService cap;
 
-    public DefaultGetSchema(CapabilityProvider cap, String netconfSessionIdForReporting) {
-        super(netconfSessionIdForReporting);
+    public GetSchema(final NetconfMonitoringService cap) {
+        super(MonitoringConstants.MODULE_NAME);
         this.cap = cap;
     }
 
@@ -47,16 +47,16 @@ public final class DefaultGetSchema extends AbstractLastNetconfOperation {
     }
 
     @Override
-    protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws NetconfDocumentedException {
-        GetSchemaEntry entry;
+    protected Element handleWithNoSubsequentOperations(final Document document, final XmlElement xml) throws NetconfDocumentedException {
+        final GetSchemaEntry entry;
 
         entry = new GetSchemaEntry(xml);
 
-        String schema;
+        final String schema;
         try {
             schema = cap.getSchemaForCapability(entry.identifier, entry.version);
-        } catch (IllegalStateException e) {
-            Map<String, String> errorInfo = Maps.newHashMap();
+        } catch (final IllegalStateException e) {
+            final Map<String, String> errorInfo = Maps.newHashMap();
             errorInfo.put(entry.identifier, e.getMessage());
             LOG.warn("Rpc error: {}", NetconfDocumentedException.ErrorTag.operation_failed, e);
             throw new NetconfDocumentedException(e.getMessage(), NetconfDocumentedException.ErrorType.application,
@@ -64,7 +64,7 @@ public final class DefaultGetSchema extends AbstractLastNetconfOperation {
                     NetconfDocumentedException.ErrorSeverity.error, errorInfo);
         }
 
-        Element getSchemaResult;
+        final Element getSchemaResult;
         getSchemaResult = XmlUtil.createTextElement(document, XmlNetconfConstants.DATA_KEY, schema,
                 Optional.of(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_YANG_IETF_NETCONF_MONITORING));
         LOG.trace("{} operation successful", GET_SCHEMA);
@@ -76,19 +76,19 @@ public final class DefaultGetSchema extends AbstractLastNetconfOperation {
         private final String identifier;
         private final Optional<String> version;
 
-        GetSchemaEntry(XmlElement getSchemaElement) throws NetconfDocumentedException {
+        GetSchemaEntry(final XmlElement getSchemaElement) throws NetconfDocumentedException {
             getSchemaElement.checkName(GET_SCHEMA);
             getSchemaElement.checkNamespace(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_YANG_IETF_NETCONF_MONITORING);
 
             XmlElement identifierElement = null;
             try {
                 identifierElement = getSchemaElement.getOnlyChildElementWithSameNamespace(IDENTIFIER);
-            } catch (MissingNameSpaceException e) {
+            } catch (final MissingNameSpaceException e) {
                 LOG.trace("Can't get identifier element as only child element with same namespace due to ",e);
                 throw NetconfDocumentedException.wrap(e);
             }
             identifier = identifierElement.getTextContent();
-            Optional<XmlElement> versionElement = getSchemaElement
+            final Optional<XmlElement> versionElement = getSchemaElement
                     .getOnlyChildElementWithSameNamespaceOptionally(VERSION);
             if (versionElement.isPresent()) {
                 version = Optional.of(versionElement.get().getTextContent());

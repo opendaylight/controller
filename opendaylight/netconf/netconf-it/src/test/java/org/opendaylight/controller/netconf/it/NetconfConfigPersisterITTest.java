@@ -9,23 +9,18 @@ package org.opendaylight.controller.netconf.it;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.opendaylight.controller.netconf.util.test.XmlUnitUtil.assertContainsElementWithName;
 import static org.opendaylight.controller.netconf.util.test.XmlUnitUtil.assertElementsCount;
 import static org.opendaylight.controller.netconf.util.xml.XmlUtil.readXmlToDocument;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import javax.management.InstanceNotFoundException;
 import javax.management.Notification;
 import javax.management.NotificationListener;
@@ -38,15 +33,6 @@ import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.jmx.CommitJMXNotification;
 import org.opendaylight.controller.netconf.client.TestingNetconfClient;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
-import org.opendaylight.controller.netconf.impl.osgi.NetconfMonitoringServiceImpl;
-import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceSnapshotImpl;
-import org.opendaylight.controller.netconf.impl.osgi.SessionMonitoringService;
-import org.opendaylight.controller.netconf.mapping.api.Capability;
-import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
-import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
-import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
-import org.opendaylight.controller.netconf.monitoring.osgi.NetconfMonitoringActivator;
-import org.opendaylight.controller.netconf.monitoring.osgi.NetconfMonitoringOperationService;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPersisterNotificationHandler;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.w3c.dom.Document;
@@ -58,27 +44,10 @@ public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
     public static final int PORT = 12026;
     private static final InetSocketAddress TCP_ADDRESS = new InetSocketAddress(LOOPBACK_ADDRESS, PORT);
 
-    private NetconfMonitoringServiceImpl netconfMonitoringService;
-
-    @Override
-    protected void setUpTestInitial() {
-        netconfMonitoringService = new NetconfMonitoringServiceImpl(getNetconfOperationProvider());
-    }
-
-    @Override
-    protected SessionMonitoringService getNetconfMonitoringService() throws Exception {
-        return netconfMonitoringService;
-    }
 
     @Override
     protected SocketAddress getTcpServerAddress() {
         return TCP_ADDRESS;
-    }
-
-    @Override
-    protected Iterable<NetconfOperationServiceFactory> getAdditionalServiceFactories() {
-        return Collections.<NetconfOperationServiceFactory>singletonList(new NetconfMonitoringActivator.NetconfMonitoringOperationServiceFactory(
-                new NetconfMonitoringOperationService(netconfMonitoringService)));
     }
 
     @Override
@@ -94,7 +63,6 @@ public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
         try (TestingNetconfClient persisterClient = new TestingNetconfClient("persister", getClientDispatcher(), getClientConfiguration(TCP_ADDRESS, 4000))) {
             try (ConfigPersisterNotificationHandler configPersisterNotificationHandler = new ConfigPersisterNotificationHandler(
                     platformMBeanServer, mockedAggregator)) {
-
 
                 try (TestingNetconfClient netconfClient = new TestingNetconfClient("client", getClientDispatcher(), getClientConfiguration(TCP_ADDRESS, 4000))) {
                     NetconfMessage response = netconfClient.sendMessage(loadGetConfigMessage());
@@ -141,20 +109,6 @@ public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
 
     private NetconfMessage loadCommitMessage() throws Exception {
         return XmlFileLoader.xmlFileToNetconfMessage("netconfMessages/commit.xml");
-    }
-
-
-    public NetconfOperationProvider getNetconfOperationProvider() {
-        final NetconfOperationProvider factoriesListener = mock(NetconfOperationProvider.class);
-        final NetconfOperationServiceSnapshotImpl snap = mock(NetconfOperationServiceSnapshotImpl.class);
-        final NetconfOperationService service = mock(NetconfOperationService.class);
-        final Set<Capability> caps = Sets.newHashSet();
-        doReturn(caps).when(service).getCapabilities();
-        final Set<NetconfOperationService> services = Sets.newHashSet(service);
-        doReturn(services).when(snap).getServices();
-        doReturn(snap).when(factoriesListener).openSnapshot(anyString());
-
-        return factoriesListener;
     }
 
     private static class VerifyingNotificationListener implements NotificationListener {
