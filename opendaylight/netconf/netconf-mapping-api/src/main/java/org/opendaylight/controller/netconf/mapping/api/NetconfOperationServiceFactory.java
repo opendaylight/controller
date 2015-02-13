@@ -8,12 +8,26 @@
 
 package org.opendaylight.controller.netconf.mapping.api;
 
+import java.util.Set;
+import org.opendaylight.controller.netconf.api.Capability;
+import org.opendaylight.controller.netconf.api.monitoring.CapabilityListener;
+
 /**
  * Factory that must be registered in OSGi service registry in order to be used
  * by netconf-impl. Responsible for creating per-session instances of
  * {@link NetconfOperationService}.
  */
 public interface NetconfOperationServiceFactory {
+
+    /**
+     * Get capabilities supported by current operation service.
+     */
+    Set<Capability> getCapabilities();
+
+    /**
+     * Supported capabilities may change over time, registering a listener allows for push based information retrieval about current notifications
+     */
+    AutoCloseable registerCapabilityListener(CapabilityListener listener);
 
     NetconfOperationService createService(String netconfSessionIdForReporting);
 

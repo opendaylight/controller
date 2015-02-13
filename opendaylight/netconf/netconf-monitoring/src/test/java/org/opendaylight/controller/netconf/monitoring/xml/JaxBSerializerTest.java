@@ -11,9 +11,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import java.util.Set;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
+import org.opendaylight.controller.netconf.api.Capability;
+import org.opendaylight.controller.netconf.api.monitoring.NetconfManagementSession;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.monitoring.xml.model.NetconfState;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -43,6 +47,26 @@ public class JaxBSerializerTest {
         final NetconfMonitoringService service = new NetconfMonitoringService() {
 
             @Override
+            public void onSessionUp(final NetconfManagementSession session) {
+
+            }
+
+            @Override
+            public void onSessionDown(final NetconfManagementSession session) {
+
+            }
+
+            @Override
+            public void onCapabilitiesAdded(final Set<Capability> addedCaps) {
+
+            }
+
+            @Override
+            public void onCapabilitiesRemoved(final Set<Capability> addedCaps) {
+
+            }
+
+            @Override
             public Sessions getSessions() {
                 return new SessionsBuilder().setSession(Lists.newArrayList(getMockSession(NetconfTcp.class), getMockSession(NetconfSsh.class))).build();
             }
@@ -50,6 +74,16 @@ public class JaxBSerializerTest {
             @Override
             public Schemas getSchemas() {
                 return new SchemasBuilder().setSchema(Lists.newArrayList(getMockSchema("id", "v1", Yang.class), getMockSchema("id2", "", Yang.class))).build();
+            }
+
+            @Override
+            public String getSchemaForCapability(final String moduleName, final Optional<String> revision) {
+                return null;
+            }
+
+            @Override
+            public Set<String> getCapabilities() {
+                return null;
             }
         };
         final NetconfState model = new NetconfState(service);

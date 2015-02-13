@@ -9,75 +9,45 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.osgi;
 
 import com.google.common.base.Optional;
-import java.lang.management.ManagementFactory;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import javax.management.MBeanServer;
 import org.opendaylight.controller.config.util.ConfigRegistryJMXClient;
+<<<<<<< HEAD
+=======
+import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.netconf.api.Capability;
-import org.opendaylight.controller.netconf.api.monitoring.CapabilityListener;
+>>>>>>> 24c71dd... Move get-schema to monitoring
+import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
 import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
-import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.yangtools.yang.model.api.Module;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class NetconfOperationServiceFactoryImpl implements NetconfOperationServiceFactory {
+/**
+ * Manages life cycle of {@link YangStoreContext}.
+ */
+public class NetconfOperationServiceImpl implements NetconfOperationService {
 
-    public static final int ATTEMPT_TIMEOUT_MS = 1000;
-    private static final int SILENT_ATTEMPTS = 30;
-
+    private final NetconfOperationProvider operationProvider;
+    private final TransactionProvider transactionProvider;
     private final YangStoreService yangStoreService;
-    private final ConfigRegistryJMXClient jmxClient;
 
-    private static final Logger LOG = LoggerFactory.getLogger(NetconfOperationServiceFactoryImpl.class);
+    public NetconfOperationServiceImpl(final YangStoreService yangStoreService, final ConfigRegistryJMXClient jmxClient,
+            final String netconfSessionIdForReporting) {
 
-    public NetconfOperationServiceFactoryImpl(YangStoreService yangStoreService) {
-        this(yangStoreService, ManagementFactory.getPlatformMBeanServer());
-    }
-
-    public NetconfOperationServiceFactoryImpl(YangStoreService yangStoreService, MBeanServer mBeanServer) {
         this.yangStoreService = yangStoreService;
 
-        ConfigRegistryJMXClient configRegistryJMXClient;
-        int i = 0;
-        // Config registry might not be present yet, but will be eventually
-        while(true) {
-
-            try {
-                configRegistryJMXClient = new ConfigRegistryJMXClient(mBeanServer);
-                break;
-            } catch (IllegalStateException e) {
-                ++i;
-                if (i > SILENT_ATTEMPTS) {
-                    LOG.info("JMX client not created after {} attempts, still trying", i, e);
-                } else {
-                    LOG.debug("JMX client could not be created, reattempting, try {}", i, e);
-                }
-                try {
-                    Thread.sleep(ATTEMPT_TIMEOUT_MS);
-                } catch (InterruptedException e1) {
-                    Thread.currentThread().interrupt();
-                    throw new IllegalStateException("Interrupted while reattempting connection", e1);
-                }
-            }
-        }
-
-        jmxClient = configRegistryJMXClient;
-        if (i > SILENT_ATTEMPTS) {
-            LOG.info("Created JMX client after {} attempts", i);
-        } else {
-            LOG.debug("Created JMX client after {} attempts", i);
-        }
+        transactionProvider = new TransactionProvider(jmxClient, netconfSessionIdForReporting);
+        operationProvider = new NetconfOperationProvider(yangStoreService, jmxClient, transactionProvider,
+                netconfSessionIdForReporting);
     }
 
     @Override
-    public NetconfOperationServiceImpl createService(String netconfSessionIdForReporting) {
-        return new NetconfOperationServiceImpl(yangStoreService, jmxClient, netconfSessionIdForReporting);
+    public void close() {
+        transactionProvider.close();
     }
-
 
     @Override
     public Set<Capability> getCapabilities() {
@@ -85,11 +55,11 @@ public class NetconfOperationServiceFactoryImpl implements NetconfOperationServi
     }
 
     @Override
-    public AutoCloseable registerCapabilityListener(final CapabilityListener listener) {
-        return yangStoreService.registerCapabilityListener(listener);
+    public Set<NetconfOperation> getNetconfOperations() {
+        return operationProvider.getOperations();
     }
 
-    public static Set<Capability> setupCapabilities(final YangStoreContext yangStoreSnapshot) {
+    private static Set<Capability> setupCapabilities(final YangStoreContext yangStoreSnapshot) {
         Set<Capability> capabilities = new HashSet<>();
         // [RFC6241] 8.3.  Candidate Configuration Capability
         capabilities.add(new BasicCapability("urn:ietf:params:netconf:capability:candidate:1.0"));

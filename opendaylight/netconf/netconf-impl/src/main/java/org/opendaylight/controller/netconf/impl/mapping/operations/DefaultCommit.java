@@ -11,9 +11,9 @@ package org.opendaylight.controller.netconf.impl.mapping.operations;
 import com.google.common.base.Preconditions;
 import java.io.InputStream;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.impl.CommitNotifier;
-import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
@@ -32,10 +32,10 @@ public class DefaultCommit extends AbstractNetconfOperation {
     private static final String NOTIFY_ATTR = "notify";
 
     private final CommitNotifier notificationProducer;
-    private final CapabilityProvider cap;
+    private final NetconfMonitoringService cap;
     private final NetconfOperationRouter operationRouter;
 
-    public DefaultCommit(CommitNotifier notifier, CapabilityProvider cap,
+    public DefaultCommit(CommitNotifier notifier, NetconfMonitoringService cap,
                          String netconfSessionIdForReporting, NetconfOperationRouter netconfOperationRouter) {
         super(netconfSessionIdForReporting);
         this.notificationProducer = notifier;

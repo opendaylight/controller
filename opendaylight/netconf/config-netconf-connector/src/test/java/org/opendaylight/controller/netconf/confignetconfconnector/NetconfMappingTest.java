@@ -95,8 +95,8 @@ import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStore
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreService;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
 import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultCloseSession;
+import org.opendaylight.controller.netconf.impl.osgi.AggregatedNetconfOperationServiceFactory;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouter;
-import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceSnapshotImpl;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
@@ -141,7 +141,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
     @Mock
     NetconfOperationRouter netconfOperationRouter;
     @Mock
-    NetconfOperationServiceSnapshotImpl netconfOperationServiceSnapshot;
+    AggregatedNetconfOperationServiceFactory netconfOperationServiceSnapshot;
 
     private TransactionProvider transactionProvider;
 

@@ -14,6 +14,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.lang.ref.SoftReference;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -21,6 +22,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicReference;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
+import org.opendaylight.controller.netconf.api.monitoring.CapabilityListener;
 import org.opendaylight.controller.netconf.notifications.BaseNetconfNotificationListener;
 import org.opendaylight.controller.netconf.notifications.BaseNotificationPublisherRegistration;
 import org.opendaylight.controller.netconf.notifications.NetconfNotificationCollector;
@@ -77,6 +79,8 @@ public class YangStoreService implements YangStoreContext {
         }
     });
 
+    private final Set<CapabilityListener> listeners = new HashSet<>();
+
     public YangStoreService(final SchemaContextProvider schemaContextProvider, final BundleContext context) {
         this(schemaContextProvider, new NotificationCollectorTracker(context));
     }
@@ -128,6 +132,19 @@ public class YangStoreService implements YangStoreContext {
         final YangStoreSnapshot previous = ref.get().get();
         ref.set(new SoftReference<YangStoreSnapshot>(null));
         notificationExecutor.submit(new CapabilityChangeNotifier(previous));
+    }
+
+    public AutoCloseable registerCapabilityListener(final CapabilityListener listener) {
+        this.listeners.add(listener);
+
+        listener.onCapabilitiesAdded(NetconfOperationServiceFactoryImpl.setupCapabilities(ref.get().get()));
+
+        return new AutoCloseable() {
+            @Override
+            public void close() throws Exception {
+                YangStoreService.this.listeners.remove(listener);
+            }
+        };
     }
 
     private final class CapabilityChangeNotifier implements Runnable {
