@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_fcebdb75",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T18:31:54Z",
+      "side": 1,
+      "message": "Fixed",
+      "parentUuid": "7a96c907_bf1ea85d",
+      "revId": "32481f250fdc7ba580f62fac665a49cb9924a506",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_e43ee3d9",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
         "patchSetId": 9
@@ -101,6 +119,24 @@
       "side": 1,
       "message": "slf4j does not have unlimited args for performance - allows a max of 4 and I added a 5th.\n\nI can use %d for ints.",
       "parentUuid": "7a96c907_e43ee3d9",
+      "revId": "32481f250fdc7ba580f62fac665a49cb9924a506",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_9c04174b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 486,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T18:31:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_3f3298f2",
       "revId": "32481f250fdc7ba580f62fac665a49cb9924a506",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
