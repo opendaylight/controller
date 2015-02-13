@@ -8,6 +8,7 @@
 package org.opendaylight.controller.netconf.it;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -26,21 +27,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import org.junit.Test;
+import org.opendaylight.controller.netconf.api.Capability;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.controller.netconf.api.monitoring.NetconfManagementSession;
+import org.opendaylight.controller.netconf.api.monitoring.CapabilityListener;
 import org.opendaylight.controller.netconf.client.TestingNetconfClient;
-import org.opendaylight.controller.netconf.impl.osgi.NetconfMonitoringServiceImpl;
-import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceSnapshotImpl;
-import org.opendaylight.controller.netconf.impl.osgi.SessionMonitoringService;
-import org.opendaylight.controller.netconf.mapping.api.Capability;
-import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
+import org.opendaylight.controller.netconf.impl.osgi.AggregatedNetconfOperationServiceFactory;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
-import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
-import org.opendaylight.controller.netconf.monitoring.osgi.NetconfMonitoringActivator;
-import org.opendaylight.controller.netconf.monitoring.osgi.NetconfMonitoringOperationService;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
-import org.slf4j.Logger;
 import org.w3c.dom.Document;
 
 public class NetconfITMonitoringTest extends AbstractNetconfConfigTest {
@@ -49,43 +43,9 @@ public class NetconfITMonitoringTest extends AbstractNetconfConfigTest {
     public static final InetSocketAddress TCP_ADDRESS = new InetSocketAddress(LOOPBACK_ADDRESS, PORT);
     public static final TestingCapability TESTING_CAPABILITY = new TestingCapability();
 
-    private NetconfMonitoringServiceImpl netconfMonitoringService;
-
-    @Override
-    protected void setUpTestInitial() {
-        netconfMonitoringService = new NetconfMonitoringServiceImpl(getNetconfOperationProvider());
-    }
-
-    @Override
-    protected SessionMonitoringService getNetconfMonitoringService() throws Exception {
-        return netconfMonitoringService;
-    }
-
-    @Override
-    protected Iterable<NetconfOperationServiceFactory> getAdditionalServiceFactories() {
-        return Collections.<NetconfOperationServiceFactory>singletonList(new NetconfMonitoringActivator.NetconfMonitoringOperationServiceFactory(
-                new NetconfMonitoringOperationService(netconfMonitoringService)));
-    }
-
     @Override
     protected InetSocketAddress getTcpServerAddress() {
         return TCP_ADDRESS;
-    }
-
-    static SessionMonitoringService getNetconfMonitoringListenerService(final Logger LOG, final NetconfMonitoringServiceImpl monitor) {
-        return new SessionMonitoringService() {
-            @Override
-            public void onSessionUp(final NetconfManagementSession session) {
-                LOG.debug("Management session up {}", session);
-                monitor.onSessionUp(session);
-            }
-
-            @Override
-            public void onSessionDown(final NetconfManagementSession session) {
-                LOG.debug("Management session down {}", session);
-                monitor.onSessionDown(session);
-            }
-        };
     }
 
     @Test
@@ -151,23 +111,24 @@ public class NetconfITMonitoringTest extends AbstractNetconfConfigTest {
         assertEquals("Incorrect number of session-id tags in " + XmlUtil.toString(document), i, elementSize);
     }
 
-    public static NetconfOperationProvider getNetconfOperationProvider() {
-        final NetconfOperationProvider factoriesListener = mock(NetconfOperationProvider.class);
-        final NetconfOperationServiceSnapshotImpl snap = mock(NetconfOperationServiceSnapshotImpl.class);
+    public static AggregatedNetconfOperationServiceFactory getNetconfOperationProvider() throws Exception {
+        final AggregatedNetconfOperationServiceFactory factoriesListener = mock(AggregatedNetconfOperationServiceFactory.class);
+        final NetconfOperationService snap = mock(NetconfOperationService.class);
         try {
             doNothing().when(snap).close();
         } catch (final Exception e) {
             // not happening
             throw new IllegalStateException(e);
         }
-        final NetconfOperationService service = mock(NetconfOperationService.class);
         final Set<Capability> caps = Sets.newHashSet();
         caps.add(TESTING_CAPABILITY);
 
-        doReturn(caps).when(service).getCapabilities();
-        final Set<NetconfOperationService> services = Sets.newHashSet(service);
-        doReturn(services).when(snap).getServices();
-        doReturn(snap).when(factoriesListener).openSnapshot(anyString());
+        doReturn(caps).when(factoriesListener).getCapabilities();
+        doReturn(snap).when(factoriesListener).createService(anyString());
+
+        AutoCloseable mock = mock(AutoCloseable.class);
+        doNothing().when(mock).close();
+        doReturn(mock).when(factoriesListener).registerCapabilityListener(any(CapabilityListener.class));
 
         return factoriesListener;
     }

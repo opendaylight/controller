@@ -7,52 +7,15 @@
 */
 package org.opendaylight.controller.netconf.monitoring.osgi;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Set;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
-import org.opendaylight.controller.netconf.mapping.api.Capability;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.monitoring.Get;
-import org.opendaylight.controller.netconf.monitoring.MonitoringConstants;
+import org.opendaylight.controller.netconf.monitoring.GetSchema;
 
 public class NetconfMonitoringOperationService implements NetconfOperationService {
-
-    private static final Set<Capability> CAPABILITIES = Sets.<Capability>newHashSet(new Capability() {
-
-        @Override
-        public String getCapabilityUri() {
-            return MonitoringConstants.URI;
-        }
-
-        @Override
-        public Optional<String> getModuleNamespace() {
-            return Optional.of(MonitoringConstants.NAMESPACE);
-        }
-
-        @Override
-        public Optional<String> getModuleName() {
-            return Optional.of(MonitoringConstants.MODULE_NAME);
-        }
-
-        @Override
-        public Optional<String> getRevision() {
-            return Optional.of(MonitoringConstants.MODULE_REVISION);
-        }
-
-        @Override
-        public Optional<String> getCapabilitySchema() {
-            return Optional.absent();
-        }
-
-        @Override
-        public Collection<String> getLocation() {
-            return Collections.emptyList();
-        }
-    });
 
     private final NetconfMonitoringService monitor;
 
@@ -61,13 +24,8 @@ public class NetconfMonitoringOperationService implements NetconfOperationServic
     }
 
     @Override
-    public Set<Capability> getCapabilities() {
-        return CAPABILITIES;
-    }
-
-    @Override
     public Set<NetconfOperation> getNetconfOperations() {
-        return Sets.<NetconfOperation>newHashSet(new Get(monitor));
+        return Sets.<NetconfOperation>newHashSet(new Get(monitor), new GetSchema(monitor));
     }
 
     @Override

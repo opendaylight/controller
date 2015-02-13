@@ -13,7 +13,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anySetOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import io.netty.channel.Channel;
@@ -47,6 +46,7 @@ import org.opendaylight.controller.config.yang.test.impl.MultipleDependenciesMod
 import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleFactory;
 import org.opendaylight.controller.config.yang.test.impl.TestImplModuleFactory;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
 import org.opendaylight.controller.netconf.client.SimpleNetconfClientSessionListener;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
@@ -57,13 +57,11 @@ import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProduce
 import org.opendaylight.controller.netconf.impl.NetconfServerDispatcherImpl;
 import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFactory;
 import org.opendaylight.controller.netconf.impl.SessionIdProvider;
+import org.opendaylight.controller.netconf.impl.osgi.AggregatedNetconfOperationServiceFactory;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfMonitoringServiceImpl;
-import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
-import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceSnapshotImpl;
-import org.opendaylight.controller.netconf.impl.osgi.SessionMonitoringService;
-import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
-import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
+import org.opendaylight.controller.netconf.monitoring.osgi.NetconfMonitoringActivator;
+import org.opendaylight.controller.netconf.monitoring.osgi.NetconfMonitoringOperationService;
 import org.opendaylight.controller.netconf.notifications.BaseNetconfNotificationListener;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.opendaylight.protocol.framework.NeverReconnectStrategy;
@@ -108,14 +106,16 @@ public abstract class AbstractNetconfConfigTest extends AbstractConfigTest {
 
         setUpTestInitial();
 
-        final NetconfOperationServiceFactoryListenerImpl factoriesListener = new NetconfOperationServiceFactoryListenerImpl();
+        final AggregatedNetconfOperationServiceFactory factoriesListener = new AggregatedNetconfOperationServiceFactory();
+        final NetconfMonitoringService netconfMonitoringService = getNetconfMonitoringService(factoriesListener);
         factoriesListener.onAddNetconfOperationServiceFactory(new NetconfOperationServiceFactoryImpl(getYangStore()));
+        factoriesListener.onAddNetconfOperationServiceFactory(new NetconfMonitoringActivator.NetconfMonitoringOperationServiceFactory(new NetconfMonitoringOperationService(netconfMonitoringService)));
 
-        for (final NetconfOperationServiceFactory netconfOperationServiceFactory : getAdditionalServiceFactories()) {
+        for (final NetconfOperationServiceFactory netconfOperationServiceFactory : getAdditionalServiceFactories(factoriesListener)) {
             factoriesListener.onAddNetconfOperationServiceFactory(netconfOperationServiceFactory);
         }
 
-        serverTcpChannel = startNetconfTcpServer(factoriesListener);
+        serverTcpChannel = startNetconfTcpServer(factoriesListener, netconfMonitoringService);
         clientDispatcher = new NetconfClientDispatcherImpl(getNettyThreadgroup(), getNettyThreadgroup(), getHashedWheelTimer());
     }
 
@@ -137,8 +137,8 @@ public abstract class AbstractNetconfConfigTest extends AbstractConfigTest {
         return get;
     }
 
-    private Channel startNetconfTcpServer(final NetconfOperationServiceFactoryListenerImpl factoriesListener) throws Exception {
-        final NetconfServerDispatcherImpl dispatch = createDispatcher(factoriesListener, getNetconfMonitoringService(), getNotificationProducer());
+    private Channel startNetconfTcpServer(final AggregatedNetconfOperationServiceFactory listener, final NetconfMonitoringService monitoring) throws Exception {
+        final NetconfServerDispatcherImpl dispatch = createDispatcher(listener, monitoring, getNotificationProducer());
 
         final ChannelFuture s;
         if(getTcpServerAddress() instanceof LocalAddress) {
@@ -157,16 +157,12 @@ public abstract class AbstractNetconfConfigTest extends AbstractConfigTest {
         return notificationProducer;
     }
 
-    protected Iterable<NetconfOperationServiceFactory> getAdditionalServiceFactories() {
+    protected Iterable<NetconfOperationServiceFactory> getAdditionalServiceFactories(final AggregatedNetconfOperationServiceFactory factoriesListener) throws Exception {
         return Collections.emptySet();
     }
 
-    protected SessionMonitoringService getNetconfMonitoringService() throws Exception {
-        final NetconfOperationProvider netconfOperationProvider = mock(NetconfOperationProvider.class);
-        final NetconfOperationServiceSnapshotImpl snap = mock(NetconfOperationServiceSnapshotImpl.class);
-        doReturn(Collections.<NetconfOperationService>emptySet()).when(snap).getServices();
-        doReturn(snap).when(netconfOperationProvider).openSnapshot(anyString());
-        return new NetconfMonitoringServiceImpl(netconfOperationProvider);
+    protected NetconfMonitoringService getNetconfMonitoringService(final AggregatedNetconfOperationServiceFactory factoriesListener) throws Exception {
+        return new NetconfMonitoringServiceImpl(factoriesListener);
     }
 
     protected abstract SocketAddress getTcpServerAddress();
@@ -206,7 +202,7 @@ public abstract class AbstractNetconfConfigTest extends AbstractConfigTest {
     }
 
     protected NetconfServerDispatcherImpl createDispatcher(
-            final NetconfOperationServiceFactoryListenerImpl factoriesListener, final SessionMonitoringService sessionMonitoringService,
+            final AggregatedNetconfOperationServiceFactory factoriesListener, final NetconfMonitoringService sessionMonitoringService,
             final DefaultCommitNotificationProducer commitNotifier) {
         final SessionIdProvider idProvider = new SessionIdProvider();
 

@@ -1,13 +1,13 @@
 package org.opendaylight.controller.config.yang.config.netconf.northbound.impl;
 
 import org.opendaylight.controller.config.api.JmxAttributeValidationException;
+import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.impl.CommitNotifier;
 import org.opendaylight.controller.netconf.impl.NetconfServerDispatcherImpl;
 import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFactory;
 import org.opendaylight.controller.netconf.impl.SessionIdProvider;
+import org.opendaylight.controller.netconf.impl.osgi.AggregatedNetconfOperationServiceFactory;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfMonitoringServiceImpl;
-import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
-import org.opendaylight.controller.netconf.impl.osgi.SessionMonitoringService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
 
 public class NetconfServerDispatcherModule extends org.opendaylight.controller.config.yang.config.netconf.northbound.impl.AbstractNetconfServerDispatcherModule {
@@ -27,8 +27,8 @@ public class NetconfServerDispatcherModule extends org.opendaylight.controller.c
     @Override
     public java.lang.AutoCloseable createInstance() {
 
-        final NetconfOperationServiceFactoryListenerImpl aggregatedOpProvider = getAggregatedOpProvider();
-        final SessionMonitoringService monitoringService = startMonitoringService(aggregatedOpProvider);
+        final AggregatedNetconfOperationServiceFactory aggregatedOpProvider = getAggregatedOpProvider();
+        final NetconfMonitoringService monitoringService = startMonitoringService(aggregatedOpProvider);
         final NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new NetconfServerSessionNegotiatorFactory(
                 getTimerDependency(), aggregatedOpProvider, new SessionIdProvider(), getConnectionTimeoutMillis(), CommitNotifier.NoopCommitNotifier.getInstance(), monitoringService);
         final NetconfServerDispatcherImpl.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcherImpl.ServerChannelInitializer(
@@ -44,12 +44,12 @@ public class NetconfServerDispatcherModule extends org.opendaylight.controller.c
 
     }
 
-    private NetconfMonitoringServiceImpl startMonitoringService(final NetconfOperationServiceFactoryListenerImpl netconfOperationProvider) {
+    private NetconfMonitoringServiceImpl startMonitoringService(final AggregatedNetconfOperationServiceFactory netconfOperationProvider) {
         return new NetconfMonitoringServiceImpl(netconfOperationProvider);
     }
 
-    private NetconfOperationServiceFactoryListenerImpl getAggregatedOpProvider() {
-        final NetconfOperationServiceFactoryListenerImpl netconfOperationProvider = new NetconfOperationServiceFactoryListenerImpl();
+    private AggregatedNetconfOperationServiceFactory getAggregatedOpProvider() {
+        final AggregatedNetconfOperationServiceFactory netconfOperationProvider = new AggregatedNetconfOperationServiceFactory();
         for (final NetconfOperationServiceFactory netconfOperationServiceFactory : getMappersDependency()) {
             netconfOperationProvider.onAddNetconfOperationServiceFactory(netconfOperationServiceFactory);
         }

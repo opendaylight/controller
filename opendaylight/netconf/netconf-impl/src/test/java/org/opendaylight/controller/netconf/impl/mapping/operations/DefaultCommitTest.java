@@ -22,9 +22,9 @@ import com.google.common.collect.Sets;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.NetconfServerSession;
-import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
@@ -38,7 +38,7 @@ public class DefaultCommitTest {
     private Document requestMessage;
     private NetconfOperationRouter router;
     private DefaultCommitNotificationProducer notifier;
-    private CapabilityProvider cap;
+    private NetconfMonitoringService cap;
     private DefaultCommit commit;
 
     @Before
@@ -49,7 +49,7 @@ public class DefaultCommitTest {
         doReturn(false).when(operation).isExecutionTermination();
         notifier = mock(DefaultCommitNotificationProducer.class);
         doNothing().when(notifier).sendCommitNotification(anyString(), any(Element.class), anySetOf(String.class));
-        cap = mock(CapabilityProvider.class);
+        cap = mock(NetconfMonitoringService.class);
         doReturn(Sets.newHashSet()).when(cap).getCapabilities();
         Document rpcData = XmlFileLoader.xmlFileToDocument("netconfMessages/editConfig_expectedResult.xml");
         doReturn(rpcData).when(router).onNetconfMessage(any(Document.class), any(NetconfServerSession.class));
