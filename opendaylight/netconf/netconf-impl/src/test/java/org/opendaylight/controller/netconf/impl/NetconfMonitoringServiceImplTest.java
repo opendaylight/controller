@@ -30,7 +30,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfManagementSession;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfMonitoringServiceImpl;
-import org.opendaylight.controller.netconf.mapping.api.Capability;
+import org.opendaylight.controller.netconf.api.Capability;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceSnapshot;

@@ -25,6 +25,7 @@ public class NetconfMonitoringServiceTracker extends ServiceTracker<NetconfMonit
     private static final Logger LOG = LoggerFactory.getLogger(NetconfMonitoringServiceTracker.class);
 
     private ServiceRegistration<NetconfOperationServiceFactory> reg;
+    private NetconfMonitoringActivator.NetconfMonitoringOperationServiceFactory factory;
 
     NetconfMonitoringServiceTracker(final BundleContext context) {
         super(context, NetconfMonitoringService.class, null);
@@ -38,7 +39,7 @@ public class NetconfMonitoringServiceTracker extends ServiceTracker<NetconfMonit
 
         final NetconfMonitoringOperationService operationService = new NetconfMonitoringOperationService(
                 netconfMonitoringService);
-        final NetconfOperationServiceFactory factory = new NetconfMonitoringActivator.NetconfMonitoringOperationServiceFactory(
+        factory = new NetconfMonitoringActivator.NetconfMonitoringOperationServiceFactory(
                 operationService);
 
         Dictionary<String, String> properties = new Hashtable<>();
@@ -57,6 +58,9 @@ public class NetconfMonitoringServiceTracker extends ServiceTracker<NetconfMonit
             } catch (final Exception e) {
                 LOG.warn("Ignoring exception while unregistering {}", reg, e);
             }
+        }
+        if(factory!=null) {
+            factory.close();
         }
     }
 

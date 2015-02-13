@@ -59,7 +59,7 @@ import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguratio
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfigurationBuilder;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
 import org.opendaylight.controller.netconf.impl.osgi.SessionMonitoringService;
-import org.opendaylight.controller.netconf.mapping.api.Capability;
+import org.opendaylight.controller.netconf.api.Capability;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;

@@ -59,7 +59,7 @@ import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFa
 import org.opendaylight.controller.netconf.impl.SessionIdProvider;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfMonitoringServiceImpl;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
-import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceSnapshotImpl;
+import org.opendaylight.controller.netconf.impl.osgi.AggregatedNetconfOperationServiceFactory;
 import org.opendaylight.controller.netconf.impl.osgi.SessionMonitoringService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
@@ -163,7 +163,7 @@ public abstract class AbstractNetconfConfigTest extends AbstractConfigTest {
 
     protected SessionMonitoringService getNetconfMonitoringService() throws Exception {
         final NetconfOperationProvider netconfOperationProvider = mock(NetconfOperationProvider.class);
-        final NetconfOperationServiceSnapshotImpl snap = mock(NetconfOperationServiceSnapshotImpl.class);
+        final AggregatedNetconfOperationServiceFactory snap = mock(AggregatedNetconfOperationServiceFactory.class);
         doReturn(Collections.<NetconfOperationService>emptySet()).when(snap).getServices();
         doReturn(snap).when(netconfOperationProvider).openSnapshot(anyString());
         return new NetconfMonitoringServiceImpl(netconfOperationProvider);

@@ -16,7 +16,7 @@ import java.util.Set;
 import org.opendaylight.controller.config.util.ConfigRegistryJMXClient;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
 import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
-import org.opendaylight.controller.netconf.mapping.api.Capability;
+import org.opendaylight.controller.netconf.api.Capability;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.yangtools.yang.model.api.Module;

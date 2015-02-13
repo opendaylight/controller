@@ -7,12 +7,19 @@
  */
 package org.opendaylight.controller.netconf.api.monitoring;
 
+import com.google.common.base.Optional;
+import java.util.Set;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.Schemas;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.Sessions;
 
-public interface NetconfMonitoringService {
+public interface NetconfMonitoringService extends CapabilityListener, SessionListener {
 
     Sessions getSessions();
 
     Schemas getSchemas();
+
+    String getSchemaForCapability(String moduleName, Optional<String> revision);
+
+    Set<String> getCapabilities();
+
 }
