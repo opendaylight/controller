@@ -31,7 +31,6 @@ import org.opendaylight.controller.cluster.raft.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
-import org.opendaylight.controller.cluster.raft.base.messages.InitiateInstallSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.IsolatedLeaderCheck;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
@@ -359,23 +358,23 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
             assertTrue(raftBehavior instanceof Leader);
 
-            // we might receive some heartbeat messages, so wait till we InitiateInstallSnapshot
+            // we might receive some heartbeat messages, so wait till we get CaptureSnapshot
             Boolean[] matches = new ReceiveWhile<Boolean>(Boolean.class, duration("2 seconds")) {
                 @Override
                 protected Boolean match(Object o) throws Exception {
-                    if (o instanceof InitiateInstallSnapshot) {
+                    if (o instanceof CaptureSnapshot) {
                         return true;
                     }
                     return false;
                 }
             }.get();
 
-            boolean initiateInitiateInstallSnapshot = false;
+            boolean captureSnapshot = false;
             for (Boolean b: matches) {
-                initiateInitiateInstallSnapshot = b | initiateInitiateInstallSnapshot;
+                captureSnapshot = b | captureSnapshot;
             }
 
-            assertTrue(initiateInitiateInstallSnapshot);
+            assertTrue(captureSnapshot);
         }};
     }
 
@@ -388,12 +387,9 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
             ActorRef followerActor = getTestActor();
 
             Map<String, String> peerAddresses = new HashMap<>();
-            peerAddresses.put(followerActor.path().toString(),
-                followerActor.path().toString());
+            peerAddresses.put(followerActor.path().toString(), followerActor.path().toString());
 
-
-            MockRaftActorContext actorContext =
-                (MockRaftActorContext) createActorContext(leaderActor);
+            MockRaftActorContext actorContext = (MockRaftActorContext) createActorContext(leaderActor);
             actorContext.setPeerAddresses(peerAddresses);
 
             Map<String, String> leadersSnapshot = new HashMap<>();
@@ -421,15 +417,16 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
             leader.setSnapshot(Optional.<ByteString>absent());
 
             // new entry
-            ReplicatedLogImplEntry entry =
-                new ReplicatedLogImplEntry(newEntryIndex, currentTerm,
+            ReplicatedLogImplEntry entry = new ReplicatedLogImplEntry(newEntryIndex, currentTerm,
                     new MockRaftActorContext.MockPayload("D"));
 
             actorContext.getReplicatedLog().append(entry);
 
-            // this should invoke a sendinstallsnapshot as followersLastIndex < snapshotIndex
+            //update follower timestamp
+            leader.markFollowerActive(followerActor.path().toString());
+
             RaftActorBehavior raftBehavior = leader.handleMessage(
-                leaderActor, new InitiateInstallSnapshot());
+                    senderActor, new Replicate(null, "state-id", entry));
 
             CaptureSnapshot cs = MessageCollectorActor.
                 getFirstMatching(leaderActor, CaptureSnapshot.class);
@@ -443,7 +440,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
             assertEquals(2, cs.getLastTerm());
 
             // if an initiate is started again when first is in progress, it shouldnt initiate Capture
-            raftBehavior = leader.handleMessage(leaderActor, new InitiateInstallSnapshot());
+            leader.handleMessage(senderActor, new Replicate(null, "state-id", entry));
             List<Object> captureSnapshots = MessageCollectorActor.getAllMatching(leaderActor, CaptureSnapshot.class);
             assertEquals("CaptureSnapshot should not get invoked when  initiate is in progress", 1, captureSnapshots.size());
 
