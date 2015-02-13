@@ -34,14 +34,14 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
+import org.opendaylight.controller.netconf.api.Capability;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.jmx.CommitJMXNotification;
 import org.opendaylight.controller.netconf.client.TestingNetconfClient;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
+import org.opendaylight.controller.netconf.impl.osgi.AggregatedNetconfOperationServiceFactory;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfMonitoringServiceImpl;
-import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceSnapshotImpl;
 import org.opendaylight.controller.netconf.impl.osgi.SessionMonitoringService;
-import org.opendaylight.controller.netconf.mapping.api.Capability;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
@@ -146,7 +146,7 @@ public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
 
     public NetconfOperationProvider getNetconfOperationProvider() {
         final NetconfOperationProvider factoriesListener = mock(NetconfOperationProvider.class);
-        final NetconfOperationServiceSnapshotImpl snap = mock(NetconfOperationServiceSnapshotImpl.class);
+        final AggregatedNetconfOperationServiceFactory snap = mock(AggregatedNetconfOperationServiceFactory.class);
         final NetconfOperationService service = mock(NetconfOperationService.class);
         final Set<Capability> caps = Sets.newHashSet();
         doReturn(caps).when(service).getCapabilities();

@@ -15,10 +15,10 @@ import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSessionListener;
 import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
+import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultCloseSession;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouter;
-import org.opendaylight.controller.netconf.impl.osgi.SessionMonitoringService;
 import org.opendaylight.controller.netconf.util.messages.SendErrorExceptionUtil;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -31,11 +31,11 @@ import org.w3c.dom.Node;
 public class NetconfServerSessionListener implements NetconfSessionListener<NetconfServerSession> {
 
     private static final Logger LOG = LoggerFactory.getLogger(NetconfServerSessionListener.class);
-    private final SessionMonitoringService monitoringService;
+    private final NetconfMonitoringService monitoringService;
     private final NetconfOperationRouter operationRouter;
     private final AutoCloseable onSessionDownCloseable;
 
-    public NetconfServerSessionListener(final NetconfOperationRouter operationRouter, final SessionMonitoringService monitoringService,
+    public NetconfServerSessionListener(final NetconfOperationRouter operationRouter, NetconfMonitoringService monitoringService,
                                         final AutoCloseable onSessionDownCloseable) {
         this.operationRouter = operationRouter;
         this.monitoringService = monitoringService;

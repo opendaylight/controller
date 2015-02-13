@@ -17,12 +17,11 @@ import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.impl.CommitNotifier;
 import org.opendaylight.controller.netconf.impl.NetconfServerSession;
-import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
 import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultCloseSession;
 import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultCommit;
-import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultGetSchema;
 import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultNetconfOperation;
 import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultStartExi;
 import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultStopExi;
@@ -30,7 +29,6 @@ import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
-import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceSnapshot;
 import org.opendaylight.controller.netconf.mapping.api.SessionAwareNetconfOperation;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
@@ -40,29 +38,20 @@ import org.w3c.dom.Document;
 public class NetconfOperationRouterImpl implements NetconfOperationRouter {
 
     private static final Logger LOG = LoggerFactory.getLogger(NetconfOperationRouterImpl.class);
-    private final NetconfOperationServiceSnapshot netconfOperationServiceSnapshot;
+    private final NetconfOperationService netconfOperationServiceSnapshot;
     private final Collection<NetconfOperation> allNetconfOperations;
 
-    public NetconfOperationRouterImpl(final NetconfOperationServiceSnapshot netconfOperationServiceSnapshot, final CapabilityProvider capabilityProvider,
-            final CommitNotifier commitNotifier) {
+    public NetconfOperationRouterImpl(final NetconfOperationService netconfOperationServiceSnapshot,
+                                      final CommitNotifier commitNotifier, final NetconfMonitoringService netconfMonitoringService, final String sessionId) {
         this.netconfOperationServiceSnapshot = Preconditions.checkNotNull(netconfOperationServiceSnapshot);
 
-        final String sessionId = netconfOperationServiceSnapshot.getNetconfSessionIdForReporting();
-
         final Set<NetconfOperation> ops = new HashSet<>();
-        ops.add(new DefaultGetSchema(capabilityProvider, sessionId));
         ops.add(new DefaultCloseSession(sessionId, this));
         ops.add(new DefaultStartExi(sessionId));
         ops.add(new DefaultStopExi(sessionId));
-        ops.add(new DefaultCommit(commitNotifier, capabilityProvider, sessionId, this));
+        ops.add(new DefaultCommit(commitNotifier, netconfMonitoringService, sessionId, this));
 
-        for (NetconfOperationService netconfOperationService : netconfOperationServiceSnapshot.getServices()) {
-            for (NetconfOperation netconfOperation : netconfOperationService.getNetconfOperations()) {
-                Preconditions.checkState(!ops.contains(netconfOperation),
-                        "Netconf operation %s already present", netconfOperation);
-                ops.add(netconfOperation);
-            }
-        }
+        ops.addAll(netconfOperationServiceSnapshot.getNetconfOperations());
 
         allNetconfOperations = ImmutableSet.copyOf(ops);
     }

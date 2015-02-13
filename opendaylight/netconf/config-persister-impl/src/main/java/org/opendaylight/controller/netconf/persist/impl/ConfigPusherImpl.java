@@ -33,10 +33,10 @@ import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.persist.api.ConfigPusher;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
+import org.opendaylight.controller.netconf.api.Capability;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
-import org.opendaylight.controller.netconf.mapping.api.Capability;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
@@ -177,20 +177,20 @@ public class ConfigPusherImpl implements ConfigPusher {
         } catch(RuntimeException e) {
             throw new NotEnoughCapabilitiesException("Netconf service not stable for " + idForReporting, e);
         }
-        Set<String> notFoundDiff = computeNotFoundCapabilities(expectedCapabilities, serviceCandidate);
+        Set<String> notFoundDiff = computeNotFoundCapabilities(expectedCapabilities, configNetconfConnector);
         if (notFoundDiff.isEmpty()) {
             return serviceCandidate;
         } else {
             serviceCandidate.close();
             LOG.trace("Netconf server did not provide required capabilities for {} ", idForReporting,
                     "Expected but not found: {}, all expected {}, current {}",
-                     notFoundDiff, expectedCapabilities, serviceCandidate.getCapabilities()
+                     notFoundDiff, expectedCapabilities, configNetconfConnector.getCapabilities()
             );
             throw new NotEnoughCapabilitiesException("Not enough capabilities for " + idForReporting + ". Expected but not found: " + notFoundDiff);
         }
     }
 
-    private static Set<String> computeNotFoundCapabilities(Set<String> expectedCapabilities, NetconfOperationService serviceCandidate) {
+    private static Set<String> computeNotFoundCapabilities(Set<String> expectedCapabilities, NetconfOperationServiceFactory serviceCandidate) {
         Collection<String> actual = Collections2.transform(serviceCandidate.getCapabilities(), new Function<Capability, String>() {
             @Override
             public String apply(@Nonnull final Capability input) {
