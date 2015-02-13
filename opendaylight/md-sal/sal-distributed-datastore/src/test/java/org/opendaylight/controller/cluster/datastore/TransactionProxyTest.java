@@ -1345,15 +1345,15 @@ public class TransactionProxyTest {
 
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, READ_WRITE);
 
-        long start = System.currentTimeMillis();
+        long start = System.nanoTime();
 
         operation.run(transactionProxy);
 
-        long end = System.currentTimeMillis();
+        long end = System.nanoTime();
 
         Assert.assertTrue(String.format("took less time than expected %s was %s",
-                mockActorContext.getDatastoreContext().getOperationTimeoutInSeconds()*1000,
-                (end-start)), (end - start) > mockActorContext.getDatastoreContext().getOperationTimeoutInSeconds()*1000);
+                TimeUnit.SECONDS.toNanos(mockActorContext.getDatastoreContext().getOperationTimeoutInSeconds()),
+                (end-start)), (end - start) > TimeUnit.SECONDS.toNanos(mockActorContext.getDatastoreContext().getOperationTimeoutInSeconds()));
 
     }
 
@@ -1392,15 +1392,15 @@ public class TransactionProxyTest {
 
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, READ_WRITE);
 
-        long start = System.currentTimeMillis();
+        long start = System.nanoTime();
 
         operation.run(transactionProxy);
 
-        long end = System.currentTimeMillis();
+        long end = System.nanoTime();
 
         Assert.assertTrue(String.format("took more time than expected %s was %s",
-                mockActorContext.getDatastoreContext().getOperationTimeoutInSeconds()*1000,
-                (end-start)), (end - start) <= mockActorContext.getDatastoreContext().getOperationTimeoutInSeconds()*1000);
+                TimeUnit.SECONDS.toNanos(mockActorContext.getDatastoreContext().getOperationTimeoutInSeconds()),
+                (end-start)), (end - start) <= TimeUnit.SECONDS.toNanos(mockActorContext.getDatastoreContext().getOperationTimeoutInSeconds()));
     }
 
     public void testWriteThrottling(boolean shardFound){
