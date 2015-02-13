@@ -34,7 +34,6 @@ import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
-import org.opendaylight.controller.cluster.raft.base.messages.InitiateInstallSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapshot;
@@ -309,9 +308,6 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 sendHeartBeat();
                 return this;
 
-            } else if(message instanceof InitiateInstallSnapshot) {
-                installSnapshotIfNeeded();
-
             } else if(message instanceof SendInstallSnapshot) {
                 // received from RaftActor
                 setSnapshot(Optional.of(((SendInstallSnapshot) message).getSnapshot()));
@@ -488,11 +484,12 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                             followerNextIndex, leaderSnapShotIndex, leaderLastIndex
                         );
                     }
-                    actor().tell(new InitiateInstallSnapshot(), actor());
 
                     // Send heartbeat to follower whenever install snapshot is initiated.
                     sendAppendEntriesToFollower(followerActor, followerLogInformation.getNextIndex(),
                             Collections.<ReplicatedLogEntry>emptyList(), followerId);
+
+                    installSnapshotIfNeeded();
 
                 } else if(sendHeartbeat) {
                     //we send an AppendEntries, even if the follower is inactive

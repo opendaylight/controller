@@ -60,7 +60,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
-import org.opendaylight.controller.cluster.raft.base.messages.InitiateInstallSnapshot;
+import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.behaviors.Follower;
 import org.opendaylight.controller.cluster.raft.behaviors.Leader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
@@ -1162,7 +1162,8 @@ public class RaftActorTest extends AbstractActorTest {
                 assertEquals(5, leaderActor.getReplicatedLog().size());
 
                 // simulate a real snapshot
-                leaderActor.onReceiveCommand(new InitiateInstallSnapshot());
+                //leaderActor.onReceiveCommand(new InitiateInstallSnapshot());
+                leaderActor.onReceiveCommand(new SendHeartBeat());
                 assertEquals(5, leaderActor.getReplicatedLog().size());
                 assertEquals(String.format("expected to be Leader but was %s. Current Leader = %s ",
                         leaderActor.getCurrentBehavior().state(), leaderActor.getLeaderId())
