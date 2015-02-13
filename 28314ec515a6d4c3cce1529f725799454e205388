@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "7a96c907_6ba5c6a0",
+        "filename": "opendaylight/md-sal/messagebus-api/src/main/yang/event-source.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-02-13T13:34:36Z",
+      "side": 1,
+      "message": "Could we have another message / rpc which will notify event source about topic destruction.",
+      "range": {
+        "startLine": 28,
+        "startChar": 4,
+        "endLine": 28,
+        "endChar": 20
+      },
+      "revId": "28314ec515a6d4c3cce1529f725799454e205388",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_b486d8d9",
         "filename": "opendaylight/md-sal/messagebus-api/src/main/yang/event-source.yang",
         "patchSetId": 1
