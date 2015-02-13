@@ -13,6 +13,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import com.google.common.base.Preconditions;
@@ -48,8 +49,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.opendaylight.controller.netconf.api.Capability;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.opendaylight.controller.netconf.api.monitoring.CapabilityListener;
+import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
@@ -57,9 +61,7 @@ import org.opendaylight.controller.netconf.client.SimpleNetconfClientSessionList
 import org.opendaylight.controller.netconf.client.TestingNetconfClient;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfigurationBuilder;
-import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
-import org.opendaylight.controller.netconf.impl.osgi.SessionMonitoringService;
-import org.opendaylight.controller.netconf.mapping.api.Capability;
+import org.opendaylight.controller.netconf.impl.osgi.AggregatedNetconfOperationServiceFactory;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
@@ -115,10 +117,11 @@ public class ConcurrentClientsTest {
     HashedWheelTimer hashedWheelTimer;
     private TestingNetconfOperation testingNetconfOperation;
 
-    public static SessionMonitoringService createMockedMonitoringService() {
-        SessionMonitoringService monitoring = mock(SessionMonitoringService.class);
+    public static NetconfMonitoringService createMockedMonitoringService() {
+        NetconfMonitoringService monitoring = mock(NetconfMonitoringService.class);
         doNothing().when(monitoring).onSessionUp(any(NetconfServerSession.class));
         doNothing().when(monitoring).onSessionDown(any(NetconfServerSession.class));
+        doReturn(Collections.emptySet()).when(monitoring).getCapabilities();
         return monitoring;
     }
 
@@ -143,7 +146,7 @@ public class ConcurrentClientsTest {
         nettyGroup = new NioEventLoopGroup(nettyThreads);
         netconfClientDispatcher = new NetconfClientDispatcherImpl(nettyGroup, nettyGroup, hashedWheelTimer);
 
-        NetconfOperationServiceFactoryListenerImpl factoriesListener = new NetconfOperationServiceFactoryListenerImpl();
+        AggregatedNetconfOperationServiceFactory factoriesListener = new AggregatedNetconfOperationServiceFactory();
 
         testingNetconfOperation = new TestingNetconfOperation();
         factoriesListener.onAddNetconfOperationServiceFactory(new TestingOperationServiceFactory(testingNetconfOperation));
@@ -260,12 +263,21 @@ public class ConcurrentClientsTest {
         }
 
         @Override
+        public Set<Capability> getCapabilities() {
+            return Collections.emptySet();
+        }
+
+        @Override
+        public AutoCloseable registerCapabilityListener(final CapabilityListener listener) {
+            return new AutoCloseable(){
+                @Override
+                public void close() throws Exception {}
+            };
+        }
+
+        @Override
         public NetconfOperationService createService(String netconfSessionIdForReporting) {
             return new NetconfOperationService() {
-                @Override
-                public Set<Capability> getCapabilities() {
-                    return Collections.emptySet();
-                }
 
                 @Override
                 public Set<NetconfOperation> getNetconfOperations() {

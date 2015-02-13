@@ -12,7 +12,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.util.Arrays;
@@ -44,11 +43,11 @@ public class NetconfImplActivatorTest {
         doReturn(filter).when(bundle).createFilter(anyString());
         doNothing().when(bundle).addServiceListener(any(ServiceListener.class), anyString());
 
-        ServiceReference<?>[] refs = new ServiceReference[0];
+        ServiceReference<?>[] refs = {};
         doReturn(refs).when(bundle).getServiceReferences(anyString(), anyString());
         doReturn(Arrays.asList(refs)).when(bundle).getServiceReferences(any(Class.class), anyString());
         doReturn("").when(bundle).getProperty(anyString());
-        doReturn(registration).when(bundle).registerService(any(Class.class), any(NetconfOperationServiceFactoryListenerImpl.class), any(Dictionary.class));
+        doReturn(registration).when(bundle).registerService(any(Class.class), any(AggregatedNetconfOperationServiceFactory.class), any(Dictionary.class));
         doNothing().when(registration).unregister();
         doNothing().when(bundle).removeServiceListener(any(ServiceListener.class));
     }
@@ -57,7 +56,7 @@ public class NetconfImplActivatorTest {
     public void testStart() throws Exception {
         NetconfImplActivator activator = new NetconfImplActivator();
         activator.start(bundle);
-        verify(bundle, times(2)).registerService(any(Class.class), any(NetconfOperationServiceFactoryListenerImpl.class), any(Dictionary.class));
+        verify(bundle).registerService(any(Class.class), any(AggregatedNetconfOperationServiceFactory.class), any(Dictionary.class));
         activator.stop(bundle);
     }
 }

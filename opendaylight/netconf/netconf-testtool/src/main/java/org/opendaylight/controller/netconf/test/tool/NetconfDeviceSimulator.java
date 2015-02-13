@@ -55,19 +55,20 @@ import org.apache.sshd.common.util.ThreadUtils;
 import org.apache.sshd.server.PasswordAuthenticator;
 import org.apache.sshd.server.keyprovider.PEMGeneratorHostKeyProvider;
 import org.apache.sshd.server.session.ServerSession;
-import org.opendaylight.controller.netconf.api.monitoring.NetconfManagementSession;
+import org.opendaylight.controller.netconf.api.Capability;
+import org.opendaylight.controller.netconf.api.monitoring.CapabilityListener;
+import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.NetconfServerDispatcherImpl;
 import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFactory;
 import org.opendaylight.controller.netconf.impl.SessionIdProvider;
+import org.opendaylight.controller.netconf.impl.osgi.AggregatedNetconfOperationServiceFactory;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfMonitoringServiceImpl;
-import org.opendaylight.controller.netconf.impl.osgi.SessionMonitoringService;
-import org.opendaylight.controller.netconf.mapping.api.Capability;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
-import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
-import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceSnapshot;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
+import org.opendaylight.controller.netconf.monitoring.osgi.NetconfMonitoringActivator;
 import org.opendaylight.controller.netconf.monitoring.osgi.NetconfMonitoringOperationService;
 import org.opendaylight.controller.netconf.ssh.SshProxyServer;
 import org.opendaylight.controller.netconf.ssh.SshProxyServerConfiguration;
@@ -141,9 +142,15 @@ public class NetconfDeviceSimulator implements Closeable {
 
         final SessionIdProvider idProvider = new SessionIdProvider();
 
+
+        final AggregatedNetconfOperationServiceFactory aggregatedNetconfOperationServiceFactory = new AggregatedNetconfOperationServiceFactory();
         final SimulatedOperationProvider simulatedOperationProvider = new SimulatedOperationProvider(idProvider, capabilities, notificationsFile);
-        final NetconfMonitoringOperationService monitoringService = new NetconfMonitoringOperationService(new NetconfMonitoringServiceImpl(simulatedOperationProvider));
-        simulatedOperationProvider.addService(monitoringService);
+
+        final NetconfMonitoringService monitoringService1 = new NetconfMonitoringServiceImpl(aggregatedNetconfOperationServiceFactory);
+        final NetconfMonitoringActivator.NetconfMonitoringOperationServiceFactory monitoringService =
+                new NetconfMonitoringActivator.NetconfMonitoringOperationServiceFactory(new NetconfMonitoringOperationService(monitoringService1));
+        aggregatedNetconfOperationServiceFactory.onAddNetconfOperationServiceFactory(simulatedOperationProvider);
+        aggregatedNetconfOperationServiceFactory.onAddNetconfOperationServiceFactory(monitoringService);
 
         final DefaultCommitNotificationProducer commitNotifier = new DefaultCommitNotificationProducer(ManagementFactory.getPlatformMBeanServer());
 
@@ -152,7 +159,7 @@ public class NetconfDeviceSimulator implements Closeable {
                 : Sets.newHashSet(XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_BASE_1_0, XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_BASE_1_1);
 
         final NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new NetconfServerSessionNegotiatorFactory(
-                hashedWheelTimer, simulatedOperationProvider, idProvider, generateConfigsTimeout, commitNotifier, new LoggingMonitoringService(), serverCapabilities);
+                hashedWheelTimer, aggregatedNetconfOperationServiceFactory, idProvider, generateConfigsTimeout, commitNotifier, monitoringService1, serverCapabilities);
 
         final NetconfServerDispatcherImpl.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcherImpl.ServerChannelInitializer(
                 serverNegotiatorFactory);
@@ -396,63 +403,41 @@ public class NetconfDeviceSimulator implements Closeable {
         // close Everything
     }
 
-    private static class SimulatedOperationProvider implements NetconfOperationProvider {
-        private final SessionIdProvider idProvider;
-        private final Set<NetconfOperationService> netconfOperationServices;
+    private static class SimulatedOperationProvider implements NetconfOperationServiceFactory {
+        private final Set<Capability> caps;
+        private final SimulatedOperationService simulatedOperationService;
 
 
         public SimulatedOperationProvider(final SessionIdProvider idProvider, final Set<Capability> caps, final Optional<File> notificationsFile) {
-            this.idProvider = idProvider;
-            final SimulatedOperationService simulatedOperationService = new SimulatedOperationService(caps, idProvider.getCurrentSessionId(), notificationsFile);
-            this.netconfOperationServices = Sets.<NetconfOperationService>newHashSet(simulatedOperationService);
+            this.caps = caps;
+            simulatedOperationService = new SimulatedOperationService(idProvider.getCurrentSessionId(), notificationsFile);
         }
 
         @Override
-        public NetconfOperationServiceSnapshot openSnapshot(final String sessionIdForReporting) {
-            return new SimulatedServiceSnapshot(idProvider, netconfOperationServices);
+        public Set<Capability> getCapabilities() {
+            return caps;
         }
 
-        public void addService(final NetconfOperationService monitoringService) {
-            netconfOperationServices.add(monitoringService);
+        @Override
+        public AutoCloseable registerCapabilityListener(final CapabilityListener listener) {
+            return new AutoCloseable() {
+                @Override
+                public void close() throws Exception {}
+            };
         }
 
-        private static class SimulatedServiceSnapshot implements NetconfOperationServiceSnapshot {
-            private final SessionIdProvider idProvider;
-            private final Set<NetconfOperationService> netconfOperationServices;
-
-            public SimulatedServiceSnapshot(final SessionIdProvider idProvider, final Set<NetconfOperationService> netconfOperationServices) {
-                this.idProvider = idProvider;
-                this.netconfOperationServices = netconfOperationServices;
-            }
-
-            @Override
-            public String getNetconfSessionIdForReporting() {
-                return String.valueOf(idProvider.getCurrentSessionId());
-            }
-
-            @Override
-            public Set<NetconfOperationService> getServices() {
-                return netconfOperationServices;
-            }
-
-            @Override
-            public void close() throws Exception {}
+        @Override
+        public NetconfOperationService createService(final String netconfSessionIdForReporting) {
+            return simulatedOperationService;
         }
 
         static class SimulatedOperationService implements NetconfOperationService {
-            private final Set<Capability> capabilities;
             private final long currentSessionId;
             private final Optional<File> notificationsFile;
 
-            public SimulatedOperationService(final Set<Capability> capabilities, final long currentSessionId, final Optional<File> notificationsFile) {
-                this.capabilities = capabilities;
+            public SimulatedOperationService(final long currentSessionId, final Optional<File> notificationsFile) {
                 this.currentSessionId = currentSessionId;
                 this.notificationsFile = notificationsFile;
-            }
-
-            @Override
-            public Set<Capability> getCapabilities() {
-                return capabilities;
             }
 
             @Override
@@ -472,18 +457,6 @@ public class NetconfDeviceSimulator implements Closeable {
             public void close() {
             }
 
-        }
-    }
-
-    private class LoggingMonitoringService implements SessionMonitoringService {
-        @Override
-        public void onSessionUp(final NetconfManagementSession session) {
-            LOG.debug("Session {} established", session);
-        }
-
-        @Override
-        public void onSessionDown(final NetconfManagementSession session) {
-            LOG.debug("Session {} down", session);
         }
     }
 

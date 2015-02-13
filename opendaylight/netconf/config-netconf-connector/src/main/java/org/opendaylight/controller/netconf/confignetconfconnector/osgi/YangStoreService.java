@@ -14,6 +14,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.lang.ref.SoftReference;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -21,6 +22,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicReference;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
+import org.opendaylight.controller.netconf.api.Capability;
+import org.opendaylight.controller.netconf.api.monitoring.CapabilityListener;
 import org.opendaylight.controller.netconf.notifications.BaseNetconfNotificationListener;
 import org.opendaylight.controller.netconf.notifications.BaseNotificationPublisherRegistration;
 import org.opendaylight.controller.netconf.notifications.NetconfNotificationCollector;
@@ -77,6 +80,8 @@ public class YangStoreService implements YangStoreContext {
         }
     });
 
+    private final Set<CapabilityListener> listeners = Collections.synchronizedSet(new HashSet<CapabilityListener>());
+
     public YangStoreService(final SchemaContextProvider schemaContextProvider, final BundleContext context) {
         this(schemaContextProvider, new NotificationCollectorTracker(context));
     }
@@ -130,7 +135,31 @@ public class YangStoreService implements YangStoreContext {
         notificationExecutor.submit(new CapabilityChangeNotifier(previous));
     }
 
+    public AutoCloseable registerCapabilityListener(final CapabilityListener listener) {
+        if(ref.get() == null || ref.get().get() == null) {
+            getYangStoreSnapshot();
+        }
+
+        this.listeners.add(listener);
+        listener.onCapabilitiesAdded(NetconfOperationServiceFactoryImpl.setupCapabilities(ref.get().get()));
+
+        return new AutoCloseable() {
+            @Override
+            public void close() throws Exception {
+                YangStoreService.this.listeners.remove(listener);
+            }
+        };
+    }
+
+    private static final Function<Module, Capability> MODULE_TO_CAPABILITY = new Function<Module, Capability>() {
+        @Override
+        public Capability apply(final Module module) {
+            return new NetconfOperationServiceFactoryImpl.YangStoreCapability(module, module.getSource());
+        }
+    };
+
     private final class CapabilityChangeNotifier implements Runnable {
+
         private final YangStoreSnapshot previous;
 
         public CapabilityChangeNotifier(final YangStoreSnapshot previous) {
@@ -142,7 +171,19 @@ public class YangStoreService implements YangStoreContext {
             final YangStoreContext current = getYangStoreSnapshot();
 
             if(current.equals(previous) == false) {
-                notificationPublisher.onCapabilityChanged(computeDiff(previous, current));
+                final Sets.SetView<Module> removed = Sets.difference(previous.getModules(), current.getModules());
+                final Sets.SetView<Module> added = Sets.difference(current.getModules(), previous.getModules());
+
+                // Notify notification manager
+                notificationPublisher.onCapabilityChanged(computeDiff(removed, added));
+
+                // Notify direct capability listener TODO would it not be better if the capability listeners went through notification manager ?
+                for (final CapabilityListener listener : listeners) {
+                    listener.onCapabilitiesAdded(Sets.newHashSet(Collections2.transform(added, MODULE_TO_CAPABILITY)));
+                }
+                for (final CapabilityListener listener : listeners) {
+                    listener.onCapabilitiesRemoved(Sets.newHashSet(Collections2.transform(removed, MODULE_TO_CAPABILITY)));
+                }
             }
         }
     }
@@ -155,10 +196,7 @@ public class YangStoreService implements YangStoreContext {
         }
     };
 
-    static NetconfCapabilityChange computeDiff(final YangStoreContext previous, final YangStoreContext current) {
-        final Sets.SetView<Module> removed = Sets.difference(previous.getModules(), current.getModules());
-        final Sets.SetView<Module> added = Sets.difference(current.getModules(), previous.getModules());
-
+    static NetconfCapabilityChange computeDiff(final Sets.SetView<Module> removed, final Sets.SetView<Module> added) {
         final NetconfCapabilityChangeBuilder netconfCapabilityChangeBuilder = new NetconfCapabilityChangeBuilder();
         netconfCapabilityChangeBuilder.setChangedBy(new ChangedByBuilder().setServerOrUser(new ServerBuilder().setServer(true).build()).build());
         netconfCapabilityChangeBuilder.setDeletedCapability(Lists.newArrayList(Collections2.transform(removed, MODULE_TO_URI)));

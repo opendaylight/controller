@@ -20,8 +20,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
+import org.opendaylight.controller.netconf.api.Capability;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.mapping.api.Capability;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
@@ -41,9 +41,10 @@ public class ConfigPersisterTest {
     private TestingExceptionHandler handler;
 
 
-    private void setUpContextAndStartPersister(String requiredCapability) throws Exception {
+    private void setUpContextAndStartPersister(String requiredCapability, final NetconfOperationService conflictingService) throws Exception {
         DummyAdapterWithInitialSnapshot.expectedCapability = requiredCapability;
         ctx = new MockedBundleContext(1000, 1000);
+        doReturn(getConflictingService()).when(ctx.serviceFactory).createService(anyString());
         configPersisterActivator = new ConfigPersisterActivator();
         configPersisterActivator.start(ctx.getBundleContext());
     }
@@ -62,7 +63,7 @@ public class ConfigPersisterTest {
 
     @Test
     public void testPersisterNotAllCapabilitiesProvided() throws Exception {
-        setUpContextAndStartPersister("required-cap");
+        setUpContextAndStartPersister("required-cap", getConflictingService());
         Thread.sleep(2000);
         handler.assertException(IllegalStateException.class, "Max wait for capabilities reached.Not enough capabilities " +
                 "for <data><config-snapshot/></data>. Expected but not found: [required-cap]");
@@ -71,7 +72,7 @@ public class ConfigPersisterTest {
 
     @Test
     public void testPersisterSuccessfulPush() throws Exception {
-        setUpContextAndStartPersister("cap1");
+        setUpContextAndStartPersister("cap1", getConflictingService());
         NetconfOperationService service = getWorkingService(getOKDocument());
         doReturn(service).when(ctx.serviceFactory).createService(anyString());
         Thread.sleep(2000);
@@ -86,7 +87,7 @@ public class ConfigPersisterTest {
     public NetconfOperationService getWorkingService(Document document) throws SAXException, IOException, NetconfDocumentedException {
         NetconfOperationService service = mock(NetconfOperationService.class);
         Capability capability = mock(Capability.class);
-        doReturn(Sets.newHashSet(capability)).when(service).getCapabilities();
+//        doReturn(Sets.newHashSet(capability)).when(service).getCapabilities();
         doReturn("cap1").when(capability).getCapabilityUri();
 
 
@@ -109,9 +110,8 @@ public class ConfigPersisterTest {
 
     @Test
     public void testPersisterConflictingVersionException() throws Exception {
-        setUpContextAndStartPersister("cap1");
+        setUpContextAndStartPersister("cap1", getConflictingService());
 
-        doReturn(getConflictingService()).when(ctx.serviceFactory).createService(anyString());
         Thread.sleep(2000);
         handler.assertException(IllegalStateException.class, "Max wait for conflicting version stabilization timeout");
     }
@@ -131,7 +131,7 @@ public class ConfigPersisterTest {
 
     @Test
     public void testSuccessConflictingVersionException() throws Exception {
-        setUpContextAndStartPersister("cap1");
+        setUpContextAndStartPersister("cap1", getConflictingService());
         doReturn(getConflictingService()).when(ctx.serviceFactory).createService(anyString());
         Thread.sleep(500);
         // working service:
