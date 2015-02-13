@@ -78,6 +78,9 @@ public final class Main {
         @Arg(dest = "debug")
         public boolean debug;
 
+        @Arg(dest = "notification-file")
+        public File notificationFile;
+
         static ArgumentParser getParser() {
             final ArgumentParser parser = ArgumentParsers.newArgumentParser("netconf testool");
 
@@ -94,6 +97,11 @@ public final class Main {
                     .type(File.class)
                     .help("Directory containing yang schemas to describe simulated devices. Some schemas e.g. netconf monitoring and inet types are included by default")
                     .dest("schemas-dir");
+
+            parser.addArgument("--notification-file")
+                    .type(File.class)
+                    .help("Xml file containing notifications that should be sent to clients after create subscription is called")
+                    .dest("notification-file");
 
             parser.addArgument("--starting-port")
                     .type(Integer.class)
