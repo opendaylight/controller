@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "7a96c907_7a410ea8",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/config/yang/messagebus/app/impl/MessageBusAppImplModule.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-13T14:36:16Z",
+      "side": 1,
+      "message": "bip remains unclosed in bap.close() throws",
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_9a3e5a27",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/config/yang/messagebus/app/impl/MessageBusAppImplModule.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-13T14:36:16Z",
+      "side": 1,
+      "message": "no message",
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_1ad80a7a",
         "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/mdsal/ioc/Callback.java",
         "patchSetId": 2
@@ -48,6 +82,23 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_bae556dd",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventAggregator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-13T14:36:16Z",
+      "side": 1,
+      "message": "NPE if augmentation does not exist",
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_7ac6ee9b",
         "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventSource.java",
         "patchSetId": 2
@@ -71,6 +122,23 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_daeaa2ab",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventSource.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-13T14:36:16Z",
+      "side": 1,
+      "message": "can be pre-allocated based on the set size",
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_9ac3ba88",
         "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventSource.java",
         "patchSetId": 2
@@ -88,6 +156,108 @@
         "endLine": 96,
         "endChar": 78
       },
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_7afa6e76",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventSourceManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-13T14:36:16Z",
+      "side": 1,
+      "message": "emit at least a debug when a callback is ignored",
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_9af73a8b",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventSourceManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-13T14:36:16Z",
+      "side": 1,
+      "message": "if (!isEventSource(node)) {\n   LOG.debug(\"Ignoring non-eventsource {}\", node);\n   return;\n}",
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3af06690",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventSourceManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-13T14:36:16Z",
+      "side": 1,
+      "message": "no parentheses, please",
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_1a332a64",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventSourceManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-13T14:36:16Z",
+      "side": 1,
+      "message": ".startsWith()",
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5aed32b6",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventSourceManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-13T14:36:16Z",
+      "side": 1,
+      "message": "return true;",
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_fa2d1eff",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventSourceManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-13T14:36:16Z",
+      "side": 1,
+      "message": "return false;",
       "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -140,6 +310,23 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_da38623f",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventSourceTopology.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-13T14:36:16Z",
+      "side": 1,
+      "message": "NPE if the topology does not exist. Also, topology.getNode() is guaranteed to be immutable, so no there\u0027s no point of copying it. If you really need a mutable copy, just perform new ArrayList\u003c\u003e(topology.getNode()), with check for null.",
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_da5b82f4",
         "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventSourceTopology.java",
         "patchSetId": 2
@@ -157,6 +344,324 @@
         "endLine": 107,
         "endChar": 44
       },
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5abf72aa",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/Topic.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-13T14:36:16Z",
+      "side": 1,
+      "message": "use the return value of check:\n\nthis.mdSal \u003d Preconditions.checkNotNull(mdSal);",
+      "range": {
+        "startLine": 37,
+        "startChar": 14,
+        "endLine": 37,
+        "endChar": 15
+      },
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_fadf5e0b",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/Topic.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-13T14:36:16Z",
+      "side": 1,
+      "message": "NPE if EventSourceService is not present",
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3ac2a634",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/TopologyException.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-13T14:36:16Z",
+      "side": 1,
+      "message": "use proper Exceptions and not this wrapper",
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_7accae6a",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/Util.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-13T14:36:16Z",
+      "side": 1,
+      "message": "utility class: must be final with a private constructor",
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3a74e634",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/Util.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-13T14:36:16Z",
+      "side": 1,
+      "message": "missing javadoc. the result of this is platform-dependent due to use of String.getBytes()",
+      "range": {
+        "startLine": 32,
+        "startChar": 39,
+        "endLine": 32,
+        "endChar": 40
+      },
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_ba80f6f7",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/Util.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-13T14:36:16Z",
+      "side": 1,
+      "message": "a shared/cloned instance should be used for performance reasons.",
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5a71b242",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/Util.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-13T14:36:16Z",
+      "side": 1,
+      "message": "highly inefficient",
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_fa919e47",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/Util.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-13T14:36:16Z",
+      "side": 1,
+      "message": "raw exception without a message",
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_1a97aa3c",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/Util.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-13T14:36:16Z",
+      "side": 1,
+      "message": "Collections.emptyList() for proper warning-free cast.",
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_9aa2da97",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/Util.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-13T14:36:16Z",
+      "side": 1,
+      "message": "missing javadoc",
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_ba979639",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/Util.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-13T14:36:16Z",
+      "side": 1,
+      "message": "change to \u0027return (Node)chengeEntry.getValue();\u0027",
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_da9ce25f",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/Util.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-13T14:36:16Z",
+      "side": 1,
+      "message": "return null to make things very clear",
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_1adb2a51",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/Util.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-13T14:36:16Z",
+      "side": 1,
+      "message": "add javadoc.",
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5aec52f3",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/Util.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-13T14:36:16Z",
+      "side": 1,
+      "message": "this leads to pattern compilation in a tight loop. The wildcard should be expanded to a compiled Pattern (by the caller) and then passed in.",
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_baaeb67f",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/Util.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-13T14:36:16Z",
+      "side": 1,
+      "message": "for (char c : wildcard.toCharArray()) {",
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5aa8d276",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/Util.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-13T14:36:16Z",
+      "side": 1,
+      "message": "s.append(\u0027.\u0027); is faster",
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_fab8bec9",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/Util.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-13T14:36:16Z",
+      "side": 1,
+      "message": "do not use multiple case statements on one line",
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_dab382e7",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/Util.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-13T14:36:16Z",
+      "side": 1,
+      "message": "return s.toString();",
       "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
