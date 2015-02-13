@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_1f3f9c89",
+        "filename": "opendaylight/md-sal/sal-akka-raft/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T02:42:56Z",
+      "side": 1,
+      "message": "Why is this compile and not test?",
+      "revId": "c192aaa8a15efdffc954a6f46bfb66a5b0a46980",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_bf3f8886",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/resources/simplelogger.properties",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T02:42:56Z",
+      "side": 1,
+      "message": "Why does this file need to here? I put 1 in src/test/resources.",
+      "revId": "c192aaa8a15efdffc954a6f46bfb66a5b0a46980",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
