@@ -12,6 +12,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -28,7 +29,7 @@ import org.opendaylight.controller.config.persist.api.ConfigPusher;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.persist.api.PropertiesProvider;
-import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
+import org.opendaylight.controller.netconf.api.Capability;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
 import org.opendaylight.controller.netconf.persist.impl.DummyAdapter;
@@ -60,11 +61,11 @@ final class MockedBundleContext {
         doReturn(null).when(context).getProperty(anyString());
         initContext(maxWaitForCapabilitiesMillis, conflictingVersionTimeoutMillis);
 
-        String outerFilterString = "(objectClass=org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider)";
+        String outerFilterString = "(objectClass=org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory)";
         doReturn(outerFilter).when(context).createFilter(outerFilterString);
         doNothing().when(context).addServiceListener(any(ServiceListener.class), eq(outerFilterString));
         ServiceReference<?>[] toBeReturned = {serviceReference};
-        doReturn(toBeReturned).when(context).getServiceReferences(NetconfOperationProvider.class.getName(), null);
+        doReturn(toBeReturned).when(context).getServiceReferences(NetconfOperationServiceFactory.class.getName(), null);
 
         String innerFilterString = "innerfilter";
         doReturn(innerFilterString).when(outerFilter).toString();
@@ -77,9 +78,12 @@ final class MockedBundleContext {
         doReturn(bundle).when(serviceReference).getBundle();
         doReturn(context).when(bundle).getBundleContext();
         doReturn("").when(serviceReference).toString();
+        doReturn("context").when(context).toString();
         doReturn(serviceFactory).when(context).getService(any(ServiceReference.class));
         doReturn(service).when(serviceFactory).createService(anyString());
-        doReturn(Collections.emptySet()).when(service).getCapabilities();
+        final Capability cap = mock(Capability.class);
+        doReturn("cap1").when(cap).getCapabilityUri();
+        doReturn(Collections.singleton(cap)).when(serviceFactory).getCapabilities();
         doNothing().when(service).close();
         doReturn("serviceFactoryMock").when(serviceFactory).toString();
 

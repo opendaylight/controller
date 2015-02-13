@@ -15,8 +15,9 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Set;
+import org.opendaylight.controller.netconf.api.Capability;
+import org.opendaylight.controller.netconf.api.monitoring.CapabilityListener;
 import org.opendaylight.controller.netconf.api.util.NetconfConstants;
-import org.opendaylight.controller.netconf.mapping.api.Capability;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
@@ -42,16 +43,30 @@ public class Activator implements BundleActivator {
 
         final NetconfOperationServiceFactory netconfOperationServiceFactory = new NetconfOperationServiceFactory() {
 
+            private final Set<Capability> capabilities = Collections.<Capability>singleton(new NotificationsCapability());
+
+            @Override
+            public Set<Capability> getCapabilities() {
+                return capabilities;
+            }
+
+            @Override
+            public AutoCloseable registerCapabilityListener(final CapabilityListener listener) {
+                listener.onCapabilitiesAdded(capabilities);
+                return new AutoCloseable() {
+                    @Override
+                    public void close() {
+                        listener.onCapabilitiesRemoved(capabilities);
+                    }
+                };
+            }
+
             @Override
             public NetconfOperationService createService(final String netconfSessionIdForReporting) {
                 return new NetconfOperationService() {
 
                     private final CreateSubscription createSubscription = new CreateSubscription(netconfSessionIdForReporting, netconfNotificationManager);
 
-                    @Override
-                    public Set<Capability> getCapabilities() {
-                        return Collections.<Capability>singleton(new NotificationsCapability());
-                    }
 
                     @Override
                     public Set<NetconfOperation> getNetconfOperations() {
@@ -68,7 +83,7 @@ public class Activator implements BundleActivator {
             }
         };
 
-        Dictionary<String, String> properties = new Hashtable<>();
+        final Dictionary<String, String> properties = new Hashtable<>();
         properties.put(NetconfConstants.SERVICE_NAME, NetconfConstants.NETCONF_MONITORING);
         operationaServiceRegistration = context.registerService(NetconfOperationServiceFactory.class, netconfOperationServiceFactory, properties);
 

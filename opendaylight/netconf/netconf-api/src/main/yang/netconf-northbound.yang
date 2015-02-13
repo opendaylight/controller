@@ -19,4 +19,9 @@ module netconf-northbound {
         config:java-class "org.opendaylight.controller.netconf.api.NetconfServerDispatcher";
     }
 
+    identity netconf-server-monitoring {
+        base "config:service-type";
+        config:java-class "org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService";
+    }
+
 }

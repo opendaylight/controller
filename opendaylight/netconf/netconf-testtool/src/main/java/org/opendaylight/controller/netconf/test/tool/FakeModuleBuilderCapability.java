@@ -12,8 +12,8 @@ import com.google.common.base.Optional;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import org.opendaylight.controller.netconf.api.Capability;
 import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
-import org.opendaylight.controller.netconf.mapping.api.Capability;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.parser.builder.impl.ModuleBuilder;
 
