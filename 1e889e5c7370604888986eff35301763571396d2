@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_428a246b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 492,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T23:25:21Z",
+      "side": 1,
+      "message": "Maybe I should clarify more. installSnapshotIfNeeded loops thru all followers but sendAppendEntries is already doing that. So sendAppendEntries  is calling it when in the context of a single follower. So we can rename it to captureSnapshotIfNeeded and pass in the follower info and remove the looping,",
+      "parentUuid": "7a96c907_5a6772b7",
+      "revId": "1e889e5c7370604888986eff35301763571396d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_ba0d56ea",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
         "patchSetId": 1
