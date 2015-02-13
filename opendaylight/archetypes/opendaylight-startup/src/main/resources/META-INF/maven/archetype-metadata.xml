@@ -64,6 +64,12 @@
          </includes>
     </fileSet>
     <fileSet filtered="true" encoding="UTF-8">
+        <directory>impl/src/test/java</directory>
+        <includes>
+            <include>**/*.java</include>
+         </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
         <directory>impl/src/main/config</directory>
         <includes>
             <include>**/*.xml</include>
