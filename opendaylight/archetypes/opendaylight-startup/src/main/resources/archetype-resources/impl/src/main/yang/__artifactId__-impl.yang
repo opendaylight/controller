@@ -14,14 +14,14 @@ module ${artifactId}-impl {
             "Initial revision";
     }
 
-    identity ${artifactId}-impl {
+    identity ${artifactId} {
         base config:module-type;
-        config:java-name-prefix ${classPrefix}Impl;
+        config:java-name-prefix ${classPrefix};
     }
 
     augment "/config:modules/config:module/config:configuration" {
-        case ${artifactId}-impl {
-            when "/config:modules/config:module/config:type = '${artifactId}-impl'";
+        case ${artifactId} {
+            when "/config:modules/config:module/config:type = '${artifactId}'";
             container broker {
                 uses config:service-ref {
                     refine type {

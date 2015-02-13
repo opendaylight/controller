@@ -1,7 +1,7 @@
 #set( $symbol_pound = '#' )
 #set( $symbol_dollar = '$' )
 #set( $symbol_escape = '\' )
-#set( $factory = "${classPrefix}ImplModuleFactory" )
+#set( $factory = "${classPrefix}ModuleFactory" )
 /*
  * ${copyright} and others.  All rights reserved.
  *
@@ -13,7 +13,7 @@ package org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.${artif
 
 import org.junit.Test;
 
-public class ${classPrefix}ImplModuleFactoryTest {
+public class ${classPrefix}ModuleFactoryTest {
     @Test
     public void testFactoryConstructor() {
         // ensure no exceptions on construction
