@@ -16,6 +16,24 @@
       "revId": "a354c937ab2587131e65390ad68cc9b945ee1a5b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_ff28b087",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 363,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T01:05:09Z",
+      "side": 0,
+      "message": "There\u0027s now logging in method (I think) so it was pretty much redundant. I could add it back with trace if you want.",
+      "parentUuid": "7a96c907_c46ba7ef",
+      "revId": "a354c937ab2587131e65390ad68cc9b945ee1a5b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

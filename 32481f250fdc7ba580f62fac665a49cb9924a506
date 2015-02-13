@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_1f2ebc92",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T01:05:09Z",
+      "side": 1,
+      "message": "I added that flag so we don\u0027t see output in sendAppendEntries for heartbeats. Passed false here b/c is the initial contact to followers so not a scheduled heartbeat.",
+      "parentUuid": "7a96c907_24392bf3",
+      "revId": "32481f250fdc7ba580f62fac665a49cb9924a506",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_e47023de",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
         "patchSetId": 9
@@ -30,6 +48,24 @@
       "writtenOn": "2015-02-13T00:26:09Z",
       "side": 1,
       "message": "else if?",
+      "revId": "32481f250fdc7ba580f62fac665a49cb9924a506",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_bf1ea85d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T01:05:09Z",
+      "side": 1,
+      "message": "Yes - my bad.",
+      "parentUuid": "7a96c907_e47023de",
       "revId": "32481f250fdc7ba580f62fac665a49cb9924a506",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_3f3298f2",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 486,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T01:05:09Z",
+      "side": 1,
+      "message": "slf4j does not have unlimited args for performance - allows a max of 4 and I added a 5th.\n\nI can use %d for ints.",
+      "parentUuid": "7a96c907_e43ee3d9",
+      "revId": "32481f250fdc7ba580f62fac665a49cb9924a506",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_642ad391",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
         "patchSetId": 9
@@ -64,6 +118,24 @@
       "writtenOn": "2015-02-13T00:26:09Z",
       "side": 1,
       "message": "I presume you added the if check because of followerLog.keySet. I presume that would not be an expensive operation especially since followerLog is immutable",
+      "revId": "32481f250fdc7ba580f62fac665a49cb9924a506",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_ff4f5069",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 540,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T01:05:09Z",
+      "side": 1,
+      "message": "yes - although I think HashSet caches the iterators once created but oner impls might not.",
+      "parentUuid": "7a96c907_642ad391",
       "revId": "32481f250fdc7ba580f62fac665a49cb9924a506",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_1f555cfa",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 665,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T01:05:09Z",
+      "side": 1,
+      "message": "We log in sendAppendEntries but this logging tells explicitly that it\u0027s from SendHeartbeat. I thought it was useful with trace on, specifically in unit tests. I can remove if you think it\u0027s not needed.",
+      "parentUuid": "7a96c907_8427dfc9",
+      "revId": "32481f250fdc7ba580f62fac665a49cb9924a506",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_041bcf81",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
         "patchSetId": 9
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_9f408c35",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 444,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T01:05:09Z",
+      "side": 1,
+      "message": "Yes - he moved the method. That\u0027s fine I can rebase it.",
+      "parentUuid": "7a96c907_041bcf81",
+      "revId": "32481f250fdc7ba580f62fac665a49cb9924a506",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_c410875b",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
         "patchSetId": 9
@@ -115,6 +223,24 @@
       "writtenOn": "2015-02-13T00:26:09Z",
       "side": 1,
       "message": "I can\u0027t help thinking there has to be a better way instead of doing this logName thing all over the place. I know you did not want to have a utility method for logging. How about a utility method for formatting? :)",
+      "revId": "32481f250fdc7ba580f62fac665a49cb9924a506",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_1f7c7c82",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T01:05:09Z",
+      "side": 1,
+      "message": "A utility method for formatting or logging could prepend \"{}: \" to the message and pass in logName() first. I think we\u0027d have to use String.format and then change all {} to %s. That would incur too overhead so for debug we\u0027d have to check isDebugEnabled() everywhere. info/warn/error logging would incur the overhead. Unless we pass in the desired debug level. \n\nI don\u0027t see any way to have a utility method that is clean and looks sane.",
+      "parentUuid": "7a96c907_c410875b",
       "revId": "32481f250fdc7ba580f62fac665a49cb9924a506",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -150,6 +276,24 @@
       "side": 1,
       "message": "I think this logging would be too much to be useful. I\u0027m ok to remove it even. Something more targeted like logging a message that took an excessive amount of time may be useful.",
       "parentUuid": "7a96c907_58e0e295",
+      "revId": "32481f250fdc7ba580f62fac665a49cb9924a506",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_24204bab",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/AbstractUntypedPersistentActor.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T01:05:09Z",
+      "side": 1,
+      "message": "So you opt to remove it? We could use this class name as logger category if you wanted to see message tracing at a high level. To be useful, we would have to include the actor name/path in the messages.\n\nWe could do some timing here. I\u0027d rather do that in another patch.",
+      "parentUuid": "7a96c907_04666f2a",
       "revId": "32481f250fdc7ba580f62fac665a49cb9924a506",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
