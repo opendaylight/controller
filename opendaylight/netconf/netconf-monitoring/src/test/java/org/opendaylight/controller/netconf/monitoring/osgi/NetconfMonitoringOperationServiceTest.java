@@ -22,14 +22,15 @@ public class NetconfMonitoringOperationServiceTest {
     public void testGetters() throws Exception {
         NetconfMonitoringService monitor = mock(NetconfMonitoringService.class);
         NetconfMonitoringOperationService service = new NetconfMonitoringOperationService(monitor);
+        NetconfMonitoringActivator.NetconfMonitoringOperationServiceFactory serviceFactory = new NetconfMonitoringActivator.NetconfMonitoringOperationServiceFactory(service);
 
         assertEquals(1, service.getNetconfOperations().size());
 
-        assertEquals(Optional.<String>absent(), service.getCapabilities().iterator().next().getCapabilitySchema());
-        assertEquals(Collections.<String>emptyList(), service.getCapabilities().iterator().next().getLocation());
-        assertEquals(Optional.of(MonitoringConstants.MODULE_REVISION), service.getCapabilities().iterator().next().getRevision());
-        assertEquals(Optional.of(MonitoringConstants.MODULE_NAME), service.getCapabilities().iterator().next().getModuleName());
-        assertEquals(Optional.of(MonitoringConstants.NAMESPACE), service.getCapabilities().iterator().next().getModuleNamespace());
-        assertEquals(MonitoringConstants.URI, service.getCapabilities().iterator().next().getCapabilityUri());
+        assertEquals(Optional.<String>absent(), serviceFactory.getCapabilities().iterator().next().getCapabilitySchema());
+        assertEquals(Collections.<String>emptyList(), serviceFactory.getCapabilities().iterator().next().getLocation());
+        assertEquals(Optional.of(MonitoringConstants.MODULE_REVISION), serviceFactory.getCapabilities().iterator().next().getRevision());
+        assertEquals(Optional.of(MonitoringConstants.MODULE_NAME), serviceFactory.getCapabilities().iterator().next().getModuleName());
+        assertEquals(Optional.of(MonitoringConstants.NAMESPACE), serviceFactory.getCapabilities().iterator().next().getModuleNamespace());
+        assertEquals(MonitoringConstants.URI, serviceFactory.getCapabilities().iterator().next().getCapabilityUri());
     }
 }

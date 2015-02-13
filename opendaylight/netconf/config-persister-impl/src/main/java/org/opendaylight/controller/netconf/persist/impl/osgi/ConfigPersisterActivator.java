@@ -16,7 +16,6 @@ import java.util.concurrent.TimeUnit;
 import javax.management.MBeanServer;
 import org.opendaylight.controller.config.persist.api.ConfigPusher;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
-import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPusherImpl;
 import org.opendaylight.controller.netconf.persist.impl.PersisterAggregator;
@@ -70,7 +69,7 @@ public class ConfigPersisterActivator implements BundleActivator {
         InnerCustomizer innerCustomizer = new InnerCustomizer(configs, maxWaitForCapabilitiesMillis,
                 conflictingVersionTimeoutMillis, persisterAggregator);
         OuterCustomizer outerCustomizer = new OuterCustomizer(context, innerCustomizer);
-        new ServiceTracker<>(context, NetconfOperationProvider.class, outerCustomizer).open();
+        new ServiceTracker<>(context, NetconfOperationServiceFactory.class, outerCustomizer).open();
     }
 
     private long getConflictingVersionTimeoutMillis(PropertiesProviderBaseImpl propertiesProvider) {
@@ -103,7 +102,7 @@ public class ConfigPersisterActivator implements BundleActivator {
                 ")";
     }
 
-    class OuterCustomizer implements ServiceTrackerCustomizer<NetconfOperationProvider, NetconfOperationProvider> {
+    class OuterCustomizer implements ServiceTrackerCustomizer<NetconfOperationServiceFactory, NetconfOperationServiceFactory> {
         private final BundleContext context;
         private final InnerCustomizer innerCustomizer;
 
@@ -113,7 +112,7 @@ public class ConfigPersisterActivator implements BundleActivator {
         }
 
         @Override
-        public NetconfOperationProvider addingService(ServiceReference<NetconfOperationProvider> reference) {
+        public NetconfOperationServiceFactory addingService(ServiceReference<NetconfOperationServiceFactory> reference) {
             LOG.trace("Got OuterCustomizer.addingService {}", reference);
             // JMX was registered, track config-netconf-connector
             Filter filter;
@@ -127,12 +126,12 @@ public class ConfigPersisterActivator implements BundleActivator {
         }
 
         @Override
-        public void modifiedService(ServiceReference<NetconfOperationProvider> reference, NetconfOperationProvider service) {
+        public void modifiedService(ServiceReference<NetconfOperationServiceFactory> reference, NetconfOperationServiceFactory service) {
 
         }
 
         @Override
-        public void removedService(ServiceReference<NetconfOperationProvider> reference, NetconfOperationProvider service) {
+        public void removedService(ServiceReference<NetconfOperationServiceFactory> reference, NetconfOperationServiceFactory service) {
 
         }
     }
