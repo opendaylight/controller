@@ -1,0 +1,257 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_1ad80a7a",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/mdsal/ioc/Callback.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-02-13T13:34:21Z",
+      "side": 1,
+      "message": "Could you remove IOC from this patchset and use explicit config subsystem wiring? Later down the line it will be easier to convert code to newly introduced Lithium APIs.\n\nPresence of this IOC prototype may be counter-productive for community as they will start copying code, and will be harder convert them to non-prototype model.",
+      "range": {
+        "startLine": 8,
+        "startChar": 0,
+        "endLine": 8,
+        "endChar": 45
+      },
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_bac8f6a8",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventAggregator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-02-13T13:34:21Z",
+      "side": 1,
+      "message": "Could you expand this to be using normal MD-SAL services instead of IOC wrappers?",
+      "range": {
+        "startLine": 35,
+        "startChar": 3,
+        "endLine": 41,
+        "endChar": 5
+      },
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_7ac6ee9b",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventSource.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-02-13T13:34:21Z",
+      "side": 1,
+      "message": "Could you rename this class to NetconfEventSource since is one of possible event source implementations, and this one deals with Netconf?",
+      "range": {
+        "startLine": 36,
+        "startChar": 13,
+        "endLine": 36,
+        "endChar": 24
+      },
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_9ac3ba88",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventSource.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-02-13T13:34:21Z",
+      "side": 1,
+      "message": "This should be configurable via Config susbystem probably.",
+      "range": {
+        "startLine": 94,
+        "startChar": 0,
+        "endLine": 96,
+        "endChar": 78
+      },
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3abce605",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventSourceTopology.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-02-13T13:34:21Z",
+      "side": 1,
+      "message": "I would suggest lower-case name.",
+      "range": {
+        "startLine": 41,
+        "startChar": 46,
+        "endLine": 41,
+        "endChar": 71
+      },
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5ab9b213",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventSourceTopology.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-02-13T13:34:21Z",
+      "side": 1,
+      "message": "Same as previous - could you expand MD-SAL services here?",
+      "range": {
+        "startLine": 62,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 41
+      },
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_da5b82f4",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventSourceTopology.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-02-13T13:34:21Z",
+      "side": 1,
+      "message": "Please retain registration object. Registration should be closed once your component is deconfigured or you do not need listener anymore to prevent resource leak.",
+      "range": {
+        "startLine": 107,
+        "startChar": 8,
+        "endLine": 107,
+        "endChar": 44
+      },
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_7a4d8e3d",
+        "filename": "opendaylight/md-sal/model/notifications-2008-07-14/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-02-13T13:34:21Z",
+      "side": 1,
+      "message": "No need to include notifications model as of now, since it became part of netconf subsystem https://git.opendaylight.org/gerrit/#/c/14920/",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 38
+      },
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_9a4ada24",
+        "filename": "opendaylight/md-sal/model/notifications-2008-07-14/src/main/yang/notifications.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-02-13T13:34:21Z",
+      "side": 1,
+      "message": "No need to include notifications model as of now, since it became part of netconf subsystem https://git.opendaylight.org/gerrit/#/c/14920/",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 22
+      },
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3a5386e3",
+        "filename": "opendaylight/md-sal/model/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-02-13T13:34:21Z",
+      "side": 1,
+      "message": "No need to include notifications model as of now, since it became part of netconf subsystem https://git.opendaylight.org/gerrit/#/c/14920/",
+      "range": {
+        "startLine": 21,
+        "startChar": 4,
+        "endLine": 21,
+        "endChar": 45
+      },
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5a50d2d3",
+        "filename": "pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-02-13T13:34:21Z",
+      "side": 1,
+      "message": "No need to change this file.",
+      "range": {
+        "startLine": 14,
+        "startChar": 2,
+        "endLine": 15,
+        "endChar": 44
+      },
+      "revId": "9833b601afbf6e30e7191e3114eda94da0da5713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
