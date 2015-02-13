@@ -1,0 +1,696 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_fca2fb49",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/MockRaftActorContext.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "term 0 isn\u0027t valid in real scenarios.",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5c91afef",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/MockRaftActorContext.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Added a second log entry - wouldn\u0027t be valid to have index 1 without index 0, unless there was a snapshot at index 0 but snapshot index doesn\u0027t reflect that (is -1).",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3c9dc30b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/TestActorFactory.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Still saw deadletters so changed it to wait for the actor to terminate.",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3cc4e3f3",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/CandidateTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Eclipse save action puts in @Override. I prefer them.",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_dcb4df83",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/FollowerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Eclipse save action outs in @Override.",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_9cb2d792",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/IsolatedLeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Eclipse save action puts in final.",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_7f5d7d14",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Made this a class member so we can close it in tearDown to stop the heartbeat schedule so it does;t keep running.",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3c6b83f3",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Useful to see the start of each test logged when sifting thru test output.",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_fc70bbdd",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Basically removed JavaTestKit.",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_9c7977ca",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Removed JavaTestKit.",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_bc76b3d5",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Switched to MessageCollectorActor.",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_dc393ff3",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Removed JavaTestKit.",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_7c7cabb5",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Switch to use MessageCollectorActor.",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_fc3e7bd9",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Removed JavaTestKit and Within.",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_9c2737ca",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Left the original entries and appended index 2 so 2 entries are applied.",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5c2d2fa7",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Verified ApplyState data.",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_1c1b2782",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Removed JavaTestKit.",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_dc105f5b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Got rid of MockLeader so explicitly create FollowerToSnapshot.",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_fc151b49",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Switch to use MessageCollectorActor.",
+      "range": {
+        "startLine": 266,
+        "startChar": 32,
+        "endLine": 266,
+        "endChar": 53
+      },
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3c2063ab",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Removed JavaTestKit.",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_bc0b1329",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 329,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Switched to use MessageCollectorActor.",
+      "range": {
+        "startLine": 329,
+        "startChar": 8,
+        "endLine": 329,
+        "endChar": 29
+      },
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_7c010b05",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 335,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Removed JavaTestKit.",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_1f02390a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 395,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Removed JavaTestKit.",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_ff0c2d3d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 437,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Will be addressed in another patch.",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_9f15e941",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 443,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Removed JavaTestKit.",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_bf122555",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 471,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "MockLeader removed so explicitly create FollowerToSnapshot.",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5f1be172",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 498,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Removed JavaTestKit.",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_1f29d989",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 551,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Clear the cached messages so priors ones are not left over.",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3f2e1593",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 573,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Removed JavaTestKit.",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_df1e115f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 608,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Dont\u0027t need getAllMatching - should only get 1.",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_ff23cda4",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 814,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Basically just removed JavaTestKit",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_9f3c09ca",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 867,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Basically just removed JavaTestKit",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_bf39c5d8",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 940,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Basically just removed JavaTestKit",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_7f2fbd88",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 963,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Basically just removed JavaTestKit",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_1f50f909",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1003,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Basically just removed JavaTestKit",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_df55b1fa",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1018,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Basically just removed JavaTestKit",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_ff5aed28",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1037,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Basically just removed JavaTestKit",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_bf40e534",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1049,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Left this one alone as it creates 2 follower actors.",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_1f9eb9b9",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/utils/MessageCollectorActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "Get should just get without waiting.",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3fa37502",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/utils/MessageCollectorActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-13T19:07:43Z",
+      "side": 1,
+      "message": "This one gets and waits.",
+      "revId": "73ed70eb1b7efa335fb104ddf09d6a3f9a35bcb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
