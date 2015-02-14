@@ -12,6 +12,11 @@
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
 
+  <!-- FIXME: remove once odlparent no longer defines it -->
+  <properties>
+    <xtend.version>2.7.3</xtend.version>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
