@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_e297b038",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 492,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-14T01:38:54Z",
+      "side": 1,
+      "message": "Yes...doing it...now...good point.",
+      "parentUuid": "7a96c907_428a246b",
+      "revId": "1e889e5c7370604888986eff35301763571396d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_ba0d56ea",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
         "patchSetId": 1
@@ -48,6 +66,24 @@
       "writtenOn": "2015-02-13T13:46:50Z",
       "side": 1,
       "message": "Can we remove this commented line?",
+      "revId": "1e889e5c7370604888986eff35301763571396d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_029dfc58",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1165,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-14T01:38:54Z",
+      "side": 1,
+      "message": "will do.",
+      "parentUuid": "7a96c907_ba0d56ea",
       "revId": "1e889e5c7370604888986eff35301763571396d2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -71,6 +107,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_82a82c78",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1304,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-14T01:38:54Z",
+      "side": 1,
+      "message": "This test was failing on me and i made some temp changes to check the issue. Forgot to revert it. My bad.",
+      "parentUuid": "7a96c907_5afe92af",
+      "revId": "1e889e5c7370604888986eff35301763571396d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_fa2e7e42",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
         "patchSetId": 1
@@ -82,6 +136,24 @@
       "writtenOn": "2015-02-13T13:46:50Z",
       "side": 1,
       "message": "It looks like you haven\u0027t rebased with my latest changes.",
+      "revId": "1e889e5c7370604888986eff35301763571396d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_22b918cc",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1340,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-14T01:38:54Z",
+      "side": 1,
+      "message": "as above",
+      "parentUuid": "7a96c907_fa2e7e42",
       "revId": "1e889e5c7370604888986eff35301763571396d2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
