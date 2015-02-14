@@ -28,6 +28,10 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
+
+      <!-- We are adding generated code which is bound to OSGi, so we need
+           to make sure anyone dependending on this artifact inherits it -->
+      <scope>compile</scope>
     </dependency>
       <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
