@@ -33,7 +33,7 @@ public class ConfigPushingRunnable implements Runnable {
     @Override
     public void run() {
         List<Feature> toInstall = new ArrayList<Feature>();
-        FeatureEvent event;
+        FeatureEvent event = null;
         boolean interuppted = false;
         while(true) {
             try {
@@ -54,7 +54,7 @@ public class ConfigPushingRunnable implements Runnable {
                 LOG.error("ConfigPushingRunnable - interupted");
                 interuppted = true;
             } catch (Exception e) {
-                LOG.error("Exception while processing features ", e);
+                LOG.error("Exception while processing features {} event {}", toInstall, event, e);
             }
         }
     }
