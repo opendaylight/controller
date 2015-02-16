@@ -15,9 +15,6 @@
 
   <properties>
 
-    <!-- FIXME: remove once odlparent no longer defines it -->
-    <xtend.version>2.7.3</xtend.version>
-
     <akka.version>2.3.4</akka.version>
     <aopalliance.version>1.0.0</aopalliance.version>
     <appauth.version>0.5.0-SNAPSHOT</appauth.version>
