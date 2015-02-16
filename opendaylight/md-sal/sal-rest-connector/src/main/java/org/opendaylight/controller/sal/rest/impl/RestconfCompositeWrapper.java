@@ -9,7 +9,6 @@ import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
 import org.opendaylight.controller.sal.restconf.impl.StructuredData;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.Node;
 
 public class RestconfCompositeWrapper implements RestconfService, SchemaRetrievalService {
 
@@ -82,7 +81,7 @@ public class RestconfCompositeWrapper implements RestconfService, SchemaRetrieva
     }
 
     @Override
-    public Response createConfigurationData(final Node<?> payload, final UriInfo uriInfo) {
+    public Response createConfigurationData(final NormalizedNodeContext payload, final UriInfo uriInfo) {
         return restconf.createConfigurationData(payload, uriInfo);
     }
 

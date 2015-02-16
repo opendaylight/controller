@@ -1034,43 +1034,28 @@ public class RestconfImpl implements RestconfService {
     }
 
     @Override
-    public Response createConfigurationData(final Node<?> payload, final UriInfo uriInfo) {
+    public Response createConfigurationData(final NormalizedNodeContext payload, final UriInfo uriInfo) {
         if (payload == null) {
             throw new RestconfDocumentedException("Input is required.", ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE);
         }
 
-        final URI payloadNS = namespace(payload);
+        final URI payloadNS = payload.getData().getNodeType().getNamespace();
         if (payloadNS == null) {
             throw new RestconfDocumentedException(
                     "Data has bad format. Root element node must have namespace (XML format) or module name(JSON format)",
                     ErrorType.PROTOCOL, ErrorTag.UNKNOWN_NAMESPACE);
         }
 
-        final Module module = this.findModule(null, payload);
-        if (module == null) {
-            throw new RestconfDocumentedException(
-                    "Data has bad format. Root element node has incorrect namespace (XML format) or module name(JSON format)",
-                    ErrorType.PROTOCOL, ErrorTag.UNKNOWN_NAMESPACE);
-        }
-
-        final String payloadName = getName(payload);
-        final DataSchemaNode schemaNode = ControllerContext.findInstanceDataChildByNameAndNamespace(module,
-                payloadName, module.getNamespace());
-        final CompositeNode value = this.normalizeNode(payload, schemaNode, null);
-        final InstanceIdentifierContext iiWithData = addLastIdentifierFromData(null, value, schemaNode,ControllerContext.getInstance().getGlobalSchema());
-        final NormalizedNode<?, ?> datastoreNormalizedData = compositeNodeToDatastoreNormalizedNode(value, schemaNode);
-        final DOMMountPoint mountPoint = iiWithData.getMountPoint();
-        YangInstanceIdentifier normalizedII;
+        final DOMMountPoint mountPoint = payload.getInstanceIdentifierContext().getMountPoint();
+        final InstanceIdentifierContext iiWithData = payload.getInstanceIdentifierContext();
+        final YangInstanceIdentifier normalizedII = iiWithData.getInstanceIdentifier();
 
         try {
             if (mountPoint != null) {
-                normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData
-                        .getInstanceIdentifier());
-                broker.commitConfigurationDataPost(mountPoint, normalizedII, datastoreNormalizedData);
+                broker.commitConfigurationDataPost(mountPoint, normalizedII, payload.getData());
 
             } else {
-                normalizedII = controllerContext.toNormalized(iiWithData.getInstanceIdentifier());
-                broker.commitConfigurationDataPost(normalizedII, datastoreNormalizedData);
+                broker.commitConfigurationDataPost(normalizedII, payload.getData());
             }
         } catch(final RestconfDocumentedException e) {
             throw e;

@@ -13,7 +13,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.Node;
 
 public class StatisticsRestconfServiceWrapper implements RestconfService {
 
@@ -103,7 +102,7 @@ public class StatisticsRestconfServiceWrapper implements RestconfService {
     }
 
     @Override
-    public Response createConfigurationData(final Node<?> payload, final UriInfo uriInfo) {
+    public Response createConfigurationData(final NormalizedNodeContext payload, final UriInfo uriInfo) {
         configPost.incrementAndGet();
         return delegate.createConfigurationData(payload, uriInfo);
     }
