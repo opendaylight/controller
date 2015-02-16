@@ -85,7 +85,7 @@ unlimitFD() {
     # Increase the maximum file descriptors if we can
     if [ "$os400" = "false" ] && [ "$cygwin" = "false" ]; then
         MAX_FD_LIMIT=`ulimit -H -n`
-        if [ "$MAX_FD_LIMIT" != 'unlimited' ]; then 
+        if [ "$MAX_FD_LIMIT" != 'unlimited' ]; then
             if [ $? -eq 0 ]; then
                 if [ "$MAX_FD" = "maximum" -o "$MAX_FD" = "max" ]; then
                     # use the system max
@@ -188,7 +188,7 @@ locateJava() {
     fi
 
     if [ "x$JAVA_HOME" = "x" ] && [ "$darwin" = "true" ]; then
-        JAVA_HOME="$(/usr/libexec/java_home)"
+        JAVA_HOME="$(/usr/libexec/java_home -v 1.7)"
     fi
     if [ "x$JAVA" = "x" ] && [ -r /etc/gentoo-release ] ; then
         JAVA_HOME=`java-config --jre-home`
@@ -202,7 +202,7 @@ locateJava() {
         else
             warn "JAVA_HOME not set; results may vary"
             JAVA=`type java`
-            JAVA=`expr "$JAVA" : '.*is \(.*\)$'`
+            JAVA=`expr "$JAVA" : '.* \(/.*\)$'`
             if [ "x$JAVA" = "x" ]; then
                 die "java command not found"
             fi
@@ -233,6 +233,10 @@ setupDebugOptions() {
         JAVA_OPTS="$DEFAULT_JAVA_OPTS"
     fi
     export JAVA_OPTS
+
+    if [ "x$EXTRA_JAVA_OPTS" != "x" ]; then
+        JAVA_OPTS="$JAVA_OPTS $EXTRA_JAVA_OPTS"
+    fi
 
     # Set Debug options if enabled
     if [ "x$KARAF_DEBUG" != "x" ]; then
@@ -280,7 +284,12 @@ setupDefaults() {
             CLASSPATH="$CLASSPATH:$file"
         fi
     done
-    DEFAULT_JAVA_DEBUG_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"
+
+    DEFAULT_JAVA_DEBUG_PORT="5005"
+    if [ "x$JAVA_DEBUG_PORT" = "x" ]; then
+        JAVA_DEBUG_PORT="$DEFAULT_JAVA_DEBUG_PORT"
+    fi
+    DEFAULT_JAVA_DEBUG_OPTS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=$JAVA_DEBUG_PORT"
 
     ##
     ## TODO: Move to conf/profiler/yourkit.{sh|cmd}
@@ -327,7 +336,7 @@ init() {
 
 run() {
 
-    CLASSPATH="${KARAF_HOME}/system/org/apache/karaf/instance/org.apache.karaf.instance.command/3.0.1/org.apache.karaf.instance.command-3.0.1.jar:${KARAF_HOME}/system/org/apache/karaf/instance/org.apache.karaf.instance.core/3.0.1/org.apache.karaf.instance.core-3.0.1.jar:${KARAF_HOME}/system/org/apache/karaf/shell/org.apache.karaf.shell.console/3.0.1/org.apache.karaf.shell.console-3.0.1.jar:${KARAF_HOME}/system/org/apache/karaf/shell/org.apache.karaf.shell.table/3.0.1/org.apache.karaf.shell.table-3.0.1.jar:${KARAF_HOME}/system/org/apache/aries/blueprint/org.apache.aries.blueprint.api/1.0.0/org.apache.aries.blueprint.api-1.0.0.jar:${KARAF_HOME}/system/org/apache/aries/blueprint/org.apache.aries.blueprint.core/1.4.0/org.apache.aries.blueprint.core-1.4.0.jar:${KARAF_HOME}/system/org/apache/aries/blueprint/org.apache.aries.blueprint.cm/1.0.3/org.apache.aries.blueprint.cm-1.0.3.jar:${KARAF_HOME}/system/org/ops4j/pax/logging/pax-logging-api/1.7.2/pax-logging-api-1.7.2.jar:${KARAF_HOME}/system/org/apache/felix/org.apache.felix.framework/4.2.1/org.apache.felix.framework-4.2.1.jar:${KARAF_HOME}/system/jline/jline/2.11/jline-2.11.jar:$CLASSPATH"
+    CLASSPATH="${KARAF_HOME}/system/org/apache/karaf/instance/org.apache.karaf.instance.command/3.0.3/org.apache.karaf.instance.command-3.0.3.jar:${KARAF_HOME}/system/org/apache/karaf/instance/org.apache.karaf.instance.core/3.0.3/org.apache.karaf.instance.core-3.0.3.jar:${KARAF_HOME}/system/org/apache/karaf/shell/org.apache.karaf.shell.console/3.0.3/org.apache.karaf.shell.console-3.0.3.jar:${KARAF_HOME}/system/org/apache/karaf/shell/org.apache.karaf.shell.table/3.0.3/org.apache.karaf.shell.table-3.0.3.jar:${KARAF_HOME}/system/org/apache/aries/blueprint/org.apache.aries.blueprint.api/1.0.1/org.apache.aries.blueprint.api-1.0.1.jar:${KARAF_HOME}/system/org/apache/aries/blueprint/org.apache.aries.blueprint.core/1.4.2/org.apache.aries.blueprint.core-1.4.2.jar:${KARAF_HOME}/system/org/apache/aries/blueprint/org.apache.aries.blueprint.cm/1.0.5/org.apache.aries.blueprint.cm-1.0.5.jar:${KARAF_HOME}/system/org/ops4j/pax/logging/pax-logging-api/1.8.1/pax-logging-api-1.8.1.jar:${KARAF_HOME}/system/org/apache/felix/org.apache.felix.framework/4.2.1/org.apache.felix.framework-4.2.1.jar:${KARAF_HOME}/system/jline/jline/2.12/jline-2.12.jar:$CLASSPATH"
 
     if $cygwin; then
         KARAF_HOME=`cygpath --path --windows "$KARAF_HOME"`
@@ -346,4 +355,3 @@ main() {
 }
 
 main "$@"
-
