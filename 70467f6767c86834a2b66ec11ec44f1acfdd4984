@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_6be05b96",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-02-16T13:17:01Z",
+      "side": 1,
+      "message": "version cannot be present here",
+      "revId": "70467f6767c86834a2b66ec11ec44f1acfdd4984",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_2bf6d363",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/MdsalNetconfOperationService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-02-16T13:17:01Z",
+      "side": 1,
+      "message": "Remove todo",
+      "revId": "70467f6767c86834a2b66ec11ec44f1acfdd4984",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_cbe64fb0",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/MdsalNetconfOperationService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-02-16T13:17:01Z",
+      "side": 1,
+      "message": "Rmove todo",
+      "revId": "70467f6767c86834a2b66ec11ec44f1acfdd4984",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_eba22b4a",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/ops/Commit.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-02-16T13:17:01Z",
+      "side": 1,
+      "message": "add placeholder",
+      "revId": "70467f6767c86834a2b66ec11ec44f1acfdd4984",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_8bb28792",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/ops/EditConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-02-16T13:17:01Z",
+      "side": 1,
+      "message": "why not use different catch branches for different exception tyoes ?",
+      "revId": "70467f6767c86834a2b66ec11ec44f1acfdd4984",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_56e50636",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/ops/EditConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-02-16T13:17:01Z",
+      "side": 1,
+      "message": "What if the data child is not present and we are processing unknown nodes ? The situation has to be handled better, right now it throws null pointer",
+      "revId": "70467f6767c86834a2b66ec11ec44f1acfdd4984",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_0b66772a",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/ops/get/AbstractGet.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-02-16T13:17:01Z",
+      "side": 1,
+      "message": "Remove comments",
+      "revId": "70467f6767c86834a2b66ec11ec44f1acfdd4984",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_2b6b33f3",
+        "filename": "opendaylight/netconf/netconf-impl/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-02-16T13:17:01Z",
+      "side": 1,
+      "message": "Remove",
+      "revId": "70467f6767c86834a2b66ec11ec44f1acfdd4984",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_cb6bafef",
+        "filename": "opendaylight/netconf/netconf-impl/src/main/java/org/opendaylight/controller/netconf/impl/mapping/operations/DefaultCommit.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-02-16T13:17:01Z",
+      "side": 1,
+      "message": "Add todo to make commit notification optional",
+      "revId": "70467f6767c86834a2b66ec11ec44f1acfdd4984",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
