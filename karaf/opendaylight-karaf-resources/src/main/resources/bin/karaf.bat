@@ -96,26 +96,9 @@ if "%KARAF_ETC%" == "" (
 
 set LOCAL_CLASSPATH=%CLASSPATH%
 set JAVA_MODE=-server
-if not exist "%JAVA_HOME%\bin\server\jvm.dll" (
-    if not exist "%JAVA_HOME%\jre\bin\server\jvm.dll" (
-        echo WARNING: Running karaf on a Java HotSpot Client VM because server-mode is not available.
-        echo Install Java Developer Kit to fix this.
-        echo For more details see http://java.sun.com/products/hotspot/whitepaper.html#client
-        set JAVA_MODE=-client
-    )
-)
-set DEFAULT_JAVA_OPTS=%JAVA_MODE% -Xms%JAVA_MIN_MEM% -Xmx%JAVA_MAX_MEM% -Dderby.system.home="%KARAF_DATA%\derby" -Dderby.storage.fileSyncTransactionLog=true -Dcom.sun.management.jmxremote  -XX:+UnlockDiagnosticVMOptions -XX:+UnsyncloadClass
-
-rem Check some easily accessible MIN/MAX params for JVM mem usage
-if not "%JAVA_PERM_MEM%" == "" (
-    set DEFAULT_JAVA_OPTS=%DEFAULT_JAVA_OPTS% -XX:PermSize=%JAVA_PERM_MEM%
-)
-if not "%JAVA_MAX_PERM_MEM%" == "" (
-    set DEFAULT_JAVA_OPTS=%DEFAULT_JAVA_OPTS% -XX:MaxPermSize=%JAVA_MAX_PERM_MEM%
-)
 
 set CLASSPATH=%LOCAL_CLASSPATH%;%KARAF_BASE%\conf
-set DEFAULT_JAVA_DEBUG_OPTS=-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005
+set DEFAULT_JAVA_DEBUG_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
 
 if "%LOCAL_CLASSPATH%" == "" goto :KARAF_CLASSPATH_EMPTY
     set CLASSPATH=%LOCAL_CLASSPATH%;%KARAF_BASE%\conf
@@ -206,8 +189,8 @@ if not "%JAVA%" == "" goto :Check_JAVA_END
     )
     if not exist "%JAVA_HOME%" (
        goto TryRegJDK
-    )
-       goto TryJDKEnd
+	)
+	goto TryJDKEnd
 :TryRegJDK
     rem try getting the JAVA_HOME from registry
     FOR /F "usebackq tokens=3*" %%A IN (`REG QUERY "HKLM\Software\JavaSoft\Java Development Kit" /v CurrentVersion`) DO (
@@ -219,7 +202,7 @@ if not "%JAVA%" == "" goto :Check_JAVA_END
     if not exist "%JAVA_HOME%" (
        call :warn Unable to retrieve JAVA_HOME from Registry
     )
-        goto TryJDKEnd
+	goto TryJDKEnd
 :TryJDKEnd
     if not exist "%JAVA_HOME%" (
         call :warn JAVA_HOME is not valid: "%JAVA_HOME%"
@@ -228,7 +211,29 @@ if not "%JAVA%" == "" goto :Check_JAVA_END
     set JAVA=%JAVA_HOME%\bin\java
 :Check_JAVA_END
 
+if not exist "%JAVA_HOME%\bin\server\jvm.dll" (
+    if not exist "%JAVA_HOME%\jre\bin\server\jvm.dll" (
+        echo WARNING: Running Karaf on a Java HotSpot Client VM because server-mode is not available.
+        echo Install Java Developer Kit to fix this.
+        echo For more details see http://java.sun.com/products/hotspot/whitepaper.html#client
+        set JAVA_MODE=-client
+    )
+)
+set DEFAULT_JAVA_OPTS=%JAVA_MODE% -Xms%JAVA_MIN_MEM% -Xmx%JAVA_MAX_MEM% -Dderby.system.home="%KARAF_DATA%\derby" -Dderby.storage.fileSyncTransactionLog=true -Dcom.sun.management.jmxremote  -XX:+UnlockDiagnosticVMOptions -XX:+UnsyncloadClass
+
+rem Check some easily accessible MIN/MAX params for JVM mem usage
+if not "%JAVA_PERM_MEM%" == "" (
+    set DEFAULT_JAVA_OPTS=%DEFAULT_JAVA_OPTS% -XX:PermSize=%JAVA_PERM_MEM%
+)
+if not "%JAVA_MAX_PERM_MEM%" == "" (
+    set DEFAULT_JAVA_OPTS=%DEFAULT_JAVA_OPTS% -XX:MaxPermSize=%JAVA_MAX_PERM_MEM%
+)
+
 if "%JAVA_OPTS%" == "" set JAVA_OPTS=%DEFAULT_JAVA_OPTS%
+
+if "%EXTRA_JAVA_OPTS%" == "" goto :KARAF_EXTRA_JAVA_OPTS_END
+    set JAVA_OPTS=%JAVA_OPTS% %EXTRA_JAVA_OPTS%
+:KARAF_EXTRA_JAVA_OPTS_END
 
 if "%KARAF_DEBUG%" == "" goto :KARAF_DEBUG_END
     if "%1" == "stop" goto :KARAF_DEBUG_END
@@ -236,7 +241,7 @@ if "%KARAF_DEBUG%" == "" goto :KARAF_DEBUG_END
     rem Use the defaults if JAVA_DEBUG_OPTS was not set
     if "%JAVA_DEBUG_OPTS%" == "" set JAVA_DEBUG_OPTS=%DEFAULT_JAVA_DEBUG_OPTS%
 
-    set "JAVA_OPTS=%JAVA_DEBUG_OPTS% %JAVA_OPTS%"
+    set JAVA_OPTS=%JAVA_DEBUG_OPTS% %JAVA_OPTS%
     call :warn Enabling Java debug options: %JAVA_DEBUG_OPTS%
 :KARAF_DEBUG_END
 
@@ -314,7 +319,7 @@ if "%KARAF_PROFILER%" == "" goto :RUN
 
 :EXECUTE_DEBUG
     if "%JAVA_DEBUG_OPTS%" == "" set JAVA_DEBUG_OPTS=%DEFAULT_JAVA_DEBUG_OPTS%
-    set "JAVA_OPTS=%JAVA_DEBUG_OPTS% %JAVA_OPTS%"
+    set JAVA_OPTS=%JAVA_DEBUG_OPTS% %JAVA_OPTS%
     shift
     goto :RUN_LOOP
 
@@ -333,4 +338,3 @@ endlocal
 if not "%PAUSE%" == "" pause
 
 :END_NO_PAUSE
-
