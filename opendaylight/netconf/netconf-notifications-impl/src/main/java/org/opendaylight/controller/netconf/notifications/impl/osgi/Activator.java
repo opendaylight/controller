@@ -12,8 +12,10 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Set;
+import org.opendaylight.controller.netconf.api.util.NetconfConstants;
 import org.opendaylight.controller.netconf.mapping.api.Capability;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
@@ -66,7 +68,9 @@ public class Activator implements BundleActivator {
             }
         };
 
-        operationaServiceRegistration = context.registerService(NetconfOperationServiceFactory.class, netconfOperationServiceFactory, new Hashtable<String, Object>());
+        Dictionary<String, String> properties = new Hashtable<>();
+        properties.put(NetconfConstants.SERVICE_NAME, NetconfConstants.NETCONF_MONITORING);
+        operationaServiceRegistration = context.registerService(NetconfOperationServiceFactory.class, netconfOperationServiceFactory, properties);
 
     }
 
