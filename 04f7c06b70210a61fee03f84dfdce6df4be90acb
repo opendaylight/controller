@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_f644521c",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataCommitCohort.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-02-16T13:36:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_07478e1e",
+      "revId": "04f7c06b70210a61fee03f84dfdce6df4be90acb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_e7f942c9",
         "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataCommitCoordinator.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-01-22T19:18:36Z",
       "side": 1,
       "message": "create a dedicated registration type. note that ObjectRegistration.close() is normally allowed to fail, which is probably not something we want to have.\n\nWould it be fair to return a Future, which completes once the initial callback has run? I am not sure in what context this is useful, but it would seem to be fair to allow the initial validation to run asynchronously and fail (which means the validator is not installed).",
+      "revId": "04f7c06b70210a61fee03f84dfdce6df4be90acb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_1661bea8",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataCommitCoordinator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-02-16T13:36:15Z",
+      "side": 1,
+      "message": "Not sure about this use-case... need to think about it bit more.",
+      "parentUuid": "7a96c907_e7f942c9",
       "revId": "04f7c06b70210a61fee03f84dfdce6df4be90acb",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_36663ac2",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataObjectModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-02-16T13:36:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_672d3246",
+      "revId": "04f7c06b70210a61fee03f84dfdce6df4be90acb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_87307e9f",
         "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataObjectModification.java",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2015-01-22T19:18:36Z",
       "side": 1,
       "message": "missing javadoc",
+      "revId": "04f7c06b70210a61fee03f84dfdce6df4be90acb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_9674ee68",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataObjectModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-02-16T13:36:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_87307e9f",
       "revId": "04f7c06b70210a61fee03f84dfdce6df4be90acb",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_b671ea77",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataObjectModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-02-16T13:36:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_e720624b",
+      "revId": "04f7c06b70210a61fee03f84dfdce6df4be90acb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_071c6e12",
         "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataObjectModification.java",
         "patchSetId": 1
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_566ae681",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataObjectModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-02-16T13:36:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_071c6e12",
+      "revId": "04f7c06b70210a61fee03f84dfdce6df4be90acb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_a71a5a15",
         "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataRootModification.java",
         "patchSetId": 1
@@ -115,6 +223,24 @@
       "writtenOn": "2015-01-22T19:18:36Z",
       "side": 1,
       "message": "same thing here -- what is the use case for beforestate?",
+      "revId": "04f7c06b70210a61fee03f84dfdce6df4be90acb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_d60d96e9",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataRootModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-02-16T13:36:15Z",
+      "side": 1,
+      "message": "Removed. Remodeled to resemble DataTreeCandidate (has only rootNode and rootPath)",
+      "parentUuid": "7a96c907_a71a5a15",
       "revId": "04f7c06b70210a61fee03f84dfdce6df4be90acb",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
