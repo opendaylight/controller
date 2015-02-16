@@ -24,7 +24,6 @@ import javax.ws.rs.core.UriInfo;
 import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
 import org.opendaylight.controller.sal.restconf.impl.StructuredData;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.Node;
 
 
 /**
@@ -137,7 +136,7 @@ public interface RestconfService {
     @Path("/config")
     @Consumes({ Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Response createConfigurationData(Node<?> payload);
+    public Response createConfigurationData(NormalizedNodeContext payload);
 
     @DELETE
     @Path("/config/{identifier:.+}")
