@@ -110,6 +110,7 @@
         <configuration>
           <instructions>
             <Bundle-Activator>org.opendaylight.controller.netconf.impl.osgi.NetconfImplActivator</Bundle-Activator>
+            <Import-Package>*</Import-Package>
           </instructions>
         </configuration>
       </plugin>
@@ -125,6 +126,41 @@
           </execution>
         </executions>
       </plugin>
+        <plugin>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>yang-maven-plugin</artifactId>
+            <executions>
+                <execution>
+                    <id>config</id>
+                    <goals>
+                        <goal>generate-sources</goal>
+                    </goals>
+                    <configuration>
+                        <codeGenerators>
+                            <generator>
+                                <codeGeneratorClass>org.opendaylight.controller.config.yangjmxgenerator.plugin.JMXGenerator</codeGeneratorClass>
+                                <outputBaseDir>${jmxGeneratorPath}</outputBaseDir>
+                                <additionalConfiguration>
+                                    <namespaceToPackage1>urn:opendaylight:params:xml:ns:yang:controller==org.opendaylight.controller.config.yang</namespaceToPackage1>
+                                </additionalConfiguration>
+                            </generator>
+                            <generator>
+                                <codeGeneratorClass>org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl</codeGeneratorClass>
+                                <outputBaseDir>${salGeneratorPath}</outputBaseDir>
+                            </generator>
+                        </codeGenerators>
+                        <inspectDependencies>true</inspectDependencies>
+                    </configuration>
+                </execution>
+            </executions>
+            <dependencies>
+                <dependency>
+                    <groupId>org.opendaylight.controller</groupId>
+                    <artifactId>yang-jmx-generator-plugin</artifactId>
+                    <version>${config.version}</version>
+                </dependency>
+            </dependencies>
+        </plugin>
     </plugins>
   </build>
 
