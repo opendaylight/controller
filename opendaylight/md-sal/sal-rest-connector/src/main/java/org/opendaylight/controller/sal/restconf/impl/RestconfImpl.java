@@ -1003,61 +1003,37 @@ public class RestconfImpl implements RestconfService {
     }
 
     @Override
-    public Response createConfigurationData(final String identifier, final Node<?> payload) {
+    public Response createConfigurationData(final String identifier, final NormalizedNodeContext payload) {
         if (payload == null) {
             throw new RestconfDocumentedException("Input is required.", ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE);
         }
 
-        final URI payloadNS = namespace(payload);
+        final URI payloadNS = payload.getData().getNodeType().getNamespace();
         if (payloadNS == null) {
             throw new RestconfDocumentedException(
                     "Data has bad format. Root element node must have namespace (XML format) or module name(JSON format)",
                     ErrorType.PROTOCOL, ErrorTag.UNKNOWN_NAMESPACE);
         }
 
-        InstanceIdentifierContext iiWithData = null;
-        CompositeNode value = null;
-        if (representsMountPointRootData(payload)) {
-            // payload represents mount point data and URI represents path to the mount point
+        final InstanceIdentifierContext iiWithData = controllerContext.toInstanceIdentifier(identifier);
+        final DOMMountPoint mountPoint = payload.getInstanceIdentifierContext().getMountPoint();
 
+        if (mountPoint != null) {
+            // payload represents mount point data and URI represents path to the mount point
             if (endsWithMountPoint(identifier)) {
                 throw new RestconfDocumentedException("URI has bad format. URI should be without \""
                         + ControllerContext.MOUNT + "\" for POST operation.", ErrorType.PROTOCOL,
                         ErrorTag.INVALID_VALUE);
             }
-
-            final String completeIdentifier = addMountPointIdentifier(identifier);
-            iiWithData = controllerContext.toInstanceIdentifier(completeIdentifier);
-
-            value = this.normalizeNode(payload, iiWithData.getSchemaNode(), iiWithData.getMountPoint());
-        } else {
-            final InstanceIdentifierContext incompleteInstIdWithData = controllerContext
-                    .toInstanceIdentifier(identifier);
-            final DataNodeContainer parentSchema = (DataNodeContainer) incompleteInstIdWithData.getSchemaNode();
-            final DOMMountPoint mountPoint = incompleteInstIdWithData.getMountPoint();
-            final Module module = findModule(mountPoint, payload);
-
-            final String payloadName = getName(payload);
-            final DataSchemaNode schemaNode = ControllerContext.findInstanceDataChildByNameAndNamespace(
-                    parentSchema, payloadName, module.getNamespace());
-            value = this.normalizeNode(payload, schemaNode, mountPoint);
-
-            iiWithData = addLastIdentifierFromData(incompleteInstIdWithData, value, schemaNode,incompleteInstIdWithData.getSchemaContext());
         }
 
-        final NormalizedNode<?, ?> datastoreNormalizedData = compositeNodeToDatastoreNormalizedNode(value,
-                iiWithData.getSchemaNode());
-        final DOMMountPoint mountPoint = iiWithData.getMountPoint();
-        YangInstanceIdentifier normalizedII;
+        final YangInstanceIdentifier normalizedII = iiWithData.getInstanceIdentifier();
 
         try {
             if (mountPoint != null) {
-                normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData
-                        .getInstanceIdentifier());
-                broker.commitConfigurationDataPost(mountPoint, normalizedII, datastoreNormalizedData);
+                broker.commitConfigurationDataPost(mountPoint, normalizedII, payload.getData());
             } else {
-                normalizedII = controllerContext.toNormalized(iiWithData.getInstanceIdentifier());
-                broker.commitConfigurationDataPost(normalizedII, datastoreNormalizedData);
+                broker.commitConfigurationDataPost(normalizedII, payload.getData());
             }
         } catch(final RestconfDocumentedException e) {
             throw e;
