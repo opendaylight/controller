@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
-import com.google.common.base.Objects;
-import com.google.common.base.Objects.ToStringHelper;
+import com.google.common.base.MoreObjects;
+import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
@@ -73,7 +73,7 @@ final class PingPongTransaction implements FutureCallback<Void> {
 
     @Override
     public String toString() {
-        return addToStringAttributes(Objects.toStringHelper(this)).toString();
+        return addToStringAttributes(MoreObjects.toStringHelper(this)).toString();
     }
 
     protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
