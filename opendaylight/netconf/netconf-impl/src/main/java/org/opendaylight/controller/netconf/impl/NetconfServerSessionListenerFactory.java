@@ -17,12 +17,12 @@ import org.opendaylight.protocol.framework.SessionListenerFactory;
 
 public class NetconfServerSessionListenerFactory implements SessionListenerFactory<NetconfServerSessionListener> {
 
-    private final DefaultCommitNotificationProducer commitNotifier;
+    private final CommitNotifier commitNotifier;
     private final SessionMonitoringService monitor;
     private final NetconfOperationServiceSnapshot netconfOperationServiceSnapshot;
     private final CapabilityProvider capabilityProvider;
 
-    public NetconfServerSessionListenerFactory(final DefaultCommitNotificationProducer commitNotifier,
+    public NetconfServerSessionListenerFactory(final CommitNotifier commitNotifier,
                                                final SessionMonitoringService monitor,
                                                final NetconfOperationServiceSnapshot netconfOperationServiceSnapshot,
                                                final CapabilityProvider capabilityProvider) {
