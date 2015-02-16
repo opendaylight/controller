@@ -23,6 +23,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <properties>
     <branding.version>1.1.0-SNAPSHOT</branding.version>
     <karaf.resources.version>1.5.0-SNAPSHOT</karaf.resources.version>
+    <karaf.localFeature>standard</karaf.localFeature>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -47,6 +48,15 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     </dependencies>
   </dependencyManagement>
   <dependencies>
+    <!-- karaf standard features -->
+    <dependency>
+      <groupId>org.apache.karaf.features</groupId>
+      <artifactId>standard</artifactId>
+      <version>${karaf.version}</version>
+      <type>xml</type>
+      <classifier>features</classifier>
+      <scope>runtime</scope>
+    </dependency>
     <!-- ODL Branding -->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>

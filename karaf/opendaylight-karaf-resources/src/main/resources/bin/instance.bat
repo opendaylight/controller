@@ -95,7 +95,7 @@ if "%KARAF_ETC%" == "" (
 )
 
 set DEFAULT_JAVA_OPTS=
-set DEFAULT_JAVA_DEBUG_OPTS=-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005
+set DEFAULT_JAVA_DEBUG_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
 
 rem Support for loading native libraries
 set PATH=%PATH%;%KARAF_BASE%\lib;%KARAF_HOME%\lib
@@ -113,11 +113,15 @@ if not "%JAVA%" == "" goto :Check_JAVA_END
 
 if "%JAVA_OPTS%" == "" set JAVA_OPTS=%DEFAULT_JAVA_OPTS%
 
+if "%EXTRA_JAVA_OPTS%" == "" goto :KARAF_EXTRA_JAVA_OPTS_END
+    set JAVA_OPTS="%JAVA_OPTS% %EXTRA_JAVA_OPTS%"
+:KARAF_EXTRA_JAVA_OPTS_END
+
 if "%KARAF_DEBUG%" == "" goto :KARAF_DEBUG_END
     rem Use the defaults if JAVA_DEBUG_OPTS was not set
     if "%JAVA_DEBUG_OPTS%" == "" set JAVA_DEBUG_OPTS=%DEFAULT_JAVA_DEBUG_OPTS%
 
-    set "JAVA_OPTS=%JAVA_DEBUG_OPTS% %JAVA_OPTS%"
+    set JAVA_OPTS="%JAVA_DEBUG_OPTS% %JAVA_OPTS%"
     call :warn Enabling Java debug options: %JAVA_DEBUG_OPTS%
 :KARAF_DEBUG_END
 
@@ -135,7 +139,7 @@ goto :EOF
 
 :CLASSPATH_END
 
-set CLASSPATH=%KARAF_HOME%\system\org\apache\karaf\instance\org.apache.karaf.instance.command\3.0.1\org.apache.karaf.instance.command-3.0.1.jar;%KARAF_HOME%\system\org\apache\karaf\instance\org.apache.karaf.instance.core\3.0.1\org.apache.karaf.instance.core-3.0.1.jar;%KARAF_HOME%\system\org\apache\karaf\shell\org.apache.karaf.shell.console\3.0.1\org.apache.karaf.shell.console-3.0.1.jar;%KARAF_HOME%\system\org\apache\karaf\shell\org.apache.karaf.shell.table\3.0.1\org.apache.karaf.shell.table-3.0.1.jar;%KARAF_HOME%\system\org\apache\aries\blueprint\org.apache.aries.blueprint.api\1.0.0\org.apache.aries.blueprint.api-1.0.0.jar;%KARAF_HOME%\system\org\apache\aries\blueprint\org.apache.aries.blueprint.core\1.4.0\org.apache.aries.blueprint.core-1.4.0.jar;%KARAF_HOME%\system\org\apache\aries\blueprint\org.apache.aries.blueprint.cm\1.0.3\org.apache.aries.blueprint.cm-1.0.3.jar;%KARAF_HOME%\system\org\ops4j\pax\logging\pax-logging-api\1.7.2\pax-logging-api-1.7.2.jar;%KARAF_HOME%\system\org\apache\felix\org.apache.felix.framework\4.2.1\org.apache.felix.framework-4.2.1.jar;%KARAF_HOME%\system\jline\jline\2.11\jline-2.11.jar;%CLASSPATH%
+set CLASSPATH=%KARAF_HOME%\system\org\apache\karaf\instance\org.apache.karaf.instance.command\3.0.3\org.apache.karaf.instance.command-3.0.3.jar;%KARAF_HOME%\system\org\apache\karaf\instance\org.apache.karaf.instance.core\3.0.3\org.apache.karaf.instance.core-3.0.3.jar;%KARAF_HOME%\system\org\apache\karaf\shell\org.apache.karaf.shell.console\3.0.3\org.apache.karaf.shell.console-3.0.3.jar;%KARAF_HOME%\system\org\apache\karaf\shell\org.apache.karaf.shell.table\3.0.3\org.apache.karaf.shell.table-3.0.3.jar;%KARAF_HOME%\system\org\apache\aries\blueprint\org.apache.aries.blueprint.api\1.0.1\org.apache.aries.blueprint.api-1.0.1.jar;%KARAF_HOME%\system\org\apache\aries\blueprint\org.apache.aries.blueprint.core\1.4.2\org.apache.aries.blueprint.core-1.4.2.jar;%KARAF_HOME%\system\org\apache\aries\blueprint\org.apache.aries.blueprint.cm\1.0.5\org.apache.aries.blueprint.cm-1.0.5.jar;%KARAF_HOME%\system\org\ops4j\pax\logging\pax-logging-api\1.8.1\pax-logging-api-1.8.1.jar;%KARAF_HOME%\system\org\apache\felix\org.apache.felix.framework\4.2.1\org.apache.felix.framework-4.2.1.jar;%KARAF_HOME%\system\jline\jline\2.12\jline-2.12.jar;%CLASSPATH%
 
 :EXECUTE
     if "%SHIFT%" == "true" SET ARGS=%2 %3 %4 %5 %6 %7 %8
@@ -148,4 +152,3 @@ rem # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 :END
 
 endlocal
-
