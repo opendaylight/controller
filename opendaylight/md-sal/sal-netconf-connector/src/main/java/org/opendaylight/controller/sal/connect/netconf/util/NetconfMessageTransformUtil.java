@@ -113,6 +113,10 @@ public class NetconfMessageTransformUtil {
     public static final CompositeNode COMMIT_RPC_CONTENT =
             NodeFactory.createImmutableCompositeNode(NETCONF_COMMIT_QNAME, null, Collections.<Node<?>>emptyList());
 
+    // Get message
+    public static final CompositeNode GET_RPC_CONTENT =
+            NodeFactory.createImmutableCompositeNode(NETCONF_GET_QNAME, null, Collections.<Node<?>>emptyList());
+
     // Create-subscription changes message
     public static final CompositeNode CREATE_SUBSCRIPTION_RPC_CONTENT =
             NodeFactory.createImmutableCompositeNode(CREATE_SUBSCRIPTION_RPC_QNAME, null, Collections.<Node<?>>emptyList());

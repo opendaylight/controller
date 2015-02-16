@@ -110,7 +110,7 @@ public final class ReadOnlyTx implements DOMDataReadOnlyTransaction {
 
     private CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readOperationalData(
             final YangInstanceIdentifier path) {
-        final ListenableFuture<RpcResult<CompositeNode>> configCandidate = netconfOps.getRunning(loggingCallback, Optional.fromNullable(path));
+        final ListenableFuture<RpcResult<CompositeNode>> configCandidate = netconfOps.get(loggingCallback, Optional.fromNullable(path));
 
         // Find data node and normalize its content
         final ListenableFuture<Optional<NormalizedNode<?, ?>>> transformedFuture = Futures.transform(configCandidate, new Function<RpcResult<CompositeNode>, Optional<NormalizedNode<?, ?>>>() {
