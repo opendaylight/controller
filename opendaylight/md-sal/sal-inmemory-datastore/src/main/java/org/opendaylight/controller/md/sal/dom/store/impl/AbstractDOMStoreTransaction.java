@@ -7,10 +7,9 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
-import com.google.common.base.Objects;
-import com.google.common.base.Objects.ToStringHelper;
+import com.google.common.base.MoreObjects;
+import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Preconditions;
-
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
 import org.slf4j.Logger;
 
@@ -42,7 +41,7 @@ abstract class AbstractDOMStoreTransaction implements DOMStoreTransaction {
 
     @Override
     public final String toString() {
-        return addToStringAttributes(Objects.toStringHelper(this)).toString();
+        return addToStringAttributes(MoreObjects.toStringHelper(this)).toString();
     }
 
     /**
