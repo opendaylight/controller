@@ -1,0 +1,293 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_16345efa",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/src/main/java/org/opendaylight/controller/md/sal/dom/xsql/XSQLAdapter.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-16T18:26:34Z",
+      "side": 1,
+      "message": "Consider using a constant for this string",
+      "revId": "d546df844746973e5f594a4eed493a4dfa06f6e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_b6248ac5",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/src/main/java/org/opendaylight/controller/md/sal/dom/xsql/XSQLBluePrint.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-16T18:26:34Z",
+      "side": 1,
+      "message": "XSQLBluePrintNode has a method which starts with upper case? Why?",
+      "revId": "d546df844746973e5f594a4eed493a4dfa06f6e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_161bfe81",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/src/main/java/org/opendaylight/controller/md/sal/dom/xsql/XSQLBluePrintNode.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-16T18:26:34Z",
+      "side": 1,
+      "message": "Can odlNodes to set to a different value (list)? If not you can make this field final. The advantage is that in the rest of the code you will not need to do a null check for it.",
+      "revId": "d546df844746973e5f594a4eed493a4dfa06f6e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_36207aab",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/src/main/java/org/opendaylight/controller/md/sal/dom/xsql/XSQLBluePrintNode.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-16T18:26:34Z",
+      "side": 1,
+      "message": "If odlNodes is not final then you could end up with an NPE here is it was set to null.",
+      "revId": "d546df844746973e5f594a4eed493a4dfa06f6e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3107241b",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/src/main/java/org/opendaylight/controller/md/sal/dom/xsql/XSQLBluePrintNode.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-16T18:26:34Z",
+      "side": 1,
+      "message": "Leaking collection",
+      "revId": "d546df844746973e5f594a4eed493a4dfa06f6e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_1102280a",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/src/main/java/org/opendaylight/controller/md/sal/dom/xsql/XSQLODLUtils.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-16T18:26:34Z",
+      "side": 1,
+      "message": "Copyrights are missing from the XSL code. Please create a separate commit which adds them in. Do not use this commit :)",
+      "revId": "d546df844746973e5f594a4eed493a4dfa06f6e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_9115d841",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/src/main/java/org/opendaylight/controller/md/sal/dom/xsql/XSQLODLUtils.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-16T18:26:34Z",
+      "side": 1,
+      "message": "commented code needed?",
+      "revId": "d546df844746973e5f594a4eed493a4dfa06f6e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_d11e005f",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/src/main/java/org/opendaylight/controller/md/sal/dom/xsql/XSQLODLUtils.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-16T18:26:34Z",
+      "side": 1,
+      "message": "You don\u0027t need to do separate checks for ListSchemaNode and DataNodeContainer. ListSchemaNode is a DataNodeContainer. Same for the check above.",
+      "revId": "d546df844746973e5f594a4eed493a4dfa06f6e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3155e4fa",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/src/main/java/org/opendaylight/controller/md/sal/dom/xsql/jdbc/JDBCResultSet.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 295,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-16T18:26:34Z",
+      "side": 1,
+      "message": "A comment on what fitCriteria stands for may be helpful.",
+      "revId": "d546df844746973e5f594a4eed493a4dfa06f6e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_f123fca4",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/src/main/java/org/opendaylight/controller/md/sal/dom/xsql/jdbc/JDBCResultSet.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 312,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-16T18:26:34Z",
+      "side": 1,
+      "message": "Constants for these strings may be a good idea.",
+      "revId": "d546df844746973e5f594a4eed493a4dfa06f6e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_913cf8c9",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/src/main/java/org/opendaylight/controller/md/sal/dom/xsql/jdbc/JDBCResultSet.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-16T18:26:34Z",
+      "side": 1,
+      "message": "formatting issue. if on a separate line",
+      "revId": "d546df844746973e5f594a4eed493a4dfa06f6e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_b139f4d8",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/src/main/java/org/opendaylight/controller/md/sal/dom/xsql/jdbc/JDBCResultSet.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 337,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-16T18:26:34Z",
+      "side": 1,
+      "message": "You must add braces even if you have only one statement in the if. It prevents issues where you may inadvertently exclude statements that need to be part of the condition.",
+      "revId": "d546df844746973e5f594a4eed493a4dfa06f6e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5132f0f2",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/src/main/java/org/opendaylight/controller/md/sal/dom/xsql/jdbc/JDBCResultSet.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 428,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-16T18:26:34Z",
+      "side": 1,
+      "message": "formatting issue",
+      "revId": "d546df844746973e5f594a4eed493a4dfa06f6e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_712fec88",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/src/main/java/org/opendaylight/controller/md/sal/dom/xsql/jdbc/JDBCResultSet.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 437,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-16T18:26:34Z",
+      "side": 1,
+      "message": "formatting issue",
+      "revId": "d546df844746973e5f594a4eed493a4dfa06f6e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_d155a0fa",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/src/main/java/org/opendaylight/xsql/XSQLProvider.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-16T18:26:34Z",
+      "side": 1,
+      "message": "Who is root? :)",
+      "revId": "d546df844746973e5f594a4eed493a4dfa06f6e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_f15a1c29",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/src/main/java/org/opendaylight/xsql/XSQLProvider.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-16T18:26:34Z",
+      "side": 1,
+      "message": "If you just need a write transaction then why not create a writetransaction only",
+      "revId": "d546df844746973e5f594a4eed493a4dfa06f6e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_91439841",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/src/main/java/org/opendaylight/yang/gen/v1/http/netconfcentral/org/ns/xsql/rev140626/XSQLModule.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-16T18:26:34Z",
+      "side": 1,
+      "message": "Make 10000 a constant.\n\nAlso you could probably just use the guava Uninterruptibles.sleepUninterruptibly instead of the sleep with try catch.",
+      "revId": "d546df844746973e5f594a4eed493a4dfa06f6e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
