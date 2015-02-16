@@ -74,6 +74,12 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
                 } else if (NetconfMessageTransformUtil.isGetConfigOperation(rpc)) {
                     final DataNodeContainer schemaForGetConfig = NetconfMessageTransformUtil.createSchemaForGetConfig(schemaContext.get());
                     w3cPayload = XmlDocumentUtils.toDocument(rpcPayload, schemaContext.get(), schemaForGetConfig, codecProvider);
+                } else if (NetconfMessageTransformUtil.isGetSFDescriptionInfoOperation(rpc)) {
+                    final DataNodeContainer schemaForGetDescriptionInfo = NetconfMessageTransformUtil.createSchemaForGetSFDescriptionInfo(schemaContext.get());
+                    w3cPayload = XmlDocumentUtils.toDocument(rpcPayload, schemaForGetDescriptionInfo, codecProvider);
+                } else if (NetconfMessageTransformUtil.isGetSFMonitorInfoOperation(rpc)) {
+                    final DataNodeContainer schemaForGetMonitorInfo = NetconfMessageTransformUtil.createSchemaForGetSFMonitorInfo(schemaContext.get());
+                    w3cPayload = XmlDocumentUtils.toDocument(rpcPayload, schemaForGetMonitorInfo, codecProvider);
                 } else {
                     final Optional<RpcDefinition> schemaForRpc = NetconfMessageTransformUtil.findSchemaForRpc(rpc, schemaContext.get());
                     if(schemaForRpc.isPresent()) {
@@ -114,6 +120,22 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
             final List<org.opendaylight.yangtools.yang.data.api.Node<?>> dataNodes = XmlDocumentUtils.toDomNodes(xmlData,
                     Optional.of(context.getDataDefinitions()), context);
 
+            final CompositeNodeBuilder<ImmutableCompositeNode> it = ImmutableCompositeNode.builder();
+            it.setQName(NetconfMessageTransformUtil.NETCONF_RPC_REPLY_QNAME);
+            it.add(ImmutableCompositeNode.create(NetconfMessageTransformUtil.NETCONF_DATA_QNAME, dataNodes));
+            compositeNode = it.toInstance();
+        } else if (NetconfMessageTransformUtil.isGetSFDescriptionInfoOperation(rpc)) {
+            final Element xmlData = NetconfMessageTransformUtil.getSFDescriptionDataSubtree(message.getDocument());
+            final List<org.opendaylight.yangtools.yang.data.api.Node<?>> dataNodes = XmlDocumentUtils.toDomNodes(xmlData,
+                    Optional.of(context.getDataDefinitions()), context);
+            final CompositeNodeBuilder<ImmutableCompositeNode> it = ImmutableCompositeNode.builder();
+            it.setQName(NetconfMessageTransformUtil.NETCONF_RPC_REPLY_QNAME);
+            it.add(ImmutableCompositeNode.create(NetconfMessageTransformUtil.NETCONF_DATA_QNAME, dataNodes));
+            compositeNode = it.toInstance();
+        } else if (NetconfMessageTransformUtil.isGetSFMonitorInfoOperation(rpc)) {
+            final Element xmlData = NetconfMessageTransformUtil.getSFMonitorDataSubtree(message.getDocument());
+            final List<org.opendaylight.yangtools.yang.data.api.Node<?>> dataNodes = XmlDocumentUtils.toDomNodes(xmlData,
+                    Optional.of(context.getDataDefinitions()), context);
             final CompositeNodeBuilder<ImmutableCompositeNode> it = ImmutableCompositeNode.builder();
             it.setQName(NetconfMessageTransformUtil.NETCONF_RPC_REPLY_QNAME);
             it.add(ImmutableCompositeNode.create(NetconfMessageTransformUtil.NETCONF_DATA_QNAME, dataNodes));

@@ -102,6 +102,11 @@ public class NetconfMessageTransformUtil {
     public static URI NETCONF_RUNNING_WRITABLE_URI = URI
             .create("urn:ietf:params:netconf:capability:writable-running:1.0");
 
+    public static URI SF_DESC_MON_URI = URI.create("urn.intel.params:xml:ns:sf-desc-mon-rpt");
+    public static QName SF_DESC_MON_QNAME = QName.create(SF_DESC_MON_URI, null, "sf-desc-mon-rpt");
+    public static QName SF_DESCRIPTION_QNAME = QName.create(SF_DESC_MON_QNAME, "get-SF-description");
+    public static QName SF_MONITOR_INFO_QNAME = QName.create(SF_DESC_MON_QNAME, "get-SF-monitoring-info");
+
     public static QName NETCONF_LOCK_QNAME = QName.create(NETCONF_QNAME, "lock");
     public static QName NETCONF_UNLOCK_QNAME = QName.create(NETCONF_QNAME, "unlock");
 
@@ -250,6 +255,22 @@ public class NetconfMessageTransformUtil {
         return (Element) doc.getElementsByTagNameNS(NETCONF_URI.toString(), "data").item(0);
     }
 
+    public static Element getSFDescriptionDataSubtree(final Document doc) {
+        return (Element) doc.getElementsByTagNameNS(SF_DESC_MON_URI.toString(), "get-SF-description").item(0);
+    }
+
+    public static Element getSFMonitorDataSubtree(final Document doc) {
+        return (Element) doc.getElementsByTagNameNS(SF_DESC_MON_URI.toString(), "get-SF-monitoring-info").item(0);
+    }
+
+    public static boolean isGetSFDescriptionInfoOperation(final QName rpc) {
+        return SF_DESC_MON_URI.equals(rpc.getNamespace()) && rpc.getLocalName().equals(SF_DESCRIPTION_QNAME.getLocalName());
+    }
+
+    public static boolean isGetSFMonitorInfoOperation(final QName rpc) {
+        return SF_DESC_MON_URI.equals(rpc.getNamespace()) && rpc.getLocalName().equals(SF_MONITOR_INFO_QNAME.getLocalName());
+    }
+
     public static boolean isDataRetrievalOperation(final QName rpc) {
         return NETCONF_URI.equals(rpc.getNamespace())
                 && (rpc.getLocalName().equals(NETCONF_GET_CONFIG_QNAME.getLocalName()) || rpc.getLocalName().equals(
@@ -267,6 +288,56 @@ public class NetconfMessageTransformUtil {
     public static boolean isDataEditOperation(final QName rpc) {
         return NETCONF_URI.equals(rpc.getNamespace())
                 && rpc.getLocalName().equals(NETCONF_EDIT_CONFIG_QNAME.getLocalName());
+    }
+
+    /**
+     * Creates artificial schema node for get sf description info rpc. This artificial schema looks like:
+     * <pre>
+     * {@code
+     * rpc
+     *   get-SF-description
+     *     filter
+     *         // All schema nodes from remote schema
+     *     filter
+     *   get-SF-description
+     * rpc
+     * }
+     * </pre>
+     *
+     * This makes the translation of rpc get-SF-description request
+     * to xml use schema which is crucial for some types of nodes e.g. identity-ref.
+     */
+    public static DataNodeContainer createSchemaForGetSFDescriptionInfo(final SchemaContext schemaContext) {
+        final QName filter = QName.create(SF_DESCRIPTION_QNAME, "filter");
+        final QName getSFDescription = QName.create(SF_DESCRIPTION_QNAME, "get-SF-description");
+        final NodeContainerProxy configProxy = new NodeContainerProxy(filter, schemaContext.getChildNodes());
+        final NodeContainerProxy editConfigProxy = new NodeContainerProxy(getSFDescription, Sets.<DataSchemaNode>newHashSet(configProxy));
+        return new NodeContainerProxy(NETCONF_RPC_QNAME, Sets.<DataSchemaNode>newHashSet(editConfigProxy));
+    }
+
+    /**
+     * Creates artificial schema node for get sf monitoring info rpc. This artificial schema looks like:
+     * <pre>
+     * {@code
+     * rpc
+     *   get-SF-monitoring-info
+     *     filter
+     *         // All schema nodes from remote schema
+     *     filter
+     *   get-SF-monitoring-info
+     * rpc
+     * }
+     * </pre>
+     *
+     * This makes the translation of rpc get-SF-monitoring-info request
+     * to xml use schema which is crucial for some types of nodes e.g. identity-ref.
+     */
+    public static DataNodeContainer createSchemaForGetSFMonitorInfo(final SchemaContext schemaContext) {
+        final QName filter = QName.create(SF_MONITOR_INFO_QNAME, "filter");
+        final QName getSFMonitorInfo = QName.create(SF_MONITOR_INFO_QNAME, "get-SF-monitoring-info");
+        final NodeContainerProxy configProxy = new NodeContainerProxy(filter, schemaContext.getChildNodes());
+        final NodeContainerProxy editConfigProxy = new NodeContainerProxy(getSFMonitorInfo, Sets.<DataSchemaNode>newHashSet(configProxy));
+        return new NodeContainerProxy(NETCONF_RPC_QNAME, Sets.<DataSchemaNode>newHashSet(editConfigProxy));
     }
 
     /**
