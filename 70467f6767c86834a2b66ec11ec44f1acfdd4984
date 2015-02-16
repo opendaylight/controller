@@ -87,6 +87,23 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_d6b4b683",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/ops/EditConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-02-16T16:45:03Z",
+      "side": 1,
+      "message": "This should not warn , if the data is simply not present, thats ok.",
+      "revId": "70467f6767c86834a2b66ec11ec44f1acfdd4984",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_56e50636",
         "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/ops/EditConfig.java",
         "patchSetId": 2
