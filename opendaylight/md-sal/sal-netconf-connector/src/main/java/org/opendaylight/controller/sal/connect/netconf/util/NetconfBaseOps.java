@@ -174,32 +174,16 @@ public final class NetconfBaseOps {
         return getConfig(callback, NETCONF_CANDIDATE_QNAME, filterPath);
     }
 
-    public ListenableFuture<RpcResult<CompositeNode>> get(final FutureCallback<RpcResult<CompositeNode>> callback, final QName datastore, final Optional<YangInstanceIdentifier> filterPath) {
+    public ListenableFuture<RpcResult<CompositeNode>> get(final FutureCallback<RpcResult<CompositeNode>> callback, final Optional<YangInstanceIdentifier> filterPath) {
         Preconditions.checkNotNull(callback);
-        Preconditions.checkNotNull(datastore);
 
         final ListenableFuture<RpcResult<CompositeNode>> future;
-        if (filterPath.isPresent()) {
-            final Node<?> node = toFilterStructure(filterPath.get());
-            future = rpc.invokeRpc(NETCONF_GET_QNAME,
-                            NetconfMessageTransformUtil.wrap(NETCONF_GET_QNAME, getSourceNode(datastore), node));
-        } else {
-            future = rpc.invokeRpc(NETCONF_GET_QNAME,
-                            NetconfMessageTransformUtil.wrap(NETCONF_GET_QNAME, getSourceNode(datastore)));
-        }
+        final Node<?> node = filterPath.isPresent() ? toFilterStructure(filterPath.get()) : NetconfMessageTransformUtil.GET_RPC_CONTENT;
+        future = rpc.invokeRpc(NETCONF_GET_QNAME, NetconfMessageTransformUtil.wrap(NETCONF_GET_QNAME, node));
 
         Futures.addCallback(future, callback);
         return future;
     }
-
-    public ListenableFuture<RpcResult<CompositeNode>> getRunning(final FutureCallback<RpcResult<CompositeNode>> callback, final Optional<YangInstanceIdentifier> filterPath) {
-        return get(callback, NETCONF_RUNNING_QNAME, filterPath);
-    }
-
-    public ListenableFuture<RpcResult<CompositeNode>> getCandidate(final FutureCallback<RpcResult<CompositeNode>> callback, final Optional<YangInstanceIdentifier> filterPath) {
-        return get(callback, NETCONF_CANDIDATE_QNAME, filterPath);
-    }
-
 
     public ListenableFuture<RpcResult<CompositeNode>> editConfigCandidate(final FutureCallback<? super RpcResult<CompositeNode>> callback, final CompositeNode editStructure, final ModifyAction modifyAction, final boolean rollback) {
         return editConfig(callback, NETCONF_CANDIDATE_QNAME, editStructure, Optional.of(modifyAction), rollback);

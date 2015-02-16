@@ -8,7 +8,7 @@
 package org.opendaylight.controller.sal.connect.netconf.schema;
 
 import com.google.common.base.Function;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
@@ -166,13 +166,13 @@ public final class NetconfRemoteSchemaYangSourceProvider implements SchemaSource
         }
 
         @Override
-        protected Objects.ToStringHelper addToStringAttributes(final Objects.ToStringHelper toStringHelper) {
-            return toStringHelper.add("device", id);
+        public InputStream openStream() throws IOException {
+            return IOUtils.toInputStream(schemaString.get());
         }
 
         @Override
-        public InputStream openStream() throws IOException {
-            return IOUtils.toInputStream(schemaString.get());
+        protected MoreObjects.ToStringHelper addToStringAttributes(final MoreObjects.ToStringHelper toStringHelper) {
+            return toStringHelper.add("device", id);
         }
     }
 }
