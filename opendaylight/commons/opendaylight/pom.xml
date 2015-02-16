@@ -16,20 +16,13 @@
   <properties>
 
     <akka.version>2.3.4</akka.version>
-    <aopalliance.version>1.0.0</aopalliance.version>
     <appauth.version>0.5.0-SNAPSHOT</appauth.version>
     <archetype-app-northbound>0.1.0-SNAPSHOT</archetype-app-northbound>
-    <aries.util.version>1.1.0</aries.util.version>
     <arphandler.version>0.6.0-SNAPSHOT</arphandler.version>
-    <!-- Controller Modules Versions -->
-    <asm.version>4.1</asm.version>
     <!-- Plugin Versions -->
-    <bouncycastle.version>1.50</bouncycastle.version>
-    <bundle.plugin.version>2.4.0</bundle.plugin.version>
     <bundlescanner.api.version>0.5.0-SNAPSHOT</bundlescanner.api.version>
     <bundlescanner.implementation.version>0.5.0-SNAPSHOT</bundlescanner.implementation.version>
     <bundlescanner.version>0.5.0-SNAPSHOT</bundlescanner.version>
-    <checkstyle.version>2.12</checkstyle.version>
     <clustering.services.version>0.6.0-SNAPSHOT</clustering.services.version>
     <clustering.services_implementation.version>0.5.0-SNAPSHOT</clustering.services_implementation.version>
     <clustering.stub.version>0.5.0-SNAPSHOT</clustering.stub.version>
@@ -49,17 +42,13 @@
     <commons.tomcat.util>7.0.53.v201406070630</commons.tomcat.util>
 
     <commons.checkstyle.version>0.1.0-SNAPSHOT</commons.checkstyle.version>
-    <commons.fileupload.version>1.2.2</commons.fileupload.version>
     <commons.httpclient.version>0.2.0-SNAPSHOT</commons.httpclient.version>
-    <commons.io.version>2.4</commons.io.version>
-    <commons.lang3.version>3.1</commons.lang3.version>
     <commons.logback_settings.version>0.1.0-SNAPSHOT</commons.logback_settings.version>
     <commons.net.version>3.0.1</commons.net.version>
     <commons.opendaylight.commons.httpclient>0.2.0-SNAPSHOT</commons.opendaylight.commons.httpclient>
     <commons.opendaylight.concepts.version>0.6.0-SNAPSHOT</commons.opendaylight.concepts.version>
     <commons.opendaylight.version>1.5.0-SNAPSHOT</commons.opendaylight.version>
     <commons.parent.version>1.1.0-SNAPSHOT</commons.parent.version>
-    <compiler.version>2.3.2</compiler.version>
     <commons.httpclient.version>0.2.0-SNAPSHOT</commons.httpclient.version>
     <concepts.version>0.6.0-SNAPSHOT</concepts.version>
     <concurrentlinkedhashmap.version>1.4</concurrentlinkedhashmap.version>
@@ -87,12 +76,8 @@
     <config.statistics.manager.configfile>30-statistics-manager.xml</config.statistics.manager.configfile>
     <eclipse.persistence.version>2.5.0</eclipse.persistence.version>
     <eclipse.jdt.core.compiler.batch.version>3.8.0.I20120518-2145</eclipse.jdt.core.compiler.batch.version>
-    <!-- enforcer version -->
-    <enforcer.version>1.3.1</enforcer.version>
-    <enunciate.version>1.28</enunciate.version>
 
     <!-- OpenEXI third party lib for netconf-->
-
     <exi.nagasena.version>0000.0002.0038.0</exi.nagasena.version>
     <felix.util.version>1.6.0</felix.util.version>
     <filtervalve.version>1.5.0-SNAPSHOT</filtervalve.version>
@@ -127,7 +112,6 @@
     <leveldb.version>0.7</leveldb.version>
     <leveldbjni.version>1.8</leveldbjni.version>
     <lifecycle.mapping.version>1.0.0</lifecycle.mapping.version>
-    <logback.version>1.0.9</logback.version>
     <logging.bridge.version>0.5.0-SNAPSHOT</logging.bridge.version>
     <maven.plugin.api.version>3.0.5</maven.plugin.api.version>
     <mimepull.version>1.9.4</mimepull.version>
