@@ -223,7 +223,7 @@ public class FileStorageAdapterTest {
         return "<config>" + i++ + "</config>";
     }
 
-    private void delete(final File f) throws IOException {
+    public static void delete(final File f) throws IOException {
         if (f.isDirectory()) {
             for (File c : f.listFiles()) {
                 delete(c);

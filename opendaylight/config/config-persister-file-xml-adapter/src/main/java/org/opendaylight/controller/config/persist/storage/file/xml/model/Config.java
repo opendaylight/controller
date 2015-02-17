@@ -12,9 +12,11 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -25,8 +27,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import javax.xml.transform.stream.StreamSource;
+
 import org.apache.commons.lang3.StringUtils;
+import org.opendaylight.controller.config.persist.storage.file.xml.DataEncrypter;
 
 @XmlRootElement(name = "persisted-snapshots")
 public final class Config {
@@ -79,8 +82,11 @@ public final class Config {
             XMLInputFactory xif = XMLInputFactory.newFactory();
             xif.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
             xif.setProperty(XMLInputFactory.SUPPORT_DTD, false);
-            XMLStreamReader xsr = xif.createXMLStreamReader(new StreamSource(from));
-            return ((Config) um.unmarshal(xsr));
+            //XMLStreamReader xsr = xif.createXMLStreamReader(new StreamSource(from));
+            XMLStreamReader xsr = xif.createXMLStreamReader(DataEncrypter.decryptCredentialAttributes(from.getPath()));
+            Config config = ((Config) um.unmarshal(xsr));
+            DataEncrypter.encryptCredentialAttributes(from.getPath());
+            return config;
         } catch (JAXBException | XMLStreamException e) {
             throw new PersistException("Unable to restore configuration", e);
         }

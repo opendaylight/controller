@@ -11,22 +11,24 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import java.io.File;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import javax.xml.transform.stream.StreamSource;
+
 import org.apache.karaf.features.ConfigFileInfo;
 import org.apache.karaf.features.Feature;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
+import org.opendaylight.controller.config.persist.storage.file.xml.DataEncrypter;
 import org.opendaylight.controller.config.persist.storage.file.xml.model.ConfigSnapshot;
 
 /*
@@ -70,8 +72,10 @@ public class FeatureConfigSnapshotHolder implements ConfigSnapshotHolder {
         xif.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
         xif.setProperty(XMLInputFactory.SUPPORT_DTD, false);
         try {
-            XMLStreamReader xsr = xif.createXMLStreamReader(new StreamSource(new File(fileInfo.getFinalname())));
+            //XMLStreamReader xsr = xif.createXMLStreamReader(new StreamSource(new File(fileInfo.getFinalname())));
+            XMLStreamReader xsr = xif.createXMLStreamReader(DataEncrypter.decryptCredentialAttributes(fileInfo.getFinalname()));
             unmarshalled = ((ConfigSnapshot) um.unmarshal(xsr));
+            DataEncrypter.encryptCredentialAttributes(fileInfo.getFinalname());
         } catch (final XMLStreamException e) {
             throw new JAXBException(e);
         }
