@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 
+import org.opendaylight.controller.md.sal.binding.impl.CompatibleNotificationBroker;
 import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
 import org.opendaylight.controller.sal.binding.impl.NotificationBrokerImpl;
 
@@ -37,8 +38,10 @@ public final class NotificationBrokerImplModule extends
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        ListeningExecutorService listeningExecutor = SingletonHolder.getDefaultNotificationExecutor();
-        NotificationBrokerImpl broker = new NotificationBrokerImpl(listeningExecutor);
-        return broker;
+//        ListeningExecutorService listeningExecutor = SingletonHolder.getDefaultNotificationExecutor();
+//        NotificationBrokerImpl broker = new NotificationBrokerImpl(listeningExecutor);
+        CompatibleNotificationBroker notificationBroker = new CompatibleNotificationBroker(
+                getNewNotificationPublishServiceDependency(), getNewNotificationServiceDependency());
+        return notificationBroker;
     }
 }
