@@ -15,7 +15,7 @@
 
   <properties>
 
-    <akka.version>2.3.4</akka.version>
+    <akka.version>2.3.9</akka.version>
     <appauth.version>0.5.0-SNAPSHOT</appauth.version>
     <archetype-app-northbound>0.1.0-SNAPSHOT</archetype-app-northbound>
     <arphandler.version>0.6.0-SNAPSHOT</arphandler.version>
