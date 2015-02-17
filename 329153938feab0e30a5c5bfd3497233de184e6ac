@@ -33,6 +33,23 @@
       "revId": "329153938feab0e30a5c5bfd3497233de184e6ac",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_f9e522dc",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehaviorTest.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 305,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-17T20:06:37Z",
+      "side": 1,
+      "message": "Shouldn\u0027t this call createBehavior and not assume Leader since all behavior test classes derived from this? Also this test isn\u0027t really valid for a candidate so should probably return if behavior instance of Candidate.",
+      "revId": "329153938feab0e30a5c5bfd3497233de184e6ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
