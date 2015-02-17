@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_03573bcb",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/AbstractReplicatedLogImpl.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-17T07:45:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_43854358",
+      "revId": "7620c23e3b023977f5025560d4d4d8bf4ad45c67",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_638abf6b",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 8
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_e371ef76",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 675,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-17T07:45:44Z",
+      "side": 1,
+      "message": "i am assuming you are pointing to the typo in comment.\n\nDone",
+      "parentUuid": "7a96c907_638abf6b",
+      "revId": "7620c23e3b023977f5025560d4d4d8bf4ad45c67",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_037bbb7b",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 8
@@ -47,6 +83,24 @@
       "writtenOn": "2015-02-17T01:55:22Z",
       "side": 1,
       "message": "This is wrong. Why would I pass lastAppliedTerm if replicatedToAllEntry is null? In fact if replicatedToAllEntry is null why would I even capture the snapshot, doesn\u0027t it mean that replicatedToAllIndex has already been removed from the journal?",
+      "revId": "7620c23e3b023977f5025560d4d4d8bf4ad45c67",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_630ddfe8",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 828,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-17T07:45:44Z",
+      "side": 1,
+      "message": "This could happen if one of the followers is down. And the snapshot on the other follower is initiated due to memory. replicatedToAllindex might be cleared and lastApplied might have grown since majority is maintained.\nWe do want the capture to happen and clear on lastApplied. \n\nI didnt want to pass -1 for the term if replicatedToAllEntry is null, but i guess there is no harm.\n\nWill make the change.",
+      "parentUuid": "7a96c907_037bbb7b",
       "revId": "7620c23e3b023977f5025560d4d4d8bf4ad45c67",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
