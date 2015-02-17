@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_4615519a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 538,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-17T14:53:09Z",
+      "side": 1,
+      "message": "We can remove this debug log - not relevant anymore since this method was refactored to handle one follower.",
+      "revId": "1f1a33293f4585f9767751b6e20861f6bae53a5b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
