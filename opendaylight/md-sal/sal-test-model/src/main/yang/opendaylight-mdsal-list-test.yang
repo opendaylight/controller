@@ -43,6 +43,10 @@ module opendaylight-mdsal-list-test {
         uses two-level-list;
     }
 
+    notification two-level-list-changed {
+        uses two-level-list;
+    }
+
     rpc put-top {
         input {
             uses two-level-list;
