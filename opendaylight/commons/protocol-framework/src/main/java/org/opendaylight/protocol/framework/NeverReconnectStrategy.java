@@ -18,6 +18,7 @@ import com.google.common.base.Preconditions;
  * Utility ReconnectStrategy singleton, which will cause the reconnect process
  * to always fail.
  */
+@Deprecated
 @ThreadSafe
 public final class NeverReconnectStrategy implements ReconnectStrategy {
     private final EventExecutor executor;

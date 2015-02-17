@@ -15,6 +15,7 @@ import io.netty.util.concurrent.Promise;
  *
  * @param <S> session type
  */
+@Deprecated
 public interface SessionNegotiatorFactory<M, S extends ProtocolSession<?>, L extends SessionListener<?, ?, ?>> {
     /**
      * Create a new negotiator attached to a channel, which will notify

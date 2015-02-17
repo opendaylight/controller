@@ -19,6 +19,7 @@ import com.google.common.base.Preconditions;
 /**
 *
 */
+@Deprecated
 public final class TimedReconnectStrategyFactoryModule extends org.opendaylight.controller.config.yang.protocol.framework.AbstractTimedReconnectStrategyFactoryModule
  {
 

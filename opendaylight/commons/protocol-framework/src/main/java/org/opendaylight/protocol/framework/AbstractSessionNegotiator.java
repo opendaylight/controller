@@ -27,6 +27,7 @@ import com.google.common.base.Preconditions;
  * @param <M> Protocol message type
  * @param <S> Protocol session type, has to extend ProtocolSession<M>
  */
+@Deprecated
 public abstract class AbstractSessionNegotiator<M, S extends AbstractProtocolSession<?>> extends ChannelInboundHandlerAdapter implements SessionNegotiator<S> {
     private final Logger LOG = LoggerFactory.getLogger(AbstractSessionNegotiator.class);
     private final Promise<S> promise;

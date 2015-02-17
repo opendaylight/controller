@@ -13,6 +13,7 @@ package org.opendaylight.protocol.framework;
  * implemented by a protocol specific abstract class, that is extended by
  * a final class that implements the methods.
  */
+@Deprecated
 public interface SessionListenerFactory<T extends SessionListener<?, ?, ?>> {
     /**
      * Returns one session listener
