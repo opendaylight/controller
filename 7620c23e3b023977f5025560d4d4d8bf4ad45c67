@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_43854358",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/AbstractReplicatedLogImpl.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-17T01:55:22Z",
+      "side": 1,
+      "message": "Unused field?",
+      "revId": "7620c23e3b023977f5025560d4d4d8bf4ad45c67",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_638abf6b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 675,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-17T01:55:22Z",
+      "side": 1,
+      "message": "if",
+      "revId": "7620c23e3b023977f5025560d4d4d8bf4ad45c67",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_037bbb7b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 828,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-17T01:55:22Z",
+      "side": 1,
+      "message": "This is wrong. Why would I pass lastAppliedTerm if replicatedToAllEntry is null? In fact if replicatedToAllEntry is null why would I even capture the snapshot, doesn\u0027t it mean that replicatedToAllIndex has already been removed from the journal?",
+      "revId": "7620c23e3b023977f5025560d4d4d8bf4ad45c67",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
