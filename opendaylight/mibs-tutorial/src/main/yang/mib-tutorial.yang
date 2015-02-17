@@ -1,0 +1,29 @@
+module mibs-tutorial {
+    namespace "org:opendaylight:tutorial:mibs";
+    prefix mib;
+    import ietf-inet-types {
+        prefix inet;
+    }
+    import DOCS-IF-MIB {
+        prefix docs;
+    }
+    revision "2014-09-22" {
+        description "Initial revision of cmts snmp model";
+    }
+
+    rpc get-docs-if-mib {
+            input {
+                leaf ip-address {
+                    type inet:ipv4-address;
+                }
+            }
+
+            output {
+
+                container tutorialObjects {
+                    uses docs:docsIfCmtsObjectsGroup;
+                }
+            }
+        }
+    }
+}
