@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_1986ce13",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 520,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-17T19:47:39Z",
+      "side": 1,
+      "message": "Extra beginning javadoc comment here.",
+      "revId": "329153938feab0e30a5c5bfd3497233de184e6ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_d97b8626",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 565,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-17T19:47:39Z",
+      "side": 1,
+      "message": "The RaftActor passes -1 for replicatedToAll if replicatedToAllEntry:\n\n(replicatedToAllEntry !\u003d null ? replicatedToAllEntry.getIndex() : -1),\n(replicatedToAllEntry !\u003d null ? replicatedToAllEntry.getTerm() : -1)\n\nShouldn\u0027t this do the same?",
+      "revId": "329153938feab0e30a5c5bfd3497233de184e6ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
