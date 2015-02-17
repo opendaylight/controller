@@ -7,10 +7,8 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 
-import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
-import org.opendaylight.controller.sal.binding.impl.NotificationBrokerImpl;
-
-import com.google.common.util.concurrent.ListeningExecutorService;
+import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
+import org.opendaylight.controller.md.sal.binding.impl.NotificationBrokerFacade;
 
 /**
 *
@@ -37,8 +35,9 @@ public final class NotificationBrokerImplModule extends
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        ListeningExecutorService listeningExecutor = SingletonHolder.getDefaultNotificationExecutor();
-        NotificationBrokerImpl broker = new NotificationBrokerImpl(listeningExecutor);
-        return broker;
+        final BindingToNormalizedNodeCodec codec = getBindingMappingServiceNotifOldDependency();
+        //TODO: add DOMNotificationRouter service dependency
+        return new NotificationBrokerFacade(getNewNotificationPublishServiceDependency(),
+                getNewNotificationServiceDependency(), null, codec.getCodecRegistry());
     }
 }
