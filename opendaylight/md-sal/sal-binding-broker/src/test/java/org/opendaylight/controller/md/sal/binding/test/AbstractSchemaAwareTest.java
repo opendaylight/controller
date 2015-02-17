@@ -19,13 +19,13 @@ public abstract class AbstractSchemaAwareTest  {
     private SchemaContext schemaContext;
 
 
-    protected Iterable<YangModuleInfo> getModuleInfos() {
+    protected Iterable<YangModuleInfo> getModuleInfos() throws Exception {
         return BindingReflections.loadModuleInfos();
     }
 
 
     @Before
-    public final void setup() {
+    public final void setup() throws Exception {
         moduleInfos = getModuleInfos();
         ModuleInfoBackedContext moduleContext = ModuleInfoBackedContext.create();
         moduleContext.addModuleInfos(moduleInfos);

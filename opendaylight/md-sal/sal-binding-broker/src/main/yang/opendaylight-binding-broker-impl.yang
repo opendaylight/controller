@@ -21,6 +21,18 @@ module opendaylight-sal-binding-broker-impl {
         config:java-class "org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec";
     }
 
+    /* FIXME: move to opendaylight-md-sal-binding (cannot be there due to Class name confict with old implementation)*/
+    identity binding-new-notification-service {
+        base config:service-type;
+        config:java-class "org.opendaylight.controller.md.sal.binding.api.NotificationService";
+    }
+
+    /* TODO: move to opendaylight-md-sal-binding (cannot be there due to Class name confict with old implementation)*/
+    identity binding-new-notification-publish-service {
+        base config:service-type;
+        config:java-class "org.opendaylight.controller.md.sal.binding.api.NotificationPublishService";
+    }
+
     identity binding-broker-impl {
         base config:module-type;
         config:provided-service sal:binding-broker-osgi-registry;
@@ -34,7 +46,7 @@ module opendaylight-sal-binding-broker-impl {
         config:provided-service sal:binding-data-consumer-broker;
         config:java-name-prefix ForwardedCompatibleDataBrokerImpl;
     }
-    
+
     identity binding-forwarded-data-broker {
         base config:module-type;
         config:provided-service sal:binding-async-data-broker;
@@ -58,6 +70,18 @@ module opendaylight-sal-binding-broker-impl {
         base config:module-type;
         config:provided-service binding-dom-mapping-service;
         config:java-name-prefix RuntimeMapping;
+    }
+
+    identity binding-notification-adapter {
+        base config:module-type;
+        config:provided-service binding-new-notification-service;
+        config:java-name-prefix BindingNotificationAdapter;
+    }
+
+    identity binding-notification-publish-adapter {
+        base config:module-type;
+        config:provided-service binding-new-notification-publish-service;
+        config:java-name-prefix BindingNotificationPublishAdapter;
     }
 
     grouping dom-forwarding-component {
@@ -130,7 +154,7 @@ module opendaylight-sal-binding-broker-impl {
             uses dom-forwarding-component;
         }
     }
-    
+
     augment "/config:modules/config:module/config:configuration" {
         case binding-forwarded-data-broker {
             when "/config:modules/config:module/config:type = 'binding-forwarded-data-broker'";
@@ -178,10 +202,29 @@ module opendaylight-sal-binding-broker-impl {
             uses common:rpc-state;
         }
     }
+
     augment "/config:modules/config:module/config:state" {
         case binding-notification-broker {
             when "/config:modules/config:module/config:type = 'binding-notification-broker'";
             uses common:notification-state;
+        }
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case binding-notification-adapter {
+            when "/config:modules/config:module/config:type = 'binding-notification-adapter'";
+            container binding-notification-adapter {
+                uses dom-forwarding-component;
+            }
+        }
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case binding-notification-publish-adapter {
+            when "/config:modules/config:module/config:type = 'binding-notification-publish-adapter'";
+            container binding-notification-publish-adapter {
+                uses dom-forwarding-component;
+            }
         }
     }
 }

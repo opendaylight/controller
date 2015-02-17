@@ -9,12 +9,9 @@ package org.opendaylight.controller.md.sal.binding.impl;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-
 import java.util.Iterator;
 import java.util.Map.Entry;
-
 import javax.annotation.Nonnull;
-
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationException;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationOperation;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizer;
@@ -141,6 +138,10 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener,AutoC
 
     public BindingIndependentMappingService getLegacy() {
         return bindingToLegacy;
+    }
+
+    public BindingNormalizedNodeCodecRegistry getCodecRegistry() {
+        return codecRegistry;
     }
 
     @Override

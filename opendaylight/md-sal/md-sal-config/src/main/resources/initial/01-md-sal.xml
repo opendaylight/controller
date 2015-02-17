@@ -21,6 +21,34 @@
                     <name>runtime-mapping-singleton</name>
                 </module>
                 <module>
+                    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:binding-notification-adapter</type>
+                    <name>binding-notification-adapter</name>
+                    <binding-notification-adapter xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">
+                        <binding-mapping-service>
+                            <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">binding:binding-dom-mapping-service</type>
+                            <name>runtime-mapping-singleton</name>
+                        </binding-mapping-service>
+                        <dom-async-broker>
+                            <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:dom-broker-osgi-registry</type>
+                            <name>dom-broker</name>
+                        </dom-async-broker>
+                    </binding-notification-adapter>
+                </module>
+                <module>
+                    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:binding-notification-publish-adapter</type>
+                    <name>binding-notification-publish-adapter</name>
+                    <binding-notification-publish-adapter xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">
+                        <binding-mapping-service>
+                            <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">binding:binding-dom-mapping-service</type>
+                            <name>runtime-mapping-singleton</name>
+                        </binding-mapping-service>
+                        <dom-async-broker>
+                            <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:dom-broker-osgi-registry</type>
+                            <name>dom-broker</name>
+                        </dom-async-broker>
+                    </binding-notification-publish-adapter>
+                </module>
+                <module>
                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:binding-notification-broker</type>
                     <name>binding-notification-broker</name>
                 </module>
@@ -182,6 +210,20 @@
                         <instance>
                             <name>runtime-mapping-singleton</name>
                             <provider>/modules/module[type='runtime-generated-mapping'][name='runtime-mapping-singleton']</provider>
+                        </instance>
+                    </service>
+                    <service>
+                        <type xmlns:binding-impl="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">binding-impl:binding-new-notification-service</type>
+                        <instance>
+                            <name>binding-notification-adapter</name>
+                            <provider>/modules/module[type='binding-notification-adapter'][name='binding-notification-adapter']</provider>
+                        </instance>
+                    </service>
+                    <service>
+                        <type xmlns:binding-impl="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">binding-impl:binding-new-notification-publish-service</type>
+                        <instance>
+                            <name>binding-notification-publish-adapter</name>
+                            <provider>/modules/module[type='binding-notification-publish-adapter'][name='binding-notification-publish-adapter']</provider>
                         </instance>
                     </service>
                     <service>

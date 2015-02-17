@@ -8,18 +8,17 @@
 package org.opendaylight.controller.sal.dom.broker.osgi;
 
 import java.util.Arrays;
-
+import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.sal.core.api.BrokerService;
-import org.osgi.framework.ServiceReference;
+import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
 import org.opendaylight.controller.sal.core.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.core.api.data.DataProviderService;
-import org.opendaylight.controller.sal.core.api.notify.NotificationPublishService;
-import org.opendaylight.controller.sal.core.api.notify.NotificationService;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
-import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
+import org.opendaylight.controller.sal.core.api.notify.NotificationPublishService;
+import org.opendaylight.controller.sal.core.api.notify.NotificationService;
+import org.osgi.framework.ServiceReference;
 
 @SuppressWarnings("unchecked")
 public class ProxyFactory {
@@ -101,8 +100,7 @@ public class ProxyFactory {
     private static Object _createProxyImpl(final ServiceReference<?> reference,
             final BrokerService service) {
 
-        throw new IllegalArgumentException("Not supported class: "
-                + service.getClass().getName());
+       return service;
     }
 
     private static Object createProxyImpl(final ServiceReference<?> ref,
