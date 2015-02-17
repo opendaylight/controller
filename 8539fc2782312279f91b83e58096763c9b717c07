@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_f958c28b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-17T21:15:02Z",
+      "side": 1,
+      "message": "We could put LOG.debug in an else so it isn\u0027t printed twice. Or can\u0027t we just have debug print the stack trace?",
+      "revId": "8539fc2782312279f91b83e58096763c9b717c07",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
