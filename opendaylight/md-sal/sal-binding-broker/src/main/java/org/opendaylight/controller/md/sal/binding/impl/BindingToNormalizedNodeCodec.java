@@ -9,22 +9,22 @@ package org.opendaylight.controller.md.sal.binding.impl;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-
 import java.util.Iterator;
 import java.util.Map.Entry;
-
 import javax.annotation.Nonnull;
-
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationException;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationOperation;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizer;
 import org.opendaylight.yangtools.binding.data.codec.impl.BindingNormalizedNodeCodecRegistry;
 import org.opendaylight.yangtools.sal.binding.generator.impl.GeneratedClassLoadingStrategy;
 import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
+import org.opendaylight.yangtools.yang.binding.DataContainer;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.Notification;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
 import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
@@ -60,6 +60,14 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener,AutoC
     public Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> toNormalizedNode(
             final Entry<InstanceIdentifier<? extends DataObject>, DataObject> binding) {
         return toNormalizedNode(binding.getKey(),binding.getValue());
+    }
+
+    public ContainerNode toNormalizedNodeNotification(final Notification data) {
+        return codecRegistry.toNormalizedNodeNotification(data);
+    }
+
+    public ContainerNode toNormalizedNodeRpcData(final DataContainer data) {
+        return codecRegistry.toNormalizedNodeRpcData(data);
     }
 
     /**
@@ -141,6 +149,10 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener,AutoC
 
     public BindingIndependentMappingService getLegacy() {
         return bindingToLegacy;
+    }
+
+    public BindingNormalizedNodeCodecRegistry getCodecRegistry() {
+        return codecRegistry;
     }
 
     @Override
