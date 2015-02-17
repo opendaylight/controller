@@ -7,10 +7,9 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 
+import com.google.common.util.concurrent.ListeningExecutorService;
 import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
 import org.opendaylight.controller.sal.binding.impl.NotificationBrokerImpl;
-
-import com.google.common.util.concurrent.ListeningExecutorService;
 
 /**
 *
@@ -37,6 +36,13 @@ public final class NotificationBrokerImplModule extends
 
     @Override
     public java.lang.AutoCloseable createInstance() {
+
+        /*
+         *  FIXME: Switch to new broker (which has different threading model)
+         *  once this change is communicated with downstream users or
+         *  we will have adapter implementation which will honor Helium
+         *  threading model for notifications.
+         */
         ListeningExecutorService listeningExecutor = SingletonHolder.getDefaultNotificationExecutor();
         NotificationBrokerImpl broker = new NotificationBrokerImpl(listeningExecutor);
         return broker;
