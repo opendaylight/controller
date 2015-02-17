@@ -12,12 +12,18 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import javassist.ClassPool;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
+import org.opendaylight.controller.md.sal.binding.api.NotificationService;
 import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
 import org.opendaylight.controller.md.sal.binding.impl.ForwardedBindingDataBroker;
+import org.opendaylight.controller.md.sal.binding.impl.ForwardedNotificationPublishService;
+import org.opendaylight.controller.md.sal.binding.impl.ForwardedNotificationService;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
+import org.opendaylight.controller.md.sal.dom.broker.impl.DOMNotificationRouter;
 import org.opendaylight.controller.md.sal.dom.broker.impl.SerializedDOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
+import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
 import org.opendaylight.controller.sal.binding.test.util.MockSchemaService;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
@@ -32,10 +38,11 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 public class DataBrokerTestCustomizer {
 
     private DOMDataBroker domDataBroker;
+    private DOMNotificationRouter domNotificationRouter;
     private final RuntimeGeneratedMappingServiceImpl mappingService;
     private final MockSchemaService schemaService;
     private ImmutableMap<LogicalDatastoreType, DOMStore> datastores;
-    private final BindingToNormalizedNodeCodec bindingToNormalized ;
+    private final BindingToNormalizedNodeCodec bindingToNormalized;
 
     public ImmutableMap<LogicalDatastoreType, DOMStore> createDatastores() {
         return ImmutableMap.<LogicalDatastoreType, DOMStore>builder()
@@ -53,6 +60,7 @@ public class DataBrokerTestCustomizer {
         GeneratedClassLoadingStrategy loading = GeneratedClassLoadingStrategy.getTCCLClassLoadingStrategy();
         bindingToNormalized = new BindingToNormalizedNodeCodec(loading, mappingService, codecRegistry);
         schemaService.registerSchemaContextListener(bindingToNormalized);
+        domNotificationRouter = DOMNotificationRouter.create(16);
     }
 
     public DOMStore createConfigurationDatastore() {
@@ -70,6 +78,16 @@ public class DataBrokerTestCustomizer {
     public DOMDataBroker createDOMDataBroker() {
         return new SerializedDOMDataBroker(getDatastores(), getCommitCoordinatorExecutor());
     }
+
+    public NotificationService createNotificationService() {
+        return new ForwardedNotificationService(bindingToNormalized.getCodecRegistry(), domNotificationRouter,
+                SingletonHolder.INVOKER_FACTORY);
+    }
+
+    public NotificationPublishService createNotificationPublishService() {
+        return new ForwardedNotificationPublishService(bindingToNormalized.getCodecRegistry(), domNotificationRouter);
+    }
+
 
     public ListeningExecutorService getCommitCoordinatorExecutor() {
         return MoreExecutors.sameThreadExecutor();
@@ -106,4 +124,7 @@ public class DataBrokerTestCustomizer {
         mappingService.onGlobalContextUpdated(ctx);
     }
 
+    public DOMNotificationRouter getDomNotificationRouter() {
+        return domNotificationRouter;
+    }
 }

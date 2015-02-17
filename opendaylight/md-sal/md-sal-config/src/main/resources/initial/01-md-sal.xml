@@ -21,8 +21,48 @@
                     <name>runtime-mapping-singleton</name>
                 </module>
                 <module>
+                    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:forwarded-notification-service</type>
+                    <name>forwarded-notification-service</name>
+                    <binding-mapping-service-notif>
+                        <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">binding:binding-dom-mapping-service</type>
+                        <name>runtime-mapping-singleton</name>
+                    </binding-mapping-service-notif>
+                    <dom-async-broker-notif>
+                        <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:dom-broker-osgi-registry</type>
+                        <name>dom-broker</name>
+                    </dom-async-broker-notif>
+                </module>
+                <module>
+                    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:forwarded-notification-publish-service</type>
+                    <name>forwarded-notification-publish-service</name>
+                    <binding-mapping-service-notif-pub>
+                        <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">binding:binding-dom-mapping-service</type>
+                        <name>runtime-mapping-singleton</name>
+                    </binding-mapping-service-notif-pub>
+                    <dom-async-broker-notif-pub>
+                        <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:dom-broker-osgi-registry</type>
+                        <name>dom-broker</name>
+                    </dom-async-broker-notif-pub>
+                </module>
+                <module>
                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:binding-notification-broker</type>
                     <name>binding-notification-broker</name>
+                    <new-notification-service>
+                        <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">binding:binding-new-notification-service</type>
+                        <name>forwarded-notification-service</name>
+                    </new-notification-service>
+                    <new-notification-publish-service>
+                        <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">binding:binding-new-notification-publish-service</type>
+                        <name>forwarded-notification-publish-service</name>
+                    </new-notification-publish-service>
+                    <binding-mapping-service-old-notif>
+                        <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">binding:binding-dom-mapping-service</type>
+                        <name>runtime-mapping-singleton</name>
+                    </binding-mapping-service-old-notif>
+                    <dom-async-broker-old-notif>
+                        <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:dom-broker-osgi-registry</type>
+                        <name>dom-broker</name>
+                    </dom-async-broker-old-notif>
                 </module>
                 <module>
                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:binding-broker-impl</type>
@@ -182,6 +222,20 @@
                         <instance>
                             <name>runtime-mapping-singleton</name>
                             <provider>/modules/module[type='runtime-generated-mapping'][name='runtime-mapping-singleton']</provider>
+                        </instance>
+                    </service>
+                    <service>
+                        <type xmlns:binding-impl="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">binding-impl:binding-new-notification-service</type>
+                        <instance>
+                            <name>forwarded-notification-service</name>
+                            <provider>/modules/module[type='forwarded-notification-service'][name='forwarded-notification-service']</provider>
+                        </instance>
+                    </service>
+                    <service>
+                        <type xmlns:binding-impl="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">binding-impl:binding-new-notification-publish-service</type>
+                        <instance>
+                            <name>forwarded-notification-publish-service</name>
+                            <provider>/modules/module[type='forwarded-notification-publish-service'][name='forwarded-notification-publish-service']</provider>
                         </instance>
                     </service>
                     <service>
