@@ -41,4 +41,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       </plugin>
     </plugins>
   </build>
+
+  <scm>
+    <connection>scm:git:ssh://git.opendaylight.org:29418/${artifactId}.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/${artifactId}.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://wiki.opendaylight.org/view/${artifactId}:Main</url>
+  </scm>
 </project>
