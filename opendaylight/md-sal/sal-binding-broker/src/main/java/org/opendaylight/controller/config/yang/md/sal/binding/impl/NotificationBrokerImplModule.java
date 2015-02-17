@@ -7,16 +7,18 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 
-import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
-import org.opendaylight.controller.sal.binding.impl.NotificationBrokerImpl;
-
-import com.google.common.util.concurrent.ListeningExecutorService;
+import java.util.Collection;
+import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
+import org.opendaylight.controller.md.sal.binding.impl.BackwardsCompatibleNotificationBroker;
+import org.opendaylight.controller.md.sal.dom.api.DOMNotificationService;
+import org.opendaylight.controller.sal.core.api.Broker;
+import org.opendaylight.controller.sal.core.api.Provider;
 
 /**
 *
 */
 public final class NotificationBrokerImplModule extends
-        org.opendaylight.controller.config.yang.md.sal.binding.impl.AbstractNotificationBrokerImplModule {
+        AbstractNotificationBrokerImplModule implements Provider {
 
     public NotificationBrokerImplModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier,
             org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
@@ -37,8 +39,20 @@ public final class NotificationBrokerImplModule extends
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        ListeningExecutorService listeningExecutor = SingletonHolder.getDefaultNotificationExecutor();
-        NotificationBrokerImpl broker = new NotificationBrokerImpl(listeningExecutor);
-        return broker;
+        final BindingToNormalizedNodeCodec codec = getBindingMappingServiceNotifOldDependency();
+        final Broker.ProviderSession session = getDomAsyncBrokerOldNotifDependency().registerProvider(this);
+        final DOMNotificationService notifService = session.getService(DOMNotificationService.class);
+        return new BackwardsCompatibleNotificationBroker(getNewNotificationPublishServiceDependency(),
+                getNewNotificationServiceDependency(), notifService, codec.getCodecRegistry());
+    }
+
+    @Override
+    public void onSessionInitiated(Broker.ProviderSession session) {
+
+    }
+
+    @Override
+    public Collection<ProviderFunctionality> getProviderFunctionality() {
+        return null;
     }
 }
