@@ -11,6 +11,7 @@ package org.opendaylight.controller.dummy.datastore;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.japi.Creator;
+import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
@@ -24,6 +25,8 @@ public class DummyShard extends UntypedActor{
     private final Configuration configuration;
     private final String followerId;
     private final Logger LOG = LoggerFactory.getLogger(DummyShard.class);
+    private long lastMessageIndex  = -1;
+    private long lastMessageSize = 0;
 
     public DummyShard(Configuration configuration, String followerId) {
         this.configuration = configuration;
@@ -54,12 +57,25 @@ public class DummyShard extends UntypedActor{
     }
 
     protected void handleAppendEntries(AppendEntries req) throws InterruptedException {
-        LOG.info("{} - Received AppendEntries message : leader term, index, size = {}, {}, {}", followerId, req.getTerm(),req.getLeaderCommit(), req.getEntries().size());
-        long lastIndex = req.getLeaderCommit();
-        if (req.getEntries().size() > 0)
-            lastIndex = req.getEntries().get(0).getIndex();
 
-        if (configuration.shouldCauseTrouble()) {
+        LOG.info("{} - Received AppendEntries message : leader term = {}, index = {}, prevLogIndex = {}, size = {}",
+                followerId, req.getTerm(),req.getLeaderCommit(), req.getPrevLogIndex(), req.getEntries().size());
+
+        if(lastMessageIndex == req.getLeaderCommit() && req.getEntries().size() > 0 && lastMessageSize > 0){
+            LOG.error("{} - Duplicate message with leaderCommit = {} prevLogIndex = {} received", followerId, req.getLeaderCommit(), req.getPrevLogIndex());
+        }
+
+        lastMessageIndex = req.getLeaderCommit();
+        lastMessageSize = req.getEntries().size();
+
+        long lastIndex = req.getLeaderCommit();
+        if (req.getEntries().size() > 0) {
+            for(ReplicatedLogEntry entry : req.getEntries()) {
+                lastIndex = entry.getIndex();
+            }
+        }
+
+        if (configuration.shouldCauseTrouble() && req.getEntries().size() > 0) {
             boolean ignore = false;
 
             if (configuration.shouldDropReplies()) {
