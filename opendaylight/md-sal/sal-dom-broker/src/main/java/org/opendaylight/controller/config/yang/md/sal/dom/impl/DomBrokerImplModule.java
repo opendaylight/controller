@@ -11,6 +11,9 @@ import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.MutableClassToInstanceMap;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
+import org.opendaylight.controller.md.sal.dom.api.DOMNotificationPublishService;
+import org.opendaylight.controller.md.sal.dom.api.DOMNotificationService;
+import org.opendaylight.controller.md.sal.dom.broker.impl.DOMNotificationRouter;
 import org.opendaylight.controller.md.sal.dom.broker.impl.compat.BackwardsCompatibleDataBroker;
 import org.opendaylight.controller.md.sal.dom.broker.impl.mount.DOMMountPointServiceImpl;
 import org.opendaylight.controller.sal.core.api.BrokerService;
@@ -51,6 +54,12 @@ public final class DomBrokerImplModule extends org.opendaylight.controller.confi
 
         final ClassToInstanceMap<BrokerService> services = MutableClassToInstanceMap.create();
 
+        // TODO: retrieve from config subsystem
+        int queueDepth = 1024;
+
+        final DOMNotificationRouter domNotificationRouter = DOMNotificationRouter.create(queueDepth);
+        services.putInstance(DOMNotificationService.class, domNotificationRouter);
+        services.putInstance(DOMNotificationPublishService.class, domNotificationRouter);
 
         final SchemaService schemaService = getSchemaServiceImpl();
         services.putInstance(SchemaService.class, schemaService);
