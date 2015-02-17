@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_99017e08",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeListener.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-17T23:45:06Z",
+      "side": 1,
+      "message": "I\u0027m assuming this would be intended if a shard temporarily loses its leader. In that case, when a shard leader becomes available again, we were thinking about \"re-notifiying\" the listener of the current data as if it had just registered on controller startup (which would notify of persisted data). That way shard failure is transparent to listeners and all listeners aren\u0027t burdened with having to explicitly handling it. This method could be called back in that case but the javadocs here wouldn\u0027t jive.",
+      "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_792d92a7",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeProducer.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-17T23:45:06Z",
+      "side": 1,
+      "message": "Does true indicate it\u0027s isolated? It seems so but should make that explicit. \nIt seems this is equivalent to chaining. If so, can we call this \"chained\" instead with more explanation of the semantics \"share the same fate\" and \"merged\"? I\u0027m assuming \"merged\" means this tx will immediately \"see\" the writes made by the previous tx.",
+      "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_992ade8e",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeProducer.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-17T23:45:06Z",
+      "side": 1,
+      "message": "What is meant by \"appropriate context\"? I assume this means being bound to a listener.",
+      "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_391b8a82",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeProducer.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-17T23:45:06Z",
+      "side": 1,
+      "message": "By \"must be accessible\", what would be a case where it wouldn\u0027t be accessible? I think I know but can you expand on that?",
+      "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5920d6ab",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeProducer.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-17T23:45:06Z",
+      "side": 1,
+      "message": "Do the specified paths need to be children of the path(s) of then parent producer? A specific use-case example of this method would be helpful.",
+      "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_b960fa01",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeProducerFactory.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-17T23:45:06Z",
+      "side": 1,
+      "message": "Probably should have class javadocs but that can be done in future patch.",
+      "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_f910c25a",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeProducerFactory.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-17T23:45:06Z",
+      "side": 1,
+      "message": "This is not a param in the method.\n\"subtrees\" should be doc\u0027ed.",
+      "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_f9420267",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-17T23:45:06Z",
+      "side": 1,
+      "message": "\"accessing them\"\"",
+      "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_19480e86",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-17T23:45:06Z",
+      "side": 1,
+      "message": "How would this happen if a producer can only used/accessed within the callback?  Is this something the implementation must check for or the client listener? Eg, if a producer wasn\u0027t idle at the time of a trigger, is it the implementation\u0027s job to delay/wait for the producer to become idle before triggering?",
+      "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_7c1b4073",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-17T23:45:06Z",
+      "side": 1,
+      "message": "I\u0027m assuming the listener subtrees can completely differ from the producer subtrees, i.e. allowing a listener to write to a separate subtree or even logical store than from which it listens.",
+      "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5952163c",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-17T23:45:06Z",
+      "side": 1,
+      "message": "I\u0027m assuming this can be empty.",
+      "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
