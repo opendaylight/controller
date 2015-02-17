@@ -1,0 +1,104 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.opendaylight.snmp</groupId>
+        <artifactId>commons.parent</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <groupId>org.opendaylight.snmp</groupId>
+    <artifactId>mibs-tutorial</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <name>mibs-tutorial</name> <!-- Used by Sonar to set project name -->
+    <packaging>bundle</packaging>
+
+
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Import-Package>*</Import-Package>
+                        <Export-Package>
+                            org.opendaylight.tutorial.mibs.*,
+                            org.opendaylight.yang.gen.v1.org.opendaylight.tutorial.mibs.rev140922.*,
+                            org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.smiv2.docs._if.mib.rev060524.*
+                        </Export-Package>
+                        <Bundle-Activator>
+                            org.opendaylight.tutorial.mibs.MIBTutorialProvider
+                        </Bundle-Activator>
+                    </instructions>
+                </configuration>
+
+            </plugin>
+            <plugin>
+                <groupId>org.opendaylight.yangtools</groupId>
+                <artifactId>yang-maven-plugin</artifactId>
+                <version>${yangtools.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate-sources</goal>
+                        </goals>
+                        <configuration>
+                            <!-- directory containing yang files to parse and generate code -->
+                            <yangFilesRootDir>src/main/yang</yangFilesRootDir>
+                            <codeGenerators>
+                                <generator>
+                                    <codeGeneratorClass>
+                                        org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl
+                                    </codeGeneratorClass>
+                                    <!-- directory into which generated files will be placed -->
+                                    <outputBaseDir>${salGeneratorPath}</outputBaseDir>
+                                </generator>
+                            </codeGenerators>
+                            <!-- if true, plugin will search for yang files also in dependent projects -->
+                            <inspectDependencies>true</inspectDependencies>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.opendaylight.snmp</groupId>
+                <artifactId>yang-oid-plugin</artifactId>
+                <version>1.0-SNAPSHOT</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>oid</goal>
+                        </goals>
+                        <configuration>
+                            <yangDirectory>target/generated-sources/sal</yangDirectory>
+                            <oidDirectory>src/main/oid</oidDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.opendaylight.yangtools.model</groupId>
+            <artifactId>ietf-inet-types</artifactId>
+            <version>${ietf-inet-types.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.yangtools.model</groupId>
+            <artifactId>ietf-yang-types</artifactId>
+            <version>${ietf-yang-types.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.snmp</groupId>
+            <artifactId>snmp</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+</project>
