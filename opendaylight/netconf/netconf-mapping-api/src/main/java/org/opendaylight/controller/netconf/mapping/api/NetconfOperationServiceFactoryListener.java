@@ -6,9 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.netconf.impl.osgi;
-
-import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
+package org.opendaylight.controller.netconf.mapping.api;
 
 public interface NetconfOperationServiceFactoryListener {
 

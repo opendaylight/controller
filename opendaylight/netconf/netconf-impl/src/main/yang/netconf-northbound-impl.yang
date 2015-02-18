@@ -67,6 +67,15 @@ module netconf-northbound-impl {
                 }
             }
 
+            container server-monitor {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity nn:netconf-server-monitoring;
+                    }
+                }
+            }
+
             container timer {
                 uses config:service-ref {
                     refine type {
@@ -74,6 +83,45 @@ module netconf-northbound-impl {
                     }
                 }
             }
+        }
+    }
+
+
+    identity netconf-server-monitoring-impl {
+            base config:module-type;
+            config:provided-service nn:netconf-server-monitoring;
+            config:java-name-prefix NetconfServerMonitoring;
+    }
+
+    // TODO Monitoring could expose the monitoring data over JMX...
+
+    augment "/config:modules/config:module/config:configuration" {
+        case netconf-server-monitoring-impl {
+            when "/config:modules/config:module/config:type = 'netconf-server-monitoring-impl'";
+
+            container aggregator {
+                uses config:service-ref {
+                    refine type {
+                        config:required-identity nnm:netconf-northbound-mapper;
+                    }
+                }
+            }
+
+        }
+    }
+
+    identity netconf-mapper-aggregator {
+        base config:module-type;
+        config:provided-service nnm:netconf-northbound-mapper;
+        config:provided-service nnm:netconf-mapper-registry;
+        config:java-name-prefix NetconfMapperAggregator;
+        description "Aggregated operation provider for netconf servers. Joins all the operations and capabilities of all the mappers it aggregates and exposes them as a single service. The dependency orientation is reversed in order to prevent cyclic dependencies when monitoring service is considered";
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case netconf-mapper-aggregator {
+            when "/config:modules/config:module/config:type = 'netconf-mapper-aggregator'";
+
         }
     }
 

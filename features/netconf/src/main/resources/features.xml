@@ -27,6 +27,7 @@
     <bundle>mvn:org.opendaylight.controller/ietf-netconf-monitoring-extension/${project.version}</bundle>
     <bundle>mvn:org.opendaylight.yangtools.model/ietf-inet-types/${ietf-inet-types.version}</bundle>
     <bundle>mvn:org.opendaylight.yangtools.model/ietf-yang-types/${ietf-yang-types.version}</bundle>
+    <bundle>mvn:org.opendaylight.yangtools.model/ietf-yang-types-20130715/2013.07.15.7-SNAPSHOT</bundle>
   </feature>
   <feature name='odl-netconf-mapping-api' version='${project.version}' description="OpenDaylight :: Netconf :: Mapping API">
     <feature version='${project.version}'>odl-netconf-api</feature>

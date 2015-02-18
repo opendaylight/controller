@@ -45,6 +45,8 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
     @Override
     public void onSessionUp(final NetconfServerSession netconfNetconfServerSession) {
         monitoringService.onSessionUp(netconfNetconfServerSession);
+        // FIXME monitoring service should be also notified about all the other changes to netconf session (from ietf-netconf-monitoring point of view)
+        // This means also notifying after every message is processed
     }
 
     @Override
