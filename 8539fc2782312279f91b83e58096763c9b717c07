@@ -16,6 +16,24 @@
       "revId": "8539fc2782312279f91b83e58096763c9b717c07",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_f2245761",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-18T18:31:00Z",
+      "side": 1,
+      "message": "I\u0027ll just make debug print the stack",
+      "parentUuid": "7a96c907_f958c28b",
+      "revId": "8539fc2782312279f91b83e58096763c9b717c07",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
