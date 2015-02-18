@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_779119f0",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeListener.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-18T16:05:40Z",
+      "side": 1,
+      "message": "Well... this really is a shutdown-style hook. The listener is really an actor, so a transient problem would result in temporary non-delivery of events. Once leadership is reestablished, this callback would be invoked only if some state loss would prevent the cluster from resuming normal change delivery.",
+      "parentUuid": "7a96c907_99017e08",
+      "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_792d92a7",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeProducer.java",
         "patchSetId": 8
@@ -30,6 +48,24 @@
       "writtenOn": "2015-02-17T23:45:06Z",
       "side": 1,
       "message": "Does true indicate it\u0027s isolated? It seems so but should make that explicit. \nIt seems this is equivalent to chaining. If so, can we call this \"chained\" instead with more explanation of the semantics \"share the same fate\" and \"merged\"? I\u0027m assuming \"merged\" means this tx will immediately \"see\" the writes made by the previous tx.",
+      "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_978e25cf",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeProducer.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-18T16:05:40Z",
+      "side": 1,
+      "message": "Transactions in a producer are always \"chained\". Merging means what PingPong broker does: rolling transactions so that they appear in the background as a single entity. That means that some data change edges (flaps) may disappear -- which is fine for most applications, but intolerable for others.",
+      "parentUuid": "7a96c907_792d92a7",
       "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_37bf1163",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeProducer.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-18T16:05:40Z",
+      "side": 1,
+      "message": "Yes, appropriate context with regard to the producer being bound or not.",
+      "parentUuid": "7a96c907_992ade8e",
+      "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_391b8a82",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeProducer.java",
         "patchSetId": 8
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_57c41df4",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeProducer.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-18T16:05:40Z",
+      "side": 1,
+      "message": "Accessible means they are a subset of the subtrees specified when the producer is instantiated. The set is further reduced as child producers are instantiated -- if you create a producer for /a and then a child for /a/b, /a/b is not accessible from the first producer.",
+      "parentUuid": "7a96c907_391b8a82",
+      "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_5920d6ab",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeProducer.java",
         "patchSetId": 8
@@ -81,6 +153,24 @@
       "writtenOn": "2015-02-17T23:45:06Z",
       "side": 1,
       "message": "Do the specified paths need to be children of the path(s) of then parent producer? A specific use-case example of this method would be helpful.",
+      "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_f7b44983",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeProducer.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-18T16:05:40Z",
+      "side": 1,
+      "message": "Yes they have to. The use case is when a single instance of an application, which produces a topology instance wants to create dedicated per-device producers (to attach to individual sessions).",
+      "parentUuid": "7a96c907_5920d6ab",
       "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
