@@ -12,6 +12,7 @@ package org.opendaylight.protocol.framework;
  * primarily useful for allowing injection of a specific type of strategy for
  * on-demand use, pretty much like you would use a ThreadFactory.
  */
+@Deprecated
 public interface ReconnectStrategyFactory {
     /**
      * Create a new ReconnectStrategy.

@@ -23,6 +23,7 @@ import javax.annotation.concurrent.ThreadSafe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Deprecated
 @ThreadSafe
 final class ProtocolSessionPromise<S extends ProtocolSession<?>> extends DefaultPromise<S> {
     private static final Logger LOG = LoggerFactory.getLogger(ProtocolSessionPromise.class);

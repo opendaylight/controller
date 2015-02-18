@@ -10,6 +10,7 @@ package org.opendaylight.controller.config.yang.protocol.framework;
 /**
 *
 */
+@Deprecated
 public class TimedReconnectStrategyFactoryModuleFactory extends org.opendaylight.controller.config.yang.protocol.framework.AbstractTimedReconnectStrategyFactoryModuleFactory
 {
 

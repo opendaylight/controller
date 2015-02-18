@@ -17,6 +17,7 @@ import org.opendaylight.protocol.framework.ReconnectStrategyFactory;
 /**
 *
 */
+@Deprecated
 public final class NeverReconnectStrategyFactoryModule extends org.opendaylight.controller.config.yang.protocol.framework.AbstractNeverReconnectStrategyFactoryModule
  {
 

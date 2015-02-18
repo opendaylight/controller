@@ -21,6 +21,7 @@ import com.google.common.base.Preconditions;
  * Utility ReconnectStrategy singleton, which will cause the reconnect process
  * to immediately schedule a reconnection attempt.
  */
+@Deprecated
 @ThreadSafe
 public final class ReconnectImmediatelyStrategy implements ReconnectStrategy {
     private static final Logger LOG = LoggerFactory.getLogger(ReconnectImmediatelyStrategy.class);

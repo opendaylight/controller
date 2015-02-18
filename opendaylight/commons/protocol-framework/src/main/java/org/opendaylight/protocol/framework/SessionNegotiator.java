@@ -17,6 +17,7 @@ import io.netty.channel.ChannelInboundHandler;
  *
  * @param <T> Protocol session type.
  */
+@Deprecated
 public interface SessionNegotiator<T extends ProtocolSession<?>> extends ChannelInboundHandler {
 
 }

@@ -17,6 +17,7 @@ import java.io.Closeable;
  *
  * This interface should be implemented by a final class representing a protocol specific session.
  */
+@Deprecated
 public interface ProtocolSession<T> extends Closeable {
     @Override
     void close();

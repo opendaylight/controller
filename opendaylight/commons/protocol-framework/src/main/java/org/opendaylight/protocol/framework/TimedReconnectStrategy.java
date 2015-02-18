@@ -42,6 +42,7 @@ import com.google.common.base.Preconditions;
  *
  * Both these caps can be combined, with the strategy giving up as soon as the first one is reached.
  */
+@Deprecated
 @ThreadSafe
 public final class TimedReconnectStrategy implements ReconnectStrategy {
     private static final Logger LOG = LoggerFactory.getLogger(TimedReconnectStrategy.class);

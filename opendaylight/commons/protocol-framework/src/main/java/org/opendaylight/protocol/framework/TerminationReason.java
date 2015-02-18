@@ -10,6 +10,7 @@ package org.opendaylight.protocol.framework;
 /**
  * Marker interface for grouping session termination cause.
  */
+@Deprecated
 public interface TerminationReason {
 
     /**
