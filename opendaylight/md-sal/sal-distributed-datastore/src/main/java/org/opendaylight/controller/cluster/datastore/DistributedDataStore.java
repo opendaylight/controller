@@ -12,6 +12,7 @@ import akka.actor.ActorSystem;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.DatastoreConfigurationMXBeanImpl;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
@@ -40,6 +41,10 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
 
     private final ActorContext actorContext;
 
+    private AutoCloseable closeable;
+
+    private DatastoreConfigurationMXBeanImpl datastoreConfigMXBean;
+
     public DistributedDataStore(ActorSystem actorSystem, ClusterWrapper cluster,
             Configuration configuration, DatastoreContext datastoreContext) {
         Preconditions.checkNotNull(actorSystem, "actorSystem should not be null");
@@ -60,10 +65,18 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
                 ShardManager.props(cluster, configuration, datastoreContext)
                         .withDispatcher(shardDispatcher).withMailbox(ActorContext.MAILBOX), shardManagerId ),
                 cluster, configuration, datastoreContext);
+
+        datastoreConfigMXBean = new DatastoreConfigurationMXBeanImpl(datastoreContext.getDataStoreMXBeanType());
+        datastoreConfigMXBean.setContext(datastoreContext);
+        datastoreConfigMXBean.registerMBean();
     }
 
     public DistributedDataStore(ActorContext actorContext) {
         this.actorContext = Preconditions.checkNotNull(actorContext, "actorContext should not be null");
+    }
+
+    public void setCloseable(AutoCloseable closeable) {
+        this.closeable = closeable;
     }
 
     @SuppressWarnings("unchecked")
@@ -115,7 +128,17 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
+        datastoreConfigMXBean.unregisterMBean();
+
+        if(closeable != null) {
+            try {
+                closeable.close();
+            } catch (Exception e) {
+                LOG.debug("Error closing insance", e);
+            }
+        }
+
         actorContext.shutdown();
     }
 
