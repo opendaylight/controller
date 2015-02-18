@@ -55,7 +55,10 @@ final class NotificationHandler {
         passNotifications = true;
 
         for (final NetconfMessage cachedNotification : queue) {
-            passNotification(messageTransformer.toNotification(cachedNotification));
+            final CompositeNode parsedNotification = messageTransformer.toNotification(cachedNotification);
+            // TODO possible race condition here, because this exception is thrown occasionally
+            Preconditions.checkNotNull(parsedNotification, "Unable to parse received notification %s", cachedNotification);
+            passNotification(parsedNotification);
         }
 
         queue.clear();
@@ -74,7 +77,6 @@ final class NotificationHandler {
 
     private synchronized void passNotification(final CompositeNode parsedNotification) {
         logger.debug("{}: Forwarding notification {}", id, parsedNotification);
-        Preconditions.checkNotNull(parsedNotification);
 
         if(filter == null || filter.filterNotification(parsedNotification).isPresent()) {
             salFacade.onNotification(parsedNotification);

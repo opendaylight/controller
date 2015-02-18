@@ -19,4 +19,9 @@ module netconf-northbound-mapper {
         config:java-class "org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory";
     }
 
+    identity netconf-mapper-registry {
+        base "config:service-type";
+        config:java-class "org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactoryListener";
+    }
+
 }

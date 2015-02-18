@@ -19,6 +19,7 @@ import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfServerSessionPreferences;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
+import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultCommit;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouterImpl;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
@@ -120,7 +121,7 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
     }
 
     private NetconfHelloMessage createHelloMessage(final long sessionId, final NetconfMonitoringService capabilityProvider) throws NetconfDocumentedException {
-        return NetconfHelloMessage.createServerHello(Sets.union(capabilityProvider.getCapabilities(), baseCapabilities), sessionId);
+        return NetconfHelloMessage.createServerHello(Sets.union(DefaultCommit.transformCapabilities(capabilityProvider.getCapabilities()), baseCapabilities), sessionId);
     }
 
 }
