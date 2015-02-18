@@ -1,13 +1,8 @@
 package org.opendaylight.controller.config.yang.config.distributed_datastore_provider;
 
-import java.util.concurrent.TimeUnit;
-
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStoreFactory;
-import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
 import org.osgi.framework.BundleContext;
-
-import scala.concurrent.duration.Duration;
 
 public class DistributedConfigDataStoreProviderModule extends
     org.opendaylight.controller.config.yang.config.distributed_datastore_provider.AbstractDistributedConfigDataStoreProviderModule {
@@ -42,23 +37,19 @@ public class DistributedConfigDataStoreProviderModule extends
 
         DatastoreContext datastoreContext = DatastoreContext.newBuilder()
                 .dataStoreType("config")
-                .dataStoreProperties(InMemoryDOMDataStoreConfigProperties.create(
-                        props.getMaxShardDataChangeExecutorPoolSize().getValue().intValue(),
-                        props.getMaxShardDataChangeExecutorQueueSize().getValue().intValue(),
-                        props.getMaxShardDataChangeListenerQueueSize().getValue().intValue(),
-                        props.getMaxShardDataStoreExecutorQueueSize().getValue().intValue()))
-                .shardTransactionIdleTimeout(Duration.create(
-                        props.getShardTransactionIdleTimeoutInMinutes().getValue(), TimeUnit.MINUTES))
+                .maxShardDataChangeExecutorPoolSize(props.getMaxShardDataChangeExecutorPoolSize().getValue().intValue())
+                .maxShardDataChangeExecutorQueueSize(props.getMaxShardDataChangeExecutorQueueSize().getValue().intValue())
+                .maxShardDataChangeListenerQueueSize(props.getMaxShardDataChangeListenerQueueSize().getValue().intValue())
+                .maxShardDataStoreExecutorQueueSize(props.getMaxShardDataStoreExecutorQueueSize().getValue().intValue())
+                .shardTransactionIdleTimeoutInMinutes(props.getShardTransactionIdleTimeoutInMinutes().getValue())
                 .operationTimeoutInSeconds(props.getOperationTimeoutInSeconds().getValue())
                 .shardJournalRecoveryLogBatchSize(props.getShardJournalRecoveryLogBatchSize().
                         getValue().intValue())
                 .shardSnapshotBatchCount(props.getShardSnapshotBatchCount().getValue().intValue())
                 .shardSnapshotDataThresholdPercentage(props.getShardSnapshotDataThresholdPercentage().getValue().intValue())
-                .shardHeartbeatIntervalInMillis(props.getShardHearbeatIntervalInMillis().getValue())
-                .shardInitializationTimeout(props.getShardInitializationTimeoutInSeconds().getValue(),
-                        TimeUnit.SECONDS)
-                .shardLeaderElectionTimeout(props.getShardLeaderElectionTimeoutInSeconds().getValue(),
-                        TimeUnit.SECONDS)
+                .shardHeartbeatIntervalInMillis(props.getShardHeartbeatIntervalInMillis().getValue())
+                .shardInitializationTimeoutInSeconds(props.getShardInitializationTimeoutInSeconds().getValue())
+                .shardLeaderElectionTimeoutInSeconds(props.getShardLeaderElectionTimeoutInSeconds().getValue())
                 .shardTransactionCommitTimeoutInSeconds(
                         props.getShardTransactionCommitTimeoutInSeconds().getValue().intValue())
                 .shardTransactionCommitQueueCapacity(
@@ -67,7 +58,7 @@ public class DistributedConfigDataStoreProviderModule extends
                 .shardIsolatedLeaderCheckIntervalInMillis(
                     props.getShardIsolatedLeaderCheckIntervalInMillis().getValue())
                 .shardElectionTimeoutFactor(props.getShardElectionTimeoutFactor().getValue())
-                .transactionCreationInitialRateLimit(props.getTxCreationInitialRateLimit().getValue())
+                .transactionCreationInitialRateLimit(props.getTransactionCreationInitialRateLimit().getValue())
                 .build();
 
         return DistributedDataStoreFactory.createInstance(getConfigSchemaServiceDependency(),
