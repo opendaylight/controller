@@ -1,0 +1,60 @@
+module netconf-mdsal-monitoring {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:netconf:mdsal:monitoring";
+    prefix "nmmonitor";
+
+    import netconf-northbound-mapper { prefix nnm; revision-date 2015-01-14; }
+    import opendaylight-md-sal-binding {prefix md-sal-binding; revision-date 2013-10-28;}
+    import netconf-northbound { prefix nn; revision-date 2015-01-14; }
+    import config { prefix config; revision-date 2013-04-05; }
+
+    organization "Cisco Systems, Inc.";
+
+    description
+        "This module contains the base YANG definitions for
+         an MD-SAL monitoring mapper implementation";
+
+    revision "2015-02-18" {
+        description
+            "Initial revision.";
+    }
+
+    identity netconf-mdsal-monitoring-mapper {
+        base config:module-type;
+        config:provided-service nnm:netconf-northbound-mapper;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case netconf-mdsal-monitoring-mapper {
+            when "/config:modules/config:module/config:type = 'netconf-mdsal-monitoring-mapper'";
+
+            container server-monitoring {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity nn:netconf-server-monitoring;
+                    }
+                }
+            }
+
+            container aggregator {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity nnm:netconf-mapper-registry;
+                    }
+                }
+            }
+
+            container binding-aware-broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity md-sal-binding:binding-broker-osgi-registry;
+                    }
+                }
+            }
+        }
+    }
+
+}
