@@ -54,7 +54,7 @@ public class DatastoreContext {
     private boolean persistent = DEFAULT_PERSISTENT;
     private ConfigurationReader configurationReader = DEFAULT_CONFIGURATION_READER;
     private long transactionCreationInitialRateLimit = DEFAULT_TX_CREATION_INITIAL_RATE_LIMIT;
-    private DefaultConfigParamsImpl raftConfig = new DefaultConfigParamsImpl();
+    private final DefaultConfigParamsImpl raftConfig = new DefaultConfigParamsImpl();
     private String dataStoreType = UNKNOWN_DATA_STORE_TYPE;
 
     private DatastoreContext(){
@@ -66,11 +66,19 @@ public class DatastoreContext {
     }
 
     public static Builder newBuilder() {
-        return new Builder();
+        return new Builder(new DatastoreContext());
+    }
+
+    public static Builder newBuilderFrom(DatastoreContext context) {
+        return new Builder(context);
     }
 
     public InMemoryDOMDataStoreConfigProperties getDataStoreProperties() {
         return dataStoreProperties;
+    }
+
+    private void setDataStoreProperties(InMemoryDOMDataStoreConfigProperties dataStoreProperties) {
+        this.dataStoreProperties = dataStoreProperties;
     }
 
     public Duration getShardTransactionIdleTimeout() {
@@ -153,11 +161,48 @@ public class DatastoreContext {
     }
 
     public static class Builder {
-        private DatastoreContext datastoreContext = new DatastoreContext();
+        private final DatastoreContext datastoreContext;
+        private int maxShardDataChangeExecutorPoolSize =
+                InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_CHANGE_EXECUTOR_POOL_SIZE;
+        private int maxShardDataChangeExecutorQueueSize =
+                InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_CHANGE_EXECUTOR_QUEUE_SIZE;
+        private int maxShardDataChangeListenerQueueSize =
+                InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_CHANGE_LISTENER_QUEUE_SIZE;
+        private int maxShardDataStoreExecutorQueueSize =
+                InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_STORE_EXECUTOR_QUEUE_SIZE;
 
-        public Builder shardTransactionIdleTimeout(Duration shardTransactionIdleTimeout) {
-            datastoreContext.shardTransactionIdleTimeout = shardTransactionIdleTimeout;
+        private Builder(DatastoreContext datastoreContext) {
+            this.datastoreContext = datastoreContext;
+
+            if(datastoreContext.getDataStoreProperties() != null) {
+                maxShardDataChangeExecutorPoolSize =
+                        datastoreContext.getDataStoreProperties().getMaxDataChangeExecutorPoolSize();
+                maxShardDataChangeExecutorQueueSize =
+                        datastoreContext.getDataStoreProperties().getMaxDataChangeExecutorQueueSize();
+                maxShardDataChangeListenerQueueSize =
+                        datastoreContext.getDataStoreProperties().getMaxDataChangeListenerQueueSize();
+                maxShardDataStoreExecutorQueueSize =
+                        datastoreContext.getDataStoreProperties().getMaxDataStoreExecutorQueueSize();
+            }
+        }
+
+        public Builder boundedMailboxCapacity(int boundedMailboxCapacity) {
+            // TODO - this is defined in the yang DataStoreProperties but not currently used.
             return this;
+        }
+
+        public Builder enableMetricCapture(boolean enableMetricCapture) {
+            // TODO - this is defined in the yang DataStoreProperties but not currently used.
+            return this;
+        }
+
+        public Builder shardTransactionIdleTimeout(long timeout, TimeUnit unit) {
+            datastoreContext.shardTransactionIdleTimeout = Duration.create(timeout, unit);
+            return this;
+        }
+
+        public Builder shardTransactionIdleTimeoutInMinutes(long timeout) {
+            return shardTransactionIdleTimeout(timeout, TimeUnit.MINUTES);
         }
 
         public Builder operationTimeoutInSeconds(int operationTimeoutInSeconds) {
@@ -167,11 +212,6 @@ public class DatastoreContext {
 
         public Builder dataStoreMXBeanType(String dataStoreMXBeanType) {
             datastoreContext.dataStoreMXBeanType = dataStoreMXBeanType;
-            return this;
-        }
-
-        public Builder dataStoreProperties(InMemoryDOMDataStoreConfigProperties dataStoreProperties) {
-            datastoreContext.dataStoreProperties = dataStoreProperties;
             return this;
         }
 
@@ -210,9 +250,17 @@ public class DatastoreContext {
             return this;
         }
 
+        public Builder shardInitializationTimeoutInSeconds(long timeout) {
+            return shardInitializationTimeout(timeout, TimeUnit.SECONDS);
+        }
+
         public Builder shardLeaderElectionTimeout(long timeout, TimeUnit unit) {
             datastoreContext.shardLeaderElectionTimeout = new Timeout(timeout, unit);
             return this;
+        }
+
+        public Builder shardLeaderElectionTimeoutInSeconds(long timeout) {
+            return shardLeaderElectionTimeout(timeout, TimeUnit.SECONDS);
         }
 
         public Builder configurationReader(ConfigurationReader configurationReader){
@@ -246,7 +294,30 @@ public class DatastoreContext {
             return this;
         }
 
+        public Builder maxShardDataChangeExecutorPoolSize(int maxShardDataChangeExecutorPoolSize) {
+            this.maxShardDataChangeExecutorPoolSize = maxShardDataChangeExecutorPoolSize;
+            return this;
+        }
+
+        public Builder maxShardDataChangeExecutorQueueSize(int maxShardDataChangeExecutorQueueSize) {
+            this.maxShardDataChangeExecutorQueueSize = maxShardDataChangeExecutorQueueSize;
+            return this;
+        }
+
+        public Builder maxShardDataChangeListenerQueueSize(int maxShardDataChangeListenerQueueSize) {
+            this.maxShardDataChangeListenerQueueSize = maxShardDataChangeListenerQueueSize;
+            return this;
+        }
+
+        public Builder maxShardDataStoreExecutorQueueSize(int maxShardDataStoreExecutorQueueSize) {
+            this.maxShardDataStoreExecutorQueueSize = maxShardDataStoreExecutorQueueSize;
+            return this;
+        }
+
         public DatastoreContext build() {
+            datastoreContext.setDataStoreProperties(InMemoryDOMDataStoreConfigProperties.create(
+                    maxShardDataChangeExecutorPoolSize, maxShardDataChangeExecutorQueueSize,
+                    maxShardDataChangeListenerQueueSize, maxShardDataStoreExecutorQueueSize));
             return datastoreContext;
         }
     }
