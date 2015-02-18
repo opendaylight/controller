@@ -49,11 +49,15 @@ public class MdsalNetconfOperationServiceFactory implements NetconfOperationServ
 
     @Override
     public Set<Capability> getCapabilities() {
+        return transformCapabilities(currentSchemaContext.getCurrentContext());
+    }
+
+    static Set<Capability> transformCapabilities(final SchemaContext currentContext1) {
         final Set<Capability> capabilities = new HashSet<>();
         // [RFC6241] 8.3.  Candidate Configuration Capability
         capabilities.add(new BasicCapability("urn:ietf:params:netconf:capability:candidate:1.0"));
 
-        final SchemaContext currentContext = currentSchemaContext.getCurrentContext();
+        final SchemaContext currentContext = currentContext1;
         final Set<Module> modules = currentContext.getModules();
         for (final Module module : modules) {
             if(currentContext.getModuleSource(module).isPresent()) {
@@ -69,13 +73,7 @@ public class MdsalNetconfOperationServiceFactory implements NetconfOperationServ
 
     @Override
     public AutoCloseable registerCapabilityListener(final CapabilityListener listener) {
-        // TODO provide notifications about changed schemas
-        return new AutoCloseable() {
-            @Override
-            public void close() throws Exception {
-
-            }
-        };
+        return currentSchemaContext.registerCapabilityListener(listener);
     }
 
     private static class BasicCapability implements Capability {

@@ -8,8 +8,12 @@
 
 package org.opendaylight.controller.netconf.impl.mapping.operations;
 
+import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Sets;
 import java.io.InputStream;
+import java.util.Set;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
@@ -20,6 +24,8 @@ import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedEx
 import org.opendaylight.controller.netconf.util.mapping.AbstractNetconfOperation;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.Capabilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -73,10 +79,20 @@ public class DefaultCommit extends AbstractNetconfOperation {
             removePersisterAttributes(requestMessage);
             Element cfgSnapshot = getConfigSnapshot(operationRouter);
             LOG.debug("Config snapshot retrieved successfully {}", cfgSnapshot);
-            notificationProducer.sendCommitNotification("ok", cfgSnapshot, cap.getCapabilities());
+            notificationProducer.sendCommitNotification("ok", cfgSnapshot, transformCapabilities(cap.getCapabilities()));
         }
 
         return subsequentOperation.execute(requestMessage);
+    }
+
+    // FIXME move somewhere to util since this is required also by negotiatiorFactory
+    public static Set<String> transformCapabilities(final Capabilities capabilities) {
+        return Sets.newHashSet(Collections2.transform(capabilities.getCapability(), new Function<Uri, String>() {
+            @Override
+            public String apply(final Uri uri) {
+                return uri.getValue();
+            }
+        }));
     }
 
     @Override

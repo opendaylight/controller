@@ -9,7 +9,9 @@ module ietf-netconf-monitoring {
 
     import ietf-yang-types {
       prefix yang;
+      revision-date "2010-09-24";
     }
+
     import ietf-inet-types {
       prefix inet;
     }

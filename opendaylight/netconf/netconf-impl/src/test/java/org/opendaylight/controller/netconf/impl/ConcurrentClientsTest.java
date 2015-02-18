@@ -12,6 +12,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anySetOf;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -73,6 +74,8 @@ import org.opendaylight.controller.netconf.util.messages.NetconfMessageUtil;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.protocol.framework.NeverReconnectStrategy;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.CapabilitiesBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -121,7 +124,15 @@ public class ConcurrentClientsTest {
         NetconfMonitoringService monitoring = mock(NetconfMonitoringService.class);
         doNothing().when(monitoring).onSessionUp(any(NetconfServerSession.class));
         doNothing().when(monitoring).onSessionDown(any(NetconfServerSession.class));
-        doReturn(Collections.emptySet()).when(monitoring).getCapabilities();
+        doReturn(new AutoCloseable() {
+            @Override
+            public void close() throws Exception {
+
+            }
+        }).when(monitoring).registerListener(any(NetconfMonitoringService.MonitoringListener.class));
+        doNothing().when(monitoring).onCapabilitiesAdded(anySetOf(Capability.class));
+        doNothing().when(monitoring).onCapabilitiesRemoved(anySetOf(Capability.class));
+        doReturn(new CapabilitiesBuilder().setCapability(Collections.<Uri>emptyList()).build()).when(monitoring).getCapabilities();
         return monitoring;
     }
 
