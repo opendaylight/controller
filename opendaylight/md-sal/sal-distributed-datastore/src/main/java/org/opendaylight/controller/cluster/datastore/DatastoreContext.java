@@ -54,7 +54,7 @@ public class DatastoreContext {
     private boolean persistent = DEFAULT_PERSISTENT;
     private ConfigurationReader configurationReader = DEFAULT_CONFIGURATION_READER;
     private long transactionCreationInitialRateLimit = DEFAULT_TX_CREATION_INITIAL_RATE_LIMIT;
-    private DefaultConfigParamsImpl raftConfig = new DefaultConfigParamsImpl();
+    private final DefaultConfigParamsImpl raftConfig = new DefaultConfigParamsImpl();
     private String dataStoreType = UNKNOWN_DATA_STORE_TYPE;
 
     private DatastoreContext(){
@@ -66,7 +66,11 @@ public class DatastoreContext {
     }
 
     public static Builder newBuilder() {
-        return new Builder();
+        return new Builder(new DatastoreContext());
+    }
+
+    public static Builder newBuilderFrom(DatastoreContext context) {
+        return new Builder(context);
     }
 
     public InMemoryDOMDataStoreConfigProperties getDataStoreProperties() {
@@ -153,11 +157,19 @@ public class DatastoreContext {
     }
 
     public static class Builder {
-        private DatastoreContext datastoreContext = new DatastoreContext();
+        private final DatastoreContext datastoreContext;
 
-        public Builder shardTransactionIdleTimeout(Duration shardTransactionIdleTimeout) {
-            datastoreContext.shardTransactionIdleTimeout = shardTransactionIdleTimeout;
+        private Builder(DatastoreContext datastoreContext) {
+            this.datastoreContext = datastoreContext;
+        }
+
+        public Builder shardTransactionIdleTimeout(long timeout, TimeUnit unit) {
+            datastoreContext.shardTransactionIdleTimeout = Duration.create(timeout, unit);
             return this;
+        }
+
+        public Builder shardTransactionIdleTimeoutInMinutes(long timeout) {
+            return shardTransactionIdleTimeout(timeout, TimeUnit.MINUTES);
         }
 
         public Builder operationTimeoutInSeconds(int operationTimeoutInSeconds) {
@@ -210,9 +222,17 @@ public class DatastoreContext {
             return this;
         }
 
+        public Builder shardInitializationTimeoutInSeconds(long timeout) {
+            return shardInitializationTimeout(timeout, TimeUnit.SECONDS);
+        }
+
         public Builder shardLeaderElectionTimeout(long timeout, TimeUnit unit) {
             datastoreContext.shardLeaderElectionTimeout = new Timeout(timeout, unit);
             return this;
+        }
+        
+        public Builder shardLeaderElectionTimeoutInSeconds(long timeout) {
+            return shardLeaderElectionTimeout(timeout, TimeUnit.SECONDS);
         }
 
         public Builder configurationReader(ConfigurationReader configurationReader){
