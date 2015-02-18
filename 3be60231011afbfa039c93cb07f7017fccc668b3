@@ -81,6 +81,23 @@
       "revId": "3be60231011afbfa039c93cb07f7017fccc668b3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_edf1d801",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1411,
+      "author": {
+        "id": 2508
+      },
+      "writtenOn": "2015-02-18T23:57:42Z",
+      "side": 1,
+      "message": "Would it be useful to have equivalent test case(s) for an IsolatedLeader (in IsolatedLeaderTest.java) to always confirm that the same heartbeat rules apply to IsolatedLeader as it does for Leader as designed?",
+      "revId": "3be60231011afbfa039c93cb07f7017fccc668b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
