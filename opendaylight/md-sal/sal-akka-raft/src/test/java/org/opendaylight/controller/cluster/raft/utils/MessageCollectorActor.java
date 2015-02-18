@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.raft.utils;
 
 import akka.actor.ActorRef;
+import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
@@ -104,5 +105,9 @@ public class MessageCollectorActor extends UntypedActor {
         }
 
         throw new TimeoutException("Actor not ready in time.");
+    }
+
+    public static Props props() {
+        return Props.create(MessageCollectorActor.class);
     }
 }

@@ -19,7 +19,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
@@ -28,6 +30,7 @@ import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogImplEntry;
 import org.opendaylight.controller.cluster.raft.SerializationUtils;
+import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
@@ -51,6 +54,19 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
         getSystem().actorOf(Props.create(DoNothingActor.class));
     private final ActorRef senderActor =
         getSystem().actorOf(Props.create(DoNothingActor.class));
+
+    private TestActorFactory factory;
+
+    @Before
+    public void setUp(){
+        factory = new TestActorFactory(getSystem());
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        factory.close();
+    }
+
 
     @Test
     public void testHandleMessageForUnknownMessage() throws Exception {
@@ -1382,6 +1398,121 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
             // Should send second log entry
             assertEquals(1, appendEntries.getLeaderCommit());
             assertEquals(1, appendEntries.getEntries().get(0).getIndex());
+        }};
+    }
+
+    /**
+     * When we removed scheduling of heartbeat in the AbstractLeader constructor we ended up with a situation where
+     * if no follower responded to an initial AppendEntries heartbeats would not be sent to it. This test verifies
+     * that regardless of whether followers respond or not we schedule heartbeats.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testLeaderSchedulesHeartbeatsEvenWhenNoFollowersRespondToInitialAppendEntries() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            String leaderActorId = factory.generateActorId("leader");
+            String follower1ActorId = factory.generateActorId("follower");
+            String follower2ActorId = factory.generateActorId("follower");
+
+            TestActorRef<ForwardMessageToBehaviorActor> leaderActor =
+                    factory.createTestActor(ForwardMessageToBehaviorActor.props(), leaderActorId);
+            ActorRef follower1Actor = factory.createActor(MessageCollectorActor.props(),follower1ActorId);
+            ActorRef follower2Actor = factory.createActor(MessageCollectorActor.props(), follower2ActorId);
+
+            MockRaftActorContext leaderActorContext =
+                    new MockRaftActorContext(leaderActorId, getSystem(), leaderActor);
+
+            DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
+            configParams.setHeartBeatInterval(new FiniteDuration(200, TimeUnit.MILLISECONDS));
+            configParams.setIsolatedLeaderCheckInterval(new FiniteDuration(10, TimeUnit.SECONDS));
+
+            leaderActorContext.setConfigParams(configParams);
+
+            leaderActorContext.setReplicatedLog(
+                    new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(1,5,1).build());
+
+            Map<String, String> peerAddresses = new HashMap<>();
+            peerAddresses.put(follower1ActorId,
+                    follower1Actor.path().toString());
+            peerAddresses.put(follower2ActorId,
+                    follower2Actor.path().toString());
+
+
+            leaderActorContext.setPeerAddresses(peerAddresses);
+
+            Leader leader = new Leader(leaderActorContext);
+
+            leaderActor.underlyingActor().behavior = leader;
+
+            Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
+
+            List<Object> allMessages = MessageCollectorActor.getAllMatching(leaderActor, SendHeartBeat.class);
+
+            Assert.assertTrue(String.format("%s messages is less than expected", allMessages.size()),
+                    allMessages.size() > 1);
+
+        }};
+    }
+
+
+    @Test
+    public void testLaggingFollowerStarvation() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            String leaderActorId = factory.generateActorId("leader");
+            String follower1ActorId = factory.generateActorId("follower");
+            String follower2ActorId = factory.generateActorId("follower");
+
+            TestActorRef<ForwardMessageToBehaviorActor> leaderActor =
+                    factory.createTestActor(ForwardMessageToBehaviorActor.props(), leaderActorId);
+            ActorRef follower1Actor = factory.createActor(MessageCollectorActor.props(),follower1ActorId);
+            ActorRef follower2Actor = factory.createActor(MessageCollectorActor.props(), follower2ActorId);
+
+            MockRaftActorContext leaderActorContext =
+                    new MockRaftActorContext(leaderActorId, getSystem(), leaderActor);
+
+            DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
+            configParams.setHeartBeatInterval(new FiniteDuration(200, TimeUnit.MILLISECONDS));
+            configParams.setIsolatedLeaderCheckInterval(new FiniteDuration(10, TimeUnit.SECONDS));
+
+            leaderActorContext.setConfigParams(configParams);
+
+
+            leaderActorContext.setReplicatedLog(
+                    new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(1,5,1).build());
+
+            Map<String, String> peerAddresses = new HashMap<>();
+            peerAddresses.put(follower1ActorId,
+                    follower1Actor.path().toString());
+            peerAddresses.put(follower2ActorId,
+                    follower2Actor.path().toString());
+
+
+            leaderActorContext.setPeerAddresses(peerAddresses);
+            leaderActorContext.getTermInformation().update(1, leaderActorId);
+
+            Leader leader = new Leader(leaderActorContext);
+
+            leaderActor.underlyingActor().behavior = leader;
+
+            for(int i=1;i<6;i++) {
+                // Each AppendEntriesReply could end up rescheduling the heartbeat (without the fix for bug 2733)
+                leader.handleMessage(follower1Actor, new AppendEntriesReply(follower1ActorId, 1, true, i, 1));
+                Uninterruptibles.sleepUninterruptibly(200, TimeUnit.MILLISECONDS);
+            }
+
+            // Check if the leader has been receiving SendHeartbeat messages despite getting AppendEntriesReply
+            List<Object> heartbeats = MessageCollectorActor.getAllMatching(leaderActor, SendHeartBeat.class);
+
+            Assert.assertTrue(String.format("%s heartbeat(s) is less than expected", heartbeats.size()),
+                    heartbeats.size() > 1);
+
+            // Check if follower-2 got AppendEntries during this time and was not starved
+            List<Object> appendEntries = MessageCollectorActor.getAllMatching(follower2Actor, AppendEntries.class);
+
+            Assert.assertTrue(String.format("%s append entries is less than expected", appendEntries.size()),
+                    appendEntries.size() > 1);
+
         }};
     }
 
