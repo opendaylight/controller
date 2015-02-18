@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_d724adc6",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/ops/get/Get.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-02-18T16:35:24Z",
+      "side": 1,
+      "message": "source element is required here in request, needs to be removed for get, since get does not require it",
+      "revId": "8d17b7aca17f10005f5f3da1b80d2e442fd0168c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
