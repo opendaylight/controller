@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>netconf-subsystem</artifactId>
+    <version>0.3.0-SNAPSHOT</version>
+  </parent>
+  <artifactId>mdsal-netconf-monitoring</artifactId>
+  <packaging>bundle</packaging>
+  <name>${project.artifactId}</name>
+
+  <dependencies>
+    <!-- compile dependencies -->
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>netconf-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>netconf-mapping-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>netconf-monitoring</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>netconf-util</artifactId>
+    </dependency>
+      <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>sal-binding-config</artifactId>
+      </dependency>
+
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>mockito-configuration</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools.model</groupId>
+      <artifactId>ietf-inet-types</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <configuration>
+          <instructions>
+            <Bundle-Activator>org.opendaylight.controller.netconf.monitoring.osgi.NetconfMonitoringActivator</Bundle-Activator>
+          </instructions>
+        </configuration>
+      </plugin>
+        <plugin>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>yang-maven-plugin</artifactId>
+            <executions>
+                <execution>
+                    <id>config</id>
+                    <goals>
+                        <goal>generate-sources</goal>
+                    </goals>
+                    <configuration>
+                        <codeGenerators>
+                            <generator>
+                                <codeGeneratorClass>org.opendaylight.controller.config.yangjmxgenerator.plugin.JMXGenerator</codeGeneratorClass>
+                                <outputBaseDir>${jmxGeneratorPath}</outputBaseDir>
+                                <additionalConfiguration>
+                                    <namespaceToPackage1>urn:opendaylight:params:xml:ns:yang:controller==org.opendaylight.controller.config.yang</namespaceToPackage1>
+                                </additionalConfiguration>
+                            </generator>
+                            <generator>
+                                <codeGeneratorClass>org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl</codeGeneratorClass>
+                                <outputBaseDir>${salGeneratorPath}</outputBaseDir>
+                            </generator>
+                        </codeGenerators>
+                        <inspectDependencies>true</inspectDependencies>
+                    </configuration>
+                </execution>
+            </executions>
+            <dependencies>
+                <dependency>
+                    <groupId>org.opendaylight.controller</groupId>
+                    <artifactId>yang-jmx-generator-plugin</artifactId>
+                    <version>${config.version}</version>
+                </dependency>
+            </dependencies>
+        </plugin>
+    </plugins>
+  </build>
+
+</project>

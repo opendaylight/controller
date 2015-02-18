@@ -9,6 +9,7 @@ package org.opendaylight.controller.netconf.impl.osgi;
 
 import org.opendaylight.controller.netconf.api.util.NetconfConstants;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactoryListener;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
