@@ -7,13 +7,11 @@
  */
 package org.opendaylight.controller.sal.core.api;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Set;
-
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-
-import com.google.common.util.concurrent.ListenableFuture;
 
 /**
  * {@link Provider}'s implementation of an RPC.
@@ -42,7 +40,10 @@ import com.google.common.util.concurrent.ListenableFuture;
  * {@link RpcResult}
  * <li> {@link Broker} returns the {@link RpcResult} to {@link Consumer}
  * </ol>
+ *
+ * @deprecated Use {@link org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementation} instead.
  */
+@Deprecated
 public interface RpcImplementation extends Provider.ProviderFunctionality {
 
     /**
