@@ -17,20 +17,18 @@ import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.Snapshot;
-import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
+import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 
 public class FollowerTest extends AbstractRaftActorBehaviorTest {
-
-    private final TestActorFactory actorFactory = new TestActorFactory(getSystem());
 
     private final TestActorRef<MessageCollectorActor> followerActor = actorFactory.createTestActor(
             Props.create(MessageCollectorActor.class), actorFactory.generateActorId("follower"));
@@ -40,13 +38,14 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
 
     private RaftActorBehavior follower;
 
+    @Override
     @After
     public void tearDown() throws Exception {
         if(follower != null) {
             follower.close();
         }
 
-        actorFactory.close();
+        super.tearDown();
     }
 
     @Override
@@ -513,5 +512,21 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
     private ReplicatedLogEntry newReplicatedLogEntry(long term, long index, String data) {
         return new MockRaftActorContext.MockReplicatedLogEntry(term, index,
                 new MockRaftActorContext.MockPayload(data));
+    }
+
+    @Override
+    protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(RaftActorContext actorContext,
+            ActorRef actorRef, RaftRPC rpc) throws Exception {
+        super.assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(actorContext, actorRef, rpc);
+
+        String expVotedFor = RequestVote.class.isInstance(rpc) ? ((RequestVote)rpc).getCandidateId() : null;
+        assertEquals("New votedFor", expVotedFor, actorContext.getTermInformation().getVotedFor());
+    }
+
+    @Override
+    protected void handleAppendEntriesAddSameEntryToLogReply(TestActorRef<MessageCollectorActor> replyActor)
+            throws Exception {
+        AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(replyActor, AppendEntriesReply.class);
+        assertEquals("isSuccess", true, reply.isSuccess());
     }
 }

@@ -1,6 +1,7 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertEquals;
+import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.testkit.TestActorRef;
 import java.util.Collections;
@@ -13,17 +14,15 @@ import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
+import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 
 public class CandidateTest extends AbstractRaftActorBehaviorTest {
-
-    private final TestActorFactory actorFactory = new TestActorFactory(getSystem());
 
     private final TestActorRef<MessageCollectorActor> candidateActor = actorFactory.createTestActor(
             Props.create(MessageCollectorActor.class), actorFactory.generateActorId("candidate"));
@@ -36,13 +35,14 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
     public void setUp(){
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         if(candidate != null) {
             candidate.close();
         }
 
-        actorFactory.close();
+        super.tearDown();
     }
 
     @Test
@@ -205,5 +205,12 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
         }
 
         return peerMap;
+    }
+
+    @Override
+    protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(RaftActorContext actorContext,
+            ActorRef actorRef, RaftRPC rpc) throws Exception {
+        super.assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(actorContext, actorRef, rpc);
+        assertEquals("New votedFor", null, actorContext.getTermInformation().getVotedFor());
     }
 }
