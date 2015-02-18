@@ -104,7 +104,7 @@ module distributed-datastore-provider {
          }
 
 
-         leaf shard-hearbeat-interval-in-millis {
+         leaf shard-heartbeat-interval-in-millis {
             default 500;
             type heartbeat-interval-type;
             description "The interval at which a shard will send a heart beat message to its remote shard.";
@@ -190,7 +190,7 @@ module distributed-datastore-provider {
                         followers are active and term itself as isolated";
         }
 
-        leaf tx-creation-initial-rate-limit {
+        leaf transaction-creation-initial-rate-limit {
             default 100;
             type non-zero-uint32-type;
             description "The initial number of transactions per second that are allowed before the data store

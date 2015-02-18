@@ -56,7 +56,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import scala.concurrent.duration.Duration;
 
 public class ShardTransactionTest extends AbstractActorTest {
 
@@ -530,7 +529,7 @@ public class ShardTransactionTest extends AbstractActorTest {
     public void testShardTransactionInactivity() {
 
         datastoreContext = DatastoreContext.newBuilder().shardTransactionIdleTimeout(
-                Duration.create(500, TimeUnit.MILLISECONDS)).build();
+                500, TimeUnit.MILLISECONDS).build();
 
         new JavaTestKit(getSystem()) {{
             final ActorRef transaction = newTransactionActor(store.newReadWriteTransaction(),
