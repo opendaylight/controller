@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockReplicatedLogEntry;
+
 /**
 *
 */
@@ -130,10 +131,16 @@ public class AbstractReplicatedLogImplTest {
 
     @Test
     public void testSnapshotPreCommit() {
+        //add 4 more entries
         replicatedLogImpl.append(new MockReplicatedLogEntry(2, 4, new MockPayload("E")));
         replicatedLogImpl.append(new MockReplicatedLogEntry(2, 5, new MockPayload("F")));
         replicatedLogImpl.append(new MockReplicatedLogEntry(3, 6, new MockPayload("G")));
         replicatedLogImpl.append(new MockReplicatedLogEntry(3, 7, new MockPayload("H")));
+
+        //sending negative values should not cause any changes
+        replicatedLogImpl.snapshotPreCommit(-1, -1);
+        assertEquals(8, replicatedLogImpl.size());
+        assertEquals(-1, replicatedLogImpl.getSnapshotIndex());
 
         replicatedLogImpl.snapshotPreCommit(4, 3);
         assertEquals(3, replicatedLogImpl.size());
@@ -152,7 +159,31 @@ public class AbstractReplicatedLogImplTest {
         assertEquals(0, replicatedLogImpl.size());
         assertEquals(7, replicatedLogImpl.getSnapshotIndex());
 
+    }
 
+    @Test
+    public void testIsPresent() {
+        assertTrue(replicatedLogImpl.isPresent(0));
+        assertTrue(replicatedLogImpl.isPresent(1));
+        assertTrue(replicatedLogImpl.isPresent(2));
+        assertTrue(replicatedLogImpl.isPresent(3));
+
+        replicatedLogImpl.append(new MockReplicatedLogEntry(2, 4, new MockPayload("D")));
+        replicatedLogImpl.snapshotPreCommit(3, 2); //snapshot on 3
+        replicatedLogImpl.snapshotCommit();
+
+        assertFalse(replicatedLogImpl.isPresent(0));
+        assertFalse(replicatedLogImpl.isPresent(1));
+        assertFalse(replicatedLogImpl.isPresent(2));
+        assertFalse(replicatedLogImpl.isPresent(3));
+        assertTrue(replicatedLogImpl.isPresent(4));
+
+        replicatedLogImpl.snapshotPreCommit(4, 2); //snapshot on 4
+        replicatedLogImpl.snapshotCommit();
+        assertFalse(replicatedLogImpl.isPresent(4));
+
+        replicatedLogImpl.append(new MockReplicatedLogEntry(2, 5, new MockPayload("D")));
+        assertTrue(replicatedLogImpl.isPresent(5));
     }
 
     // create a snapshot for test
