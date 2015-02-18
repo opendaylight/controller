@@ -22,6 +22,30 @@
       "revId": "3be60231011afbfa039c93cb07f7017fccc668b3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_d2011b39",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-18T21:32:21Z",
+      "side": 1,
+      "message": "This actually uses the scheduler to schedule the heartbeat. If you did not do this heartbeat would not get triggered with the prior code - see test case",
+      "parentUuid": "7a96c907_f258d78b",
+      "range": {
+        "startLine": 133,
+        "startChar": 8,
+        "endLine": 133,
+        "endChar": 25
+      },
+      "revId": "3be60231011afbfa039c93cb07f7017fccc668b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
