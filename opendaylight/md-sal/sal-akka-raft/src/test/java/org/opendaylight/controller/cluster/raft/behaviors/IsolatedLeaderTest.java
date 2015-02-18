@@ -22,7 +22,7 @@ import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 
-public class IsolatedLeaderTest  extends AbstractRaftActorBehaviorTest {
+public class IsolatedLeaderTest  extends AbstractLeaderTest {
 
     private final TestActorRef<MessageCollectorActor> leaderActor = actorFactory.createTestActor(
             Props.create(MessageCollectorActor.class), actorFactory.generateActorId("leader"));
@@ -44,7 +44,7 @@ public class IsolatedLeaderTest  extends AbstractRaftActorBehaviorTest {
 
     @Override
     protected RaftActorBehavior createBehavior(RaftActorContext actorContext) {
-        return new Leader(actorContext);
+        return new IsolatedLeader(actorContext);
     }
 
     @Override
