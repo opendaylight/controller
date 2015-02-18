@@ -39,6 +39,8 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
 
     private final ActorContext actorContext;
 
+    private AutoCloseable closeable;
+
     public DistributedDataStore(ActorSystem actorSystem, ClusterWrapper cluster,
             Configuration configuration, DatastoreContext datastoreContext) {
         Preconditions.checkNotNull(actorSystem, "actorSystem should not be null");
@@ -60,6 +62,10 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
 
     public DistributedDataStore(ActorContext actorContext) {
         this.actorContext = Preconditions.checkNotNull(actorContext, "actorContext should not be null");
+    }
+
+    public void setCloseable(AutoCloseable closeable) {
+        this.closeable = closeable;
     }
 
     @SuppressWarnings("unchecked")
@@ -111,7 +117,13 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
+        if(closeable != null) {
+            try {
+                closeable.close();
+            } catch (Exception e) {}
+        }
+
         actorContext.shutdown();
     }
 

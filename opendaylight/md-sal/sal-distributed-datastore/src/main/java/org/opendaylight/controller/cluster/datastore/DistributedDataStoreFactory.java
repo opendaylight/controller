@@ -23,7 +23,7 @@ public class DistributedDataStoreFactory {
     private static volatile ActorSystem persistentActorSystem = null;
 
     public static DistributedDataStore createInstance(SchemaService schemaService,
-                                                      DatastoreContext datastoreContext, BundleContext bundleContext) {
+            DatastoreContext datastoreContext, BundleContext bundleContext) {
 
         ActorSystem actorSystem = getOrCreateInstance(bundleContext, datastoreContext.getConfigurationReader());
         Configuration config = new ConfigurationImpl("module-shards.conf", "modules.conf");
@@ -33,6 +33,10 @@ public class DistributedDataStoreFactory {
 
         ShardStrategyFactory.setConfiguration(config);
         schemaService.registerSchemaContextListener(dataStore);
+
+        DatastoreContextConfigAdminOverlay overlay = new DatastoreContextConfigAdminOverlay(
+                new DatastoreContextIntrospector(datastoreContext), bundleContext);
+        dataStore.setCloseable(overlay);
         return dataStore;
     }
 
