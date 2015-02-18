@@ -27,7 +27,6 @@ import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogImplEntry;
 import org.opendaylight.controller.cluster.raft.SerializationUtils;
-import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
@@ -40,6 +39,7 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
+import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages;
@@ -49,8 +49,6 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
     static final String FOLLOWER_ID = "follower";
 
-    private final TestActorFactory actorFactory = new TestActorFactory(getSystem());
-
     private final TestActorRef<ForwardMessageToBehaviorActor> leaderActor = actorFactory.createTestActor(
             Props.create(ForwardMessageToBehaviorActor.class), actorFactory.generateActorId("leader"));
 
@@ -59,13 +57,14 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
     private Leader leader;
 
+    @Override
     @After
     public void tearDown() throws Exception {
         if(leader != null) {
             leader.close();
         }
 
-        actorFactory.close();
+        super.tearDown();
     }
 
     @Test
@@ -1134,6 +1133,13 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
         assertEquals(1, appendEntries.getEntries().get(0).getIndex());
 
         follower.close();
+    }
+
+    @Override
+    protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(RaftActorContext actorContext,
+            ActorRef actorRef, RaftRPC rpc) throws Exception {
+        super.assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(actorContext, actorRef, rpc);
+        assertEquals("New votedFor", null, actorContext.getTermInformation().getVotedFor());
     }
 
     private class MockConfigParamsImpl extends DefaultConfigParamsImpl {
