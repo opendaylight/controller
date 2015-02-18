@@ -134,7 +134,7 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
             sender().tell((returnSerialized ? readDataReply.toSerializable(clientTxVersion): readDataReply), self());
 
         } catch (Exception e) {
-            LOG.error(String.format("Unexpected error reading path %s", path), e);
+            LOG.debug(String.format("Unexpected error reading path %s", path), e);
             shardStats.incrementFailedReadTransactionsCount();
             sender().tell(new akka.actor.Status.Failure(e), self());
         }
