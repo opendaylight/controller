@@ -51,6 +51,11 @@
                   <type>xml</type>
                   <classifier>moduleconf</classifier>
                 </artifact>
+                <artifact>
+                  <file>${project.build.directory}/classes/initial/datastore.cfg</file>
+                  <type>cfg</type>
+                  <classifier>datastore</classifier>
+                </artifact>
               </artifacts>
             </configuration>
           </execution>
