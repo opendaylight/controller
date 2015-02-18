@@ -103,7 +103,6 @@
     <jmxGeneratorPath>src/main/yang-gen-config</jmxGeneratorPath>
     <jolokia-bridge.version>0.1.0-SNAPSHOT</jolokia-bridge.version>
     <jolokia.version>1.1.4</jolokia.version>
-    <jsr305.api.version>2.0.1</jsr305.api.version>
     <jsr311.api.version>1.1.1</jsr311.api.version>
     <jsr311.v2.api.version>2.0</jsr311.v2.api.version>
     <karaf.branding.version>1.1.0-SNAPSHOT</karaf.branding.version>
@@ -285,11 +284,6 @@
         <groupId>com.github.romix</groupId>
         <artifactId>java-concurrent-hash-trie-map</artifactId>
         <version>${ctrie.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.code.findbugs</groupId>
-        <artifactId>jsr305</artifactId>
-        <version>${jsr305.api.version}</version>
       </dependency>
       <dependency>
         <groupId>com.google.code.gson</groupId>
