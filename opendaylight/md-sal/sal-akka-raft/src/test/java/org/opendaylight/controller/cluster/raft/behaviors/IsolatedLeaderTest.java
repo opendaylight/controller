@@ -19,10 +19,11 @@ import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
+import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 
-public class IsolatedLeaderTest  extends AbstractRaftActorBehaviorTest {
+public class IsolatedLeaderTest  extends AbstractLeaderTest {
 
     private final TestActorRef<MessageCollectorActor> leaderActor = actorFactory.createTestActor(
             Props.create(MessageCollectorActor.class), actorFactory.generateActorId("leader"));
@@ -157,5 +158,15 @@ public class IsolatedLeaderTest  extends AbstractRaftActorBehaviorTest {
         assertEquals("Raft state", RaftState.Follower, behavior.state());
 
         behavior.close();
+    }
+
+    @Override
+    protected AbstractLeader createLeader(MockRaftActorContext actorContext) {
+        return new IsolatedLeader(actorContext);
+    }
+
+    @Override
+    protected TestActorFactory getTestActorFactory() {
+        return actorFactory;
     }
 }

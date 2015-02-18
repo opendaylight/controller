@@ -126,6 +126,9 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         // (heartbeat) to each server; repeat during idle periods to
         // prevent election timeouts (§5.2)
         sendAppendEntries(0, false);
+
+        // It is important to schedule this heartbeat here
+        scheduleHeartBeat(context.getConfigParams().getHeartBeatInterval());
     }
 
     /**
@@ -294,26 +297,24 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             }
         }
 
-        try {
-            if (message instanceof SendHeartBeat) {
-                sendHeartBeat();
-                return this;
-
-            } else if(message instanceof SendInstallSnapshot) {
-                // received from RaftActor
-                setSnapshot(Optional.of(((SendInstallSnapshot) message).getSnapshot()));
-                sendInstallSnapshot();
-
-            } else if (message instanceof Replicate) {
-                replicate((Replicate) message);
-
-            } else if (message instanceof InstallSnapshotReply){
-                handleInstallSnapshotReply((InstallSnapshotReply) message);
-
-            }
-        } finally {
+        if (message instanceof SendHeartBeat) {
+            sendHeartBeat();
             scheduleHeartBeat(context.getConfigParams().getHeartBeatInterval());
+            return this;
+
+        } else if(message instanceof SendInstallSnapshot) {
+            // received from RaftActor
+            setSnapshot(Optional.of(((SendInstallSnapshot) message).getSnapshot()));
+            sendInstallSnapshot();
+
+        } else if (message instanceof Replicate) {
+            replicate((Replicate) message);
+
+        } else if (message instanceof InstallSnapshotReply){
+            handleInstallSnapshotReply((InstallSnapshotReply) message);
+
         }
+
 
         return super.handleMessage(sender, message);
     }
