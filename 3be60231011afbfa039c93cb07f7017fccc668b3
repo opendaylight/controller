@@ -46,6 +46,23 @@
       "revId": "3be60231011afbfa039c93cb07f7017fccc668b3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_f2b45783",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-18T21:57:19Z",
+      "side": 1,
+      "message": "I\u0027ve added this in my refactoring.",
+      "revId": "3be60231011afbfa039c93cb07f7017fccc668b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
