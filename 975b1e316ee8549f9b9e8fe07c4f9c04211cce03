@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_977ce5b6",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeListener.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-18T16:27:54Z",
+      "side": 1,
+      "message": "OK - instead of requiring the client to unregister, can\u0027t the implementation do it automatically? Essentially this means the listener is done so auto-unregistering seems to make sense.",
+      "parentUuid": "7a96c907_779119f0",
+      "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_792d92a7",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeProducer.java",
         "patchSetId": 8
@@ -66,6 +84,24 @@
       "side": 1,
       "message": "Transactions in a producer are always \"chained\". Merging means what PingPong broker does: rolling transactions so that they appear in the background as a single entity. That means that some data change edges (flaps) may disappear -- which is fine for most applications, but intolerable for others.",
       "parentUuid": "7a96c907_792d92a7",
+      "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_374dd19a",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeProducer.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-18T16:27:54Z",
+      "side": 1,
+      "message": "ok - that clarifies it a bit. Can you include this language in the javadocs? I think it\u0027s important to make it clear the tx\u0027s are automatically chained, as this differs from before, and what that means. \n\nAlso the text talks about \"isolated\" but the param is named \"barrier\". I think it would be more clear to use the same terminology, i.e. name the param \"isolated\".",
+      "parentUuid": "7a96c907_978e25cf",
       "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -107,6 +143,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_d75d8d48",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeProducer.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-18T16:27:54Z",
+      "side": 1,
+      "message": "Can we make that clear? Eg \"invoked in the appropriate context (bounded or unbounded).\"",
+      "parentUuid": "7a96c907_37bf1163",
+      "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_391b8a82",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeProducer.java",
         "patchSetId": 8
@@ -142,6 +196,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_3734f1fa",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeProducer.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-18T16:27:54Z",
+      "side": 1,
+      "message": "Can you include that language?",
+      "parentUuid": "7a96c907_57c41df4",
+      "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_5920d6ab",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeProducer.java",
         "patchSetId": 8
@@ -171,6 +243,24 @@
       "side": 1,
       "message": "Yes they have to. The use case is when a single instance of an application, which produces a topology instance wants to create dedicated per-device producers (to attach to individual sessions).",
       "parentUuid": "7a96c907_5920d6ab",
+      "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_57397df1",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeProducer.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-18T16:27:54Z",
+      "side": 1,
+      "message": "I think this one really needs an example use case.",
+      "parentUuid": "7a96c907_f7b44983",
       "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
