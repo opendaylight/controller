@@ -1,0 +1,22 @@
+module netconf-northbound {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:netconf:northbound";
+    prefix "nn";
+
+    import config { prefix config; revision-date 2013-04-05; }
+
+    description
+        "This module contains the base YANG definitions for
+         netconf northbound server API";
+
+    revision "2015-01-14" {
+        description
+            "Initial revision.";
+    }
+
+    identity netconf-server-dispatcher {
+        base "config:service-type";
+        config:java-class "org.opendaylight.controller.netconf.api.NetconfServerDispatcher";
+    }
+
+}

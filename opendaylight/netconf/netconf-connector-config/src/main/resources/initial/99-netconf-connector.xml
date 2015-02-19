@@ -42,7 +42,7 @@
             <name>global-netconf-processing-executor</name>
           </processing-executor>
         </module>
-      </modules>
+        </modules>
     </data>
   </configuration>
   <required-capabilities>
