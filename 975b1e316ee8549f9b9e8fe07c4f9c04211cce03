@@ -284,6 +284,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_8d4934b9",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeProducerFactory.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-19T09:12:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_b960fa01",
+      "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_f910c25a",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeProducerFactory.java",
         "patchSetId": 8
@@ -295,6 +313,24 @@
       "writtenOn": "2015-02-17T23:45:06Z",
       "side": 1,
       "message": "This is not a param in the method.\n\"subtrees\" should be doc\u0027ed.",
+      "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_2dca601b",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeProducerFactory.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-19T09:12:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_f910c25a",
       "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -318,6 +354,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_edcf9827",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-19T09:12:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_f9420267",
+      "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_19480e86",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeService.java",
         "patchSetId": 8
@@ -329,6 +383,24 @@
       "writtenOn": "2015-02-17T23:45:06Z",
       "side": 1,
       "message": "How would this happen if a producer can only used/accessed within the callback?  Is this something the implementation must check for or the client listener? Eg, if a producer wasn\u0027t idle at the time of a trigger, is it the implementation\u0027s job to delay/wait for the producer to become idle before triggering?",
+      "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_cddadce7",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-19T09:12:12Z",
+      "side": 1,
+      "message": "Usually producers will be created at the same callsite the listener is registered from. This delineates the requirement, how that is achieved is up to the caller. If it violates the API contract, the implementation is free to do whatever.",
+      "parentUuid": "7a96c907_19480e86",
       "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -352,6 +424,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_6de388a4",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-19T09:12:12Z",
+      "side": 1,
+      "message": "correct",
+      "parentUuid": "7a96c907_7c1b4073",
+      "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_5952163c",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeService.java",
         "patchSetId": 8
@@ -363,6 +453,24 @@
       "writtenOn": "2015-02-17T23:45:06Z",
       "side": 1,
       "message": "I\u0027m assuming this can be empty.",
+      "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_8de05497",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataTreeService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-02-19T09:12:12Z",
+      "side": 1,
+      "message": "yes",
+      "parentUuid": "7a96c907_5952163c",
       "revId": "975b1e316ee8549f9b9e8fe07c4f9c04211cce03",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
