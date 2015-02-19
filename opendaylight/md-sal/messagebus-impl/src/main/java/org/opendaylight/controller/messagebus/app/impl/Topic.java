@@ -63,10 +63,7 @@ public class Topic implements DataChangeListener {
     public void notifyNode(final NodeId nodeId) {
         JoinTopicInput jti = getJoinTopicInputArgument(nodeId);
         EventSourceService ess = mdSal.getRpcService(EventSourceService.class);
-
-        if (ess == null) {
-            throw new IllegalStateException("EventSourceService is not registered.");
-        }
+        Preconditions.checkState(ess != null, "EventSourceService is not registered");
 
         ess.joinTopic(jti);
     }
