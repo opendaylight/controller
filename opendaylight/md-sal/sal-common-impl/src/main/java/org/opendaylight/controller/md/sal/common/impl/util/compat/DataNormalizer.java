@@ -14,10 +14,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
@@ -106,24 +104,6 @@ public class DataNormalizer {
                         normalizedPath), e);
             }
         }
-
-        // Write Augmentation data resolution
-        if (legacyData.getValue().size() == 1) {
-            final DataNormalizationOperation<?> potentialOp;
-
-            try {
-                final QName childType = legacyData.getValue().get(0).getNodeType();
-                potentialOp = currentOp.getChild(childType);
-            } catch (DataNormalizationException e) {
-                throw new IllegalArgumentException(String.format("Failed to get child operation for %s", legacyData), e);
-            }
-
-            if (potentialOp.getIdentifier() instanceof AugmentationIdentifier) {
-                currentOp = potentialOp;
-                normalizedPath = normalizedPath.node(potentialOp.getIdentifier());
-            }
-        }
-
         Preconditions.checkArgument(currentOp != null,
                 "Instance Identifier %s does not reference correct schema Node.", normalizedPath);
         return new AbstractMap.SimpleEntry<YangInstanceIdentifier, NormalizedNode<?, ?>>(normalizedPath,
