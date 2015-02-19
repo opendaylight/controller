@@ -8,9 +8,14 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
+import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.DatastoreConfigurationMXBeanImpl;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
@@ -38,11 +43,22 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
     private static final Logger LOG = LoggerFactory.getLogger(DistributedDataStore.class);
     public static final int REGISTER_DATA_CHANGE_LISTENER_TIMEOUT_FACTOR = 24; // 24 times the usual operation timeout
 
-    private final ActorContext actorContext;
+    private volatile ActorContext actorContext;
 
     private AutoCloseable closeable;
 
-    private DatastoreConfigurationMXBeanImpl datastoreConfigMXBean;
+    private final DatastoreConfigurationMXBeanImpl datastoreConfigMXBean;
+
+    private final ActorSystem actorSystem;
+
+    private final ClusterWrapper cluster;
+
+    private final Configuration configuration;
+
+    private volatile SchemaContext lastSchemaContext;
+
+    private final ConcurrentMap<ForwardingDataChangeListenerRegistration, ForwardingDataChangeListenerRegistration>
+            listenerRegMap = new ConcurrentHashMap<>();
 
     public DistributedDataStore(ActorSystem actorSystem, ClusterWrapper cluster,
             Configuration configuration, DatastoreContext datastoreContext) {
@@ -51,28 +67,66 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
         Preconditions.checkNotNull(configuration, "configuration should not be null");
         Preconditions.checkNotNull(datastoreContext, "datastoreContext should not be null");
 
-        String type = datastoreContext.getDataStoreType();
+        this.actorSystem = actorSystem;
+        this.cluster = cluster;
+        this.configuration = configuration;
 
-        String shardManagerId = ShardManagerIdentifier.builder().type(type).build().toString();
-
-        LOG.info("Creating ShardManager : {}", shardManagerId);
-
-        actorContext = new ActorContext(actorSystem, actorSystem.actorOf(
-                ShardManager.props(cluster, configuration, datastoreContext)
-                    .withMailbox(ActorContext.MAILBOX), shardManagerId ),
-                cluster, configuration, datastoreContext);
+        createActorContext(datastoreContext);
 
         datastoreConfigMXBean = new DatastoreConfigurationMXBeanImpl(datastoreContext.getDataStoreMXBeanType());
         datastoreConfigMXBean.setContext(datastoreContext);
         datastoreConfigMXBean.registerMBean();
     }
 
+    private void createActorContext(DatastoreContext datastoreContext) {
+        String type = datastoreContext.getDataStoreType();
+
+        String shardManagerId = ShardManagerIdentifier.builder().type(type).build().toString();
+
+        LOG.info("Creating ShardManager : {}", shardManagerId);
+
+        ActorRef shardManager = actorSystem.actorOf(ShardManager.props(cluster, configuration,
+                datastoreContext).withMailbox(ActorContext.MAILBOX), shardManagerId);
+
+        actorContext = new ActorContext(actorSystem, shardManager, cluster, configuration, datastoreContext);
+    }
+
     public DistributedDataStore(ActorContext actorContext) {
         this.actorContext = Preconditions.checkNotNull(actorContext, "actorContext should not be null");
+        this.actorSystem = null;
+        this.cluster = null;
+        this.configuration = null;
+        this.datastoreConfigMXBean = null;
     }
 
     public void setCloseable(AutoCloseable closeable) {
         this.closeable = closeable;
+    }
+
+    public synchronized void restartWithNewContext(DatastoreContext newContext) {
+        LOG.info("Restarting DistributedDataStore {}", actorContext.getDataStoreType());
+
+        List<DataChangeListenerRegistrationProxy> oldListenerRegs = closeDataChangeListenerRegistrations();
+
+        actorContext.close();
+
+        createActorContext(newContext);
+
+        actorContext.setSchemaContext(lastSchemaContext);
+
+        for(DataChangeListenerRegistrationProxy reg: oldListenerRegs) {
+            registerChangeListener(reg.getPath(), reg.getListener(), reg.getScope());
+        }
+    }
+
+    private List<DataChangeListenerRegistrationProxy> closeDataChangeListenerRegistrations() {
+        List<DataChangeListenerRegistrationProxy> oldListenerRegs = new ArrayList<>();
+        for(ForwardingDataChangeListenerRegistration reg: listenerRegMap.values()) {
+            oldListenerRegs.add(reg.getDelegate());
+            reg.close();
+        }
+
+        return oldListenerRegs;
     }
 
     @SuppressWarnings("unchecked")
@@ -93,7 +147,12 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
                 new DataChangeListenerRegistrationProxy(shardName, actorContext, listener);
         listenerRegistrationProxy.init(path, scope);
 
-        return listenerRegistrationProxy;
+        ForwardingDataChangeListenerRegistration forwardingListenerReg =
+                new ForwardingDataChangeListenerRegistration(listenerRegistrationProxy, listenerRegMap);
+
+        listenerRegMap.put(forwardingListenerReg, forwardingListenerReg);
+
+        return forwardingListenerReg;
     }
 
     @Override
@@ -120,6 +179,7 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
 
     @Override
     public void onGlobalContextUpdated(SchemaContext schemaContext) {
+        lastSchemaContext = schemaContext;
         actorContext.setSchemaContext(schemaContext);
     }
 
@@ -135,11 +195,41 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
             }
         }
 
-        actorContext.shutdown();
+        actorContext.close();
+        actorSystem.shutdown();
     }
 
     @VisibleForTesting
     ActorContext getActorContext() {
         return actorContext;
+    }
+
+    @SuppressWarnings("rawtypes")
+    static class ForwardingDataChangeListenerRegistration implements ListenerRegistration {
+        private final DataChangeListenerRegistrationProxy delegate;
+        private final ConcurrentMap<ForwardingDataChangeListenerRegistration,
+                              ForwardingDataChangeListenerRegistration> listenerRegMap;
+
+        ForwardingDataChangeListenerRegistration(DataChangeListenerRegistrationProxy delegate,
+                ConcurrentMap<ForwardingDataChangeListenerRegistration,
+                              ForwardingDataChangeListenerRegistration> listenerRegMap) {
+            this.delegate = delegate;
+            this.listenerRegMap = listenerRegMap;
+        }
+
+        @Override
+        public Object getInstance() {
+            return delegate.getInstance();
+        }
+
+        @Override
+        public void close() {
+            listenerRegMap.remove(this);
+            delegate.close();
+        }
+
+        DataChangeListenerRegistrationProxy getDelegate() {
+            return delegate;
+        }
     }
 }

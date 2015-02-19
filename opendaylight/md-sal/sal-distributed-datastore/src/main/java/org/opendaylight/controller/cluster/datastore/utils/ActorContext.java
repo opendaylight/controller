@@ -363,9 +363,8 @@ public class ActorContext {
         actor.tell(message, ActorRef.noSender());
     }
 
-    public void shutdown() {
+    public void close() {
         shardManager.tell(PoisonPill.getInstance(), null);
-        actorSystem.shutdown();
     }
 
     public ClusterWrapper getClusterWrapper() {

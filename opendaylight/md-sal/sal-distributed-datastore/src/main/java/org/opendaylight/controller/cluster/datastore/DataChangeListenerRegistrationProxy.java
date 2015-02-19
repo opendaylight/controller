@@ -12,6 +12,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.PoisonPill;
 import akka.dispatch.OnComplete;
+import com.google.common.annotations.VisibleForTesting;
 import org.opendaylight.controller.cluster.datastore.exceptions.LocalShardNotFoundException;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataChangeListenerRegistration;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
@@ -25,7 +26,6 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.google.common.annotations.VisibleForTesting;
 import scala.concurrent.Future;
 
 /**
@@ -42,6 +42,8 @@ public class DataChangeListenerRegistrationProxy implements ListenerRegistration
 
     private volatile ActorSelection listenerRegistrationActor;
     private final AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener;
+    private YangInstanceIdentifier path;
+    private AsyncDataBroker.DataChangeScope scope;
     private ActorRef dataChangeListenerActor;
     private final String shardName;
     private final ActorContext actorContext;
@@ -63,6 +65,18 @@ public class DataChangeListenerRegistrationProxy implements ListenerRegistration
     @VisibleForTesting
     ActorRef getDataChangeListenerActor() {
         return dataChangeListenerActor;
+    }
+
+    AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> getListener() {
+        return listener;
+    }
+
+    YangInstanceIdentifier getPath() {
+        return path;
+    }
+
+    AsyncDataBroker.DataChangeScope getScope() {
+        return scope;
     }
 
     @Override
@@ -91,6 +105,9 @@ public class DataChangeListenerRegistrationProxy implements ListenerRegistration
     }
 
     public void init(final YangInstanceIdentifier path, final AsyncDataBroker.DataChangeScope scope) {
+
+        this.path = path;
+        this.scope = scope;
 
         dataChangeListenerActor = actorContext.getActorSystem().actorOf(
                 DataChangeListener.props(listener));

@@ -136,6 +136,19 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     @Override
+    public void postStop() {
+        if(currentBehavior != null) {
+            try {
+                currentBehavior.close();
+            } catch (Exception e) {
+                LOG.debug("{}: Error closing behavior {}", persistenceId(), currentBehavior.state());
+            }
+        }
+
+        super.postStop();
+    }
+
+    @Override
     public void handleRecover(Object message) {
         if(persistence().isRecoveryApplicable()) {
             if (message instanceof SnapshotOffer) {

@@ -6,6 +6,8 @@ import static org.junit.Assert.fail;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
+import akka.actor.Terminated;
+import akka.testkit.JavaTestKit;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -774,6 +776,71 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
         }};
     }
 
+    @Test
+    public void testDataChangeListenerAfterDistributedDataStoreRestart() throws Exception{
+        new IntegrationTestKit(getSystem()) {{
+            DistributedDataStore dataStore = setupDistributedDataStore(
+                    "testDataChangeListenerAfterDistributedDataStoreRestart", "test-1");
+
+            testWriteTransaction(dataStore, TestModel.TEST_PATH,
+                    ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+
+            MockDataChangeListener listener = new MockDataChangeListener(1);
+
+            ListenerRegistration<MockDataChangeListener>
+                    listenerReg = dataStore.registerChangeListener(TestModel.TEST_PATH, listener,
+                            DataChangeScope.SUBTREE);
+
+            assertNotNull("registerChangeListener returned null", listenerReg);
+
+            // Wait for the initial notification
+
+            listener.waitForChangeEvents(TestModel.TEST_PATH);
+
+            listener.reset(1);
+
+            // Restart the DistributedDataStore a new DatastoreContext.
+
+            Optional<ActorRef> shardReply = dataStore.getActorContext().findLocalShard("test-1");
+            assertEquals("isPresent", true, shardReply.isPresent());
+
+            watch(shardReply.get());
+
+            Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
+            ActorRef listenerRegActor =
+                    ((DistributedDataStore.ForwardingDataChangeListenerRegistration)listenerReg).
+                            getDelegate().getDataChangeListenerActor();
+
+            JavaTestKit listenerRegKit = new JavaTestKit(getSystem());
+            listenerRegKit.watch(listenerRegActor);
+
+            dataStore.restartWithNewContext(datastoreContextBuilder.build());
+
+            expectMsgClass(duration("5 seconds"), Terminated.class);
+            listenerRegKit.expectMsgClass(duration("5 seconds"), Terminated.class);
+
+            waitUntilLeader(dataStore, "test-1");
+
+            // Wait for the initial notification
+
+            listener.waitForChangeEvents(TestModel.TEST_PATH);
+
+            listener.reset(1);
+
+            // Write an update.
+
+            testWriteTransaction(dataStore, TestModel.OUTER_LIST_PATH,
+                    ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
+
+            // Wait for the update.
+
+            listener.waitForChangeEvents(TestModel.OUTER_LIST_PATH);
+
+            cleanup(dataStore);
+        }};
+    }
+
+
     class IntegrationTestKit extends ShardTestKit {
 
         IntegrationTestKit(ActorSystem actorSystem) {
@@ -801,23 +868,27 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
             dataStore.onGlobalContextUpdated(schemaContext);
 
             if(waitUntilLeader) {
-                for(String shardName: shardNames) {
-                    ActorRef shard = null;
-                    for(int i = 0; i < 20 * 5 && shard == null; i++) {
-                        Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
-                        Optional<ActorRef> shardReply = dataStore.getActorContext().findLocalShard(shardName);
-                        if(shardReply.isPresent()) {
-                            shard = shardReply.get();
-                        }
-                    }
-
-                    assertNotNull("Shard was not created", shard);
-
-                    waitUntilLeader(shard);
-                }
+                waitUntilLeader(dataStore, shardNames);
             }
 
             return dataStore;
+        }
+
+        void waitUntilLeader(DistributedDataStore dataStore, String... shardNames) {
+            for(String shardName: shardNames) {
+                ActorRef shard = null;
+                for(int i = 0; i < 20 * 5 && shard == null; i++) {
+                    Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
+                    Optional<ActorRef> shardReply = dataStore.getActorContext().findLocalShard(shardName);
+                    if(shardReply.isPresent()) {
+                        shard = shardReply.get();
+                    }
+                }
+
+                assertNotNull("Shard was not created", shard);
+
+                waitUntilLeader(shard);
+            }
         }
 
         void testWriteTransaction(DistributedDataStore dataStore, YangInstanceIdentifier nodePath,

@@ -201,6 +201,8 @@ public class Shard extends RaftActor {
 
     @Override
     public void postStop() {
+        LOG.info("Stopping Shard {}", persistenceId());
+
         super.postStop();
 
         if(txCommitTimeoutCheckSchedule != null) {

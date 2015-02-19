@@ -60,7 +60,7 @@ public class MockDataChangeListener implements
         }
 
         for(int i = 0; i < expPaths.length; i++) {
-            assertTrue(String.format("Change %d does not contain %s", (i+1), expPaths[i]),
+            assertTrue(String.format("Change %d does not contain %s: %s", (i+1), expPaths[i], changeList.get(i)),
                     changeList.get(i).getCreatedData().containsKey(expPaths[i]));
         }
     }

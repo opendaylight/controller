@@ -8,7 +8,11 @@
 
 package org.opendaylight.controller.cluster.datastore.identifiers;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class ShardManagerIdentifier {
+    private static final AtomicInteger UNIQUE_ID = new AtomicInteger(1);
+
     private final String type;
 
     public ShardManagerIdentifier(String type) {
@@ -40,7 +44,7 @@ public class ShardManagerIdentifier {
 
     @Override public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("shardmanager-").append(type);
+        builder.append("shardmanager-").append(type).append('-').append(UNIQUE_ID.getAndIncrement());
         return builder.toString();
     }
 

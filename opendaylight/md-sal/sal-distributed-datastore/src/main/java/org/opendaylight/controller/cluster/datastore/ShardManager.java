@@ -112,6 +112,13 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         createLocalShards();
     }
 
+    @Override
+    public void postStop() {
+        LOG.info("Stopping ShardManager");
+
+        super.postStop();
+    }
+
     protected DataPersistenceProvider createDataPersistenceProvider(boolean persistent) {
         return (persistent) ? new PersistentDataProvider() : new NonPersistentDataProvider();
     }
