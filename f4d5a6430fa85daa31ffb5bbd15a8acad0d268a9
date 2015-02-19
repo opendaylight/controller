@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_156b03f3",
+        "filename": "opendaylight/config/config-persister-feature-adapter/src/main/java/org/opendaylight/controller/configpusherfeature/internal/AbstractFeatureWrapper.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-02-19T13:44:22Z",
+      "side": 1,
+      "message": "what happens if the exclusion of jetty.xml is not present ? the initialization of ODL fails ? or it just logs the error and continues to install everything else ?\n\nAlso I would make this configurable, so in the property file, user would specify the list of files to exclude from here (for now it would contain only the jetty.xml file), because I dont really like hardcoded file name in the code.",
+      "revId": "f4d5a6430fa85daa31ffb5bbd15a8acad0d268a9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
