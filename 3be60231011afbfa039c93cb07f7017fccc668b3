@@ -98,6 +98,24 @@
       "revId": "3be60231011afbfa039c93cb07f7017fccc668b3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_68e376a4",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1411,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-19T17:18:28Z",
+      "side": 1,
+      "message": "Yeah - we could move most of this into an AbstractLeaderTest and derive LeaderTest and IsolatedLeaderTest. I already have patches for refactoring these tests so we can do this later after those patches go thru to avoid too many conflicts.",
+      "parentUuid": "7a96c907_edf1d801",
+      "revId": "3be60231011afbfa039c93cb07f7017fccc668b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
