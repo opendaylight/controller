@@ -98,7 +98,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      * This context should NOT be passed directly to any other actor it is
      * only to be consumed by the RaftActorBehaviors
      */
-    private final RaftActorContext context;
+    private final RaftActorContextImpl context;
 
     /**
      * The in-memory journal
@@ -137,6 +137,19 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 context.getConfigParams().getJournalRecoveryLogBatchSize());
 
         super.preStart();
+    }
+
+    @Override
+    public void postStop() {
+        if(currentBehavior != null) {
+            try {
+                currentBehavior.close();
+            } catch (Exception e) {
+                LOG.debug("{}: Error closing behavior {}", persistenceId(), currentBehavior.state());
+            }
+        }
+
+        super.postStop();
     }
 
     @Override
@@ -509,6 +522,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     protected RaftActorContext getRaftActorContext() {
         return context;
+    }
+
+    protected void updateConfigParams(ConfigParams configParams) {
+        context.setConfigParams(configParams);
     }
 
     /**

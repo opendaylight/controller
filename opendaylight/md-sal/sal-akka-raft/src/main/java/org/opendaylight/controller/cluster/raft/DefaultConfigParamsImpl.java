@@ -43,6 +43,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     private long snapshotBatchCount = SNAPSHOT_BATCH_COUNT;
     private int journalRecoveryLogBatchSize = JOURNAL_RECOVERY_LOG_BATCH_SIZE;
     private long isolatedLeaderCheckInterval = HEART_BEAT_INTERVAL.$times(1000).toMillis();
+    private FiniteDuration electionTimeOutInterval;
 
     // 12 is just an arbitrary percentage. This is the amount of the total memory that a raft actor's
     // in-memory journal can use before it needs to snapshot
@@ -92,7 +93,11 @@ public class DefaultConfigParamsImpl implements ConfigParams {
 
     @Override
     public FiniteDuration getElectionTimeOutInterval() {
-        return getHeartBeatInterval().$times(electionTimeoutFactor);
+        if(electionTimeOutInterval == null) {
+            electionTimeOutInterval = getHeartBeatInterval().$times(electionTimeoutFactor);
+        }
+
+        return electionTimeOutInterval;
     }
 
     @Override

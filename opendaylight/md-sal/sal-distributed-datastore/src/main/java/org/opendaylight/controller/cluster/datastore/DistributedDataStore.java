@@ -33,7 +33,8 @@ import org.slf4j.LoggerFactory;
 /**
  *
  */
-public class DistributedDataStore implements DOMStore, SchemaContextListener, AutoCloseable {
+public class DistributedDataStore implements DOMStore, SchemaContextListener,
+        DatastoreContextConfigAdminOverlay.Listener, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributedDataStore.class);
     public static final int REGISTER_DATA_CHANGE_LISTENER_TIMEOUT_FACTOR = 24; // 24 times the usual operation timeout
@@ -121,6 +122,14 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
     @Override
     public void onGlobalContextUpdated(SchemaContext schemaContext) {
         actorContext.setSchemaContext(schemaContext);
+    }
+
+    @Override
+    public void onDatastoreContextUpdated(DatastoreContext context) {
+        LOG.info("DatastoreContext updated for data store {}", actorContext.getDataStoreType());
+
+        actorContext.setDatastoreContext(context);
+        datastoreConfigMXBean.setContext(context);
     }
 
     @Override

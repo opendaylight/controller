@@ -97,9 +97,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         final Builder<String, FollowerLogInformation> ftlBuilder = ImmutableMap.builder();
         for (String followerId : context.getPeerAddresses().keySet()) {
             FollowerLogInformation followerLogInformation =
-                new FollowerLogInformationImpl(followerId,
-                    context.getCommitIndex(), -1,
-                    context.getConfigParams().getElectionTimeOutInterval());
+                new FollowerLogInformationImpl(followerId, -1, context);
 
             ftlBuilder.put(followerId, followerLogInformation);
         }
