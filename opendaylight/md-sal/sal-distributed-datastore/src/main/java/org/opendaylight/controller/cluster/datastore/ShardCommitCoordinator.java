@@ -34,7 +34,7 @@ public class ShardCommitCoordinator {
 
     private final Queue<CohortEntry> queuedCohortEntries;
 
-    private final int queueCapacity;
+    private int queueCapacity;
 
     private final Logger log;
 
@@ -52,6 +52,10 @@ public class ShardCommitCoordinator {
         // We use a LinkedList here to avoid synchronization overhead with concurrent queue impls
         // since this should only be accessed on the shard's dispatcher.
         queuedCohortEntries = new LinkedList<>();
+    }
+
+    public void setQueueCapacity(int queueCapacity) {
+        this.queueCapacity = queueCapacity;
     }
 
     /**

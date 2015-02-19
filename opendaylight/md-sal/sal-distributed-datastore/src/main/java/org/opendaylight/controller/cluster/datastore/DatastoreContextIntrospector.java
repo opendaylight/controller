@@ -203,6 +203,8 @@ public class DatastoreContextIntrospector {
             return false;
         }
 
+        LOG.debug("In update: properties: {}", properties);
+
         Builder builder = DatastoreContext.newBuilderFrom(context);
 
         // Sort the property keys by putting the names prefixed with the data store type last. This
@@ -278,12 +280,12 @@ public class DatastoreContextIntrospector {
     }
 
     private Object constructorValueRecursively(Class<?> toType, Object fromValue) throws Exception {
-        LOG.debug("convertValueRecursively - toType: {}, fromValue {} ({})",
+        LOG.trace("convertValueRecursively - toType: {}, fromValue {} ({})",
                 toType.getSimpleName(), fromValue, fromValue.getClass().getSimpleName());
 
         Constructor<?> ctor = constructors.get(toType);
 
-        LOG.debug("Found {}", ctor);
+        LOG.trace("Found {}", ctor);
 
         if(ctor == null) {
             throw new IllegalArgumentException(String.format("Constructor not found for type %s", toType));

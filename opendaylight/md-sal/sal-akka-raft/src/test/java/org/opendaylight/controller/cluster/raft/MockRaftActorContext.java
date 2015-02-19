@@ -37,22 +37,7 @@ public class MockRaftActorContext implements RaftActorContext {
     private boolean snapshotCaptureInitiated;
 
     public MockRaftActorContext(){
-        electionTerm = null;
-
-        initReplicatedLog();
-    }
-
-    public MockRaftActorContext(String id, ActorSystem system, ActorRef actor){
-        this.id = id;
-        this.system = system;
-        this.actor = actor;
-
-        final String id1 = id;
         electionTerm = new ElectionTerm() {
-            /**
-             * Identifier of the actor whose election term information this is
-             */
-            private final String id = id1;
             private long currentTerm = 1;
             private String votedFor = "";
 
@@ -81,6 +66,13 @@ public class MockRaftActorContext implements RaftActorContext {
         };
 
         configParams = new DefaultConfigParamsImpl();
+    }
+
+    public MockRaftActorContext(String id, ActorSystem system, ActorRef actor){
+        this();
+        this.id = id;
+        this.system = system;
+        this.actor = actor;
 
         initReplicatedLog();
     }

@@ -84,17 +84,18 @@ public class ActorContext {
     private final ActorRef shardManager;
     private final ClusterWrapper clusterWrapper;
     private final Configuration configuration;
-    private final DatastoreContext datastoreContext;
-    private final FiniteDuration operationDuration;
-    private final Timeout operationTimeout;
+    private DatastoreContext datastoreContext;
+    private FiniteDuration operationDuration;
+    private Timeout operationTimeout;
     private final String selfAddressHostPort;
-    private final RateLimiter txRateLimiter;
+    private RateLimiter txRateLimiter;
     private final MetricRegistry metricRegistry = new MetricRegistry();
     private final JmxReporter jmxReporter = JmxReporter.forRegistry(metricRegistry).inDomain(DOMAIN).build();
     private final int transactionOutstandingOperationLimit;
-    private final Timeout transactionCommitOperationTimeout;
+    private Timeout transactionCommitOperationTimeout;
 
     private volatile SchemaContext schemaContext;
+    private volatile boolean updated;
 
     public ActorContext(ActorSystem actorSystem, ActorRef shardManager,
             ClusterWrapper clusterWrapper, Configuration configuration) {
@@ -110,13 +111,8 @@ public class ActorContext {
         this.clusterWrapper = clusterWrapper;
         this.configuration = configuration;
         this.datastoreContext = datastoreContext;
-        this.txRateLimiter = RateLimiter.create(datastoreContext.getTransactionCreationInitialRateLimit());
 
-        operationDuration = Duration.create(datastoreContext.getOperationTimeoutInSeconds(), TimeUnit.SECONDS);
-        operationTimeout = new Timeout(operationDuration);
-        transactionCommitOperationTimeout =  new Timeout(Duration.create(getDatastoreContext().getShardTransactionCommitTimeoutInSeconds(),
-                TimeUnit.SECONDS));
-
+        setCachedProperties();
 
         Address selfAddress = clusterWrapper.getSelfAddress();
         if (selfAddress != null && !selfAddress.host().isEmpty()) {
@@ -127,6 +123,16 @@ public class ActorContext {
 
         transactionOutstandingOperationLimit = new CommonConfig(this.getActorSystem().settings().config()).getMailBoxCapacity();
         jmxReporter.start();
+    }
+
+    private void setCachedProperties() {
+        txRateLimiter = RateLimiter.create(datastoreContext.getTransactionCreationInitialRateLimit());
+
+        operationDuration = Duration.create(datastoreContext.getOperationTimeoutInSeconds(), TimeUnit.SECONDS);
+        operationTimeout = new Timeout(operationDuration);
+
+        transactionCommitOperationTimeout =  new Timeout(Duration.create(
+                datastoreContext.getShardTransactionCommitTimeoutInSeconds(), TimeUnit.SECONDS));
     }
 
     public DatastoreContext getDatastoreContext() {
@@ -153,7 +159,25 @@ public class ActorContext {
         this.schemaContext = schemaContext;
 
         if(shardManager != null) {
-            shardManager.tell(new UpdateSchemaContext(schemaContext), null);
+            shardManager.tell(new UpdateSchemaContext(schemaContext), ActorRef.noSender());
+        }
+    }
+
+    public void setDatastoreContext(DatastoreContext context) {
+        this.datastoreContext = context;
+        setCachedProperties();
+
+        // We write the 'updated' volatile to trigger a write memory barrier so that the writes above
+        // will be published immediately even though they may not be immediately visible to other
+        // threads due to unsynchronized reads. That's OK though - we're going for eventual
+        // consistency here as immediately visible updates to these members aren't critical. These
+        // members could've been made volatile but wanted to avoid volatile reads as these are
+        // accessed often and updates will be infrequent.
+
+        updated = true;
+
+        if(shardManager != null) {
+            shardManager.tell(context, ActorRef.noSender());
         }
     }
 
