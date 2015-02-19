@@ -113,9 +113,9 @@ public class Shard extends RaftActor {
     private final List<DelayedListenerRegistration> delayedListenerRegistrations =
                                                                        Lists.newArrayList();
 
-    private final DatastoreContext datastoreContext;
+    private DatastoreContext datastoreContext;
 
-    private final DataPersistenceProvider dataPersistenceProvider;
+    private DataPersistenceProvider dataPersistenceProvider;
 
     private SchemaContext schemaContext;
 
@@ -123,7 +123,7 @@ public class Shard extends RaftActor {
 
     private final ShardCommitCoordinator commitCoordinator;
 
-    private final long transactionCommitTimeout;
+    private long transactionCommitTimeout;
 
     private Cancellable txCommitTimeoutCheckSchedule;
 
@@ -175,14 +175,18 @@ public class Shard extends RaftActor {
         commitCoordinator = new ShardCommitCoordinator(TimeUnit.SECONDS.convert(1, TimeUnit.MINUTES),
                 datastoreContext.getShardTransactionCommitQueueCapacity(), LOG, name.toString());
 
-        transactionCommitTimeout = TimeUnit.MILLISECONDS.convert(
-                datastoreContext.getShardTransactionCommitTimeoutInSeconds(), TimeUnit.SECONDS);
+        setTransactionCommitTimeout();
 
         // create a notifier actor for each cluster member
         roleChangeNotifier = createRoleChangeNotifier(name.toString());
 
         appendEntriesReplyTracker = new MessageTracker(AppendEntriesReply.class,
                 getRaftActorContext().getConfigParams().getIsolatedCheckIntervalInMillis());
+    }
+
+    private void setTransactionCommitTimeout() {
+        transactionCommitTimeout = TimeUnit.MILLISECONDS.convert(
+                datastoreContext.getShardTransactionCommitTimeoutInSeconds(), TimeUnit.SECONDS);
     }
 
     private static Map<String, String> mapPeerAddresses(
@@ -216,11 +220,15 @@ public class Shard extends RaftActor {
 
     @Override
     public void postStop() {
+        LOG.info("Stopping Shard {}", persistenceId());
+
         super.postStop();
 
         if(txCommitTimeoutCheckSchedule != null) {
             txCommitTimeoutCheckSchedule.cancel();
         }
+
+        shardMBean.unregisterMBean();
     }
 
     @Override
@@ -278,6 +286,8 @@ public class Shard extends RaftActor {
                         resolved.getPeerAddress());
             } else if (message.equals(TX_COMMIT_TIMEOUT_CHECK_MESSAGE)) {
                 handleTransactionCommitTimeoutCheck();
+            } else if(message instanceof DatastoreContext) {
+                onDatastoreContext((DatastoreContext)message);
             } else {
                 super.onReceiveCommand(message);
             }
@@ -289,6 +299,24 @@ public class Shard extends RaftActor {
     @Override
     protected Optional<ActorRef> getRoleChangeNotifier() {
         return roleChangeNotifier;
+    }
+
+    private void onDatastoreContext(DatastoreContext context) {
+        datastoreContext = context;
+
+        commitCoordinator.setQueueCapacity(datastoreContext.getShardTransactionCommitQueueCapacity());
+
+        setTransactionCommitTimeout();
+
+        if(datastoreContext.isPersistent() &&
+                dataPersistenceProvider instanceof NonPersistentRaftDataProvider) {
+            dataPersistenceProvider = new PersistentDataProvider();
+        } else if(!datastoreContext.isPersistent() &&
+                dataPersistenceProvider instanceof PersistentDataProvider) {
+            dataPersistenceProvider = new NonPersistentRaftDataProvider();
+        }
+
+        updateConfigParams(datastoreContext.getShardRaftConfig());
     }
 
     private void handleTransactionCommitTimeoutCheck() {

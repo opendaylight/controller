@@ -17,6 +17,7 @@ import com.google.common.base.Optional;
 import com.typesafe.config.ConfigFactory;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang.time.StopWatch;
+import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
@@ -339,4 +340,29 @@ public class ActorContextTest extends AbstractActorTest{
 
     }
 
+    @Test
+    public void testSetDatastoreContext() {
+        new JavaTestKit(getSystem()) {{
+            ActorContext actorContext = new ActorContext(getSystem(), getRef(), mock(ClusterWrapper.class),
+                            mock(Configuration.class), DatastoreContext.newBuilder().
+                                operationTimeoutInSeconds(5).shardTransactionCommitTimeoutInSeconds(7).build());
+
+            assertEquals("getOperationDuration", 5, actorContext.getOperationDuration().toSeconds());
+            assertEquals("getTransactionCommitOperationTimeout", 7,
+                    actorContext.getTransactionCommitOperationTimeout().duration().toSeconds());
+
+            DatastoreContext newContext = DatastoreContext.newBuilder().operationTimeoutInSeconds(6).
+                    shardTransactionCommitTimeoutInSeconds(8).build();
+
+            actorContext.setDatastoreContext(newContext);
+
+            expectMsgClass(duration("5 seconds"), DatastoreContext.class);
+
+            Assert.assertSame("getDatastoreContext", newContext, actorContext.getDatastoreContext());
+
+            assertEquals("getOperationDuration", 6, actorContext.getOperationDuration().toSeconds());
+            assertEquals("getTransactionCommitOperationTimeout", 8,
+                    actorContext.getTransactionCommitOperationTimeout().duration().toSeconds());
+        }};
+    }
 }

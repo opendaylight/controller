@@ -37,7 +37,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private final Logger LOG;
 
-    private final ConfigParams configParams;
+    private ConfigParams configParams;
 
     private boolean snapshotCaptureInitiated;
 
@@ -57,6 +57,10 @@ public class RaftActorContextImpl implements RaftActorContext {
         this.peerAddresses = peerAddresses;
         this.configParams = configParams;
         this.LOG = logger;
+    }
+
+    void setConfigParams(ConfigParams configParams) {
+        this.configParams = configParams;
     }
 
     @Override

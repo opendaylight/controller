@@ -7,29 +7,29 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import com.google.common.base.Stopwatch;
-import com.google.common.util.concurrent.Uninterruptibles;
-import org.junit.Test;
-import scala.concurrent.duration.FiniteDuration;
-
-import java.util.concurrent.TimeUnit;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import com.google.common.base.Stopwatch;
+import com.google.common.util.concurrent.Uninterruptibles;
+import java.util.concurrent.TimeUnit;
+import org.junit.Test;
+import scala.concurrent.duration.FiniteDuration;
 
 public class FollowerLogInformationImplTest {
 
     @Test
     public void testIsFollowerActive() {
 
-        FiniteDuration timeoutDuration =
-            new FiniteDuration(500, TimeUnit.MILLISECONDS);
+        MockRaftActorContext context = new MockRaftActorContext();
+        context.setCommitIndex(10);
+
+        DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
+        configParams.setHeartBeatInterval(new FiniteDuration(500, TimeUnit.MILLISECONDS));
+        configParams.setElectionTimeoutFactor(1);
+        context.setConfigParams(configParams);
 
         FollowerLogInformation followerLogInformation =
-            new FollowerLogInformationImpl(
-                "follower1", 10, 9, timeoutDuration);
-
-
+            new FollowerLogInformationImpl("follower1", 9, context);
 
         assertFalse("Follower should be termed inactive before stopwatch starts",
             followerLogInformation.isFollowerActive());
