@@ -11,8 +11,11 @@ import java.io.IOException;
 import java.util.Dictionary;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.cm.ConfigurationEvent;
+import org.osgi.service.cm.ConfigurationListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +32,7 @@ public class DatastoreContextConfigAdminOverlay implements AutoCloseable {
 
     private final DatastoreContextIntrospector introspector;
     private final BundleContext bundleContext;
+    private ServiceRegistration<?> configListenerServiceRef;
 
     public DatastoreContextConfigAdminOverlay(DatastoreContextIntrospector introspector, BundleContext bundleContext) {
         this.introspector = introspector;
@@ -40,6 +44,9 @@ public class DatastoreContextConfigAdminOverlay implements AutoCloseable {
             LOG.warn("No ConfigurationAdmin service found");
         } else {
             overlaySettings(configAdminServiceReference);
+
+            configListenerServiceRef = bundleContext.registerService(ConfigurationListener.class.getName(),
+                    new DatastoreConfigurationListener(), null);
         }
     }
 
@@ -72,5 +79,21 @@ public class DatastoreContextConfigAdminOverlay implements AutoCloseable {
 
     @Override
     public void close() {
+        if(configListenerServiceRef != null) {
+            configListenerServiceRef.unregister();
+        }
+    }
+
+    private class DatastoreConfigurationListener implements ConfigurationListener {
+        @Override
+        public void configurationEvent(ConfigurationEvent event) {
+            LOG.debug("configurationEvent: pid: {}, type: {}", event.getPid(), event.getType());
+
+            if(!CONFIG_ID.equals(event.getPid()) || event.getType() != ConfigurationEvent.CM_UPDATED) {
+                return;
+            }
+
+            overlaySettings(event.getReference());
+        }
     }
 }
