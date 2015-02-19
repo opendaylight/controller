@@ -1,0 +1,156 @@
+module opendaylight-of-migration-test-model {
+
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:of-migration-test-model";
+    prefix of-migration-test;
+
+    import opendaylight-mdsal-list-test {prefix test;}
+    import yang-ext {prefix ext;}
+    import opendaylight-mdsal-augment-test {prefix aug;}
+    import opendaylight-test-routed-rpc {prefix routed;}
+
+    description
+        "This module contains a collection of YANG definitions used for
+        test cases that used to depend on flow model.";
+
+    revision 2015-02-10 {
+    }
+
+    typedef bit-flags {
+        type bits {
+            bit FLAG_ONE;
+            bit FLAG_TWO;
+            bit FLAG_THREE;
+            bit FLAG_FOUR;
+            bit FLAG_FIVE;
+        }
+    }
+
+    typedef custom-enum {
+        type enumeration {
+            enum type1;
+            enum type2;
+            enum type3;
+        }
+    }
+
+    grouping enum-grouping {
+        leaf attr-enum {
+            type custom-enum;
+        }
+    }
+
+    grouping aug-grouping {
+        container cont1 {
+            leaf attr-str {
+                type string;
+            }
+        }
+
+        container cont2 {
+            list contlist1 {
+                key "attr-str";
+
+                leaf attr-str {
+                    type string;
+                }
+
+                uses enum-grouping;
+            }
+        }
+
+        leaf attr-str1 {
+            type string;
+        }
+
+        leaf attr-str2 {
+            type string;
+        }
+
+        leaf attr-str3 {
+            type string;
+        }
+
+        leaf attr-str4 {
+            type string;
+        }
+
+        list list1 {
+            key "attr-str";
+            leaf attr-str {
+                type string;
+            }
+
+            list list1-1 {
+                key "attr-int";
+                leaf attr-int {
+                    type int32;
+                }
+
+                leaf attr-str {
+                    type string;
+                }
+
+                leaf flags {
+                    type bit-flags;
+                }
+            }
+
+            list list1-2 {
+                key "attr-int";
+                leaf attr-int {
+                    type int32;
+                }
+
+                leaf attr-str {
+                    type string;
+                }
+            }
+        }
+    }
+
+    augment "/test:top/test:top-level-list" {
+        ext:augment-identifier tll-complex-augment;
+        uses aug-grouping;
+    }
+
+    augment "/test:top/test:top-level-list/list1/list1-1"  {
+        ext:augment-identifier list11-simple-augment;
+
+        leaf attr-str2 {
+            type string;
+        }
+
+        container cont {
+            leaf attr-int {
+                type int32;
+            }
+        }
+    }
+
+    augment "/test:top/test:top-level-list/test:nested-list/"  {
+        ext:augment-identifier nested-list-simple-augment;
+
+        leaf type {
+            type string;
+        }
+    }
+
+    rpc knock-knock {
+        input {
+            leaf knocker-id {
+                ext:context-reference routed:test-context;
+                type instance-identifier;
+            }
+
+            leaf question {
+                type string;
+            }
+        }
+
+        output {
+            leaf answer {
+                type string;
+            }
+        }
+    }
+}
