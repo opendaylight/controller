@@ -9,6 +9,7 @@
 package org.opendaylight.controller.netconf.mdsal.connector.ops.get;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Iterables;
 import java.io.IOException;
@@ -115,13 +116,13 @@ public abstract class AbstractGet extends AbstractLastNetconfOperation {
     }
 
     protected static final class GetConfigExecution {
-        private final Datastore datastore;
+        private final Optional<Datastore> datastore;
 
-        public GetConfigExecution(final Datastore datastore) {
+        public GetConfigExecution(final Optional<Datastore> datastore) {
             this.datastore = datastore;
         }
 
-        public Datastore getDatastore() {
+        public Optional<Datastore> getDatastore() {
             return datastore;
         }
 
@@ -132,7 +133,7 @@ public abstract class AbstractGet extends AbstractLastNetconfOperation {
                 throw new NetconfDocumentedException("Incorrect RPC: " + e.getMessage(), e.getErrorType(), e.getErrorTag(), e.getErrorSeverity(), e.getErrorInfo());
             }
 
-            final Datastore sourceDatastore;
+            final Optional<Datastore> sourceDatastore;
             try {
                 sourceDatastore = parseSource(xml);
             } catch (final NetconfDocumentedException e) {
@@ -144,14 +145,12 @@ public abstract class AbstractGet extends AbstractLastNetconfOperation {
             return new GetConfigExecution(sourceDatastore);
         }
 
-        private static Datastore parseSource(final XmlElement xml) throws NetconfDocumentedException {
-            final Datastore sourceDatastore;
-            final XmlElement sourceElement = xml.getOnlyChildElement(XmlNetconfConstants.SOURCE_KEY,
+        private static Optional<Datastore> parseSource(final XmlElement xml) throws NetconfDocumentedException {
+            final Optional<XmlElement> sourceElement = xml.getOnlyChildElementOptionally(XmlNetconfConstants.SOURCE_KEY,
                     XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
 
-            final String sourceParsed = sourceElement.getOnlyChildElement().getName();
-            sourceDatastore = Datastore.valueOf(sourceParsed);
-            return sourceDatastore;
+            return  sourceElement.isPresent() ?
+                    Optional.of(Datastore.valueOf(sourceElement.get().getOnlyChildElement().getName())) : Optional.<Datastore>absent();
         }
 
         private static void validateInputRpc(final XmlElement xml, String operationName) throws NetconfDocumentedException{

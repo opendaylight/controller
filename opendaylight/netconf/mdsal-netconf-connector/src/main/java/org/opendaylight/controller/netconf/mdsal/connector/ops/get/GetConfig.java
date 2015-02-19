@@ -9,6 +9,7 @@
 package org.opendaylight.controller.netconf.mdsal.connector.ops.get;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
@@ -52,10 +53,13 @@ public class GetConfig extends AbstractGet {
         }
 
         final YangInstanceIdentifier dataRoot = ROOT;
-        DOMDataReadWriteTransaction rwTx = getTransaction(getConfigExecution.getDatastore());
+        // Proper exception should be thrown
+        Preconditions.checkState(getConfigExecution.getDatastore().isPresent(), "Source element missing from request");
+
+        DOMDataReadWriteTransaction rwTx = getTransaction(getConfigExecution.getDatastore().get());
         try {
             final Optional<NormalizedNode<?, ?>> normalizedNodeOptional = rwTx.read(LogicalDatastoreType.CONFIGURATION, dataRoot).checkedGet();
-            if (getConfigExecution.getDatastore() == Datastore.running) {
+            if (getConfigExecution.getDatastore().get() == Datastore.running) {
                 transactionProvider.abortRunningTransaction(rwTx);
                 rwTx = null;
             }

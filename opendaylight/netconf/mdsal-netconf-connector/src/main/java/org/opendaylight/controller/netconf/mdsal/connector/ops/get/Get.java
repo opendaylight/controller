@@ -52,13 +52,10 @@ public class Get extends AbstractGet {
         }
 
         final YangInstanceIdentifier dataRoot = ROOT;
-        DOMDataReadWriteTransaction rwTx = getTransaction(getConfigExecution.getDatastore());
+        DOMDataReadWriteTransaction rwTx = getTransaction(Datastore.running);
         try {
             final Optional<NormalizedNode<?, ?>> normalizedNodeOptional = rwTx.read(LogicalDatastoreType.OPERATIONAL, dataRoot).checkedGet();
-            if (getConfigExecution.getDatastore() == Datastore.running) {
-                transactionProvider.abortRunningTransaction(rwTx);
-                rwTx = null;
-            }
+            transactionProvider.abortRunningTransaction(rwTx);
             return (Element) transformNormalizedNode(document, normalizedNodeOptional.get(), dataRoot);
         } catch (ReadFailedException e) {
             LOG.warn("Unable to read data: {}", dataRoot, e);
