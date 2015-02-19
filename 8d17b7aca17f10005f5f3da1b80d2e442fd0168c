@@ -16,6 +16,23 @@
       "revId": "8d17b7aca17f10005f5f3da1b80d2e442fd0168c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_c8940a45",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/ops/get/Get.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-02-19T15:11:41Z",
+      "side": 1,
+      "message": "why setting the transaction to null ?\n\nAlso the cleanup of the transaction should be kept in the transaction provider ... just as the creation is. Right now we have creation there and disposal here move them to one place.",
+      "revId": "8d17b7aca17f10005f5f3da1b80d2e442fd0168c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
