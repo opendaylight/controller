@@ -93,6 +93,7 @@
 
     <!-- Message Bus -->
     <module>messagebus-api</module>
+    <module>messagebus-impl</module>
   </modules>
 
   <build>
