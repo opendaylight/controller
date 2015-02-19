@@ -100,4 +100,16 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
     public long timeSinceLastActivity() {
         return stopwatch.elapsed(TimeUnit.MILLISECONDS);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("FollowerLogInformationImpl [id=").append(id).append(", nextIndex=").append(nextIndex)
+                .append(", matchIndex=").append(matchIndex).append(", stopwatch=")
+                .append(stopwatch.elapsed(TimeUnit.MILLISECONDS))
+                .append(", followerTimeoutMillis=").append(followerTimeoutMillis).append("]");
+        return builder.toString();
+    }
+
+
 }

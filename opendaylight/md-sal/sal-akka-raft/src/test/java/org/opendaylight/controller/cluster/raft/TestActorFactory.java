@@ -21,6 +21,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
+import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import java.util.LinkedList;
 import java.util.List;
@@ -108,10 +109,14 @@ public class TestActorFactory implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
-        for(ActorRef actor : createdActors){
-            LOG.info("Killing actor {}", actor);
-            actor.tell(PoisonPill.getInstance(), null);
-        }
+    public void close() {
+        new JavaTestKit(system) {{
+            for(ActorRef actor : createdActors) {
+                watch(actor);
+                LOG.info("Killing actor {}", actor);
+                actor.tell(PoisonPill.getInstance(), ActorRef.noSender());
+                expectTerminated(duration("5 seconds"), actor);
+            }
+        }};
     }
 }
