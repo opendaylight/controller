@@ -54,13 +54,15 @@ public class DiscardChanges extends AbstractConfigNetconfOperation {
     protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws NetconfDocumentedException {
         fromXml(xml);
         try {
-            this.transactionProvider.abortTransaction();
-        } catch (final IllegalStateException e) {
+            if (transactionProvider.getTransaction().isPresent()) {
+                this.transactionProvider.abortTransaction();
+            }
+        } catch (final RuntimeException e) {
             LOG.warn("Abort failed: ", e);
             final Map<String, String> errorInfo = new HashMap<>();
             errorInfo
                     .put(ErrorTag.operation_failed.name(),
-                            "Operation failed. Use 'get-config' or 'edit-config' before triggering 'discard-changes' operation");
+                            "Abort failed.");
             throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.application, ErrorTag.operation_failed,
                     ErrorSeverity.error, errorInfo);
         }
