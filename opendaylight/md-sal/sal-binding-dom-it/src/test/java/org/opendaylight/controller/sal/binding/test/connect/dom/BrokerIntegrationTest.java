@@ -17,12 +17,10 @@ import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.Top;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListKey;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -31,16 +29,23 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 @SuppressWarnings("deprecation")
 public class BrokerIntegrationTest extends AbstractDataServiceTest {
 
+    private static final TopLevelListKey TLL_FOO_KEY = new TopLevelListKey("foo");
+    private static final TopLevelListKey TLL_BAR_KEY = new TopLevelListKey("bar");
+    private static final TopLevelListKey TLL_BAZ_KEY = new TopLevelListKey("baz");
+    private static final InstanceIdentifier<Top> TOP_PATH = InstanceIdentifier.builder(Top.class).build();
+    private static final InstanceIdentifier<TopLevelList> FOO_PATH = TOP_PATH.child(TopLevelList.class, TLL_FOO_KEY);
+    private static final InstanceIdentifier<TopLevelList> BAR_PATH = TOP_PATH.child(TopLevelList.class, TLL_BAR_KEY);
+    private static final InstanceIdentifier<TopLevelList> BAZ_PATH = TOP_PATH.child(TopLevelList.class, TLL_BAZ_KEY);
+
     @Test
     public void simpleModifyOperation() throws Exception {
 
-        NodeRef node1 = createNodeRef("0");
-        DataObject node = baDataService.readConfigurationData(node1.getValue());
-        assertNull(node);
-        Node nodeData1 = createNode("0");
+        DataObject tllFoo = baDataService.readConfigurationData(FOO_PATH);
+        assertNull(tllFoo);
+        TopLevelList tllFooData = createTll(TLL_FOO_KEY);
 
         DataModificationTransaction transaction = baDataService.beginTransaction();
-        transaction.putConfigurationData(node1.getValue(), nodeData1);
+        transaction.putConfigurationData(FOO_PATH, tllFooData);
         Future<RpcResult<TransactionStatus>> commitResult = transaction.commit();
         assertNotNull(commitResult);
 
@@ -50,29 +55,26 @@ public class BrokerIntegrationTest extends AbstractDataServiceTest {
         assertNotNull(result.getResult());
         assertEquals(TransactionStatus.COMMITED, result.getResult());
 
-        Node readedData = (Node) baDataService.readConfigurationData(node1.getValue());
+        TopLevelList readedData = (TopLevelList) baDataService.readConfigurationData(FOO_PATH);
         assertNotNull(readedData);
-        assertEquals(nodeData1.getKey(), readedData.getKey());
+        assertEquals(tllFooData.getKey(), readedData.getKey());
 
-        NodeRef nodeFoo = createNodeRef("foo");
-        NodeRef nodeBar = createNodeRef("bar");
-        Node nodeFooData = createNode("foo");
-        Node nodeBarData = createNode("bar");
+        TopLevelList nodeBarData = createTll(TLL_BAR_KEY);
+        TopLevelList nodeBazData = createTll(TLL_BAZ_KEY);
 
         DataModificationTransaction insertMoreTr = baDataService.beginTransaction();
-        insertMoreTr.putConfigurationData(nodeFoo.getValue(), nodeFooData);
-        insertMoreTr.putConfigurationData(nodeBar.getValue(), nodeBarData);
+        insertMoreTr.putConfigurationData(BAR_PATH, nodeBarData);
+        insertMoreTr.putConfigurationData(BAZ_PATH, nodeBazData);
         RpcResult<TransactionStatus> result2 = insertMoreTr.commit().get();
 
         assertNotNull(result2);
         assertNotNull(result2.getResult());
         assertEquals(TransactionStatus.COMMITED, result.getResult());
 
-        Nodes allNodes = (Nodes) baDataService.readConfigurationData(InstanceIdentifier.builder(Nodes.class)
-                .toInstance());
-        assertNotNull(allNodes);
-        assertNotNull(allNodes.getNode());
-        assertEquals(3, allNodes.getNode().size());
+        Top top = (Top) baDataService.readConfigurationData(TOP_PATH);
+        assertNotNull(top);
+        assertNotNull(top.getTopLevelList());
+        assertEquals(3, top.getTopLevelList().size());
 
         /**
          * We create transaction no 2
@@ -85,7 +87,7 @@ public class BrokerIntegrationTest extends AbstractDataServiceTest {
          * We remove node 1
          *
          */
-        removalTransaction.removeConfigurationData(node1.getValue());
+        removalTransaction.removeConfigurationData(BAR_PATH);
 
         /**
          * We commit transaction
@@ -99,21 +101,13 @@ public class BrokerIntegrationTest extends AbstractDataServiceTest {
         assertNotNull(result3.getResult());
         assertEquals(TransactionStatus.COMMITED, result2.getResult());
 
-        DataObject readedData2 = baDataService.readConfigurationData(node1.getValue());
+        DataObject readedData2 = baDataService.readConfigurationData(BAR_PATH);
         assertNull(readedData2);
     }
 
-    private static NodeRef createNodeRef(final String string) {
-        NodeKey key = new NodeKey(new NodeId(string));
-        InstanceIdentifier<Node> path = InstanceIdentifier.builder(Nodes.class).child(Node.class, key)
-                .toInstance();
-        return new NodeRef(path);
-    }
-
-    private static Node createNode(final String string) {
-        NodeBuilder ret = new NodeBuilder();
-        ret.setId(new NodeId(string));
-        ret.setKey(new NodeKey(ret.getId()));
+    private static TopLevelList createTll(final TopLevelListKey key) {
+        TopLevelListBuilder ret = new TopLevelListBuilder();
+        ret.setKey(key);
         return ret.build();
     }
 }

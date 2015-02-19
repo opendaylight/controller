@@ -18,13 +18,13 @@ import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
 import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.TreeComplexUsesAugment;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.TreeComplexUsesAugmentBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.complex.from.grouping.ContainerWithUsesBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.Top;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListKey;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -34,17 +34,17 @@ import com.google.common.util.concurrent.SettableFuture;
 @SuppressWarnings("deprecation")
 public class WriteParentListenAugmentTest extends AbstractDataServiceTest {
 
-    private static final String NODE_ID = "node:1";
+    private static final String TLL_NAME = "foo";
 
-    private static final NodeKey NODE_KEY = new NodeKey(new NodeId(NODE_ID));
-    private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA = InstanceIdentifier.builder(Nodes.class) //
-            .child(Node.class, NODE_KEY).toInstance();
+    private static final TopLevelListKey TLL_KEY = new TopLevelListKey(TLL_NAME);
+    private static final InstanceIdentifier<TopLevelList> TLL_INSTANCE_ID_BA = InstanceIdentifier.builder(Top.class) //
+            .child(TopLevelList.class, TLL_KEY).toInstance();
 
-    private static final InstanceIdentifier<FlowCapableNode> AUGMENT_WILDCARDED_PATH = InstanceIdentifier
-            .builder(Nodes.class).child(Node.class).augmentation(FlowCapableNode.class).toInstance();
+    private static final InstanceIdentifier<TreeComplexUsesAugment> AUGMENT_WILDCARDED_PATH = InstanceIdentifier
+            .builder(Top.class).child(TopLevelList.class).augmentation(TreeComplexUsesAugment.class).toInstance();
 
-    private static final InstanceIdentifier<FlowCapableNode> AUGMENT_NODE_PATH = InstanceIdentifier
-            .builder(Nodes.class).child(Node.class, NODE_KEY).augmentation(FlowCapableNode.class).toInstance();
+    private static final InstanceIdentifier<TreeComplexUsesAugment> AUGMENT_TLL_PATH = InstanceIdentifier
+            .builder(Top.class).child(TopLevelList.class, TLL_KEY).augmentation(TreeComplexUsesAugment.class).toInstance();
 
     @Test
     public void writeNodeListenAugment() throws Exception {
@@ -62,29 +62,29 @@ public class WriteParentListenAugmentTest extends AbstractDataServiceTest {
 
         DataModificationTransaction modification = baDataService.beginTransaction();
 
-        Node node = new NodeBuilder() //
-                .setKey(NODE_KEY) //
-                .addAugmentation(FlowCapableNode.class, flowCapableNode("one")).build();
-        modification.putOperationalData(NODE_INSTANCE_ID_BA, node);
+        TopLevelList tll = new TopLevelListBuilder() //
+                .setKey(TLL_KEY) //
+                .addAugmentation(TreeComplexUsesAugment.class, treeComplexUsesAugment("one")).build();
+        modification.putOperationalData(TLL_INSTANCE_ID_BA, tll);
         modification.commit().get();
 
         DataChangeEvent<InstanceIdentifier<?>, DataObject> receivedEvent = event.get(1000, TimeUnit.MILLISECONDS);
-        assertTrue(receivedEvent.getCreatedOperationalData().containsKey(AUGMENT_NODE_PATH));
+        assertTrue(receivedEvent.getCreatedOperationalData().containsKey(AUGMENT_TLL_PATH));
 
         dclRegistration.close();
 
         DataModificationTransaction mod2 = baDataService.beginTransaction();
-        mod2.putOperationalData(AUGMENT_NODE_PATH, flowCapableNode("two"));
+        mod2.putOperationalData(AUGMENT_TLL_PATH, treeComplexUsesAugment("two"));
         mod2.commit().get();
 
-        FlowCapableNode readedAug = (FlowCapableNode) baDataService.readOperationalData(AUGMENT_NODE_PATH);
-        assertEquals("two", readedAug.getDescription());
+        TreeComplexUsesAugment readedAug = (TreeComplexUsesAugment) baDataService.readOperationalData(AUGMENT_TLL_PATH);
+        assertEquals("two", readedAug.getContainerWithUses().getLeafFromGrouping());
 
     }
 
-    private FlowCapableNode flowCapableNode(final String description) {
-        return new FlowCapableNodeBuilder() //
-                .setDescription(description) //
+    private TreeComplexUsesAugment treeComplexUsesAugment(final String value) {
+        return new TreeComplexUsesAugmentBuilder() //
+                .setContainerWithUses(new ContainerWithUsesBuilder().setLeafFromGrouping(value).build()) //
                 .build();
     }
 }
