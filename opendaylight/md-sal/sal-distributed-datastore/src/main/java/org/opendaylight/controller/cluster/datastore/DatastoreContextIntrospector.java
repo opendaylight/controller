@@ -196,10 +196,12 @@ public class DatastoreContextIntrospector {
      * @param properties the properties to apply
      * @return true if the cached DatastoreContext was updated, false otherwise.
      */
-    public boolean update(Dictionary<String, Object> properties) {
+    public synchronized boolean update(Dictionary<String, Object> properties) {
         if(properties == null || properties.isEmpty()) {
             return false;
         }
+
+        LOG.debug("In update: properties: {}", properties);
 
         Builder builder = DatastoreContext.newBuilderFrom(context);
 
@@ -291,12 +293,12 @@ public class DatastoreContextIntrospector {
     }
 
     private Object constructorValueRecursively(Class<?> toType, Object fromValue) throws Exception {
-        LOG.debug("convertValueRecursively - toType: {}, fromValue {} ({})",
+        LOG.trace("convertValueRecursively - toType: {}, fromValue {} ({})",
                 toType.getSimpleName(), fromValue, fromValue.getClass().getSimpleName());
 
         Constructor<?> ctor = constructors.get(toType);
 
-        LOG.debug("Found {}", ctor);
+        LOG.trace("Found {}", ctor);
 
         if(ctor == null) {
             throw new IllegalArgumentException(String.format("Constructor not found for type %s", toType));

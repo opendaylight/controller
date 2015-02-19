@@ -11,7 +11,6 @@ package org.opendaylight.controller.cluster.raft;
 import com.google.common.base.Stopwatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
-import scala.concurrent.duration.FiniteDuration;
 
 public class FollowerLogInformationImpl implements FollowerLogInformation {
     private static final AtomicLongFieldUpdater<FollowerLogInformationImpl> NEXT_INDEX_UPDATER = AtomicLongFieldUpdater.newUpdater(FollowerLogInformationImpl.class, "nextIndex");
@@ -21,18 +20,17 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
 
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
 
-    private final long followerTimeoutMillis;
+    private final RaftActorContext context;
 
     private volatile long nextIndex;
 
     private volatile long matchIndex;
 
-    public FollowerLogInformationImpl(String id, long nextIndex,
-        long matchIndex, FiniteDuration followerTimeoutDuration) {
+    public FollowerLogInformationImpl(String id, long matchIndex, RaftActorContext context) {
         this.id = id;
-        this.nextIndex = nextIndex;
+        this.nextIndex = context.getCommitIndex();
         this.matchIndex = matchIndex;
-        this.followerTimeoutMillis = followerTimeoutDuration.toMillis();
+        this.context = context;
     }
 
     @Override
@@ -78,7 +76,8 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
     @Override
     public boolean isFollowerActive() {
         long elapsed = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-        return (stopwatch.isRunning()) && (elapsed <= followerTimeoutMillis);
+        return (stopwatch.isRunning()) &&
+                (elapsed <= context.getConfigParams().getElectionTimeOutInterval().toMillis());
     }
 
     @Override
@@ -107,7 +106,8 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
         builder.append("FollowerLogInformationImpl [id=").append(id).append(", nextIndex=").append(nextIndex)
                 .append(", matchIndex=").append(matchIndex).append(", stopwatch=")
                 .append(stopwatch.elapsed(TimeUnit.MILLISECONDS))
-                .append(", followerTimeoutMillis=").append(followerTimeoutMillis).append("]");
+                .append(", followerTimeoutMillis=")
+                .append(context.getConfigParams().getElectionTimeOutInterval().toMillis()).append("]");
         return builder.toString();
     }
 

@@ -39,7 +39,6 @@ import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersisten
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shardmanager.ShardManagerInfo;
-import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shardmanager.ShardManagerInfoMBean;
 import org.opendaylight.controller.cluster.datastore.messages.ActorInitialized;
 import org.opendaylight.controller.cluster.datastore.messages.ActorNotInitialized;
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
@@ -90,7 +89,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private final String shardDispatcherPath;
 
-    private ShardManagerInfoMBean mBean;
+    private ShardManagerInfo mBean;
 
     private final DatastoreContext datastoreContext;
 
@@ -133,6 +132,13 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     @Override
+    public void postStop() {
+        LOG.info("Stopping ShardManager");
+
+        mBean.unregisterMBean();
+    }
+
+    @Override
     public void handleCommand(Object message) throws Exception {
         if (message.getClass().equals(FindPrimary.SERIALIZABLE_CLASS)) {
             findPrimary(FindPrimary.fromSerializable(message));
@@ -148,6 +154,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             memberRemoved((ClusterEvent.MemberRemoved) message);
         } else if(message instanceof ClusterEvent.UnreachableMember) {
             ignoreMessage(message);
+        } else if(message instanceof DatastoreContext) {
+            onDatastoreContext((DatastoreContext)message);
         } else{
             unknownMessage(message);
         }
@@ -255,6 +263,14 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             String shardName = info.getShardName();
             info.updatePeerAddress(getShardIdentifier(memberName, shardName),
                 getShardActorPath(shardName, memberName));
+        }
+    }
+
+    private void onDatastoreContext(DatastoreContext context) {
+        for (ShardInformation info : localShards.values()) {
+            if (info.getActor() != null) {
+                info.getActor().tell(context, getSelf());
+            }
         }
     }
 

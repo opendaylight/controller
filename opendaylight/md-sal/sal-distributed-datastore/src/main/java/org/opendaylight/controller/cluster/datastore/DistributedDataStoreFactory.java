@@ -34,6 +34,8 @@ public class DistributedDataStoreFactory {
         final DistributedDataStore dataStore = new DistributedDataStore(actorSystem,
                 new ClusterWrapperImpl(actorSystem), config, introspector.getContext());
 
+        overlay.setListener(dataStore);
+
         ShardStrategyFactory.setConfiguration(config);
         schemaService.registerSchemaContextListener(dataStore);
 
