@@ -8,10 +8,9 @@
 
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
-import java.util.concurrent.ExecutorService;
-
 import com.google.common.util.concurrent.ForwardingExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import java.util.concurrent.ExecutorService;
 
 /**
  * A forwarding Executor used by unit tests for DataChangeListener notifications
@@ -21,13 +20,13 @@ import com.google.common.util.concurrent.MoreExecutors;
 public class TestDCLExecutorService extends ForwardingExecutorService {
 
     // Start with a same thread executor to avoid timing issues during test setup.
-    private volatile ExecutorService currentExecutor = MoreExecutors.sameThreadExecutor();
+    private volatile ExecutorService currentExecutor = MoreExecutors.newDirectExecutorService();
 
     // The real executor to use when test setup is complete.
     private final ExecutorService postSetupExecutor;
 
 
-    public TestDCLExecutorService( ExecutorService postSetupExecutor ) {
+    public TestDCLExecutorService( final ExecutorService postSetupExecutor ) {
         this.postSetupExecutor = postSetupExecutor;
     }
 
