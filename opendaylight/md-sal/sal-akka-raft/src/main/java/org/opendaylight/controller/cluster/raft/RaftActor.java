@@ -82,6 +82,9 @@ import org.slf4j.LoggerFactory;
  * </ul>
  */
 public abstract class RaftActor extends AbstractUntypedPersistentActor {
+
+    private static final int APPLY_STATE_DELAY_THRESHOLD_IN_NANOS = 50000000; // 50 millis
+
     protected final Logger LOG = LoggerFactory.getLogger(getClass());
 
     /**
@@ -277,6 +280,12 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     @Override public void handleCommand(Object message) {
         if (message instanceof ApplyState){
             ApplyState applyState = (ApplyState) message;
+
+            long elapsedTime = (System.nanoTime() - applyState.getStartTime());
+            if(elapsedTime >= APPLY_STATE_DELAY_THRESHOLD_IN_NANOS){
+                LOG.error("ApplyState took more time than expected. Elapsed Time = {} ApplyState = {}",
+                        elapsedTime, applyState);
+            }
 
             if(LOG.isDebugEnabled()) {
                 LOG.debug("{}: Applying state for log index {} data {}",
