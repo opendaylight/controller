@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_d8d5b9e5",
+        "filename": "opendaylight/config/config-util/src/main/java/org/opendaylight/controller/config/util/BeanReader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-02-20T14:03:24Z",
+      "side": 1,
+      "message": "Add header",
+      "revId": "88b018e66d236a31f1cdbc96c469a2c729a3a0c7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
