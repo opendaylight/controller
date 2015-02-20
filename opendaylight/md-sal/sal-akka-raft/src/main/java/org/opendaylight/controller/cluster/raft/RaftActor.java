@@ -788,7 +788,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
                             dataSizeSinceLastSnapshot = 0;
 
-                            LOG.info("{}: Initiating Snapshot Capture..", persistenceId());
+                            LOG.info("{}: Initiating Snapshot Capture, journalSize = {}, dataSizeForCheck = {}," +
+                                " dataThreshold = {}", persistenceId(), journalSize, dataSizeForCheck, dataThreshold);
+
                             long lastAppliedIndex = -1;
                             long lastAppliedTerm = -1;
 
