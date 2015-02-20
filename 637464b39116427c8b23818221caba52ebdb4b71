@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_b81d4dc0",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-20T14:21:58Z",
+      "side": 1,
+      "message": "Use logName() here instead of context.getId()",
+      "revId": "637464b39116427c8b23818221caba52ebdb4b71",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_988091c1",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-20T14:21:58Z",
+      "side": 1,
+      "message": "This assumes the heartbeat interval and timeout factor are configured the same on each node but that seems like a reasonable assumption.",
+      "revId": "637464b39116427c8b23818221caba52ebdb4b71",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
