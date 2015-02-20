@@ -37,6 +37,41 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_8607cec9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContext.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 2508
+      },
+      "writtenOn": "2015-02-20T22:05:07Z",
+      "side": 1,
+      "message": "Ok, I traced it further and I see it only affects tests now and other uses in production code override each setting based on yang config.",
+      "parentUuid": "7a96c907_f2f9b480",
+      "revId": "60a045433108dceab05d9a8e48796bb862196a4a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_46b22607",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContextConfigAdminOverlay.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 2508
+      },
+      "writtenOn": "2015-02-20T22:05:07Z",
+      "side": 1,
+      "message": "If configAdmin was null (service not available) we would end up in this catch, but there would be no other indication that the Overlay settings were not applied in the logs?",
+      "revId": "60a045433108dceab05d9a8e48796bb862196a4a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_f296944b",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStore.java",
         "patchSetId": 4
