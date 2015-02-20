@@ -16,7 +16,7 @@ import org.opendaylight.controller.config.api.jmx.CommitStatus;
 import org.opendaylight.controller.config.api.jmx.ConfigTransactionControllerMXBean;
 
 public interface ConfigTransactionClient extends
-        ConfigTransactionControllerMXBean {
+        ConfigTransactionControllerMXBean, BeanReader {
 
     CommitStatus commit() throws ConflictingVersionException,
             ValidationException;
@@ -47,7 +47,7 @@ public interface ConfigTransactionClient extends
      * @param on - ObjectName of the Object from which the attribute should be read
      * @param jmxName - name of the attribute to be read
      *
-     * @return Attribute of Object on with attribute name jmxName
+     * @return Object of Object on with attribute name jmxName
      */
     Attribute getAttribute(ObjectName on, String jmxName);
 }

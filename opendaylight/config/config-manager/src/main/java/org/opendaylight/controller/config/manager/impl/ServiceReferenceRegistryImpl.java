@@ -98,6 +98,16 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
             }
 
             @Override
+            public Set<ObjectName> lookupRuntimeBeans() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public Set<ObjectName> lookupRuntimeBeans(final String moduleName, final String instanceName) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
             public String toString() {
                 return "initial";
             }

@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.management.ObjectName;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
+import org.opendaylight.controller.config.util.ConfigTransactionClient;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
@@ -27,6 +28,7 @@ import org.opendaylight.controller.netconf.confignetconfconnector.operations.Abs
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Datastore;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreContext;
+import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
 import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
 import org.opendaylight.controller.netconf.util.exception.UnexpectedElementException;
 import org.opendaylight.controller.netconf.util.exception.UnexpectedNamespaceException;
@@ -38,16 +40,18 @@ import org.w3c.dom.Element;
 
 public class Get extends AbstractConfigNetconfOperation {
 
+    private final TransactionProvider transactionProvider;
     private final YangStoreContext yangStoreSnapshot;
     private static final Logger LOG = LoggerFactory.getLogger(Get.class);
 
-    public Get(YangStoreContext yangStoreSnapshot, ConfigRegistryClient configRegistryClient,
+    public Get(final TransactionProvider transactionProvider, YangStoreContext yangStoreSnapshot, ConfigRegistryClient configRegistryClient,
                String netconfSessionIdForReporting) {
         super(configRegistryClient, netconfSessionIdForReporting);
+        this.transactionProvider = transactionProvider;
         this.yangStoreSnapshot = yangStoreSnapshot;
     }
 
-    private Map<String, Map<String, ModuleRuntime>> createModuleRuntimes(ConfigRegistryClient configRegistryClient,
+    private Map<String, Map<String, ModuleRuntime>> createModuleRuntimes(ConfigTransactionClient configRegistryClient,
             Map<String, Map<String, ModuleMXBeanEntry>> mBeanEntries) {
         Map<String, Map<String, ModuleRuntime>> retVal = Maps.newHashMap();
 
@@ -115,23 +119,29 @@ public class Get extends AbstractConfigNetconfOperation {
     protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws NetconfDocumentedException {
         checkXml(xml);
 
-        final Set<ObjectName> runtimeBeans = getConfigRegistryClient().lookupRuntimeBeans();
+        final ObjectName testTransaction = transactionProvider.getOrCreateReadTransaction();
+        final ConfigTransactionClient registryClient = getConfigRegistryClient().getConfigTransactionClient(testTransaction);
 
-        //Transaction provider required only for candidate datastore
-        final Set<ObjectName> configBeans = Datastore.getInstanceQueryStrategy(Datastore.running, null)
-                .queryInstances(getConfigRegistryClient());
+        try {
+            final Set<ObjectName> runtimeBeans = registryClient.lookupRuntimeBeans();
 
-        final Map<String, Map<String, ModuleRuntime>> moduleRuntimes = createModuleRuntimes(getConfigRegistryClient(),
-                yangStoreSnapshot.getModuleMXBeanEntryMap());
-        final Map<String, Map<String, ModuleConfig>> moduleConfigs = EditConfig.transformMbeToModuleConfigs(
-                getConfigRegistryClient(), yangStoreSnapshot.getModuleMXBeanEntryMap());
+            final Set<ObjectName> configBeans = Datastore.getInstanceQueryStrategy(Datastore.running, transactionProvider)
+                    .queryInstances(getConfigRegistryClient());
 
-        final Runtime runtime = new Runtime(moduleRuntimes, moduleConfigs);
+            final Map<String, Map<String, ModuleRuntime>> moduleRuntimes = createModuleRuntimes(registryClient,
+                    yangStoreSnapshot.getModuleMXBeanEntryMap());
+            final Map<String, Map<String, ModuleConfig>> moduleConfigs = EditConfig.transformMbeToModuleConfigs(
+                    registryClient, yangStoreSnapshot.getModuleMXBeanEntryMap());
 
-        final Element element = runtime.toXml(runtimeBeans, configBeans, document);
+            final Runtime runtime = new Runtime(moduleRuntimes, moduleConfigs);
 
-        LOG.trace("{} operation successful", XmlNetconfConstants.GET);
+            final Element element = runtime.toXml(runtimeBeans, configBeans, document);
 
-        return element;
+            LOG.trace("{} operation successful", XmlNetconfConstants.GET);
+
+            return element;
+        } finally {
+            transactionProvider.closeReadTransaction();
+        }
     }
 }

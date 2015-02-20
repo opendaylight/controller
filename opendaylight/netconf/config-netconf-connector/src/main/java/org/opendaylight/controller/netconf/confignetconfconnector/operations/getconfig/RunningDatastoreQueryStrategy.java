@@ -11,12 +11,22 @@ package org.opendaylight.controller.netconf.confignetconfconnector.operations.ge
 import java.util.Set;
 import javax.management.ObjectName;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
+import org.opendaylight.controller.config.util.ConfigTransactionClient;
+import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
 
 public class RunningDatastoreQueryStrategy implements DatastoreQueryStrategy {
 
+    private final TransactionProvider transactionProvider;
+
+    public RunningDatastoreQueryStrategy(TransactionProvider transactionProvider) {
+        this.transactionProvider = transactionProvider;
+    }
+
     @Override
     public Set<ObjectName> queryInstances(ConfigRegistryClient configRegistryClient) {
-        return configRegistryClient.lookupConfigBeans();
+        ObjectName on = transactionProvider.getOrCreateReadTransaction();
+        ConfigTransactionClient proxy = configRegistryClient.getConfigTransactionClient(on);
+        return proxy.lookupConfigBeans();
     }
 
 }
