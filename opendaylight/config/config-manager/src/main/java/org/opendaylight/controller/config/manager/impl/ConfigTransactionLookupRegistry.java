@@ -116,6 +116,26 @@ class ConfigTransactionLookupRegistry  implements LookupRegistry, Closeable {
         return ModuleQNameUtil.getQNames(allCurrentFactories);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<ObjectName> lookupRuntimeBeans() {
+        return lookupRuntimeBeans("*", "*");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<ObjectName> lookupRuntimeBeans(String moduleName,
+                                              String instanceName) {
+        String finalModuleName = moduleName == null ? "*" : moduleName;
+        String finalInstanceName = instanceName == null ? "*" : instanceName;
+        ObjectName namePattern = ObjectNameUtil.createRuntimeBeanPattern(
+                finalModuleName, finalInstanceName);
+        return transactionJMXRegistrator.queryNames(namePattern, null);
+    }
 
     @Override
     public String toString() {

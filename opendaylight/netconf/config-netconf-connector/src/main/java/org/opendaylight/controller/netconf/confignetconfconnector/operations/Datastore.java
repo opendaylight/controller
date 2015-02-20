@@ -26,7 +26,7 @@ public enum Datastore {
             TransactionProvider transactionProvider) {
         switch (source) {
         case running:
-            return new RunningDatastoreQueryStrategy();
+            return new RunningDatastoreQueryStrategy(transactionProvider);
         case candidate:
             return new CandidateDatastoreQueryStrategy(transactionProvider);
         default:
