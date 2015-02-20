@@ -11,6 +11,8 @@ package org.opendaylight.controller.dummy.datastore;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.japi.Creator;
+import com.google.common.base.Stopwatch;
+import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
@@ -27,6 +29,7 @@ public class DummyShard extends UntypedActor{
     private final Logger LOG = LoggerFactory.getLogger(DummyShard.class);
     private long lastMessageIndex  = -1;
     private long lastMessageSize = 0;
+    private Stopwatch appendEntriesWatch;
 
     public DummyShard(Configuration configuration, String followerId) {
         this.configuration = configuration;
@@ -57,9 +60,20 @@ public class DummyShard extends UntypedActor{
     }
 
     protected void handleAppendEntries(AppendEntries req) throws InterruptedException {
-
         LOG.info("{} - Received AppendEntries message : leader term = {}, index = {}, prevLogIndex = {}, size = {}",
                 followerId, req.getTerm(),req.getLeaderCommit(), req.getPrevLogIndex(), req.getEntries().size());
+
+        if(appendEntriesWatch != null){
+            long elapsed = appendEntriesWatch.elapsed(TimeUnit.SECONDS);
+            if(elapsed >= 5){
+                LOG.error("More than 5 seconds since last append entry, elapsed Time = {} seconds" +
+                                ", leaderCommit = {}, prevLogIndex = {}, size = {}",
+                        elapsed, req.getLeaderCommit(), req.getPrevLogIndex(), req.getEntries().size());
+            }
+            appendEntriesWatch.reset().start();
+        } else {
+            appendEntriesWatch = Stopwatch.createStarted();
+        }
 
         if(lastMessageIndex == req.getLeaderCommit() && req.getEntries().size() > 0 && lastMessageSize > 0){
             LOG.error("{} - Duplicate message with leaderCommit = {} prevLogIndex = {} received", followerId, req.getLeaderCommit(), req.getPrevLogIndex());
