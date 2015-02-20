@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_b8e22d9e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-20T14:40:20Z",
+      "side": 1,
+      "message": "Should this be warn and not error (not really an error condition)?",
+      "revId": "15bf16359a8962b43f0ee42bef1262766a127273",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_38e61db1",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-20T14:40:20Z",
+      "side": 1,
+      "message": "Since we\u0027re no longer scheduling the isolated check we don\u0027t need it to be defined as a FiniteDuration - we can make it a long so we don\u0027t incur the overhead of converting it here.",
+      "revId": "15bf16359a8962b43f0ee42bef1262766a127273",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
