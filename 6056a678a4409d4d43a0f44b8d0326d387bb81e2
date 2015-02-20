@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_d8f6195d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-20T14:43:28Z",
+      "side": 1,
+      "message": "We might want to make this configurable but should be fine for now.",
+      "revId": "6056a678a4409d4d43a0f44b8d0326d387bb81e2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
