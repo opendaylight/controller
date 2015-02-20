@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_b2aa4c6f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContext.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 2508
+      },
+      "writtenOn": "2015-02-20T00:51:53Z",
+      "side": 1,
+      "message": "Can/should these default constant values be linked back to their default values specified in distributed-datastore-provider.yang (ConfigProperties.java / OperationalProperties.java)?\n\nI know you are attempting to override them with a new config file for the purpose of this patchset, but the hardcoded config values caught my eye.",
+      "revId": "60a045433108dceab05d9a8e48796bb862196a4a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_f296944b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStore.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 2508
+      },
+      "writtenOn": "2015-02-20T00:51:53Z",
+      "side": 1,
+      "message": "Log Error?\n\nLOG.debug(\"Error closing instance\", e);",
+      "revId": "60a045433108dceab05d9a8e48796bb862196a4a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
