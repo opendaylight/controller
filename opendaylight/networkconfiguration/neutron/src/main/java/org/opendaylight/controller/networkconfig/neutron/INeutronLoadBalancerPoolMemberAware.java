@@ -7,6 +7,13 @@
  */
 package org.opendaylight.controller.networkconfig.neutron;
 
+/**
+ * This interface defines the methods for CRUD of NB OpenStack INeutronLoadBalancerPoolMemberAware objects
+ *
+ * @deprecated Replaced by {@link org.opendaylight.neutron.neutron.spi.INeutronLoadBalancerPoolMemberAware}
+ */
+
+@Deprecated
 public interface INeutronLoadBalancerPoolMemberAware {
 
 

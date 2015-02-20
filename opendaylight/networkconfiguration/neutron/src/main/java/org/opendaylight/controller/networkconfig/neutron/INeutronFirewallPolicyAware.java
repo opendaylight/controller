@@ -11,8 +11,10 @@ package org.opendaylight.controller.networkconfig.neutron;
 /**
  * This interface defines the methods a service that wishes to be aware of Firewall Policys needs to implement
  *
+ * @deprecated Replaced by {@link org.opendaylight.neutron.neutron.spi.INeutronFirewallPolicyAware}
  */
 
+@Deprecated
 public interface INeutronFirewallPolicyAware {
 
     /**

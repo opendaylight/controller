@@ -11,8 +11,10 @@ package org.opendaylight.controller.networkconfig.neutron;
 /**
  * This interface defines the methods a service that wishes to be aware of Neutron FloatingIPs needs to implement
  *
+ * @deprecated Replaced by {@link org.opendaylight.neutron.neutron.spi.INeutronFloatingIPAware}
  */
 
+@Deprecated
 public interface INeutronFloatingIPAware {
 
     /**

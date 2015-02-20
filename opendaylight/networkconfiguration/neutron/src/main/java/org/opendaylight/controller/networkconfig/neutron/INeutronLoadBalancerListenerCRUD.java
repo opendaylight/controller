@@ -13,8 +13,10 @@ import java.util.List;
 /**
  * This interface defines the methods for CRUD of NB OpenStack LoadBalancerListener objects
  *
+ * @deprecated Replaced by {@link org.opendaylight.neutron.neutron.spi.INeutronLoadBalancerListenerCRUD}
  */
 
+@Deprecated
 public interface INeutronLoadBalancerListenerCRUD {
     /**
      * Applications call this interface method to determine if a particular
