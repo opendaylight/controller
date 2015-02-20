@@ -223,6 +223,8 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionPreferenc
 
     @Override
     public void onRemoteSessionDown() {
+        notificationHandler.onRemoteSchemaDown();
+
         salFacade.onDeviceDisconnected();
         for (final SchemaSourceRegistration<? extends SchemaSourceRepresentation> sourceRegistration : sourceRegistrations) {
             sourceRegistration.close();
@@ -314,6 +316,7 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionPreferenc
                 logger.warn("{}: Netconf device provides additional yang models not reported in hello message capabilities: {}",
                         id, providedSourcesNotRequired);
                 logger.warn("{}: Adding provided but not required sources as required to prevent failures", id);
+                logger.debug("{}: Netconf device reported in hello: {}", id, requiredSources);
                 requiredSources.addAll(providedSourcesNotRequired);
             }
 
