@@ -8,12 +8,12 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
-import akka.actor.Cancellable;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Stopwatch;
+import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.base.messages.IsolatedLeaderCheck;
-import scala.concurrent.duration.FiniteDuration;
 
 /**
  * The behavior of a RaftActor when it is in the Leader state
@@ -38,15 +38,12 @@ import scala.concurrent.duration.FiniteDuration;
  * set commitIndex = N (§5.3, §5.4).
  */
 public class Leader extends AbstractLeader {
-    private Cancellable installSnapshotSchedule = null;
-    private Cancellable isolatedLeaderCheckSchedule = null;
+    private static final IsolatedLeaderCheck ISOLATED_LEADER_CHECK = new IsolatedLeaderCheck();
+    private final Stopwatch isolatedLeaderCheck;
 
     public Leader(RaftActorContext context) {
         super(context);
-
-        scheduleIsolatedLeaderCheck(
-            new FiniteDuration(context.getConfigParams().getHeartBeatInterval().length() * 10,
-                context.getConfigParams().getHeartBeatInterval().unit()));
+        isolatedLeaderCheck = Stopwatch.createStarted();
     }
 
     @Override public RaftActorBehavior handleMessage(ActorRef sender, Object originalMessage) {
@@ -54,8 +51,9 @@ public class Leader extends AbstractLeader {
 
         if (originalMessage instanceof IsolatedLeaderCheck) {
             if (isLeaderIsolated()) {
-                LOG.info("{}: At least {} followers need to be active, Switching {} from Leader to IsolatedLeader",
+                LOG.error("{}: At least {} followers need to be active, Switching {} from Leader to IsolatedLeader",
                         context.getId(), minIsolatedLeaderPeerCount, leaderId);
+
                 return switchBehavior(new IsolatedLeader(context));
             }
         }
@@ -63,21 +61,17 @@ public class Leader extends AbstractLeader {
         return super.handleMessage(sender, originalMessage);
     }
 
-    protected void stopIsolatedLeaderCheckSchedule() {
-        if (isolatedLeaderCheckSchedule != null && !isolatedLeaderCheckSchedule.isCancelled()) {
-            isolatedLeaderCheckSchedule.cancel();
+    @Override
+    protected void beforeSendHeartbeat(){
+        if(isolatedLeaderCheck.elapsed(TimeUnit.MILLISECONDS) > context.getConfigParams().getIsolatedCheckInterval().toMillis()){
+            context.getActor().tell(ISOLATED_LEADER_CHECK, context.getActor());
+            isolatedLeaderCheck.reset().start();
         }
-    }
 
-    protected void scheduleIsolatedLeaderCheck(FiniteDuration isolatedCheckInterval) {
-        isolatedLeaderCheckSchedule = context.getActorSystem().scheduler().schedule(isolatedCheckInterval, isolatedCheckInterval,
-            context.getActor(), new IsolatedLeaderCheck(),
-            context.getActorSystem().dispatcher(), context.getActor());
     }
 
     @Override
     public void close() throws Exception {
-        stopIsolatedLeaderCheckSchedule();
         super.close();
     }
 

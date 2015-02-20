@@ -1024,7 +1024,6 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
             leaderActorContext.setPeerAddresses(peerAddresses);
 
             leader = new Leader(leaderActorContext);
-            leader.stopIsolatedLeaderCheckSchedule();
 
             leader.markFollowerActive("follower-1");
             leader.markFollowerActive("follower-2");
