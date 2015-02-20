@@ -22,6 +22,7 @@ import com.google.common.base.Stopwatch;
 import com.google.protobuf.ByteString;
 import java.io.Serializable;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActor;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
@@ -82,6 +83,9 @@ import org.slf4j.LoggerFactory;
  * </ul>
  */
 public abstract class RaftActor extends AbstractUntypedPersistentActor {
+
+    private static final long APPLY_STATE_DELAY_THRESHOLD_IN_NANOS = TimeUnit.MILLISECONDS.toNanos(50L); // 50 millis
+
     protected final Logger LOG = LoggerFactory.getLogger(getClass());
 
     /**
@@ -277,6 +281,12 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     @Override public void handleCommand(Object message) {
         if (message instanceof ApplyState){
             ApplyState applyState = (ApplyState) message;
+
+            long elapsedTime = (System.nanoTime() - applyState.getStartTime());
+            if(elapsedTime >= APPLY_STATE_DELAY_THRESHOLD_IN_NANOS){
+                LOG.warn("ApplyState took more time than expected. Elapsed Time = {} ms ApplyState = {}",
+                        TimeUnit.NANOSECONDS.toMillis(elapsedTime), applyState);
+            }
 
             if(LOG.isDebugEnabled()) {
                 LOG.debug("{}: Applying state for log index {} data {}",
