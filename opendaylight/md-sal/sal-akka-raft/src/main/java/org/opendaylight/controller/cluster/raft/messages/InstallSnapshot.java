@@ -73,6 +73,7 @@ public class InstallSnapshot extends AbstractRaftRPC {
 
     public <T extends Object> Object toSerializable(){
         InstallSnapshotMessages.InstallSnapshot.Builder builder = InstallSnapshotMessages.InstallSnapshot.newBuilder()
+                .setTerm(this.getTerm())
                 .setLeaderId(this.getLeaderId())
                 .setChunkIndex(this.getChunkIndex())
                 .setData(this.getData())
