@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_a6544aff",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-20T19:32:50Z",
+      "side": 1,
+      "message": "This isn\u0027t needed - doesn\u0027t hurt anything so I\u0027m ok if you want to clean this up in another patch so we push this one.",
+      "revId": "b3ccce2e570ea875b07ff3a58deb113ab90f3ed3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
