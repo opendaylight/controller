@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_d8a4d94c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-20T15:00:26Z",
+      "side": 1,
+      "message": "The method is not needed - can use createBehavior overridden from AbstractRaftActorBehaviorTest. However I noticed that IsolatedLeaderTest instantiates a Leader instead of IsolatedLeader so that needs to be fixed.",
+      "revId": "10f1ad1d38654cb541e52f6544abcae910e93d21",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_7865851c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-20T15:00:26Z",
+      "side": 1,
+      "message": "Don\u0027t need this as AbstractRaftActorBehaviorTest defines a protected TestActorFactory.",
+      "revId": "10f1ad1d38654cb541e52f6544abcae910e93d21",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_38b4dd80",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-20T15:00:26Z",
+      "side": 1,
+      "message": "Can we use MessageCollectorActor.expectFirstMatching here as it seems we really only care that 1 SendHeartBeat is sent? That would eliminate the arbitrary 1 sec sleep here (and also wouldn\u0027t need the assertion below).",
+      "revId": "10f1ad1d38654cb541e52f6544abcae910e93d21",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_58b9a977",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-20T15:00:26Z",
+      "side": 1,
+      "message": "AbstractRaftActorBehaviorTest has a TestActorFactory so this isn\u0027t needed.",
+      "revId": "10f1ad1d38654cb541e52f6544abcae910e93d21",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
