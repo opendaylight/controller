@@ -281,6 +281,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         return this;
     }
 
+    protected void beforeSendHeartbeat(){}
+
     @Override
     public RaftActorBehavior handleMessage(ActorRef sender, Object originalMessage) {
         Preconditions.checkNotNull(sender, "sender should not be null");
@@ -304,6 +306,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
         try {
             if (message instanceof SendHeartBeat) {
+                beforeSendHeartbeat();
                 sendHeartBeat();
                 return this;
 
