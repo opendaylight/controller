@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_b84b0db0",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-20T14:33:53Z",
+      "side": 1,
+      "message": "Could use TimeUnit.NANOSECONDS.convert(50, TImeUnit.MILLISECONDS) but either way is fine.",
+      "revId": "8309d88e308ad691c6c1e902d4fd35e8a2ba9cf6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_58d449bc",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 286,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-20T14:33:53Z",
+      "side": 1,
+      "message": "Perhaps this should be warn instead of error (not really an error condition)?",
+      "range": {
+        "startLine": 286,
+        "startChar": 68,
+        "endLine": 286,
+        "endChar": 85
+      },
+      "revId": "8309d88e308ad691c6c1e902d4fd35e8a2ba9cf6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_38cffd2a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-20T14:33:53Z",
+      "side": 1,
+      "message": "Should we convert elapsedTime to millis for better readability? Also include the units in the message, i.e. \"Elapsed Time \u003d {} ms/ns\".",
+      "revId": "8309d88e308ad691c6c1e902d4fd35e8a2ba9cf6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
