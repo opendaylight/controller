@@ -10,7 +10,7 @@ package org.opendaylight.controller.config.util;
 import javax.management.ObjectName;
 import org.opendaylight.controller.config.api.jmx.ConfigRegistryMXBean;
 
-public interface ConfigRegistryClient extends ConfigRegistryMXBean {
+public interface ConfigRegistryClient extends ConfigRegistryMXBean, BeanReader {
 
     ConfigTransactionClient createTransaction();
 
@@ -22,7 +22,5 @@ public interface ConfigRegistryClient extends ConfigRegistryMXBean {
 
     Object invokeMethod(ObjectName on, String name, Object[] params,
             String[] signature);
-
-    Object getAttributeCurrentValue(ObjectName on, String attributeName);
 
 }

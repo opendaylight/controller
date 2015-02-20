@@ -8,6 +8,7 @@
 package org.opendaylight.controller.config.util;
 
 import com.google.common.collect.Sets;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -182,6 +183,16 @@ public class TestingConfigTransactionController implements
     @Override
     public Set<String> getAvailableModuleFactoryQNames() {
         return Sets.newHashSet("availableModuleFactoryQNames");
+    }
+
+    @Override
+    public Set<ObjectName> lookupRuntimeBeans() {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Set<ObjectName> lookupRuntimeBeans(final String moduleName, final String instanceName) {
+        return Collections.emptySet();
     }
 
     @Override

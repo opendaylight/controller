@@ -72,23 +72,36 @@ public class GetConfig extends AbstractConfigNetconfOperation {
 
     private Element getResponseInternal(final Document document, final ConfigRegistryClient configRegistryClient,
             final Datastore source) {
-        Element dataElement = XmlUtil.createElement(document, XmlNetconfConstants.DATA_KEY, Optional.<String>absent());
-        final Set<ObjectName> instances = Datastore.getInstanceQueryStrategy(source, this.transactionProvider)
-                .queryInstances(configRegistryClient);
 
-        final Config configMapping = new Config(EditConfig.transformMbeToModuleConfigs(configRegistryClient,
-                yangStoreSnapshot.getModuleMXBeanEntryMap()));
+        final ConfigTransactionClient registryClient;
+        // Read current state from a transaction, if running is source, then start new transaction just for reading
+        // in case of candidate, get current transaction representing candidate
+        if(source == Datastore.running) {
+            final ObjectName readTx = transactionProvider.getOrCreateReadTransaction();
+            registryClient = getConfigRegistryClient().getConfigTransactionClient(readTx);
+        } else {
+            registryClient  = getConfigRegistryClient().getConfigTransactionClient(transactionProvider.getOrCreateTransaction());
+        }
 
+        try {
+            Element dataElement = XmlUtil.createElement(document, XmlNetconfConstants.DATA_KEY, Optional.<String>absent());
+            final Set<ObjectName> instances = Datastore.getInstanceQueryStrategy(source, this.transactionProvider)
+                    .queryInstances(configRegistryClient);
 
-        ObjectName on = transactionProvider.getOrCreateTransaction();
-        ConfigTransactionClient ta = configRegistryClient.getConfigTransactionClient(on);
+            final Config configMapping = new Config(EditConfig.transformMbeToModuleConfigs(registryClient,
+                    yangStoreSnapshot.getModuleMXBeanEntryMap()));
 
-        ServiceRegistryWrapper serviceTracker = new ServiceRegistryWrapper(ta);
-        dataElement = configMapping.toXml(instances, this.maybeNamespace, document, dataElement, serviceTracker);
+            ServiceRegistryWrapper serviceTracker = new ServiceRegistryWrapper(registryClient);
+            dataElement = configMapping.toXml(instances, this.maybeNamespace, document, dataElement, serviceTracker);
 
-        LOG.trace("{} operation successful", GET_CONFIG);
+            LOG.trace("{} operation successful", GET_CONFIG);
 
-        return dataElement;
+            return dataElement;
+        } finally {
+            if(source == Datastore.running) {
+                transactionProvider.closeReadTransaction();
+            }
+        }
     }
 
     @Override

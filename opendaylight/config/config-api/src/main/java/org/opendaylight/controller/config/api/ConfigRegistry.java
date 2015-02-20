@@ -66,23 +66,4 @@ public interface ConfigRegistry extends LookupRegistry, ServiceReferenceReadable
     Set<String> getAvailableModuleNames();
 
 
-
-    /**
-     * Find all runtime beans
-     *
-     * @return objectNames
-     */
-    Set<ObjectName> lookupRuntimeBeans();
-
-    /**
-     * Find all runtime of specified module
-     *
-     * @param moduleName
-     *            of bean
-     * @param instanceName
-     *            of bean
-     * @return objectNames
-     */
-    Set<ObjectName> lookupRuntimeBeans(String moduleName, String instanceName);
-
 }

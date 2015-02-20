@@ -31,7 +31,8 @@ public class TransactionProvider implements AutoCloseable {
     private final ConfigRegistryClient configRegistryClient;
 
     private final String netconfSessionIdForReporting;
-    private ObjectName transaction;
+    private ObjectName candidateTx;
+    private ObjectName readTx;
     private final List<ObjectName> allOpenedTransactions = new ArrayList<>();
     private static final String  NO_TRANSACTION_FOUND_FOR_SESSION = "No transaction found for session ";
 
@@ -56,18 +57,34 @@ public class TransactionProvider implements AutoCloseable {
 
     public synchronized Optional<ObjectName> getTransaction() {
 
-        if (transaction == null){
+        if (candidateTx == null){
             return Optional.absent();
         }
 
         // Transaction was already closed somehow
-        if (!isStillOpenTransaction(transaction)) {
-            LOG.warn("Fixing illegal state: transaction {} was closed in {}", transaction,
+        if (!isStillOpenTransaction(candidateTx)) {
+            LOG.warn("Fixing illegal state: transaction {} was closed in {}", candidateTx,
                     netconfSessionIdForReporting);
-            transaction = null;
+            candidateTx = null;
             return Optional.absent();
         }
-        return Optional.of(transaction);
+        return Optional.of(candidateTx);
+    }
+
+    public synchronized Optional<ObjectName> getReadTransaction() {
+
+        if (readTx == null){
+            return Optional.absent();
+        }
+
+        // Transaction was already closed somehow
+        if (!isStillOpenTransaction(readTx)) {
+            LOG.warn("Fixing illegal state: transaction {} was closed in {}", readTx,
+                    netconfSessionIdForReporting);
+            readTx = null;
+            return Optional.absent();
+        }
+        return Optional.of(readTx);
     }
 
     private boolean isStillOpenTransaction(ObjectName transaction) {
@@ -80,9 +97,20 @@ public class TransactionProvider implements AutoCloseable {
         if (ta.isPresent()) {
             return ta.get();
         }
-        transaction = configRegistryClient.beginConfig();
-        allOpenedTransactions.add(transaction);
-        return transaction;
+        candidateTx = configRegistryClient.beginConfig();
+        allOpenedTransactions.add(candidateTx);
+        return candidateTx;
+    }
+
+    public synchronized ObjectName getOrCreateReadTransaction() {
+        Optional<ObjectName> ta = getReadTransaction();
+
+        if (ta.isPresent()) {
+            return ta.get();
+        }
+        readTx = configRegistryClient.beginConfig();
+        allOpenedTransactions.add(readTx);
+        return readTx;
     }
 
     /**
@@ -109,8 +137,8 @@ public class TransactionProvider implements AutoCloseable {
         try {
             CommitStatus status = configRegistryClient.commitConfig(taON);
             // clean up
-            allOpenedTransactions.remove(transaction);
-            transaction = null;
+            allOpenedTransactions.remove(candidateTx);
+            candidateTx = null;
             return status;
         } catch (ValidationException validationException) {
             // no clean up: user can reconfigure and recover this transaction
@@ -131,8 +159,19 @@ public class TransactionProvider implements AutoCloseable {
 
         ConfigTransactionClient transactionClient = configRegistryClient.getConfigTransactionClient(taON.get());
         transactionClient.abortConfig();
-        allOpenedTransactions.remove(transaction);
-        transaction = null;
+        allOpenedTransactions.remove(candidateTx);
+        candidateTx = null;
+    }
+
+    public synchronized void closeReadTransaction() {
+        LOG.debug("Closing read transaction");
+        Optional<ObjectName> taON = getReadTransaction();
+        Preconditions.checkState(taON.isPresent(), NO_TRANSACTION_FOUND_FOR_SESSION + netconfSessionIdForReporting);
+
+        ConfigTransactionClient transactionClient = configRegistryClient.getConfigTransactionClient(taON.get());
+        transactionClient.abortConfig();
+        allOpenedTransactions.remove(readTx);
+        readTx = null;
     }
 
     public synchronized void abortTestTransaction(ObjectName testTx) {
