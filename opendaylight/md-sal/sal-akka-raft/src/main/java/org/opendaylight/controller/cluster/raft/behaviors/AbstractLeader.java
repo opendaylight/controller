@@ -171,6 +171,14 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             return this;
         }
 
+        if(followerLogInformation.timeSinceLastActivity() >
+                context.getConfigParams().getElectionTimeOutInterval().toMillis()) {
+            LOG.error("{} : handleAppendEntriesReply delayed beyond election timeout, " +
+                            "appendEntriesReply : {}, timeSinceLastActivity : {}, lastApplied : {}, commitIndex : {}",
+                    logName(), appendEntriesReply, followerLogInformation.timeSinceLastActivity(),
+                    context.getLastApplied(), context.getCommitIndex());
+        }
+
         followerLogInformation.markFollowerActive();
 
         if (appendEntriesReply.isSuccess()) {
