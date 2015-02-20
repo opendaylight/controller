@@ -63,7 +63,7 @@ final class NotificationHandler {
 
     private CompositeNode transformNotification(final NetconfMessage cachedNotification) {
         final CompositeNode parsedNotification = messageTransformer.toNotification(cachedNotification);
-        Preconditions.checkNotNull(parsedNotification, "{}: Unable to parse received notification %s", id, cachedNotification);
+        Preconditions.checkNotNull(parsedNotification, "%s: Unable to parse received notification: %s", id, cachedNotification);
         return parsedNotification;
     }
 
@@ -91,6 +91,7 @@ final class NotificationHandler {
     }
 
     synchronized void onRemoteSchemaDown() {
+        queue.clear();
         passNotifications = false;
     }
 
