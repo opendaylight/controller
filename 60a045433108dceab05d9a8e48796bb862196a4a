@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_f2f9b480",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContext.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-20T01:54:42Z",
+      "side": 1,
+      "message": "I\u0027m not sure I understand what you mean by \"linked back to their default values specified in\" in the yang file...\n\nThese hardcoded default values aren\u0027t actually used in production b/c we have defaults in the yang (and a default cfg file that I\u0027m adding as well). They\u0027re really only used for unit tests.",
+      "parentUuid": "7a96c907_b2aa4c6f",
+      "revId": "60a045433108dceab05d9a8e48796bb862196a4a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_f296944b",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStore.java",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2015-02-20T00:51:53Z",
       "side": 1,
       "message": "Log Error?\n\nLOG.debug(\"Error closing instance\", e);",
+      "revId": "60a045433108dceab05d9a8e48796bb862196a4a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_32fcfc71",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStore.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-20T01:54:42Z",
+      "side": 1,
+      "message": "I could log to debug.",
+      "parentUuid": "7a96c907_f296944b",
       "revId": "60a045433108dceab05d9a8e48796bb862196a4a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
