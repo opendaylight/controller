@@ -69,6 +69,24 @@
       "revId": "15bf16359a8962b43f0ee42bef1262766a127273",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_e617b243",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-20T19:26:13Z",
+      "side": 1,
+      "message": "Yeah - it\u0027s FiniteDuration so we could use it directly when scheduling. Now we just need it as millis. Not a big deal - not sure how processing overhead in FiniteDuration to convert it (probably minimal). We can change it later if we want.",
+      "parentUuid": "7a96c907_fb550f50",
+      "revId": "15bf16359a8962b43f0ee42bef1262766a127273",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
