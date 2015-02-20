@@ -23,7 +23,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
-import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
@@ -35,42 +34,54 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang2sources.spi.CodeGenerator;
+import org.opendaylight.yangtools.yang2sources.spi.BasicCodeGenerator;
+import org.opendaylight.yangtools.yang2sources.spi.MavenProjectAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.impl.StaticLoggerBinder;
 
 /**
  * This class interfaces with yang-maven-plugin. Gets parsed yang modules in
  * {@link SchemaContext}, and parameters form the plugin configuration, and
  * writes service interfaces and/or modules.
  */
-public class JMXGenerator implements CodeGenerator {
+public class JMXGenerator implements BasicCodeGenerator, MavenProjectAware {
+    private static final class NamespaceMapping {
+        private final String namespace, packageName;
 
+        public NamespaceMapping(final String namespace, final String packagename) {
+            this.namespace = namespace;
+            this.packageName = packagename;
+        }
+    }
+
+    @VisibleForTesting
     static final String NAMESPACE_TO_PACKAGE_DIVIDER = "==";
+    @VisibleForTesting
     static final String NAMESPACE_TO_PACKAGE_PREFIX = "namespaceToPackage";
+    @VisibleForTesting
     static final String MODULE_FACTORY_FILE_BOOLEAN = "moduleFactoryFile";
+
+    private static final Logger LOG = LoggerFactory.getLogger(JMXGenerator.class);
+    private static final Pattern NAMESPACE_MAPPING_PATTERN = Pattern.compile("(.+)" + NAMESPACE_TO_PACKAGE_DIVIDER + "(.+)");
 
     private PackageTranslator packageTranslator;
     private final CodeWriter codeWriter;
-    private static final Logger LOG = LoggerFactory
-            .getLogger(JMXGenerator.class);
     private Map<String, String> namespaceToPackageMapping;
     private File resourceBaseDir;
     private File projectBaseDir;
     private boolean generateModuleFactoryFile = true;
 
     public JMXGenerator() {
-        this.codeWriter = new CodeWriter();
+        this(new CodeWriter());
     }
 
-    public JMXGenerator(CodeWriter codeWriter) {
+    public JMXGenerator(final CodeWriter codeWriter) {
         this.codeWriter = codeWriter;
     }
 
     @Override
-    public Collection<File> generateSources(SchemaContext context,
-                                            File outputBaseDir, Set<Module> yangModulesInCurrentMavenModule) {
+    public Collection<File> generateSources(final SchemaContext context,
+                                            final File outputBaseDir, final Set<Module> yangModulesInCurrentMavenModule) {
 
         Preconditions.checkArgument(context != null, "Null context received");
         Preconditions.checkArgument(outputBaseDir != null,
@@ -173,7 +184,8 @@ public class JMXGenerator implements CodeGenerator {
         return generatedFiles.getFiles();
     }
 
-    static File concatFolders(File projectBaseDir, String... folderNames) {
+    @VisibleForTesting
+    static File concatFolders(final File projectBaseDir, final String... folderNames) {
         StringBuilder b = new StringBuilder();
         for (String folder : folderNames) {
             b.append(folder);
@@ -183,18 +195,14 @@ public class JMXGenerator implements CodeGenerator {
     }
 
     @Override
-    public void setAdditionalConfig(Map<String, String> additionalCfg) {
-        if (LOG != null) {
-            LOG.debug(getClass().getCanonicalName(),
-                    ": Additional configuration received: ",
-                    additionalCfg.toString());
-        }
+    public void setAdditionalConfig(final Map<String, String> additionalCfg) {
+        LOG.debug("{}: Additional configuration received: {}", getClass().getCanonicalName(), additionalCfg);
         this.namespaceToPackageMapping = extractNamespaceMapping(additionalCfg);
         this.generateModuleFactoryFile = extractModuleFactoryBoolean(additionalCfg);
     }
 
     private boolean extractModuleFactoryBoolean(
-            Map<String, String> additionalCfg) {
+            final Map<String, String> additionalCfg) {
         String bool = additionalCfg.get(MODULE_FACTORY_FILE_BOOLEAN);
         if (bool == null) {
             return true;
@@ -205,13 +213,8 @@ public class JMXGenerator implements CodeGenerator {
         return true;
     }
 
-    @Override
-    public void setLog(Log log) {
-        StaticLoggerBinder.getSingleton().setMavenLog(log);
-    }
-
     private static Map<String, String> extractNamespaceMapping(
-            Map<String, String> additionalCfg) {
+            final Map<String, String> additionalCfg) {
         Map<String, String> namespaceToPackage = Maps.newHashMap();
         for (String key : additionalCfg.keySet()) {
             if (key.startsWith(NAMESPACE_TO_PACKAGE_PREFIX)) {
@@ -224,46 +227,30 @@ public class JMXGenerator implements CodeGenerator {
         return namespaceToPackage;
     }
 
-    static Pattern namespaceMappingPattern = Pattern.compile("(.+)"
-            + NAMESPACE_TO_PACKAGE_DIVIDER + "(.+)");
-
-    private static NamespaceMapping extractNamespaceMapping(String mapping) {
-        Matcher matcher = namespaceMappingPattern.matcher(mapping);
-        Preconditions
-                .checkArgument(matcher.matches(), String.format("Namespace to package mapping:%s is in invalid " +
-                        "format, requested format is: %s", mapping, namespaceMappingPattern));
+    private static NamespaceMapping extractNamespaceMapping(final String mapping) {
+        Matcher matcher = NAMESPACE_MAPPING_PATTERN.matcher(mapping);
+        Preconditions.checkArgument(matcher.matches(),
+            "Namespace to package mapping:%s is in invalid format, requested format is: %s",
+            mapping, NAMESPACE_MAPPING_PATTERN);
         return new NamespaceMapping(matcher.group(1), matcher.group(2));
     }
 
-    private static class NamespaceMapping {
-        public NamespaceMapping(String namespace, String packagename) {
-            this.namespace = namespace;
-            this.packageName = packagename;
-        }
-
-        private final String namespace, packageName;
-    }
-
     @Override
-    public void setResourceBaseDir(File resourceDir) {
+    public void setResourceBaseDir(final File resourceDir) {
         this.resourceBaseDir = resourceDir;
     }
 
     @Override
-    public void setMavenProject(MavenProject project) {
+    public void setMavenProject(final MavenProject project) {
         this.projectBaseDir = project.getBasedir();
-
-        if (LOG != null) {
-            LOG.debug(getClass().getCanonicalName(), " project base dir: ",
-                    projectBaseDir);
-        }
+        LOG.debug("{}: project base dir: {}", getClass().getCanonicalName(), projectBaseDir);
     }
 
     @VisibleForTesting
     static class GeneratedFilesTracker {
         private final Set<File> files = Sets.newHashSet();
 
-        void addFile(File file) {
+        void addFile(final File file) {
             if (files.contains(file)) {
                 List<File> undeletedFiles = Lists.newArrayList();
                 for (File presentFile : files) {
@@ -283,7 +270,7 @@ public class JMXGenerator implements CodeGenerator {
             files.add(file);
         }
 
-        void addFile(Collection<File> files) {
+        void addFile(final Collection<File> files) {
             for (File file : files) {
                 addFile(file);
             }

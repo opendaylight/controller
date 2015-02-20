@@ -310,9 +310,10 @@
 
       <!-- 3rd party dependencies needed by config-->
       <dependency>
-        <groupId>com.jcabi</groupId>
-        <artifactId>jcabi-maven-slf4j</artifactId>
-        <version>0.8</version>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-core</artifactId>
+        <version>3.1.1</version>
+        <scope>provided</scope>
       </dependency>
 
       <dependency>
