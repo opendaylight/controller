@@ -342,7 +342,7 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
             timerContext.stop();
 
             Snapshot timerSnapshot = commitTimer.getSnapshot();
-            double allowedLatencyInNanos = timerSnapshot.get98thPercentile();
+            double allowedLatencyInNanos = timerSnapshot.get95thPercentile();
 
             long commitTimeoutInSeconds = actorContext.getDatastoreContext()
                     .getShardTransactionCommitTimeoutInSeconds();

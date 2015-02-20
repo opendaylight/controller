@@ -71,7 +71,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
         doReturn(commitTimer).when(actorContext).getOperationTimer("commit");
         doReturn(commitTimerContext).when(commitTimer).time();
         doReturn(commitSnapshot).when(commitTimer).getSnapshot();
-        doReturn(TimeUnit.MILLISECONDS.toNanos(2000) * 1.0).when(commitSnapshot).get98thPercentile();
+        doReturn(TimeUnit.MILLISECONDS.toNanos(2000) * 1.0).when(commitSnapshot).get95thPercentile();
         doReturn(10.0).when(actorContext).getTxCreationLimit();
     }
 
