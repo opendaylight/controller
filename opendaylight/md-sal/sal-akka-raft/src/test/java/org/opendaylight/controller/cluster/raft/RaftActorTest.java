@@ -552,7 +552,6 @@ public class RaftActorTest extends AbstractActorTest {
                 assertNotEquals("voted for", "foobar", mockRaftActor.getRaftActorContext().getTermInformation().getVotedFor());
 
                 mockRaftActor.onReceiveRecover(mock(RecoveryCompleted.class));
-
             }};
     }
 
@@ -576,12 +575,12 @@ public class RaftActorTest extends AbstractActorTest {
 
                 MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 
+                mockRaftActor.waitForInitializeBehaviorComplete();
+
                 mockRaftActor.getRaftActorContext().getTermInformation().updateAndPersist(10, "foobar");
 
                 assertEquals("Persist called", true, persistLatch.await(5, TimeUnit.SECONDS));
-
             }
-
         };
     }
 
@@ -602,14 +601,14 @@ public class RaftActorTest extends AbstractActorTest {
 
                 MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 
+                mockRaftActor.waitForInitializeBehaviorComplete();
+
                 MockRaftActorContext.MockReplicatedLogEntry logEntry = new MockRaftActorContext.MockReplicatedLogEntry(10, 10, mock(Payload.class));
 
                 mockRaftActor.getRaftActorContext().getReplicatedLog().appendAndPersist(logEntry);
 
                 verify(dataPersistenceProvider).persist(eq(logEntry), any(Procedure.class));
-
             }
-
         };
     }
 
@@ -630,14 +629,14 @@ public class RaftActorTest extends AbstractActorTest {
 
                 MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 
+                mockRaftActor.waitForInitializeBehaviorComplete();
+
                 mockRaftActor.getReplicatedLog().appendAndPersist(new MockRaftActorContext.MockReplicatedLogEntry(1, 0, mock(Payload.class)));
 
                 mockRaftActor.getRaftActorContext().getReplicatedLog().removeFromAndPersist(0);
 
                 verify(dataPersistenceProvider, times(2)).persist(anyObject(), any(Procedure.class));
-
             }
-
         };
     }
 
@@ -657,6 +656,8 @@ public class RaftActorTest extends AbstractActorTest {
                         Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
 
                 MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
+
+                mockRaftActor.waitForInitializeBehaviorComplete();
 
                 mockRaftActor.onReceiveCommand(new ApplyLogEntries(10));
 
@@ -684,6 +685,8 @@ public class RaftActorTest extends AbstractActorTest {
                                 Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
 
                 MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
+
+                mockRaftActor.waitForInitializeBehaviorComplete();
 
                 ByteString snapshotBytes = fromObject(Arrays.asList(
                         new MockRaftActorContext.MockPayload("A"),
@@ -721,6 +724,8 @@ public class RaftActorTest extends AbstractActorTest {
                         Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
 
                 MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
+
+                mockRaftActor.waitForInitializeBehaviorComplete();
 
                 mockRaftActor.getReplicatedLog().append(new MockRaftActorContext.MockReplicatedLogEntry(1, 0, mock(Payload.class)));
                 mockRaftActor.getReplicatedLog().append(new MockRaftActorContext.MockReplicatedLogEntry(1, 1, mock(Payload.class)));
@@ -783,6 +788,8 @@ public class RaftActorTest extends AbstractActorTest {
 
                 MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 
+                mockRaftActor.waitForInitializeBehaviorComplete();
+
                 ReplicatedLogEntry entry = new MockRaftActorContext.MockReplicatedLogEntry(1, 5,
                         new MockRaftActorContext.MockPayload("F"));
 
@@ -810,6 +817,8 @@ public class RaftActorTest extends AbstractActorTest {
                         Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProviderMonitor), persistenceId);
 
                 MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
+
+                mockRaftActor.waitForInitializeBehaviorComplete();
 
                 ReplicatedLog oldReplicatedLog = mockRaftActor.getReplicatedLog();
 
@@ -863,6 +872,8 @@ public class RaftActorTest extends AbstractActorTest {
                         Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProviderMonitor), persistenceId);
 
                 MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
+
+                mockRaftActor.waitForInitializeBehaviorComplete();
 
                 ByteString snapshotBytes = fromObject(Arrays.asList(
                         new MockRaftActorContext.MockPayload("A"),
@@ -955,11 +966,12 @@ public class RaftActorTest extends AbstractActorTest {
                 Map<String, String> peerAddresses = new HashMap<>();
                 peerAddresses.put(follower1Id, followerActor1.path().toString());
 
-                TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(),
+                TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(
                         MockRaftActor.props(persistenceId, peerAddresses,
                                 Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
 
                 MockRaftActor leaderActor = mockActorRef.underlyingActor();
+
                 leaderActor.getRaftActorContext().setCommitIndex(4);
                 leaderActor.getRaftActorContext().setLastApplied(4);
                 leaderActor.getRaftActorContext().getTermInformation().update(1, persistenceId);
@@ -1045,7 +1057,7 @@ public class RaftActorTest extends AbstractActorTest {
                 Map<String, String> peerAddresses = new HashMap<>();
                 peerAddresses.put(leaderId, leaderActor1.path().toString());
 
-                TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(),
+                TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(
                         MockRaftActor.props(persistenceId, peerAddresses,
                                 Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
 
