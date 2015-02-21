@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_e1eb1cda",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 908,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-21T18:33:53Z",
+      "side": 1,
+      "message": "What is the formula \"5000 / heartBeatInterval * 2\"?",
+      "range": {
+        "startLine": 908,
+        "startChar": 30,
+        "endLine": 908,
+        "endChar": 31
+      },
+      "revId": "8a98961e9b06f4ecc5291afab0ac89bf21c2f772",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
