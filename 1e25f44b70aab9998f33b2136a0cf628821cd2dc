@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_e1d55ce5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/Dispatchers.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-21T21:50:56Z",
+      "side": 1,
+      "message": "Right - I see it will use the default. Is the plan to define these dispatchers in the akka.conf by default?",
+      "parentUuid": "7a96c907_81dfb80c",
+      "revId": "1e25f44b70aab9998f33b2136a0cf628821cd2dc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_619cec5d",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/utils/DispatchersTest.java",
         "patchSetId": 1
