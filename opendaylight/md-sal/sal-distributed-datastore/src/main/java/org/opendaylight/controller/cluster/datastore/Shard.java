@@ -60,6 +60,7 @@ import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContex
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.modification.ModificationPayload;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
+import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
 import org.opendaylight.controller.cluster.datastore.utils.MessageTracker;
 import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotifier;
@@ -73,6 +74,7 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListene
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreFactory;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionFactory;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
@@ -137,6 +139,8 @@ public class Shard extends RaftActor {
 
     private final Map<String, DOMStoreTransactionChain> transactionChains = new HashMap<>();
 
+    private final String txnDispatcherPath;
+
     protected Shard(final ShardIdentifier name, final Map<ShardIdentifier, String> peerAddresses,
             final DatastoreContext datastoreContext, final SchemaContext schemaContext) {
         super(name.toString(), mapPeerAddresses(peerAddresses),
@@ -145,7 +149,11 @@ public class Shard extends RaftActor {
         this.name = name;
         this.datastoreContext = datastoreContext;
         this.schemaContext = schemaContext;
-        this.dataPersistenceProvider = (datastoreContext.isPersistent()) ? new PersistentDataProvider() : new NonPersistentRaftDataProvider();
+        this.dataPersistenceProvider = (datastoreContext.isPersistent())
+                ? new PersistentDataProvider() : new NonPersistentRaftDataProvider();
+        this.txnDispatcherPath = new Dispatchers(context().system().dispatchers())
+                .getDispatcherPath(Dispatchers.DispatcherType.Transaction);
+
 
         LOG.info("Shard created : {}, persistent : {}", name, datastoreContext.isPersistent());
 
@@ -515,37 +523,35 @@ public class Shard extends RaftActor {
 
             shardMBean.incrementReadOnlyTransactionCount();
 
-            return getContext().actorOf(
-                ShardTransaction.props(factory.newReadOnlyTransaction(), getSelf(),
-                        schemaContext, datastoreContext, shardMBean,
-                        transactionId.getRemoteTransactionId(), clientVersion),
-                        transactionId.toString());
+            return createShardTransaction(factory.newReadOnlyTransaction(), transactionId, clientVersion);
 
         } else if (transactionType == TransactionProxy.TransactionType.READ_WRITE.ordinal()) {
 
             shardMBean.incrementReadWriteTransactionCount();
 
-            return getContext().actorOf(
-                ShardTransaction.props(factory.newReadWriteTransaction(), getSelf(),
-                        schemaContext, datastoreContext, shardMBean,
-                        transactionId.getRemoteTransactionId(), clientVersion),
-                        transactionId.toString());
-
+            return createShardTransaction(factory.newReadWriteTransaction(), transactionId, clientVersion);
 
         } else if (transactionType == TransactionProxy.TransactionType.WRITE_ONLY.ordinal()) {
 
             shardMBean.incrementWriteOnlyTransactionCount();
 
-            return getContext().actorOf(
-                ShardTransaction.props(factory.newWriteOnlyTransaction(), getSelf(),
-                        schemaContext, datastoreContext, shardMBean,
-                        transactionId.getRemoteTransactionId(), clientVersion),
-                        transactionId.toString());
+            return createShardTransaction(factory.newWriteOnlyTransaction(), transactionId, clientVersion);
         } else {
             throw new IllegalArgumentException(
                 "Shard="+name + ":CreateTransaction message has unidentified transaction type="
                     + transactionType);
         }
+    }
+
+    private ActorRef createShardTransaction(DOMStoreTransaction transaction, ShardTransactionIdentifier transactionId,
+                                            short clientVersion){
+        return getContext().actorOf(
+                ShardTransaction.props(transaction, getSelf(),
+                        schemaContext, datastoreContext, shardMBean,
+                        transactionId.getRemoteTransactionId(), clientVersion)
+                        .withDispatcher(txnDispatcherPath),
+                transactionId.toString());
+
     }
 
     private void createTransaction(CreateTransaction createTransaction) {
