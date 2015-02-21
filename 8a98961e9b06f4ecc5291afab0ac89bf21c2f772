@@ -46,6 +46,30 @@
       "revId": "8a98961e9b06f4ecc5291afab0ac89bf21c2f772",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_c19ce06c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 908,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-21T19:23:16Z",
+      "side": 1,
+      "message": "Well no - as soon as we get 3 messages, it breaks. If we don\u0027t get 3 messages the total wait time would be 5 sec (loop 25 times * 200 ms sleep \u003d 5000 ms). Not sure why I did *2 (did this a while ago) - seems like *1 is sufficient. I\u0027ll change that.",
+      "parentUuid": "7a96c907_a1c19455",
+      "range": {
+        "startLine": 908,
+        "startChar": 30,
+        "endLine": 908,
+        "endChar": 31
+      },
+      "revId": "8a98961e9b06f4ecc5291afab0ac89bf21c2f772",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
