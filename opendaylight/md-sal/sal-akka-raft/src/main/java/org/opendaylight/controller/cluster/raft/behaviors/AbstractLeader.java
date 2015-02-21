@@ -160,8 +160,6 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
         if(LOG.isTraceEnabled()) {
             LOG.trace("{}: handleAppendEntriesReply: {}", logName(), appendEntriesReply);
-        } else if(LOG.isDebugEnabled() && !appendEntriesReply.isSuccess()) {
-            LOG.debug("{}: handleAppendEntriesReply: {}", logName(), appendEntriesReply);
         }
 
         // Update the FollowerLogInformation
@@ -176,7 +174,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
         if(followerLogInformation.timeSinceLastActivity() >
                 context.getConfigParams().getElectionTimeOutInterval().toMillis()) {
-            LOG.error("{} : handleAppendEntriesReply delayed beyond election timeout, " +
+            LOG.warn("{} : handleAppendEntriesReply delayed beyond election timeout, " +
                             "appendEntriesReply : {}, timeSinceLastActivity : {}, lastApplied : {}, commitIndex : {}",
                     logName(), appendEntriesReply, followerLogInformation.timeSinceLastActivity(),
                     context.getLastApplied(), context.getCommitIndex());
@@ -184,12 +182,17 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
         followerLogInformation.markFollowerActive();
 
+        boolean updated = false;
         if (appendEntriesReply.isSuccess()) {
-            followerLogInformation
-                .setMatchIndex(appendEntriesReply.getLogLastIndex());
-            followerLogInformation
-                .setNextIndex(appendEntriesReply.getLogLastIndex() + 1);
+            updated = followerLogInformation.setMatchIndex(appendEntriesReply.getLogLastIndex());
+            updated = followerLogInformation.setNextIndex(appendEntriesReply.getLogLastIndex() + 1) || updated;
+
+            if(updated && LOG.isDebugEnabled()) {
+                LOG.debug("{}: handleAppendEntriesReply - FollowerLogInformation for {} updated: matchIndex: {}, nextIndex: {}", logName(),
+                        followerId, followerLogInformation.getMatchIndex(), followerLogInformation.getNextIndex());
+            }
         } else {
+            LOG.debug("{}: handleAppendEntriesReply: received unsuccessful reply: {}", logName(), appendEntriesReply);
 
             // TODO: When we find that the follower is out of sync with the
             // Leader we simply decrement that followers next index by 1.
@@ -226,8 +229,10 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
         // Apply the change to the state machine
         if (context.getCommitIndex() > context.getLastApplied()) {
-            LOG.debug("{}: handleAppendEntriesReply: applying to log - commitIndex: {}, lastAppliedIndex: {}",
-                    logName(), context.getCommitIndex(), context.getLastApplied());
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("{}: handleAppendEntriesReply from {}: applying to log - commitIndex: {}, lastAppliedIndex: {}",
+                        logName(), followerId, context.getCommitIndex(), context.getLastApplied());
+            }
 
             applyLogToStateMachine(context.getCommitIndex());
         }
@@ -237,7 +242,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         }
 
         //Send the next log entry immediately, if possible, no need to wait for heartbeat to trigger that event
-        sendUpdatesToFollower(followerId, followerLogInformation, false, false);
+        sendUpdatesToFollower(followerId, followerLogInformation, false, !updated);
         return this;
     }
 
@@ -385,7 +390,10 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 followerToSnapshot.markSendStatus(false);
             }
 
-            if (!wasLastChunk && followerToSnapshot.canSendNextChunk()) {
+            if (wasLastChunk && !context.isSnapshotCaptureInitiated()) {
+                // Since the follower is now caught up try to purge the log.
+                purgeInMemoryLog();
+            } else if (!wasLastChunk && followerToSnapshot.canSendNextChunk()) {
                 ActorSelection followerActor = context.getPeerActorSelection(followerId);
                 if(followerActor != null) {
                     sendSnapshotChunk(followerActor, followerId);
@@ -468,9 +476,9 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 long leaderLastIndex = context.getReplicatedLog().lastIndex();
                 long leaderSnapShotIndex = context.getReplicatedLog().getSnapshotIndex();
 
-                if(!isHeartbeat || LOG.isTraceEnabled()) {
-                    LOG.debug("{}: Checking sendAppendEntries for follower {}, leaderLastIndex: {}, leaderSnapShotIndex: {}",
-                            logName(), followerId, leaderLastIndex, leaderSnapShotIndex);
+                if((!isHeartbeat && LOG.isDebugEnabled()) || LOG.isTraceEnabled()) {
+                    LOG.debug("{}: Checking sendAppendEntries for follower {}, followerNextIndex {}, leaderLastIndex: {}, leaderSnapShotIndex: {}",
+                            logName(), followerId, followerNextIndex, leaderLastIndex, leaderSnapShotIndex);
                 }
 
                 if (isFollowerActive && context.getReplicatedLog().isPresent(followerNextIndex)) {
@@ -555,7 +563,6 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
             } else if (!context.isSnapshotCaptureInitiated()) {
 
-                LOG.info("{}: Initiating Snapshot Capture to Install Snapshot, Leader:{}", logName(), getLeaderId());
                 ReplicatedLogEntry lastAppliedEntry = context.getReplicatedLog().get(context.getLastApplied());
                 long lastAppliedIndex = -1;
                 long lastAppliedTerm = -1;
@@ -571,10 +578,16 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 boolean isInstallSnapshotInitiated = true;
                 long replicatedToAllIndex = super.getReplicatedToAllIndex();
                 ReplicatedLogEntry replicatedToAllEntry = context.getReplicatedLog().get(replicatedToAllIndex);
-                actor().tell(new CaptureSnapshot(lastIndex(), lastTerm(), lastAppliedIndex, lastAppliedTerm,
-                    (replicatedToAllEntry != null ? replicatedToAllEntry.getIndex() : -1),
-                    (replicatedToAllEntry != null ? replicatedToAllEntry.getTerm() : -1),
-                    isInstallSnapshotInitiated), actor());
+
+                CaptureSnapshot captureSnapshot = new CaptureSnapshot(
+                        lastIndex(), lastTerm(), lastAppliedIndex, lastAppliedTerm,
+                        (replicatedToAllEntry != null ? replicatedToAllEntry.getIndex() : -1),
+                        (replicatedToAllEntry != null ? replicatedToAllEntry.getTerm() : -1),
+                        isInstallSnapshotInitiated);
+
+                LOG.info("{}: Initiating instal snapshot to follower {}: {}", logName(), followerId, captureSnapshot);
+
+                actor().tell(captureSnapshot, actor());
                 context.setSnapshotCaptureInitiated(true);
             }
         }
