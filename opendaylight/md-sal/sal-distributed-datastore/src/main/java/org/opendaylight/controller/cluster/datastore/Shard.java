@@ -60,10 +60,12 @@ import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContex
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.modification.ModificationPayload;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
+import org.opendaylight.controller.cluster.datastore.utils.MessageTracker;
 import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotifier;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationByteStringPayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationPayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
@@ -125,6 +127,8 @@ public class Shard extends RaftActor {
 
     private final Optional<ActorRef> roleChangeNotifier;
 
+    private final MessageTracker appendEntriesReplyTracker;
+
     /**
      * Coordinates persistence recovery on startup.
      */
@@ -168,6 +172,9 @@ public class Shard extends RaftActor {
 
         // create a notifier actor for each cluster member
         roleChangeNotifier = createRoleChangeNotifier(name.toString());
+
+        appendEntriesReplyTracker = new MessageTracker(AppendEntriesReply.class,
+                getRaftActorContext().getConfigParams().getIsolatedCheckIntervalInMillis());
     }
 
     private static Map<String, String> mapPeerAddresses(
@@ -224,35 +231,50 @@ public class Shard extends RaftActor {
             onRecoveryComplete();
         } else {
             super.onReceiveRecover(message);
+            if(LOG.isTraceEnabled()) {
+                appendEntriesReplyTracker.beginTracking();
+            }
         }
     }
 
     @Override
     public void onReceiveCommand(final Object message) throws Exception {
-        if (message.getClass().equals(CreateTransaction.SERIALIZABLE_CLASS)) {
-            handleCreateTransaction(message);
-        } else if(message instanceof ForwardedReadyTransaction) {
-            handleForwardedReadyTransaction((ForwardedReadyTransaction)message);
-        } else if(message.getClass().equals(CanCommitTransaction.SERIALIZABLE_CLASS)) {
-            handleCanCommitTransaction(CanCommitTransaction.fromSerializable(message));
-        } else if(message.getClass().equals(CommitTransaction.SERIALIZABLE_CLASS)) {
-            handleCommitTransaction(CommitTransaction.fromSerializable(message));
-        } else if(message.getClass().equals(AbortTransaction.SERIALIZABLE_CLASS)) {
-            handleAbortTransaction(AbortTransaction.fromSerializable(message));
-        } else if (message.getClass().equals(CloseTransactionChain.SERIALIZABLE_CLASS)){
-            closeTransactionChain(CloseTransactionChain.fromSerializable(message));
-        } else if (message instanceof RegisterChangeListener) {
-            registerChangeListener((RegisterChangeListener) message);
-        } else if (message instanceof UpdateSchemaContext) {
-            updateSchemaContext((UpdateSchemaContext) message);
-        } else if (message instanceof PeerAddressResolved) {
-            PeerAddressResolved resolved = (PeerAddressResolved) message;
-            setPeerAddress(resolved.getPeerId().toString(),
-                resolved.getPeerAddress());
-        } else if(message.equals(TX_COMMIT_TIMEOUT_CHECK_MESSAGE)) {
-            handleTransactionCommitTimeoutCheck();
-        } else {
-            super.onReceiveCommand(message);
+
+        MessageTracker.Context context = appendEntriesReplyTracker.arrived(message);
+
+        if(context.error().isPresent()){
+            LOG.trace("{} : AppendEntriesReply failed to arrive at the expected interval {}", persistenceId(),
+                    context.error());
+        }
+
+        try {
+            if (message.getClass().equals(CreateTransaction.SERIALIZABLE_CLASS)) {
+                handleCreateTransaction(message);
+            } else if (message instanceof ForwardedReadyTransaction) {
+                handleForwardedReadyTransaction((ForwardedReadyTransaction) message);
+            } else if (message.getClass().equals(CanCommitTransaction.SERIALIZABLE_CLASS)) {
+                handleCanCommitTransaction(CanCommitTransaction.fromSerializable(message));
+            } else if (message.getClass().equals(CommitTransaction.SERIALIZABLE_CLASS)) {
+                handleCommitTransaction(CommitTransaction.fromSerializable(message));
+            } else if (message.getClass().equals(AbortTransaction.SERIALIZABLE_CLASS)) {
+                handleAbortTransaction(AbortTransaction.fromSerializable(message));
+            } else if (message.getClass().equals(CloseTransactionChain.SERIALIZABLE_CLASS)) {
+                closeTransactionChain(CloseTransactionChain.fromSerializable(message));
+            } else if (message instanceof RegisterChangeListener) {
+                registerChangeListener((RegisterChangeListener) message);
+            } else if (message instanceof UpdateSchemaContext) {
+                updateSchemaContext((UpdateSchemaContext) message);
+            } else if (message instanceof PeerAddressResolved) {
+                PeerAddressResolved resolved = (PeerAddressResolved) message;
+                setPeerAddress(resolved.getPeerId().toString(),
+                        resolved.getPeerAddress());
+            } else if (message.equals(TX_COMMIT_TIMEOUT_CHECK_MESSAGE)) {
+                handleTransactionCommitTimeoutCheck();
+            } else {
+                super.onReceiveCommand(message);
+            }
+        } finally {
+            context.done();
         }
     }
 
@@ -495,7 +517,7 @@ public class Shard extends RaftActor {
 
             return getContext().actorOf(
                 ShardTransaction.props(factory.newReadOnlyTransaction(), getSelf(),
-                        schemaContext,datastoreContext, shardMBean,
+                        schemaContext, datastoreContext, shardMBean,
                         transactionId.getRemoteTransactionId(), clientVersion),
                         transactionId.toString());
 
