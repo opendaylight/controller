@@ -25,10 +25,13 @@ public interface FollowerLogInformation {
     long decrNextIndex();
 
     /**
+     * Sets the index of the next log entry for this follower.
      *
      * @param nextIndex
+     * @return true if the new index differed from the current index and the current index was updated, false
+     *              otherwise.
      */
-    void setNextIndex(long nextIndex);
+    boolean setNextIndex(long nextIndex);
 
     /**
      * Increment the value of the matchIndex
@@ -36,7 +39,14 @@ public interface FollowerLogInformation {
      */
     long incrMatchIndex();
 
-    void setMatchIndex(long matchIndex);
+    /**
+     * Sets the index of the highest log entry for this follower.
+     *
+     * @param matchIndex
+     * @return true if the new index differed from the current index and the current index was updated, false
+     *              otherwise.
+     */
+    boolean setMatchIndex(long matchIndex);
 
     /**
      * The identifier of the follower

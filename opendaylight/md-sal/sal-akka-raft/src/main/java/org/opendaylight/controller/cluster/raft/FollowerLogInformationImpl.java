@@ -46,8 +46,13 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
     }
 
     @Override
-    public void setNextIndex(long nextIndex) {
-        this.nextIndex = nextIndex;
+    public boolean setNextIndex(long nextIndex) {
+        if(this.nextIndex != nextIndex) {
+            this.nextIndex = nextIndex;
+            return true;
+        }
+
+        return false;
     }
 
     @Override
@@ -56,8 +61,13 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
     }
 
     @Override
-    public void setMatchIndex(long matchIndex) {
-        this.matchIndex = matchIndex;
+    public boolean setMatchIndex(long matchIndex) {
+        if(this.matchIndex != matchIndex) {
+            this.matchIndex = matchIndex;
+            return true;
+        }
+
+        return false;
     }
 
     @Override
