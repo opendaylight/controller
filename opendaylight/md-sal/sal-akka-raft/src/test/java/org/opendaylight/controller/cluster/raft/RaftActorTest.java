@@ -892,17 +892,28 @@ public class RaftActorTest extends AbstractActorTest {
     public void testRaftRoleChangeNotifier() throws Exception {
         new JavaTestKit(getSystem()) {{
             ActorRef notifierActor = factory.createActor(Props.create(MessageCollectorActor.class));
+            MessageCollectorActor.waitUntilReady(notifierActor);
+
             DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+            long heartBeatInterval = 100;
+            config.setHeartBeatInterval(FiniteDuration.create(heartBeatInterval, TimeUnit.MILLISECONDS));
+            config.setElectionTimeoutFactor(1);
+
             String persistenceId = factory.generateActorId("notifier-");
 
             factory.createTestActor(MockRaftActor.props(persistenceId,
                     Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config), notifierActor), persistenceId);
 
-            // sleeping for a minimum of 2 seconds, if it spans more its fine.
-            Uninterruptibles.sleepUninterruptibly(2, TimeUnit.SECONDS);
+            List<RoleChanged> matches =  null;
+            for(int i = 0; i < 5000 / heartBeatInterval; i++) {
+                matches = MessageCollectorActor.getAllMatching(notifierActor, RoleChanged.class);
+                assertNotNull(matches);
+                if(matches.size() == 3) {
+                    break;
+                }
+                Uninterruptibles.sleepUninterruptibly(heartBeatInterval, TimeUnit.MILLISECONDS);
+            }
 
-            List<RoleChanged> matches = MessageCollectorActor.getAllMatching(notifierActor, RoleChanged.class);
-            assertNotNull(matches);
             assertEquals(3, matches.size());
 
             // check if the notifier got a role change from null to Follower
