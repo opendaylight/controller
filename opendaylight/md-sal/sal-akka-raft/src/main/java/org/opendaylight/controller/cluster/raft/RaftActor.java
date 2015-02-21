@@ -86,6 +86,13 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     private static final long APPLY_STATE_DELAY_THRESHOLD_IN_NANOS = TimeUnit.MILLISECONDS.toNanos(50L); // 50 millis
 
+    private static final Procedure<ApplyLogEntries> APPLY_LOG_ENTRIES_PERSIST_CALLBACK =
+            new Procedure<ApplyLogEntries>() {
+                @Override
+                public void apply(ApplyLogEntries param) throws Exception {
+                }
+            };
+
     protected final Logger LOG = LoggerFactory.getLogger(getClass());
 
     /**
@@ -302,11 +309,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             if(LOG.isDebugEnabled()) {
                 LOG.debug("{}: Persisting ApplyLogEntries with index={}", persistenceId(), ale.getToIndex());
             }
-            persistence().persist(new ApplyLogEntries(ale.getToIndex()), new Procedure<ApplyLogEntries>() {
-                @Override
-                public void apply(ApplyLogEntries param) throws Exception {
-                }
-            });
+
+            persistence().persist(new ApplyLogEntries(ale.getToIndex()), APPLY_LOG_ENTRIES_PERSIST_CALLBACK);
 
         } else if(message instanceof ApplySnapshot ) {
             Snapshot snapshot = ((ApplySnapshot) message).getSnapshot();
@@ -354,7 +358,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 context.getReplicatedLog().size());
 
         } else if (message instanceof CaptureSnapshot) {
-            LOG.info("{}: CaptureSnapshot received by actor", persistenceId());
+            LOG.info("{}: CaptureSnapshot received by actor: {}", persistenceId(), message);
 
             if(captureSnapshot == null) {
                 captureSnapshot = (CaptureSnapshot)message;
@@ -626,6 +630,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     protected void onLeaderChanged(String oldLeader, String newLeader){};
 
     private void trimPersistentData(long sequenceNumber) {
+        LOG.debug("{}: trimPersistentData: sequenceNumber: {}, snapshotBatchCount: {}", persistenceId(),
+                sequenceNumber, context.getConfigParams().getSnapshotBatchCount());
+
         // Trim akka snapshots
         // FIXME : Not sure how exactly the SnapshotSelectionCriteria is applied
         // For now guessing that it is ANDed.
@@ -668,7 +675,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         LOG.info("{}: Persisting of snapshot done:{}", persistenceId(), sn.getLogMessage());
 
-        long dataThreshold = Runtime.getRuntime().totalMemory() *
+        long dataThreshold = getTotalMemory() *
                 getRaftActorContext().getConfigParams().getSnapshotDataThresholdPercentage() / 100;
         if (context.getReplicatedLog().dataSize() > dataThreshold) {
             // if memory is less, clear the log based on lastApplied.
@@ -694,9 +701,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
 
 
-        LOG.info("{}: Removed in-memory snapshotted entries, adjusted snaphsotIndex:{} " +
-            "and term:{}", persistenceId(), captureSnapshot.getLastAppliedIndex(),
-            captureSnapshot.getLastAppliedTerm());
+        LOG.info("{}: Removed in-memory snapshotted entries, adjusted snaphsotIndex: {} " +
+            "and term: {}", persistenceId(), replicatedLog.getSnapshotIndex(),
+            replicatedLog.getSnapshotTerm());
 
         if (isLeader() && captureSnapshot.isInstallSnapshotInitiated()) {
             // this would be call straight to the leader and won't initiate in serialization
@@ -706,6 +713,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         captureSnapshot = null;
         context.setSnapshotCaptureInitiated(false);
+    }
+
+    protected long getTotalMemory() {
+        return Runtime.getRuntime().totalMemory();
     }
 
     protected boolean hasFollowers(){
@@ -798,7 +809,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                             dataSizeForCheck = dataSizeSinceLastSnapshot / DATA_SIZE_DIVIDER;
                         }
 
-                        long dataThreshold = Runtime.getRuntime().totalMemory() *
+                        long dataThreshold = getTotalMemory() *
                                 getRaftActorContext().getConfigParams().getSnapshotDataThresholdPercentage() / 100;
 
                         // when a snaphsot is being taken, captureSnapshot != null

@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.junit.Assert;
+import org.opendaylight.controller.cluster.raft.SerializationUtils;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
@@ -28,6 +29,8 @@ import scala.concurrent.duration.FiniteDuration;
 
 public class MessageCollectorActor extends UntypedActor {
     private static final String ARE_YOU_READY = "ARE_YOU_READY";
+    private static final String GET_ALL_MESSAGES = "get-all-messages";
+    private static final String CLEAR_MESSAGES = "clear-messages";
 
     private final List<Object> messages = new ArrayList<>();
 
@@ -37,12 +40,12 @@ public class MessageCollectorActor extends UntypedActor {
             return;
         }
 
-        if(message instanceof String){
-            if("get-all-messages".equals(message)){
-                getSender().tell(new ArrayList<>(messages), getSelf());
-            }
+        if(GET_ALL_MESSAGES.equals(message)) {
+            getSender().tell(new ArrayList<>(messages), getSelf());
+        } else if(CLEAR_MESSAGES.equals(message)) {
+            messages.clear();
         } else if(message != null) {
-            messages.add(message);
+            messages.add(SerializationUtils.fromSerializable(message));
         }
     }
 
@@ -53,9 +56,13 @@ public class MessageCollectorActor extends UntypedActor {
     public static List<Object> getAllMessages(ActorRef actor) throws Exception {
         FiniteDuration operationDuration = Duration.create(5, TimeUnit.SECONDS);
         Timeout operationTimeout = new Timeout(operationDuration);
-        Future<Object> future = Patterns.ask(actor, "get-all-messages", operationTimeout);
+        Future<Object> future = Patterns.ask(actor, GET_ALL_MESSAGES, operationTimeout);
 
         return (List<Object>) Await.result(future, operationDuration);
+    }
+
+    public static void clearMessages(ActorRef actor) {
+        actor.tell(CLEAR_MESSAGES, ActorRef.noSender());
     }
 
     /**
@@ -73,6 +80,23 @@ public class MessageCollectorActor extends UntypedActor {
             }
         }
 
+        return null;
+    }
+
+    public static <T> List<T> expectMatching(ActorRef actor, Class<T> clazz, int count) {
+        int timeout = 5000;
+        for(int i = 0; i < timeout / 50; i++) {
+            try {
+                List<T> messages = getAllMatching(actor, clazz);
+                if(messages.size() >= count) {
+                    return messages;
+                }
+            } catch (Exception e) {}
+
+            Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
+        }
+
+        Assert.fail("Did not receive messages of type " + clazz);
         return null;
     }
 

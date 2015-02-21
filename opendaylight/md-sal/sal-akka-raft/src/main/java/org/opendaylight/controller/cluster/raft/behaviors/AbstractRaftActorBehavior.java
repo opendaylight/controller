@@ -464,6 +464,11 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         long lastApplied = context.getLastApplied();
         long tempMin = Math.min(snapshotCapturedIndex, (lastApplied > -1 ? lastApplied - 1 : -1));
 
+        if(LOG.isTraceEnabled()) {
+            LOG.trace("{}: performSnapshotWithoutCapture: snapshotCapturedIndex: {}, lastApplied: {}, tempMin: {}",
+                    logName, snapshotCapturedIndex, lastApplied, tempMin);
+        }
+
         if (tempMin > -1 && context.getReplicatedLog().isPresent(tempMin))  {
             LOG.debug("{}: fakeSnapshot purging log to {} for term {}", logName(), tempMin,
                     context.getTermInformation().getCurrentTerm());
