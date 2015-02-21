@@ -69,9 +69,9 @@ import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
+import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
+import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
-import org.opendaylight.controller.cluster.raft.utils.MockAkkaJournal;
-import org.opendaylight.controller.cluster.raft.utils.MockSnapshotStore;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
@@ -89,13 +89,13 @@ public class RaftActorTest extends AbstractActorTest {
     @After
     public void tearDown() throws Exception {
         factory.close();
-        MockAkkaJournal.clearJournal();
-        MockSnapshotStore.setMockSnapshot(null);
+        InMemoryJournal.clear();
+        InMemorySnapshotStore.clear();
     }
 
     public static class MockRaftActor extends RaftActor {
 
-        private final DataPersistenceProvider dataPersistenceProvider;
+        protected DataPersistenceProvider dataPersistenceProvider;
         private final RaftActor delegate;
         private final CountDownLatch recoveryComplete = new CountDownLatch(1);
         private final List<Object> state;
@@ -178,7 +178,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         @Override protected void applyState(ActorRef clientActor, String identifier, Object data) {
             delegate.applyState(clientActor, identifier, data);
-            LOG.info("applyState called");
+            LOG.info("{}: applyState called", persistenceId());
         }
 
         @Override
@@ -220,10 +220,12 @@ public class RaftActorTest extends AbstractActorTest {
         }
 
         @Override protected void createSnapshot() {
+            LOG.info("{}: createSnapshot called", persistenceId());
             delegate.createSnapshot();
         }
 
         @Override protected void applySnapshot(byte [] snapshot) {
+            LOG.info("{}: applySnapshot called", persistenceId());
             delegate.applySnapshot(snapshot);
         }
 
@@ -271,7 +273,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
 
-    private static class RaftActorTestKit extends JavaTestKit {
+    public static class RaftActorTestKit extends JavaTestKit {
         private final ActorRef raftActor;
 
         public RaftActorTestKit(ActorSystem actorSystem, String actorName) {
@@ -307,7 +309,7 @@ public class RaftActorTest extends AbstractActorTest {
             waitUntilLeader(raftActor);
         }
 
-        protected void waitUntilLeader(ActorRef actorRef) {
+        public static void waitUntilLeader(ActorRef actorRef) {
             FiniteDuration duration = Duration.create(100, TimeUnit.MILLISECONDS);
             for(int i = 0; i < 20 * 5; i++) {
                 Future<Object> future = Patterns.ask(actorRef, new FindLeader(), new Timeout(duration));
@@ -377,8 +379,7 @@ public class RaftActorTest extends AbstractActorTest {
             Snapshot snapshot = Snapshot.create(snapshotBytes.toByteArray(),
                     snapshotUnappliedEntries, lastIndexDuringSnapshotCapture, 1,
                     lastAppliedDuringSnapshotCapture, 1);
-            MockSnapshotStore.setMockSnapshot(snapshot);
-            MockSnapshotStore.setPersistenceId(persistenceId);
+            InMemorySnapshotStore.addSnapshot(persistenceId, snapshot);
 
             // add more entries after snapshot is taken
             List<ReplicatedLogEntry> entries = new ArrayList<>();
@@ -395,11 +396,11 @@ public class RaftActorTest extends AbstractActorTest {
             int lastAppliedToState = 5;
             int lastIndex = 7;
 
-            MockAkkaJournal.addToJournal(5, entry2);
+            InMemoryJournal.addEntry(persistenceId, 5, entry2);
             // 2 entries are applied to state besides the 4 entries in snapshot
-            MockAkkaJournal.addToJournal(6, new ApplyJournalEntries(lastAppliedToState));
-            MockAkkaJournal.addToJournal(7, entry3);
-            MockAkkaJournal.addToJournal(8, entry4);
+            InMemoryJournal.addEntry(persistenceId, 6, new ApplyJournalEntries(lastAppliedToState));
+            InMemoryJournal.addEntry(persistenceId, 7, entry3);
+            InMemoryJournal.addEntry(persistenceId, 8, entry4);
 
 
             // kill the actor
@@ -442,10 +443,10 @@ public class RaftActorTest extends AbstractActorTest {
                     new MockRaftActorContext.MockPayload("two"));
 
             long seqNr = 1;
-            MockAkkaJournal.addToJournal(seqNr++, entry0);
-            MockAkkaJournal.addToJournal(seqNr++, entry1);
-            MockAkkaJournal.addToJournal(seqNr++, new ApplyLogEntries(1));
-            MockAkkaJournal.addToJournal(seqNr++, entry2);
+            InMemoryJournal.addEntry(persistenceId, seqNr++, entry0);
+            InMemoryJournal.addEntry(persistenceId, seqNr++, entry1);
+            InMemoryJournal.addEntry(persistenceId, seqNr++, new ApplyLogEntries(1));
+            InMemoryJournal.addEntry(persistenceId, seqNr++, entry2);
 
             int lastAppliedToState = 1;
             int lastIndex = 2;

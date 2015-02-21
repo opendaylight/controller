@@ -43,11 +43,11 @@ import org.opendaylight.controller.cluster.datastore.messages.PrimaryFound;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryNotFound;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.controller.cluster.datastore.utils.DoNothingActor;
-import org.opendaylight.controller.cluster.datastore.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.utils.MockConfiguration;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotification;
 import org.opendaylight.controller.cluster.raft.RaftState;
+import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -512,7 +512,7 @@ public class ShardManagerTest extends AbstractActorTest {
 
     private static class DelegatingShardManagerCreator implements Creator<ShardManager> {
         private static final long serialVersionUID = 1L;
-        private Creator<ShardManager> delegate;
+        private final Creator<ShardManager> delegate;
 
         public DelegatingShardManagerCreator(Creator<ShardManager> delegate) {
             this.delegate = delegate;
