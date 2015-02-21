@@ -60,7 +60,7 @@ final class TransactionContextImpl extends AbstractTransactionContext {
     }
 
     private Future<Object> completeOperation(Future<Object> operationFuture){
-        operationFuture.onComplete(this.operationCompleter, actorContext.getActorSystem().dispatcher());
+        operationFuture.onComplete(this.operationCompleter, actorContext.getClientDispatcher());
         return operationFuture;
     }
 
@@ -105,7 +105,7 @@ final class TransactionContextImpl extends AbstractTransactionContext {
         futureList.add(replyFuture);
 
         Future<Iterable<Object>> combinedFutures = akka.dispatch.Futures.sequence(futureList,
-                actorContext.getActorSystem().dispatcher());
+                actorContext.getClientDispatcher());
 
         // Transform the combined Future into a Future that returns the cohort actor path from
         // the ReadyTransactionReply. That's the end result of the ready operation.
@@ -152,7 +152,7 @@ final class TransactionContextImpl extends AbstractTransactionContext {
                             serializedReadyReply.getClass()));
                 }
             }
-        }, TransactionProxy.SAME_FAILURE_TRANSFORMER, actorContext.getActorSystem().dispatcher());
+        }, TransactionProxy.SAME_FAILURE_TRANSFORMER, actorContext.getClientDispatcher());
     }
 
     @Override
@@ -198,7 +198,7 @@ final class TransactionContextImpl extends AbstractTransactionContext {
 
             Future<Iterable<Object>> combinedFutures = akka.dispatch.Futures.sequence(
                     Lists.newArrayList(recordedOperationFutures),
-                    actorContext.getActorSystem().dispatcher());
+                    actorContext.getClientDispatcher());
 
             OnComplete<Iterable<Object>> onComplete = new OnComplete<Iterable<Object>>() {
                 @Override
@@ -216,7 +216,7 @@ final class TransactionContextImpl extends AbstractTransactionContext {
                 }
             };
 
-            combinedFutures.onComplete(onComplete, actorContext.getActorSystem().dispatcher());
+            combinedFutures.onComplete(onComplete, actorContext.getClientDispatcher());
         }
 
     }
@@ -255,7 +255,7 @@ final class TransactionContextImpl extends AbstractTransactionContext {
 
         Future<Object> readFuture = executeOperationAsync(new ReadData(path));
 
-        readFuture.onComplete(onComplete, actorContext.getActorSystem().dispatcher());
+        readFuture.onComplete(onComplete, actorContext.getClientDispatcher());
     }
 
     @Override
@@ -280,7 +280,7 @@ final class TransactionContextImpl extends AbstractTransactionContext {
 
             Future<Iterable<Object>> combinedFutures = akka.dispatch.Futures.sequence(
                     Lists.newArrayList(recordedOperationFutures),
-                    actorContext.getActorSystem().dispatcher());
+                    actorContext.getClientDispatcher());
             OnComplete<Iterable<Object>> onComplete = new OnComplete<Iterable<Object>>() {
                 @Override
                 public void onComplete(Throwable failure, Iterable<Object> notUsed)
@@ -297,7 +297,7 @@ final class TransactionContextImpl extends AbstractTransactionContext {
                 }
             };
 
-            combinedFutures.onComplete(onComplete, actorContext.getActorSystem().dispatcher());
+            combinedFutures.onComplete(onComplete, actorContext.getClientDispatcher());
         }
     }
 
@@ -332,6 +332,6 @@ final class TransactionContextImpl extends AbstractTransactionContext {
 
         Future<Object> future = executeOperationAsync(new DataExists(path));
 
-        future.onComplete(onComplete, actorContext.getActorSystem().dispatcher());
+        future.onComplete(onComplete, actorContext.getClientDispatcher());
     }
 }

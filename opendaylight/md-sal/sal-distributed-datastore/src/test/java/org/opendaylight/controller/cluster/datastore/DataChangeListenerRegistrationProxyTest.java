@@ -193,9 +193,11 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
             doReturn(mockActor).when(mockActorSystem).actorOf(any(Props.class));
             ExecutionContextExecutor executor = ExecutionContexts.fromExecutor(
                     MoreExecutors.sameThreadExecutor());
-            doReturn(executor).when(mockActorSystem).dispatcher();
+
 
             ActorContext actorContext = mock(ActorContext.class);
+
+            doReturn(executor).when(actorContext).getClientDispatcher();
 
             String shardName = "shard-1";
             final DataChangeListenerRegistrationProxy proxy = new DataChangeListenerRegistrationProxy(
@@ -227,6 +229,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
                     shardName, actorContext, mockListener);
 
             doReturn(DatastoreContext.newBuilder().build()).when(actorContext).getDatastoreContext();
+            doReturn(getSystem().dispatchers().defaultGlobalDispatcher()).when(actorContext).getClientDispatcher();
             doReturn(getSystem()).when(actorContext).getActorSystem();
             doReturn(getSystem().actorSelection(getRef().path())).
                     when(actorContext).actorSelection(getRef().path());

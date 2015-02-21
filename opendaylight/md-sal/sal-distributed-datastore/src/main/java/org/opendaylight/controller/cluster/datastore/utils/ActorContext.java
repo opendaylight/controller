@@ -47,6 +47,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
+import scala.concurrent.ExecutionContext;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
@@ -93,6 +94,7 @@ public class ActorContext {
     private final JmxReporter jmxReporter = JmxReporter.forRegistry(metricRegistry).inDomain(DOMAIN).build();
     private final int transactionOutstandingOperationLimit;
     private final Timeout transactionCommitOperationTimeout;
+    private final Dispatchers dispatchers;
 
     private volatile SchemaContext schemaContext;
 
@@ -111,6 +113,7 @@ public class ActorContext {
         this.configuration = configuration;
         this.datastoreContext = datastoreContext;
         this.txRateLimiter = RateLimiter.create(datastoreContext.getTransactionCreationInitialRateLimit());
+        this.dispatchers = new Dispatchers(actorSystem.dispatchers());
 
         operationDuration = Duration.create(datastoreContext.getOperationTimeoutInSeconds(), TimeUnit.SECONDS);
         operationTimeout = new Timeout(operationDuration);
@@ -127,6 +130,7 @@ public class ActorContext {
 
         transactionOutstandingOperationLimit = new CommonConfig(this.getActorSystem().settings().config()).getMailBoxCapacity();
         jmxReporter.start();
+
     }
 
     public DatastoreContext getDatastoreContext() {
@@ -200,7 +204,7 @@ public class ActorContext {
                 throw new UnknownMessageException(String.format(
                         "FindPrimary returned unkown response: %s", response));
             }
-        }, FIND_PRIMARY_FAILURE_TRANSFORMER, getActorSystem().dispatcher());
+        }, FIND_PRIMARY_FAILURE_TRANSFORMER, getClientDispatcher());
     }
 
     /**
@@ -251,7 +255,7 @@ public class ActorContext {
                 throw new UnknownMessageException(String.format(
                         "FindLocalShard returned unkown response: %s", response));
             }
-        }, getActorSystem().dispatcher());
+        }, getClientDispatcher());
     }
 
     private String findPrimaryPathOrNull(String shardName) {
@@ -514,5 +518,13 @@ public class ActorContext {
         return transactionCommitOperationTimeout;
     }
 
+    /**
+     * An akka dispatcher that is meant to be used when processing ask Futures which were triggered by client
+     * code on the datastore
+     * @return
+     */
+    public ExecutionContext getClientDispatcher() {
+        return this.dispatchers.getDispatcher(Dispatchers.DispatcherType.Client);
+    }
 
 }

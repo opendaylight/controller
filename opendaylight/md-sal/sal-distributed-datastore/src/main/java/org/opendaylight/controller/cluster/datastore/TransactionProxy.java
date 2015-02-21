@@ -484,7 +484,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                         newTxFutureCallback.setPrimaryShard(primaryShard);
                     }
                 }
-            }, actorContext.getActorSystem().dispatcher());
+            }, actorContext.getClientDispatcher());
         }
 
         return txFutureCallback;
@@ -601,7 +601,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                             TransactionProxy.this.transactionType.ordinal(),
                             getTransactionChainId()).toSerializable());
 
-            createTxFuture.onComplete(this, actorContext.getActorSystem().dispatcher());
+            createTxFuture.onComplete(this, actorContext.getClientDispatcher());
         }
 
         @Override
@@ -621,7 +621,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                                 public void run() {
                                     tryCreateTransaction();
                                 }
-                            }, actorContext.getActorSystem().dispatcher());
+                            }, actorContext.getClientDispatcher());
                     return;
                 }
             }
