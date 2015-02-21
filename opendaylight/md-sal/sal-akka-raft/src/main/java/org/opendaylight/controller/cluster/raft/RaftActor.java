@@ -354,7 +354,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 context.getReplicatedLog().size());
 
         } else if (message instanceof CaptureSnapshot) {
-            LOG.info("{}: CaptureSnapshot received by actor", persistenceId());
+            LOG.info("{}: CaptureSnapshot received by actor: {}", persistenceId(), message);
 
             if(captureSnapshot == null) {
                 captureSnapshot = (CaptureSnapshot)message;
@@ -694,9 +694,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
 
 
-        LOG.info("{}: Removed in-memory snapshotted entries, adjusted snaphsotIndex:{} " +
-            "and term:{}", persistenceId(), captureSnapshot.getLastAppliedIndex(),
-            captureSnapshot.getLastAppliedTerm());
+        LOG.info("{}: Removed in-memory snapshotted entries, adjusted snaphsotIndex: {} " +
+            "and term: {}", persistenceId(), replicatedLog.getSnapshotIndex(),
+            replicatedLog.getSnapshotTerm());
 
         if (isLeader() && captureSnapshot.isInstallSnapshotInitiated()) {
             // this would be call straight to the leader and won't initiate in serialization
