@@ -231,13 +231,19 @@ public class MockRaftActorContext implements RaftActorContext {
     public static class MockPayload extends Payload implements Serializable {
         private static final long serialVersionUID = 3121380393130864247L;
         private String value = "";
+        private int size;
 
-        public MockPayload(){
-
+        public MockPayload() {
         }
 
         public MockPayload(String s) {
             this.value = s;
+            size = value.length();
+        }
+
+        public MockPayload(String s, int size) {
+            this(s);
+            this.size = size;
         }
 
         @Override public  Map<GeneratedMessage.GeneratedExtension, String> encode() {
@@ -255,7 +261,7 @@ public class MockRaftActorContext implements RaftActorContext {
 
         @Override
         public int size() {
-            return value.length();
+            return size;
         }
 
         @Override public String getClientPayloadClassName() {
