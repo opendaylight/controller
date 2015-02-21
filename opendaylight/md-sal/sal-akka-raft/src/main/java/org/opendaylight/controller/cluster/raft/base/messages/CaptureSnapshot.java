@@ -9,13 +9,13 @@
 package org.opendaylight.controller.cluster.raft.base.messages;
 
 public class CaptureSnapshot {
-    private long lastAppliedIndex;
-    private long lastAppliedTerm;
-    private long lastIndex;
-    private long lastTerm;
-    private boolean installSnapshotInitiated;
-    private long replicatedToAllIndex;
-    private long replicatedToAllTerm;
+    private final long lastAppliedIndex;
+    private final long lastAppliedTerm;
+    private final long lastIndex;
+    private final long lastTerm;
+    private final boolean installSnapshotInitiated;
+    private final long replicatedToAllIndex;
+    private final long replicatedToAllTerm;
 
     public CaptureSnapshot(long lastIndex, long lastTerm,
         long lastAppliedIndex, long lastAppliedTerm, long replicatedToAllIndex, long replicatedToAllTerm) {
@@ -59,5 +59,16 @@ public class CaptureSnapshot {
 
     public long getReplicatedToAllTerm() {
         return replicatedToAllTerm;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("CaptureSnapshot [lastAppliedIndex=").append(lastAppliedIndex).append(", lastAppliedTerm=")
+                .append(lastAppliedTerm).append(", lastIndex=").append(lastIndex).append(", lastTerm=")
+                .append(lastTerm).append(", installSnapshotInitiated=").append(installSnapshotInitiated)
+                .append(", replicatedToAllIndex=").append(replicatedToAllIndex).append(", replicatedToAllTerm=")
+                .append(replicatedToAllTerm).append("]");
+        return builder.toString();
     }
 }
