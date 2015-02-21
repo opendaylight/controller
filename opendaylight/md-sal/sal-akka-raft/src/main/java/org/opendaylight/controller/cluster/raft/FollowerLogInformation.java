@@ -28,7 +28,7 @@ public interface FollowerLogInformation {
      *
      * @param nextIndex
      */
-    void setNextIndex(long nextIndex);
+    boolean setNextIndex(long nextIndex);
 
     /**
      * Increment the value of the matchIndex
@@ -36,7 +36,7 @@ public interface FollowerLogInformation {
      */
     long incrMatchIndex();
 
-    void setMatchIndex(long matchIndex);
+    boolean setMatchIndex(long matchIndex);
 
     /**
      * The identifier of the follower
