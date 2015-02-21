@@ -75,7 +75,7 @@ public interface ConfigParams {
      * The interval in which the leader needs to check itself if its isolated
      * @return FiniteDuration
      */
-    FiniteDuration getIsolatedCheckInterval();
+    long getIsolatedCheckIntervalInMillis();
 
 
     /**
