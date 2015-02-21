@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015 Brocade Communications Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.cluster.datastore.utils;
+package org.opendaylight.controller.cluster.common.persistence;
 
 import akka.dispatch.Futures;
 import akka.japi.Option;
@@ -15,18 +15,25 @@ import akka.persistence.SnapshotMetadata;
 import akka.persistence.SnapshotSelectionCriteria;
 import akka.persistence.snapshot.japi.SnapshotStore;
 import com.google.common.collect.Iterables;
-import scala.concurrent.Future;
+import com.google.common.collect.Lists;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.opendaylight.controller.cluster.raft.Snapshot;
+import scala.concurrent.Future;
 
+/**
+ * An akka SnapshotStore implementation that stores data in memory. This is intended for testing.
+ *
+ * @author Thomas Pantelis
+ */
 public class InMemorySnapshotStore extends SnapshotStore {
 
     private static Map<String, List<StoredSnapshot>> snapshots = new ConcurrentHashMap<>();
 
-    public static void addSnapshot(String persistentId, Snapshot snapshot) {
+    public static void addSnapshot(String persistentId, Object snapshot) {
         List<StoredSnapshot> snapshotList = snapshots.get(persistentId);
 
         if(snapshotList == null) {
@@ -36,6 +43,23 @@ public class InMemorySnapshotStore extends SnapshotStore {
 
         snapshotList.add(new StoredSnapshot(new SnapshotMetadata(persistentId, snapshotList.size(),
                 System.currentTimeMillis()), snapshot));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> List<T> getSnapshots(String persistentId, Class<T> type) {
+        List<StoredSnapshot> stored = snapshots.get(persistentId);
+        if(stored == null) {
+            return Collections.emptyList();
+        }
+
+        List<T> retList = Lists.newArrayListWithCapacity(stored.size());
+        for(StoredSnapshot s: stored) {
+            if(type.isInstance(s.getData())) {
+                retList.add((T) s.getData());
+            }
+        }
+
+        return retList;
     }
 
     public static void clear() {
@@ -98,17 +122,21 @@ public class InMemorySnapshotStore extends SnapshotStore {
     }
 
     @Override
-    public void doDelete(String s, SnapshotSelectionCriteria snapshotSelectionCriteria)
+    public void doDelete(String persistentId, SnapshotSelectionCriteria snapshotSelectionCriteria)
         throws Exception {
-        List<StoredSnapshot> snapshotList = snapshots.get(s);
+        List<StoredSnapshot> snapshotList = snapshots.get(persistentId);
 
         if(snapshotList == null){
             return;
         }
 
-        // TODO : This is a quick and dirty implementation. Do actual match later.
-        snapshotList.clear();
-        snapshots.remove(s);
+        Iterator<StoredSnapshot> iter = snapshotList.iterator();
+        while(iter.hasNext()) {
+            StoredSnapshot s = iter.next();
+            if(s.getMetadata().sequenceNr() <= snapshotSelectionCriteria.maxSequenceNr()) {
+                iter.remove();
+            }
+        }
     }
 
     private static class StoredSnapshot {

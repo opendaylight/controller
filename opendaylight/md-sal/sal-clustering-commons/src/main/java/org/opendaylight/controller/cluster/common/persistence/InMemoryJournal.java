@@ -1,23 +1,12 @@
 /*
- * Copyright (c) 2014 Brocade Communications Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015 Brocade Communications Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.datastore.utils;
+package org.opendaylight.controller.cluster.common.persistence;
 
-import static org.junit.Assert.assertEquals;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import com.google.common.collect.Maps;
-import com.google.common.util.concurrent.Uninterruptibles;
-import scala.concurrent.Future;
 import akka.dispatch.Futures;
 import akka.japi.Procedure;
 import akka.persistence.PersistentConfirmation;
@@ -25,7 +14,22 @@ import akka.persistence.PersistentId;
 import akka.persistence.PersistentImpl;
 import akka.persistence.PersistentRepr;
 import akka.persistence.journal.japi.AsyncWriteJournal;
+import com.google.common.collect.Maps;
+import com.google.common.util.concurrent.Uninterruptibles;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import scala.concurrent.Future;
 
+/**
+ * An akka AsyncWriteJournal implementation that stores data in memory. This is intended for testing.
+ *
+ * @author Thomas Pantelis
+ */
 public class InMemoryJournal extends AsyncWriteJournal {
 
     private static final Map<String, Map<Long, Object>> journals = new ConcurrentHashMap<>();
@@ -56,8 +60,9 @@ public class InMemoryJournal extends AsyncWriteJournal {
     }
 
     public static void waitForDeleteMessagesComplete(String persistenceId) {
-        assertEquals("Recovery complete", true, Uninterruptibles.awaitUninterruptibly(
-                deleteMessagesCompleteLatches.get(persistenceId), 5, TimeUnit.SECONDS));
+        if(!Uninterruptibles.awaitUninterruptibly(deleteMessagesCompleteLatches.get(persistenceId), 5, TimeUnit.SECONDS)) {
+            throw new AssertionError("Delete messages did not complete");
+        }
     }
 
     public static void addDeleteMessagesCompleteLatch(String persistenceId) {
