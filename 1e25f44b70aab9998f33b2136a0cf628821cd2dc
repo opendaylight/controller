@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_81dfb80c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/Dispatchers.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-21T21:40:17Z",
+      "side": 1,
+      "message": "The way I did these is to use the custom dispatcher if it was available - otherwise use the default - which is \"akka.actor.default-dispatcher\"",
+      "parentUuid": "7a96c907_c1aaa070",
+      "revId": "1e25f44b70aab9998f33b2136a0cf628821cd2dc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_619cec5d",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/utils/DispatchersTest.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-02-21T19:48:26Z",
       "side": 1,
       "message": "Needs copyright header",
+      "revId": "1e25f44b70aab9998f33b2136a0cf628821cd2dc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_a1e434e1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/utils/DispatchersTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-21T21:40:17Z",
+      "side": 1,
+      "message": "Interesting - IntelliJ did not automatically add the copyright here. Will add.",
+      "parentUuid": "7a96c907_619cec5d",
       "revId": "1e25f44b70aab9998f33b2136a0cf628821cd2dc",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
