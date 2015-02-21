@@ -14,6 +14,7 @@ import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
@@ -52,9 +53,12 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
 
         LOG.info("Creating ShardManager : {}", shardManagerId);
 
+        String shardDispatcher =
+                new Dispatchers(actorSystem.dispatchers()).getDispatcherPath(Dispatchers.DispatcherType.Shard);
+
         actorContext = new ActorContext(actorSystem, actorSystem.actorOf(
                 ShardManager.props(cluster, configuration, datastoreContext)
-                    .withMailbox(ActorContext.MAILBOX), shardManagerId ),
+                        .withDispatcher(shardDispatcher).withMailbox(ActorContext.MAILBOX), shardManagerId ),
                 cluster, configuration, datastoreContext);
     }
 
