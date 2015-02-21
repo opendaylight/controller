@@ -88,7 +88,7 @@
     </dependency>
     <!-- test the features.xml -->
     <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
+      <groupId>org.opendaylight.odlparent</groupId>
       <artifactId>features-test</artifactId>
     </dependency>
   </dependencies>
@@ -146,7 +146,7 @@
             <karaf.distro.version>${commons.opendaylight.version}</karaf.distro.version>
           </systemPropertyVariables>
           <dependenciesToScan>
-           <dependency>org.opendaylight.yangtools:features-test</dependency>
+           <dependency>org.opendaylight.odlparent:features-test</dependency>
           </dependenciesToScan>
         </configuration>
       </plugin>

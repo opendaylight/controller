@@ -105,6 +105,7 @@
     </feature>
     <feature name='odl-netconf-ssh' version='${netconf.version}' description="OpenDaylight :: Netconf Connector :: SSH">
         <feature version='${netconf.version}'>odl-netconf-tcp</feature>
+        <feature version='${config.version}'>odl-config-netty</feature>
         <!-- FIXME: This introduces cycle between projects, which makes version updates
                     harder. Should be moved to different.
         -->

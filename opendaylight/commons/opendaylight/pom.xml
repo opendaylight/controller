@@ -81,6 +81,7 @@
     <!-- OpenEXI third party lib for netconf-->
     <exi.nagasena.version>0000.0002.0038.0</exi.nagasena.version>
     <felix.util.version>1.6.0</felix.util.version>
+    <features.test.version>1.5.0-SNAPSHOT</features.test.version>
     <filtervalve.version>1.5.0-SNAPSHOT</filtervalve.version>
     <findbugs.maven.plugin.version>2.4.0</findbugs.maven.plugin.version>
     <flowprogrammer.northbound.version>0.5.0-SNAPSHOT</flowprogrammer.northbound.version>
@@ -1192,6 +1193,12 @@
         <groupId>org.opendaylight.yangtools</groupId>
         <artifactId>features-test</artifactId>
         <version>${yangtools.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.odlparent</groupId>
+        <artifactId>features-test</artifactId>
+        <version>${features.test.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
