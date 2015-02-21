@@ -31,6 +31,7 @@ import static org.junit.Assert.assertEquals;
 import static org.opendaylight.controller.test.sal.binding.it.TestHelper.baseModelBundles;
 import static org.opendaylight.controller.test.sal.binding.it.TestHelper.bindingAwareSalBundles;
 import static org.opendaylight.controller.test.sal.binding.it.TestHelper.configMinumumBundles;
+import static org.opendaylight.controller.test.sal.binding.it.TestHelper.flowCapableModelBundles;
 import static org.opendaylight.controller.test.sal.binding.it.TestHelper.junitAndMockitoBundles;
 import static org.opendaylight.controller.test.sal.binding.it.TestHelper.mdSalCoreBundles;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
@@ -66,6 +67,7 @@ public class ToasterTest {
                 configMinumumBundles(),
                 // BASE Models
                 baseModelBundles(),
+                flowCapableModelBundles(),
 
                 // Set fail if unresolved bundle present
                 systemProperty("pax.exam.osgi.unresolved.fail").value("true"),
