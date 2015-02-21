@@ -165,6 +165,7 @@ public class NotificationTest extends AbstractTest {
     }
 
     /**
+     *
      * Implements
      * {@link OpendaylightTestNotificationListener} and contains attributes which keep lists of objects of
      * the type {@link OutOfFairyDustNotification}.
