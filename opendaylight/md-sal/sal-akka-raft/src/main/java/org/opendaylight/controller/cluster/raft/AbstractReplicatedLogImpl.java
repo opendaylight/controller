@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -187,9 +188,14 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
 
     @Override
     public void snapshotPreCommit(long snapshotCapturedIndex, long snapshotCapturedTerm) {
+        Preconditions.checkArgument(snapshotCapturedIndex >= snapshotIndex,
+                "snapshotCapturedIndex must be greater than or equal to snapshotIndex");
+
         snapshottedJournal = new ArrayList<>(journal.size());
 
-        snapshottedJournal.addAll(journal.subList(0, (int)(snapshotCapturedIndex - snapshotIndex)));
+        List<ReplicatedLogEntry> snapshotJournalEntries = journal.subList(0, (int) (snapshotCapturedIndex - snapshotIndex));
+
+        snapshottedJournal.addAll(snapshotJournalEntries);
         clear(0, (int) (snapshotCapturedIndex - snapshotIndex));
 
         previousSnapshotIndex = snapshotIndex;
