@@ -134,6 +134,16 @@ public class MockRaftActorContext implements RaftActorContext {
     }
 
     @Override
+    // FIXME : A lot of tests try to manipulate the replicated log by setting it using this method
+    // This is OK to do if the underlyingActor is not RafActor or a derived class. If not then you should not
+    // used this way to manipulate the log because the RaftActor actually has a field replicatedLog
+    // which it creates internally and sets on the RaftActorContext
+    // The only right way to manipulate the replicated log therefore is to get it from either the RaftActor
+    // or the RaftActorContext and modify the entries in there instead of trying to replace it by using this setter
+    // Simple assertion that will fail if you do so
+    // ReplicatedLog log = new ReplicatedLogImpl();
+    // raftActor.underlyingActor().getRaftActorContext().setReplicatedLog(log);
+    // assertEquals(log, raftActor.underlyingActor().getReplicatedLog())
     public void setReplicatedLog(ReplicatedLog replicatedLog) {
         this.replicatedLog = replicatedLog;
     }
