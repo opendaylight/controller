@@ -35,6 +35,7 @@ public class MockRaftActorContext implements RaftActorContext {
     private Map<String, String> peerAddresses = new HashMap<>();
     private ConfigParams configParams;
     private boolean snapshotCaptureInitiated;
+    private SnapshotManager snapshotManager;
 
     public MockRaftActorContext(){
         electionTerm = null;
@@ -199,13 +200,16 @@ public class MockRaftActorContext implements RaftActorContext {
     }
 
     @Override
-    public void setSnapshotCaptureInitiated(boolean snapshotCaptureInitiated) {
-        this.snapshotCaptureInitiated = snapshotCaptureInitiated;
+    public boolean isSnapshotCaptureInitiated() {
+        return snapshotCaptureInitiated;
     }
 
     @Override
-    public boolean isSnapshotCaptureInitiated() {
-        return snapshotCaptureInitiated;
+    public SnapshotManager getSnapshotManager() {
+        if(this.snapshotManager == null){
+            this.snapshotManager = new SnapshotManager(this);
+        }
+        return this.snapshotManager;
     }
 
     public void setConfigParams(ConfigParams configParams) {

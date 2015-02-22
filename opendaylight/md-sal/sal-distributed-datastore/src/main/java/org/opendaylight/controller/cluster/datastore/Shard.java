@@ -431,7 +431,7 @@ public class Shard extends RaftActor {
                 public void onSuccess(final Void v) {
                     shardMBean.incrementAbortTransactionsCount();
 
-                    if(sender != null) {
+                    if (sender != null) {
                         sender.tell(AbortTransactionReply.INSTANCE.toSerializable(), self);
                     }
                 }
@@ -440,7 +440,7 @@ public class Shard extends RaftActor {
                 public void onFailure(final Throwable t) {
                     LOG.error("{}: An exception happened during abort", persistenceId(), t);
 
-                    if(sender != null) {
+                    if (sender != null) {
                         sender.tell(new akka.actor.Status.Failure(t), self);
                     }
                 }
