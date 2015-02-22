@@ -33,7 +33,6 @@ import org.opendaylight.controller.cluster.raft.FollowerLogInformationImpl;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapshot;
@@ -553,29 +552,12 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 final ActorSelection followerActor = context.getPeerActorSelection(followerId);
                 sendSnapshotChunk(followerActor, followerId);
 
-            } else if (!context.isSnapshotCaptureInitiated()) {
+            } else {
 
-                LOG.info("{}: Initiating Snapshot Capture to Install Snapshot, Leader:{}", logName(), getLeaderId());
-                ReplicatedLogEntry lastAppliedEntry = context.getReplicatedLog().get(context.getLastApplied());
-                long lastAppliedIndex = -1;
-                long lastAppliedTerm = -1;
-
-                if (lastAppliedEntry != null) {
-                    lastAppliedIndex = lastAppliedEntry.getIndex();
-                    lastAppliedTerm = lastAppliedEntry.getTerm();
-                } else if (context.getReplicatedLog().getSnapshotIndex() > -1) {
-                    lastAppliedIndex = context.getReplicatedLog().getSnapshotIndex();
-                    lastAppliedTerm = context.getReplicatedLog().getSnapshotTerm();
+                if(!context.getSnapshotManager().isCapturing()) {
+                    context.getSnapshotManager().captureToInstall(context.getReplicatedLog().last(),
+                            this.getReplicatedToAllIndex());
                 }
-
-                boolean isInstallSnapshotInitiated = true;
-                long replicatedToAllIndex = super.getReplicatedToAllIndex();
-                ReplicatedLogEntry replicatedToAllEntry = context.getReplicatedLog().get(replicatedToAllIndex);
-                actor().tell(new CaptureSnapshot(lastIndex(), lastTerm(), lastAppliedIndex, lastAppliedTerm,
-                    (replicatedToAllEntry != null ? replicatedToAllEntry.getIndex() : -1),
-                    (replicatedToAllEntry != null ? replicatedToAllEntry.getTerm() : -1),
-                    isInstallSnapshotInitiated), actor());
-                context.setSnapshotCaptureInitiated(true);
             }
         }
     }
