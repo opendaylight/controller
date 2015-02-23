@@ -20,7 +20,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
       <modules xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
         <module>
-          <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:${artifactId}:impl">prefix:${artifactId}-impl</type>
+          <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:${artifactId}:impl">prefix:${artifactId}</type>
           <name>${artifactId}-default</name>
           <broker>
             <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-broker-osgi-registry</type>

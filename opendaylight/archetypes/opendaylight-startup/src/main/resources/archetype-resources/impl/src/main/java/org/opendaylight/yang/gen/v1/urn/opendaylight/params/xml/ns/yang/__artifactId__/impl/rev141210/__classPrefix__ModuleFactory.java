@@ -18,6 +18,6 @@
 * Do not modify this file unless it is present under src/main directory
 */
 package org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.${artifactId}.impl.rev141210;
-public class ${classPrefix}ImplModuleFactory extends org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.${artifactId}.impl.rev141210.Abstract${classPrefix}ImplModuleFactory {
+public class ${classPrefix}ModuleFactory extends org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.${artifactId}.impl.rev141210.Abstract${classPrefix}ModuleFactory {
 
 }

@@ -1,7 +1,7 @@
 #set( $symbol_pound = '#' )
 #set( $symbol_dollar = '$' )
 #set( $symbol_escape = '\' )
-#set( $module = "${classPrefix}ImplModule" )
+#set( $module = "${classPrefix}Module" )
 /*
  * ${copyright} and others.  All rights reserved.
  *
@@ -26,7 +26,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class ${classPrefix}ImplModuleTest {
+public class ${classPrefix}ModuleTest {
     @Test
     public void testCustomValidation() {
         ${module} module = new ${module}(mock(ModuleIdentifier.class), mock(DependencyResolver.class));
