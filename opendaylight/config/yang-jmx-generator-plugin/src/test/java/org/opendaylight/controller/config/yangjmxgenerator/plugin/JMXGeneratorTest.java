@@ -16,11 +16,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
@@ -42,7 +39,6 @@ import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.commons.io.FileUtils;
-import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -124,13 +120,6 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
         File targetDir = new File(generatorOutputPath, "target");
         generatedResourcesDir = new File(targetDir, "generated-resources");
         jmxGenerator.setResourceBaseDir(generatedResourcesDir);
-        Log mockedLog = mock(Log.class);
-        doReturn(false).when(mockedLog).isDebugEnabled();
-        doNothing().when(mockedLog).debug(any(CharSequence.class));
-        doNothing().when(mockedLog).info(any(CharSequence.class));
-        doNothing().when(mockedLog).error(any(CharSequence.class),
-                any(Throwable.class));
-        jmxGenerator.setLog(mockedLog);
         MavenProject project = mock(MavenProject.class);
         doReturn(generatorOutputPath).when(project).getBasedir();
         jmxGenerator.setMavenProject(project);
@@ -158,18 +147,19 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
         verifyModuleFactoryFile(false);
     }
 
-    private void verifyModuleFactoryFile(boolean shouldBePresent) {
+    private void verifyModuleFactoryFile(final boolean shouldBePresent) {
         File factoryFile = new File(generatedResourcesDir, "META-INF"
                 + File.separator + "services" + File.separator
                 + ModuleFactory.class.getName());
-        if (!shouldBePresent)
+        if (!shouldBePresent) {
             assertFalse("Factory file should not be generated",
                     factoryFile.exists());
-        else
+        } else {
             assertTrue("Factory file should be generated", factoryFile.exists());
+        }
     }
 
-    public static List<String> toFileNames(Collection<File> files) {
+    public static List<String> toFileNames(final Collection<File> files) {
         List<String> result = new ArrayList<>();
         for (File f : files) {
             result.add(f.getName());
@@ -279,7 +269,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
                 new Predicate<File>() {
 
                     @Override
-                    public boolean apply(File input) {
+                    public boolean apply(final File input) {
                         return input.getName().endsWith("xml");
                     }
                 });
@@ -288,7 +278,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
                 new Predicate<File>() {
 
                     @Override
-                    public boolean apply(File input) {
+                    public boolean apply(final File input) {
                         return input.getName().endsWith("java");
                     }
                 });
@@ -303,16 +293,21 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
             String name = file.getName();
             MbeASTVisitor visitor = new MbeASTVisitor();
             verifiers.put(name, visitor);
-            if (name.equals("AbstractDynamicThreadPoolModule.java"))
+            if (name.equals("AbstractDynamicThreadPoolModule.java")) {
                 abstractDynamicThreadPoolModuleVisitor = visitor;
-            if (name.equals("AsyncEventBusModuleMXBean.java"))
+            }
+            if (name.equals("AsyncEventBusModuleMXBean.java")) {
                 asyncEventBusModuleMXBeanVisitor = visitor;
-            if (name.equals("AbstractNamingThreadFactoryModuleFactory.java"))
+            }
+            if (name.equals("AbstractNamingThreadFactoryModuleFactory.java")) {
                 abstractNamingThreadFactoryModuleFactoryVisitor = visitor;
-            if (name.equals("AsyncEventBusModule.java"))
+            }
+            if (name.equals("AsyncEventBusModule.java")) {
                 asyncEventBusModuleVisitor = visitor;
-            if (name.equals("EventBusModuleFactory.java"))
+            }
+            if (name.equals("EventBusModuleFactory.java")) {
                 eventBusModuleFactoryVisitor = visitor;
+            }
         }
 
         processGeneratedCode(javaFiles, verifiers);
@@ -348,25 +343,25 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
 
     }
 
-    private void verifyXmlFiles(Collection<File> xmlFiles) throws Exception {
+    private void verifyXmlFiles(final Collection<File> xmlFiles) throws Exception {
         ErrorHandler errorHandler = new ErrorHandler() {
 
             @Override
-            public void warning(SAXParseException exception)
+            public void warning(final SAXParseException exception)
                     throws SAXException {
                 fail("Generated blueprint xml is not well formed "
                         + exception.getMessage());
             }
 
             @Override
-            public void fatalError(SAXParseException exception)
+            public void fatalError(final SAXParseException exception)
                     throws SAXException {
                 fail("Generated blueprint xml is not well formed "
                         + exception.getMessage());
             }
 
             @Override
-            public void error(SAXParseException exception) throws SAXException {
+            public void error(final SAXParseException exception) throws SAXException {
                 fail("Generated blueprint xml is not well formed "
                         + exception.getMessage());
             }
@@ -386,7 +381,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
 
     }
 
-    private void assertEventBusModuleFactory(MbeASTVisitor visitor) {
+    private void assertEventBusModuleFactory(final MbeASTVisitor visitor) {
         assertEquals(PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
                 + ".threads.java", visitor.packageName);
         assertEquals("EventBusModuleFactory", visitor.type);
@@ -406,7 +401,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
                 visitor.methodJavadoc.size());
     }
 
-    private void assertAsyncEventBusModule(MbeASTVisitor visitor) {
+    private void assertAsyncEventBusModule(final MbeASTVisitor visitor) {
         assertEquals(PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
                 + ".threads.java", visitor.packageName);
         assertEquals("AsyncEventBusModule", visitor.type);
@@ -427,7 +422,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
     }
 
     private void assertAbstractNamingThreadFactoryModuleFactory(
-            MbeASTVisitor visitor) {
+            final MbeASTVisitor visitor) {
         assertEquals(PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
                 + ".threads.java", visitor.packageName);
         assertEquals("AbstractNamingThreadFactoryModuleFactory", visitor.type);
@@ -450,7 +445,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
 
     }
 
-    private void assertFactoryMethods(Set<String> methods, int expectedSize) {
+    private void assertFactoryMethods(final Set<String> methods, final int expectedSize) {
 
         List<ArgumentAssertion> args = Lists.newArrayList();
         ArgumentAssertion oldInstanceArg = new ArgumentAssertion(DynamicMBeanWithInstance.class.getCanonicalName(), "old");
@@ -496,12 +491,12 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
 
     }
 
-    private void assertMethodPresent(Set<String> methods, MethodAssertion methodAssertion) {
+    private void assertMethodPresent(final Set<String> methods, final MethodAssertion methodAssertion) {
         assertTrue(String.format("Generated methods did not contain %s, generated methods: %s",
                 methodAssertion.toString(), methods), methods.contains(methodAssertion.toString()));
     }
 
-    private void assertAsyncEventBusModuleMXBean(MbeASTVisitor visitor) {
+    private void assertAsyncEventBusModuleMXBean(final MbeASTVisitor visitor) {
         assertEquals(PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
                 + ".threads.java", visitor.packageName);
         assertEquals("AsyncEventBusModuleMXBean", visitor.type);
@@ -511,7 +506,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
 
     }
 
-    private void assertAbstractDynamicThreadPoolModule(MbeASTVisitor visitor) {
+    private void assertAbstractDynamicThreadPoolModule(final MbeASTVisitor visitor) {
         assertEquals(PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
                 + ".threads.java", visitor.packageName);
         assertNotNull(visitor.javadoc);
@@ -557,8 +552,8 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
                 visitor.methodJavadoc.get("void setMaximumSize(java.lang.Long maximumSize)"));
     }
 
-    private void assertDeclaredField(Set<String> fieldDeclarations,
-            String declaration) {
+    private void assertDeclaredField(final Set<String> fieldDeclarations,
+            final String declaration) {
         assertTrue("Missing field " + declaration + ", got: "
                 + fieldDeclarations,
                 fieldDeclarations.contains(declaration + ";\n"));
@@ -570,13 +565,13 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
         protected Map<String, String> methodDescriptions = Maps.newHashMap();
 
         @Override
-        public boolean visit(PackageDeclaration node) {
+        public boolean visit(final PackageDeclaration node) {
             packageName = node.getName().toString();
             return super.visit(node);
         }
 
         @Override
-        public boolean visit(NormalAnnotation node) {
+        public boolean visit(final NormalAnnotation node) {
             if (node.getTypeName().toString()
                     .equals(Description.class.getCanonicalName())) {
                 if (node.getParent() instanceof TypeDeclaration) {
@@ -604,7 +599,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
         }
 
         @Override
-        public boolean visit(TypeDeclaration node) {
+        public boolean visit(final TypeDeclaration node) {
             javadoc = node.getJavadoc() == null ? null : node.getJavadoc()
                     .toString();
             type = node.getName().toString();
@@ -624,7 +619,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
         private final Map<String, String> methodJavadoc = Maps.newHashMap();
 
         @Override
-        public boolean visit(NormalAnnotation node) {
+        public boolean visit(final NormalAnnotation node) {
             boolean result = super.visit(node);
             if (node.getTypeName().toString()
                     .equals(RequireInterface.class.getCanonicalName())
@@ -638,16 +633,16 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
         }
 
         @Override
-        public boolean visit(FieldDeclaration node) {
+        public boolean visit(final FieldDeclaration node) {
             fieldDeclarations.add(node.toString());
             return super.visit(node);
         }
 
         @Override
-        public boolean visit(MethodDeclaration node) {
-            if (node.isConstructor())
+        public boolean visit(final MethodDeclaration node) {
+            if (node.isConstructor()) {
                 constructors.add(node.toString());
-            else {
+            } else {
                 String methodSignature = node.getReturnType2() + " " + node.getName() + "(";
                 boolean first = true;
                 for (Object o : node.parameters()) {
@@ -668,7 +663,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
         }
 
         @Override
-        public boolean visit(TypeDeclaration node) {
+        public boolean visit(final TypeDeclaration node) {
             boolean visit = super.visit(node);
             List<?> superIfcs = node.superInterfaceTypes();
             implmts = superIfcs != null && !superIfcs.isEmpty() ? superIfcs
@@ -680,14 +675,14 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
 
     }
 
-    private void assertContains(String source, String... contained) {
+    private void assertContains(final String source, final String... contained) {
         for (String string : contained) {
             assertThat(source, containsString(string));
         }
     }
 
-    private void processGeneratedCode(Collection<File> files,
-            Map<String, ASTVisitor> verifiers) throws IOException {
+    private void processGeneratedCode(final Collection<File> files,
+            final Map<String, ASTVisitor> verifiers) throws IOException {
         ASTParser parser = ASTParser.newParser(AST.JLS3);
         Map<?, ?> options = JavaCore.getOptions();
         JavaCore.setComplianceOptions(JavaCore.VERSION_1_7, options);
@@ -705,27 +700,31 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
             for (IProblem c : cu.getProblems()) {
                 // 1610613332 = Syntax error, annotations are only available if
                 // source level is 5.0
-                if (c.getID() == 1610613332)
+                if (c.getID() == 1610613332) {
                     continue;
+                }
                 // 1610613332 = Syntax error, parameterized types are only
                 // available if source level is 5.0
-                if (c.getID() == 1610613329)
+                if (c.getID() == 1610613329) {
                     continue;
-                if (c.getID() == 1610613328) // 'for each' statements are only available if source level is 5.0
+                }
+                if (c.getID() == 1610613328) {
                     continue;
+                }
                 fail("Error in generated source code " + file + ":"
                         + c.getSourceLineNumber() + " id: " + c.getID() + " message:"  + c.toString());
             }
 
             ASTVisitor visitor = verifiers.get(file.getName());
-            if (visitor == null)
+            if (visitor == null) {
                 fail("Unknown generated file " + file.getName());
+            }
             cu.accept(visitor);
 
         }
     }
 
-    public static char[] readFileAsChars(File file) throws IOException {
+    public static char[] readFileAsChars(final File file) throws IOException {
         List<String> readLines = Files
                 .readLines(file, Charset.forName("utf-8"));
         char[] retVal = new char[0];
@@ -741,15 +740,15 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
 
     private static class MethodAssertion extends ArgumentAssertion{
 
-        private List<ArgumentAssertion> arguments;
+        private final List<ArgumentAssertion> arguments;
 
 
-        MethodAssertion(String type, String name, List<ArgumentAssertion> arguments) {
+        MethodAssertion(final String type, final String name, final List<ArgumentAssertion> arguments) {
             super(type, name);
             this.arguments = arguments;
         }
 
-        MethodAssertion(String type, String name) {
+        MethodAssertion(final String type, final String name) {
             this(type, name, Collections.<ArgumentAssertion>emptyList());
         }
 
@@ -763,8 +762,9 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
             for (ArgumentAssertion argument : arguments) {
                 sb.append(argument.type).append(' ');
                 sb.append(argument.name);
-                if(++i != arguments.size())
+                if(++i != arguments.size()) {
                     sb.append(',');
+                }
             }
             sb.append(')');
             return sb.toString();
@@ -775,7 +775,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
 
         protected final String type, name;
 
-        private ArgumentAssertion(String type, String name) {
+        private ArgumentAssertion(final String type, final String name) {
             this.type = type;
             this.name = name;
         }

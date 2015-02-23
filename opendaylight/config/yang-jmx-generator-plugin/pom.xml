@@ -22,11 +22,6 @@
     </dependency>
 
     <dependency>
-      <groupId>com.jcabi</groupId>
-      <artifactId>jcabi-maven-slf4j</artifactId>
-    </dependency>
-
-    <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
     </dependency>
@@ -34,17 +29,6 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.codehaus.gmaven.runtime</groupId>
-      <artifactId>gmaven-runtime-2.0</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.sonatype.gossip</groupId>
-          <artifactId>gossip</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
     <dependency>
@@ -65,6 +49,10 @@
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-maven-plugin-spi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-core</artifactId>
     </dependency>
 
     <dependency>
