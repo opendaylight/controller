@@ -48,9 +48,9 @@ import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Meth
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.MethodDefinition;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.ModuleField;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.FullyQualifiedNameHelper;
-import org.opendaylight.yangtools.binding.generator.util.BindingGeneratorUtil;
 import org.opendaylight.yangtools.sal.binding.model.api.ParameterizedType;
 import org.opendaylight.yangtools.sal.binding.model.api.Type;
+import org.opendaylight.yangtools.yang.binding.BindingMapping;
 
 public class TemplateFactory {
 
@@ -59,7 +59,7 @@ public class TemplateFactory {
      * bean as value that should be persisted from this instance.
      */
     public static Map<String, FtlTemplate> getTOAndMXInterfaceFtlFiles(
-            RuntimeBeanEntry entry) {
+            final RuntimeBeanEntry entry) {
         Map<String, FtlTemplate> result = new HashMap<>();
         { // create GeneralInterfaceFtlFile for runtime MXBean. Attributes will
           // be transformed to getter methods
@@ -109,7 +109,7 @@ public class TemplateFactory {
     }
 
     // FIXME: put into Type.toString
-    static String serializeType(Type type, boolean addWildcards) {
+    static String serializeType(final Type type, final boolean addWildcards) {
         if (type instanceof ParameterizedType){
             ParameterizedType parameterizedType = (ParameterizedType) type;
             StringBuilder sb = new StringBuilder();
@@ -131,11 +131,11 @@ public class TemplateFactory {
         }
     }
 
-    static String serializeType(Type type) {
+    static String serializeType(final Type type) {
         return serializeType(type, false);
     }
 
-    private static String getReturnType(AttributeIfc attributeIfc) {
+    private static String getReturnType(final AttributeIfc attributeIfc) {
         String returnType;
         if (attributeIfc instanceof TypedAttribute) {
             Type type = ((TypedAttribute) attributeIfc).getType();
@@ -151,7 +151,7 @@ public class TemplateFactory {
     }
 
     public static GeneralInterfaceTemplate serviceInterfaceFromSie(
-            ServiceInterfaceEntry sie) {
+            final ServiceInterfaceEntry sie) {
 
         List<String> extendedInterfaces = Lists
                 .newArrayList(AbstractServiceInterface.class.getCanonicalName());
@@ -177,7 +177,7 @@ public class TemplateFactory {
     }
 
     public static AbstractFactoryTemplate abstractFactoryTemplateFromMbe(
-            ModuleMXBeanEntry mbe) {
+            final ModuleMXBeanEntry mbe) {
         AbstractFactoryAttributesProcessor attrProcessor = new AbstractFactoryAttributesProcessor();
         attrProcessor.processAttributes(mbe.getAttributes(),
                 mbe.getPackageName());
@@ -191,7 +191,7 @@ public class TemplateFactory {
     }
 
     public static AbstractModuleTemplate abstractModuleTemplateFromMbe(
-            ModuleMXBeanEntry mbe) {
+            final ModuleMXBeanEntry mbe) {
         AbstractModuleAttributesProcessor attrProcessor = new AbstractModuleAttributesProcessor(mbe.getAttributes());
 
         List<ModuleField> moduleFields = attrProcessor.getModuleFields();
@@ -234,7 +234,7 @@ public class TemplateFactory {
     }
 
     public static StubFactoryTemplate stubFactoryTemplateFromMbe(
-            ModuleMXBeanEntry mbe) {
+            final ModuleMXBeanEntry mbe) {
         return new StubFactoryTemplate(getHeaderFromEntry(mbe),
                 mbe.getPackageName(), mbe.getStubFactoryName(),
                 mbe.getFullyQualifiedName(mbe.getAbstractFactoryName())
@@ -242,7 +242,7 @@ public class TemplateFactory {
     }
 
     public static GeneralInterfaceTemplate mXBeanInterfaceTemplateFromMbe(
-            ModuleMXBeanEntry mbe) {
+            final ModuleMXBeanEntry mbe) {
         MXBeanInterfaceAttributesProcessor attrProcessor = new MXBeanInterfaceAttributesProcessor();
         attrProcessor.processAttributes(mbe.getAttributes());
         GeneralInterfaceTemplate ifcTemplate = new GeneralInterfaceTemplate(
@@ -254,7 +254,7 @@ public class TemplateFactory {
     }
 
     public static Map<String, GeneralClassTemplate> tOsFromMbe(
-            ModuleMXBeanEntry mbe) {
+            final ModuleMXBeanEntry mbe) {
         Map<String, GeneralClassTemplate> retVal = Maps.newHashMap();
         TOAttributesProcessor processor = new TOAttributesProcessor();
         processor.processAttributes(mbe.getAttributes());
@@ -275,7 +275,7 @@ public class TemplateFactory {
     }
 
     public static Map<String, GeneralClassTemplate> tOsFromRbe(
-            RuntimeBeanEntry rbe) {
+            final RuntimeBeanEntry rbe) {
         Map<String, GeneralClassTemplate> retVal = Maps.newHashMap();
         TOAttributesProcessor processor = new TOAttributesProcessor();
         Map<String, AttributeIfc> yangPropertiesToTypesMap = Maps.newHashMap(rbe.getYangPropertiesToTypesMap());
@@ -316,7 +316,7 @@ public class TemplateFactory {
         return retVal;
     }
 
-    private static Header getHeaderFromEntry(AbstractEntry mbe) {
+    private static Header getHeaderFromEntry(final AbstractEntry mbe) {
         return new Header(mbe.getYangModuleName(), mbe.getYangModuleLocalname());
     }
 
@@ -326,7 +326,7 @@ public class TemplateFactory {
 
         private final List<TOInternal> tos = Lists.newArrayList();
 
-        void processAttributes(Map<String, AttributeIfc> attributes) {
+        void processAttributes(final Map<String, AttributeIfc> attributes) {
             for (Entry<String, AttributeIfc> attrEntry : attributes.entrySet()) {
                 AttributeIfc attributeIfc = attrEntry.getValue();
                 if (attributeIfc instanceof TOAttribute) {
@@ -342,7 +342,7 @@ public class TemplateFactory {
             }
         }
 
-        private void createTOInternal(TOAttribute toAttribute) {
+        private void createTOInternal(final TOAttribute toAttribute) {
 
             Map<String, AttributeIfc> attrs = toAttribute.getCapitalizedPropertiesToTypesMap();
             // recursive processing of TO's attributes
@@ -360,12 +360,12 @@ public class TemplateFactory {
             private List<Field> fields;
             private List<MethodDefinition> methods;
 
-            public TOInternal(Type type, Map<String, AttributeIfc> attrs) {
+            public TOInternal(final Type type, final Map<String, AttributeIfc> attrs) {
                 this(type.getFullyQualifiedName(), type.getName(), attrs, type.getPackageName());
             }
 
-            public TOInternal(String fullyQualifiedName, String name,
-                    Map<String, AttributeIfc> attrs, String packageName) {
+            public TOInternal(final String fullyQualifiedName, final String name,
+                    final Map<String, AttributeIfc> attrs, final String packageName) {
                 this.fullyQualifiedName = fullyQualifiedName;
                 this.name = name;
                 processAttrs(attrs, packageName);
@@ -374,7 +374,7 @@ public class TemplateFactory {
             private final static String dependencyResolverVarName = "dependencyResolver";
             private final static String dependencyResolverInjectMethodName = "injectDependencyResolver";
 
-            private void processAttrs(Map<String, AttributeIfc> attrs, String packageName) {
+            private void processAttrs(final Map<String, AttributeIfc> attrs, final String packageName) {
                 fields = Lists.newArrayList();
                 methods = Lists.newArrayList();
 
@@ -386,8 +386,7 @@ public class TemplateFactory {
 
                 for (Entry<String, AttributeIfc> attrEntry : attrs.entrySet()) {
                     String innerName = attrEntry.getKey();
-                    String varName = BindingGeneratorUtil
-                            .parseToValidParamName(attrEntry.getKey());
+                    String varName = BindingMapping.getPropertyName(attrEntry.getKey());
 
                     String fullyQualifiedName, nullableDefault = null;
                     if (attrEntry.getValue() instanceof TypedAttribute) {
@@ -449,7 +448,7 @@ public class TemplateFactory {
     private static class MXBeanInterfaceAttributesProcessor {
         private final List<MethodDeclaration> methods = Lists.newArrayList();
 
-        void processAttributes(Map<String, AttributeIfc> attributes) {
+        void processAttributes(final Map<String, AttributeIfc> attributes) {
             for (Entry<String, AttributeIfc> attrEntry : attributes.entrySet()) {
                 String returnType;
                 AttributeIfc attributeIfc = attrEntry.getValue();
@@ -473,8 +472,7 @@ public class TemplateFactory {
                 MethodDeclaration getter = new MethodDeclaration(returnType,
                         getterName, Collections.<Field> emptyList());
 
-                String varName = BindingGeneratorUtil
-                        .parseToValidParamName(attrEntry.getKey());
+                String varName = BindingMapping.getPropertyName(attrEntry.getKey());
                 String setterName = "set"
                         + attributeIfc.getUpperCaseCammelCase();
                 MethodDeclaration setter = new MethodDeclaration("void",
@@ -519,8 +517,8 @@ public class TemplateFactory {
 
         private final List<Field> fields = Lists.newArrayList();
 
-        void processAttributes(Map<String, AttributeIfc> attributes,
-                String packageName) {
+        void processAttributes(final Map<String, AttributeIfc> attributes,
+                final String packageName) {
             for (Entry<String, AttributeIfc> attrEntry : attributes.entrySet()) {
                 String type;
                 String nullableDefaultWrapped = null;
@@ -550,7 +548,7 @@ public class TemplateFactory {
             private final List<ModuleField> moduleFields;
             private final List<MethodDefinition> methods;
 
-            private Holder(List<ModuleField> moduleFields, List<MethodDefinition> methods) {
+            private Holder(final List<ModuleField> moduleFields, final List<MethodDefinition> methods) {
                 this.moduleFields = Collections.unmodifiableList(moduleFields);
                 this.methods = Collections.unmodifiableList(methods);
             }
@@ -559,11 +557,11 @@ public class TemplateFactory {
         private final Holder holder;
 
 
-        private AbstractModuleAttributesProcessor(Map<String, AttributeIfc> attributes) {
+        private AbstractModuleAttributesProcessor(final Map<String, AttributeIfc> attributes) {
             this.holder = processAttributes(attributes);
         }
 
-        private static Holder processAttributes(Map<String, AttributeIfc> attributes) {
+        private static Holder processAttributes(final Map<String, AttributeIfc> attributes) {
             List<ModuleField> moduleFields = new ArrayList<>();
             List<MethodDefinition> methods = new ArrayList<>();
             for (Entry<String, AttributeIfc> attrEntry : attributes.entrySet()) {
@@ -607,8 +605,7 @@ public class TemplateFactory {
                     }
                 }
 
-                String varName = BindingGeneratorUtil
-                        .parseToValidParamName(attrEntry.getKey());
+                String varName = BindingMapping.getPropertyName(attrEntry.getKey());
 
                 ModuleField field;
                 if (isIdentity) {
@@ -689,7 +686,7 @@ public class TemplateFactory {
     }
 
 
-    private static boolean needsDepResolver(AttributeIfc value) {
+    private static boolean needsDepResolver(final AttributeIfc value) {
         if(value instanceof TOAttribute) {
             return true;
         }
@@ -701,7 +698,7 @@ public class TemplateFactory {
         return false;
     }
 
-    private static String getInnerTypeFromIdentity(Type type) {
+    private static String getInnerTypeFromIdentity(final Type type) {
         Preconditions.checkArgument(type instanceof ParameterizedType);
         Type[] args = ((ParameterizedType) type).getActualTypeArguments();
         Preconditions.checkArgument(args.length ==1);
