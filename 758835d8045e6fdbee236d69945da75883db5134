@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_21afc42b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 693,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-23T06:00:43Z",
+      "side": 1,
+      "message": "Shouldn\u0027t this pass: \n    captureSnapshot.getLastAppliedIndex(),\n    captureSnapshot.getLastAppliedTerm()\n\ninstead of the current snapshot index and term in the replicated log?\nEg, if the current snapshot index is 1 and the new snapshot index is 2, this will result in the replicated log\u0027s snapshot index being 1 and not 2.",
+      "revId": "758835d8045e6fdbee236d69945da75883db5134",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
