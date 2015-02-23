@@ -44,6 +44,15 @@ module netconf-mdsal-mapper {
                     }
                 }
             }
+
+            container mapper-aggregator {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity nnm:netconf-mapper-registry;
+                    }
+                }
+            }
         }
     }
 

@@ -24,12 +24,14 @@
     </feature>
 
     <!-- TODO move to netconf features, however there are some weird dependencies on features-config-persister all over that cause cyclic dependencies-->
-    <feature name='odl-netconf-mdsal' version='${project.version}' description="OpenDaylight :: Netconf :: All">
+    <!-- TODO when installing this in pure karaf distro, many optimistic lock exceptions are thrown from config manager -->
+    <feature name='odl-netconf-mdsal' version='${project.version}' description="OpenDaylight :: Netconf :: Mdsal">
         <feature version='${config.version}'>odl-config-all</feature>
         <feature version='${netconf.version}'>odl-netconf-all</feature>
         <bundle>mvn:org.opendaylight.controller/netconf-ssh/${netconf.version}</bundle>
         <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
         <bundle>mvn:org.opendaylight.controller/mdsal-netconf-connector/${netconf.version}</bundle>
+        <bundle>mvn:org.opendaylight.controller/mdsal-netconf-monitoring/${netconf.version}</bundle>
         <!-- TODO 01-netconf.xml file requires netconf-config-dispatcher to be present and its part of netconf-connector features. Clean Up-->
         <bundle>mvn:org.opendaylight.controller/netconf-config-dispatcher/${config.version}</bundle>
         <configfile finalname='${config.configfile.directory}/${config.netconf.client.configfile}'>mvn:org.opendaylight.controller/netconf-config/${netconf.version}/xml/config</configfile>

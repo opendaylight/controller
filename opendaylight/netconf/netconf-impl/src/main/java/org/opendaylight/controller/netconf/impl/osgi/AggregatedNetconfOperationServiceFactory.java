@@ -22,12 +22,13 @@ import org.opendaylight.controller.netconf.api.monitoring.CapabilityListener;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactoryListener;
 import org.opendaylight.controller.netconf.util.CloseableUtil;
 
 /**
  * NetconfOperationService aggregator. Makes a collection of operation services accessible as one.
  */
-public class AggregatedNetconfOperationServiceFactory implements NetconfOperationServiceFactory, NetconfOperationServiceFactoryListener {
+public class AggregatedNetconfOperationServiceFactory implements NetconfOperationServiceFactory, NetconfOperationServiceFactoryListener, AutoCloseable {
 
     private final Set<NetconfOperationServiceFactory> factories = new HashSet<>();
     private final Multimap<NetconfOperationServiceFactory, AutoCloseable> registrations = HashMultimap.create();
@@ -94,6 +95,16 @@ public class AggregatedNetconfOperationServiceFactory implements NetconfOperatio
     @Override
     public synchronized NetconfOperationService createService(final String netconfSessionIdForReporting) {
         return new AggregatedNetconfOperation(factories, netconfSessionIdForReporting);
+    }
+
+    @Override
+    public synchronized void close() throws Exception {
+        factories.clear();
+        for (AutoCloseable reg : registrations.values()) {
+            reg.close();
+        }
+        registrations.clear();
+        listeners.clear();
     }
 
     private static final class AggregatedNetconfOperation implements NetconfOperationService {

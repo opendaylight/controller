@@ -143,8 +143,8 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
             if (!handlingPriority.equals(HandlingPriority.CANNOT_HANDLE)) {
 
                 Preconditions.checkState(!sortedPriority.containsKey(handlingPriority),
-                        "Multiple %s available to handle message %s with priority %s",
-                        NetconfOperation.class.getName(), message, handlingPriority);
+                        "Multiple %s available to handle message %s with priority %s, %s and %s",
+                        NetconfOperation.class.getName(), message, handlingPriority, netconfOperation, sortedPriority.get(handlingPriority));
                 sortedPriority.put(handlingPriority, netconfOperation);
             }
         }

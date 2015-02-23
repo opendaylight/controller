@@ -55,9 +55,9 @@ public final class NetconfServerSession extends AbstractNetconfSession<NetconfSe
 
     @Override
     protected void sessionUp() {
-        super.sessionUp();
         Preconditions.checkState(loginTime == null, "Session is already up");
         this.loginTime = new Date();
+        super.sessionUp();
     }
 
     public void onIncommingRpcSuccess() {

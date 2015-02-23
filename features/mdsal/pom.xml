@@ -246,6 +246,15 @@
       <artifactId>sal-inmemory-datastore</artifactId>
     </dependency>
 
+      <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>mdsal-netconf-connector</artifactId>
+      </dependency>
+      <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>mdsal-netconf-monitoring</artifactId>
+      </dependency>
+
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-netconf-connector</artifactId>

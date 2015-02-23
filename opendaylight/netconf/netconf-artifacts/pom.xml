@@ -89,6 +89,11 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>mdsal-netconf-monitoring</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>netconf-netty-util</artifactId>
                 <version>${project.version}</version>
             </dependency>

@@ -18,7 +18,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import com.google.common.collect.Sets;
+import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
@@ -29,6 +29,8 @@ import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.CapabilitiesBuilder;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -50,7 +52,7 @@ public class DefaultCommitTest {
         notifier = mock(DefaultCommitNotificationProducer.class);
         doNothing().when(notifier).sendCommitNotification(anyString(), any(Element.class), anySetOf(String.class));
         cap = mock(NetconfMonitoringService.class);
-        doReturn(Sets.newHashSet()).when(cap).getCapabilities();
+        doReturn(new CapabilitiesBuilder().setCapability(Collections.<Uri>emptyList()).build()).when(cap).getCapabilities();
         Document rpcData = XmlFileLoader.xmlFileToDocument("netconfMessages/editConfig_expectedResult.xml");
         doReturn(rpcData).when(router).onNetconfMessage(any(Document.class), any(NetconfServerSession.class));
         commit = new DefaultCommit(notifier, cap, "", router);
