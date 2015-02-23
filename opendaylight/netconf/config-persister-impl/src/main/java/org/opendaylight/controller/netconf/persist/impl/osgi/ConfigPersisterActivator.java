@@ -13,6 +13,7 @@ import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.management.MBeanServer;
 import org.opendaylight.controller.config.persist.api.ConfigPusher;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
@@ -141,7 +142,9 @@ public class ConfigPersisterActivator implements BundleActivator {
         private final List<ConfigSnapshotHolder> configs;
         private final PersisterAggregator persisterAggregator;
         private final long maxWaitForCapabilitiesMillis, conflictingVersionTimeoutMillis;
-
+        // This inner customizer has its filter to find the right operation service, but it gets triggered after any
+        // operation service appears. This means that it could start pushing thread up to N times (N = number of operation services spawned in OSGi)
+        private final AtomicBoolean alreadyStarted = new AtomicBoolean(false);
 
         InnerCustomizer(List<ConfigSnapshotHolder> configs, long maxWaitForCapabilitiesMillis, long conflictingVersionTimeoutMillis,
                         PersisterAggregator persisterAggregator) {
@@ -153,6 +156,10 @@ public class ConfigPersisterActivator implements BundleActivator {
 
         @Override
         public NetconfOperationServiceFactory addingService(ServiceReference<NetconfOperationServiceFactory> reference) {
+            if(alreadyStarted.compareAndSet(false, true) == false) {
+                //Prevents multiple calls to this method spawning multiple pushing threads
+                return reference.getBundle().getBundleContext().getService(reference);
+            }
             LOG.trace("Got InnerCustomizer.addingService {}", reference);
             NetconfOperationServiceFactory service = reference.getBundle().getBundleContext().getService(reference);
 
@@ -196,10 +203,12 @@ public class ConfigPersisterActivator implements BundleActivator {
 
         @Override
         public void modifiedService(ServiceReference<NetconfOperationServiceFactory> reference, NetconfOperationServiceFactory service) {
+            LOG.trace("Got InnerCustomizer.modifiedService {}", reference);
         }
 
         @Override
         public void removedService(ServiceReference<NetconfOperationServiceFactory> reference, NetconfOperationServiceFactory service) {
+            LOG.trace("Got InnerCustomizer.removedService {}", reference);
         }
 
     }
