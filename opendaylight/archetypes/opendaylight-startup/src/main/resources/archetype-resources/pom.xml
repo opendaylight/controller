@@ -9,7 +9,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <groupId>${groupId}</groupId>
   <artifactId>${artifactId}-aggregator</artifactId>
   <version>${version}</version>
-  <name>${project.artifactId}</name>
+  <name>${artifactId}</name>
   <packaging>pom</packaging>
   <modelVersion>4.0.0</modelVersion>
   <prerequisites>
