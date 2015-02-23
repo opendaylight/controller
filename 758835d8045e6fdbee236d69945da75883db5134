@@ -34,6 +34,24 @@
       "revId": "758835d8045e6fdbee236d69945da75883db5134",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_ccbbb70d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 693,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-23T09:26:42Z",
+      "side": 1,
+      "message": "Hmm - we just captured a snapshot and persisted it yet we don\u0027t advance the cached snapshot index. If that is correct then I\u0027m missing something here - can you clarify it for me? I was writing a RaftActor integration test (with no mock messages) and ran into this... \n\nI agree on the refactoring. RaftActor has become monolithic and messy. It could use additional refactoring as well.",
+      "parentUuid": "7a96c907_e17b1cbc",
+      "revId": "758835d8045e6fdbee236d69945da75883db5134",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
