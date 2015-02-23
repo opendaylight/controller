@@ -162,9 +162,13 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
      */
     @GuardedBy("this")
     private void processIfReady() {
-        final PingPongTransaction tx = READY_UPDATER.getAndSet(this, null);
-        if (tx != null) {
-            processTransaction(tx);
+        if (inflightTx == null) {
+            final PingPongTransaction tx = READY_UPDATER.getAndSet(this, null);
+            if (tx != null) {
+                processTransaction(tx);
+            }
+        } else {
+            LOG.warn("Uh-oh, inflight raced");
         }
     }
 
