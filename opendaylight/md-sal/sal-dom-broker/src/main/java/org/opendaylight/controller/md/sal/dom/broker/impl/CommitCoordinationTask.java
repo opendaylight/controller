@@ -8,9 +8,9 @@ package org.opendaylight.controller.md.sal.dom.broker.impl;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
-import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
@@ -32,18 +32,16 @@ final class CommitCoordinationTask implements Callable<Void> {
     };
 
     private static final Logger LOG = LoggerFactory.getLogger(CommitCoordinationTask.class);
-    private final Iterable<DOMStoreThreePhaseCommitCohort> cohorts;
+    private final Collection<DOMStoreThreePhaseCommitCohort> cohorts;
     private final DurationStatisticsTracker commitStatTracker;
     private final DOMDataWriteTransaction tx;
-    private final int cohortSize;
 
     public CommitCoordinationTask(final DOMDataWriteTransaction transaction,
-            final Iterable<DOMStoreThreePhaseCommitCohort> cohorts,
+            final Collection<DOMStoreThreePhaseCommitCohort> cohorts,
             final DurationStatisticsTracker commitStatTracker) {
         this.tx = Preconditions.checkNotNull(transaction, "transaction must not be null");
         this.cohorts = Preconditions.checkNotNull(cohorts, "cohorts must not be null");
         this.commitStatTracker = commitStatTracker;
-        this.cohortSize = Iterables.size(cohorts);
     }
 
     @Override
@@ -115,7 +113,7 @@ final class CommitCoordinationTask implements Callable<Void> {
      *
      */
     private ListenableFuture<?>[] canCommitAll() {
-        final ListenableFuture<?>[] ops = new ListenableFuture<?>[cohortSize];
+        final ListenableFuture<?>[] ops = new ListenableFuture<?>[cohorts.size()];
         int i = 0;
         for (DOMStoreThreePhaseCommitCohort cohort : cohorts) {
             ops[i++] = cohort.canCommit();
@@ -162,7 +160,7 @@ final class CommitCoordinationTask implements Callable<Void> {
      *
      */
     private ListenableFuture<?>[] preCommitAll() {
-        final ListenableFuture<?>[] ops = new ListenableFuture<?>[cohortSize];
+        final ListenableFuture<?>[] ops = new ListenableFuture<?>[cohorts.size()];
         int i = 0;
         for (DOMStoreThreePhaseCommitCohort cohort : cohorts) {
             ops[i++] = cohort.preCommit();
@@ -205,7 +203,7 @@ final class CommitCoordinationTask implements Callable<Void> {
      * @return List of all cohorts futures from can commit phase.
      */
     private ListenableFuture<?>[] commitAll() {
-        final ListenableFuture<?>[] ops = new ListenableFuture<?>[cohortSize];
+        final ListenableFuture<?>[] ops = new ListenableFuture<?>[cohorts.size()];
         int i = 0;
         for (DOMStoreThreePhaseCommitCohort cohort : cohorts) {
             ops[i++] = cohort.commit();
@@ -256,7 +254,7 @@ final class CommitCoordinationTask implements Callable<Void> {
      */
     private ListenableFuture<Void> abortAsyncAll() {
 
-        final ListenableFuture<?>[] ops = new ListenableFuture<?>[cohortSize];
+        final ListenableFuture<?>[] ops = new ListenableFuture<?>[cohorts.size()];
         int i = 0;
         for (DOMStoreThreePhaseCommitCohort cohort : cohorts) {
             ops[i++] = cohort.abort();
