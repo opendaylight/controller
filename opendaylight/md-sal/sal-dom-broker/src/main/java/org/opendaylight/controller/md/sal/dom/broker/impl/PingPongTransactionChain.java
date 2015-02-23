@@ -158,13 +158,16 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
 
     /*
      * This forces allocateTransaction() on a slow path, which has to happen after
-     * this method has completed executing.
+     * this method has completed executing. Also inflightTx may be updated outside
+     * the lock, hence we need to re-check.
      */
     @GuardedBy("this")
     private void processIfReady() {
-        final PingPongTransaction tx = READY_UPDATER.getAndSet(this, null);
-        if (tx != null) {
-            processTransaction(tx);
+        if (inflightTx == null) {
+            final PingPongTransaction tx = READY_UPDATER.getAndSet(this, null);
+            if (tx != null) {
+                processTransaction(tx);
+            }
         }
     }
 
@@ -251,14 +254,27 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
         final PingPongTransaction notLocked = lockedTx;
         Preconditions.checkState(notLocked == null, "Attempted to close chain with outstanding transaction %s", notLocked);
 
-        synchronized (this) {
-            processIfReady();
-            delegate.close();
+        // Force allocations on slow path. We will complete the rest
+        final PingPongTransaction tx = READY_UPDATER.getAndSet(this, null);
+
+        // Make sure no transaction is outstanding. Otherwise sleep a bit and retry
+        while (inflightTx != null) {
+            LOG.debug("Busy-waiting for in-flight transaction {} to complete", inflightTx);
+            Thread.yield();
+            continue;
         }
+
+        // If we have an outstanding transaction, send it down
+        if (tx != null) {
+            processTransaction(tx);
+        }
+
+        // All done, close the delegate. All new allocations should fail.
+        delegate.close();
     }
 
     @Override
