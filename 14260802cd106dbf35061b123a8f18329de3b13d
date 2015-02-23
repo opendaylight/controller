@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_27da74e8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStore.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-02-23T19:24:16Z",
+      "side": 1,
+      "message": "we should think of moving shard manager actor initialization in separate method, which constructor will call. It makes things easier to understand.",
+      "range": {
+        "startLine": 57,
+        "startChar": 32,
+        "endLine": 57,
+        "endChar": 43
+      },
+      "revId": "14260802cd106dbf35061b123a8f18329de3b13d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
