@@ -57,9 +57,9 @@ public class DOMBrokerTest {
     public void setupStore() {
 
         InMemoryDOMDataStore operStore = new InMemoryDOMDataStore("OPER",
-                MoreExecutors.sameThreadExecutor());
+                MoreExecutors.newDirectExecutorService());
         InMemoryDOMDataStore configStore = new InMemoryDOMDataStore("CFG",
-                MoreExecutors.sameThreadExecutor());
+                MoreExecutors.newDirectExecutorService());
         schemaContext = TestModel.createTestContext();
 
         operStore.onGlobalContextUpdated(schemaContext);
