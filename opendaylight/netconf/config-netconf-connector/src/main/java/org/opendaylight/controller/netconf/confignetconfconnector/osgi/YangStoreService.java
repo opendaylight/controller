@@ -191,8 +191,7 @@ public class YangStoreService implements YangStoreContext {
     private static final Function<Module, Uri> MODULE_TO_URI = new Function<Module, Uri>() {
         @Override
         public Uri apply(final Module input) {
-            final QName qName = QName.cachedReference(QName.create(input.getQNameModule(), input.getName()));
-            return new Uri(qName.toString());
+            return new Uri(new NetconfOperationServiceFactoryImpl.YangStoreCapability(input, input.getSource()).getCapabilityUri());
         }
     };
 
