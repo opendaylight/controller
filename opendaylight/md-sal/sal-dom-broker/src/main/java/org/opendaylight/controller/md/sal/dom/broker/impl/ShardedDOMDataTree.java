@@ -10,6 +10,8 @@ package org.opendaylight.controller.md.sal.dom.broker.impl;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
+import edu.uci.ics.jung.graph.DirectedGraph;
+import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
@@ -36,6 +38,10 @@ public final class ShardedDOMDataTree implements DOMDataTreeService, DOMDataTree
     private final Map<LogicalDatastoreType, ShardingTableEntry> shardingTables = new EnumMap<>(LogicalDatastoreType.class);
     @GuardedBy("this")
     private final Map<DOMDataTreeIdentifier, DOMDataTreeProducer> idToProducer = new TreeMap<>();
+
+    // FIXME: figure out how to do this
+    @GuardedBy("this")
+    private final DirectedGraph<Object, Object> connectivity = new DirectedSparseMultigraph<>();
 
     @GuardedBy("this")
     private ShardingTableEntry lookupShard(final DOMDataTreeIdentifier prefix) {
