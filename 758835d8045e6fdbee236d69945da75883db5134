@@ -70,6 +70,24 @@
       "revId": "758835d8045e6fdbee236d69945da75883db5134",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_877b48f4",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 693,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-23T19:10:11Z",
+      "side": 1,
+      "message": "I\u0027ve been playing around with this in my integration test. With the \"fake\" snapshot trimming, each successful replication and apply state will trim the log and advance the snapshot index. So normally the snapshot index (and replicatedToLogIndex) will be 1 less than the last applied index and the last applied log entry will remain. \n\nWhen a snapshot is initiated on replicate, replicatedToLogIndex in the CaptureSnapshot will usually be set to -1 b/c the current replicatedToLogIndex in the behavior isn\u0027t present in the log. So in handleCaptureSnapshotReply, it always gets into the last else and calls snapshotPreCommit with the current replicated.getSnapshotIndex() which is behind the CaptureSnapshot lastAppliedIndex. However, the snapshot is persisted with lastAppliedIndex  which seems OK. Once the log entry is replicated and applied, the fake snapshot trims the in-memory log and advances the in-memory snapshot index. \n\nI haven\u0027t yet come up with a scenario where CaptureSnapshot#replicatedToLogIndex is not -1 in handleCaptureSnapshotReply. I think this occurs when a follower lags behind although it seems it would already have been trimmed to replicatedToLogIndex.",
+      "parentUuid": "7a96c907_ccbbb70d",
+      "revId": "758835d8045e6fdbee236d69945da75883db5134",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
