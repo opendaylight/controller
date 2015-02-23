@@ -16,6 +16,24 @@
       "revId": "758835d8045e6fdbee236d69945da75883db5134",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_e17b1cbc",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 693,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-23T06:25:48Z",
+      "side": 1,
+      "message": "No. This will result infact in the snapshot index not being changed at all. There are many confusing little things about snapshotting code. I\u0027m refactoring it so that we can better understand what it\u0027s doing. Right now it\u0027s spread around a little bit and is confusing. See later commits.",
+      "parentUuid": "7a96c907_21afc42b",
+      "revId": "758835d8045e6fdbee236d69945da75883db5134",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
