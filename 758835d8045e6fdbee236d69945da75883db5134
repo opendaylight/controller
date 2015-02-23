@@ -52,6 +52,24 @@
       "revId": "758835d8045e6fdbee236d69945da75883db5134",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_a780c4c0",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 693,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-23T18:54:18Z",
+      "side": 1,
+      "message": "There are 2 parts to snapshotting,\na. Saving an akka persistence snapshot so that we can recover from disk\nb. Trimming the in-memory log and setting the snapshotIndex on the log. The snapshotIndex allows us to create the logical index for a log entry (in code it\u0027s called the adjusted index)\n\nWhile we coordinate the two they are not really dependent on each other which is evidenced by the fact that we do fake snapshotting where we trim the log without actually saving the snapshot to disk.\n\nThis code get\u0027s invoked when doing real snapshotting. A real snapshot happens when we reach the batch count or when we are low on memory. It get\u0027s triggered when we append an entry to the log. Since we introduced the replicatedToAllIndex we try to trim the in-memory log based on the replicatedToAllIndex. The replicatedToAllIndex is always behind lastApplied because lastApplied moves forward even when all the replicas do not have an index. So when we are low on memory we still trim the in-memory log based on the lastApplied index. \n\nSo now we come to the case where I encountered  this bug. It happens if replicateToAllIndex is -1 which happens iff replicatedToAllIndex \u003d\u003d -1 or replicatedToAllIndex is not found in the log. It replicatedToAllIndex is not in the log then it means that it has to be in the snapshot. That is why I do the snapshotPrecommit without advancing the snapshotIndex because it\u0027s already where it\u0027s supposed to be.",
+      "parentUuid": "7a96c907_ccbbb70d",
+      "revId": "758835d8045e6fdbee236d69945da75883db5134",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
