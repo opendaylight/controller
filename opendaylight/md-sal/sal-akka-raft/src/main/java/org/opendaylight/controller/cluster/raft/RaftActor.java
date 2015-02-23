@@ -677,12 +677,22 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             context.getReplicatedLog().snapshotPreCommit(captureSnapshot.getLastAppliedIndex(),
                     captureSnapshot.getLastAppliedTerm());
 
-        } else {
+            getCurrentBehavior().setReplicatedToAllIndex(captureSnapshot.getReplicatedToAllIndex());
+        } else if(captureSnapshot.getReplicatedToAllIndex() != -1){
             // clear the log based on replicatedToAllIndex
             context.getReplicatedLog().snapshotPreCommit(captureSnapshot.getReplicatedToAllIndex(),
                     captureSnapshot.getReplicatedToAllTerm());
+
+            getCurrentBehavior().setReplicatedToAllIndex(captureSnapshot.getReplicatedToAllIndex());
+        } else {
+            // The replicatedToAllIndex was not found in the log
+            // This means that replicatedToAllIndex never moved beyond -1 or that it is already in the snapshot.
+            // In this scenario we may need to save the snapshot to the akka persistence
+            // snapshot for recovery but we do not need to do the replicated log trimming.
+            context.getReplicatedLog().snapshotPreCommit(replicatedLog.getSnapshotIndex(),
+                    replicatedLog.getSnapshotTerm());
         }
-        getCurrentBehavior().setReplicatedToAllIndex(captureSnapshot.getReplicatedToAllIndex());
+
 
         LOG.info("{}: Removed in-memory snapshotted entries, adjusted snaphsotIndex:{} " +
             "and term:{}", persistenceId(), captureSnapshot.getLastAppliedIndex(),

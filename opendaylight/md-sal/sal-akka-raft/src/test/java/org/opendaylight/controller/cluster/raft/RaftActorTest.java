@@ -1227,6 +1227,128 @@ public class RaftActorTest extends AbstractActorTest {
         };
     }
 
+
+    private static class NonPersistentProvider implements DataPersistenceProvider {
+        @Override
+        public boolean isRecoveryApplicable() {
+            return false;
+        }
+
+        @Override
+        public <T> void persist(T o, Procedure<T> procedure) {
+            try {
+                procedure.apply(o);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void saveSnapshot(Object o) {
+
+        }
+
+        @Override
+        public void deleteSnapshots(SnapshotSelectionCriteria criteria) {
+
+        }
+
+        @Override
+        public void deleteMessages(long sequenceNumber) {
+
+        }
+    }
+
+    @Test
+    public void testRealSnapshotWhenReplicatedToAllIndexMinusOne() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            String persistenceId = factory.generateActorId("leader-");
+            DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+            config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+            config.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
+            config.setSnapshotBatchCount(5);
+
+            DataPersistenceProvider dataPersistenceProvider = new NonPersistentProvider();
+
+            Map<String, String> peerAddresses = new HashMap<>();
+
+            TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(
+                    MockRaftActor.props(persistenceId, peerAddresses,
+                            Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
+
+            MockRaftActor leaderActor = mockActorRef.underlyingActor();
+            leaderActor.getRaftActorContext().setCommitIndex(3);
+            leaderActor.getRaftActorContext().setLastApplied(3);
+            leaderActor.getRaftActorContext().getTermInformation().update(1, persistenceId);
+
+            leaderActor.waitForInitializeBehaviorComplete();
+            for(int i=0;i< 4;i++) {
+                leaderActor.getReplicatedLog()
+                        .append(new MockRaftActorContext.MockReplicatedLogEntry(1, i,
+                                new MockRaftActorContext.MockPayload("A")));
+            }
+
+            Leader leader = new Leader(leaderActor.getRaftActorContext());
+            leaderActor.setCurrentBehavior(leader);
+            assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
+
+            // Persist another entry (this will cause a CaptureSnapshot to be triggered
+            leaderActor.persistData(mockActorRef, "x", new MockRaftActorContext.MockPayload("duh"));
+
+            // Now send a CaptureSnapshotReply
+            mockActorRef.tell(new CaptureSnapshotReply(fromObject("foo").toByteArray()), mockActorRef);
+
+            // Trimming log in this scenario is a no-op
+            assertEquals(-1, leaderActor.getReplicatedLog().getSnapshotIndex());
+            assertFalse(leaderActor.getRaftActorContext().isSnapshotCaptureInitiated());
+            assertEquals(-1, leader.getReplicatedToAllIndex());
+
+        }};
+    }
+
+    @Test
+    public void testRealSnapshotWhenReplicatedToAllIndexNotInReplicatedLog() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            String persistenceId = factory.generateActorId("leader-");
+            DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+            config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+            config.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
+            config.setSnapshotBatchCount(5);
+
+            DataPersistenceProvider dataPersistenceProvider = new NonPersistentProvider();
+
+            Map<String, String> peerAddresses = new HashMap<>();
+
+            TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(
+                    MockRaftActor.props(persistenceId, peerAddresses,
+                            Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
+
+            MockRaftActor leaderActor = mockActorRef.underlyingActor();
+            leaderActor.getRaftActorContext().setCommitIndex(3);
+            leaderActor.getRaftActorContext().setLastApplied(3);
+            leaderActor.getRaftActorContext().getTermInformation().update(1, persistenceId);
+            leaderActor.getReplicatedLog().setSnapshotIndex(3);
+
+            leaderActor.waitForInitializeBehaviorComplete();
+            Leader leader = new Leader(leaderActor.getRaftActorContext());
+            leaderActor.setCurrentBehavior(leader);
+            leader.setReplicatedToAllIndex(3);
+            assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
+
+            // Persist another entry (this will cause a CaptureSnapshot to be triggered
+            leaderActor.persistData(mockActorRef, "x", new MockRaftActorContext.MockPayload("duh"));
+
+            // Now send a CaptureSnapshotReply
+            mockActorRef.tell(new CaptureSnapshotReply(fromObject("foo").toByteArray()), mockActorRef);
+
+            // Trimming log in this scenario is a no-op
+            assertEquals(3, leaderActor.getReplicatedLog().getSnapshotIndex());
+            assertFalse(leaderActor.getRaftActorContext().isSnapshotCaptureInitiated());
+            assertEquals(3, leader.getReplicatedToAllIndex());
+
+        }};
+    }
+
     private ByteString fromObject(Object snapshot) throws Exception {
         ByteArrayOutputStream b = null;
         ObjectOutputStream o = null;
