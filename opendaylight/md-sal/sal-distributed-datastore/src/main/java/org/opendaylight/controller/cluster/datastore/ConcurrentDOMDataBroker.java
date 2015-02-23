@@ -8,13 +8,13 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.AbstractFuture;
 import com.google.common.util.concurrent.AbstractListeningExecutorService;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -70,17 +70,16 @@ public class ConcurrentDOMDataBroker extends AbstractDOMDataBroker {
 
     @Override
     public CheckedFuture<Void, TransactionCommitFailedException> submit(DOMDataWriteTransaction transaction,
-            Iterable<DOMStoreThreePhaseCommitCohort> cohorts) {
+            Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
 
         Preconditions.checkArgument(transaction != null, "Transaction must not be null.");
         Preconditions.checkArgument(cohorts != null, "Cohorts must not be null.");
         LOG.debug("Tx: {} is submitted for execution.", transaction.getIdentifier());
 
-        final int cohortSize = Iterables.size(cohorts);
         final AsyncNotifyingSettableFuture clientSubmitFuture =
                 new AsyncNotifyingSettableFuture(clientFutureCallbackExecutor);
 
-        doCanCommit(clientSubmitFuture, transaction, cohorts, cohortSize);
+        doCanCommit(clientSubmitFuture, transaction, cohorts);
 
         return MappingCheckedFuture.create(clientSubmitFuture,
                 TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER);
@@ -88,31 +87,31 @@ public class ConcurrentDOMDataBroker extends AbstractDOMDataBroker {
 
     private void doCanCommit(final AsyncNotifyingSettableFuture clientSubmitFuture,
             final DOMDataWriteTransaction transaction,
-            final Iterable<DOMStoreThreePhaseCommitCohort> cohorts, final int cohortSize) {
+            final Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
 
         final long startTime = System.nanoTime();
 
         // Not using Futures.allAsList here to avoid its internal overhead.
-        final AtomicInteger remaining = new AtomicInteger(cohortSize);
+        final AtomicInteger remaining = new AtomicInteger(cohorts.size());
         FutureCallback<Boolean> futureCallback = new FutureCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
                 if (result == null || !result) {
-                    handleException(clientSubmitFuture, transaction, cohorts, cohortSize,
+                    handleException(clientSubmitFuture, transaction, cohorts,
                             CAN_COMMIT, TransactionCommitFailedExceptionMapper.CAN_COMMIT_ERROR_MAPPER,
                             new TransactionCommitFailedException(
                                             "Can Commit failed, no detailed cause available."));
                 } else {
                     if(remaining.decrementAndGet() == 0) {
                         // All cohorts completed successfully - we can move on to the preCommit phase
-                        doPreCommit(startTime, clientSubmitFuture, transaction, cohorts, cohortSize);
+                        doPreCommit(startTime, clientSubmitFuture, transaction, cohorts);
                     }
                 }
             }
 
             @Override
             public void onFailure(Throwable t) {
-                handleException(clientSubmitFuture, transaction, cohorts, cohortSize, CAN_COMMIT,
+                handleException(clientSubmitFuture, transaction, cohorts, CAN_COMMIT,
                         TransactionCommitFailedExceptionMapper.CAN_COMMIT_ERROR_MAPPER, t);
             }
         };
@@ -125,22 +124,22 @@ public class ConcurrentDOMDataBroker extends AbstractDOMDataBroker {
 
     private void doPreCommit(final long startTime, final AsyncNotifyingSettableFuture clientSubmitFuture,
             final DOMDataWriteTransaction transaction,
-            final Iterable<DOMStoreThreePhaseCommitCohort> cohorts, final int cohortSize) {
+            final Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
 
         // Not using Futures.allAsList here to avoid its internal overhead.
-        final AtomicInteger remaining = new AtomicInteger(cohortSize);
+        final AtomicInteger remaining = new AtomicInteger(cohorts.size());
         FutureCallback<Void> futureCallback = new FutureCallback<Void>() {
             @Override
             public void onSuccess(Void notUsed) {
                 if(remaining.decrementAndGet() == 0) {
                     // All cohorts completed successfully - we can move on to the commit phase
-                    doCommit(startTime, clientSubmitFuture, transaction, cohorts, cohortSize);
+                    doCommit(startTime, clientSubmitFuture, transaction, cohorts);
                 }
             }
 
             @Override
             public void onFailure(Throwable t) {
-                handleException(clientSubmitFuture, transaction, cohorts, cohortSize, PRE_COMMIT,
+                handleException(clientSubmitFuture, transaction, cohorts, PRE_COMMIT,
                         TransactionCommitFailedExceptionMapper.PRE_COMMIT_MAPPER, t);
             }
         };
@@ -153,10 +152,10 @@ public class ConcurrentDOMDataBroker extends AbstractDOMDataBroker {
 
     private void doCommit(final long startTime, final AsyncNotifyingSettableFuture clientSubmitFuture,
             final DOMDataWriteTransaction transaction,
-            final Iterable<DOMStoreThreePhaseCommitCohort> cohorts, final int cohortSize) {
+            final Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
 
         // Not using Futures.allAsList here to avoid its internal overhead.
-        final AtomicInteger remaining = new AtomicInteger(cohortSize);
+        final AtomicInteger remaining = new AtomicInteger(cohorts.size());
         FutureCallback<Void> futureCallback = new FutureCallback<Void>() {
             @Override
             public void onSuccess(Void notUsed) {
@@ -170,7 +169,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMDataBroker {
 
             @Override
             public void onFailure(Throwable t) {
-                handleException(clientSubmitFuture, transaction, cohorts, cohortSize, COMMIT,
+                handleException(clientSubmitFuture, transaction, cohorts, COMMIT,
                         TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER, t);
             }
         };
@@ -183,7 +182,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMDataBroker {
 
     private void handleException(final AsyncNotifyingSettableFuture clientSubmitFuture,
             final DOMDataWriteTransaction transaction,
-            final Iterable<DOMStoreThreePhaseCommitCohort> cohorts, int cohortSize,
+            final Collection<DOMStoreThreePhaseCommitCohort> cohorts,
             final String phase, final TransactionCommitFailedExceptionMapper exMapper,
             final Throwable t) {
 
@@ -205,7 +204,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMDataBroker {
         // Transaction failed - tell all cohorts to abort.
 
         @SuppressWarnings("unchecked")
-        ListenableFuture<Void>[] canCommitFutures = new ListenableFuture[cohortSize];
+        ListenableFuture<Void>[] canCommitFutures = new ListenableFuture[cohorts.size()];
         int i = 0;
         for(DOMStoreThreePhaseCommitCohort cohort: cohorts) {
             canCommitFutures[i++] = cohort.abort();

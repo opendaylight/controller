@@ -11,6 +11,7 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.RejectedExecutionException;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -57,7 +58,7 @@ public class SerializedDOMDataBroker extends AbstractDOMDataBroker {
 
     @Override
     protected CheckedFuture<Void,TransactionCommitFailedException> submit(final DOMDataWriteTransaction transaction,
-            final Iterable<DOMStoreThreePhaseCommitCohort> cohorts) {
+            final Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
         Preconditions.checkArgument(transaction != null, "Transaction must not be null.");
         Preconditions.checkArgument(cohorts != null, "Cohorts must not be null.");
         LOG.debug("Tx: {} is submitted for execution.", transaction.getIdentifier());
