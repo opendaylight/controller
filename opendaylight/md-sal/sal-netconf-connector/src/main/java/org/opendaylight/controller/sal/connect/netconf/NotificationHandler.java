@@ -42,7 +42,7 @@ final class NotificationHandler {
 
     synchronized void handleNotification(final NetconfMessage notification) {
         if(passNotifications) {
-            passNotification(messageTransformer.toNotification(notification));
+            passNotification(transformNotification(notification));
         } else {
             queueNotification(notification);
         }
@@ -55,13 +55,16 @@ final class NotificationHandler {
         passNotifications = true;
 
         for (final NetconfMessage cachedNotification : queue) {
-            final CompositeNode parsedNotification = messageTransformer.toNotification(cachedNotification);
-            // TODO possible race condition here, because this exception is thrown occasionally
-            Preconditions.checkNotNull(parsedNotification, "Unable to parse received notification %s", cachedNotification);
-            passNotification(parsedNotification);
+            passNotification(transformNotification(cachedNotification));
         }
 
         queue.clear();
+    }
+
+    private CompositeNode transformNotification(final NetconfMessage cachedNotification) {
+        final CompositeNode parsedNotification = messageTransformer.toNotification(cachedNotification);
+        Preconditions.checkNotNull(parsedNotification, "{}: Unable to parse received notification %s", id, cachedNotification);
+        return parsedNotification;
     }
 
     private void queueNotification(final NetconfMessage notification) {
@@ -85,6 +88,10 @@ final class NotificationHandler {
 
     synchronized void addNotificationFilter(final NotificationFilter filter) {
         this.filter = filter;
+    }
+
+    synchronized void onRemoteSchemaDown() {
+        passNotifications = false;
     }
 
     static interface NotificationFilter {
