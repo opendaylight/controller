@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_b9df8cd5",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 428,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-24T02:46:47Z",
+      "side": 1,
+      "message": "this check could be better. I should probably introduce can*Operation* methods. They would be the least ambiguous.",
+      "revId": "9c43a199d3d19abd6bdebf80d1be6b172d3fffd8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_f9d994f3",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 853,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-24T02:46:47Z",
+      "side": 1,
+      "message": "Committing the snapshot here would end up calling commit in the creating state which would be a state violation. That\u0027s why now I am sending a message to commit the snapshot.",
+      "revId": "9c43a199d3d19abd6bdebf80d1be6b172d3fffd8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_59f0c866",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorContext.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-24T02:46:47Z",
+      "side": 1,
+      "message": "Need to get rid of this method",
+      "revId": "9c43a199d3d19abd6bdebf80d1be6b172d3fffd8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
