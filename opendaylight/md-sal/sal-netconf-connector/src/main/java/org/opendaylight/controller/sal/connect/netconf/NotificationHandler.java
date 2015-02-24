@@ -16,7 +16,8 @@ import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.controller.sal.connect.api.MessageTransformer;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceHandler;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,14 +30,14 @@ final class NotificationHandler {
 
     private final RemoteDeviceHandler<?> salFacade;
     private final List<NetconfMessage> queue = new LinkedList<>();
-    private final MessageTransformer<NetconfMessage> messageTransformer;
     private final RemoteDeviceId id;
     private boolean passNotifications = false;
-    private NotificationFilter filter;
 
-    NotificationHandler(final RemoteDeviceHandler<?> salFacade, final MessageTransformer<NetconfMessage> messageTransformer, final RemoteDeviceId id) {
+    private NotificationFilter filter;
+    private MessageTransformer<NetconfMessage> messageTransformer;
+
+    NotificationHandler(final RemoteDeviceHandler<?> salFacade, final RemoteDeviceId id) {
         this.salFacade = Preconditions.checkNotNull(salFacade);
-        this.messageTransformer = Preconditions.checkNotNull(messageTransformer);
         this.id = Preconditions.checkNotNull(id);
     }
 
@@ -50,8 +51,11 @@ final class NotificationHandler {
 
     /**
      * Forward all cached notifications and pass all notifications from this point directly to sal facade.
+     * @param messageTransformer
      */
-    synchronized void onRemoteSchemaUp() {
+    synchronized void onRemoteSchemaUp(final MessageTransformer<NetconfMessage> messageTransformer) {
+        this.messageTransformer = Preconditions.checkNotNull(messageTransformer);
+
         passNotifications = true;
 
         for (final NetconfMessage cachedNotification : queue) {
@@ -61,8 +65,8 @@ final class NotificationHandler {
         queue.clear();
     }
 
-    private CompositeNode transformNotification(final NetconfMessage cachedNotification) {
-        final CompositeNode parsedNotification = messageTransformer.toNotification(cachedNotification);
+    private ContainerNode transformNotification(final NetconfMessage cachedNotification) {
+        final ContainerNode parsedNotification = messageTransformer.toNotification(cachedNotification);
         Preconditions.checkNotNull(parsedNotification, "%s: Unable to parse received notification: %s", id, cachedNotification);
         return parsedNotification;
     }
@@ -78,7 +82,7 @@ final class NotificationHandler {
         queue.add(notification);
     }
 
-    private synchronized void passNotification(final CompositeNode parsedNotification) {
+    private synchronized void passNotification(final ContainerNode parsedNotification) {
         logger.debug("{}: Forwarding notification {}", id, parsedNotification);
 
         if(filter == null || filter.filterNotification(parsedNotification).isPresent()) {
@@ -93,10 +97,11 @@ final class NotificationHandler {
     synchronized void onRemoteSchemaDown() {
         queue.clear();
         passNotifications = false;
+        messageTransformer = null;
     }
 
     static interface NotificationFilter {
 
-        Optional<CompositeNode> filterNotification(CompositeNode notification);
+        Optional<NormalizedNode<?, ?>> filterNotification(NormalizedNode<?, ?> notification);
     }
 }
