@@ -8,6 +8,9 @@
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -16,6 +19,7 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeService;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeProducer;
@@ -140,7 +144,10 @@ public final class ShardedDOMDataTree implements DOMDataTreeService, DOMDataTree
         // Record the producer's attachment points
         final DOMDataTreeProducer ret = ShardedDOMDataTreeProducer.create(this, shardMap);
         for (DOMDataTreeIdentifier s : shardMap.keySet()) {
-            idToProducer.put(s, ret);
+            final DOMDataTreeProducer prev = idToProducer.put(s, ret);
+            if (prev != null) {
+                LOG.warn("Replaced producer %s on subtree %s", prev, s);
+            }
         }
 
         return ret;
@@ -174,8 +181,50 @@ public final class ShardedDOMDataTree implements DOMDataTreeService, DOMDataTree
     }
 
     @Override
-    public synchronized <T extends DOMDataTreeListener> ListenerRegistration<T> registerListener(final T listener, final Collection<DOMDataTreeIdentifier> subtrees, final boolean allowRxMerges, final Collection<DOMDataTreeProducer> producers) {
+    public <T extends DOMDataTreeListener> ListenerRegistration<T> registerListener(final T listener, final Collection<DOMDataTreeIdentifier> subtrees,
+        final boolean allowRxMerges, final Collection<DOMDataTreeProducer> producers) {
+
+        // Check arguments first and build the producer set
+        Preconditions.checkArgument(!subtrees.isEmpty());
+
+        final Builder<ShardedDOMDataTreeProducer> pb = ImmutableSet.builder();
+        for (DOMDataTreeProducer p : producers) {
+            Preconditions.checkArgument(p instanceof ShardedDOMDataTreeProducer, "Unsupported producer type %s", p.getClass());
+
+            final ShardedDOMDataTreeProducer sp = (ShardedDOMDataTreeProducer)p;
+            final DOMDataTreeListener l = sp.getListener();
+            Preconditions.checkArgument(l == null, "Producer %s is bound to listener %s", p, l);
+            pb.add(sp);
+        }
+
+        final ShardedListenerRegistration<T> ret = new ShardedListenerRegistration<T>(listener);
+        final Collection<ListenerRegistration<?>> regs = new ArrayList<>();
+
+        synchronized (this) {
+            final Map<DOMDataTreeIdentifier, DOMDataTreeChangeService> shardMap = new HashMap<>();
+            for (DOMDataTreeIdentifier s : subtrees) {
+                final DOMDataTreeShard shard = lookupShard(s).getRegistration().getInstance();
+
+                Preconditions.checkArgument(shard instanceof DOMDataTreeChangeService, "Subtree %s is non-listenable shard type %s", s, shard.getClass());
+                shardMap.put(s, (DOMDataTreeChangeService)shard);
+            }
+
+            // FIXME: play the 'what-if' game to prove the system remains loop-free
+
+
+            for (Entry<DOMDataTreeIdentifier, DOMDataTreeChangeService> e : shardMap.entrySet()) {
+                regs.add(e.getValue().registerDataTreeChangeListener(e.getKey(), ret));
+            }
+
+            // FIXME: register the listener
+        }
+
+        ret.startForwarding(regs);
+
+
+
+
         // TODO Auto-generated method stub
-        return null;
+        return ret;
     }
 }
