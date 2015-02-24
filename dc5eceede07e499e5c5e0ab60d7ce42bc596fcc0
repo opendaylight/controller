@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_b2456144",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/OperationCompleter.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-24T18:00:25Z",
+      "side": 1,
+      "message": "Should we try to keep message knowledge out of OperationCompleter? Instead what if we create an OperationLimiter with specific number of permits and then release them on complete? What do you think?",
+      "revId": "dc5eceede07e499e5c5e0ab60d7ce42bc596fcc0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
