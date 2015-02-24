@@ -66,6 +66,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
         MockitoAnnotations.initMocks(this);
 
         doReturn(getSystem()).when(actorContext).getActorSystem();
+        doReturn(getSystem().dispatchers().defaultGlobalDispatcher()).when(actorContext).getClientDispatcher();
         doReturn(datastoreContext).when(actorContext).getDatastoreContext();
         doReturn(100).when(datastoreContext).getShardTransactionCommitTimeoutInSeconds();
         doReturn(commitTimer).when(actorContext).getOperationTimer("commit");
