@@ -15,7 +15,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
-import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizer;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionPreferences;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfBaseOps;
@@ -23,9 +23,9 @@ import org.opendaylight.controller.sal.connect.netconf.util.NetconfRpcFutureCall
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.ModifyAction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,8 +50,8 @@ public class WriteRunningTx extends AbstractWriteTx {
     private static final Logger LOG  = LoggerFactory.getLogger(WriteRunningTx.class);
 
     public WriteRunningTx(final RemoteDeviceId id, final NetconfBaseOps netOps,
-                          final DataNormalizer normalizer, final NetconfSessionPreferences netconfSessionPreferences) {
-        super(netOps, id, normalizer, netconfSessionPreferences);
+                          final NetconfSessionPreferences netconfSessionPreferences) {
+        super(netOps, id, netconfSessionPreferences);
     }
 
     @Override
@@ -61,9 +61,9 @@ public class WriteRunningTx extends AbstractWriteTx {
 
     private void lock() {
         try {
-            invokeBlocking("Lock running", new Function<NetconfBaseOps, ListenableFuture<RpcResult<CompositeNode>>>() {
+            invokeBlocking("Lock running", new Function<NetconfBaseOps, ListenableFuture<DOMRpcResult>>() {
                 @Override
-                public ListenableFuture<RpcResult<CompositeNode>> apply(final NetconfBaseOps input) {
+                public ListenableFuture<DOMRpcResult> apply(final NetconfBaseOps input) {
                     return input.lockRunning(new NetconfRpcFutureCallback("Lock running", id));
                 }
             });
@@ -117,10 +117,10 @@ public class WriteRunningTx extends AbstractWriteTx {
     }
 
     @Override
-    protected void editConfig(final CompositeNode editStructure, final Optional<ModifyAction> defaultOperation) throws NetconfDocumentedException {
-        invokeBlocking("Edit running", new Function<NetconfBaseOps, ListenableFuture<RpcResult<CompositeNode>>>() {
+    protected void editConfig(final DataContainerChild<?, ?> editStructure, final Optional<ModifyAction> defaultOperation) throws NetconfDocumentedException {
+        invokeBlocking("Edit running", new Function<NetconfBaseOps, ListenableFuture<DOMRpcResult>>() {
             @Override
-            public ListenableFuture<RpcResult<CompositeNode>> apply(final NetconfBaseOps input) {
+            public ListenableFuture<DOMRpcResult> apply(final NetconfBaseOps input) {
                         return defaultOperation.isPresent()
                                 ? input.editConfigRunning(new NetconfRpcFutureCallback("Edit running", id), editStructure, defaultOperation.get(),
                                 netconfSessionPreferences.isRollbackSupported())
@@ -132,9 +132,9 @@ public class WriteRunningTx extends AbstractWriteTx {
 
     private void unlock() {
         try {
-            invokeBlocking("Unlocking running", new Function<NetconfBaseOps, ListenableFuture<RpcResult<CompositeNode>>>() {
+            invokeBlocking("Unlocking running", new Function<NetconfBaseOps, ListenableFuture<DOMRpcResult>>() {
                 @Override
-                public ListenableFuture<RpcResult<CompositeNode>> apply(final NetconfBaseOps input) {
+                public ListenableFuture<DOMRpcResult> apply(final NetconfBaseOps input) {
                     return input.unlockRunning(new NetconfRpcFutureCallback("Unlock running", id));
                 }
             });

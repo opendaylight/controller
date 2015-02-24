@@ -29,7 +29,6 @@ import org.opendaylight.controller.sal.connect.netconf.NetconfStateSchemas;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfDeviceCommunicator;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionPreferences;
 import org.opendaylight.controller.sal.connect.netconf.sal.NetconfDeviceSalFacade;
-import org.opendaylight.controller.sal.connect.netconf.schema.mapping.NetconfMessageTransformer;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.protocol.framework.ReconnectStrategy;
@@ -105,13 +104,13 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         final BindingAwareBroker bindingBroker = getBindingRegistryDependency();
 
         final RemoteDeviceHandler<NetconfSessionPreferences> salFacade
-                = new NetconfDeviceSalFacade(id, domBroker, bindingBroker, bundleContext, globalProcessingExecutor);
+                = new NetconfDeviceSalFacade(id, domBroker, bindingBroker, bundleContext);
 
         final NetconfDevice.SchemaResourcesDTO schemaResourcesDTO =
                 new NetconfDevice.SchemaResourcesDTO(schemaRegistry, schemaContextFactory, new NetconfStateSchemas.NetconfStateSchemasResolverImpl());
 
         final NetconfDevice device =
-                new NetconfDevice(schemaResourcesDTO, id, salFacade, globalProcessingExecutor, new NetconfMessageTransformer(), getReconnectOnChangedSchema());
+                new NetconfDevice(schemaResourcesDTO, id, salFacade, globalProcessingExecutor, getReconnectOnChangedSchema());
 
         final NetconfDeviceCommunicator listener = userCapabilities.isPresent() ?
                 new NetconfDeviceCommunicator(id, device, userCapabilities.get()) : new NetconfDeviceCommunicator(id, device);

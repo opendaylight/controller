@@ -10,14 +10,12 @@ package org.opendaylight.controller.sal.connect.netconf.sal.tx;
 
 import com.google.common.base.Function;
 import com.google.common.util.concurrent.ListenableFuture;
-import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizer;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionPreferences;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfBaseOps;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfRpcFutureCallback;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
-import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,8 +30,8 @@ public class WriteCandidateRunningTx extends WriteCandidateTx {
 
     private static final Logger LOG  = LoggerFactory.getLogger(WriteCandidateRunningTx.class);
 
-    public WriteCandidateRunningTx(final RemoteDeviceId id, final NetconfBaseOps netOps, final DataNormalizer normalizer, final NetconfSessionPreferences netconfSessionPreferences) {
-        super(id, netOps, normalizer, netconfSessionPreferences);
+    public WriteCandidateRunningTx(final RemoteDeviceId id, final NetconfBaseOps netOps, final NetconfSessionPreferences netconfSessionPreferences) {
+        super(id, netOps, netconfSessionPreferences);
     }
 
     @Override
@@ -50,9 +48,9 @@ public class WriteCandidateRunningTx extends WriteCandidateTx {
 
     private void lockRunning() {
         try {
-            invokeBlocking("Lock running", new Function<NetconfBaseOps, ListenableFuture<RpcResult<CompositeNode>>>() {
+            invokeBlocking("Lock running", new Function<NetconfBaseOps, ListenableFuture<DOMRpcResult>>() {
                 @Override
-                public ListenableFuture<RpcResult<CompositeNode>> apply(final NetconfBaseOps input) {
+                public ListenableFuture<DOMRpcResult> apply(final NetconfBaseOps input) {
                     return input.lockRunning(new NetconfRpcFutureCallback("Lock running", id));
                 }
             });
