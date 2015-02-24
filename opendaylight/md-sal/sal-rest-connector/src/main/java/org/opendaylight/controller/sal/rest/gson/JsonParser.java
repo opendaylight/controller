@@ -22,31 +22,34 @@ import java.io.EOFException;
 import java.io.IOException;
 
 /**
+ * @deprecated class will be removed in Lithium release
+ *
  * This class parses JSON elements from a gson JsonReader. It disallows multiple elements of the same name unlike the
  * default gson JsonParser."
  */
+@Deprecated
 public class JsonParser {
-    public JsonElement parse(JsonReader reader) throws JsonIOException, JsonSyntaxException {
+    public JsonElement parse(final JsonReader reader) throws JsonIOException, JsonSyntaxException {
         // code copied from gson's JsonParser and Stream classes
 
-        boolean lenient = reader.isLenient();
+        final boolean lenient = reader.isLenient();
         reader.setLenient(true);
         boolean isEmpty = true;
         try {
             reader.peek();
             isEmpty = false;
             return read(reader);
-        } catch (EOFException e) {
+        } catch (final EOFException e) {
             if (isEmpty) {
                 return JsonNull.INSTANCE;
             }
             // The stream ended prematurely so it is likely a syntax error.
             throw new JsonSyntaxException(e);
-        } catch (MalformedJsonException e) {
+        } catch (final MalformedJsonException e) {
             throw new JsonSyntaxException(e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new JsonIOException(e);
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             throw new JsonSyntaxException(e);
         } catch (StackOverflowError | OutOfMemoryError e) {
             throw new JsonParseException("Failed parsing JSON source: " + reader + " to Json", e);
@@ -55,12 +58,12 @@ public class JsonParser {
         }
     }
 
-    public JsonElement read(JsonReader in) throws IOException {
+    public JsonElement read(final JsonReader in) throws IOException {
         switch (in.peek()) {
         case STRING:
             return new JsonPrimitive(in.nextString());
         case NUMBER:
-            String number = in.nextString();
+            final String number = in.nextString();
             return new JsonPrimitive(new LazilyParsedNumber(number));
         case BOOLEAN:
             return new JsonPrimitive(in.nextBoolean());
@@ -68,7 +71,7 @@ public class JsonParser {
             in.nextNull();
             return JsonNull.INSTANCE;
         case BEGIN_ARRAY:
-            JsonArray array = new JsonArray();
+            final JsonArray array = new JsonArray();
             in.beginArray();
             while (in.hasNext()) {
                 array.add(read(in));
@@ -76,7 +79,7 @@ public class JsonParser {
             in.endArray();
             return array;
         case BEGIN_OBJECT:
-            JsonObject object = new JsonObject();
+            final JsonObject object = new JsonObject();
             in.beginObject();
             while (in.hasNext()) {
                 final String childName = in.nextName();

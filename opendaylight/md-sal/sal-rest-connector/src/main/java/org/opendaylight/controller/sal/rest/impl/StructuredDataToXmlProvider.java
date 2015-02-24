@@ -37,6 +37,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
+/**
+ * @deprecated class will be removed in Lithium release
+ */
 @Provider
 @Produces({ Draft02.MediaTypes.API + RestconfService.XML, Draft02.MediaTypes.DATA + RestconfService.XML,
         Draft02.MediaTypes.OPERATION + RestconfService.XML, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
@@ -51,7 +54,7 @@ public enum StructuredDataToXmlProvider implements MessageBodyWriter<StructuredD
             final Transformer ret;
             try {
                 ret = FACTORY.newTransformer();
-            } catch (TransformerConfigurationException e) {
+            } catch (final TransformerConfigurationException e) {
                 LOG.error("Failed to instantiate XML transformer", e);
                 throw new IllegalStateException("XML encoding currently unavailable", e);
             }
@@ -83,7 +86,7 @@ public enum StructuredDataToXmlProvider implements MessageBodyWriter<StructuredD
             final Annotation[] annotations, final MediaType mediaType,
             final MultivaluedMap<String, Object> httpHeaders, final OutputStream entityStream) throws IOException,
             WebApplicationException {
-        CompositeNode data = t.getData();
+        final CompositeNode data = t.getData();
         if (data == null) {
             throw new RestconfDocumentedException(Response.Status.NOT_FOUND);
         }
@@ -96,7 +99,7 @@ public enum StructuredDataToXmlProvider implements MessageBodyWriter<StructuredD
             } else {
                 trans.setOutputProperty(OutputKeys.INDENT, "no");
             }
-        } catch (RuntimeException e) {
+        } catch (final RuntimeException e) {
             throw new RestconfDocumentedException(e.getMessage(), ErrorType.TRANSPORT, ErrorTag.OPERATION_FAILED);
         }
 
@@ -104,7 +107,7 @@ public enum StructuredDataToXmlProvider implements MessageBodyWriter<StructuredD
         final Document domTree = new XmlMapper().write(data, (DataNodeContainer) t.getSchema());
         try {
             trans.transform(new DOMSource(domTree), new StreamResult(entityStream));
-        } catch (TransformerException e) {
+        } catch (final TransformerException e) {
             LOG.error("Error during translation of Document to OutputStream", e);
             throw new RestconfDocumentedException(e.getMessage(), ErrorType.TRANSPORT, ErrorTag.OPERATION_FAILED);
         }

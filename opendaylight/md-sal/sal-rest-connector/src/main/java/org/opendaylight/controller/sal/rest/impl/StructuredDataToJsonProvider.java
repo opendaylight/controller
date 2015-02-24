@@ -28,6 +28,9 @@ import org.opendaylight.controller.sal.restconf.impl.StructuredData;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 
+/**
+ * @deprecated class will be removed in Lithium release
+ */
 @Provider
 @Produces({ Draft02.MediaTypes.API + RestconfService.JSON, Draft02.MediaTypes.DATA + RestconfService.JSON,
     Draft02.MediaTypes.OPERATION + RestconfService.JSON, MediaType.APPLICATION_JSON })
@@ -48,19 +51,19 @@ public enum StructuredDataToJsonProvider implements MessageBodyWriter<Structured
     public void writeTo(final StructuredData t, final Class<?> type, final Type genericType, final Annotation[] annotations,
             final MediaType mediaType, final MultivaluedMap<String, Object> httpHeaders, final OutputStream entityStream)
                     throws IOException, WebApplicationException {
-        CompositeNode data = t.getData();
+        final CompositeNode data = t.getData();
         if (data == null) {
             throw new RestconfDocumentedException(Response.Status.NOT_FOUND);
         }
 
-        JsonWriter writer = new JsonWriter(new OutputStreamWriter(entityStream, Charsets.UTF_8));
+        final JsonWriter writer = new JsonWriter(new OutputStreamWriter(entityStream, Charsets.UTF_8));
 
         if (t.isPrettyPrintMode()) {
             writer.setIndent("    ");
         } else {
             writer.setIndent("");
         }
-        JsonMapper jsonMapper = new JsonMapper(t.getMountPoint());
+        final JsonMapper jsonMapper = new JsonMapper(t.getMountPoint());
         jsonMapper.write(writer, data, (DataNodeContainer) t.getSchema());
         writer.flush();
     }

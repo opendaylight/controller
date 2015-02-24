@@ -27,6 +27,9 @@ import org.opendaylight.yangtools.yang.data.api.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @deprecated class will be removed in Lithium release
+ */
 @Provider
 @Consumes({ Draft02.MediaTypes.DATA + RestconfService.XML, Draft02.MediaTypes.OPERATION + RestconfService.XML,
         MediaType.APPLICATION_XML, MediaType.TEXT_XML })
@@ -42,9 +45,9 @@ public enum XmlToCompositeNodeProvider implements MessageBodyReader<Node<?>> {
 
     @Override
     public Node<?> readFrom(final Class<Node<?>> type, final Type genericType, final Annotation[] annotations,
-            MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream)
+            final MediaType mediaType, final MultivaluedMap<String, String> httpHeaders, final InputStream entityStream)
             throws IOException, WebApplicationException {
-        XmlToCompositeNodeReader xmlReader = new XmlToCompositeNodeReader();
+        final XmlToCompositeNodeReader xmlReader = new XmlToCompositeNodeReader();
         try {
             return xmlReader.read(entityStream);
         } catch (XMLStreamException | UnsupportedFormatException e) {

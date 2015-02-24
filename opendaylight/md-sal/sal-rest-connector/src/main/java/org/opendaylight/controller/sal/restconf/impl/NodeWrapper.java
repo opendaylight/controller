@@ -11,6 +11,10 @@ import java.net.URI;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.Node;
 
+/**
+ * @deprecated class will be removed in Lithium release
+ */
+@Deprecated
 public interface NodeWrapper<T extends Node<?>> {
 
     void setQname(QName name);

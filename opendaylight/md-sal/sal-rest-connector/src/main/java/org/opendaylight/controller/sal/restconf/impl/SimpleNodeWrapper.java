@@ -16,6 +16,10 @@ import org.opendaylight.yangtools.yang.data.api.MutableSimpleNode;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 
+/**
+ * @deprecated class will be removed in Lithium release
+ */
+@Deprecated
 public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, SimpleNode<Object> {
 
     private SimpleNode<Object> simpleNode;

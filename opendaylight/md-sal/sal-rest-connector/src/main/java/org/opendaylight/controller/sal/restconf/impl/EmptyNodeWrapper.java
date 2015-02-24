@@ -15,6 +15,10 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 
+/**
+ * @deprecated class will be removed in Lithium release
+ */
+@Deprecated
 public final class EmptyNodeWrapper implements NodeWrapper<Node<?>>, Node<Void> {
 
     private Node<?> unwrapped;

@@ -8,7 +8,6 @@
 package org.opendaylight.controller.sal.rest.impl;
 
 import static com.google.common.base.Preconditions.checkArgument;
-
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,6 +27,9 @@ import org.opendaylight.controller.sal.restconf.impl.NodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.SimpleNodeWrapper;
 import org.opendaylight.yangtools.yang.data.api.Node;
 
+/**
+ * @deprecated class will be removed in Lithium release
+ */
 @Deprecated
 public class XmlToCompositeNodeReader {
 
@@ -50,7 +52,7 @@ public class XmlToCompositeNodeReader {
 
         eventReader = xmlInputFactory.createXMLEventReader(entityStream);
         if (eventReader.hasNext()) {
-            XMLEvent element = eventReader.peek();
+            final XMLEvent element = eventReader.peek();
             if (element.isStartDocument()) {
                 eventReader.nextEvent();
             }
@@ -126,7 +128,7 @@ public class XmlToCompositeNodeReader {
     private boolean isSimpleNodeEvent(final XMLEvent event) throws XMLStreamException {
         checkArgument(event != null, "XML Event cannot be NULL!");
         if (event.isStartElement()) {
-            XMLEvent innerEvent = skipCommentsAndWhitespace();
+            final XMLEvent innerEvent = skipCommentsAndWhitespace();
             if (innerEvent != null && (innerEvent.isCharacters() || innerEvent.isEndElement())) {
                 return true;
             }
@@ -137,7 +139,7 @@ public class XmlToCompositeNodeReader {
     private boolean isCompositeNodeEvent(final XMLEvent event) throws XMLStreamException {
         checkArgument(event != null, "XML Event cannot be NULL!");
         if (event.isStartElement()) {
-            XMLEvent innerEvent = skipCommentsAndWhitespace();
+            final XMLEvent innerEvent = skipCommentsAndWhitespace();
             if (innerEvent != null) {
                 if (innerEvent.isStartElement()) {
                     return true;
@@ -149,14 +151,14 @@ public class XmlToCompositeNodeReader {
 
     private XMLEvent skipCommentsAndWhitespace() throws XMLStreamException {
         while (eventReader.hasNext()) {
-            XMLEvent event = eventReader.peek();
+            final XMLEvent event = eventReader.peek();
             if (event.getEventType() == XMLStreamConstants.COMMENT) {
                 eventReader.nextEvent();
                 continue;
             }
 
             if (event.isCharacters()) {
-                Characters chars = event.asCharacters();
+                final Characters chars = event.asCharacters();
                 if (chars.isWhiteSpace()) {
                     eventReader.nextEvent();
                     continue;
@@ -175,7 +177,7 @@ public class XmlToCompositeNodeReader {
     private NodeWrapper<? extends Node<?>> resolveSimpleNodeFromStartElement(final StartElement startElement)
             throws XMLStreamException {
         checkArgument(startElement != null, "Start Element cannot be NULL!");
-        String data = getValueOf(startElement);
+        final String data = getValueOf(startElement);
         if (data == null) {
             return new EmptyNodeWrapper(getNamespaceFor(startElement), getLocalNameFor(startElement));
         }
@@ -224,23 +226,23 @@ public class XmlToCompositeNodeReader {
     }
 
     private URI getNamespaceFor(final StartElement startElement) {
-        String namespaceURI = startElement.getName().getNamespaceURI();
+        final String namespaceURI = startElement.getName().getNamespaceURI();
         return namespaceURI.isEmpty() ? null : URI.create(namespaceURI);
     }
 
     private Object resolveValueOfElement(final String value, final StartElement startElement) {
         // it could be instance-identifier Built-In Type
         if (value.startsWith("/")) {
-            IdentityValuesDTO iiValue = RestUtil.asInstanceIdentifier(value, new RestUtil.PrefixMapingFromXml(
+            final IdentityValuesDTO iiValue = RestUtil.asInstanceIdentifier(value, new RestUtil.PrefixMapingFromXml(
                     startElement));
             if (iiValue != null) {
                 return iiValue;
             }
         }
         // it could be identityref Built-In Type
-        String[] namespaceAndValue = value.split(":");
+        final String[] namespaceAndValue = value.split(":");
         if (namespaceAndValue.length == 2) {
-            String namespace = startElement.getNamespaceContext().getNamespaceURI(namespaceAndValue[0]);
+            final String namespace = startElement.getNamespaceContext().getNamespaceURI(namespaceAndValue[0]);
             if (namespace != null && !namespace.isEmpty()) {
                 return new IdentityValuesDTO(namespace, namespaceAndValue[1], namespaceAndValue[0], value);
             }

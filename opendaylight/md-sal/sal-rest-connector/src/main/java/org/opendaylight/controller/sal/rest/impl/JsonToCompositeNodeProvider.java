@@ -26,6 +26,9 @@ import org.opendaylight.yangtools.yang.data.api.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @deprecated class will be removed in Lithium release
+ */
 @Provider
 @Consumes({ Draft02.MediaTypes.DATA + RestconfService.JSON, Draft02.MediaTypes.OPERATION + RestconfService.JSON,
         MediaType.APPLICATION_JSON })
@@ -47,7 +50,7 @@ public enum JsonToCompositeNodeProvider implements MessageBodyReader<Node<?>> {
             WebApplicationException {
         try {
             return JsonToCompositeNodeReader.read(entityStream);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.debug("Error parsing json input", e);
 
             throw new RestconfDocumentedException("Error parsing input: " + e.getMessage(), ErrorType.PROTOCOL,

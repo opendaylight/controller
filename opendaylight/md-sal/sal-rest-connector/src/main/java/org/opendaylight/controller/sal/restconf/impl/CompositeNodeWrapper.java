@@ -23,6 +23,10 @@ import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 
+/**
+ * @deprecated class will be removed in Lithium release
+ */
+@Deprecated
 public final class CompositeNodeWrapper implements NodeWrapper<CompositeNode>, CompositeNode {
 
     private MutableCompositeNode compositeNode;
@@ -102,8 +106,8 @@ public final class CompositeNodeWrapper implements NodeWrapper<CompositeNode>, C
                 name = new QName(namespace, localName);
             }
 
-            List<Node<?>> nodeValues = new ArrayList<>(values.size());
-            for (NodeWrapper<?> nodeWrapper : values) {
+            final List<Node<?>> nodeValues = new ArrayList<>(values.size());
+            for (final NodeWrapper<?> nodeWrapper : values) {
                 nodeValues.add(nodeWrapper.unwrap());
             }
             compositeNode = NodeFactory.createMutableCompositeNode(name, null, nodeValues, null, null);

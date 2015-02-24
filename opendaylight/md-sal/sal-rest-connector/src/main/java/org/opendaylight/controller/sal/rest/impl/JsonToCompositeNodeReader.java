@@ -28,6 +28,10 @@ import org.opendaylight.controller.sal.restconf.impl.SimpleNodeWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @deprecated class will be removed in Lithium release
+ */
+@Deprecated
 class JsonToCompositeNodeReader {
     private static final Logger LOG = LoggerFactory.getLogger(JsonToCompositeNodeReader.class);
     private static final Splitter COLON_SPLITTER = Splitter.on(':');
@@ -37,9 +41,9 @@ class JsonToCompositeNodeReader {
     }
 
     public static CompositeNodeWrapper read(final InputStream entityStream) throws UnsupportedFormatException {
-        JsonParser parser = new JsonParser();
+        final JsonParser parser = new JsonParser();
 
-        JsonElement rootElement = parser.parse(new JsonReader(new InputStreamReader(entityStream)));
+        final JsonElement rootElement = parser.parse(new JsonReader(new InputStreamReader(entityStream)));
         if (rootElement.isJsonNull()) {
             // no content, so return null to indicate no input
             return null;
@@ -49,14 +53,14 @@ class JsonToCompositeNodeReader {
             throw new UnsupportedFormatException("Root element of Json has to be Object");
         }
 
-        Set<Entry<String, JsonElement>> entrySetsOfRootJsonObject = rootElement.getAsJsonObject().entrySet();
+        final Set<Entry<String, JsonElement>> entrySetsOfRootJsonObject = rootElement.getAsJsonObject().entrySet();
         if (entrySetsOfRootJsonObject.size() != 1) {
             throw new UnsupportedFormatException("Json Object should contain one element");
         }
 
-        Entry<String, JsonElement> childEntry = entrySetsOfRootJsonObject.iterator().next();
-        String firstElementName = childEntry.getKey();
-        JsonElement firstElementType = childEntry.getValue();
+        final Entry<String, JsonElement> childEntry = entrySetsOfRootJsonObject.iterator().next();
+        final String firstElementName = childEntry.getKey();
+        final JsonElement firstElementType = childEntry.getValue();
         if (firstElementType.isJsonObject()) {
             // container in yang
             return createStructureWithRoot(firstElementName, firstElementType.getAsJsonObject());
@@ -64,7 +68,7 @@ class JsonToCompositeNodeReader {
         if (firstElementType.isJsonArray()) {
             // list in yang
             if (firstElementType.getAsJsonArray().size() == 1) {
-                JsonElement firstElementInArray = firstElementType.getAsJsonArray().get(0);
+                final JsonElement firstElementInArray = firstElementType.getAsJsonArray().get(0);
                 if (firstElementInArray.isJsonObject()) {
                     return createStructureWithRoot(firstElementName, firstElementInArray.getAsJsonObject());
                 }
@@ -77,9 +81,9 @@ class JsonToCompositeNodeReader {
     }
 
     private static CompositeNodeWrapper createStructureWithRoot(final String rootObjectName, final JsonObject rootObject) {
-        CompositeNodeWrapper firstNode = new CompositeNodeWrapper(getNamespaceFor(rootObjectName),
+        final CompositeNodeWrapper firstNode = new CompositeNodeWrapper(getNamespaceFor(rootObjectName),
                 getLocalNameFor(rootObjectName));
-        for (Entry<String, JsonElement> childOfFirstNode : rootObject.entrySet()) {
+        for (final Entry<String, JsonElement> childOfFirstNode : rootObject.entrySet()) {
             addChildToParent(childOfFirstNode.getKey(), childOfFirstNode.getValue(), firstNode);
         }
         return firstNode;
@@ -88,10 +92,10 @@ class JsonToCompositeNodeReader {
     private static void addChildToParent(final String childName, final JsonElement childType,
             final CompositeNodeWrapper parent) {
         if (childType.isJsonObject()) {
-            CompositeNodeWrapper child = new CompositeNodeWrapper(getNamespaceFor(childName),
+            final CompositeNodeWrapper child = new CompositeNodeWrapper(getNamespaceFor(childName),
                     getLocalNameFor(childName));
             parent.addValue(child);
-            for (Entry<String, JsonElement> childOfChild : childType.getAsJsonObject().entrySet()) {
+            for (final Entry<String, JsonElement> childOfChild : childType.getAsJsonObject().entrySet()) {
                 addChildToParent(childOfChild.getKey(), childOfChild.getValue(), child);
             }
         } else if (childType.isJsonArray()) {
@@ -99,13 +103,13 @@ class JsonToCompositeNodeReader {
                 parent.addValue(new EmptyNodeWrapper(getNamespaceFor(childName), getLocalNameFor(childName)));
 
             } else {
-                for (JsonElement childOfChildType : childType.getAsJsonArray()) {
+                for (final JsonElement childOfChildType : childType.getAsJsonArray()) {
                     addChildToParent(childName, childOfChildType, parent);
                 }
             }
         } else if (childType.isJsonPrimitive()) {
-            JsonPrimitive childPrimitive = childType.getAsJsonPrimitive();
-            String value = childPrimitive.getAsString().trim();
+            final JsonPrimitive childPrimitive = childType.getAsJsonPrimitive();
+            final String value = childPrimitive.getAsString().trim();
             parent.addValue(new SimpleNodeWrapper(getNamespaceFor(childName), getLocalNameFor(childName),
                     resolveValueOfElement(value)));
         } else {
@@ -133,7 +137,7 @@ class JsonToCompositeNodeReader {
             if (Iterators.size(it) == 1) {
                 try {
                     return URI.create(maybeURI);
-                } catch (IllegalArgumentException e) {
+                } catch (final IllegalArgumentException e) {
                     LOG.debug("Value {} couldn't be interpreted as URI.", maybeURI);
                 }
             }
@@ -153,14 +157,14 @@ class JsonToCompositeNodeReader {
     private static Object resolveValueOfElement(final String value) {
         // it could be instance-identifier Built-In Type
         if (!value.isEmpty() && value.charAt(0) == '/') {
-            IdentityValuesDTO resolvedValue = RestUtil.asInstanceIdentifier(value, new PrefixMapingFromJson());
+            final IdentityValuesDTO resolvedValue = RestUtil.asInstanceIdentifier(value, new PrefixMapingFromJson());
             if (resolvedValue != null) {
                 return resolvedValue;
             }
         }
 
         // it could be identityref Built-In Type therefore it is necessary to look at value as module_name:local_name
-        URI namespace = getNamespaceFor(value);
+        final URI namespace = getNamespaceFor(value);
         if (namespace != null) {
             return new IdentityValuesDTO(namespace.toString(), getLocalNameFor(value), null, value);
         }

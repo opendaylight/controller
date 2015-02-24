@@ -11,6 +11,10 @@ import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 
+/**
+ * @deprecated class will be removed in Lithium release
+ */
+@Deprecated
 public class StructuredData {
 
     private final CompositeNode data;
@@ -27,7 +31,7 @@ public class StructuredData {
         this.data = data;
         this.schema = schema;
         this.mountPoint = mountPoint;
-        this.prettyPrintMode = preattyPrintMode;
+        prettyPrintMode = preattyPrintMode;
     }
 
     public CompositeNode getData() {
