@@ -23,6 +23,7 @@ import java.util.Queue;
 import java.util.Set;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeIdentifier;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeProducer;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeProducerBusyException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeProducerException;
@@ -46,6 +47,8 @@ final class ShardedDOMDataTreeProducer implements DOMDataTreeProducer {
     private DOMDataWriteTransaction openTx;
     @GuardedBy("this")
     private boolean closed;
+    @GuardedBy("this")
+    private DOMDataTreeListener listener;
 
     ShardedDOMDataTreeProducer(final ShardedDOMDataTree dataTree, final Map<DOMDataTreeIdentifier, DOMDataTreeShard> shardMap, final Set<DOMDataTreeShard> shards) {
         this.dataTree = Preconditions.checkNotNull(dataTree);
@@ -206,5 +209,19 @@ final class ShardedDOMDataTreeProducer implements DOMDataTreeProducer {
 
         LOG.debug("Transaction {} cancelled", transaction);
         openTx = null;
+    }
+
+    synchronized DOMDataTreeListener getListener() {
+        return listener;
+    }
+
+    synchronized void setListener(final ShardedDOMDataTreeListener listener) {
+        Preconditions.checkState(this.listener == null);
+        this.listener = Preconditions.checkNotNull(listener);
+    }
+
+    synchronized void resetListener() {
+        Preconditions.checkState(this.listener != null);
+        listener = null;
     }
 }
