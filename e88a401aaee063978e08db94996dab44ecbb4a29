@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_9cb63e3d",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/datastore.cfg",
+        "patchSetId": 8
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-24T06:08:48Z",
+      "side": 1,
+      "message": "I can easily do the dot separator. Keeping the property names the same as in the yang config is doable but a little trickier. In the end, the property name must match the Builder method so I\u0027d have to strip the dashes and camel case it. The yang code generation does that - maybe that code it reusable.\n\nRe: auto-generating this file from the yang, I leave that as an exercise for the reader :) But seriously, that can be a future enhancement.",
+      "parentUuid": "7a96c907_39861cdc",
+      "revId": "e88a401aaee063978e08db94996dab44ecbb4a29",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_b971cc0d",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContextIntrospector.java",
         "patchSetId": 8
@@ -30,6 +48,24 @@
       "writtenOn": "2015-02-24T01:57:31Z",
       "side": 1,
       "message": "I see. This is why the names in the properties file matches the data store context. But I think this is going to be confusing from an end user perspective.",
+      "revId": "e88a401aaee063978e08db94996dab44ecbb4a29",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_bcb3fa4b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContextIntrospector.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-24T06:08:48Z",
+      "side": 1,
+      "message": "Yup - made it easier. It would be better if it matches the yang file.",
+      "parentUuid": "7a96c907_b971cc0d",
       "revId": "e88a401aaee063978e08db94996dab44ecbb4a29",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_7c89f273",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContextIntrospector.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-24T06:08:48Z",
+      "side": 1,
+      "message": "Indeed. I like doing reflection. Cool stuff.",
+      "parentUuid": "7a96c907_19580089",
+      "revId": "e88a401aaee063978e08db94996dab44ecbb4a29",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_997410ff",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContextIntrospector.java",
         "patchSetId": 8
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_1c7a2e77",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContextIntrospector.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-24T06:08:48Z",
+      "side": 1,
+      "message": "typo. You have a keen eye :)",
+      "parentUuid": "7a96c907_997410ff",
+      "revId": "e88a401aaee063978e08db94996dab44ecbb4a29",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_5962083f",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/yang/distributed-datastore-provider.yang",
         "patchSetId": 8
@@ -81,6 +153,24 @@
       "writtenOn": "2015-02-24T01:57:31Z",
       "side": 1,
       "message": "good catch",
+      "revId": "e88a401aaee063978e08db94996dab44ecbb4a29",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_9c8dde7e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/yang/distributed-datastore-provider.yang",
+        "patchSetId": 8
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-24T06:08:48Z",
+      "side": 1,
+      "message": "I\u0027ve noticed this before - been kinda bugging me. Finally had to fix it - it broke the reflection code.",
+      "parentUuid": "7a96c907_5962083f",
       "revId": "e88a401aaee063978e08db94996dab44ecbb4a29",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
