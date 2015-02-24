@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_790b448e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-24T01:25:32Z",
+      "side": 1,
+      "message": "I have a problem with this. I want the available permits to match the mailbox size.\n\nI think this batching is fine but we need to aquire 1 permit when we do an operation and release \u0027n\u0027 permits when we finish a batch operation. The \u0027n\u0027 count can be put in the BatchedModification response. We are not doing this today - is this why you want to increase the number of available permits?\n\nOne reason I have a problem with allowing more permits is that I think we may find ourselves overloaded with the batching. I believe the batching optimization will improve performance simply by reducing the roundtrips and we should have better performance despite the existing throttling without increasing the available permits.",
+      "revId": "b5d7695162ba3ed6907436d41d1a3a2bb792cafd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
