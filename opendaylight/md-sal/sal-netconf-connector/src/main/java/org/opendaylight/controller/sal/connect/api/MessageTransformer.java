@@ -7,17 +7,16 @@
  */
 package org.opendaylight.controller.sal.connect.api;
 
-import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
+import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
-public interface MessageTransformer<M> extends SchemaContextListener {
+public interface MessageTransformer<M> {
 
-    CompositeNode toNotification(M message);
+    ContainerNode toNotification(M message);
 
-    M toRpcRequest(QName rpc, CompositeNode node);
+    M toRpcRequest(SchemaPath rpc, ContainerNode node);
 
-    RpcResult<CompositeNode> toRpcResult(M message, QName rpc);
+    DOMRpcResult toRpcResult(M message, SchemaPath rpc);
 
 }

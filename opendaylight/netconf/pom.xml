@@ -16,7 +16,7 @@
 
   <modules>
     <module>netconf-api</module>
-    <module>netconf-cli</module>
+    <!--<module>netconf-cli</module>-->
     <module>netconf-config</module>
     <module>netconf-impl</module>
     <module>config-netconf-connector</module>
