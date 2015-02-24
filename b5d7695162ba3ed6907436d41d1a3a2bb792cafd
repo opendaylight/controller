@@ -16,6 +16,24 @@
       "revId": "b5d7695162ba3ed6907436d41d1a3a2bb792cafd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_9955f01f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-24T04:39:32Z",
+      "side": 1,
+      "message": "That seems reasonable. I didn\u0027t think of doing that way. I\u0027ll change it.",
+      "parentUuid": "7a96c907_790b448e",
+      "revId": "b5d7695162ba3ed6907436d41d1a3a2bb792cafd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
