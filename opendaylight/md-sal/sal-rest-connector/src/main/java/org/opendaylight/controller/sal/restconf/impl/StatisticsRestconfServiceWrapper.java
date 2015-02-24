@@ -28,7 +28,7 @@ public class StatisticsRestconfServiceWrapper implements RestconfService {
 
     final RestconfService delegate;
 
-    private StatisticsRestconfServiceWrapper(RestconfService delegate) {
+    private StatisticsRestconfServiceWrapper(final RestconfService delegate) {
         this.delegate = delegate;
     }
 
@@ -42,84 +42,84 @@ public class StatisticsRestconfServiceWrapper implements RestconfService {
     }
 
     @Override
-    public StructuredData getModules(UriInfo uriInfo) {
+    public NormalizedNodeContext getModules(final UriInfo uriInfo) {
         return delegate.getModules(uriInfo);
     }
 
     @Override
-    public StructuredData getModules(String identifier, UriInfo uriInfo) {
+    public StructuredData getModules(final String identifier, final UriInfo uriInfo) {
         return delegate.getModules(identifier, uriInfo);
     }
 
     @Override
-    public StructuredData getModule(String identifier, UriInfo uriInfo) {
+    public StructuredData getModule(final String identifier, final UriInfo uriInfo) {
         return delegate.getModule(identifier, uriInfo);
     }
 
     @Override
-    public StructuredData getOperations(UriInfo uriInfo) {
+    public StructuredData getOperations(final UriInfo uriInfo) {
         return delegate.getOperations(uriInfo);
     }
 
     @Override
-    public StructuredData getOperations(String identifier, UriInfo uriInfo) {
+    public StructuredData getOperations(final String identifier, final UriInfo uriInfo) {
         return delegate.getOperations(identifier, uriInfo);
     }
 
     @Override
-    public StructuredData invokeRpc(String identifier, CompositeNode payload, UriInfo uriInfo) {
+    public StructuredData invokeRpc(final String identifier, final CompositeNode payload, final UriInfo uriInfo) {
         rpc.incrementAndGet();
         return delegate.invokeRpc(identifier, payload, uriInfo);
     }
 
     @Override
-    public StructuredData invokeRpc(String identifier, String noPayload, UriInfo uriInfo) {
+    public StructuredData invokeRpc(final String identifier, final String noPayload, final UriInfo uriInfo) {
         rpc.incrementAndGet();
         return delegate.invokeRpc(identifier, noPayload, uriInfo);
     }
 
     @Override
-    public NormalizedNodeContext readConfigurationData(String identifier, UriInfo uriInfo) {
+    public NormalizedNodeContext readConfigurationData(final String identifier, final UriInfo uriInfo) {
         configGet.incrementAndGet();
         return delegate.readConfigurationData(identifier, uriInfo);
     }
 
     @Override
-    public NormalizedNodeContext readOperationalData(String identifier, UriInfo uriInfo) {
+    public NormalizedNodeContext readOperationalData(final String identifier, final UriInfo uriInfo) {
         operationalGet.incrementAndGet();
         return delegate.readOperationalData(identifier, uriInfo);
     }
 
     @Override
-    public Response updateConfigurationData(String identifier, Node<?> payload) {
+    public Response updateConfigurationData(final String identifier, final Node<?> payload) {
         configPut.incrementAndGet();
         return delegate.updateConfigurationData(identifier, payload);
     }
 
     @Override
-    public Response createConfigurationData(String identifier, Node<?> payload) {
+    public Response createConfigurationData(final String identifier, final Node<?> payload) {
         configPost.incrementAndGet();
         return delegate.createConfigurationData(identifier, payload);
     }
 
     @Override
-    public Response createConfigurationData(Node<?> payload) {
+    public Response createConfigurationData(final Node<?> payload) {
         configPost.incrementAndGet();
         return delegate.createConfigurationData(payload);
     }
 
     @Override
-    public Response deleteConfigurationData(String identifier) {
+    public Response deleteConfigurationData(final String identifier) {
         return delegate.deleteConfigurationData(identifier);
     }
 
     @Override
-    public Response subscribeToStream(String identifier, UriInfo uriInfo) {
+    public Response subscribeToStream(final String identifier, final UriInfo uriInfo) {
         return delegate.subscribeToStream(identifier, uriInfo);
     }
 
     @Override
-    public StructuredData getAvailableStreams(UriInfo uriInfo) {
+    public StructuredData getAvailableStreams(final UriInfo uriInfo) {
         return delegate.getAvailableStreams(uriInfo);
     }
 
