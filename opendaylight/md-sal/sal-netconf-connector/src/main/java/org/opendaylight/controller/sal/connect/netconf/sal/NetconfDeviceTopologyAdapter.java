@@ -153,9 +153,8 @@ final class NetconfDeviceTopologyAdapter implements AutoCloseable {
                 .setUnavailableCapabilities(unavailableCapabilities);
 
         final NodeBuilder nodeBuilder = getNodeIdBuilder(id);
-        final Node node = nodeBuilder.addAugmentation(NetconfNode.class, netconfNodeBuilder.build()).build();
 
-        return node;
+        return nodeBuilder.addAugmentation(NetconfNode.class, netconfNodeBuilder.build()).build();
     }
 
     public void removeDeviceConfiguration() {

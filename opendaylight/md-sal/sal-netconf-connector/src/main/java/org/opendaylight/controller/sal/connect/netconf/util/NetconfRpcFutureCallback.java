@@ -9,17 +9,16 @@
 package org.opendaylight.controller.sal.connect.netconf.util;
 
 import com.google.common.util.concurrent.FutureCallback;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.sal.connect.netconf.sal.tx.WriteRunningTx;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
-import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Simple Netconf rpc logging callback
  */
-public class NetconfRpcFutureCallback implements FutureCallback<RpcResult<CompositeNode>> {
+public class NetconfRpcFutureCallback implements FutureCallback<DOMRpcResult> {
     private static final Logger LOG  = LoggerFactory.getLogger(WriteRunningTx.class);
 
     private final String type;
@@ -31,15 +30,15 @@ public class NetconfRpcFutureCallback implements FutureCallback<RpcResult<Compos
     }
 
     @Override
-    public void onSuccess(final RpcResult<CompositeNode> result) {
-        if(result.isSuccessful()) {
+    public void onSuccess(final DOMRpcResult result) {
+        if(result.getErrors().isEmpty()) {
             LOG.trace("{}: " + type + " invoked successfully", id);
         } else {
             onUnsuccess(result);
         }
     }
 
-    protected void onUnsuccess(final RpcResult<CompositeNode> result) {
+    protected void onUnsuccess(final DOMRpcResult result) {
         LOG.warn("{}: " + type + " invoked unsuccessfully: {}", id, result.getErrors());
     }
 

@@ -15,7 +15,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
-import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizer;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionPreferences;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfBaseOps;
@@ -24,9 +24,9 @@ import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.ModifyAction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,10 +53,10 @@ public class WriteCandidateTx extends AbstractWriteTx {
 
     private static final Logger LOG  = LoggerFactory.getLogger(WriteCandidateTx.class);
 
-    private static final Function<RpcResult<CompositeNode>, RpcResult<TransactionStatus>> RPC_RESULT_TO_TX_STATUS = new Function<RpcResult<CompositeNode>, RpcResult<TransactionStatus>>() {
+    private static final Function<DOMRpcResult, RpcResult<TransactionStatus>> RPC_RESULT_TO_TX_STATUS = new Function<DOMRpcResult, RpcResult<TransactionStatus>>() {
         @Override
-        public RpcResult<TransactionStatus> apply(final RpcResult<CompositeNode> input) {
-            if (input.isSuccessful()) {
+        public RpcResult<TransactionStatus> apply(final DOMRpcResult input) {
+            if (isSuccess(input)) {
                 return RpcResultBuilder.success(TransactionStatus.COMMITED).build();
             } else {
                 final RpcResultBuilder<TransactionStatus> failed = RpcResultBuilder.failed();
@@ -69,8 +69,8 @@ public class WriteCandidateTx extends AbstractWriteTx {
         }
     };
 
-    public WriteCandidateTx(final RemoteDeviceId id, final NetconfBaseOps rpc, final DataNormalizer normalizer, final NetconfSessionPreferences netconfSessionPreferences) {
-        super(rpc, id, normalizer, netconfSessionPreferences);
+    public WriteCandidateTx(final RemoteDeviceId id, final NetconfBaseOps rpc, final NetconfSessionPreferences netconfSessionPreferences) {
+        super(rpc, id, netconfSessionPreferences);
     }
 
     @Override
@@ -94,9 +94,9 @@ public class WriteCandidateTx extends AbstractWriteTx {
 
     private void lock() throws NetconfDocumentedException {
         try {
-            invokeBlocking("Lock candidate", new Function<NetconfBaseOps, ListenableFuture<RpcResult<CompositeNode>>>() {
+            invokeBlocking("Lock candidate", new Function<NetconfBaseOps, ListenableFuture<DOMRpcResult>>() {
                 @Override
-                public ListenableFuture<RpcResult<CompositeNode>> apply(final NetconfBaseOps input) {
+                public ListenableFuture<DOMRpcResult> apply(final NetconfBaseOps input) {
                     return input.lockCandidate(new NetconfRpcFutureCallback("Lock candidate", id));
                 }
             });
@@ -152,16 +152,16 @@ public class WriteCandidateTx extends AbstractWriteTx {
 
     @Override
     public synchronized ListenableFuture<RpcResult<TransactionStatus>> performCommit() {
-        final ListenableFuture<RpcResult<CompositeNode>> rpcResult = netOps.commit(new NetconfRpcFutureCallback("Commit", id) {
+        final ListenableFuture<DOMRpcResult> rpcResult = netOps.commit(new NetconfRpcFutureCallback("Commit", id) {
             @Override
-            public void onSuccess(final RpcResult<CompositeNode> result) {
+            public void onSuccess(final DOMRpcResult result) {
                 super.onSuccess(result);
                 LOG.debug("{}: Write successful, transaction: {}. Unlocking", id, getIdentifier());
                 cleanupOnSuccess();
             }
 
             @Override
-            protected void onUnsuccess(final RpcResult<CompositeNode> result) {
+            protected void onUnsuccess(final DOMRpcResult result) {
                 LOG.error("{}: Write failed, transaction {}, discarding changes, unlocking: {}", id, getIdentifier(), result.getErrors());
                 cleanup();
             }
@@ -181,10 +181,10 @@ public class WriteCandidateTx extends AbstractWriteTx {
     }
 
     @Override
-    protected void editConfig(final CompositeNode editStructure, final Optional<ModifyAction> defaultOperation) throws NetconfDocumentedException {
-        invokeBlocking("Edit candidate", new Function<NetconfBaseOps, ListenableFuture<RpcResult<CompositeNode>>>() {
+    protected void editConfig(final DataContainerChild<?, ?> editStructure, final Optional<ModifyAction> defaultOperation) throws NetconfDocumentedException {
+        invokeBlocking("Edit candidate", new Function<NetconfBaseOps, ListenableFuture<DOMRpcResult>>() {
             @Override
-            public ListenableFuture<RpcResult<CompositeNode>> apply(final NetconfBaseOps input) {
+            public ListenableFuture<DOMRpcResult> apply(final NetconfBaseOps input) {
                         return defaultOperation.isPresent()
                                 ? input.editConfigCandidate(new NetconfRpcFutureCallback("Edit candidate", id), editStructure, defaultOperation.get(),
                                 netconfSessionPreferences.isRollbackSupported())

@@ -1,0 +1,74 @@
+module normalization-test {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:normalization:test";
+    prefix "norm-test";
+
+    revision "2014-03-13" {
+        description "Initial revision.";
+    }
+
+    grouping outer-grouping {
+    }
+
+    container test {
+        list outer-list {
+            key id;
+            leaf id {
+                type uint16;
+            }
+            choice outer-choice {
+                case one {
+                    leaf one {
+                        type string;
+                    }
+                }
+                case two-three {
+                    leaf two {
+                        type string;
+                    }
+                    leaf three {
+                        type string;
+                    }
+               }
+           }
+           list inner-list {
+                key name;
+                ordered-by user;
+
+                leaf name {
+                    type string;
+                }
+                leaf value {
+                    type string;
+                }
+            }
+        }
+
+        list unkeyed-list {
+            leaf name {
+                type string;
+            }
+        }
+
+        leaf-list unordered-leaf-list {
+            type string;
+        }
+
+        leaf-list ordered-leaf-list {
+            ordered-by user;
+            type string;
+        }
+
+        container outer-container {
+        }
+
+        anyxml any-xml-data;
+    }
+
+    augment /norm-test:test/norm-test:outer-container {
+
+        leaf augmented-leaf {
+           type string;
+        }
+    }
+}
