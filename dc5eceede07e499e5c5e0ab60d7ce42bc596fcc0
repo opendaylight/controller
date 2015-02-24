@@ -16,6 +16,24 @@
       "revId": "dc5eceede07e499e5c5e0ab60d7ce42bc596fcc0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_12ae9581",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/OperationCompleter.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-24T23:38:55Z",
+      "side": 1,
+      "message": "I had a feeling you would comment on this. We create one OperationCompleter per tx. I think with what you\u0027re saying is we\u0027d need to create an OperationCompleter per operation - I\u0027d rather avoid that extra GC overhead. \n\nI could add an interface MultiplePermitsOperation with method getNumPermits. What do you think?",
+      "parentUuid": "7a96c907_b2456144",
+      "revId": "dc5eceede07e499e5c5e0ab60d7ce42bc596fcc0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
