@@ -13,8 +13,10 @@ import java.util.List;
 /**
  * This interface defines the methods for CRUD of NB Router objects
  *
+ * @deprecated Replaced by {@link org.opendaylight.neutron.neutron.spi.INeutronRouterCRUD}
  */
 
+@Deprecated
 public interface INeutronRouterCRUD {
     /**
      * Applications call this interface method to determine if a particular

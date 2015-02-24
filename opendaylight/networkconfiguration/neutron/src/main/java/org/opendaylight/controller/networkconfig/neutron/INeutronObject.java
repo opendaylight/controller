@@ -12,7 +12,10 @@ package org.opendaylight.controller.networkconfig.neutron;
 
 /**
  * This class contains behaviour common to Neutron configuration objects
+ *
+ * @deprecated Replaced by {@link org.opendaylight.neutron.neutron.spi.INeutronObject}
  */
+@Deprecated
 public interface INeutronObject {
     public String getID();
     public void setID(String id);

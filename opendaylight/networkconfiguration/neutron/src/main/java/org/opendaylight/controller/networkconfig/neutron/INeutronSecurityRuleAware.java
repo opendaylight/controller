@@ -11,8 +11,11 @@ package org.opendaylight.controller.networkconfig.neutron;
 
 /**
  * This interface defines the methods required to be aware of Neutron Security Rules
+ *
+ * @deprecated Replaced by {@link org.opendaylight.neutron.neutron.spi.INeutronSecurityRuleAware}
  */
 
+@Deprecated
 public interface INeutronSecurityRuleAware {
 
     /**

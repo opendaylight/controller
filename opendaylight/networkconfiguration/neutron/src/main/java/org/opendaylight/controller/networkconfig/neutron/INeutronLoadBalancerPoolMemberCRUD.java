@@ -10,6 +10,13 @@ package org.opendaylight.controller.networkconfig.neutron;
 
 import java.util.List;
 
+/**
+ * This interface defines the methods for CRUD of NB OpenStack INeutronLoadBalancerPoolMemberCRUD objects
+ *
+ * @deprecated Replaced by {@link org.opendaylight.neutron.neutron.spi.INeutronLoadBalancerPoolMemberCRUD}
+ */
+
+@Deprecated
 public interface INeutronLoadBalancerPoolMemberCRUD {
 
     /**

@@ -13,8 +13,10 @@ import java.util.List;
 /**
  * This interface defines the methods for CRUD of NB Port objects
  *
+ * @deprecated Replaced by {@link org.opendaylight.neutron.neutron.spi.INeutronPortCRUD}
  */
 
+@Deprecated
 public interface INeutronPortCRUD {
     /**
      * Applications call this interface method to determine if a particular

@@ -14,6 +14,12 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronObject;
 
 import java.util.List;
 
+/**
+ * This interface defines the methods for Neutron Requests
+ *
+ * @deprecated Replaced by {@link org.opendaylight.neutron.northbound.api.INeutronRequest}
+ */
+@Deprecated
 public interface INeutronRequest<T extends INeutronObject> {
     public T getSingleton();
     public boolean isSingleton();

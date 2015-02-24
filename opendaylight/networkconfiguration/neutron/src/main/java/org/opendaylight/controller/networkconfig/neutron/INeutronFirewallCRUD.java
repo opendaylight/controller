@@ -13,8 +13,10 @@ import java.util.List;
 /**
  * This interface defines the methods for CRUD of NB OpenStack Firewall objects
  *
+ * @deprecated Replaced by {@link org.opendaylight.neutron.neutron.spi.INeutronFirewallCRUD}
  */
 
+@Deprecated
 public interface INeutronFirewallCRUD {
     /**
      * Applications call this interface method to determine if a particular
