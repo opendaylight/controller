@@ -34,6 +34,24 @@
       "revId": "dc5eceede07e499e5c5e0ab60d7ce42bc596fcc0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_1233f562",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/OperationCompleter.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-24T23:55:04Z",
+      "side": 1,
+      "message": "Let\u0027s revisit this later. I want to move forward with merging this. Let me know what you think.",
+      "parentUuid": "7a96c907_12ae9581",
+      "revId": "dc5eceede07e499e5c5e0ab60d7ce42bc596fcc0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
