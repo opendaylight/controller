@@ -36,6 +36,7 @@ import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
 import org.opendaylight.controller.cluster.datastore.utils.DoNothingActor;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
@@ -231,6 +232,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
             doReturn(DatastoreContext.newBuilder().build()).when(actorContext).getDatastoreContext();
             doReturn(getSystem().dispatchers().defaultGlobalDispatcher()).when(actorContext).getClientDispatcher();
             doReturn(getSystem()).when(actorContext).getActorSystem();
+            doReturn(Dispatchers.DEFAULT_DISPATCHER_PATH).when(actorContext).getNotificationDispatcherPath();
             doReturn(getSystem().actorSelection(getRef().path())).
                     when(actorContext).actorSelection(getRef().path());
             doReturn(duration("5 seconds")).when(actorContext).getOperationDuration();

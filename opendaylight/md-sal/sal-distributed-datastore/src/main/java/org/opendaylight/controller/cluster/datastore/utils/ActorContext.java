@@ -527,4 +527,8 @@ public class ActorContext {
         return this.dispatchers.getDispatcher(Dispatchers.DispatcherType.Client);
     }
 
+    public String getNotificationDispatcherPath(){
+        return this.dispatchers.getDispatcherPath(Dispatchers.DispatcherType.Notification);
+    }
+
 }
