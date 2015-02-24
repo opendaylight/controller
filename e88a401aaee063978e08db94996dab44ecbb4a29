@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_39861cdc",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/datastore.cfg",
+        "patchSetId": 8
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-24T01:57:31Z",
+      "side": 1,
+      "message": "Don\u0027t you think it may be better to keep the property names exactly as they are in the yang config, i.e words separated by dashes?\n\nAlso to qualify how about using a dot separator. Example operational.shard-election-timeout-factor I think it\u0027s cleaner and we can do more qualification in the future if necessary.\n\nHaving one property defined for both datastores is a good improvement over what we have. \n\nBTW, I wonder what it would take to auto-generate this file from the yang. Easier to maintain that way :)",
+      "revId": "e88a401aaee063978e08db94996dab44ecbb4a29",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_b971cc0d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContextIntrospector.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-24T01:57:31Z",
+      "side": 1,
+      "message": "I see. This is why the names in the properties file matches the data store context. But I think this is going to be confusing from an end user perspective.",
+      "revId": "e88a401aaee063978e08db94996dab44ecbb4a29",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_19580089",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContextIntrospector.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-24T01:57:31Z",
+      "side": 1,
+      "message": "I hope you had fun writing this class :)",
+      "revId": "e88a401aaee063978e08db94996dab44ecbb4a29",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_997410ff",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContextIntrospector.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-24T01:57:31Z",
+      "side": 1,
+      "message": "intentional omission of i in prmitives or typo?",
+      "revId": "e88a401aaee063978e08db94996dab44ecbb4a29",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5962083f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/yang/distributed-datastore-provider.yang",
+        "patchSetId": 8
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-24T01:57:31Z",
+      "side": 1,
+      "message": "good catch",
+      "revId": "e88a401aaee063978e08db94996dab44ecbb4a29",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
