@@ -16,7 +16,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
  * A {@link DOMService} which allows its users to subscribe to receive
  * {@link DOMNotification}s.
  */
-public interface DOMNotificationService {
+public interface DOMNotificationService extends DOMService {
     /**
      * Register a {@link DOMNotificationListener} to receive a set of notifications. As with
      * other ListenerRegistration-based interfaces, registering an instance multiple times
