@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_3c128a09",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContextIntrospector.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-24T07:26:21Z",
+      "side": 1,
+      "message": "Made this a Precondition so the unit tests will fail if the property name in the yang config doesn\u0027t match the Builder method. This will enforce that they match.",
+      "revId": "e58bc80f62ed1ed6288b0c5cec4896bc36d008b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
