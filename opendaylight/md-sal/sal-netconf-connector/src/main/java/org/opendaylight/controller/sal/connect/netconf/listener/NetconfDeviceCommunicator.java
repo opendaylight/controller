@@ -248,6 +248,10 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
 
                 request.future.set( RpcResultBuilder.<NetconfMessage>failed()
                         .withRpcError( NetconfMessageTransformUtil.toRpcError( e ) ).build() );
+
+                //recursively processing message to eventually find matching request
+                processMessage(message);
+
                 return;
             }
 
