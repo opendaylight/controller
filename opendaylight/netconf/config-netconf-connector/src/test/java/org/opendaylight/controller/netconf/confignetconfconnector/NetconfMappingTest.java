@@ -569,14 +569,14 @@ public class NetconfMappingTest extends AbstractConfigTest {
         commit();
     }
 
-    @Test(expected = NetconfDocumentedException.class)
+    @Test
     public void testEx2() throws Exception {
-        discard();
+        assertContainsElement(discard(), readXmlToElement("<ok xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"/>"));
     }
 
-    private void discard() throws ParserConfigurationException, SAXException, IOException, NetconfDocumentedException {
+    private Document discard() throws ParserConfigurationException, SAXException, IOException, NetconfDocumentedException {
         DiscardChanges discardOp = new DiscardChanges(transactionProvider, configRegistryClient, NETCONF_SESSION_ID);
-        executeOp(discardOp, "netconfMessages/discardChanges.xml");
+        return executeOp(discardOp, "netconfMessages/discardChanges.xml");
     }
 
     private void checkBinaryLeafEdited(final Document response) throws NodeTestException, SAXException, IOException {
