@@ -716,7 +716,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
     }
 
     private Document get() throws NetconfDocumentedException, ParserConfigurationException, SAXException, IOException {
-        Get getOp = new Get(yangStoreSnapshot, configRegistryClient, NETCONF_SESSION_ID);
+        Get getOp = new Get(transactionProvider, yangStoreSnapshot, configRegistryClient, NETCONF_SESSION_ID);
         return executeOp(getOp, "netconfMessages/get.xml");
     }
 

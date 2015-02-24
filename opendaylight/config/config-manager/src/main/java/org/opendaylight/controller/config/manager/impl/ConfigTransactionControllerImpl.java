@@ -482,6 +482,25 @@ class ConfigTransactionControllerImpl implements
     public void checkConfigBeanExists(ObjectName objectName) throws InstanceNotFoundException {
         txLookupRegistry.checkConfigBeanExists(objectName);
     }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<ObjectName> lookupRuntimeBeans() {
+        return txLookupRegistry.lookupRuntimeBeans();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<ObjectName> lookupRuntimeBeans(String moduleName,
+                                              String instanceName) {
+        return txLookupRegistry.lookupRuntimeBeans(moduleName, instanceName);
+    }
+
     // --
 
     /**

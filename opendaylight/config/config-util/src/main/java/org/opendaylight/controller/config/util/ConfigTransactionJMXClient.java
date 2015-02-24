@@ -241,6 +241,26 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
     }
 
     @Override
+    public Attribute getAttribute(ObjectName on, String attrName) {
+        if (ObjectNameUtil.getTransactionName(on) == null) {
+            throw new IllegalArgumentException("Not in transaction instance "
+                    + on + ", no transaction name present");
+        }
+
+        try {
+            return new Attribute(attrName, configMBeanServer.getAttribute(on,attrName));
+        } catch (JMException e) {
+            throw new IllegalStateException("Unable to get attribute "
+                    + attrName + " for " + on, e);
+        }
+    }
+
+    @Override
+    public Object getAttributeCurrentValue(ObjectName on, String attrName) {
+        return getAttribute(on, attrName).getValue();
+    }
+
+    @Override
     public void validateBean(ObjectName configBeanON)
             throws ValidationException {
         try {
@@ -273,22 +293,17 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
     }
 
     @Override
-    public Attribute getAttribute(ObjectName on, String attrName) {
-        if (ObjectNameUtil.getTransactionName(on) == null) {
-            throw new IllegalArgumentException("Not in transaction instance "
-                    + on + ", no transaction name present");
-        }
-
-        try {
-            return new Attribute(attrName, configMBeanServer.getAttribute(on,attrName));
-        } catch (JMException e) {
-            throw new IllegalStateException("Unable to get attribute "
-                    + attrName + " for " + on, e);
-        }
+    public Set<String> getAvailableModuleFactoryQNames() {
+        return configTransactionControllerMXBeanProxy.getAvailableModuleFactoryQNames();
     }
 
     @Override
-    public Set<String> getAvailableModuleFactoryQNames() {
-        return configTransactionControllerMXBeanProxy.getAvailableModuleFactoryQNames();
+    public Set<ObjectName> lookupRuntimeBeans() {
+        return configTransactionControllerMXBeanProxy.lookupRuntimeBeans();
+    }
+
+    @Override
+    public Set<ObjectName> lookupRuntimeBeans(final String moduleName, final String instanceName) {
+        return configTransactionControllerMXBeanProxy.lookupRuntimeBeans(moduleName, instanceName);
     }
 }

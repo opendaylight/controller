@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import javax.management.ObjectName;
 import javax.management.openmbean.OpenType;
-import org.opendaylight.controller.config.util.ConfigRegistryClient;
+import org.opendaylight.controller.config.util.BeanReader;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
@@ -46,9 +46,9 @@ public final class InstanceConfig {
     private final Map<String, AttributeIfc> yangToAttrConfig;
     private final String nullableDummyContainerName;
     private final Map<String, AttributeIfc> jmxToAttrConfig;
-    private final ConfigRegistryClient configRegistryClient;
+    private final BeanReader configRegistryClient;
 
-    public InstanceConfig(ConfigRegistryClient configRegistryClient, Map<String, AttributeIfc> yangNamesToAttributes,
+    public InstanceConfig(BeanReader configRegistryClient, Map<String, AttributeIfc> yangNamesToAttributes,
                           String nullableDummyContainerName) {
 
         this.yangToAttrConfig = yangNamesToAttributes;

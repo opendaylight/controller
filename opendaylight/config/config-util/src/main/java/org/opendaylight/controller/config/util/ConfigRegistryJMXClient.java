@@ -211,7 +211,7 @@ public class ConfigRegistryJMXClient implements ConfigRegistryClient {
         } catch (AttributeNotFoundException | InstanceNotFoundException
                 | MBeanException | ReflectionException e) {
             throw new RuntimeException("Unable to get attribute "
-                    + attributeName + " for " + on, e);
+                    + attributeName + " for " + on + ". Available beans: " + lookupConfigBeans(), e);
         }
     }
 

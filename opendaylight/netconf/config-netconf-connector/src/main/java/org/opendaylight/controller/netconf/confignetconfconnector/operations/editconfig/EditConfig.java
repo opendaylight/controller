@@ -20,6 +20,7 @@ import java.util.Set;
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
 import org.opendaylight.controller.config.api.ValidationException;
+import org.opendaylight.controller.config.util.BeanReader;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
@@ -262,7 +263,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
 
     public static Map<String/* Namespace from yang file */,
             Map<String /* Name of module entry from yang file */, ModuleConfig>> transformMbeToModuleConfigs
-    (final ConfigRegistryClient configRegistryClient, Map<String/* Namespace from yang file */,
+    (final BeanReader configRegistryClient, Map<String/* Namespace from yang file */,
                     Map<String /* Name of module entry from yang file */, ModuleMXBeanEntry>> mBeanEntries) {
 
         Map<String, Map<String, ModuleConfig>> namespaceToModuleNameToModuleConfig = Maps.newHashMap();
@@ -295,7 +296,6 @@ public class EditConfig extends AbstractConfigNetconfOperation {
 
     @Override
     protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws NetconfDocumentedException {
-
         EditConfigXmlParser.EditConfigExecution editConfigExecution;
         Config cfg = getConfigMapping(getConfigRegistryClient(), yangStoreSnapshot);
         editConfigExecution = editConfigXmlParser.fromXml(xml, cfg);
