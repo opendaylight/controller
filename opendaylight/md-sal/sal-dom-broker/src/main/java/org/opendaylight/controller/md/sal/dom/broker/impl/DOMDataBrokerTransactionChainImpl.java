@@ -10,6 +10,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicLong;
@@ -87,7 +88,7 @@ final class DOMDataBrokerTransactionChainImpl extends AbstractDOMForwardedTransa
 
     @Override
     public CheckedFuture<Void, TransactionCommitFailedException> submit(
-            final DOMDataWriteTransaction transaction, final Iterable<DOMStoreThreePhaseCommitCohort> cohorts) {
+            final DOMDataWriteTransaction transaction, final Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
         checkNotFailed();
         checkNotClosed();
 

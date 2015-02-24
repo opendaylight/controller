@@ -9,6 +9,7 @@ package org.opendaylight.controller.md.sal.dom.broker.impl;
 
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
+import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -77,7 +78,7 @@ abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreTransact
      *         the Future fails with a {@link TransactionCommitFailedException}.
      */
     protected abstract CheckedFuture<Void,TransactionCommitFailedException> submit(final DOMDataWriteTransaction transaction,
-            final Iterable<DOMStoreThreePhaseCommitCohort> cohorts);
+            final Collection<DOMStoreThreePhaseCommitCohort> cohorts);
 
     /**
      * Creates a new composite read-only transaction
