@@ -37,6 +37,8 @@ import org.slf4j.LoggerFactory;
  * Asynchronous (Binding-aware) adapter over datastore subtree for netconf device.
  *
  * All data changes are submitted to an ExecutorService to avoid Thread blocking while sal is waiting for schema.
+ *
+ * @deprecated Data is pushed into Topology instead if Inventory model
  */
 @Deprecated
 final class NetconfDeviceDatastoreAdapter implements AutoCloseable {

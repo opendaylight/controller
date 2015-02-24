@@ -15,7 +15,7 @@ module config-test-rpc {
     revision 2014-07-21 {
         description "Initial revision.";
     }
-    
+
     extension get-filter-element-attributes {
           description
             "If this extension is present within an 'anyxml'
@@ -25,21 +25,21 @@ module config-test-rpc {
              following unqualified XML attribute is supported
              within the <filter> element, within a <get> or
              <get-config> protocol operation:
-    
+
                type : optional attribute with allowed
                       value strings 'subtree' and 'xpath'.
                       If missing, the default value is 'subtree'.
-    
+
              If the 'xpath' feature is supported, then the
              following unqualified XML attribute is
              also supported:
-    
+
                select: optional attribute containing a
                        string representing an XPath expression.
                        The 'type' attribute must be equal to 'xpath'
                        if this attribute is present.";
     }
-    
+
     rpc edit-config {
         description "The <edit-config> operation loads all or part of a specified
              configuration to the specified target configuration.";
@@ -164,4 +164,13 @@ module config-test-rpc {
             }
         }
     }
+
+      rpc discard-changes {
+        if-feature candidate;
+
+        description
+          "Revert the candidate configuration to the current
+           running configuration.";
+        reference "RFC 6241, Section 8.3.4.2";
+      }
 }

@@ -7,20 +7,21 @@
  */
 package org.opendaylight.controller.sal.connect.api;
 
-import org.opendaylight.controller.sal.core.api.RpcImplementation;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
+import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionPreferences;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public interface RemoteDeviceHandler<PREF> extends AutoCloseable {
 
     void onDeviceConnected(SchemaContext remoteSchemaContext,
-                           PREF netconfSessionPreferences, RpcImplementation deviceRpc);
+                           NetconfSessionPreferences netconfSessionPreferences, DOMRpcService deviceRpc);
 
     void onDeviceDisconnected();
 
     void onDeviceFailed(Throwable throwable);
 
-    void onNotification(CompositeNode domNotification);
+    void onNotification(ContainerNode domNotification);
 
     void close();
 }

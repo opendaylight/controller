@@ -3,6 +3,8 @@ package org.opendaylight.controller.sal.connect.netconf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.toId;
+import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.toPath;
 
 import java.io.InputStream;
 import java.util.Collections;
@@ -10,16 +12,17 @@ import java.util.List;
 import java.util.Set;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.controller.sal.connect.netconf.schema.mapping.NetconfMessageTransformer;
-import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.Node;
-import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
-import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
+import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
+import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
+import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeAttrBuilder;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.parser.api.YangContextParser;
@@ -71,45 +74,43 @@ public class NetconfToRpcRequestTest {
         cfgCtx = parser.resolveSchemaContext(configModules);
         assertNotNull(cfgCtx);
 
-        messageTransformer = new NetconfMessageTransformer();
+        messageTransformer = new NetconfMessageTransformer(cfgCtx);
     }
 
     @Test
     public void testIsDataEditOperation() throws Exception {
-        messageTransformer.onGlobalContextUpdated(cfgCtx);
+        final DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode> rootBuilder = Builders.containerBuilder();
+        rootBuilder.withNodeIdentifier(toId(EDIT_CONFIG_QNAME));
 
-        final CompositeNodeBuilder<ImmutableCompositeNode> rootBuilder = ImmutableCompositeNode.builder();
-        rootBuilder.setQName(EDIT_CONFIG_QNAME);
+        final DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode> inputBuilder = Builders.containerBuilder();
+        inputBuilder.withNodeIdentifier(toId(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "input")));
 
-        final CompositeNodeBuilder<ImmutableCompositeNode> inputBuilder = ImmutableCompositeNode.builder();
-        inputBuilder.setQName(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "input"));
+        final DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode> targetBuilder = Builders.containerBuilder();
+        targetBuilder.withNodeIdentifier(toId(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "target")));
+        targetBuilder.withChild(buildLeaf(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "running"), null));
 
-        final CompositeNodeBuilder<ImmutableCompositeNode> targetBuilder = ImmutableCompositeNode.builder();
-        targetBuilder.setQName(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "target"));
-        targetBuilder.addLeaf(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "running"), null);
+        final DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode> configBuilder = Builders.containerBuilder();
+        configBuilder.withNodeIdentifier(toId(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "config")));
 
-        final CompositeNodeBuilder<ImmutableCompositeNode> configBuilder = ImmutableCompositeNode.builder();
-        configBuilder.setQName(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "config"));
+        final DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode> anyxmlTopBuilder = Builders.containerBuilder();
+        anyxmlTopBuilder.withNodeIdentifier(toId(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "top")));
 
-        final CompositeNodeBuilder<ImmutableCompositeNode> anyxmlTopBuilder = ImmutableCompositeNode.builder();
-        anyxmlTopBuilder.setQName(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "top"));
+        final DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode> anyxmlInterfBuilder = Builders.containerBuilder();
+        anyxmlInterfBuilder.withNodeIdentifier(toId(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "interface")));
 
-        final CompositeNodeBuilder<ImmutableCompositeNode> anyxmlInterfBuilder = ImmutableCompositeNode.builder();
-        anyxmlInterfBuilder.setQName(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "interface"));
+        anyxmlInterfBuilder.withChild(buildLeaf(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "name"), "Ethernet0/0"));
+        anyxmlInterfBuilder.withChild(buildLeaf(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "mtu"), "1500"));
 
-        anyxmlInterfBuilder.addLeaf(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "name"), "Ethernet0/0");
-        anyxmlInterfBuilder.addLeaf(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "mtu"), "1500");
+        anyxmlTopBuilder.withChild(anyxmlInterfBuilder.build());
+        configBuilder.withChild(anyxmlTopBuilder.build());
 
-        anyxmlTopBuilder.add(anyxmlInterfBuilder.toInstance());
-        configBuilder.add(anyxmlTopBuilder.toInstance());
+        inputBuilder.withChild(targetBuilder.build());
+        inputBuilder.withChild(configBuilder.build());
 
-        inputBuilder.add(targetBuilder.toInstance());
-        inputBuilder.add(configBuilder.toInstance());
+        rootBuilder.withChild(inputBuilder.build());
+        final ContainerNode root = rootBuilder.build();
 
-        rootBuilder.add(inputBuilder.toInstance());
-        final ImmutableCompositeNode root = rootBuilder.toInstance();
-
-        final NetconfMessage message = messageTransformer.toRpcRequest(EDIT_CONFIG_QNAME, root);
+        final NetconfMessage message = messageTransformer.toRpcRequest(toPath(EDIT_CONFIG_QNAME), root);
         assertNotNull(message);
 
         final Document xmlDoc = message.getDocument();
@@ -141,20 +142,22 @@ public class NetconfToRpcRequestTest {
         assertEquals(mtuNode.getLocalName(), "mtu");
     }
 
+    private LeafNode<Object> buildLeaf(final QName running, final Object value) {
+        return Builders.leafBuilder().withNodeIdentifier(toId(running)).withValue(value).build();
+    }
+
     @Test
     public void testIsGetOperation() throws Exception {
-        messageTransformer.onGlobalContextUpdated(cfgCtx);
+        final DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode> rootBuilder = Builders.containerBuilder();
+        rootBuilder.withNodeIdentifier(toId(GET_QNAME));
 
-        final CompositeNodeBuilder<ImmutableCompositeNode> rootBuilder = ImmutableCompositeNode.builder();
-        rootBuilder.setQName(GET_QNAME);
+        final DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode> inputBuilder = Builders.containerBuilder();
+        inputBuilder.withNodeIdentifier(toId(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "input")));
 
-        final CompositeNodeBuilder<ImmutableCompositeNode> inputBuilder = ImmutableCompositeNode.builder();
-        inputBuilder.setQName(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "input"));
+        rootBuilder.withChild(inputBuilder.build());
+        final ContainerNode root = rootBuilder.build();
 
-        rootBuilder.add(inputBuilder.toInstance());
-        final ImmutableCompositeNode root = rootBuilder.toInstance();
-
-        final NetconfMessage message = messageTransformer.toRpcRequest(GET_QNAME, root);
+        final NetconfMessage message = messageTransformer.toRpcRequest(toPath(GET_QNAME), root);
         assertNotNull(message);
 
         final Document xmlDoc = message.getDocument();
@@ -167,33 +170,31 @@ public class NetconfToRpcRequestTest {
 
     @Test
     public void testIsGetConfigOperation() throws Exception {
-        messageTransformer.onGlobalContextUpdated(cfgCtx);
+        final DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode> rootBuilder = Builders.containerBuilder();
+        rootBuilder.withNodeIdentifier(toId(GET_CONFIG_QNAME));
 
-        final CompositeNodeBuilder<ImmutableCompositeNode> rootBuilder = ImmutableCompositeNode.builder();
-        rootBuilder.setQName(GET_CONFIG_QNAME);
+        final DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode> inputBuilder = Builders.containerBuilder();
+        inputBuilder.withNodeIdentifier(toId(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "input")));
 
-        final CompositeNodeBuilder<ImmutableCompositeNode> inputBuilder = ImmutableCompositeNode.builder();
-        inputBuilder.setQName(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "input"));
+        final DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode> sourceBuilder = Builders.containerBuilder();
+        sourceBuilder.withNodeIdentifier(toId(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "source")));
+        sourceBuilder.withChild(buildLeaf(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "running"), null));
 
-        final CompositeNodeBuilder<ImmutableCompositeNode> sourceBuilder = ImmutableCompositeNode.builder();
-        sourceBuilder.setQName(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "source"));
-        sourceBuilder.addLeaf(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "running"), null);
+        final DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode> anyxmlFilterBuilder = Builders.containerBuilder();
+        anyxmlFilterBuilder.withNodeIdentifier(toId(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "filter")));
 
-        final CompositeNodeBuilder<ImmutableCompositeNode> anyxmlFilterBuilder = ImmutableCompositeNode.builder();
-        anyxmlFilterBuilder.setQName(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "filter"));
+        final DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode> anyxmlTopBuilder = Builders.containerBuilder();
+        anyxmlTopBuilder.withNodeIdentifier(toId(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "top")));
+        anyxmlTopBuilder.withChild(buildLeaf(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "users"), null));
 
-        final CompositeNodeBuilder<ImmutableCompositeNode> anyxmlTopBuilder = ImmutableCompositeNode.builder();
-        anyxmlTopBuilder.setQName(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "top"));
-        anyxmlTopBuilder.addLeaf(QName.create(CONFIG_TEST_NAMESPACE, CONFIG_TEST_REVISION, "users"), null);
+        anyxmlFilterBuilder.withChild(anyxmlTopBuilder.build());
 
-        anyxmlFilterBuilder.add(anyxmlTopBuilder.toInstance());
+        inputBuilder.withChild(sourceBuilder.build());
+        inputBuilder.withChild(anyxmlFilterBuilder.build());
+        rootBuilder.withChild(inputBuilder.build());
+        final ContainerNode root = rootBuilder.build();
 
-        inputBuilder.add(sourceBuilder.toInstance());
-        inputBuilder.add(anyxmlFilterBuilder.toInstance());
-        rootBuilder.add(inputBuilder.toInstance());
-        final ImmutableCompositeNode root = rootBuilder.toInstance();
-
-        final NetconfMessage message = messageTransformer.toRpcRequest(GET_CONFIG_QNAME, root);
+        final NetconfMessage message = messageTransformer.toRpcRequest(toPath(GET_CONFIG_QNAME), root);
         assertNotNull(message);
 
         final Document xmlDoc = message.getDocument();
@@ -221,27 +222,17 @@ public class NetconfToRpcRequestTest {
 
     @Test
     public void testUserDefinedRpcCall() throws Exception {
-        messageTransformer.onGlobalContextUpdated(notifCtx);
+        final DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode> rootBuilder = Builders.containerBuilder();
+        rootBuilder.withNodeIdentifier(toId(SUBSCRIBE_RPC_NAME));
 
-        final CompositeNodeBuilder<ImmutableCompositeNode> rootBuilder = ImmutableCompositeNode.builder();
-        rootBuilder.setQName(SUBSCRIBE_RPC_NAME);
+        final DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode> inputBuilder = Builders.containerBuilder();
+        inputBuilder.withNodeIdentifier(toId(INPUT_QNAME));
+        inputBuilder.withChild(buildLeaf(STREAM_NAME, "NETCONF"));
 
-        final CompositeNodeBuilder<ImmutableCompositeNode> inputBuilder = ImmutableCompositeNode.builder();
-        inputBuilder.setQName(INPUT_QNAME);
-        inputBuilder.addLeaf(STREAM_NAME, "NETCONF");
+        rootBuilder.withChild(inputBuilder.build());
+        final ContainerNode root = rootBuilder.build();
 
-        rootBuilder.add(inputBuilder.toInstance());
-        final ImmutableCompositeNode root = rootBuilder.toInstance();
-
-        final CompositeNode flattenedNode = NetconfMessageTransformUtil.flattenInput(root);
-        assertNotNull(flattenedNode);
-        assertEquals(1, flattenedNode.size());
-
-        final List<CompositeNode> inputNode = flattenedNode.getCompositesByName(INPUT_QNAME);
-        assertNotNull(inputNode);
-        assertTrue(inputNode.isEmpty());
-
-        final NetconfMessage message = messageTransformer.toRpcRequest(SUBSCRIBE_RPC_NAME, root);
+        final NetconfMessage message = messageTransformer.toRpcRequest(toPath(SUBSCRIBE_RPC_NAME), root);
         assertNotNull(message);
 
         final Document xmlDoc = message.getDocument();
@@ -265,8 +256,8 @@ public class NetconfToRpcRequestTest {
                 "</data>\n" +
                 "</rpc-reply>\n"
         ));
-        final RpcResult<CompositeNode> compositeNodeRpcResult = messageTransformer.toRpcResult(response, SUBSCRIBE_RPC_NAME);
-        final Node<?> dataNode = compositeNodeRpcResult.getResult().getValue().get(0);
+        final DOMRpcResult compositeNodeRpcResult = messageTransformer.toRpcResult(response, toPath(SUBSCRIBE_RPC_NAME));
+        final DataContainerChild<? extends YangInstanceIdentifier.PathArgument, ?> dataNode = ((ContainerNode) compositeNodeRpcResult.getResult()).getValue().iterator().next();
         assertEquals("module schema", dataNode.getValue());
     }
 

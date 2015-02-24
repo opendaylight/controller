@@ -10,6 +10,7 @@ package org.opendaylight.controller.sal.connect.netconf.util;
 
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.DISCARD_CHANGES_RPC_CONTENT;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_CANDIDATE_QNAME;
+import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_COPY_CONFIG_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_DEFAULT_OPERATION_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_DISCARD_CHANGES_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_EDIT_CONFIG_QNAME;
@@ -24,26 +25,24 @@ import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessag
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_VALIDATE_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.ROLLBACK_ON_ERROR_OPTION;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.toFilterStructure;
+import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.toId;
+import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.toPath;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import java.util.Collections;
-import org.opendaylight.controller.sal.core.api.RpcImplementation;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.ModifyAction;
-import org.opendaylight.yangtools.yang.data.api.Node;
-import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
-import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
-import org.opendaylight.yangtools.yang.data.impl.SimpleNodeTOImpl;
-import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
+import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeAttrBuilder;
 
 /**
  * Provides base operations for netconf e.g. get, get-config, edit-config, (un)lock, commit etc.
@@ -51,114 +50,115 @@ import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
  */
 public final class NetconfBaseOps {
 
-    private final RpcImplementation rpc;
+    private final DOMRpcService rpc;
 
-    public NetconfBaseOps(final RpcImplementation rpc) {
+    public NetconfBaseOps(final DOMRpcService rpc) {
         this.rpc = rpc;
     }
 
-    public ListenableFuture<RpcResult<CompositeNode>> lock(final FutureCallback<RpcResult<CompositeNode>> callback, final QName datastore) {
+    public ListenableFuture<DOMRpcResult> lock(final FutureCallback<DOMRpcResult> callback, final QName datastore) {
         Preconditions.checkNotNull(callback);
         Preconditions.checkNotNull(datastore);
 
-        final ListenableFuture<RpcResult<CompositeNode>> future = rpc.invokeRpc(NETCONF_LOCK_QNAME, getLockContent(datastore));
+        final ListenableFuture<DOMRpcResult> future = rpc.invokeRpc(toPath(NETCONF_LOCK_QNAME), getLockContent(datastore));
         Futures.addCallback(future, callback);
         return future;
     }
 
-    public ListenableFuture<RpcResult<CompositeNode>> lockCandidate(final FutureCallback<RpcResult<CompositeNode>> callback) {
-        final ListenableFuture<RpcResult<CompositeNode>> future = rpc.invokeRpc(NETCONF_LOCK_QNAME, getLockContent(NETCONF_CANDIDATE_QNAME));
+    public ListenableFuture<DOMRpcResult> lockCandidate(final FutureCallback<DOMRpcResult> callback) {
+        final ListenableFuture<DOMRpcResult> future = rpc.invokeRpc(toPath(NETCONF_LOCK_QNAME), getLockContent(NETCONF_CANDIDATE_QNAME));
         Futures.addCallback(future, callback);
         return future;
     }
 
 
-    public ListenableFuture<RpcResult<CompositeNode>> lockRunning(final FutureCallback<RpcResult<CompositeNode>> callback) {
-        final ListenableFuture<RpcResult<CompositeNode>> future = rpc.invokeRpc(NETCONF_LOCK_QNAME, getLockContent(NETCONF_RUNNING_QNAME));
+    public ListenableFuture<DOMRpcResult> lockRunning(final FutureCallback<DOMRpcResult> callback) {
+        final ListenableFuture<DOMRpcResult> future = rpc.invokeRpc(toPath(NETCONF_LOCK_QNAME), getLockContent(NETCONF_RUNNING_QNAME));
         Futures.addCallback(future, callback);
         return future;
     }
 
-    public ListenableFuture<RpcResult<CompositeNode>> unlock(final FutureCallback<RpcResult<CompositeNode>> callback, final QName datastore) {
+    public ListenableFuture<DOMRpcResult> unlock(final FutureCallback<DOMRpcResult> callback, final QName datastore) {
         Preconditions.checkNotNull(callback);
         Preconditions.checkNotNull(datastore);
 
-        final ListenableFuture<RpcResult<CompositeNode>> future = rpc.invokeRpc(NETCONF_UNLOCK_QNAME, getUnLockContent(datastore));
+        final ListenableFuture<DOMRpcResult> future = rpc.invokeRpc(toPath(NETCONF_UNLOCK_QNAME), getUnLockContent(datastore));
         Futures.addCallback(future, callback);
         return future;
     }
 
-    public ListenableFuture<RpcResult<CompositeNode>> unlockRunning(final FutureCallback<RpcResult<CompositeNode>> callback) {
-        final ListenableFuture<RpcResult<CompositeNode>> future = rpc.invokeRpc(NETCONF_UNLOCK_QNAME, getUnLockContent(NETCONF_RUNNING_QNAME));
+    public ListenableFuture<DOMRpcResult> unlockRunning(final FutureCallback<DOMRpcResult> callback) {
+        final ListenableFuture<DOMRpcResult> future = rpc.invokeRpc(toPath(NETCONF_UNLOCK_QNAME), getUnLockContent(NETCONF_RUNNING_QNAME));
         Futures.addCallback(future, callback);
         return future;
     }
 
-    public ListenableFuture<RpcResult<CompositeNode>> unlockCandidate(final FutureCallback<RpcResult<CompositeNode>> callback) {
-        final ListenableFuture<RpcResult<CompositeNode>> future = rpc.invokeRpc(NETCONF_UNLOCK_QNAME, getUnLockContent(NETCONF_CANDIDATE_QNAME));
+    public ListenableFuture<DOMRpcResult> unlockCandidate(final FutureCallback<DOMRpcResult> callback) {
+        final ListenableFuture<DOMRpcResult> future = rpc.invokeRpc(toPath(NETCONF_UNLOCK_QNAME), getUnLockContent(NETCONF_CANDIDATE_QNAME));
         Futures.addCallback(future, callback);
         return future;
     }
 
-    public ListenableFuture<RpcResult<CompositeNode>> discardChanges(final FutureCallback<RpcResult<CompositeNode>> callback) {
+    public ListenableFuture<DOMRpcResult> discardChanges(final FutureCallback<DOMRpcResult> callback) {
         Preconditions.checkNotNull(callback);
 
-        final ListenableFuture<RpcResult<CompositeNode>> future = rpc.invokeRpc(NETCONF_DISCARD_CHANGES_QNAME, DISCARD_CHANGES_RPC_CONTENT);
+        final ListenableFuture<DOMRpcResult> future = rpc.invokeRpc(toPath(NETCONF_DISCARD_CHANGES_QNAME), DISCARD_CHANGES_RPC_CONTENT);
         Futures.addCallback(future, callback);
         return future;
     }
 
-    public ListenableFuture<RpcResult<CompositeNode>> commit(final FutureCallback<RpcResult<CompositeNode>> callback) {
+    public ListenableFuture<DOMRpcResult> commit(final FutureCallback<DOMRpcResult> callback) {
         Preconditions.checkNotNull(callback);
 
-        final ListenableFuture<RpcResult<CompositeNode>> future = rpc.invokeRpc(NetconfMessageTransformUtil.NETCONF_COMMIT_QNAME, NetconfMessageTransformUtil.COMMIT_RPC_CONTENT);
+        final ListenableFuture<DOMRpcResult> future = rpc.invokeRpc(toPath(NetconfMessageTransformUtil.NETCONF_COMMIT_QNAME), NetconfMessageTransformUtil.COMMIT_RPC_CONTENT);
         Futures.addCallback(future, callback);
         return future;
     }
 
-    public ListenableFuture<RpcResult<CompositeNode>> validate(final FutureCallback<RpcResult<CompositeNode>> callback, final QName datastore) {
+    public ListenableFuture<DOMRpcResult> validate(final FutureCallback<DOMRpcResult> callback, final QName datastore) {
         Preconditions.checkNotNull(callback);
         Preconditions.checkNotNull(datastore);
 
-        final ListenableFuture<RpcResult<CompositeNode>> future = rpc.invokeRpc(NetconfMessageTransformUtil.NETCONF_VALIDATE_QNAME, getValidateContent(datastore));
+        final ListenableFuture<DOMRpcResult> future = rpc.invokeRpc(toPath(NetconfMessageTransformUtil.NETCONF_VALIDATE_QNAME), getValidateContent(datastore));
         Futures.addCallback(future, callback);
         return future;
     }
 
-    public ListenableFuture<RpcResult<CompositeNode>> validateCandidate(final FutureCallback<RpcResult<CompositeNode>> callback) {
+    public ListenableFuture<DOMRpcResult> validateCandidate(final FutureCallback<DOMRpcResult> callback) {
         return validate(callback, NETCONF_CANDIDATE_QNAME);
     }
 
 
-    public ListenableFuture<RpcResult<CompositeNode>> validateRunning(final FutureCallback<RpcResult<CompositeNode>> callback) {
+    public ListenableFuture<DOMRpcResult> validateRunning(final FutureCallback<DOMRpcResult> callback) {
         return validate(callback, NETCONF_RUNNING_QNAME);
     }
 
-    public ListenableFuture<RpcResult<CompositeNode>> copyConfig(final FutureCallback<RpcResult<CompositeNode>> callback, final QName source, final QName target) {
+    public ListenableFuture<DOMRpcResult> copyConfig(final FutureCallback<DOMRpcResult> callback, final QName source, final QName target) {
         Preconditions.checkNotNull(callback);
         Preconditions.checkNotNull(source);
         Preconditions.checkNotNull(target);
 
-        final ListenableFuture<RpcResult<CompositeNode>> future = rpc.invokeRpc(NetconfMessageTransformUtil.NETCONF_COPY_CONFIG_QNAME, getCopyConfigContent(source, target));
+        final ListenableFuture<DOMRpcResult> future = rpc.invokeRpc(toPath(NetconfMessageTransformUtil.NETCONF_COPY_CONFIG_QNAME), getCopyConfigContent(source, target));
         Futures.addCallback(future, callback);
         return future;
     }
 
-    public ListenableFuture<RpcResult<CompositeNode>> copyRunningToCandidate(final FutureCallback<RpcResult<CompositeNode>> callback) {
+    public ListenableFuture<DOMRpcResult> copyRunningToCandidate(final FutureCallback<DOMRpcResult> callback) {
         return copyConfig(callback, NETCONF_RUNNING_QNAME, NETCONF_CANDIDATE_QNAME);
     }
 
-    public ListenableFuture<RpcResult<CompositeNode>> getConfig(final FutureCallback<RpcResult<CompositeNode>> callback, final QName datastore, final Optional<YangInstanceIdentifier> filterPath) {
+    public ListenableFuture<DOMRpcResult> getConfig(final FutureCallback<DOMRpcResult> callback, final QName datastore, final Optional<YangInstanceIdentifier> filterPath) {
         Preconditions.checkNotNull(callback);
         Preconditions.checkNotNull(datastore);
 
-        final ListenableFuture<RpcResult<CompositeNode>> future;
+        final ListenableFuture<DOMRpcResult> future;
         if (filterPath.isPresent()) {
-            final Node<?> node = toFilterStructure(filterPath.get());
-            future = rpc.invokeRpc(NETCONF_GET_CONFIG_QNAME,
+            // FIXME the source node has to be wrapped in a choice
+            final DataContainerChild<?, ?> node = toFilterStructure(filterPath.get());
+            future = rpc.invokeRpc(toPath(NETCONF_GET_CONFIG_QNAME),
                             NetconfMessageTransformUtil.wrap(NETCONF_GET_CONFIG_QNAME, getSourceNode(datastore), node));
         } else {
-            future = rpc.invokeRpc(NETCONF_GET_CONFIG_QNAME,
+            future = rpc.invokeRpc(toPath(NETCONF_GET_CONFIG_QNAME),
                             NetconfMessageTransformUtil.wrap(NETCONF_GET_CONFIG_QNAME, getSourceNode(datastore)));
         }
 
@@ -166,104 +166,102 @@ public final class NetconfBaseOps {
         return future;
     }
 
-    public ListenableFuture<RpcResult<CompositeNode>> getConfigRunning(final FutureCallback<RpcResult<CompositeNode>> callback, final Optional<YangInstanceIdentifier> filterPath) {
+    public ListenableFuture<DOMRpcResult> getConfigRunning(final FutureCallback<DOMRpcResult> callback, final Optional<YangInstanceIdentifier> filterPath) {
         return getConfig(callback, NETCONF_RUNNING_QNAME, filterPath);
     }
 
-    public ListenableFuture<RpcResult<CompositeNode>> getConfigCandidate(final FutureCallback<RpcResult<CompositeNode>> callback, final Optional<YangInstanceIdentifier> filterPath) {
+    public ListenableFuture<DOMRpcResult> getConfigCandidate(final FutureCallback<DOMRpcResult> callback, final Optional<YangInstanceIdentifier> filterPath) {
         return getConfig(callback, NETCONF_CANDIDATE_QNAME, filterPath);
     }
 
-    public ListenableFuture<RpcResult<CompositeNode>> get(final FutureCallback<RpcResult<CompositeNode>> callback, final Optional<YangInstanceIdentifier> filterPath) {
+    public ListenableFuture<DOMRpcResult> get(final FutureCallback<DOMRpcResult> callback, final Optional<YangInstanceIdentifier> filterPath) {
         Preconditions.checkNotNull(callback);
 
-        final ListenableFuture<RpcResult<CompositeNode>> future;
-        final Node<?> node = filterPath.isPresent() ? toFilterStructure(filterPath.get()) : NetconfMessageTransformUtil.GET_RPC_CONTENT;
-        future = rpc.invokeRpc(NETCONF_GET_QNAME, NetconfMessageTransformUtil.wrap(NETCONF_GET_QNAME, node));
+        final ListenableFuture<DOMRpcResult> future;
+        final DataContainerChild<?, ?> node =
+                filterPath.isPresent() ? toFilterStructure(filterPath.get()) : NetconfMessageTransformUtil.GET_RPC_CONTENT;
+        future = rpc.invokeRpc(toPath(NETCONF_GET_QNAME), NetconfMessageTransformUtil.wrap(NETCONF_GET_QNAME, node));
 
         Futures.addCallback(future, callback);
         return future;
     }
 
-    public ListenableFuture<RpcResult<CompositeNode>> editConfigCandidate(final FutureCallback<? super RpcResult<CompositeNode>> callback, final CompositeNode editStructure, final ModifyAction modifyAction, final boolean rollback) {
+    public ListenableFuture<DOMRpcResult> editConfigCandidate(final FutureCallback<? super DOMRpcResult> callback, final DataContainerChild<?, ?> editStructure, final ModifyAction modifyAction, final boolean rollback) {
         return editConfig(callback, NETCONF_CANDIDATE_QNAME, editStructure, Optional.of(modifyAction), rollback);
     }
 
-    public ListenableFuture<RpcResult<CompositeNode>> editConfigCandidate(final FutureCallback<? super RpcResult<CompositeNode>> callback, final CompositeNode editStructure, final boolean rollback) {
+    public ListenableFuture<DOMRpcResult> editConfigCandidate(final FutureCallback<? super DOMRpcResult> callback, final DataContainerChild<?, ?> editStructure, final boolean rollback) {
         return editConfig(callback, NETCONF_CANDIDATE_QNAME, editStructure, Optional.<ModifyAction>absent(), rollback);
     }
 
-    public ListenableFuture<RpcResult<CompositeNode>> editConfigRunning(final FutureCallback<? super RpcResult<CompositeNode>> callback, final CompositeNode editStructure, final ModifyAction modifyAction, final boolean rollback) {
+    public ListenableFuture<DOMRpcResult> editConfigRunning(final FutureCallback<? super DOMRpcResult> callback, final DataContainerChild<?, ?> editStructure, final ModifyAction modifyAction, final boolean rollback) {
         return editConfig(callback, NETCONF_RUNNING_QNAME, editStructure, Optional.of(modifyAction), rollback);
     }
 
-    public ListenableFuture<RpcResult<CompositeNode>> editConfigRunning(final FutureCallback<? super RpcResult<CompositeNode>> callback, final CompositeNode editStructure, final boolean rollback) {
+    public ListenableFuture<DOMRpcResult> editConfigRunning(final FutureCallback<? super DOMRpcResult> callback, final DataContainerChild<?, ?> editStructure, final boolean rollback) {
         return editConfig(callback, NETCONF_RUNNING_QNAME, editStructure, Optional.<ModifyAction>absent(), rollback);
     }
 
-    public ListenableFuture<RpcResult<CompositeNode>> editConfig(final FutureCallback<? super RpcResult<CompositeNode>> callback, final QName datastore, final CompositeNode editStructure, final Optional<ModifyAction> modifyAction, final boolean rollback) {
+    public ListenableFuture<DOMRpcResult> editConfig(final FutureCallback<? super DOMRpcResult> callback, final QName datastore, final DataContainerChild<?, ?> editStructure, final Optional<ModifyAction> modifyAction, final boolean rollback) {
         Preconditions.checkNotNull(editStructure);
         Preconditions.checkNotNull(callback);
         Preconditions.checkNotNull(datastore);
 
-        final ListenableFuture<RpcResult<CompositeNode>> future = rpc.invokeRpc(NETCONF_EDIT_CONFIG_QNAME, getEditConfigContent(datastore, editStructure, modifyAction, rollback));
+        final ListenableFuture<DOMRpcResult> future = rpc.invokeRpc(toPath(NETCONF_EDIT_CONFIG_QNAME), getEditConfigContent(datastore, editStructure, modifyAction, rollback));
 
         Futures.addCallback(future, callback);
         return future;
     }
 
-    private CompositeNode getEditConfigContent(final QName datastore, final CompositeNode editStructure, final Optional<ModifyAction> defaultOperation, final boolean rollback) {
-        final CompositeNodeBuilder<ImmutableCompositeNode> ret = ImmutableCompositeNode.builder();
+    private ContainerNode getEditConfigContent(final QName datastore, final DataContainerChild<?, ?> editStructure, final Optional<ModifyAction> defaultOperation, final boolean rollback) {
+        final DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode> editBuilder = Builders.containerBuilder().withNodeIdentifier(toId(NETCONF_EDIT_CONFIG_QNAME));
 
         // Target
-        ret.add(getTargetNode(datastore));
+        editBuilder.withChild(getTargetNode(datastore));
 
         // Default operation
         if(defaultOperation.isPresent()) {
-            final SimpleNode<String> defOp = NodeFactory.createImmutableSimpleNode(NETCONF_DEFAULT_OPERATION_QNAME, null, NetconfMessageTransformUtil.modifyOperationToXmlString(defaultOperation.get()));
-            ret.add(defOp);
+            editBuilder.withChild(Builders.leafBuilder().withNodeIdentifier(toId(NETCONF_DEFAULT_OPERATION_QNAME)).withValue(NetconfMessageTransformUtil.modifyOperationToXmlString(defaultOperation.get())).build());
         }
 
         // Error option
         if(rollback) {
-            ret.addLeaf(NETCONF_ERROR_OPTION_QNAME, ROLLBACK_ON_ERROR_OPTION);
+            editBuilder.withChild(Builders.leafBuilder().withNodeIdentifier(toId(NETCONF_ERROR_OPTION_QNAME)).withValue(ROLLBACK_ON_ERROR_OPTION).build());
         }
 
-        ret.setQName(NETCONF_EDIT_CONFIG_QNAME);
         // Edit content
-        ret.add(editStructure);
-        return ret.toInstance();
+        editBuilder.withChild(editStructure);
+        return editBuilder.build();
     }
 
-    private static CompositeNode getSourceNode(final QName datastore) {
-        return NodeFactory.createImmutableCompositeNode(NETCONF_SOURCE_QNAME, null,
-                Collections.<Node<?>> singletonList(new SimpleNodeTOImpl<>(datastore, null, null)));
+    private static DataContainerChild<?, ?> getSourceNode(final QName datastore) {
+        return Builders.containerBuilder().withNodeIdentifier(toId(NETCONF_SOURCE_QNAME))
+                .withChild(Builders.leafBuilder().withNodeIdentifier(toId(datastore)).build()).build();
     }
 
-
-    public static CompositeNode getLockContent(final QName datastore) {
-        return NodeFactory.createImmutableCompositeNode(NETCONF_LOCK_QNAME, null, Collections.<Node<?>>singletonList(
-                getTargetNode(datastore)));
+    public static NormalizedNode<?, ?> getLockContent(final QName datastore) {
+        return Builders.containerBuilder().withNodeIdentifier(toId(NETCONF_LOCK_QNAME))
+                .withChild(getTargetNode(datastore)).build();
     }
 
-    private static CompositeNode getTargetNode(final QName datastore) {
-        return NodeFactory.createImmutableCompositeNode(NETCONF_TARGET_QNAME, null, Collections.<Node<?>>singletonList(
-                NodeFactory.createImmutableSimpleNode(datastore, null, null)
-        ));
+    private static DataContainerChild<?, ?> getTargetNode(final QName datastore) {
+        return Builders.containerBuilder().withNodeIdentifier(toId(NETCONF_TARGET_QNAME))
+                .withChild(Builders.leafBuilder().withNodeIdentifier(toId(datastore)).build()).build();
     }
 
-    public static CompositeNode getCopyConfigContent(final QName source, final QName target) {
-        return NodeFactory.createImmutableCompositeNode(NETCONF_LOCK_QNAME, null,
-                Lists.<Node<?>> newArrayList(getTargetNode(target), getSourceNode(source)));
+    public static NormalizedNode<?, ?> getCopyConfigContent(final QName source, final QName target) {
+        return Builders.containerBuilder().withNodeIdentifier(toId(NETCONF_COPY_CONFIG_QNAME))
+                .withChild(getTargetNode(target)).withChild(getSourceNode(source)).build();
     }
 
-    public static CompositeNode getValidateContent(final QName source) {
-        return NodeFactory.createImmutableCompositeNode(NETCONF_VALIDATE_QNAME, null, Lists.<Node<?>> newArrayList(getSourceNode(source)));
+    public static NormalizedNode<?, ?> getValidateContent(final QName source) {
+        return Builders.containerBuilder().withNodeIdentifier(toId(NETCONF_VALIDATE_QNAME))
+                .withChild(getSourceNode(source)).build();
     }
 
-    public static CompositeNode getUnLockContent(final QName preferedDatastore) {
-        return NodeFactory.createImmutableCompositeNode(NETCONF_UNLOCK_QNAME, null, Collections.<Node<?>>singletonList(
-                getTargetNode(preferedDatastore)));
+    public static NormalizedNode<?, ?> getUnLockContent(final QName datastore) {
+        return Builders.containerBuilder().withNodeIdentifier(toId(NETCONF_UNLOCK_QNAME))
+                .withChild(getTargetNode(datastore)).build();
     }
 
 }

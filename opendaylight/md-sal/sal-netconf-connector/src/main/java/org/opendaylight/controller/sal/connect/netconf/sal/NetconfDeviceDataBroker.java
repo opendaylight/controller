@@ -10,42 +10,38 @@ package org.opendaylight.controller.sal.connect.netconf.sal;
 
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
-import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizer;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionPreferences;
 import org.opendaylight.controller.sal.connect.netconf.sal.tx.ReadOnlyTx;
 import org.opendaylight.controller.sal.connect.netconf.sal.tx.ReadWriteTx;
-import org.opendaylight.controller.sal.connect.netconf.sal.tx.WriteCandidateTx;
 import org.opendaylight.controller.sal.connect.netconf.sal.tx.WriteCandidateRunningTx;
+import org.opendaylight.controller.sal.connect.netconf.sal.tx.WriteCandidateTx;
 import org.opendaylight.controller.sal.connect.netconf.sal.tx.WriteRunningTx;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfBaseOps;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
-import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 final class NetconfDeviceDataBroker implements DOMDataBroker {
     private final RemoteDeviceId id;
     private final NetconfBaseOps netconfOps;
     private final NetconfSessionPreferences netconfSessionPreferences;
-    private final DataNormalizer normalizer;
 
-    public NetconfDeviceDataBroker(final RemoteDeviceId id, final RpcImplementation rpc, final SchemaContext schemaContext, final NetconfSessionPreferences netconfSessionPreferences) {
+    public NetconfDeviceDataBroker(final RemoteDeviceId id, final DOMRpcService rpc, final NetconfSessionPreferences netconfSessionPreferences) {
         this.id = id;
         this.netconfOps = new NetconfBaseOps(rpc);
         this.netconfSessionPreferences = netconfSessionPreferences;
-        normalizer = new DataNormalizer(schemaContext);
     }
 
     @Override
     public DOMDataReadOnlyTransaction newReadOnlyTransaction() {
-        return new ReadOnlyTx(netconfOps, normalizer, id);
+        return new ReadOnlyTx(netconfOps, id);
     }
 
     @Override
@@ -57,12 +53,12 @@ final class NetconfDeviceDataBroker implements DOMDataBroker {
     public DOMDataWriteTransaction newWriteOnlyTransaction() {
         if(netconfSessionPreferences.isCandidateSupported()) {
             if(netconfSessionPreferences.isRunningWritable()) {
-                return new WriteCandidateRunningTx(id, netconfOps, normalizer, netconfSessionPreferences);
+                return new WriteCandidateRunningTx(id, netconfOps, netconfSessionPreferences);
             } else {
-                return new WriteCandidateTx(id, netconfOps, normalizer, netconfSessionPreferences);
+                return new WriteCandidateTx(id, netconfOps, netconfSessionPreferences);
             }
         } else {
-            return new WriteRunningTx(id, netconfOps, normalizer, netconfSessionPreferences);
+            return new WriteRunningTx(id, netconfOps, netconfSessionPreferences);
         }
     }
 

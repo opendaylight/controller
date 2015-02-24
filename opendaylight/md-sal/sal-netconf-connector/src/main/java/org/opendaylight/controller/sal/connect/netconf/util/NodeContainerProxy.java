@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.sal.connect.netconf.util;
 
+import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -31,22 +32,29 @@ class NodeContainerProxy implements ContainerSchemaNode {
 
     private final Map<QName, DataSchemaNode> childNodes;
     private final QName qName;
+    private final Set<AugmentationSchema> availableAugmentations;
 
-    public NodeContainerProxy(final QName qName, final Map<QName, DataSchemaNode> childNodes) {
+    public NodeContainerProxy(final QName qName, final Map<QName, DataSchemaNode> childNodes, final Set<AugmentationSchema> availableAugmentations) {
+        this.availableAugmentations = availableAugmentations;
         this.childNodes = Preconditions.checkNotNull(childNodes, "childNodes");
         this.qName = Preconditions.checkNotNull(qName, "qName");
     }
 
     public NodeContainerProxy(final QName qName, final Collection<DataSchemaNode> childNodes) {
-        this(qName, asMap(childNodes));
+        this(qName, asMap(childNodes), Collections.<AugmentationSchema>emptySet());
+    }
+
+    public NodeContainerProxy(final QName qName, final Collection<DataSchemaNode> childNodes, final Set<AugmentationSchema> availableAugmentations) {
+        this(qName, asMap(childNodes), availableAugmentations);
     }
 
     private static Map<QName, DataSchemaNode> asMap(final Collection<DataSchemaNode> childNodes) {
-        final Map<QName, DataSchemaNode> mapped = Maps.newHashMap();
-        for (final DataSchemaNode childNode : childNodes) {
-            mapped.put(childNode.getQName(), childNode);
-        }
-        return mapped;
+        return Maps.uniqueIndex(childNodes, new Function<DataSchemaNode, QName>() {
+            @Override
+            public QName apply(final DataSchemaNode input) {
+                return input.getQName();
+            }
+        });
     }
 
     @Override
@@ -86,7 +94,7 @@ class NodeContainerProxy implements ContainerSchemaNode {
 
     @Override
     public Set<AugmentationSchema> getAvailableAugmentations() {
-        throw new UnsupportedOperationException();
+        return availableAugmentations;
     }
 
     @Override
