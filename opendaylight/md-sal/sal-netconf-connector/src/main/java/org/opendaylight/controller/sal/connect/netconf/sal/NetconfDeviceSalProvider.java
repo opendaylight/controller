@@ -10,20 +10,19 @@ package org.opendaylight.controller.sal.connect.netconf.sal;
 import com.google.common.base.Preconditions;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.concurrent.ExecutorService;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
+import org.opendaylight.controller.md.sal.dom.api.DOMNotificationService;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.Provider;
-import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
-import org.opendaylight.controller.sal.core.api.notify.NotificationPublishService;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,15 +32,13 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
     private static final Logger logger = LoggerFactory.getLogger(NetconfDeviceSalProvider.class);
 
     private final RemoteDeviceId id;
-    private final ExecutorService executor;
     private volatile NetconfDeviceDatastoreAdapter datastoreAdapter;
     private MountInstance mountInstance;
 
     private volatile NetconfDeviceTopologyAdapter topologyDatastoreAdapter;
 
-    public NetconfDeviceSalProvider(final RemoteDeviceId deviceId, final ExecutorService executor) {
+    public NetconfDeviceSalProvider(final RemoteDeviceId deviceId) {
         this.id = deviceId;
-        this.executor = executor;
     }
 
     public MountInstance getMountInstance() {
@@ -100,7 +97,7 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
         private DOMMountPointService mountService;
         private final RemoteDeviceId id;
         private ObjectRegistration<DOMMountPoint> registration;
-        private NotificationPublishService notificationSerivce;
+        private NetconfDeviceNotificationService notificationService;
 
         private ObjectRegistration<DOMMountPoint> topologyRegistration;
 
@@ -111,8 +108,8 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
 
         @Deprecated
         synchronized void onDeviceConnected(final SchemaContext initialCtx,
-                final DOMDataBroker broker, final RpcProvisionRegistry rpc,
-                final NotificationPublishService notificationSerivce) {
+                final DOMDataBroker broker, final DOMRpcService rpc,
+                final NetconfDeviceNotificationService notificationService) {
 
             Preconditions.checkNotNull(mountService, "Closed");
             Preconditions.checkState(registration == null, "Already initialized");
@@ -121,9 +118,9 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
             mountBuilder.addInitialSchemaContext(initialCtx);
 
             mountBuilder.addService(DOMDataBroker.class, broker);
-            mountBuilder.addService(RpcProvisionRegistry.class, rpc);
-            this.notificationSerivce = notificationSerivce;
-            mountBuilder.addService(NotificationPublishService.class, notificationSerivce);
+            mountBuilder.addService(DOMRpcService.class, rpc);
+            mountBuilder.addService(DOMNotificationService.class, notificationService);
+            this.notificationService = notificationService;
 
             registration = mountBuilder.register();
         }
@@ -145,8 +142,8 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
         }
 
         synchronized void onTopologyDeviceConnected(final SchemaContext initialCtx,
-                final DOMDataBroker broker, final RpcProvisionRegistry rpc,
-                final NotificationPublishService notificationSerivce) {
+                                                    final DOMDataBroker broker, final DOMRpcService rpc,
+                                                    final NetconfDeviceNotificationService notificationService) {
 
             Preconditions.checkNotNull(mountService, "Closed");
             Preconditions.checkState(topologyRegistration == null, "Already initialized");
@@ -155,9 +152,8 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
             mountBuilder.addInitialSchemaContext(initialCtx);
 
             mountBuilder.addService(DOMDataBroker.class, broker);
-            mountBuilder.addService(RpcProvisionRegistry.class, rpc);
-            this.notificationSerivce = notificationSerivce;
-            mountBuilder.addService(NotificationPublishService.class, notificationSerivce);
+            mountBuilder.addService(DOMRpcService.class, rpc);
+            mountBuilder.addService(DOMNotificationService.class, notificationService);
 
             topologyRegistration = mountBuilder.register();
         }
@@ -186,9 +182,9 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
             mountService = null;
         }
 
-        public synchronized void publish(final CompositeNode domNotification) {
-            Preconditions.checkNotNull(notificationSerivce, "Device not set up yet, cannot handle notification {}", domNotification);
-            notificationSerivce.publish(domNotification);
+        public synchronized void publish(final ContainerNode domNotification) {
+            Preconditions.checkNotNull(notificationService, "Device not set up yet, cannot handle notification {}", domNotification);
+            notificationService.publishNotification(domNotification);
         }
     }
 
