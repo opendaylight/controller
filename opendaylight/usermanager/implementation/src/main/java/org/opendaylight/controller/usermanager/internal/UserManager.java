@@ -311,57 +311,57 @@ public class UserManager implements IUserManager, IObjectReader,
         IAAAProvider aaaClient;
         AuthResponse rcResponse = null;
         AuthenticatedUser result;
-        boolean remotelyAuthenticated = false;
+        boolean locallyAuthenticated = false;
         boolean authorizationInfoIsPresent = false;
         boolean authorized = false;
+
+        UserConfig localUser = this.localUserConfigList.get(userName);
+        if (localUser == null) {
+            logger.trace(
+                    "Local Authentication Failed for User:\"{}\", Reason: "
+                            + "user not found in Local Database", userName);
+            return (AuthResultEnum.AUTH_INVALID_LOC_USER);
+        }
+        rcResponse = localUser.authenticate(password);
+        if (rcResponse.getStatus() != AuthResultEnum.AUTH_ACCEPT_LOC) {
+            logger.trace(
+                    "Local Authentication Failed for User: \"{}\", Reason: {}",
+                    userName, rcResponse.getStatus().toString());
+
+            return (rcResponse.getStatus());
+        }
+        logger.trace("Local Authentication Succeeded for User: \"{}\"",
+                userName);
+        locallyAuthenticated = true;
 
         /*
          * Attempt remote authentication first if server is configured
          */
-        for (ServerConfig aaaServer : remoteServerConfigList.values()) {
-            String protocol = aaaServer.getProtocol();
-            aaaClient = this.getAAAProvider(protocol);
-            if (aaaClient != null) {
-                rcResponse = aaaClient.authService(userName, password,
-                        aaaServer.getAddress(), aaaServer.getSecret());
-                if (rcResponse.getStatus() == AuthResultEnum.AUTH_ACCEPT) {
-                    logger.trace(
-                            "Remote Authentication Succeeded for User: \"{}\", by Server: {}",
-                            userName, aaaServer.getAddress());
-                    remotelyAuthenticated = true;
-                    break;
-                } else if (rcResponse.getStatus() == AuthResultEnum.AUTH_REJECT) {
-                    logger.trace(
-                            "Remote Authentication Rejected User: \"{}\", from Server: {}, Reason:{}",
-                            new Object[] { userName, aaaServer.getAddress(),
-                                    rcResponse.getStatus().toString() });
-                } else {
-                    logger.trace(
-                            "Remote Authentication Failed for User: \"{}\", from Server: {}, Reason:{}",
-                            new Object[] { userName, aaaServer.getAddress(),
-                                    rcResponse.getStatus().toString() });
+        if (!locallyAuthenticated) {
+            for (ServerConfig aaaServer : remoteServerConfigList.values()) {
+                String protocol = aaaServer.getProtocol();
+                aaaClient = this.getAAAProvider(protocol);
+                if (aaaClient != null) {
+                    rcResponse = aaaClient.authService(userName, password,
+                            aaaServer.getAddress(), aaaServer.getSecret());
+                    if (rcResponse.getStatus() == AuthResultEnum.AUTH_ACCEPT) {
+                        logger.trace(
+                                "Remote Authentication Succeeded for User: \"{}\", by Server: {}",
+                                userName, aaaServer.getAddress());
+                        break;
+                    } else if (rcResponse.getStatus() == AuthResultEnum.AUTH_REJECT) {
+                        logger.trace(
+                                "Remote Authentication Rejected User: \"{}\", from Server: {}, Reason:{}",
+                                new Object[] { userName, aaaServer.getAddress(),
+                                        rcResponse.getStatus().toString() });
+                    } else {
+                        logger.trace(
+                                "Remote Authentication Failed for User: \"{}\", from Server: {}, Reason:{}",
+                                new Object[] { userName, aaaServer.getAddress(),
+                                        rcResponse.getStatus().toString() });
+                    }
                 }
             }
-        }
-
-        if (!remotelyAuthenticated) {
-            UserConfig localUser = this.localUserConfigList.get(userName);
-            if (localUser == null) {
-                logger.trace(
-                        "Local Authentication Failed for User:\"{}\", Reason: "
-                                + "user not found in Local Database", userName);
-                return (AuthResultEnum.AUTH_INVALID_LOC_USER);
-            }
-            rcResponse = localUser.authenticate(password);
-            if (rcResponse.getStatus() != AuthResultEnum.AUTH_ACCEPT_LOC) {
-                logger.trace(
-                        "Local Authentication Failed for User: \"{}\", Reason: {}",
-                        userName, rcResponse.getStatus().toString());
-
-                return (rcResponse.getStatus());
-            }
-            logger.trace("Local Authentication Succeeded for User: \"{}\"",
-                    userName);
         }
 
         /*
@@ -387,7 +387,7 @@ public class UserManager implements IUserManager, IObjectReader,
          * locally stored authorization info for this user If found, add the
          * data to the rcResponse
          */
-        if (remotelyAuthenticated && !authorizationInfoIsPresent) {
+        if (locallyAuthenticated && !authorizationInfoIsPresent) {
             logger.trace(
                     "No Remote Authorization Info provided by Server for User: \"{}\"",
                     userName);
