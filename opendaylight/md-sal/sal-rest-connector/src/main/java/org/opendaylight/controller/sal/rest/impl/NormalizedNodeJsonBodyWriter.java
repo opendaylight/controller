@@ -8,13 +8,13 @@
 package org.opendaylight.controller.sal.rest.impl;
 
 import com.google.common.base.Charsets;
+import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.net.URI;
-import java.util.Iterator;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -34,7 +34,9 @@ import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
+import org.opendaylight.yangtools.yang.data.codec.gson.JSONCodecFactory;
 import org.opendaylight.yangtools.yang.data.codec.gson.JSONNormalizedNodeStreamWriter;
+import org.opendaylight.yangtools.yang.data.codec.gson.JsonWriterFactory;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -60,45 +62,66 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
             final MediaType mediaType, final MultivaluedMap<String, Object> httpHeaders, final OutputStream entityStream)
                     throws IOException, WebApplicationException {
         NormalizedNode<?, ?> data = t.getData();
-        final InstanceIdentifierContext context = t.getInstanceIdentifierContext();
-        final DataSchemaNode schema = context.getSchemaNode();
-        SchemaPath path = context.getSchemaNode().getPath();
-        final OutputStreamWriter outputWriter = new OutputStreamWriter(entityStream, Charsets.UTF_8);
         if (data == null) {
             throw new RestconfDocumentedException(Response.Status.NOT_FOUND);
         }
 
+        final InstanceIdentifierContext context = t.getInstanceIdentifierContext();
+
+        SchemaPath path = context.getSchemaNode().getPath();
         boolean isDataRoot = false;
-        URI initialNs = null;
         if (SchemaPath.ROOT.equals(path)) {
             isDataRoot = true;
         } else {
             path = path.getParent();
             // FIXME: Add proper handling of reading root.
         }
-        if(!schema.isAugmenting() && !(schema instanceof SchemaContext)) {
-            initialNs = schema.getQName().getNamespace();
-        }
-        final NormalizedNodeStreamWriter jsonWriter = JSONNormalizedNodeStreamWriter.create(context.getSchemaContext(),path,initialNs,outputWriter);
-        final NormalizedNodeWriter nnWriter = NormalizedNodeWriter.forStreamWriter(jsonWriter);
+
+        JsonWriter jsonWriter = createJsonWriter(entityStream);
+        NormalizedNodeWriter nnWriter = createNormalizedNodeWriter(context,path,jsonWriter);
+
+        jsonWriter.beginObject();
         if(isDataRoot) {
-            writeDataRoot(outputWriter,nnWriter,(ContainerNode) data);
+            writeDataRoot(nnWriter,(ContainerNode) data);
         } else {
             if(data instanceof MapEntryNode) {
                 data = ImmutableNodes.mapNodeBuilder(data.getNodeType()).withChild(((MapEntryNode) data)).build();
             }
             nnWriter.write(data);
         }
+
         nnWriter.flush();
-        outputWriter.flush();
+        jsonWriter.endObject();
+        jsonWriter.flush();
     }
 
-    private void writeDataRoot(final OutputStreamWriter outputWriter, final NormalizedNodeWriter nnWriter, final ContainerNode data) throws IOException {
-        final Iterator<DataContainerChild<? extends PathArgument, ?>> iterator = data.getValue().iterator();
-        while(iterator.hasNext()) {
-            final DataContainerChild<? extends PathArgument, ?> child = iterator.next();
+    private NormalizedNodeWriter createNormalizedNodeWriter(InstanceIdentifierContext context, SchemaPath path, JsonWriter jsonWriter) {
+
+        final DataSchemaNode schema = context.getSchemaNode();
+        final JSONCodecFactory codecs = getCodecFactory(context);
+
+        URI initialNs = null;
+        if(!schema.isAugmenting() && !(schema instanceof SchemaContext)) {
+            initialNs = schema.getQName().getNamespace();
+        }
+        final NormalizedNodeStreamWriter streamWriter = JSONNormalizedNodeStreamWriter.createNestedWriter(codecs,path,initialNs,jsonWriter);
+        return NormalizedNodeWriter.forStreamWriter(streamWriter);
+    }
+
+    private JsonWriter createJsonWriter(OutputStream entityStream) {
+        // FIXME BUG-2153: Add pretty print support
+        return JsonWriterFactory.createJsonWriter(new OutputStreamWriter(entityStream, Charsets.UTF_8));
+
+    }
+
+    private JSONCodecFactory getCodecFactory(InstanceIdentifierContext context) {
+        // TODO: Performance: Cache JSON Codec factory and schema context
+        return JSONCodecFactory.create(context.getSchemaContext());
+    }
+
+    private void writeDataRoot(final NormalizedNodeWriter nnWriter, final ContainerNode data) throws IOException {
+        for(DataContainerChild<? extends PathArgument, ?> child : data.getValue()) {
             nnWriter.write(child);
-            nnWriter.flush();
         }
     }
 
