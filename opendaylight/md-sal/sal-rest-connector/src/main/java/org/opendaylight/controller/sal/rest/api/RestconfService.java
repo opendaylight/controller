@@ -80,7 +80,7 @@ public interface RestconfService {
     @Path("/operations")
     @Produces({ Draft02.MediaTypes.API + JSON, Draft02.MediaTypes.API + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public StructuredData getOperations(@Context UriInfo uriInfo);
+    public NormalizedNodeContext getOperations(@Context UriInfo uriInfo);
 
     @GET
     @Path("/operations/{identifier:.+}")
