@@ -17,8 +17,10 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 public abstract class AbstractModification implements Modification {
 
     private YangInstanceIdentifier path;
+    private short version;
 
-    protected AbstractModification() {
+    protected AbstractModification(short version) {
+        this.version = version;
     }
 
     protected AbstractModification(YangInstanceIdentifier path) {
@@ -31,5 +33,9 @@ public abstract class AbstractModification implements Modification {
 
     public YangInstanceIdentifier getPath() {
         return path;
+    }
+
+    public short getVersion() {
+        return version;
     }
 }

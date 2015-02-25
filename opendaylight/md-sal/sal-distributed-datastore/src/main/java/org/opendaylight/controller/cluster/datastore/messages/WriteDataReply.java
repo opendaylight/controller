@@ -10,6 +10,10 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 
+/**
+ * @deprecated Replaced by BatchedModificationsReply.
+ */
+@Deprecated
 public class WriteDataReply extends EmptyReply {
     private static final long serialVersionUID = 1L;
 

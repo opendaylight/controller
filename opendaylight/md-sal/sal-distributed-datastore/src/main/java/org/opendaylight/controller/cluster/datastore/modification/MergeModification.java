@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore.modification;
 
 import java.io.IOException;
 import java.io.ObjectInput;
+import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
 import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec.Decoded;
 import org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages;
@@ -24,6 +25,11 @@ public class MergeModification extends WriteModification {
     private static final long serialVersionUID = 1L;
 
     public MergeModification() {
+        this(DataStoreVersions.CURRENT_VERSION);
+    }
+
+    public MergeModification(short version) {
+        super(version);
     }
 
     public MergeModification(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
@@ -47,8 +53,9 @@ public class MergeModification extends WriteModification {
         return new MergeModification(decoded.getDecodedPath(), decoded.getDecodedNode());
     }
 
-    public static MergeModification fromStream(ObjectInput in) throws ClassNotFoundException, IOException {
-        MergeModification mod = new MergeModification();
+    public static MergeModification fromStream(ObjectInput in, short version)
+            throws ClassNotFoundException, IOException {
+        MergeModification mod = new MergeModification(version);
         mod.readExternal(in);
         return mod;
     }

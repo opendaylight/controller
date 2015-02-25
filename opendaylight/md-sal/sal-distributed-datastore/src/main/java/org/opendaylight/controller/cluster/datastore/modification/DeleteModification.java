@@ -25,6 +25,11 @@ public class DeleteModification extends AbstractModification {
     private static final long serialVersionUID = 1L;
 
     public DeleteModification() {
+        this(DataStoreVersions.CURRENT_VERSION);
+    }
+
+    public DeleteModification(short version) {
+        super(version);
     }
 
     public DeleteModification(YangInstanceIdentifier path) {
@@ -43,13 +48,11 @@ public class DeleteModification extends AbstractModification {
 
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        in.readShort();
         setPath(SerializationUtils.deserializePath(in));
     }
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeShort(DataStoreVersions.CURRENT_VERSION);
         SerializationUtils.serializePath(getPath(), out);
     }
 
@@ -66,8 +69,9 @@ public class DeleteModification extends AbstractModification {
         return new DeleteModification(InstanceIdentifierUtils.fromSerializable(o.getPath()));
     }
 
-    public static DeleteModification fromStream(ObjectInput in) throws ClassNotFoundException, IOException {
-        DeleteModification mod = new DeleteModification();
+    public static DeleteModification fromStream(ObjectInput in, short version)
+            throws ClassNotFoundException, IOException {
+        DeleteModification mod = new DeleteModification(version);
         mod.readExternal(in);
         return mod;
     }
