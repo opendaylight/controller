@@ -72,10 +72,6 @@
       <artifactId>usermanager.northbound</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>networkconfig.neutron.northbound</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
@@ -161,7 +157,6 @@
                   </fileset>
                   <mapper>
                     <regexpmapper from="^(.*)/([^/]+)/*/target/enunciate/generate/swagger/ui/(.*Northbound).*$$" to="\3"></regexpmapper>
-                    <regexpmapper from="^(.*)/neutron/([^/]+)/*/target/enunciate/generate/swagger/ui/(.*resource-list.json)$$" to="neutron-\3"></regexpmapper>
                     <regexpmapper from="^(.*)/([^/]+)/*/target/enunciate/generate/swagger/ui/(.*resource-list.json)$$" to="\2-\3"></regexpmapper>
                   </mapper>
                 </copy>
@@ -181,7 +176,6 @@
                   <path>
                     <fileset dir="${api.dir}">
                       <include name="**/*resource-list.json"></include>
-                      <exclude name="**/neutron*"></exclude>
                     </fileset>
                   </path>
                   <sequential>
@@ -196,16 +190,6 @@
                     <var name="jsoncontent" unset="true"></var>
                   </sequential>
                 </for>
-                <sequential>
-                  <loadfile property="jsoncontent" srcfile="${api.dir}/neutron-resource-list.json">
-                    <filterchain>
-                      <headfilter lines="46"></headfilter>
-                      <tailfilter lines="42"></tailfilter>
-                    </filterchain>
-                  </loadfile>
-                  <echo append="true" file="${resource.dir}/apilist.json" message="${jsoncontent},"></echo>
-                  <var name="jsoncontent" unset="true"></var>
-                </sequential>
                 <echo append="true" file="${resource.dir}/apilist.json">{ }
   ]
 }</echo>
