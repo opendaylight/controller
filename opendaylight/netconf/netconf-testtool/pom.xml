@@ -97,7 +97,7 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.yangtools.model</groupId>
-            <artifactId>ietf-yang-types-20130715</artifactId>
+            <artifactId>ietf-yang-types</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.yangtools.model</groupId>
