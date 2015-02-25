@@ -92,12 +92,16 @@
             <artifactId>ietf-netconf-monitoring</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>ietf-netconf-monitoring-extension</artifactId>
+        </dependency>
+        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>netconf-client</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.yangtools.model</groupId>
-            <artifactId>ietf-yang-types-20130715</artifactId>
+            <artifactId>ietf-yang-types</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.yangtools.model</groupId>

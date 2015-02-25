@@ -354,8 +354,11 @@ public class NetconfDeviceSimulator implements Closeable {
         SourceIdentifier sId = new SourceIdentifier("ietf-netconf-monitoring", "2010-10-04");
         registerSource(consumer, "/META-INF/yang/ietf-netconf-monitoring.yang", sId);
 
-        sId = new SourceIdentifier("ietf-yang-types", "2013-07-15");
-        registerSource(consumer, "/META-INF/yang/ietf-yang-types@2013-07-15.yang", sId);
+        sId = new SourceIdentifier("ietf-netconf-monitoring-extension", "2013-12-10");
+        registerSource(consumer, "/META-INF/yang/ietf-netconf-monitoring-extension.yang", sId);
+
+        sId = new SourceIdentifier("ietf-yang-types", "2010-09-24");
+        registerSource(consumer, "/META-INF/yang/ietf-yang-types.yang", sId);
 
         sId = new SourceIdentifier("ietf-inet-types", "2010-09-24");
         registerSource(consumer, "/META-INF/yang/ietf-inet-types.yang", sId);
@@ -420,6 +423,7 @@ public class NetconfDeviceSimulator implements Closeable {
 
         @Override
         public AutoCloseable registerCapabilityListener(final CapabilityListener listener) {
+            listener.onCapabilitiesAdded(caps);
             return new AutoCloseable() {
                 @Override
                 public void close() throws Exception {}
