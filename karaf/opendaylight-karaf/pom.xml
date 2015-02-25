@@ -102,14 +102,6 @@
       <type>xml</type>
       <scope>runtime</scope>
     </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>features-neutron</artifactId>
-      <version>${networkconfig.neutron.version}</version>
-      <classifier>features</classifier>
-      <type>xml</type>
-      <scope>runtime</scope>
-    </dependency>
     <!-- Netconf connector features. When this is included, users can test the netconf connector using netconf-testtool -->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -117,15 +109,6 @@
       <classifier>features</classifier>
       <type>xml</type>
     </dependency>
-
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>features-neutron</artifactId>
-      <classifier>features</classifier>
-      <type>xml</type>
-      <scope>runtime</scope>
-    </dependency>
-
   </dependencies>
 
   <build>
