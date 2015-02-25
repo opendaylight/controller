@@ -51,10 +51,6 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>networkconfig.neutron.northbound</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
       <artifactId>statistics.northbound</artifactId>
     </dependency>
     <dependency>
