@@ -119,9 +119,7 @@
     <mdsal.version>1.2.0-SNAPSHOT</mdsal.version>
     <netconf.version>0.3.0-SNAPSHOT</netconf.version>
     <networkconfig.bridgedomain.northbound.version>0.1.0-SNAPSHOT</networkconfig.bridgedomain.northbound.version>
-    <networkconfig.neutron.implementation.version>0.5.0-SNAPSHOT</networkconfig.neutron.implementation.version>
-    <networkconfig.neutron.northbound.version>0.5.0-SNAPSHOT</networkconfig.neutron.northbound.version>
-    <networkconfig.neutron.version>0.5.0-SNAPSHOT</networkconfig.neutron.version>
+    <neutron.version>0.5.0-SNAPSHOT</neutron.version>
     <!-- ODL repository / plugin repository -->
     <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
     <northbound.commons.version>0.5.0-SNAPSHOT</northbound.commons.version>
@@ -993,19 +991,19 @@
 
       <!--  Neutron -->
       <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>networkconfig.neutron</artifactId>
-        <version>${networkconfig.neutron.version}</version>
+        <groupId>org.opendaylight.neutron</groupId>
+        <artifactId>northbound-api</artifactId>
+        <version>${neutron.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>networkconfig.neutron.implementation</artifactId>
-        <version>${networkconfig.neutron.implementation.version}</version>
+        <groupId>org.opendaylight.neutron</groupId>
+        <artifactId>neutron-spi</artifactId>
+        <version>${neutron.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>networkconfig.neutron.northbound</artifactId>
-        <version>${networkconfig.neutron.northbound.version}</version>
+        <groupId>org.opendaylight.neutron</groupId>
+        <artifactId>transcriber</artifactId>
+        <version>${neutron.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
@@ -1325,12 +1323,12 @@
       </dependency>
 
       <dependency>
-        <groupId>org.opendaylight.controller</groupId>
+        <groupId>org.opendaylight.neutron</groupId>
         <artifactId>features-neutron</artifactId>
         <classifier>features</classifier>
         <type>xml</type>
         <scope>runtime</scope>
-        <version>${networkconfig.neutron.version}</version>
+        <version>${neutron.version}</version>
       </dependency>
 
       <!-- JMH Benchmark dependencies -->

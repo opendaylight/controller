@@ -169,16 +169,16 @@
       <artifactId>networkconfig.bridgedomain.northbound</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>networkconfig.neutron</artifactId>
+      <groupId>org.opendaylight.neutron</groupId>
+      <artifactId>neutron-spi</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>networkconfig.neutron.implementation</artifactId>
+      <groupId>org.opendaylight.neutron</groupId>
+      <artifactId>northbound-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>networkconfig.neutron.northbound</artifactId>
+      <groupId>org.opendaylight.neutron</groupId>
+      <artifactId>transcriber</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>

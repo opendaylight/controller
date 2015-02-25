@@ -103,9 +103,9 @@
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
+      <groupId>org.opendaylight.neutron</groupId>
       <artifactId>features-neutron</artifactId>
-      <version>${networkconfig.neutron.version}</version>
+      <version>${neutron.version}</version>
       <classifier>features</classifier>
       <type>xml</type>
       <scope>runtime</scope>
@@ -119,7 +119,7 @@
     </dependency>
 
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
+      <groupId>org.opendaylight.neutron</groupId>
       <artifactId>features-neutron</artifactId>
       <classifier>features</classifier>
       <type>xml</type>
