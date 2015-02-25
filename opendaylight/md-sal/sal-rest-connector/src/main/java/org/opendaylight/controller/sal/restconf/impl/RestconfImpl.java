@@ -314,9 +314,9 @@ public class RestconfImpl implements RestconfService {
     }
 
     @Override
-    public StructuredData getOperations(final UriInfo uriInfo) {
+    public NormalizedNodeContext getOperations(final UriInfo uriInfo) {
         final Set<Module> allModules = controllerContext.getAllModules();
-        return operationsFromModulesToStructuredData(allModules, null, parsePrettyPrintParameter(uriInfo));
+        return operationsFromModulesToNormalizedContext(allModules, null);
     }
 
     @Override
