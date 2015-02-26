@@ -32,7 +32,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
 import org.opendaylight.yangtools.yang.data.impl.codec.xml.XMLStreamNormalizedNodeStreamWriter;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -57,7 +56,6 @@ public abstract class AbstractGet extends AbstractLastNetconfOperation {
     }
 
     protected Node transformNormalizedNode(final Document document, final NormalizedNode<?, ?> data, final YangInstanceIdentifier dataRoot) {
-//        boolean isDataRoot = true;
 
         final DOMResult result = new DOMResult(document.createElement(XmlNetconfConstants.DATA_KEY));
 
@@ -68,17 +66,7 @@ public abstract class AbstractGet extends AbstractLastNetconfOperation {
 
         final NormalizedNodeWriter nnWriter = NormalizedNodeWriter.forStreamWriter(nnStreamWriter);
 
-//        if (isDataRoot) {
         writeRootElement(xmlWriter, nnWriter, (ContainerNode) data);
-//        } else {
-//            if (data instanceof MapEntryNode) {
-//                // Restconf allows returning one list item. We need to wrap it
-//                // in map node in order to serialize it properly
-//                data = ImmutableNodes.mapNodeBuilder(data.getNodeType()).addChild((MapEntryNode) data).build();
-//            }
-//            nnWriter.write(data);
-//            nnWriter.flush();
-//        }
         return result.getNode();
     }
 
@@ -104,7 +92,6 @@ public abstract class AbstractGet extends AbstractLastNetconfOperation {
     // TODO this code is located in Restconf already
     private void writeRootElement(final XMLStreamWriter xmlWriter, final NormalizedNodeWriter nnWriter, final ContainerNode data) {
         try {
-            final QName name = SchemaContext.NAME;
             for (final DataContainerChild<? extends PathArgument, ?> child : data.getValue()) {
                 nnWriter.write(child);
             }

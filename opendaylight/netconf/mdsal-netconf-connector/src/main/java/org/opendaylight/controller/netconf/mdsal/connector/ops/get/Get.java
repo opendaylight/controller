@@ -42,14 +42,6 @@ public class Get extends AbstractGet {
 
     @Override
     protected Element handleWithNoSubsequentOperations(Document document, XmlElement operationElement) throws NetconfDocumentedException {
-        GetConfigExecution getConfigExecution = null;
-        try {
-            getConfigExecution = GetConfigExecution.fromXml(operationElement, OPERATION_NAME);
-
-        } catch (final NetconfDocumentedException e) {
-            LOG.warn("Get request processing failed on session: {}", getNetconfSessionIdForReporting(), e);
-            throw e;
-        }
 
         final YangInstanceIdentifier dataRoot = ROOT;
         DOMDataReadWriteTransaction rwTx = getTransaction(Datastore.running);

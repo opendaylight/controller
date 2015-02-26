@@ -37,6 +37,7 @@ public class DefaultCommit extends AbstractNetconfOperation {
 
     private static final String NOTIFY_ATTR = "notify";
 
+    //TODO make commit notification optional
     private final CommitNotifier notificationProducer;
     private final NetconfMonitoringService cap;
     private final NetconfOperationRouter operationRouter;
