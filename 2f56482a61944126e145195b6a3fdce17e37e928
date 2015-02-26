@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_031ba273",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/CommitCallback.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-26T21:37:35Z",
+      "side": 1,
+      "message": "\"to the new accumulated rate limit\"?",
+      "revId": "2f56482a61944126e145195b6a3fdce17e37e928",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_c34ffa69",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/CommitCallback.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-26T21:37:35Z",
+      "side": 1,
+      "message": "In the original code on the other patch, you were multiplying commitTimeoutInSeconds by 10. I see you\u0027re now dividing each percentileTimeInNanos by 10 above. This should yield the same result but probably would be a little more efficient to do one multiply rather than 10 divisions.",
+      "revId": "2f56482a61944126e145195b6a3fdce17e37e928",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_235d7e15",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/CommitCallbackTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-26T21:37:35Z",
+      "side": 1,
+      "message": "Could use a real DatastoreContext - easy enough to construct with the Builder.",
+      "revId": "2f56482a61944126e145195b6a3fdce17e37e928",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_036082cd",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/CommitCallbackTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-26T21:37:35Z",
+      "side": 1,
+      "message": "Just curious why you do timeout(5000) - not an issue but nothing\u0027s async right?\n\nRe: the exact value 292.89682539682536, could we lose some precision in the calculation on some runs and cause sporadic failures? Probably would be safer with a delta cushion. You can\u0027t do that with Mockito but you could construct a real ActorContext and use assertEquals with a delta.",
+      "revId": "2f56482a61944126e145195b6a3fdce17e37e928",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_03b7223b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/CommitCallbackTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-26T21:37:35Z",
+      "side": 1,
+      "message": "I think it would be good to add more tests with specific percentile value scenarios and edge cases so we have an idea how it will behave. We\u0027ll have to think of some. But we can do that in another patch.",
+      "revId": "2f56482a61944126e145195b6a3fdce17e37e928",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
