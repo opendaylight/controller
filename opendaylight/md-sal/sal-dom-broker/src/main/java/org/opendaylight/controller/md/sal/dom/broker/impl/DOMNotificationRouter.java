@@ -79,6 +79,7 @@ public final class DOMNotificationRouter implements AutoCloseable, DOMNotificati
         final ExecutorService executor = Executors.newCachedThreadPool();
         final Disruptor<DOMNotificationRouterEvent> disruptor = new Disruptor<>(DOMNotificationRouterEvent.FACTORY, queueDepth, executor, ProducerType.MULTI, DEFAULT_STRATEGY);
 
+        disruptor.handleEventsWith(DISPATCH_NOTIFICATIONS);
         disruptor.after(DISPATCH_NOTIFICATIONS).handleEventsWith(NOTIFY_FUTURE);
         disruptor.start();
 
