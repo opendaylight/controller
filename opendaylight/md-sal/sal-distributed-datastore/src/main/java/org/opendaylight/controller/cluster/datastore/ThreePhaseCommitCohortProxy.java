@@ -342,7 +342,8 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
             timerContext.stop();
 
             Snapshot timerSnapshot = commitTimer.getSnapshot();
-            double allowedLatencyInNanos = timerSnapshot.get95thPercentile();
+            int percentile = actorContext.getDatastoreContext().getTransactionSubmitThresholdPercentile();
+            double allowedLatencyInNanos = timerSnapshot.getValue(percentile*1.0/100);
 
             long commitTimeoutInSeconds = actorContext.getDatastoreContext()
                     .getShardTransactionCommitTimeoutInSeconds();
@@ -351,8 +352,8 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
             // Here we are trying to find out how many transactions per second are allowed
             double newRateLimit = ((double) commitTimeoutInNanos / allowedLatencyInNanos) / commitTimeoutInSeconds;
 
-            LOG.debug("Data Store {} commit rateLimit adjusted to {} allowedLatencyInNanos = {}",
-                    actorContext.getDataStoreType(), newRateLimit, allowedLatencyInNanos);
+            LOG.debug("Data Store {} commit rateLimit adjusted to {} allowedLatencyInNanos = {} percentile = {}",
+                    actorContext.getDataStoreType(), newRateLimit, allowedLatencyInNanos, percentile);
 
             actorContext.setTxCreationLimit(newRateLimit);
         }

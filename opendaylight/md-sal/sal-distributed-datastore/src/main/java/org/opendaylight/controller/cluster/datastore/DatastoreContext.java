@@ -43,6 +43,7 @@ public class DatastoreContext {
     public static final int DEFAULT_TX_CREATION_INITIAL_RATE_LIMIT = 100;
     public static final String UNKNOWN_DATA_STORE_TYPE = "unknown";
     public static final int DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT= 100;
+    public static final int DEFAULT_TXN_SUBMIT_THRESHOLD_PERCENTILE = 95;
 
     private InMemoryDOMDataStoreConfigProperties dataStoreProperties;
     private Duration shardTransactionIdleTimeout = DatastoreContext.DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT;
@@ -58,6 +59,7 @@ public class DatastoreContext {
     private final DefaultConfigParamsImpl raftConfig = new DefaultConfigParamsImpl();
     private String dataStoreType = UNKNOWN_DATA_STORE_TYPE;
     private int shardBatchedModificationCount = DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT;
+    private int transactionSubmitThresholdPercentile = DEFAULT_TXN_SUBMIT_THRESHOLD_PERCENTILE;
 
     private DatastoreContext() {
         setShardJournalRecoveryLogBatchSize(DEFAULT_JOURNAL_RECOVERY_BATCH_SIZE);
@@ -82,6 +84,7 @@ public class DatastoreContext {
         this.transactionCreationInitialRateLimit = other.transactionCreationInitialRateLimit;
         this.dataStoreType = other.dataStoreType;
         this.shardBatchedModificationCount = other.shardBatchedModificationCount;
+        this.transactionSubmitThresholdPercentile = other.transactionSubmitThresholdPercentile;
 
         setShardJournalRecoveryLogBatchSize(other.raftConfig.getJournalRecoveryLogBatchSize());
         setSnapshotBatchCount(other.raftConfig.getSnapshotBatchCount());
@@ -184,6 +187,10 @@ public class DatastoreContext {
 
     public int getShardBatchedModificationCount() {
         return shardBatchedModificationCount;
+    }
+
+    public int getTransactionSubmitThresholdPercentile(){
+        return transactionSubmitThresholdPercentile;
     }
 
     public static class Builder {
@@ -343,6 +350,11 @@ public class DatastoreContext {
 
         public Builder maxShardDataStoreExecutorQueueSize(int maxShardDataStoreExecutorQueueSize) {
             this.maxShardDataStoreExecutorQueueSize = maxShardDataStoreExecutorQueueSize;
+            return this;
+        }
+
+        public Builder transactionSubmitThresholdPercentile(int transactionSubmitThresholdPercentile){
+            datastoreContext.transactionSubmitThresholdPercentile = transactionSubmitThresholdPercentile;
             return this;
         }
 

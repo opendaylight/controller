@@ -197,6 +197,12 @@ module distributed-datastore-provider {
                          should begin applying back pressure. This number is only used as an initial guidance,
                          subsequently the datastore measures the latency for a commit and auto-adjusts the rate limit";
         }
+
+        leaf transaction-submit-threshold-percentile {
+            default 95;
+            type percentage;
+            description "The transaction submit percentile to base the transaction back pressure on";
+        }
     }
 
     // Augments the 'configuration' choice node under modules/module.
