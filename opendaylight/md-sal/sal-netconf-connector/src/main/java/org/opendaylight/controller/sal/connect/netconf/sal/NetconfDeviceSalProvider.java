@@ -91,6 +91,8 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
         mountInstance.close();
         datastoreAdapter.close();
         datastoreAdapter = null;
+        topologyDatastoreAdapter.close();
+        topologyDatastoreAdapter = null;
     }
 
     static final class MountInstance implements AutoCloseable {
