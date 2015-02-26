@@ -40,7 +40,6 @@ public class DiscardChanges extends AbstractLastNetconfOperation{
 
     @Override
     protected Element handleWithNoSubsequentOperations(final Document document, final XmlElement operationElement) throws NetconfDocumentedException {
-        operationElement.getOnlyChildElement(OPERATION_NAME);
 
         try {
             transactionProvider.abortTransaction();

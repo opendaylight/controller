@@ -72,22 +72,19 @@ public class EditConfig extends AbstractLastNetconfOperation {
 
             final NormalizedNode storedNode = readStoredNode(LogicalDatastoreType.CONFIGURATION, ident);
             try {
-                final Optional<NormalizedNode<?,?>> newNode = modifyNode(schemaNode, element, storedNode);
+                final Optional<NormalizedNode<?, ?>> newNode = modifyNode(schemaNode, element, storedNode);
                 final DOMDataReadWriteTransaction rwTx = transactionProvider.getOrCreateTransaction();
                 if (newNode.isPresent()) {
                     rwTx.put(LogicalDatastoreType.CONFIGURATION, ident, newNode.get());
                 } else {
                     rwTx.delete(LogicalDatastoreType.CONFIGURATION, ident);
                 }
+            } catch (final DataExistsException e) {
+                throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.protocol, ErrorTag.data_exists, ErrorSeverity.error);
+            } catch (final DataMissingException e) {
+                throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.protocol, ErrorTag.data_missing, ErrorSeverity.error);
             } catch (final DataModificationException e) {
-                if (e instanceof DataExistsException) {
-                    throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.protocol, ErrorTag.data_exists, ErrorSeverity.error);
-                } else if (e instanceof DataMissingException) {
-                    throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.protocol, ErrorTag.data_missing, ErrorSeverity.error);
-                } else {
-                    //should never happen, since in edit-config only the 2 previous cases can happen
-                    throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.protocol, ErrorTag.operation_failed, ErrorSeverity.error);
-                }
+                throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.protocol, ErrorTag.operation_failed, ErrorSeverity.error);
             }
         }
 
@@ -102,23 +99,32 @@ public class EditConfig extends AbstractLastNetconfOperation {
                 final NormalizedNode node = readFuture.checkedGet().get();
                 return node;
             } else {
-                LOG.warn("Unable to read node : {} from {} datastore", path, logicalDatastoreType);
+                LOG.debug("Unable to read node : {} from {} datastore", path, logicalDatastoreType);
             }
         } catch (final ReadFailedException e) {
             //only log this since DataOperations.modify will handle throwing an exception or writing the node.
-            LOG.warn("Unable to read stored data: {}", path, e);
+            LOG.debug("Unable to read stored data: {}", path, e);
         }
 
         //we can return null here since DataOperations.modify handles null as input
         return null;
     }
 
-    private Optional<DataSchemaNode> getSchemaNodeFromNamespace(final String namespace, final XmlElement element){
+    private Optional<DataSchemaNode> getSchemaNodeFromNamespace(final String namespace, final XmlElement element) throws NetconfDocumentedException{
         Optional<DataSchemaNode> dataSchemaNode = Optional.absent();
         try {
             //returns module with newest revision since findModuleByNamespace returns a set of modules and we only need the newest one
             final Module module = schemaContext.getCurrentContext().findModuleByNamespaceAndRevision(new URI(namespace), null);
-            dataSchemaNode = Optional.of(module.getDataChildByName(element.getName()));
+            DataSchemaNode schemaNode = module.getDataChildByName(element.getName());
+            if (schemaNode != null) {
+                dataSchemaNode = Optional.of(module.getDataChildByName(element.getName()));
+            } else {
+                throw new NetconfDocumentedException("Unable to find node with namespace: " + namespace + "in module: " + module.toString(),
+                        ErrorType.application,
+                        ErrorTag.unknown_namespace,
+                        ErrorSeverity.error);
+            }
+
         } catch (URISyntaxException e) {
             LOG.debug("Unable to create URI for namespace : {}", namespace);
         }
