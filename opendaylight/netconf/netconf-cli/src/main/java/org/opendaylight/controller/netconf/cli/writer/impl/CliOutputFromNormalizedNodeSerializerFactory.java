@@ -17,6 +17,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafSetNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
+import org.opendaylight.yangtools.yang.data.api.schema.UnkeyedListNode;
 import org.opendaylight.yangtools.yang.data.impl.codec.xml.XmlCodecProvider;
 import org.opendaylight.yangtools.yang.data.impl.schema.transform.FromNormalizedNodeSerializer;
 import org.opendaylight.yangtools.yang.data.impl.schema.transform.FromNormalizedNodeSerializerFactory;
@@ -95,6 +96,11 @@ public final class CliOutputFromNormalizedNodeSerializerFactory implements FromN
     @Override
     public FromNormalizedNodeSerializer<String, MapEntryNode, ListSchemaNode> getMapEntryNodeSerializer() {
         return mapEntryNodeSerializer;
+    }
+
+    @Override
+    public FromNormalizedNodeSerializer<String, UnkeyedListNode, ListSchemaNode> getUnkeyedListNodeSerializer() {
+        return null;
     }
 
     @Override

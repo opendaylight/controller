@@ -14,11 +14,11 @@ import java.util.Map.Entry;
 import org.opendaylight.controller.netconf.cli.writer.OutFormatter;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.transform.base.serializer.MapEntryNodeBaseSerializer;
+import org.opendaylight.yangtools.yang.data.impl.schema.transform.base.serializer.ListEntryNodeBaseSerializer;
 import org.opendaylight.yangtools.yang.data.impl.schema.transform.base.serializer.NodeSerializerDispatcher;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 
-final class MapEntryNodeCliSerializer extends MapEntryNodeBaseSerializer<String> {
+final class MapEntryNodeCliSerializer extends ListEntryNodeBaseSerializer<String,MapEntryNode> {
 
     private final NodeSerializerDispatcher<String> dispatcher;
     private final OutFormatter out;
