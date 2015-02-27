@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_a65afc27",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/05-clustering.xml.conf",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-27T05:24:32Z",
+      "side": 1,
+      "message": "Can we put this in the cfg file instead? Or at least in addition to?",
+      "revId": "e345f444c47b0f4e672b1322147f76ef9d5c0cb9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
