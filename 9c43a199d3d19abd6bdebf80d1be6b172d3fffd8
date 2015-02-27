@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_26feecae",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 428,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-27T09:12:51Z",
+      "side": 1,
+      "message": "why do we need a check at all?\n\nCan we just let the SnapshotManager handle if it can trim the log or not? If it can it will trim or will just return.",
+      "parentUuid": "7a96c907_b9df8cd5",
+      "revId": "9c43a199d3d19abd6bdebf80d1be6b172d3fffd8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_068e5079",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 3
@@ -47,6 +65,23 @@
       "writtenOn": "2015-02-27T07:19:47Z",
       "side": 1,
       "message": "Slight difference from before  but the replicatedLogEntry index should equal lastIndex().",
+      "revId": "9c43a199d3d19abd6bdebf80d1be6b172d3fffd8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_c62e2843",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 744,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-27T09:12:51Z",
+      "side": 1,
+      "message": "Do we need the check isCapturing()? If the state is not idle, wont it reject anyway.",
       "revId": "9c43a199d3d19abd6bdebf80d1be6b172d3fffd8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -116,6 +151,24 @@
       "writtenOn": "2015-02-27T07:19:47Z",
       "side": 1,
       "message": "The previous code was equivalent to passing get(context.getLastApplied()) instead of last(). Is this correct?",
+      "revId": "9c43a199d3d19abd6bdebf80d1be6b172d3fffd8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_0618901c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 558,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-27T09:12:51Z",
+      "side": 1,
+      "message": "i guess the SnapshotManager gets the lastApplied from the context (and terms from the new \u0027readers\u0027). So here its just served with the last().",
+      "parentUuid": "7a96c907_66c39489",
       "revId": "9c43a199d3d19abd6bdebf80d1be6b172d3fffd8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
