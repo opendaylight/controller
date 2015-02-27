@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "7a96c907_e60c84ef",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/SnapshotState.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-27T08:42:10Z",
+      "side": 1,
+      "message": "It would be beneficial to describe the relevance of this param (procedure) passed while  creating a snapshot",
+      "revId": "358d8b4d1cfbc5d4f709eed0d277914e4b763794",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_066ad080",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-27T08:42:10Z",
+      "side": 1,
+      "message": "I dont think it would be illegal to call captureToInstall if the currentState is not Idle\n\nConsider a scenario, when another follower wants an install, when a current capture is in-progress.\n\nSo we might want to log it as info but not an error.",
+      "revId": "358d8b4d1cfbc5d4f709eed0d277914e4b763794",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_a6a8bcdb",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
         "patchSetId": 3
@@ -13,6 +47,23 @@
       "writtenOn": "2015-02-27T07:19:30Z",
       "side": 1,
       "message": "Can we just let the AbstractSnapshotState handle the illegal call to make cleaner?   AbstractSnapshotState could include the message in the exception. Same with other calls below.",
+      "revId": "358d8b4d1cfbc5d4f709eed0d277914e4b763794",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_c60708c9",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-02-27T08:42:10Z",
+      "side": 1,
+      "message": "Didnt get why we are allowing the trimming of log when the state is Persisting\n\nDuring a rollback, we do swap the journals and the snapshot index.\n\nAs i gather, till the state changes from Persisting to Idle, a snapshot is not done and is in progress.",
       "revId": "358d8b4d1cfbc5d4f709eed0d277914e4b763794",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
