@@ -126,6 +126,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_29ec7ff2",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-27T18:51:59Z",
+      "side": 1,
+      "message": "I agree - let the SnapshotManager grant the request if necessary. I think throwing exceptions is dangerous b/c we may miss a work flow scenario in the unit tests that is valid or code may change that introduces a new valid scenario. \n\nWe can have 2 snapshots going on at the same time.   We can\u0027t have 2 captures going on simultaneously but after one captures and goes on to finish persisting, another capture can start. I\u0027ve created a scenario in my integration test that causes this.",
+      "parentUuid": "7a96c907_a9e08ffa",
+      "revId": "358d8b4d1cfbc5d4f709eed0d277914e4b763794",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_a6a8bcdb",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
         "patchSetId": 3
@@ -313,6 +331,24 @@
       "side": 1,
       "message": "Probably. Basically it seems like the rule should be if snapshotting is in progress do not allow another snapshot. So isCapturing should be true in all states except Idle. Some tests actually fail when I make that assumption.",
       "parentUuid": "7a96c907_268b4c69",
+      "revId": "358d8b4d1cfbc5d4f709eed0d277914e4b763794",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_c9bcfbde",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-27T18:51:59Z",
+      "side": 1,
+      "message": "And maybe except Persisting as well.  If a follower install snapshot occurs after a leader-initiated snapshot finished handleCaptureSnapshotReply and before Persisting is done, the follower snapshot will not initiate. Although this is probably OK b/c the next heartbeat should try again.",
+      "parentUuid": "7a96c907_49fb0bc1",
       "revId": "358d8b4d1cfbc5d4f709eed0d277914e4b763794",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
