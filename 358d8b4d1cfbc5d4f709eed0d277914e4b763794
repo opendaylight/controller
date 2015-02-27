@@ -1,0 +1,95 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_a6a8bcdb",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-27T07:19:30Z",
+      "side": 1,
+      "message": "Can we just let the AbstractSnapshotState handle the illegal call to make cleaner?   AbstractSnapshotState could include the message in the exception. Same with other calls below.",
+      "revId": "358d8b4d1cfbc5d4f709eed0d277914e4b763794",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_4698d8bf",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-27T07:19:30Z",
+      "side": 1,
+      "message": "I think it would be good to include a text message with these exceptions as I commented above.",
+      "revId": "358d8b4d1cfbc5d4f709eed0d277914e4b763794",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_268b4c69",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-27T07:19:30Z",
+      "side": 1,
+      "message": "I think we want this state to return true from isCapturing since we\u0027re not done capturing until we\u0027ve gotten the CaptureSnapshotReply. Previously the snapshotCaptureInitiated flag was cleared by handleCaptureSnapshotReply.",
+      "revId": "358d8b4d1cfbc5d4f709eed0d277914e4b763794",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_86f10003",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 268,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-27T07:19:30Z",
+      "side": 1,
+      "message": "I put the totalMemory() call in a protected method in RaftActor so I could override in my tests to cause a snapshot. I\u0027ll have to figure out something here.",
+      "range": {
+        "startLine": 268,
+        "startChar": 33,
+        "endLine": 268,
+        "endChar": 63
+      },
+      "revId": "358d8b4d1cfbc5d4f709eed0d277914e4b763794",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_46df7869",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 373,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-27T07:19:30Z",
+      "side": 1,
+      "message": "It looks like this else check and block is for the call from AbstractLeader for a follower install snapshot. How will this behave when called from RaftActor for a replication snapshot? Would this be a no-op?",
+      "revId": "358d8b4d1cfbc5d4f709eed0d277914e4b763794",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
