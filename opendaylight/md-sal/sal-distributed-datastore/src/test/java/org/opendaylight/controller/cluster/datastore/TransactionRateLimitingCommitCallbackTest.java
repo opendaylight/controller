@@ -68,14 +68,6 @@ public class TransactionRateLimitingCommitCallbackTest {
         commitCallback.success();
 
         verify(actorContext).setTxCreationLimit(Matchers.doubleThat(approximately(292)));
-
-        doReturn(TimeUnit.MILLISECONDS.toNanos(0) * 1D).when(commitSnapshot).getValue(0.1);
-
-        commitCallback = new TransactionRateLimitingCallback(actorContext);
-        commitCallback.run();
-        commitCallback.success();
-
-        verify(actorContext).setTxCreationLimit(Matchers.doubleThat(approximately(292)));
     }
 
     @Test
@@ -188,7 +180,7 @@ public class TransactionRateLimitingCommitCallbackTest {
 
             @Override
             public void describeTo(Description description) {
-
+                description.appendText("> " + val +" < " + (val+1));
             }
         };
     }
