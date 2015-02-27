@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_090183ae",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/SnapshotState.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-27T18:12:58Z",
+      "side": 1,
+      "message": "will do.",
+      "parentUuid": "7a96c907_e60c84ef",
+      "revId": "358d8b4d1cfbc5d4f709eed0d277914e4b763794",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_066ad080",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
         "patchSetId": 3
@@ -54,6 +72,42 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_2950ffd2",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-27T18:12:58Z",
+      "side": 1,
+      "message": "We can expand on what we can allow after we have determined what is safe.",
+      "parentUuid": "7a96c907_a60f5c87",
+      "revId": "358d8b4d1cfbc5d4f709eed0d277914e4b763794",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_0953c3e2",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-27T18:12:58Z",
+      "side": 1,
+      "message": "If a snapshot is in progress and we find that a follower needs a snapshot what should we do? Ideally I should throw an exception if someone calls this method. I am logging an error because this should not happen ever. The consuming code should first check if it is possible to do this action before attempting to do the action and if it did then this error will not be logged.",
+      "parentUuid": "7a96c907_066ad080",
+      "revId": "358d8b4d1cfbc5d4f709eed0d277914e4b763794",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_a6a8bcdb",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
         "patchSetId": 3
@@ -65,6 +119,24 @@
       "writtenOn": "2015-02-27T07:19:30Z",
       "side": 1,
       "message": "Can we just let the AbstractSnapshotState handle the illegal call to make cleaner?   AbstractSnapshotState could include the message in the exception. Same with other calls below.",
+      "revId": "358d8b4d1cfbc5d4f709eed0d277914e4b763794",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_69712775",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-27T18:12:58Z",
+      "side": 1,
+      "message": "I can move this.",
+      "parentUuid": "7a96c907_a6a8bcdb",
       "revId": "358d8b4d1cfbc5d4f709eed0d277914e4b763794",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -88,6 +160,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_c9071bc9",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-27T18:12:58Z",
+      "side": 1,
+      "message": "Well I was just mimicking the existing code which did allow this. I agree trimLog should only be allowed in the Idle state.",
+      "parentUuid": "7a96c907_c60708c9",
+      "revId": "358d8b4d1cfbc5d4f709eed0d277914e4b763794",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_4698d8bf",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
         "patchSetId": 3
@@ -99,6 +189,24 @@
       "writtenOn": "2015-02-27T07:19:30Z",
       "side": 1,
       "message": "I think it would be good to include a text message with these exceptions as I commented above.",
+      "revId": "358d8b4d1cfbc5d4f709eed0d277914e4b763794",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_e90c57ef",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-27T18:12:58Z",
+      "side": 1,
+      "message": "I\u0027ll move the error log here",
+      "parentUuid": "7a96c907_4698d8bf",
       "revId": "358d8b4d1cfbc5d4f709eed0d277914e4b763794",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -122,6 +230,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_890d93ea",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-27T18:12:58Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "7a96c907_061e50bb",
+      "revId": "358d8b4d1cfbc5d4f709eed0d277914e4b763794",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_268b4c69",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
         "patchSetId": 3
@@ -133,6 +259,24 @@
       "writtenOn": "2015-02-27T07:19:30Z",
       "side": 1,
       "message": "I think we want this state to return true from isCapturing since we\u0027re not done capturing until we\u0027ve gotten the CaptureSnapshotReply. Previously the snapshotCaptureInitiated flag was cleared by handleCaptureSnapshotReply.",
+      "revId": "358d8b4d1cfbc5d4f709eed0d277914e4b763794",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_49fb0bc1",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-27T18:12:58Z",
+      "side": 1,
+      "message": "Probably. Basically it seems like the rule should be if snapshotting is in progress do not allow another snapshot. So isCapturing should be true in all states except Idle. Some tests actually fail when I make that assumption.",
+      "parentUuid": "7a96c907_268b4c69",
       "revId": "358d8b4d1cfbc5d4f709eed0d277914e4b763794",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -173,6 +317,24 @@
       "writtenOn": "2015-02-27T07:19:30Z",
       "side": 1,
       "message": "It looks like this else check and block is for the call from AbstractLeader for a follower install snapshot. How will this behave when called from RaftActor for a replication snapshot? Would this be a no-op?",
+      "revId": "358d8b4d1cfbc5d4f709eed0d277914e4b763794",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_69f847c3",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 373,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-02-27T18:12:58Z",
+      "side": 1,
+      "message": "It should work the same.",
+      "parentUuid": "7a96c907_46df7869",
       "revId": "358d8b4d1cfbc5d4f709eed0d277914e4b763794",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
