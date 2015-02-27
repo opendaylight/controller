@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_a60f5c87",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-27T13:07:38Z",
+      "side": 1,
+      "message": "I think you\u0027re right -  there could be an issue as follows:\n\n  - snapshot capture is initiated by replication\n\n  - after CaptureSnapshotReply, we transition to the Persisted state\n\n  - on next replication, the payload is large enough to exceed the memory threshold. Or sendAppendEntries determines it needs to install a snapshot on a follower  \n\n  - Either way it will call isCapturing(). Persisted will return false so the caller will call capture which would blow up.\n\nSo we can theoretically be persisting one snapshot while capturing another. Not saying we want back-to-back snapshots but it\u0027s possible. It seems we need to allow capture in Persisted as well. Calling capture in Capturing or Created should be illegal.",
+      "parentUuid": "7a96c907_066ad080",
+      "revId": "358d8b4d1cfbc5d4f709eed0d277914e4b763794",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_a6a8bcdb",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
         "patchSetId": 3
@@ -81,6 +99,23 @@
       "writtenOn": "2015-02-27T07:19:30Z",
       "side": 1,
       "message": "I think it would be good to include a text message with these exceptions as I commented above.",
+      "revId": "358d8b4d1cfbc5d4f709eed0d277914e4b763794",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_061e50bb",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-27T13:07:38Z",
+      "side": 1,
+      "message": "We could reuse a LastAppliedTermInformationReader instance here to save an object creation. Instead of creating a new one, call an init method. Same with ReplicatedToAllTermInformationReader below.",
       "revId": "358d8b4d1cfbc5d4f709eed0d277914e4b763794",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
