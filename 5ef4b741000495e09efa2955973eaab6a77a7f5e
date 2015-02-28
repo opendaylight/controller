@@ -1,0 +1,299 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_1472fa10",
+        "filename": "opendaylight/md-sal/sal-akka-raft/pom.xml",
+        "patchSetId": 10
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-28T17:44:37Z",
+      "side": 1,
+      "message": "Need to exclude target from checkstyle as every time I ran tests from mvn the xml files generated under target/surefire-reports failed checkstyle the next time I tried to compile from mvn. I had to manually remove the target/surefire-reports files each time.",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_b462263c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/FollowerLogInformation.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-28T17:44:37Z",
+      "side": 1,
+      "message": "Returns boolean now indicating if the value changed.",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_d467b24b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-28T17:44:37Z",
+      "side": 1,
+      "message": "Moved this to static instead of creating an instance each time to save object creations and GC work.",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_74581e8a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 361,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-28T17:44:37Z",
+      "side": 1,
+      "message": "Found it useful to dump the full message as well. If this is too much for info, I can make this debug.",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_945daa7b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 675,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-28T17:44:37Z",
+      "side": 1,
+      "message": "Moved this to a method so unit tests can override to simulate memory threshold exceeded.",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3456165d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 695,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-28T17:44:37Z",
+      "side": 1,
+      "message": "captureSnapshot.getReplicatedToAllIndex() is usually -1 (in fact I haven\u0027t yet been able to come with a test scenario where it isn\u0027t) and it doesn\u0027t seem we should reset the behavior\u0027s replicatedToAllIndex history when we snapshot due to memory threshold exceeded. As mentioned in my comment, the behavior I saw in the integration test is that it prevents log trimming when a lagging follower is caught up via install snapshot. Eventually log trimming would catch up on subsequent replicates but I don\u0027t see a reason why we should reset it to -1.",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5453a26a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 714,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-28T17:44:37Z",
+      "side": 1,
+      "message": "Since the snapshot index usually wont be set to captureSnapshot.getLastAppliedIndex() now, we should print the actual value.",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_f44bceae",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 821,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-28T17:44:37Z",
+      "side": 1,
+      "message": "Moved this to a method so unit tests can override to simulate memory threshold exceeded.",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_14499ab6",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-28T17:44:37Z",
+      "side": 1,
+      "message": "I don\u0027t think this should be reported as an error. It can happen due to natural latencies.",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_b4c9c627",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-28T17:44:37Z",
+      "side": 1,
+      "message": "Utilize the new updated boolean returned from FollowerLogInformation. I did this for logging. I found it useful to log the follower\u0027s current indexes but only if they changed. I didn\u0027t want to always log it as that results in a lot of extraneous output from heartbeats when nothing changed.",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_74cfbe29",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-28T17:44:37Z",
+      "side": 1,
+      "message": "I realized the slf4j logging API has vararg methods that allow any # of format objs and only has specific methods that take 1 or 2 args. So if you have more than 2 format args it will call the vararg method and incur an implicit Object[] construction which isn\u0027t ideal on the fast path. Of course we avoid this by adding the isDebugEnabled check. I have another patch to change other occurrences as well.",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_94d4cabd",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-28T17:44:37Z",
+      "side": 1,
+      "message": "Added followerId to the log - useful info.",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_74e6deb1",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-28T17:44:37Z",
+      "side": 1,
+      "message": "Pass !updated as isHeartbeat so we don\u0027t log unnecessary debug in sendUpdatesToFollower when nothing changed here. This reduces output from heartbeats when nothing changed.",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_94eb6a77",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 395,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-28T17:44:37Z",
+      "side": 1,
+      "message": "Since install snapshot *should* only happen now for a lagging follower, the follower is most likely caught up now so be greedy and try to trim the log and advance replicatedToAllIndex.",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3404d648",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 479,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-28T17:44:37Z",
+      "side": 1,
+      "message": "Added isDebugEnabled same as above to avoid implicit vararg Object[] creation on the fast path.",
+      "range": {
+        "startLine": 479,
+        "startChar": 40,
+        "endLine": 479,
+        "endChar": 54
+      },
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_54016236",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 588,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-28T17:44:37Z",
+      "side": 1,
+      "message": "Found it useful to log the whole CaptureSnapshot message.",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_f4f98e4e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 487,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-02-28T17:44:37Z",
+      "side": 1,
+      "message": "See code comments.",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
