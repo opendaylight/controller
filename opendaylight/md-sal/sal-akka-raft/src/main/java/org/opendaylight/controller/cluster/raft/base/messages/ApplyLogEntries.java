@@ -18,9 +18,11 @@ import java.io.Serializable;
  * This class is also used as a internal message sent from Behaviour to
  * RaftActor to persist the ApplyLogEntries
  *
+ * @deprecated Deprecated in favor of ApplyJournalEntries whose type for toIndex is long instead of int.
+ *             This class was kept for backwards compatibility with Helium.
  */
+@Deprecated
 public class ApplyLogEntries implements Serializable {
-    private static final long serialVersionUID = 1L;
     private final int toIndex;
 
     public ApplyLogEntries(int toIndex) {
