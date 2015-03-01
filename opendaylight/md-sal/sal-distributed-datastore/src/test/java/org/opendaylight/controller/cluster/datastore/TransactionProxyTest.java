@@ -1072,6 +1072,17 @@ public class TransactionProxyTest {
     }
 
     @Test
+    public void testUnusedTransaction() throws Exception {
+        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, READ_WRITE);
+
+        DOMStoreThreePhaseCommitCohort ready = transactionProxy.ready();
+
+        assertEquals("canCommit", true, ready.canCommit().get());
+        ready.preCommit().get();
+        ready.commit().get();
+    }
+
+    @Test
     public void testGetIdentifier() {
         setupActorContextWithInitialCreateTransaction(getSystem(), READ_ONLY);
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
