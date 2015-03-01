@@ -11,17 +11,18 @@ package org.opendaylight.controller.cluster.datastore.identifiers;
 import com.google.common.base.Preconditions;
 
 public class TransactionIdentifier {
+    private static final String TX_SEPARATOR = "-txn-";
+
     private final String memberName;
     private final long counter;
-
+    private final String stringRepresentation;
 
     public TransactionIdentifier(String memberName, long counter) {
         this.memberName = Preconditions.checkNotNull(memberName, "memberName should not be null");
         this.counter = counter;
-    }
 
-    public static Builder builder(){
-        return new Builder();
+        stringRepresentation = new StringBuilder(memberName.length() + TX_SEPARATOR.length() + 10).
+                append(memberName).append(TX_SEPARATOR).append(counter).toString();
     }
 
     @Override
@@ -52,29 +53,8 @@ public class TransactionIdentifier {
         return result;
     }
 
-    @Override public String toString() {
-        final StringBuilder sb =
-            new StringBuilder();
-        sb.append(memberName).append("-txn-").append(counter);
-        return sb.toString();
-    }
-
-    public static class Builder {
-        private String memberName;
-        private long counter;
-
-        public TransactionIdentifier build(){
-            return new TransactionIdentifier(memberName, counter);
-        }
-
-        public Builder memberName(String memberName){
-            this.memberName = memberName;
-            return this;
-        }
-
-        public Builder counter(long counter){
-            this.counter = counter;
-            return this;
-        }
+    @Override
+    public String toString() {
+        return stringRepresentation;
     }
 }
