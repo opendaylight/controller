@@ -15,14 +15,13 @@ import akka.persistence.PersistentImpl;
 import akka.persistence.PersistentRepr;
 import akka.persistence.journal.japi.AsyncWriteJournal;
 import com.google.common.collect.Maps;
-import scala.concurrent.Future;
-
 import java.util.Map;
 import java.util.concurrent.Callable;
+import scala.concurrent.Future;
 
 public class MockAkkaJournal extends AsyncWriteJournal {
 
-    private static Map<Long, Object> journal = Maps.newHashMap();
+    private static Map<Long, Object> journal = Maps.newLinkedHashMap();
 
     public static void addToJournal(long sequenceNr, Object message) {
         journal.put(sequenceNr, message);
