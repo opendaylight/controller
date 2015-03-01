@@ -55,6 +55,7 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.datastore.DataPersistenceProviderMonitor;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
+import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
@@ -387,18 +388,24 @@ public class RaftActorTest extends AbstractActorTest {
                     new MockRaftActorContext.MockPayload("G"));
             ReplicatedLogEntry entry4 = new MockRaftActorContext.MockReplicatedLogEntry(1, 7,
                     new MockRaftActorContext.MockPayload("H"));
+            ReplicatedLogEntry entry5 = new MockRaftActorContext.MockReplicatedLogEntry(1, 8,
+                    new MockRaftActorContext.MockPayload("I"));
             entries.add(entry2);
             entries.add(entry3);
             entries.add(entry4);
+            entries.add(entry5);
 
-            int lastAppliedToState = 5;
-            int lastIndex = 7;
-
-            MockAkkaJournal.addToJournal(5, entry2);
+            long seqNr = 5;
+            MockAkkaJournal.addToJournal(seqNr++, entry2);
             // 2 entries are applied to state besides the 4 entries in snapshot
-            MockAkkaJournal.addToJournal(6, new ApplyLogEntries(lastAppliedToState));
-            MockAkkaJournal.addToJournal(7, entry3);
-            MockAkkaJournal.addToJournal(8, entry4);
+            MockAkkaJournal.addToJournal(seqNr++, new ApplyLogEntries(5));
+            MockAkkaJournal.addToJournal(seqNr++, entry3);
+            MockAkkaJournal.addToJournal(seqNr++, new ApplyJournalEntries(6));
+            MockAkkaJournal.addToJournal(seqNr++, entry4);
+            MockAkkaJournal.addToJournal(seqNr++, entry5);
+
+            int lastAppliedToState = 6;
+            int lastIndex = 8;
 
             // kill the actor
             followerActor.tell(PoisonPill.getInstance(), null);
@@ -419,7 +426,7 @@ public class RaftActorTest extends AbstractActorTest {
             assertEquals("Last index", lastIndex, context.getReplicatedLog().lastIndex());
             assertEquals("Last applied", lastAppliedToState, context.getLastApplied());
             assertEquals("Commit index", lastAppliedToState, context.getCommitIndex());
-            assertEquals("Recovered state size", 6, ref.underlyingActor().getState().size());
+            assertEquals("Recovered state size", 7, ref.underlyingActor().getState().size());
         }};
     }
 
@@ -471,7 +478,7 @@ public class RaftActorTest extends AbstractActorTest {
 
                 assertEquals("add replicated log entry", 2, replicatedLog.size());
 
-                mockRaftActor.onReceiveRecover(new ApplyLogEntries(1));
+                mockRaftActor.onReceiveRecover(new ApplyJournalEntries(1));
 
                 assertEquals("commit index 1", 1, mockRaftActor.getRaftActorContext().getCommitIndex());
 
@@ -538,7 +545,7 @@ public class RaftActorTest extends AbstractActorTest {
 
                 assertEquals("add replicated log entry", 0, replicatedLog.size());
 
-                mockRaftActor.onReceiveRecover(new ApplyLogEntries(1));
+                mockRaftActor.onReceiveRecover(new ApplyJournalEntries(1));
 
                 assertEquals("commit index -1", -1, mockRaftActor.getRaftActorContext().getCommitIndex());
 
@@ -641,7 +648,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testApplyLogEntriesCallsDataPersistence() throws Exception {
+    public void testApplyJournalEntriesCallsDataPersistence() throws Exception {
         new JavaTestKit(getSystem()) {
             {
                 String persistenceId = factory.generateActorId("leader-");
@@ -659,7 +666,7 @@ public class RaftActorTest extends AbstractActorTest {
 
                 mockRaftActor.waitForInitializeBehaviorComplete();
 
-                mockRaftActor.onReceiveCommand(new ApplyLogEntries(10));
+                mockRaftActor.onReceiveCommand(new ApplyJournalEntries(10));
 
                 verify(dataPersistenceProvider, times(1)).persist(anyObject(), any(Procedure.class));
 
