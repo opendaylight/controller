@@ -13,15 +13,11 @@ import com.google.common.base.Preconditions;
 public class TransactionIdentifier {
     private final String memberName;
     private final long counter;
-
+    private String stringRepresentation;
 
     public TransactionIdentifier(String memberName, long counter) {
         this.memberName = Preconditions.checkNotNull(memberName, "memberName should not be null");
         this.counter = counter;
-    }
-
-    public static Builder builder(){
-        return new Builder();
     }
 
     @Override
@@ -52,29 +48,12 @@ public class TransactionIdentifier {
         return result;
     }
 
-    @Override public String toString() {
-        final StringBuilder sb =
-            new StringBuilder();
-        sb.append(memberName).append("-txn-").append(counter);
-        return sb.toString();
-    }
-
-    public static class Builder {
-        private String memberName;
-        private long counter;
-
-        public TransactionIdentifier build(){
-            return new TransactionIdentifier(memberName, counter);
+    @Override
+    public String toString() {
+        if(stringRepresentation == null) {
+            stringRepresentation = new StringBuilder().append(memberName).append("-txn-").append(counter).toString();
         }
 
-        public Builder memberName(String memberName){
-            this.memberName = memberName;
-            return this;
-        }
-
-        public Builder counter(long counter){
-            this.counter = counter;
-            return this;
-        }
+        return stringRepresentation;
     }
 }
