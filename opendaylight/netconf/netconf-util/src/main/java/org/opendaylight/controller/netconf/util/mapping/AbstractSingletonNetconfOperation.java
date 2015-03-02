@@ -7,12 +7,23 @@
  */
 package org.opendaylight.controller.netconf.util.mapping;
 
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
+import org.opendaylight.controller.netconf.util.xml.XmlElement;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 public abstract class AbstractSingletonNetconfOperation extends AbstractLastNetconfOperation {
 
     protected AbstractSingletonNetconfOperation(String netconfSessionIdForReporting) {
         super(netconfSessionIdForReporting);
+    }
+
+    @Override
+    protected Element handle(Document document, XmlElement operationElement,
+                             NetconfOperationChainedExecution subsequentOperation) throws NetconfDocumentedException {
+        return handleWithNoSubsequentOperations(document, operationElement);
     }
 
     @Override

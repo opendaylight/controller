@@ -17,7 +17,7 @@ import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorT
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.mdsal.connector.TransactionProvider;
-import org.opendaylight.controller.netconf.util.mapping.AbstractLastNetconfOperation;
+import org.opendaylight.controller.netconf.util.mapping.AbstractSingletonNetconfOperation;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-public class DiscardChanges extends AbstractLastNetconfOperation{
+public class DiscardChanges extends AbstractSingletonNetconfOperation {
 
     private static final Logger LOG = LoggerFactory.getLogger(DiscardChanges.class);
 
@@ -59,4 +59,5 @@ public class DiscardChanges extends AbstractLastNetconfOperation{
     protected String getOperationName() {
         return OPERATION_NAME;
     }
+
 }

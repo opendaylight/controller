@@ -10,6 +10,7 @@ package org.opendaylight.controller.netconf.mdsal.connector;
 
 import java.util.Set;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 
@@ -18,8 +19,8 @@ public class MdsalNetconfOperationService implements NetconfOperationService {
     private final OperationProvider operationProvider;
 
     public MdsalNetconfOperationService(final CurrentSchemaContext schemaContext, final String netconfSessionIdForReporting,
-                                        final DOMDataBroker dataBroker) {
-        this.operationProvider = new OperationProvider(netconfSessionIdForReporting, schemaContext, dataBroker);
+                                        final DOMDataBroker dataBroker, final DOMRpcService rpcService) {
+        this.operationProvider = new OperationProvider(netconfSessionIdForReporting, schemaContext, dataBroker, rpcService);
     }
 
     @Override

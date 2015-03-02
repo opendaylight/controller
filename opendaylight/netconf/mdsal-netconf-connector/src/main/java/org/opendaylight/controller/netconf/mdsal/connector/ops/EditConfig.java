@@ -25,7 +25,7 @@ import org.opendaylight.controller.netconf.mdsal.connector.CurrentSchemaContext;
 import org.opendaylight.controller.netconf.mdsal.connector.TransactionProvider;
 import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
 import org.opendaylight.controller.netconf.util.exception.UnexpectedNamespaceException;
-import org.opendaylight.controller.netconf.util.mapping.AbstractLastNetconfOperation;
+import org.opendaylight.controller.netconf.util.mapping.AbstractSingletonNetconfOperation;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.yangtools.yang.data.api.ModifyAction;
@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-public class EditConfig extends AbstractLastNetconfOperation {
+public class EditConfig extends AbstractSingletonNetconfOperation {
 
     private static final Logger LOG = LoggerFactory.getLogger(EditConfig.class);
 
@@ -229,4 +229,5 @@ public class EditConfig extends AbstractLastNetconfOperation {
     protected String getOperationName() {
         return OPERATION_NAME;
     }
+
 }
