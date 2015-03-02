@@ -36,6 +36,41 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_8ab33ee8",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/FollowerLogInformation.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-02T22:06:38Z",
+      "side": 1,
+      "message": "Please add this comment to the javadoc",
+      "parentUuid": "7a96c907_b462263c",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_2acc6a69",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/FollowerLogInformationImpl.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-02T22:06:38Z",
+      "side": 1,
+      "message": "you\u0027re setting this.nextIndex before checking if it is not equal to the the argument",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_d467b24b",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 10
@@ -47,6 +82,24 @@
       "writtenOn": "2015-02-28T17:44:37Z",
       "side": 1,
       "message": "Moved this to static instead of creating an instance each time to save object creations and GC work.",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_eac1a22f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-02T22:06:38Z",
+      "side": 1,
+      "message": "+1",
+      "parentUuid": "7a96c907_d467b24b",
       "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -70,6 +123,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_aa063a84",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 361,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-02T22:06:38Z",
+      "side": 1,
+      "message": "we should make this debug. There are certain scenarios in which this can happen quite frequently.",
+      "parentUuid": "7a96c907_74581e8a",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_945daa7b",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 10
@@ -81,6 +152,24 @@
       "writtenOn": "2015-02-28T17:44:37Z",
       "side": 1,
       "message": "Moved this to a method so unit tests can override to simulate memory threshold exceeded.",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_ca0b868c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 675,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-02T22:06:38Z",
+      "side": 1,
+      "message": "+1",
+      "parentUuid": "7a96c907_945daa7b",
       "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -104,6 +193,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_8a01fe6b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 695,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-02T22:06:38Z",
+      "side": 1,
+      "message": "makes sense. Wish this was in a separate commit though :)",
+      "parentUuid": "7a96c907_3456165d",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_5453a26a",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 10
@@ -115,6 +222,24 @@
       "writtenOn": "2015-02-28T17:44:37Z",
       "side": 1,
       "message": "Since the snapshot index usually wont be set to captureSnapshot.getLastAppliedIndex() now, we should print the actual value.",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_2afa2a75",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 714,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-02T22:06:38Z",
+      "side": 1,
+      "message": "+1",
+      "parentUuid": "7a96c907_5453a26a",
       "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -240,6 +365,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_ea4682bf",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 395,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-02T22:06:38Z",
+      "side": 1,
+      "message": "I really really really wish this change wasn\u0027t made in this commit :) even though it makes sense.",
+      "parentUuid": "7a96c907_94eb6a77",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_3404d648",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
         "patchSetId": 10
@@ -291,6 +434,41 @@
       "writtenOn": "2015-02-28T17:44:37Z",
       "side": 1,
       "message": "See code comments.",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_aa14fa9f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 487,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-02T22:06:38Z",
+      "side": 1,
+      "message": ":)",
+      "parentUuid": "7a96c907_f4f98e4e",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_0a1baeca",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/pom.xml",
+        "patchSetId": 10
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-02T22:06:38Z",
+      "side": 1,
+      "message": "Is this how we can add dependencies on the test classes in project?",
       "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
