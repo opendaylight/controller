@@ -197,8 +197,9 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
 
         final ByteArrayOutputStream outStream = new ByteArrayOutputStream();
         NormalizedNode<?, ?> data = errorsNode.getData();
-        final InstanceIdentifierContext context = errorsNode.getInstanceIdentifierContext();
+        final InstanceIdentifierContext<DataSchemaNode> context = errorsNode.getInstanceIdentifierContext();
         final DataSchemaNode schema = context.getSchemaNode();
+
         SchemaPath path = context.getSchemaNode().getPath();
         final OutputStreamWriter outputWriter = new OutputStreamWriter(outStream, Charsets.UTF_8);
         if (data == null) {

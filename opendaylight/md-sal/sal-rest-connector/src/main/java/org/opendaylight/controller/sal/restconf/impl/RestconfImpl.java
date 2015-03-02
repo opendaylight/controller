@@ -18,6 +18,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.CheckedFuture;
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -32,6 +33,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
@@ -44,6 +47,9 @@ import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedEx
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizer;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
@@ -91,6 +97,7 @@ import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.SchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition;
@@ -514,18 +521,75 @@ public class RestconfImpl implements RestconfService {
     }
 
     @Override
-    public StructuredData invokeRpc(final String identifier, final CompositeNode payload, final UriInfo uriInfo) {
-        final RpcExecutor rpc = resolveIdentifierInInvokeRpc(identifier);
-        final QName rpcName = rpc.getRpcDefinition().getQName();
-        final URI rpcNamespace = rpcName.getNamespace();
-        if (Objects.equal(rpcNamespace.toString(), SAL_REMOTE_NAMESPACE)
-                && Objects.equal(rpcName.getLocalName(), SAL_REMOTE_RPC_SUBSRCIBE)) {
-            return invokeSalRemoteRpcSubscribeRPC(payload, rpc.getRpcDefinition(), parsePrettyPrintParameter(uriInfo));
+    public NormalizedNodeContext invokeRpc(final String identifier, final NormalizedNodeContext payload, final UriInfo uriInfo) {
+        final SchemaPath type = payload.getInstanceIdentifierContext().getSchemaNode().getPath();
+        final CheckedFuture<DOMRpcResult, DOMRpcException> response;
+        final DOMMountPoint mountPoint = payload.getInstanceIdentifierContext().getMountPoint();
+        final SchemaContext schemaContext;
+        if (identifier.contains(MOUNT_POINT_MODULE_NAME) && mountPoint != null) {
+            final Optional<DOMRpcService> mountRpcServices = mountPoint.getService(DOMRpcService.class);
+            if ( ! mountRpcServices.isPresent()) {
+                throw new RestconfDocumentedException("Rpc service is missing.");
+            }
+            schemaContext = mountPoint.getSchemaContext();
+            response = mountRpcServices.get().invokeRpc(type, payload.getData());
+        } else {
+            response = broker.invokeRpc(type, payload.getData());
+            schemaContext = controllerContext.getGlobalSchema();
         }
 
-        validateInput(rpc.getRpcDefinition().getInput(), payload);
+        final DOMRpcResult result = checkRpcResponse(response);
 
-        return callRpc(rpc, payload, parsePrettyPrintParameter(uriInfo));
+        DataSchemaNode resultNodeSchema = null;
+        NormalizedNode<?, ?> resultData = null;
+        if (result != null && result.getResult() != null) {
+            resultData = result.getResult();
+            final ContainerSchemaNode rpcDataSchemaNode = SchemaContextUtil.getRpcDataSchema(schemaContext, type);
+            resultNodeSchema = rpcDataSchemaNode.getDataChildByName(result.getResult().getNodeType());
+        }
+
+        return new NormalizedNodeContext(new InstanceIdentifierContext(null, resultNodeSchema, mountPoint,
+                schemaContext), resultData);
+    }
+
+    private DOMRpcResult checkRpcResponse(final CheckedFuture<DOMRpcResult, DOMRpcException> response) {
+        if (response == null) {
+            return null;
+        }
+        try {
+            final DOMRpcResult retValue = response.get();
+            if (retValue.getErrors() == null || retValue.getErrors().isEmpty()) {
+                return retValue;
+            }
+            throw new RestconfDocumentedException("RpcError message", null, retValue.getErrors());
+        }
+        catch (final InterruptedException e) {
+            throw new RestconfDocumentedException(
+                    "The operation was interrupted while executing and did not complete.", ErrorType.RPC,
+                    ErrorTag.PARTIAL_OPERATION);
+        }
+        catch (final ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof CancellationException) {
+                throw new RestconfDocumentedException("The operation was cancelled while executing.", ErrorType.RPC,
+                        ErrorTag.PARTIAL_OPERATION);
+            } else if (cause != null) {
+                while (cause.getCause() != null) {
+                    cause = cause.getCause();
+                }
+
+                if (cause instanceof IllegalArgumentException) {
+                    throw new RestconfDocumentedException(cause.getMessage(), ErrorType.PROTOCOL,
+                            ErrorTag.INVALID_VALUE);
+                }
+
+                throw new RestconfDocumentedException("The operation encountered an unexpected error while executing.",
+                        cause);
+            } else {
+                throw new RestconfDocumentedException("The operation encountered an unexpected error while executing.",
+                        e);
+            }
+        }
     }
 
     private void validateInput(final DataSchemaNode inputSchema, final NormalizedNodeContext payload) {
@@ -567,6 +631,10 @@ public class RestconfImpl implements RestconfService {
         // }
     }
 
+    /**
+     * @deprecated method wil be removed for Lithium release
+     */
+    @Deprecated
     private StructuredData invokeSalRemoteRpcSubscribeRPC(final CompositeNode payload, final RpcDefinition rpc,
             final boolean prettyPrint) {
         final CompositeNode value = this.normalizeNode(payload, rpc.getInput(), null);
@@ -621,7 +689,22 @@ public class RestconfImpl implements RestconfService {
         if (StringUtils.isNotBlank(noPayload)) {
             throw new RestconfDocumentedException("Content must be empty.", ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
         }
-        return invokeRpc(identifier, (CompositeNode) null, uriInfo);
+        final CompositeNode payload = null;
+        final RpcExecutor rpc = resolveIdentifierInInvokeRpc(identifier);
+        final QName rpcName = rpc.getRpcDefinition().getQName();
+        final URI rpcNamespace = rpcName.getNamespace();
+        if (Objects.equal(rpcNamespace.toString(), SAL_REMOTE_NAMESPACE)
+                && Objects.equal(rpcName.getLocalName(), SAL_REMOTE_RPC_SUBSRCIBE)) {
+            return invokeSalRemoteRpcSubscribeRPC(payload, rpc.getRpcDefinition(), parsePrettyPrintParameter(uriInfo));
+        }
+
+        validateInput(rpc.getRpcDefinition().getInput(), payload);
+
+        return callRpc(rpc, payload, parsePrettyPrintParameter(uriInfo));
+    }
+
+    private void resolveInvokeRpc(final String identifier, final DOMMountPoint mountPoint) {
+
     }
 
     private RpcExecutor resolveIdentifierInInvokeRpc(final String identifier) {
@@ -685,6 +768,10 @@ public class RestconfImpl implements RestconfService {
         return null;
     }
 
+    /**
+     * @deprecated method will be removed for Lithium release
+     */
+    @Deprecated
     private StructuredData callRpc(final RpcExecutor rpcExecutor, final CompositeNode payload, final boolean prettyPrint) {
         if (rpcExecutor == null) {
             throw new RestconfDocumentedException("RPC does not exist.", ErrorType.RPC, ErrorTag.UNKNOWN_ELEMENT);
@@ -810,7 +897,7 @@ public class RestconfImpl implements RestconfService {
     @Override
     public Response updateConfigurationData(final String identifier, final NormalizedNodeContext payload) {
         Preconditions.checkNotNull(identifier);
-        final InstanceIdentifierContext iiWithData = controllerContext.toInstanceIdentifier(identifier);
+        final InstanceIdentifierContext<DataSchemaNode> iiWithData = controllerContext.toInstanceIdentifier(identifier);
 
         validateInput(iiWithData.getSchemaNode(), payload);
         validateTopLevelNodeName(payload, iiWithData.getInstanceIdentifier());
@@ -1053,6 +1140,36 @@ public class RestconfImpl implements RestconfService {
             responseBuilder.location(location);
         }
         return responseBuilder.build();
+    }
+
+    // FIXME create RestconfIdetifierHelper and move this method there
+    private YangInstanceIdentifier checkConsistencyOfNormalizedNodeContext(final NormalizedNodeContext payload) {
+        Preconditions.checkArgument(payload != null);
+        Preconditions.checkArgument(payload.getData() != null);
+        Preconditions.checkArgument(payload.getData().getNodeType() != null);
+        Preconditions.checkArgument(payload.getInstanceIdentifierContext() != null);
+        Preconditions.checkArgument(payload.getInstanceIdentifierContext().getInstanceIdentifier() != null);
+
+        final QName payloadNodeQname = payload.getData().getNodeType();
+        final YangInstanceIdentifier yangIdent = payload.getInstanceIdentifierContext().getInstanceIdentifier();
+        if (payloadNodeQname.compareTo(yangIdent.getLastPathArgument().getNodeType()) > 0) {
+            return yangIdent;
+        }
+        final InstanceIdentifierContext parentContext = payload.getInstanceIdentifierContext();
+        final SchemaNode parentSchemaNode = parentContext.getSchemaNode();
+        if(parentSchemaNode instanceof DataNodeContainer) {
+            final DataNodeContainer cast = (DataNodeContainer) parentSchemaNode;
+            for (final DataSchemaNode child : cast.getChildNodes()) {
+                if (payloadNodeQname.compareTo(child.getQName()) == 0) {
+                    return YangInstanceIdentifier.builder(yangIdent).node(child.getQName()).build();
+                }
+            }
+        }
+        if (parentSchemaNode instanceof RpcDefinition) {
+            return yangIdent;
+        }
+        final String errMsg = "Error parsing input: DataSchemaNode has not children";
+        throw new RestconfDocumentedException(errMsg, ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE);
     }
 
     @Override

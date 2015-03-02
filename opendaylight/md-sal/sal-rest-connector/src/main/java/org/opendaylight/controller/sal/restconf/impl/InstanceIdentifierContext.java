@@ -9,18 +9,18 @@ package org.opendaylight.controller.sal.restconf.impl;
 
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.SchemaNode;
 
-public class InstanceIdentifierContext {
+public class InstanceIdentifierContext <T extends SchemaNode> {
 
     private final YangInstanceIdentifier instanceIdentifier;
-    private final DataSchemaNode schemaNode;
+    private final T schemaNode;
     private final DOMMountPoint mountPoint;
     private final SchemaContext schemaContext;
 
-    public InstanceIdentifierContext(YangInstanceIdentifier instanceIdentifier, DataSchemaNode schemaNode,
-            DOMMountPoint mountPoint,SchemaContext context) {
+    public InstanceIdentifierContext(final YangInstanceIdentifier instanceIdentifier, final T schemaNode,
+            final DOMMountPoint mountPoint,final SchemaContext context) {
         this.instanceIdentifier = instanceIdentifier;
         this.schemaNode = schemaNode;
         this.mountPoint = mountPoint;
@@ -31,7 +31,7 @@ public class InstanceIdentifierContext {
         return instanceIdentifier;
     }
 
-    public DataSchemaNode getSchemaNode() {
+    public T getSchemaNode() {
         return schemaNode;
     }
 

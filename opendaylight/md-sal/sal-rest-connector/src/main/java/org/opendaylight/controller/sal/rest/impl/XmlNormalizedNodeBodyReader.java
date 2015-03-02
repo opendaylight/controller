@@ -38,6 +38,8 @@ import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
+import org.opendaylight.yangtools.yang.model.api.SchemaNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -101,10 +103,18 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
         }
     }
 
-    private static NormalizedNode<?,?> parse(final InstanceIdentifierContext pathContext,final Document doc) {
+    private static NormalizedNode<?,?> parse(final InstanceIdentifierContext<?> pathContext,final Document doc) {
 
         final List<Element> elements = Collections.singletonList(doc.getDocumentElement());
-        DataSchemaNode schemaNode = pathContext.getSchemaNode();
+        final SchemaNode schemaNodeContext = pathContext.getSchemaNode();
+        DataSchemaNode schemaNode = null;
+        if (schemaNodeContext instanceof RpcDefinition) {
+            schemaNode = ((RpcDefinition) schemaNodeContext).getInput();
+        } else if (schemaNodeContext instanceof DataSchemaNode) {
+            schemaNode = (DataSchemaNode) schemaNodeContext;
+        } else {
+            throw new IllegalStateException("Unknow SchemaNode");
+        }
 
         final String docRootElm = doc.getDocumentElement().getLocalName();
         final String schemaNodeName = pathContext.getSchemaNode().getQName().getLocalName();
