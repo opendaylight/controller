@@ -22,8 +22,8 @@
                   <name>yang-schema-service</name>
               </root-schema-service>
               <dom-broker xmlns="urn:opendaylight:params:xml:ns:yang:controller:netconf:mdsal:mapper">
-                  <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:dom-async-data-broker</type>
-                  <name>inmemory-data-broker</name>
+                  <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:dom-broker-osgi-registry</type>
+                  <name>dom-broker</name>
               </dom-broker>
               <mapper-aggregator xmlns="urn:opendaylight:params:xml:ns:yang:controller:netconf:mdsal:mapper">
                   <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:netconf:north:mapper">prefix:netconf-mapper-registry</type>

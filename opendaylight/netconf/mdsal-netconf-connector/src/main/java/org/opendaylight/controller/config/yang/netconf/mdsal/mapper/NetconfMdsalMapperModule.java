@@ -8,9 +8,12 @@
 
 package org.opendaylight.controller.config.yang.netconf.mdsal.mapper;
 
+import java.util.Collection;
 import org.opendaylight.controller.netconf.mdsal.connector.MdsalNetconfOperationServiceFactory;
+import org.opendaylight.controller.sal.core.api.Broker.ConsumerSession;
+import org.opendaylight.controller.sal.core.api.Consumer;
 
-public class NetconfMdsalMapperModule extends org.opendaylight.controller.config.yang.netconf.mdsal.mapper.AbstractNetconfMdsalMapperModule {
+public class NetconfMdsalMapperModule extends org.opendaylight.controller.config.yang.netconf.mdsal.mapper.AbstractNetconfMdsalMapperModule implements Consumer{
     public NetconfMdsalMapperModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
@@ -26,15 +29,24 @@ public class NetconfMdsalMapperModule extends org.opendaylight.controller.config
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        final MdsalNetconfOperationServiceFactory mdsalNetconfOperationServiceFactory = new MdsalNetconfOperationServiceFactory(getRootSchemaServiceDependency(), getDomBrokerDependency()) {
-            @Override
-            public void close() throws Exception {
-                super.close();
-                getMapperAggregatorDependency().onRemoveNetconfOperationServiceFactory(this);
-            }
-        };
+        final MdsalNetconfOperationServiceFactory mdsalNetconfOperationServiceFactory =
+                new MdsalNetconfOperationServiceFactory(getRootSchemaServiceDependency(), getDomBrokerDependency().registerConsumer(this)) {
+                    @Override
+                    public void close() throws Exception {
+                        super.close();
+                        getMapperAggregatorDependency().onRemoveNetconfOperationServiceFactory(this);
+                    }
+                };
         getMapperAggregatorDependency().onAddNetconfOperationServiceFactory(mdsalNetconfOperationServiceFactory);
         return mdsalNetconfOperationServiceFactory;
+    }
+
+    @Override
+    public void onSessionInitiated(ConsumerSession session) {}
+
+    @Override
+    public Collection<ConsumerFunctionality> getConsumerFunctionality() {
+        return null;
     }
 
 }
