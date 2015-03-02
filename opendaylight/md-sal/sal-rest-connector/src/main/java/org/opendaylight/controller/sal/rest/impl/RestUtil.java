@@ -11,7 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.xml.stream.events.StartElement;
+
 import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO;
 import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO.IdentityValue;
 import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO.Predicate;
@@ -44,7 +46,15 @@ public final class RestUtil {
         }
         final IdentityValuesDTO identityValuesDTO = new IdentityValuesDTO(value);
         for (int i = 1; i < xPathParts.length; i++) {
-            final String xPathPartTrimmed = xPathParts[i].trim();
+            String xPathPartTrimmed = xPathParts[i].trim();
+            /*
+             * If we have an odd number of quotes then we have an open string literal
+             * and we should ignore the "/" character inside the string literal by grafting
+             * the next one on after it
+             */
+            while(xPathPartTrimmed.split("'").length%2 != 1 && i+1 < xPathParts.length) {
+                xPathPartTrimmed = xPathPartTrimmed.concat("/" + xPathParts[++i].trim());
+            }
 
             final String xPathPartStr = getIdAndPrefixAsStr(xPathPartTrimmed);
             final IdentityValue identityValue = toIdentity(xPathPartStr, prefixMap);
