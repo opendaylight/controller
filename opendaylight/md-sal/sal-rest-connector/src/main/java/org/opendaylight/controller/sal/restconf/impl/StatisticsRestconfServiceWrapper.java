@@ -97,13 +97,13 @@ public class StatisticsRestconfServiceWrapper implements RestconfService {
     }
 
     @Override
-    public Response createConfigurationData(String identifier, Node<?> payload, UriInfo uriInfo) {
+    public Response createConfigurationData(final String identifier, final NormalizedNodeContext payload, final UriInfo uriInfo) {
         configPost.incrementAndGet();
         return delegate.createConfigurationData(identifier, payload, uriInfo);
     }
 
     @Override
-    public Response createConfigurationData(Node<?> payload, UriInfo uriInfo) {
+    public Response createConfigurationData(final Node<?> payload, final UriInfo uriInfo) {
         configPost.incrementAndGet();
         return delegate.createConfigurationData(payload, uriInfo);
     }
