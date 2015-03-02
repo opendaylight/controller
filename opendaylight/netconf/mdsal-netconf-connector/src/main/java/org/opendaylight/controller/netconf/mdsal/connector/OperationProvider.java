@@ -11,11 +11,13 @@ package org.opendaylight.controller.netconf.mdsal.connector;
 import com.google.common.collect.Sets;
 import java.util.Set;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mdsal.connector.ops.Commit;
 import org.opendaylight.controller.netconf.mdsal.connector.ops.DiscardChanges;
 import org.opendaylight.controller.netconf.mdsal.connector.ops.EditConfig;
 import org.opendaylight.controller.netconf.mdsal.connector.ops.Lock;
+import org.opendaylight.controller.netconf.mdsal.connector.ops.RuntimeRpc;
 import org.opendaylight.controller.netconf.mdsal.connector.ops.Unlock;
 import org.opendaylight.controller.netconf.mdsal.connector.ops.get.Get;
 import org.opendaylight.controller.netconf.mdsal.connector.ops.get.GetConfig;
@@ -25,14 +27,16 @@ final class OperationProvider {
     private final String netconfSessionIdForReporting;
     private final CurrentSchemaContext schemaContext;
     private final DOMDataBroker dataBroker;
+    private final DOMRpcService rpcService;
     private final TransactionProvider transactionProvider;
 
-    public OperationProvider(final String netconfSessionIdForReporting, final CurrentSchemaContext schemaContext, final DOMDataBroker dataBroker) {
+    public OperationProvider(final String netconfSessionIdForReporting, final CurrentSchemaContext schemaContext,
+                             final DOMDataBroker dataBroker, final DOMRpcService rpcService) {
         this.netconfSessionIdForReporting = netconfSessionIdForReporting;
         this.schemaContext = schemaContext;
         this.dataBroker = dataBroker;
-        this.transactionProvider = new TransactionProvider(dataBroker, netconfSessionIdForReporting);
-
+        this.rpcService = rpcService;
+        this.transactionProvider = new TransactionProvider(this.dataBroker, netconfSessionIdForReporting);
     }
 
     Set<NetconfOperation> getOperations() {
@@ -43,7 +47,8 @@ final class OperationProvider {
                 new Get(netconfSessionIdForReporting, schemaContext, transactionProvider),
                 new GetConfig(netconfSessionIdForReporting, schemaContext, transactionProvider),
                 new Lock(netconfSessionIdForReporting),
-                new Unlock(netconfSessionIdForReporting)
+                new Unlock(netconfSessionIdForReporting),
+                new RuntimeRpc(netconfSessionIdForReporting, schemaContext, rpcService)
         );
     }
 
