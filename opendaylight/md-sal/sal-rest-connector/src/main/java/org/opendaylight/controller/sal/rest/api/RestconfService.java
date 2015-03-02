@@ -22,8 +22,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
-import org.opendaylight.controller.sal.restconf.impl.StructuredData;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 
 /**
@@ -33,17 +31,17 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
  * <li><b>/restconf</b> - {@link #getRoot()}
  * <ul>
  *      <li><b>/config</b> - {@link #readConfigurationData(String)}
- *                              {@link #updateConfigurationData(String, CompositeNode)}
- *                              {@link #createConfigurationData(CompositeNode)}
- *                              {@link #createConfigurationData(String, CompositeNode)}
+ *                              {@link #updateConfigurationData(String, NormalizedNodeContext)}
+ *                              {@link #createConfigurationData(NormalizedNodeContext)}
+ *                              {@link #createConfigurationData(String, NormalizedNodeContext)}
  * {@link #deleteConfigurationData(String)}
  * <li><b>/operational</b> - {@link #readOperationalData(String)}
  * <li>/modules - {@link #getModules()}
  * <ul>
  * <li>/module
  * </ul>
- *      <li><b>/operations</b> - {@link #invokeRpc(String, CompositeNode)}
- *                               {@link #invokeRpc(String, CompositeNode)}
+ *      <li><b>/operations</b> - {@link #invokeRpc(String, NormalizedNodeContext)}
+ *                               {@link #invokeRpc(String, NormalizedNodeContext)}
  * <li>/version (field)
  * </ul>
  * </ul>
