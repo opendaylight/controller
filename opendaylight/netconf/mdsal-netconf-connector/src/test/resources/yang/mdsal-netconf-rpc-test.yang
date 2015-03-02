@@ -1,0 +1,41 @@
+module rpc-test {
+    yang-version 1;
+    namespace "urn:opendaylight:mdsal:mapping:rpc:test";
+    prefix "rpc";
+
+    rpc void-rpc {
+        input {
+            leaf test-string {
+                type string;
+            }
+
+            leaf test-string2 {
+                type string;
+            }
+        }
+
+    }
+
+    rpc nonvoid-rpc {
+        input {
+            leaf test-string {
+                type string;
+            }
+
+            leaf test-string2 {
+                type string;
+            }
+        }
+
+        output {
+            leaf test-string {
+                type string;
+            }
+
+            leaf test-string2 {
+                type string;
+            }
+        }
+    }
+}
+

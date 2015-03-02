@@ -12,11 +12,13 @@ import com.google.common.base.Preconditions;
 import java.util.HashSet;
 import java.util.Set;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.netconf.api.Capability;
 import org.opendaylight.controller.netconf.api.monitoring.CapabilityListener;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
 import org.opendaylight.controller.netconf.util.capability.BasicCapability;
 import org.opendaylight.controller.netconf.util.capability.YangModuleCapability;
+import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -27,17 +29,21 @@ public class MdsalNetconfOperationServiceFactory implements NetconfOperationServ
 
     private static final Logger LOG = LoggerFactory.getLogger(MdsalNetconfOperationServiceFactory.class);
 
+    private final ProviderSession session;
     private final DOMDataBroker dataBroker;
+    private final DOMRpcService rpcService;
     private final CurrentSchemaContext currentSchemaContext;
 
-    public MdsalNetconfOperationServiceFactory(final SchemaService schemaService, final DOMDataBroker domDataBroker) {
+    public MdsalNetconfOperationServiceFactory(final SchemaService schemaService, final ProviderSession session) {
         this.currentSchemaContext = new CurrentSchemaContext(Preconditions.checkNotNull(schemaService));
-        this.dataBroker = Preconditions.checkNotNull(domDataBroker);
+        this.session = Preconditions.checkNotNull(session);
+        this.dataBroker = session.getService(DOMDataBroker.class);
+        this.rpcService = session.getService(DOMRpcService.class);
     }
 
     @Override
     public MdsalNetconfOperationService createService(final String netconfSessionIdForReporting) {
-        return new MdsalNetconfOperationService(currentSchemaContext, netconfSessionIdForReporting, dataBroker);
+        return new MdsalNetconfOperationService(currentSchemaContext, netconfSessionIdForReporting, dataBroker, rpcService);
     }
 
     @Override

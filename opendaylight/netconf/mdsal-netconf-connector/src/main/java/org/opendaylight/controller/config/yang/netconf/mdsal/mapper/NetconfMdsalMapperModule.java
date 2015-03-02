@@ -8,7 +8,10 @@
 
 package org.opendaylight.controller.config.yang.netconf.mdsal.mapper;
 
+import java.util.Collection;
 import org.opendaylight.controller.netconf.mdsal.connector.MdsalNetconfOperationServiceFactory;
+import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
+import org.opendaylight.controller.sal.core.api.Provider;
 
 public class NetconfMdsalMapperModule extends org.opendaylight.controller.config.yang.netconf.mdsal.mapper.AbstractNetconfMdsalMapperModule {
     public NetconfMdsalMapperModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
@@ -26,7 +29,8 @@ public class NetconfMdsalMapperModule extends org.opendaylight.controller.config
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        final MdsalNetconfOperationServiceFactory mdsalNetconfOperationServiceFactory = new MdsalNetconfOperationServiceFactory(getRootSchemaServiceDependency(), getDomBrokerDependency()) {
+        ProviderSession session = getDomBrokerDependency().registerProvider(new MappingProvider());
+        final MdsalNetconfOperationServiceFactory mdsalNetconfOperationServiceFactory = new MdsalNetconfOperationServiceFactory(getRootSchemaServiceDependency(), session) {
             @Override
             public void close() throws Exception {
                 super.close();
@@ -35,6 +39,19 @@ public class NetconfMdsalMapperModule extends org.opendaylight.controller.config
         };
         getMapperAggregatorDependency().onAddNetconfOperationServiceFactory(mdsalNetconfOperationServiceFactory);
         return mdsalNetconfOperationServiceFactory;
+    }
+
+    private class MappingProvider implements Provider {
+
+        @Override
+        public void onSessionInitiated(ProviderSession session) {
+
+        }
+
+        @Override
+        public Collection<ProviderFunctionality> getProviderFunctionality() {
+            return null;
+        }
     }
 
 }
