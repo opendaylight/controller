@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
@@ -559,7 +560,7 @@ public class RestconfImpl implements RestconfService {
         final YangInstanceIdentifier pathIdentifier = ((YangInstanceIdentifier) pathValue);
         String streamName = null;
         if (!Iterables.isEmpty(pathIdentifier.getPathArguments())) {
-            final String fullRestconfIdentifier = controllerContext.toFullRestconfIdentifier(pathIdentifier);
+            final String fullRestconfIdentifier = controllerContext.toFullRestconfIdentifier(pathIdentifier, null);
 
             LogicalDatastoreType datastore = parseEnumTypeParameter(value, LogicalDatastoreType.class,
                     DATASTORE_PARAM_NAME);
@@ -794,7 +795,6 @@ public class RestconfImpl implements RestconfService {
         validateListKeysEqualityInPayloadAndUri(iiWithData, payload.getData());
 
         final DOMMountPoint mountPoint = iiWithData.getMountPoint();
-
         final YangInstanceIdentifier normalizedII = iiWithData.getInstanceIdentifier();
 
         /*
@@ -993,7 +993,7 @@ public class RestconfImpl implements RestconfService {
     }
 
     @Override
-    public Response createConfigurationData(final String identifier, final Node<?> payload) {
+    public Response createConfigurationData(final String identifier, final Node<?> payload, final UriInfo uriInfo) {
         if (payload == null) {
             throw new RestconfDocumentedException("Input is required.", ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE);
         }
@@ -1026,6 +1026,10 @@ public class RestconfImpl implements RestconfService {
             final DataNodeContainer parentSchema = (DataNodeContainer) incompleteInstIdWithData.getSchemaNode();
             final DOMMountPoint mountPoint = incompleteInstIdWithData.getMountPoint();
             final Module module = findModule(mountPoint, payload);
+            if (module == null) {
+                throw new RestconfDocumentedException("Module was not found for \"" + payloadNS + "\"",
+                        ErrorType.PROTOCOL, ErrorTag.UNKNOWN_ELEMENT);
+            }
 
             final String payloadName = getName(payload);
             final DataSchemaNode schemaNode = ControllerContext.findInstanceDataChildByNameAndNamespace(
@@ -1055,11 +1059,17 @@ public class RestconfImpl implements RestconfService {
             throw new RestconfDocumentedException("Error creating data", e);
         }
 
-        return Response.status(Status.NO_CONTENT).build();
+
+        final ResponseBuilder responseBuilder = Response.status(Status.NO_CONTENT);
+        final URI location = resolveLocation(uriInfo, "config", mountPoint, normalizedII);
+        if (location != null) {
+            responseBuilder.location(location);
+        }
+        return responseBuilder.build();
     }
 
     @Override
-    public Response createConfigurationData(final Node<?> payload) {
+    public Response createConfigurationData(final Node<?> payload, final UriInfo uriInfo) {
         if (payload == null) {
             throw new RestconfDocumentedException("Input is required.", ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE);
         }
@@ -1072,6 +1082,11 @@ public class RestconfImpl implements RestconfService {
         }
 
         final Module module = this.findModule(null, payload);
+        if (module == null) {
+            throw new RestconfDocumentedException(
+                    "Data has bad format. Root element node has incorrect namespace (XML format) or module name(JSON format)",
+                    ErrorType.PROTOCOL, ErrorTag.UNKNOWN_NAMESPACE);
+        }
 
         final String payloadName = getName(payload);
         final DataSchemaNode schemaNode = ControllerContext.findInstanceDataChildByNameAndNamespace(module,
@@ -1098,7 +1113,24 @@ public class RestconfImpl implements RestconfService {
             throw new RestconfDocumentedException("Error creating data", e);
         }
 
-        return Response.status(Status.NO_CONTENT).build();
+        final ResponseBuilder responseBuilder = Response.status(Status.NO_CONTENT);
+        final URI location = resolveLocation(uriInfo, "", mountPoint, normalizedII);
+        if (location != null) {
+            responseBuilder.location(location);
+        }
+        return responseBuilder.build();
+    }
+
+    private URI resolveLocation(final UriInfo uriInfo, final String uriBehindBase, final DOMMountPoint mountPoint, final YangInstanceIdentifier normalizedII) {
+        final UriBuilder uriBuilder = uriInfo.getBaseUriBuilder();
+        uriBuilder.path("config");
+        try {
+            uriBuilder.path(controllerContext.toFullRestconfIdentifier(normalizedII, mountPoint));
+        } catch (final Exception e) {
+            LOG.debug("Location for instance identifier"+normalizedII+"wasn't created", e);
+            return null;
+        }
+        return uriBuilder.build();
     }
 
     @Override
