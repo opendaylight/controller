@@ -1037,8 +1037,8 @@ public class RestconfImpl implements RestconfService {
         } catch (NullPointerException e) {
             WebSocketServer.createInstance(NOTIFICATION_PORT);
         }
-        UriBuilder port = uriBuilder.port(notificationPort);
-        final URI uriToWebsocketServer = port.replacePath(streamName).build();
+        final UriBuilder uriToWebsocketServerBuilder = uriBuilder.port(notificationPort).scheme("ws");
+        final URI uriToWebsocketServer = uriToWebsocketServerBuilder.replacePath(streamName).build();
 
         return Response.status(Status.OK).location(uriToWebsocketServer).build();
     }
