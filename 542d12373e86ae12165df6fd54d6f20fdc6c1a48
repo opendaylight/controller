@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_ca8066c2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/identifiers/TransactionIdentifier.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-02T22:14:26Z",
+      "side": 1,
+      "message": "Wouldn\u0027t it be better to just initialize stringRepresentation in the constructor. I can imagine toString being multiple times and then we\u0027ll have this null check done every time.",
+      "revId": "542d12373e86ae12165df6fd54d6f20fdc6c1a48",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
