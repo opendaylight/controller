@@ -7,6 +7,9 @@
  */
 package org.opendaylight.controller.sal.restconf.impl;
 
+import java.math.BigInteger;
+import java.util.Collection;
+import java.util.Collections;
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.Config;
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.Get;
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.Operational;
@@ -16,6 +19,7 @@ import org.opendaylight.controller.config.yang.md.sal.rest.connector.RestConnect
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.Rpcs;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
+import org.opendaylight.controller.md.sal.dom.broker.impl.DOMRpcRouter;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
@@ -25,30 +29,33 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 
-import java.math.BigInteger;
-import java.util.Collection;
-import java.util.Collections;
-
 public class RestconfProviderImpl implements Provider, AutoCloseable, RestConnector, RestConnectorRuntimeMXBean {
 
     private final StatisticsRestconfServiceWrapper stats = StatisticsRestconfServiceWrapper.getInstance();
     private ListenerRegistration<SchemaContextListener> listenerRegistration;
+    private ListenerRegistration<SchemaContextListener> rpcRouterSchemalistenerRegistration;
     private PortNumber port;
     private Thread webSocketServerThread;
 
-    public void setWebsocketPort(PortNumber port) {
+    public void setWebsocketPort(final PortNumber port) {
         this.port = port;
     }
 
     @Override
-    public void onSessionInitiated(ProviderSession session) {
+    public void onSessionInitiated(final ProviderSession session) {
         final DOMDataBroker domDataBroker = session.getService(DOMDataBroker.class);
 
         BrokerFacade.getInstance().setContext(session);
         BrokerFacade.getInstance().setDomDataBroker( domDataBroker);
 
-        SchemaService schemaService = session.getService(SchemaService.class);
+        final DOMRpcRouter rpcRouter = new DOMRpcRouter();
+
+        final SchemaService schemaService = session.getService(SchemaService.class);
         listenerRegistration = schemaService.registerSchemaContextListener(ControllerContext.getInstance());
+        rpcRouterSchemalistenerRegistration = schemaService.registerSchemaContextListener(rpcRouter);
+        BrokerFacade.getInstance().setRpcService(rpcRouter);
+
+
         ControllerContext.getInstance().setSchemas(schemaService.getGlobalContext());
         ControllerContext.getInstance().setMountService(session.getService(DOMMountPointService.class));
 
@@ -65,6 +72,10 @@ public class RestconfProviderImpl implements Provider, AutoCloseable, RestConnec
     @Override
     public void close() {
 
+        if (rpcRouterSchemalistenerRegistration != null) {
+            rpcRouterSchemalistenerRegistration.close();
+        }
+
         if (listenerRegistration != null) {
             listenerRegistration.close();
         }
@@ -75,14 +86,14 @@ public class RestconfProviderImpl implements Provider, AutoCloseable, RestConnec
 
     @Override
     public Config getConfig() {
-        Config config = new Config();
-        Get get = new Get();
+        final Config config = new Config();
+        final Get get = new Get();
         get.setReceivedRequests(stats.getConfigGet());
         config.setGet(get);
-        Post post = new Post();
+        final Post post = new Post();
         post.setReceivedRequests(stats.getConfigPost());
         config.setPost(post);
-        Put put = new Put();
+        final Put put = new Put();
         put.setReceivedRequests(stats.getConfigPut());
         config.setPut(put);
         return config;
@@ -90,9 +101,9 @@ public class RestconfProviderImpl implements Provider, AutoCloseable, RestConnec
 
     @Override
     public Operational getOperational() {
-        BigInteger opGet = stats.getOperationalGet();
-        Operational operational = new Operational();
-        Get get = new Get();
+        final BigInteger opGet = stats.getOperationalGet();
+        final Operational operational = new Operational();
+        final Get get = new Get();
         get.setReceivedRequests(opGet);
         operational.setGet(get);
         return operational;
@@ -100,8 +111,8 @@ public class RestconfProviderImpl implements Provider, AutoCloseable, RestConnec
 
     @Override
     public Rpcs getRpcs() {
-        BigInteger rpcInvoke = stats.getRpc();
-        Rpcs rpcs = new Rpcs();
+        final BigInteger rpcInvoke = stats.getRpc();
+        final Rpcs rpcs = new Rpcs();
         rpcs.setReceivedRequests(rpcInvoke);
         return rpcs ;
     }
