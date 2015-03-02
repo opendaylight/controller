@@ -33,17 +33,57 @@ public final class RestUtil {
         return superType;
     }
 
+    //Utility routine to split strings on a separator but excluding seprators inside quoted strings
+    //Supports both single quoted and double quoted strings assuming that they are terminated
+    private static String[] strSplit(String arg, char  sep) {
+        ArrayList<String>  tokens = new ArrayList<String>();
+        int index = 0, start = 0;
+        int length = arg.length();
+        boolean bSingleQuote, bDoubleQuote = false;
+        while (index < length) {
+            //If you find a single quote, skip to the end of the quoted string
+            // ignoring separators or double quote appearing inside the string
+            if (arg.charAt(index) == '\'') {
+                index++;
+                while ((index < length) && (arg.charAt(index) != '\''))
+                    index++;
+            }
+            //If you find a double quote, skip to the end of the quoted string
+            // ignoring separators or single quote appearing inside the string
+            if (arg.charAt(index) == '"') {
+                index++;
+                while ((index < length) && (arg.charAt(index) != '"'))
+                    index++;
+            }
+            //If you find the a separator, add the token to the list
+            if ((index < length) && (arg.charAt(index) == sep)) {
+                if (start < index)
+                    tokens.add(arg.substring(start,index));
+                start = index+1;
+            }
+            index++;
+        }
+        //Add the last token
+        if (index > start) {
+            tokens.add(arg.substring(start,index));
+        }
+        //Convert the array list to an array
+        String[] array = new String[tokens.size()];
+        return tokens.toArray(array);
+    }
+
+
     public static IdentityValuesDTO asInstanceIdentifier(final String value, final PrefixesMaping prefixMap) {
         final String valueTrimmed = value.trim();
         if (!valueTrimmed.startsWith("/")) {
             return null;
         }
-        final String[] xPathParts = valueTrimmed.split("/");
+        final String[] xPathParts = strSplit(valueTrimmed,'/');
         if (xPathParts.length < 2) { // must be at least "/pr:node"
             return null;
         }
         final IdentityValuesDTO identityValuesDTO = new IdentityValuesDTO(value);
-        for (int i = 1; i < xPathParts.length; i++) {
+        for (int i = 0; i < xPathParts.length; i++) {
             final String xPathPartTrimmed = xPathParts[i].trim();
 
             final String xPathPartStr = getIdAndPrefixAsStr(xPathPartTrimmed);
@@ -73,7 +113,7 @@ public final class RestUtil {
         if (xPathPartTrimmed.isEmpty()) {
             return null;
         }
-        final String[] prefixAndIdentifier = xPathPartTrimmed.split(":");
+        final String[] prefixAndIdentifier = strSplit(xPathPartTrimmed,':');
         // it is not "prefix:value"
         if (prefixAndIdentifier.length != 2) {
             return null;
