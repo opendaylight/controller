@@ -587,6 +587,15 @@ public class ControllerContext implements SchemaContextListener {
             }
 
             targetNode = findInstanceDataChildByNameAndNamespace(parentNode, nodeName, module.getNamespace());
+
+            if (targetNode == null && parentNode instanceof Module) {
+                final RpcDefinition rpc = ControllerContext.getInstance().getRpcDefinition(head);
+                if (rpc != null) {
+                    return new InstanceIdentifierContext<RpcDefinition>(builder.build(), rpc, mountPoint,
+                            mountPoint != null ? mountPoint.getSchemaContext() : globalSchema);
+                }
+            }
+
             if (targetNode == null) {
                 throw new RestconfDocumentedException("URI has bad format. Possible reasons:\n" + " 1. \"" + head
                         + "\" was not found in parent data node.\n" + " 2. \"" + head

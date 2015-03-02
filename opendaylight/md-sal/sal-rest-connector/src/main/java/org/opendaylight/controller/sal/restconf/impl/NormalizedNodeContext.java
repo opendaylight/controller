@@ -7,7 +7,7 @@ public class NormalizedNodeContext {
     private final InstanceIdentifierContext context;
     private final NormalizedNode<?,?> data;
 
-    public NormalizedNodeContext(InstanceIdentifierContext context, NormalizedNode<?, ?> data) {
+    public NormalizedNodeContext(final InstanceIdentifierContext context, final NormalizedNode<?, ?> data) {
         this.context = context;
         this.data = data;
     }

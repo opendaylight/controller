@@ -8,7 +8,6 @@ import org.opendaylight.controller.md.sal.rest.schema.SchemaRetrievalService;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
 import org.opendaylight.controller.sal.restconf.impl.StructuredData;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 public class RestconfCompositeWrapper implements RestconfService, SchemaRetrievalService {
 
@@ -51,7 +50,7 @@ public class RestconfCompositeWrapper implements RestconfService, SchemaRetrieva
     }
 
     @Override
-    public StructuredData invokeRpc(final String identifier, final CompositeNode payload, final UriInfo uriInfo) {
+    public NormalizedNodeContext invokeRpc(final String identifier, final NormalizedNodeContext payload, final UriInfo uriInfo) {
         return restconf.invokeRpc(identifier, payload, uriInfo);
     }
 

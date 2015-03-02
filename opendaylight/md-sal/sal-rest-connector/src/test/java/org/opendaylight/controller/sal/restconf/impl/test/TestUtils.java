@@ -182,8 +182,8 @@ public final class TestUtils {
 
         final InstanceIdentifierContext iiContext = ControllerContext.getInstance().toInstanceIdentifier(schemaNodePath);
         final DOMMountPoint mountPoint = iiContext.getMountPoint();
-        final CompositeNode value = RestconfImpl.getInstance().normalizeNode(node, iiContext.getSchemaNode(), mountPoint);
-        final NormalizedNode<?, ?> normNodePayload = compositeNodeToDatastoreNormalizedNode(value, iiContext.getSchemaNode());
+        final CompositeNode value = RestconfImpl.getInstance().normalizeNode(node, (DataSchemaNode) iiContext.getSchemaNode(), mountPoint);
+        final NormalizedNode<?, ?> normNodePayload = compositeNodeToDatastoreNormalizedNode(value, (DataSchemaNode) iiContext.getSchemaNode());
         final NormalizedNodeContext normlNodeContext = new NormalizedNodeContext(iiContext, normNodePayload);
 
         restconf.updateConfigurationData(schemaNodePath, normlNodeContext);
