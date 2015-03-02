@@ -16,13 +16,17 @@ import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 public class BrokerRpcExecutor extends AbstractRpcExecutor {
     private final BrokerFacade broker;
 
-    public BrokerRpcExecutor(RpcDefinition rpcDef, BrokerFacade broker) {
+    public BrokerRpcExecutor(final RpcDefinition rpcDef, final BrokerFacade broker) {
         super(rpcDef);
         this.broker = broker;
     }
 
+    /**
+     * @deprecated Method has to be removed for Lithium release
+     */
+    @Deprecated
     @Override
-    protected Future<RpcResult<CompositeNode>> invokeRpcUnchecked(CompositeNode rpcRequest) {
-        return broker.invokeRpc(getRpcDefinition().getQName(), rpcRequest);
+    protected Future<RpcResult<CompositeNode>> invokeRpcUnchecked(final CompositeNode rpcRequest) {
+        throw new AbstractMethodError("Unsuported functionality");
     }
 }

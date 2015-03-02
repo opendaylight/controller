@@ -22,8 +22,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
-import org.opendaylight.controller.sal.restconf.impl.StructuredData;
-
 
 /**
  * The URI hierarchy for the RESTCONF resources consists of an entry point container, 4 top-level resources, and 1
@@ -102,7 +100,7 @@ public interface RestconfService {
     @Produces({ Draft02.MediaTypes.OPERATION + JSON, Draft02.MediaTypes.OPERATION + XML,
             Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public StructuredData invokeRpc(@Encoded @PathParam("identifier") String identifier,
+    public NormalizedNodeContext invokeRpc(@Encoded @PathParam("identifier") String identifier,
             @DefaultValue("") String noPayload, @Context UriInfo uriInfo);
 
     @GET

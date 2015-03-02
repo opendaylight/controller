@@ -13,7 +13,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
 import com.google.common.util.concurrent.CheckedFuture;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
@@ -25,8 +24,11 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
-import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
+import org.opendaylight.controller.sal.rest.impl.JsonNormalizedNodeBodyReader;
+import org.opendaylight.controller.sal.rest.impl.NormalizedNodeJsonBodyWriter;
+import org.opendaylight.controller.sal.rest.impl.NormalizedNodeXmlBodyWriter;
+import org.opendaylight.controller.sal.rest.impl.RestconfDocumentedExceptionMapper;
+import org.opendaylight.controller.sal.rest.impl.XmlNormalizedNodeBodyReader;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
@@ -43,9 +45,9 @@ public class RestDeleteOperationTest extends JerseyTest {
 
     @BeforeClass
     public static void init() throws FileNotFoundException {
-        Set<Module> allModules = TestUtils.loadModulesFrom("/test-config-data/yang1");
+        final Set<Module> allModules = TestUtils.loadModulesFrom("/test-config-data/yang1");
         assertNotNull(allModules);
-        SchemaContext schemaContext = TestUtils.loadSchemaContext(allModules);
+        final SchemaContext schemaContext = TestUtils.loadSchemaContext(allModules);
         controllerContext = ControllerContext.getInstance();
         controllerContext.setSchemas(schemaContext);
         brokerFacade = mock(BrokerFacade.class);
@@ -62,14 +64,15 @@ public class RestDeleteOperationTest extends JerseyTest {
         // enable(TestProperties.RECORD_LOG_LEVEL);
         // set(TestProperties.RECORD_LOG_LEVEL, Level.ALL.intValue());
         ResourceConfig resourceConfig = new ResourceConfig();
-        resourceConfig = resourceConfig.registerInstances(restconfImpl, StructuredDataToXmlProvider.INSTANCE,
-                XmlToCompositeNodeProvider.INSTANCE);
+        resourceConfig = resourceConfig.registerInstances(restconfImpl, new NormalizedNodeJsonBodyWriter(),
+                new NormalizedNodeXmlBodyWriter(), new XmlNormalizedNodeBodyReader(), new JsonNormalizedNodeBodyReader());
+        resourceConfig.registerClasses(RestconfDocumentedExceptionMapper.class);
         return resourceConfig;
     }
 
     @Test
     public void deleteConfigStatusCodes() throws UnsupportedEncodingException {
-        String uri = "/config/test-interface:interfaces";
+        final String uri = "/config/test-interface:interfaces";
         when(brokerFacade.commitConfigurationDataDelete(any(YangInstanceIdentifier.class))).thenReturn(
                 mock(CheckedFuture.class));
         Response response = target(uri).request(MediaType.APPLICATION_XML).delete();

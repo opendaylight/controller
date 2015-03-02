@@ -19,7 +19,6 @@ import static org.opendaylight.controller.sal.restconf.impl.test.RestOperationUt
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.Futures;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -45,20 +44,15 @@ import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.impl.JsonNormalizedNodeBodyReader;
-import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
 import org.opendaylight.controller.sal.rest.impl.NormalizedNodeJsonBodyWriter;
 import org.opendaylight.controller.sal.rest.impl.NormalizedNodeXmlBodyWriter;
 import org.opendaylight.controller.sal.rest.impl.RestconfDocumentedExceptionMapper;
-import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
-import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
 import org.opendaylight.controller.sal.rest.impl.XmlNormalizedNodeBodyReader;
-import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
-import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -110,10 +104,8 @@ public class RestPostOperationTest extends JerseyTest {
         // enable(TestProperties.RECORD_LOG_LEVEL);
         // set(TestProperties.RECORD_LOG_LEVEL, Level.ALL.intValue());
         ResourceConfig resourceConfig = new ResourceConfig();
-        resourceConfig = resourceConfig.registerInstances(restconfImpl, StructuredDataToXmlProvider.INSTANCE,
-                StructuredDataToJsonProvider.INSTANCE, XmlToCompositeNodeProvider.INSTANCE,
-                JsonToCompositeNodeProvider.INSTANCE, new XmlNormalizedNodeBodyReader(), new NormalizedNodeXmlBodyWriter(),
-                new JsonNormalizedNodeBodyReader(), new NormalizedNodeJsonBodyWriter());
+        resourceConfig = resourceConfig.registerInstances(restconfImpl, new XmlNormalizedNodeBodyReader(),
+                new NormalizedNodeXmlBodyWriter(), new JsonNormalizedNodeBodyReader(), new NormalizedNodeJsonBodyWriter());
         resourceConfig.registerClasses(RestconfDocumentedExceptionMapper.class);
         return resourceConfig;
     }
@@ -209,8 +201,8 @@ public class RestPostOperationTest extends JerseyTest {
             builder.errors(errors);
         }
         final RpcResult<CompositeNode> rpcResult = builder.build();
-        when(brokerFacade.invokeRpc(any(QName.class), any(CompositeNode.class))).thenReturn(
-                Futures.<RpcResult<CompositeNode>> immediateFuture(rpcResult));
+//        when(brokerFacade.invokeRpc(any(QName.class), any(CompositeNode.class))).thenReturn(
+//                Futures.<RpcResult<CompositeNode>> immediateFuture(rpcResult));
     }
 
     /**
