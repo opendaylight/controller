@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_07a5e745",
+        "filename": "opendaylight/adsal/features/nsf/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 590
+      },
+      "writtenOn": "2015-03-02T18:16:50Z",
+      "side": 0,
+      "message": "Do we really mean to remove this dependency?",
+      "range": {
+        "startLine": 185,
+        "startChar": 23,
+        "endLine": 185,
+        "endChar": 36
+      },
+      "revId": "6345946ab68108ac70de6f0c472b520802656abe",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
