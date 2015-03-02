@@ -7,7 +7,6 @@ import org.opendaylight.controller.md.sal.rest.schema.SchemaExportContext;
 import org.opendaylight.controller.md.sal.rest.schema.SchemaRetrievalService;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
-import org.opendaylight.controller.sal.restconf.impl.StructuredData;
 
 public class RestconfCompositeWrapper implements RestconfService, SchemaRetrievalService {
 
