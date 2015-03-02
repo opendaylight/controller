@@ -12,7 +12,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 public class StatisticsRestconfServiceWrapper implements RestconfService {
 
@@ -66,7 +65,7 @@ public class StatisticsRestconfServiceWrapper implements RestconfService {
     }
 
     @Override
-    public StructuredData invokeRpc(final String identifier, final CompositeNode payload, final UriInfo uriInfo) {
+    public NormalizedNodeContext invokeRpc(final String identifier, final NormalizedNodeContext payload, final UriInfo uriInfo) {
         rpc.incrementAndGet();
         return delegate.invokeRpc(identifier, payload, uriInfo);
     }
