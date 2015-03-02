@@ -71,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_ea4be2ae",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/FollowerLogInformationImpl.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-02T22:54:24Z",
+      "side": 1,
+      "message": "Duh - I forgot to remove line 50 - thanks for catching this. This is why we do reviews!",
+      "parentUuid": "7a96c907_2acc6a69",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_d467b24b",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 10
@@ -141,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_cace262e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 361,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-02T22:54:24Z",
+      "side": 1,
+      "message": "Do you think it\u0027s necessary to log any info info here? I\u0027m thinking no....",
+      "parentUuid": "7a96c907_aa063a84",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_945daa7b",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 10
@@ -176,6 +212,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_8ad49ebd",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 675,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-02T22:54:24Z",
+      "side": 1,
+      "message": "This messes with your refactoring though :) I\u0027m fine if you want to get that merged first - I can deal with this rebase.",
+      "parentUuid": "7a96c907_ca0b868c",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_3456165d",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 10
@@ -205,6 +259,24 @@
       "side": 1,
       "message": "makes sense. Wish this was in a separate commit though :)",
       "parentUuid": "7a96c907_3456165d",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_2add4ae0",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 695,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-02T22:54:24Z",
+      "side": 1,
+      "message": "yeah - the problem was that this change is needed for the test expectations to pass. I suppose I could\u0027ve made this change in another commit that this would depend on. But I was on too much of a roll at that point :)",
+      "parentUuid": "7a96c907_8a01fe6b",
       "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -383,6 +455,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_aaf07a67",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 395,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-02T22:54:24Z",
+      "side": 1,
+      "message": "I know, sorry - but, like the other change, my test expectations are dependent on it and it was easier to make the change in this patch.",
+      "parentUuid": "7a96c907_ea4682bf",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_3404d648",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
         "patchSetId": 10
@@ -417,6 +507,24 @@
       "writtenOn": "2015-02-28T17:44:37Z",
       "side": 1,
       "message": "Found it useful to log the whole CaptureSnapshot message.",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_2a046a48",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 588,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-02T22:54:24Z",
+      "side": 1,
+      "message": "Maybe this should be logged to debug. What do you think?",
+      "parentUuid": "7a96c907_54016236",
       "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -469,6 +577,24 @@
       "writtenOn": "2015-03-02T22:06:38Z",
       "side": 1,
       "message": "Is this how we can add dependencies on the test classes in project?",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_4a01b636",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/pom.xml",
+        "patchSetId": 10
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-02T22:54:24Z",
+      "side": 1,
+      "message": "Yup - test classes from another project.",
+      "parentUuid": "7a96c907_0a1baeca",
       "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
