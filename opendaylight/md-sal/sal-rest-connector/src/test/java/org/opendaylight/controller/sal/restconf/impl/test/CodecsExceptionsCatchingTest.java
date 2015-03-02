@@ -11,11 +11,11 @@ import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
+import org.opendaylight.controller.sal.rest.impl.JsonNormalizedNodeBodyReader;
+import org.opendaylight.controller.sal.rest.impl.NormalizedNodeJsonBodyWriter;
+import org.opendaylight.controller.sal.rest.impl.NormalizedNodeXmlBodyWriter;
 import org.opendaylight.controller.sal.rest.impl.RestconfDocumentedExceptionMapper;
-import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
-import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
-import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
+import org.opendaylight.controller.sal.rest.impl.XmlNormalizedNodeBodyReader;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -42,9 +42,8 @@ public class CodecsExceptionsCatchingTest extends JerseyTest {
         // enable(TestProperties.RECORD_LOG_LEVEL);
         // set(TestProperties.RECORD_LOG_LEVEL, Level.ALL.intValue());
         ResourceConfig resourceConfig = new ResourceConfig();
-        resourceConfig = resourceConfig.registerInstances(restConf, StructuredDataToXmlProvider.INSTANCE,
-                StructuredDataToJsonProvider.INSTANCE, XmlToCompositeNodeProvider.INSTANCE,
-                JsonToCompositeNodeProvider.INSTANCE);
+        resourceConfig = resourceConfig.registerInstances(restConf, new NormalizedNodeJsonBodyWriter(),
+                new NormalizedNodeXmlBodyWriter(), new XmlNormalizedNodeBodyReader(), new JsonNormalizedNodeBodyReader());
         resourceConfig.registerClasses(RestconfDocumentedExceptionMapper.class);
         return resourceConfig;
     }

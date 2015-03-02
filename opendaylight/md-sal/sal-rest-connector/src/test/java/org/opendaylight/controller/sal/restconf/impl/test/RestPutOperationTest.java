@@ -33,14 +33,10 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFaile
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.sal.rest.impl.JsonNormalizedNodeBodyReader;
-import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
 import org.opendaylight.controller.sal.rest.impl.NormalizedNodeJsonBodyWriter;
 import org.opendaylight.controller.sal.rest.impl.NormalizedNodeXmlBodyWriter;
 import org.opendaylight.controller.sal.rest.impl.RestconfDocumentedExceptionMapper;
-import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
-import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
 import org.opendaylight.controller.sal.rest.impl.XmlNormalizedNodeBodyReader;
-import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
@@ -90,10 +86,8 @@ public class RestPutOperationTest extends JerseyTest {
         // enable(TestProperties.RECORD_LOG_LEVEL);
         // set(TestProperties.RECORD_LOG_LEVEL, Level.ALL.intValue());
         ResourceConfig resourceConfig = new ResourceConfig();
-        resourceConfig = resourceConfig.registerInstances(restconfImpl, StructuredDataToXmlProvider.INSTANCE,
-                StructuredDataToJsonProvider.INSTANCE, XmlToCompositeNodeProvider.INSTANCE,
-                JsonToCompositeNodeProvider.INSTANCE, new XmlNormalizedNodeBodyReader(), new NormalizedNodeXmlBodyWriter(),
-                new JsonNormalizedNodeBodyReader(), new NormalizedNodeJsonBodyWriter());
+        resourceConfig = resourceConfig.registerInstances(restconfImpl,new XmlNormalizedNodeBodyReader(),
+                new NormalizedNodeXmlBodyWriter(), new JsonNormalizedNodeBodyReader(), new NormalizedNodeJsonBodyWriter());
         resourceConfig.registerClasses(RestconfDocumentedExceptionMapper.class);
         return resourceConfig;
     }

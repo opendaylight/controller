@@ -71,7 +71,7 @@ public class StatisticsRestconfServiceWrapper implements RestconfService {
     }
 
     @Override
-    public StructuredData invokeRpc(final String identifier, final String noPayload, final UriInfo uriInfo) {
+    public NormalizedNodeContext invokeRpc(final String identifier, final String noPayload, final UriInfo uriInfo) {
         rpc.incrementAndGet();
         return delegate.invokeRpc(identifier, noPayload, uriInfo);
     }

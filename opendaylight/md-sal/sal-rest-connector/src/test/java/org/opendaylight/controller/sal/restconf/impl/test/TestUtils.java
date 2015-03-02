@@ -404,6 +404,11 @@ public final class TestUtils {
                 predicate);
     }
 
+    /**
+     * @deprecated method has to be removed for Lithium release
+     *          so please use prepareNormalizedNodeWithIetfInterfacesInterfacesData method
+     */
+    @Deprecated
     public static CompositeNode prepareCompositeNodeWithIetfInterfacesInterfacesData() {
         final CompositeNodeBuilder<ImmutableCompositeNode> interfaceBuilder = ImmutableCompositeNode.builder();
         interfaceBuilder.addLeaf(buildQName("name", "dummy", "2014-07-29"), "eth0");

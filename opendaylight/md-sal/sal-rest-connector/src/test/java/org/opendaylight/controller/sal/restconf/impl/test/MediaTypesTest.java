@@ -30,13 +30,10 @@ import org.junit.Test;
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.rest.impl.JsonNormalizedNodeBodyReader;
-import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
 import org.opendaylight.controller.sal.rest.impl.NormalizedNodeJsonBodyWriter;
 import org.opendaylight.controller.sal.rest.impl.NormalizedNodeXmlBodyWriter;
-import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
-import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
+import org.opendaylight.controller.sal.rest.impl.RestconfDocumentedExceptionMapper;
 import org.opendaylight.controller.sal.rest.impl.XmlNormalizedNodeBodyReader;
-import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
 
 public class MediaTypesTest extends JerseyTest {
@@ -62,10 +59,9 @@ public class MediaTypesTest extends JerseyTest {
         // enable(TestProperties.RECORD_LOG_LEVEL);
         // set(TestProperties.RECORD_LOG_LEVEL, Level.ALL.intValue());
         ResourceConfig resourceConfig = new ResourceConfig();
-        resourceConfig = resourceConfig.registerInstances(restconfService, StructuredDataToXmlProvider.INSTANCE,
-                StructuredDataToJsonProvider.INSTANCE, XmlToCompositeNodeProvider.INSTANCE,
-                JsonToCompositeNodeProvider.INSTANCE, new NormalizedNodeJsonBodyWriter(), new NormalizedNodeXmlBodyWriter(),
-                new JsonNormalizedNodeBodyReader(), new XmlNormalizedNodeBodyReader());
+        resourceConfig = resourceConfig.registerInstances(restconfService,  new NormalizedNodeJsonBodyWriter(),
+                new NormalizedNodeXmlBodyWriter(), new XmlNormalizedNodeBodyReader(), new JsonNormalizedNodeBodyReader());
+        resourceConfig.registerClasses(RestconfDocumentedExceptionMapper.class);
         return resourceConfig;
     }
 

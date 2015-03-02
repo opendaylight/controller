@@ -50,15 +50,11 @@ import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.sal.rest.impl.JsonNormalizedNodeBodyReader;
-import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
 import org.opendaylight.controller.sal.rest.impl.NormalizedNodeJsonBodyWriter;
 import org.opendaylight.controller.sal.rest.impl.NormalizedNodeXmlBodyWriter;
 import org.opendaylight.controller.sal.rest.impl.RestconfApplication;
 import org.opendaylight.controller.sal.rest.impl.RestconfDocumentedExceptionMapper;
-import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
-import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
 import org.opendaylight.controller.sal.rest.impl.XmlNormalizedNodeBodyReader;
-import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
@@ -128,10 +124,8 @@ public class RestGetOperationTest extends JerseyTest {
         // enable(TestProperties.RECORD_LOG_LEVEL);
         // set(TestProperties.RECORD_LOG_LEVEL, Level.ALL.intValue());
         ResourceConfig resourceConfig = new ResourceConfig();
-        resourceConfig = resourceConfig.registerInstances(restconfImpl, StructuredDataToXmlProvider.INSTANCE,
-                StructuredDataToJsonProvider.INSTANCE, XmlToCompositeNodeProvider.INSTANCE,
-                JsonToCompositeNodeProvider.INSTANCE, new NormalizedNodeJsonBodyWriter(), new NormalizedNodeXmlBodyWriter(),
-                new XmlNormalizedNodeBodyReader(), new JsonNormalizedNodeBodyReader());
+        resourceConfig = resourceConfig.registerInstances(restconfImpl, new NormalizedNodeJsonBodyWriter(),
+                new NormalizedNodeXmlBodyWriter(), new XmlNormalizedNodeBodyReader(), new JsonNormalizedNodeBodyReader());
         resourceConfig.registerClasses(RestconfDocumentedExceptionMapper.class);
         resourceConfig.registerClasses(new RestconfApplication().getClasses());
         return resourceConfig;
