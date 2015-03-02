@@ -39,8 +39,8 @@ module netconf-mdsal-mapper {
             container dom-broker {
                 uses config:service-ref {
                     refine type {
-                        mandatory false;
-                        config:required-identity md-sal-dom:dom-async-data-broker;
+                        mandatory true;
+                        config:required-identity md-sal-dom:dom-broker-osgi-registry;
                     }
                 }
             }
