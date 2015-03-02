@@ -9,7 +9,6 @@ package org.opendaylight.controller.sal.restconf.impl;
 
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
-
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -32,6 +31,9 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataReadTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.sal.core.api.Broker.ConsumerSession;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
@@ -43,6 +45,7 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,10 +53,15 @@ public class BrokerFacade {
     private final static Logger LOG = LoggerFactory.getLogger(BrokerFacade.class);
 
     private final static BrokerFacade INSTANCE = new BrokerFacade();
+    private volatile DOMRpcService rpcService;
     private volatile ConsumerSession context;
     private DOMDataBroker domDataBroker;
 
     private BrokerFacade() {
+    }
+
+    public void setRpcService(final DOMRpcService router) {
+        rpcService = router;
     }
 
     public void setContext(final ConsumerSession context) {
@@ -102,7 +110,7 @@ public class BrokerFacade {
     public CheckedFuture<Void, TransactionCommitFailedException> commitConfigurationDataPut(
             final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload) {
         checkPreconditions();
-        DataNormalizationOperation<?> rootOp = ControllerContext.getInstance().getRootOperation();
+        final DataNormalizationOperation<?> rootOp = ControllerContext.getInstance().getRootOperation();
         return putDataViaTransaction(domDataBroker.newReadWriteTransaction(), CONFIGURATION, path, payload, rootOp);
     }
 
@@ -110,7 +118,7 @@ public class BrokerFacade {
             final DOMMountPoint mountPoint, final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload) {
         final Optional<DOMDataBroker> domDataBrokerService = mountPoint.getService(DOMDataBroker.class);
         if (domDataBrokerService.isPresent()) {
-            DataNormalizationOperation<?> rootOp = new DataNormalizer(mountPoint.getSchemaContext()).getRootOperation();
+            final DataNormalizationOperation<?> rootOp = new DataNormalizer(mountPoint.getSchemaContext()).getRootOperation();
             return putDataViaTransaction(domDataBrokerService.get().newReadWriteTransaction(), CONFIGURATION, path,
                     payload, rootOp);
         }
@@ -121,7 +129,7 @@ public class BrokerFacade {
     public CheckedFuture<Void, TransactionCommitFailedException> commitConfigurationDataPost(
             final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload) {
         checkPreconditions();
-        DataNormalizationOperation<?> rootOp = ControllerContext.getInstance().getRootOperation();
+        final DataNormalizationOperation<?> rootOp = ControllerContext.getInstance().getRootOperation();
         return postDataViaTransaction(domDataBroker.newReadWriteTransaction(), CONFIGURATION, path, payload, rootOp);
     }
 
@@ -129,7 +137,7 @@ public class BrokerFacade {
             final DOMMountPoint mountPoint, final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload) {
         final Optional<DOMDataBroker> domDataBrokerService = mountPoint.getService(DOMDataBroker.class);
         if (domDataBrokerService.isPresent()) {
-            DataNormalizationOperation<?> rootOp = new DataNormalizer(mountPoint.getSchemaContext()).getRootOperation();
+            final DataNormalizationOperation<?> rootOp = new DataNormalizer(mountPoint.getSchemaContext()).getRootOperation();
             return postDataViaTransaction(domDataBrokerService.get().newReadWriteTransaction(), CONFIGURATION, path,
                     payload, rootOp);
         }
@@ -153,21 +161,33 @@ public class BrokerFacade {
     }
 
     // RPC
+    public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(final SchemaPath type, final NormalizedNode<?, ?> input) {
+        checkPreconditions();
+        if (rpcService == null) {
+            throw new RestconfDocumentedException(Status.SERVICE_UNAVAILABLE);
+        }
+        return rpcService.invokeRpc(type, input);
+    }
+
+    /**
+     * @deprecated methode has to be removed in Lithium release
+     */
+    @Deprecated
     public Future<RpcResult<CompositeNode>> invokeRpc(final QName type, final CompositeNode payload) {
-        this.checkPreconditions();
+        checkPreconditions();
 
         return context.rpc(type, payload);
     }
 
     public void registerToListenDataChanges(final LogicalDatastoreType datastore, final DataChangeScope scope,
             final ListenerAdapter listener) {
-        this.checkPreconditions();
+        checkPreconditions();
 
         if (listener.isListening()) {
             return;
         }
 
-        YangInstanceIdentifier path = listener.getPath();
+        final YangInstanceIdentifier path = listener.getPath();
         final ListenerRegistration<DOMDataChangeListener> registration = domDataBroker.registerDataChangeListener(
                 datastore, path, listener, scope);
 
@@ -175,7 +195,7 @@ public class BrokerFacade {
     }
 
     private NormalizedNode<?, ?> readDataViaTransaction(final DOMDataReadTransaction transaction,
-            LogicalDatastoreType datastore, YangInstanceIdentifier path) {
+            final LogicalDatastoreType datastore, final YangInstanceIdentifier path) {
         LOG.trace("Read " + datastore.name() + " via Restconf: {}", path);
         final ListenableFuture<Optional<NormalizedNode<?, ?>>> listenableFuture = transaction.read(datastore, path);
         if (listenableFuture != null) {
@@ -198,12 +218,12 @@ public class BrokerFacade {
 
     private CheckedFuture<Void, TransactionCommitFailedException> postDataViaTransaction(
             final DOMDataReadWriteTransaction rWTransaction, final LogicalDatastoreType datastore,
-            final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload, DataNormalizationOperation<?> root) {
-        ListenableFuture<Optional<NormalizedNode<?, ?>>> futureDatastoreData = rWTransaction.read(datastore, path);
+            final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload, final DataNormalizationOperation<?> root) {
+        final ListenableFuture<Optional<NormalizedNode<?, ?>>> futureDatastoreData = rWTransaction.read(datastore, path);
         try {
             final Optional<NormalizedNode<?, ?>> optionalDatastoreData = futureDatastoreData.get();
             if (optionalDatastoreData.isPresent() && payload.equals(optionalDatastoreData.get())) {
-                String errMsg = "Post Configuration via Restconf was not executed because data already exists";
+                final String errMsg = "Post Configuration via Restconf was not executed because data already exists";
                 LOG.trace(errMsg + ":{}", path);
                 rWTransaction.cancel();
                 throw new RestconfDocumentedException("Data already exists for path: " + path, ErrorType.PROTOCOL,
@@ -221,7 +241,7 @@ public class BrokerFacade {
 
     private CheckedFuture<Void, TransactionCommitFailedException> putDataViaTransaction(
             final DOMDataReadWriteTransaction writeTransaction, final LogicalDatastoreType datastore,
-            final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload, DataNormalizationOperation<?> root) {
+            final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload, final DataNormalizationOperation<?> root) {
         LOG.trace("Put " + datastore.name() + " via Restconf: {}", path);
         ensureParentsByMerge(datastore, path, writeTransaction, root);
         writeTransaction.put(datastore, path, payload);
@@ -230,41 +250,41 @@ public class BrokerFacade {
 
     private CheckedFuture<Void, TransactionCommitFailedException> deleteDataViaTransaction(
             final DOMDataWriteTransaction writeTransaction, final LogicalDatastoreType datastore,
-            YangInstanceIdentifier path) {
+            final YangInstanceIdentifier path) {
         LOG.trace("Delete " + datastore.name() + " via Restconf: {}", path);
         writeTransaction.delete(datastore, path);
         return writeTransaction.submit();
     }
 
-    public void setDomDataBroker(DOMDataBroker domDataBroker) {
+    public void setDomDataBroker(final DOMDataBroker domDataBroker) {
         this.domDataBroker = domDataBroker;
     }
 
     private final void ensureParentsByMerge(final LogicalDatastoreType store,
             final YangInstanceIdentifier normalizedPath, final DOMDataReadWriteTransaction rwTx,
             final DataNormalizationOperation<?> root) {
-        List<PathArgument> currentArguments = new ArrayList<>();
-        Iterator<PathArgument> iterator = normalizedPath.getPathArguments().iterator();
+        final List<PathArgument> currentArguments = new ArrayList<>();
+        final Iterator<PathArgument> iterator = normalizedPath.getPathArguments().iterator();
         DataNormalizationOperation<?> currentOp = root;
         while (iterator.hasNext()) {
-            PathArgument currentArg = iterator.next();
+            final PathArgument currentArg = iterator.next();
             try {
                 currentOp = currentOp.getChild(currentArg);
-            } catch (DataNormalizationException e) {
+            } catch (final DataNormalizationException e) {
                 rwTx.cancel();
                 throw new IllegalArgumentException(
                         String.format("Invalid child encountered in path %s", normalizedPath), e);
             }
             currentArguments.add(currentArg);
-            YangInstanceIdentifier currentPath = YangInstanceIdentifier.create(currentArguments);
+            final YangInstanceIdentifier currentPath = YangInstanceIdentifier.create(currentArguments);
 
             final Boolean exists;
 
             try {
 
-                CheckedFuture<Boolean, ReadFailedException> future = rwTx.exists(store, currentPath);
+                final CheckedFuture<Boolean, ReadFailedException> future = rwTx.exists(store, currentPath);
                 exists = future.checkedGet();
-            } catch (ReadFailedException e) {
+            } catch (final ReadFailedException e) {
                 LOG.error("Failed to read pre-existing data from store {} path {}", store, currentPath, e);
                 rwTx.cancel();
                 throw new IllegalStateException("Failed to read pre-existing data", e);
