@@ -12,6 +12,11 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 
 public interface RpcExecutor {
+
+    /**
+     * @deprecated method will be removed in Lithium release
+     */
+    @Deprecated
     RpcResult<CompositeNode> invokeRpc(CompositeNode rpcRequest);
 
     RpcDefinition getRpcDefinition();

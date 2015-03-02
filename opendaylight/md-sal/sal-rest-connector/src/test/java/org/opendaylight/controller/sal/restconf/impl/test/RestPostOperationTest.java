@@ -125,6 +125,7 @@ public class RestPostOperationTest extends JerseyTest {
     }
 
     @Test
+    @Ignore //FIXME we don't wish to mock CompositeNode as result
     public void postOperationsStatusCodes() throws IOException {
         setSchemaControllerContext(schemaContextTestModule);
         mockInvokeRpc(cnSnDataOutput, true);
@@ -212,6 +213,10 @@ public class RestPostOperationTest extends JerseyTest {
                 Futures.<RpcResult<CompositeNode>> immediateFuture(rpcResult));
     }
 
+    /**
+     * @deprecated has to be removed for lithium release
+     */
+    @Deprecated
     private void mockInvokeRpc(final CompositeNode result, final boolean sucessful) {
         mockInvokeRpc(result, sucessful, Collections.<RpcError> emptyList());
     }
