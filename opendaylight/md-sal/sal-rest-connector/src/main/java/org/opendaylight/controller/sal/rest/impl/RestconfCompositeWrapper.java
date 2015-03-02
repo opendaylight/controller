@@ -77,13 +77,13 @@ public class RestconfCompositeWrapper implements RestconfService, SchemaRetrieva
     }
 
     @Override
-    public Response createConfigurationData(final String identifier, final Node<?> payload) {
-        return restconf.createConfigurationData(identifier, payload);
+    public Response createConfigurationData(final String identifier, final Node<?> payload, final UriInfo uriInfo) {
+        return restconf.createConfigurationData(identifier, payload, uriInfo);
     }
 
     @Override
-    public Response createConfigurationData(final Node<?> payload) {
-        return restconf.createConfigurationData(payload);
+    public Response createConfigurationData(final Node<?> payload, final UriInfo uriInfo) {
+        return restconf.createConfigurationData(payload, uriInfo);
     }
 
     @Override
