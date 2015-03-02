@@ -40,6 +40,8 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
+
+import com.google.common.util.concurrent.Futures;
 import org.apache.commons.lang3.StringUtils;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -50,6 +52,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
+import org.opendaylight.controller.md.sal.dom.spi.DefaultDOMRpcResult;
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
@@ -73,19 +76,17 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.InstanceI
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
-import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
-import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
-import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
-import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.*;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ModifiedNodeDoesNotExistException;
 import org.opendaylight.yangtools.yang.data.composite.node.schema.cnsn.parser.CnSnToNormalizedNodeParserFactory;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
+import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeAttrBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.ListNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
@@ -468,7 +469,7 @@ public class RestconfImpl implements RestconfService {
         instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
                 ((DataNodeContainer) streamSchemaNode), "events");
         final DataSchemaNode eventsSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
-        streamNodeValues.add(NodeFactory.<String> createImmutableSimpleNode(eventsSchemaNode.getQName(), null, ""));
+        streamNodeValues.add(NodeFactory.<String>createImmutableSimpleNode(eventsSchemaNode.getQName(), null, ""));
 
         return NodeFactory.createImmutableCompositeNode(streamSchemaNode.getQName(), null, streamNodeValues);
     }
@@ -522,6 +523,7 @@ public class RestconfImpl implements RestconfService {
     @Override
     public NormalizedNodeContext invokeRpc(final String identifier, final NormalizedNodeContext payload, final UriInfo uriInfo) {
         final SchemaPath type = payload.getInstanceIdentifierContext().getSchemaNode().getPath();
+        final URI namespace = payload.getInstanceIdentifierContext().getSchemaNode().getQName().getNamespace();
         final CheckedFuture<DOMRpcResult, DOMRpcException> response;
         final DOMMountPoint mountPoint = payload.getInstanceIdentifierContext().getMountPoint();
         final SchemaContext schemaContext;
@@ -533,7 +535,11 @@ public class RestconfImpl implements RestconfService {
             schemaContext = mountPoint.getSchemaContext();
             response = mountRpcServices.get().invokeRpc(type, payload.getData());
         } else {
-            response = broker.invokeRpc(type, payload.getData());
+            if (namespace.toString().equals(SAL_REMOTE_NAMESPACE)) {
+                response = invokeSalRemoteRpcSubscribeRPC(payload);
+            } else {
+                response = broker.invokeRpc(type, payload.getData());
+            }
             schemaContext = controllerContext.getGlobalSchema();
         }
 
@@ -630,16 +636,12 @@ public class RestconfImpl implements RestconfService {
         // }
     }
 
-    /**
-     * @deprecated method wil be removed for Lithium release
-     */
-    @Deprecated
-    private StructuredData invokeSalRemoteRpcSubscribeRPC(final CompositeNode payload, final RpcDefinition rpc,
-            final boolean prettyPrint) {
-        final CompositeNode value = this.normalizeNode(payload, rpc.getInput(), null);
-        final SimpleNode<? extends Object> pathNode = value == null ? null : value.getFirstSimpleByName(QName.create(
-                rpc.getQName(), "path"));
-        final Object pathValue = pathNode == null ? null : pathNode.getValue();
+    private CheckedFuture<DOMRpcResult, DOMRpcException> invokeSalRemoteRpcSubscribeRPC(final NormalizedNodeContext payload) {
+        final ContainerNode value = (ContainerNode) payload.getData();
+        final QName rpcQName = payload.getInstanceIdentifierContext().getSchemaNode().getQName();
+        Optional<DataContainerChild<? extends PathArgument, ?>> path = value.getChild(new NodeIdentifier(
+                QName.create(payload.getInstanceIdentifierContext().getSchemaNode().getQName(), "path")));
+        final Object pathValue = path.isPresent() ? path.get().getValue() : null;
 
         if (!(pathValue instanceof YangInstanceIdentifier)) {
             throw new RestconfDocumentedException("Instance identifier was not normalized correctly.",
@@ -664,23 +666,24 @@ public class RestconfImpl implements RestconfService {
 
         if (Strings.isNullOrEmpty(streamName)) {
             throw new RestconfDocumentedException(
-                    "Path is empty or contains data node which is not Container or List build-in type.",
+                    "Path is empty or contains value node which is not Container or List build-in type.",
                     ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
         }
 
-        final SimpleNode<String> streamNameNode = NodeFactory.<String> createImmutableSimpleNode(
-                QName.create(rpc.getOutput().getQName(), "stream-name"), null, streamName);
-        final List<Node<?>> output = new ArrayList<Node<?>>();
-        output.add(streamNameNode);
+        QName outputQname = QName.create(rpcQName, "output");
+        QName streamNameQname = QName.create(rpcQName, "stream-name");
 
-        final MutableCompositeNode responseData = NodeFactory.createMutableCompositeNode(rpc.getOutput().getQName(),
-                null, output, null, null);
+        ContainerNode output = ImmutableContainerNodeBuilder.create().withNodeIdentifier(new NodeIdentifier(outputQname))
+                .withChild(ImmutableNodes.leafNode(streamNameQname, streamName)).build();
 
         if (!Notificator.existListenerFor(streamName)) {
-            Notificator.createListener(pathIdentifier, streamName);
+            YangInstanceIdentifier normalizedPathIdentifier = controllerContext.toNormalized(pathIdentifier);
+            Notificator.createListener(normalizedPathIdentifier, streamName);
         }
 
-        return new StructuredData(responseData, rpc.getOutput(), null, prettyPrint);
+        DOMRpcResult defaultDOMRpcResult = new DefaultDOMRpcResult(output);
+
+        return Futures.immediateCheckedFuture(defaultDOMRpcResult);
     }
 
     @Override
@@ -1310,8 +1313,8 @@ public class RestconfImpl implements RestconfService {
         } catch (final NullPointerException e) {
             WebSocketServer.createInstance(NOTIFICATION_PORT);
         }
-        final UriBuilder port = uriBuilder.port(notificationPort);
-        final URI uriToWebsocketServer = port.replacePath(streamName).build();
+        final UriBuilder uriToWebsocketServerBuilder = uriBuilder.port(notificationPort).scheme("ws");
+        final URI uriToWebsocketServer = uriToWebsocketServerBuilder.replacePath(streamName).build();
 
         return Response.status(Status.OK).location(uriToWebsocketServer).build();
     }
@@ -1323,15 +1326,16 @@ public class RestconfImpl implements RestconfService {
      *            contains value
      * @return enum object if its string value is equal to {@code paramName}. In other cases null.
      */
-    private <T> T parseEnumTypeParameter(final CompositeNode compNode, final Class<T> classDescriptor,
+    private <T> T parseEnumTypeParameter(final ContainerNode value, final Class<T> classDescriptor,
             final String paramName) {
         final QNameModule salRemoteAugment = QNameModule.create(NAMESPACE_EVENT_SUBSCRIPTION_AUGMENT,
                 EVENT_SUBSCRIPTION_AUGMENT_REVISION);
-        final SimpleNode<?> simpleNode = compNode.getFirstSimpleByName(QName.create(salRemoteAugment, paramName));
-        if (simpleNode == null) {
+        Optional<DataContainerChild<? extends PathArgument, ?>> enumNode = value.getChild(new NodeIdentifier(
+                QName.create(salRemoteAugment, paramName)));
+        if (!enumNode.isPresent()) {
             return null;
         }
-        final Object rawValue = simpleNode.getValue();
+        final Object rawValue = enumNode.get().getValue();
         if (!(rawValue instanceof String)) {
             return null;
         }
@@ -1486,7 +1490,7 @@ public class RestconfImpl implements RestconfService {
          * || MOUNT_POINT_MODULE_NAME .equals( namespace .
          * toString( ) )
          */)
-         && SchemaContext.NAME.getLocalName().equals(localName(data));
+                && SchemaContext.NAME.getLocalName().equals(localName(data));
     }
 
     private String addMountPointIdentifier(final String identifier) {
@@ -1929,8 +1933,47 @@ public class RestconfImpl implements RestconfService {
 
     protected MapEntryNode toModuleEntryNode(final Module module, final DataSchemaNode moduleSchemaNode) {
         Preconditions.checkArgument(moduleSchemaNode instanceof ListSchemaNode,
-                "moduleSchemaNode has to be of type ListSchemaNode");        final ListSchemaNode listModuleSchemaNode = (ListSchemaNode) moduleSchemaNode;        final DataContainerNodeAttrBuilder<NodeIdentifierWithPredicates, MapEntryNode> moduleNodeValues = Builders                .mapEntryBuilder(listModuleSchemaNode);        List<DataSchemaNode> instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(                (listModuleSchemaNode), "name");        final DataSchemaNode nameSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);        Preconditions.checkState(nameSchemaNode instanceof LeafSchemaNode);        moduleNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) nameSchemaNode).withValue(module.getName())                .build());        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(                (listModuleSchemaNode), "revision");        final DataSchemaNode revisionSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);        Preconditions.checkState(revisionSchemaNode instanceof LeafSchemaNode);        final String revision = REVISION_FORMAT.format(module.getRevision());        moduleNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) revisionSchemaNode).withValue(revision)                .build());        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(                (listModuleSchemaNode), "namespace");        final DataSchemaNode namespaceSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);        Preconditions.checkState(namespaceSchemaNode instanceof LeafSchemaNode);        moduleNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) namespaceSchemaNode)                .withValue(module.getNamespace().toString()).build());        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(                (listModuleSchemaNode), "feature");        final DataSchemaNode featureSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);        Preconditions.checkState(featureSchemaNode instanceof LeafListSchemaNode);        final ListNodeBuilder<Object, LeafSetEntryNode<Object>> featuresBuilder = Builders                .leafSetBuilder((LeafListSchemaNode) featureSchemaNode);        for (final FeatureDefinition feature : module.getFeatures()) {            featuresBuilder.withChild(Builders.leafSetEntryBuilder(((LeafListSchemaNode) featureSchemaNode))                    .withValue(feature.getQName().getLocalName()).build());        }        moduleNodeValues.withChild(featuresBuilder.build());
-        return moduleNodeValues.build();    }
+                "moduleSchemaNode has to be of type ListSchemaNode");
+        final ListSchemaNode listModuleSchemaNode = (ListSchemaNode) moduleSchemaNode;
+        final DataContainerNodeAttrBuilder<NodeIdentifierWithPredicates, MapEntryNode> moduleNodeValues = Builders
+                .mapEntryBuilder(listModuleSchemaNode);
+
+        List<DataSchemaNode> instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
+                (listModuleSchemaNode), "name");
+        final DataSchemaNode nameSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
+        Preconditions.checkState(nameSchemaNode instanceof LeafSchemaNode);
+        moduleNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) nameSchemaNode).withValue(module.getName())
+                .build());
+
+        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
+                (listModuleSchemaNode), "revision");
+        final DataSchemaNode revisionSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
+        Preconditions.checkState(revisionSchemaNode instanceof LeafSchemaNode);
+        final String revision = REVISION_FORMAT.format(module.getRevision());
+        moduleNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) revisionSchemaNode).withValue(revision)
+                .build());
+
+        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
+                (listModuleSchemaNode), "namespace");
+        final DataSchemaNode namespaceSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
+        Preconditions.checkState(namespaceSchemaNode instanceof LeafSchemaNode);
+        moduleNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) namespaceSchemaNode)
+                .withValue(module.getNamespace().toString()).build());
+
+        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
+                (listModuleSchemaNode), "feature");
+        final DataSchemaNode featureSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
+        Preconditions.checkState(featureSchemaNode instanceof LeafListSchemaNode);
+        final ListNodeBuilder<Object, LeafSetEntryNode<Object>> featuresBuilder = Builders
+                .leafSetBuilder((LeafListSchemaNode) featureSchemaNode);
+        for (final FeatureDefinition feature : module.getFeatures()) {
+            featuresBuilder.withChild(Builders.leafSetEntryBuilder(((LeafListSchemaNode) featureSchemaNode))
+                    .withValue(feature.getQName().getLocalName()).build());
+        }
+        moduleNodeValues.withChild(featuresBuilder.build());
+
+        return moduleNodeValues.build();
+    }
 
     protected MapEntryNode toStreamEntryNode(final String streamName, final DataSchemaNode streamSchemaNode) {
         Preconditions.checkArgument(streamSchemaNode instanceof ListSchemaNode,
