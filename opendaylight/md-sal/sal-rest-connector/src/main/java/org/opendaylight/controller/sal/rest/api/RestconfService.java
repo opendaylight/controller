@@ -103,7 +103,7 @@ public interface RestconfService {
     @Produces({ Draft02.MediaTypes.OPERATION + JSON, Draft02.MediaTypes.OPERATION + XML,
             Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public StructuredData invokeRpc(@Encoded @PathParam("identifier") String identifier,
+    public NormalizedNodeContext invokeRpc(@Encoded @PathParam("identifier") String identifier,
             @DefaultValue("") String noPayload, @Context UriInfo uriInfo);
 
     @GET

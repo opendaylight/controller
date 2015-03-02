@@ -19,7 +19,6 @@ import static org.opendaylight.controller.sal.restconf.impl.test.RestOperationUt
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.Futures;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -58,7 +57,6 @@ import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
-import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -209,8 +207,8 @@ public class RestPostOperationTest extends JerseyTest {
             builder.errors(errors);
         }
         final RpcResult<CompositeNode> rpcResult = builder.build();
-        when(brokerFacade.invokeRpc(any(QName.class), any(CompositeNode.class))).thenReturn(
-                Futures.<RpcResult<CompositeNode>> immediateFuture(rpcResult));
+//        when(brokerFacade.invokeRpc(any(QName.class), any(CompositeNode.class))).thenReturn(
+//                Futures.<RpcResult<CompositeNode>> immediateFuture(rpcResult));
     }
 
     /**

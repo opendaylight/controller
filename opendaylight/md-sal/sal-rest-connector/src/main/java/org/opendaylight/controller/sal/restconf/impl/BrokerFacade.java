@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import javax.ws.rs.core.Response.Status;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -39,9 +38,6 @@ import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 import org.opendaylight.controller.sal.streams.listeners.ListenerAdapter;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -167,16 +163,6 @@ public class BrokerFacade {
             throw new RestconfDocumentedException(Status.SERVICE_UNAVAILABLE);
         }
         return rpcService.invokeRpc(type, input);
-    }
-
-    /**
-     * @deprecated methode has to be removed in Lithium release
-     */
-    @Deprecated
-    public Future<RpcResult<CompositeNode>> invokeRpc(final QName type, final CompositeNode payload) {
-        checkPreconditions();
-
-        return context.rpc(type, payload);
     }
 
     public void registerToListenDataChanges(final LogicalDatastoreType datastore, final DataChangeScope scope,

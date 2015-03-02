@@ -684,26 +684,75 @@ public class RestconfImpl implements RestconfService {
     }
 
     @Override
-    public StructuredData invokeRpc(final String identifier, final String noPayload, final UriInfo uriInfo) {
+    public NormalizedNodeContext invokeRpc(final String identifier, final String noPayload, final UriInfo uriInfo) {
         if (StringUtils.isNotBlank(noPayload)) {
             throw new RestconfDocumentedException("Content must be empty.", ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
         }
-        final CompositeNode payload = null;
-        final RpcExecutor rpc = resolveIdentifierInInvokeRpc(identifier);
-        final QName rpcName = rpc.getRpcDefinition().getQName();
-        final URI rpcNamespace = rpcName.getNamespace();
-        if (Objects.equal(rpcNamespace.toString(), SAL_REMOTE_NAMESPACE)
-                && Objects.equal(rpcName.getLocalName(), SAL_REMOTE_RPC_SUBSRCIBE)) {
-            return invokeSalRemoteRpcSubscribeRPC(payload, rpc.getRpcDefinition(), parsePrettyPrintParameter(uriInfo));
+
+        String identifierEncoded = null;
+        DOMMountPoint mountPoint = null;
+        final SchemaContext schemaContext;
+        if (identifier.contains(ControllerContext.MOUNT)) {
+            // mounted RPC call - look up mount instance.
+            final InstanceIdentifierContext mountPointId = controllerContext.toMountPointIdentifier(identifier);
+            mountPoint = mountPointId.getMountPoint();
+            schemaContext = mountPoint.getSchemaContext();
+            final int startOfRemoteRpcName = identifier.lastIndexOf(ControllerContext.MOUNT)
+                    + ControllerContext.MOUNT.length() + 1;
+            final String remoteRpcName = identifier.substring(startOfRemoteRpcName);
+            identifierEncoded = remoteRpcName;
+
+        } else if (identifier.indexOf("/") != CHAR_NOT_FOUND) {
+            final String slashErrorMsg = String.format("Identifier %n%s%ncan\'t contain slash "
+                    + "character (/).%nIf slash is part of identifier name then use %%2F placeholder.", identifier);
+            throw new RestconfDocumentedException(slashErrorMsg, ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
+        } else {
+            identifierEncoded = identifier;
+            schemaContext = controllerContext.getGlobalSchema();
         }
 
-        validateInput(rpc.getRpcDefinition().getInput(), payload);
+        final String identifierDecoded = controllerContext.urlPathArgDecode(identifierEncoded);
 
-        return callRpc(rpc, payload, parsePrettyPrintParameter(uriInfo));
-    }
+        RpcDefinition rpc = null;
+        if (mountPoint == null) {
+            rpc = controllerContext.getRpcDefinition(identifierDecoded);
+        } else {
+            rpc = findRpc(mountPoint.getSchemaContext(), identifierDecoded);
+        }
 
-    private void resolveInvokeRpc(final String identifier, final DOMMountPoint mountPoint) {
+        if (rpc == null) {
+            throw new RestconfDocumentedException("RPC does not exist.", ErrorType.RPC, ErrorTag.UNKNOWN_ELEMENT);
+        }
 
+        if (rpc.getInput() != null) {
+            // FIXME : find a correct Error from specification
+            throw new IllegalStateException("RPC " + rpc + " needs input value!");
+        }
+
+        final CheckedFuture<DOMRpcResult, DOMRpcException> response;
+        if (mountPoint != null) {
+            final Optional<DOMRpcService> mountRpcServices = mountPoint.getService(DOMRpcService.class);
+            if ( ! mountRpcServices.isPresent()) {
+                throw new RestconfDocumentedException("Rpc service is missing.");
+            }
+            response = mountRpcServices.get().invokeRpc(rpc.getPath(), null);
+        } else {
+            response = broker.invokeRpc(rpc.getPath(), null);
+        }
+
+        final DOMRpcResult result = checkRpcResponse(response);
+
+        DataSchemaNode resultNodeSchema = null;
+        NormalizedNode<?, ?> resultData = null;
+        if (result != null && result.getResult() != null) {
+            resultData = result.getResult();
+            final ContainerSchemaNode rpcDataSchemaNode =
+                    SchemaContextUtil.getRpcDataSchema(schemaContext, rpc.getOutput().getPath());
+            resultNodeSchema = rpcDataSchemaNode.getDataChildByName(result.getResult().getNodeType());
+        }
+
+        return new NormalizedNodeContext(new InstanceIdentifierContext(null, resultNodeSchema, mountPoint,
+                schemaContext), resultData);
     }
 
     private RpcExecutor resolveIdentifierInInvokeRpc(final String identifier) {
