@@ -2,7 +2,10 @@ package org.opendaylight.controller.cluster.datastore.utils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import akka.actor.ActorRef;
@@ -11,9 +14,13 @@ import akka.actor.ActorSystem;
 import akka.actor.Address;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
+import akka.dispatch.Futures;
 import akka.japi.Creator;
 import akka.testkit.JavaTestKit;
+import akka.testkit.TestActorRef;
+import akka.util.Timeout;
 import com.google.common.base.Optional;
+import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang.time.StopWatch;
@@ -22,9 +29,14 @@ import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.Configuration;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
+import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
+import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
+import org.opendaylight.controller.cluster.datastore.messages.ActorNotInitialized;
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound;
+import org.opendaylight.controller.cluster.datastore.messages.PrimaryFound;
+import org.opendaylight.controller.cluster.datastore.messages.PrimaryNotFound;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
@@ -277,6 +289,7 @@ public class ActorContextTest extends AbstractActorTest{
 
         doReturn(155L).when(mockDataStoreContext).getTransactionCreationInitialRateLimit();
         doReturn("config").when(mockDataStoreContext).getDataStoreType();
+        doReturn(Timeout.apply(100, TimeUnit.MILLISECONDS)).when(mockDataStoreContext).getShardLeaderElectionTimeout();
 
         ActorContext actorContext =
                 new ActorContext(getSystem(), mock(ActorRef.class), mock(ClusterWrapper.class),
@@ -310,6 +323,7 @@ public class ActorContextTest extends AbstractActorTest{
 
         doReturn(155L).when(mockDataStoreContext).getTransactionCreationInitialRateLimit();
         doReturn("config").when(mockDataStoreContext).getDataStoreType();
+        doReturn(Timeout.apply(100, TimeUnit.MILLISECONDS)).when(mockDataStoreContext).getShardLeaderElectionTimeout();
 
         ActorContext actorContext =
                 new ActorContext(getSystem(), mock(ActorRef.class), mock(ClusterWrapper.class),
@@ -326,6 +340,7 @@ public class ActorContextTest extends AbstractActorTest{
 
         doReturn(155L).when(mockDataStoreContext).getTransactionCreationInitialRateLimit();
         doReturn("config").when(mockDataStoreContext).getDataStoreType();
+        doReturn(Timeout.apply(100, TimeUnit.MILLISECONDS)).when(mockDataStoreContext).getShardLeaderElectionTimeout();
 
         ActorSystem actorSystem = ActorSystem.create("with-custom-dispatchers", ConfigFactory.load("application-with-custom-dispatchers.conf"));
 
@@ -338,5 +353,133 @@ public class ActorContextTest extends AbstractActorTest{
         actorSystem.shutdown();
 
     }
+
+    @Test
+    public void testFindPrimaryShardAsyncPrimaryFound() throws Exception {
+
+        new JavaTestKit(getSystem()) {
+            {
+                TestActorRef<MessageCollectorActor> shardManager =
+                        TestActorRef.create(getSystem(), Props.create(MessageCollectorActor.class));
+
+                DatastoreContext mockDataStoreContext = mock(DatastoreContext.class);
+
+                doReturn(155L).when(mockDataStoreContext).getTransactionCreationInitialRateLimit();
+                doReturn("config").when(mockDataStoreContext).getDataStoreType();
+                doReturn(Timeout.apply(100, TimeUnit.MILLISECONDS)).when(mockDataStoreContext).getShardLeaderElectionTimeout();
+
+                ActorContext actorContext =
+                        new ActorContext(getSystem(), shardManager, mock(ClusterWrapper.class),
+                                mock(Configuration.class), mockDataStoreContext) {
+                            @Override
+                            protected Future<Object> doAsk(ActorRef actorRef, Object message, Timeout timeout) {
+                                return Futures.successful((Object) new PrimaryFound("akka://test-system/test"));
+                            }
+                        };
+
+
+                Future<ActorSelection> foobar = actorContext.findPrimaryShardAsync("foobar");
+                ActorSelection actual = Await.result(foobar, Duration.apply(100, TimeUnit.MILLISECONDS));
+
+                assertNotNull(actual);
+
+                ActorSelection cached = actorContext.getPrimaryShardActorSelectionCache().getIfPresent("foobar");
+
+                assertEquals(cached, actual);
+
+                // Wait for 200 Milliseconds. The cached entry should have been removed.
+
+                Uninterruptibles.sleepUninterruptibly(200, TimeUnit.MILLISECONDS);
+
+                cached = actorContext.getPrimaryShardActorSelectionCache().getIfPresent("foobar");
+
+                assertNull(cached);
+
+            }};
+
+    }
+
+    @Test
+    public void testFindPrimaryShardAsyncPrimaryNotFound() throws Exception {
+
+        new JavaTestKit(getSystem()) {
+            {
+                TestActorRef<MessageCollectorActor> shardManager =
+                        TestActorRef.create(getSystem(), Props.create(MessageCollectorActor.class));
+
+                DatastoreContext mockDataStoreContext = mock(DatastoreContext.class);
+
+                doReturn(155L).when(mockDataStoreContext).getTransactionCreationInitialRateLimit();
+                doReturn("config").when(mockDataStoreContext).getDataStoreType();
+                doReturn(Timeout.apply(100, TimeUnit.MILLISECONDS)).when(mockDataStoreContext).getShardLeaderElectionTimeout();
+
+                ActorContext actorContext =
+                        new ActorContext(getSystem(), shardManager, mock(ClusterWrapper.class),
+                                mock(Configuration.class), mockDataStoreContext) {
+                            @Override
+                            protected Future<Object> doAsk(ActorRef actorRef, Object message, Timeout timeout) {
+                                return Futures.successful((Object) new PrimaryNotFound("foobar"));
+                            }
+                        };
+
+
+                Future<ActorSelection> foobar = actorContext.findPrimaryShardAsync("foobar");
+
+                try {
+                    Await.result(foobar, Duration.apply(100, TimeUnit.MILLISECONDS));
+                    fail("Expected PrimaryNotFoundException");
+                } catch(PrimaryNotFoundException e){
+
+                }
+
+                ActorSelection cached = actorContext.getPrimaryShardActorSelectionCache().getIfPresent("foobar");
+
+                assertNull(cached);
+
+            }};
+
+    }
+
+    @Test
+    public void testFindPrimaryShardAsyncActorNotInitialized() throws Exception {
+
+        new JavaTestKit(getSystem()) {
+            {
+                TestActorRef<MessageCollectorActor> shardManager =
+                        TestActorRef.create(getSystem(), Props.create(MessageCollectorActor.class));
+
+                DatastoreContext mockDataStoreContext = mock(DatastoreContext.class);
+
+                doReturn(155L).when(mockDataStoreContext).getTransactionCreationInitialRateLimit();
+                doReturn("config").when(mockDataStoreContext).getDataStoreType();
+                doReturn(Timeout.apply(100, TimeUnit.MILLISECONDS)).when(mockDataStoreContext).getShardLeaderElectionTimeout();
+
+                ActorContext actorContext =
+                        new ActorContext(getSystem(), shardManager, mock(ClusterWrapper.class),
+                                mock(Configuration.class), mockDataStoreContext) {
+                            @Override
+                            protected Future<Object> doAsk(ActorRef actorRef, Object message, Timeout timeout) {
+                                return Futures.successful((Object) new ActorNotInitialized());
+                            }
+                        };
+
+
+                Future<ActorSelection> foobar = actorContext.findPrimaryShardAsync("foobar");
+
+                try {
+                    Await.result(foobar, Duration.apply(100, TimeUnit.MILLISECONDS));
+                    fail("Expected NotInitializedException");
+                } catch(NotInitializedException e){
+
+                }
+
+                ActorSelection cached = actorContext.getPrimaryShardActorSelectionCache().getIfPresent("foobar");
+
+                assertNull(cached);
+
+            }};
+
+    }
+
 
 }
