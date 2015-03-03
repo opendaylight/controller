@@ -16,6 +16,24 @@
       "revId": "e345f444c47b0f4e672b1322147f76ef9d5c0cb9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_fd172e43",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/05-clustering.xml.conf",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-03T04:00:14Z",
+      "side": 1,
+      "message": "I\u0027ll do in-addition to :)",
+      "parentUuid": "7a96c907_a65afc27",
+      "revId": "e345f444c47b0f4e672b1322147f76ef9d5c0cb9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
