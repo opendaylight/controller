@@ -53,4 +53,6 @@ public interface ShardStatsMXBean {
    void resetTransactionCounters();
 
    long getInMemoryJournalDataSize();
+
+   boolean getFollowerInitialSyncStatus();
 }
