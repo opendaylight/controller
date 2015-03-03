@@ -53,6 +53,40 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_7deb1e78",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-03T13:12:45Z",
+      "side": 1,
+      "message": "As a further optimization, we can cache the Future instead of the selection.",
+      "revId": "581955d92edeaeec433426da2b8a3c0b30fc0ae7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_bd9c4610",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-03T13:12:45Z",
+      "side": 1,
+      "message": "Do you think we should resolve the ActorSelection here and return an ActorRef? I\u0027m not exactly sure how ActorSelection works but I assume when a message needs to be sent, the ActorSelection needs to be resolved. I\u0027m not sure if ActorSelection caches or performs resolution every time and how expensive the resolution is. Or maybe it\u0027s not safe to resolve it here?",
+      "revId": "581955d92edeaeec433426da2b8a3c0b30fc0ae7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_bd0be68c",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
         "patchSetId": 1
