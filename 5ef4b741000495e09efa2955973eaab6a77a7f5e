@@ -54,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_9d014a07",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/FollowerLogInformation.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-03T11:14:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_8ab33ee8",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_2acc6a69",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/FollowerLogInformationImpl.java",
         "patchSetId": 10
@@ -83,6 +101,24 @@
       "side": 1,
       "message": "Duh - I forgot to remove line 50 - thanks for catching this. This is why we do reviews!",
       "parentUuid": "7a96c907_2acc6a69",
+      "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5d074218",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/FollowerLogInformationImpl.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-03T11:14:16Z",
+      "side": 1,
+      "message": "Fixed.",
+      "parentUuid": "7a96c907_ea4be2ae",
       "revId": "5ef4b741000495e09efa2955973eaab6a77a7f5e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
