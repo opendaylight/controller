@@ -34,6 +34,8 @@ public class ControllerCustomRealm  extends RealmBase {
 
     @Override
     protected String getPassword(String username) {
+        logger.trace("getPassword called for user {}", username);
+
         IUserManager userManager = (IUserManager) ServiceHelper
                 .getGlobalInstance(IUserManager.class, this);
         if (userManager != null) {
@@ -45,6 +47,8 @@ public class ControllerCustomRealm  extends RealmBase {
 
     @Override
     protected Principal getPrincipal(String username) {
+        logger.trace("getPrincipal called for user {}", username);
+
         IUserManager userManager = (IUserManager) ServiceHelper
                 .getGlobalInstance(IUserManager.class, this);
         if (userManager != null) {
@@ -52,6 +56,7 @@ public class ControllerCustomRealm  extends RealmBase {
             for (UserLevel level : userManager.getUserLevels(username)) {
                 controllerRoles.add(level.toString());
             }
+            logger.trace("getPrincipal returning roles {} for user {}", controllerRoles, username);
             return new GenericPrincipal(username, "", controllerRoles);
         } else {
             throw new RuntimeException("User Manager reference is null");
@@ -60,6 +65,7 @@ public class ControllerCustomRealm  extends RealmBase {
 
     @Override
     public Principal authenticate(String username, String credentials) {
+        logger.trace("Authentication called for user {} with credentials {}", username, credentials);
 
         IUserManager userManager = (IUserManager) ServiceHelper
                 .getGlobalInstance(IUserManager.class, this);
@@ -69,6 +75,8 @@ public class ControllerCustomRealm  extends RealmBase {
             if (result.equals(AuthResultEnum.AUTHOR_PASS)
                     || result.equals(AuthResultEnum.AUTH_ACCEPT_LOC)
                     || result.equals(AuthResultEnum.AUTH_ACCEPT)) {
+                logger.trace("Authentication authenticated for user {} with credentials {} result",
+                        username, credentials, result);
                 return this.getPrincipal(username);
             } else {
                 logger.debug("Authentication failed for user " + username);

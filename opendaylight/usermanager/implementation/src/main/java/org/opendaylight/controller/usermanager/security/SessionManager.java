@@ -70,6 +70,8 @@ public class SessionManager implements ISessionManager {
     @Override
     public void invalidateSessions(String username, String sessionId) {
 
+        logger.trace("invalidateSessions called for username {} sessionId {}", username, sessionId);
+
         synchronized (sessionMap) {
             List<HttpSession> sessionsList = new ArrayList<HttpSession>();
             Iterator<Map.Entry<ServletContext, Set<HttpSession>>> sessMapIterator = sessionMap
