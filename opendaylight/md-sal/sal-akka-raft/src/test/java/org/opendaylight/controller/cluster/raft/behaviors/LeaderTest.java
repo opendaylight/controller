@@ -308,6 +308,8 @@ public class LeaderTest extends AbstractLeaderTest {
                 new ReplicatedLogImplEntry(newEntryIndex, currentTerm,
                         new MockRaftActorContext.MockPayload("D"));
 
+        actorContext.getReplicatedLog().append(entry);
+
         //update follower timestamp
         leader.markFollowerActive(FOLLOWER_ID);
 
