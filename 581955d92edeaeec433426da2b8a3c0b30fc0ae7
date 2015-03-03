@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_e069c18c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 573,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-03T15:32:33Z",
+      "side": 1,
+      "message": "I should say \"We can further optimize here \"...",
+      "parentUuid": "7a96c907_3d53566c",
+      "revId": "581955d92edeaeec433426da2b8a3c0b30fc0ae7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_fdd5eee4",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
         "patchSetId": 1
