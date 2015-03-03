@@ -66,6 +66,7 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     private final SimpleDateFormat sdf =
         new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    private boolean followerInitialSyncStatus;
 
     public ShardStats(final String shardName, final String mxBeanType) {
         super(shardName, mxBeanType, JMX_CATEGORY_SHARD);
@@ -275,5 +276,13 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     public void setDataStore(final InMemoryDOMDataStore store) {
         setNotificationManager(store.getDataChangeListenerNotificationManager());
+    }
+
+    public void setFollowerInitialSyncStatus(boolean followerInitialSyncStatus) {
+        this.followerInitialSyncStatus = followerInitialSyncStatus;
+    }
+
+    public boolean isFollowerInitialSyncStatus() {
+        return followerInitialSyncStatus;
     }
 }
