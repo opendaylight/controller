@@ -230,7 +230,7 @@ public class Follower extends AbstractRaftActorBehavior {
 
         sender.tell(reply, actor());
 
-        if (!context.isSnapshotCaptureInitiated()) {
+        if (!context.getSnapshotManager().isCapturing()) {
             super.performSnapshotWithoutCapture(appendEntries.getReplicatedToAllIndex());
         }
 

@@ -41,6 +41,10 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private boolean snapshotCaptureInitiated;
 
+    // Snapshot manager will need to be created on demand as it needs raft actor context which cannot
+    // be passed to it in the constructor
+    private SnapshotManager snapshotManager;
+
     public RaftActorContextImpl(ActorRef actor, UntypedActorContext context,
         String id,
         ElectionTerm termInformation, long commitIndex,
@@ -130,16 +134,6 @@ public class RaftActorContextImpl implements RaftActorContext {
         return configParams;
     }
 
-    @Override
-    public void setSnapshotCaptureInitiated(boolean snapshotCaptureInitiated) {
-        this.snapshotCaptureInitiated = snapshotCaptureInitiated;
-    }
-
-    @Override
-    public boolean isSnapshotCaptureInitiated() {
-        return snapshotCaptureInitiated;
-    }
-
     @Override public void addToPeers(String name, String address) {
         peerAddresses.put(name, address);
     }
@@ -161,5 +155,12 @@ public class RaftActorContextImpl implements RaftActorContext {
         checkState(peerAddresses.containsKey(peerId), peerId + " is unknown");
 
         peerAddresses.put(peerId, peerAddress);
+    }
+
+    public SnapshotManager getSnapshotManager() {
+        if(snapshotManager == null){
+            snapshotManager = new SnapshotManager(this);
+        }
+        return snapshotManager;
     }
 }
