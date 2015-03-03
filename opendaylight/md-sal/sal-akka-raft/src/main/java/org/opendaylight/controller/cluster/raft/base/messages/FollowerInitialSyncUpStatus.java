@@ -18,12 +18,18 @@ package org.opendaylight.controller.cluster.raft.base.messages;
  */
 public class FollowerInitialSyncUpStatus {
     private final boolean initialSyncDone;
+    private final String name;
 
-    public FollowerInitialSyncUpStatus(boolean initialSyncDone){
+    public FollowerInitialSyncUpStatus(boolean initialSyncDone, String name){
         this.initialSyncDone = initialSyncDone;
+        this.name = name;
     }
 
     public boolean isInitialSyncDone() {
         return initialSyncDone;
+    }
+
+    public String getName() {
+        return name;
     }
 }

@@ -352,7 +352,7 @@ public class Follower extends AbstractRaftActorBehavior {
         return snapshotTracker;
     }
 
-    private static class InitialSyncStatusTracker {
+    private class InitialSyncStatusTracker {
 
         private static final long INVALID_LOG_INDEX = -2L;
         private long initialLeaderCommit = INVALID_LOG_INDEX;
@@ -374,10 +374,10 @@ public class Follower extends AbstractRaftActorBehavior {
 
             if(!initialSyncUpDone){
                 if(initialLeaderCommit == INVALID_LOG_INDEX){
-                    actor.tell(new FollowerInitialSyncUpStatus(false), ActorRef.noSender());
+                    actor.tell(new FollowerInitialSyncUpStatus(false, getId()), ActorRef.noSender());
                     initialLeaderCommit = leaderCommit;
                 } else if(commitIndex >= initialLeaderCommit){
-                    actor.tell(new FollowerInitialSyncUpStatus(true), ActorRef.noSender());
+                    actor.tell(new FollowerInitialSyncUpStatus(true, getId()), ActorRef.noSender());
                     initialSyncUpDone = true;
                 }
             }

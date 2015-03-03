@@ -476,4 +476,8 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         }
     }
 
+    protected String getId(){
+        return context.getId();
+    }
+
 }

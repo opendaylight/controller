@@ -18,6 +18,8 @@ public class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfo
 
     private final List<String> localShards;
 
+    private boolean syncStatus = false;
+
     public ShardManagerInfo(String name, String mxBeanType, List<String> localShards) {
         super(name, mxBeanType, JMX_CATEGORY_SHARD_MANAGER);
         this.localShards = localShards;
@@ -35,5 +37,14 @@ public class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfo
     @Override
     public List<String> getLocalShards() {
         return localShards;
+    }
+
+    @Override
+    public boolean getSyncStatus() {
+        return this.syncStatus;
+    }
+
+    public void setSyncStatus(boolean syncStatus){
+        this.syncStatus = syncStatus;
     }
 }

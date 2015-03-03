@@ -12,4 +12,5 @@ import java.util.List;
 
 public interface ShardManagerInfoMBean {
     List<String> getLocalShards();
+    boolean getSyncStatus();
 }
