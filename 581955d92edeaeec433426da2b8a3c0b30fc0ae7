@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_1dd3fa04",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-03T12:34:57Z",
+      "side": 1,
+      "message": "Should we make this isInstance for consistency?",
+      "revId": "581955d92edeaeec433426da2b8a3c0b30fc0ae7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3d53566c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 573,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-03T12:34:57Z",
+      "side": 1,
+      "message": "We optimize here for local transactions by not serializing the actor path, so pass an un-serialized CreateTransactionReply instance with the ActorRef. However this can be done in another patch (I can work on this if you want).",
+      "revId": "581955d92edeaeec433426da2b8a3c0b30fc0ae7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_fdd5eee4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-03T12:34:57Z",
+      "side": 1,
+      "message": "clever",
+      "revId": "581955d92edeaeec433426da2b8a3c0b30fc0ae7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_bd0be68c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 355,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-03T12:34:57Z",
+      "side": 1,
+      "message": "Why did create a new doAsk method? It only appears to be called here.",
+      "revId": "581955d92edeaeec433426da2b8a3c0b30fc0ae7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_7d01de68",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/utils/ActorContextTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 361,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-03T12:34:57Z",
+      "side": 1,
+      "message": "It doesn\u0027t look like we need JavaTestKit here.",
+      "revId": "581955d92edeaeec433426da2b8a3c0b30fc0ae7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_ddefd2af",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/utils/ActorContextTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 382,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-03T12:34:57Z",
+      "side": 1,
+      "message": "100 ms timeout may be fragile on jenkins. We know the Future is immediate so we can use no timeout or a long one (5 sec) to be safe.",
+      "revId": "581955d92edeaeec433426da2b8a3c0b30fc0ae7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3df7d68c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/utils/ActorContextTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-03T12:34:57Z",
+      "side": 1,
+      "message": "It doesn\u0027t look like we need JavaTestKit here.",
+      "revId": "581955d92edeaeec433426da2b8a3c0b30fc0ae7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_1dfa1a75",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/utils/ActorContextTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 447,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-03T12:34:57Z",
+      "side": 1,
+      "message": "It doesn\u0027t look like we need JavaTestKit here.",
+      "revId": "581955d92edeaeec433426da2b8a3c0b30fc0ae7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
