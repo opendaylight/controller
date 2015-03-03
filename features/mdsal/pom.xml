@@ -235,7 +235,13 @@
       <type>xml</type>
       <classifier>config</classifier>
     </dependency>
-
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-clustering-config</artifactId>
+      <version>${mdsal.version}</version>
+      <type>cfg</type>
+      <classifier>datastore</classifier>
+    </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-distributed-datastore</artifactId>
