@@ -13,13 +13,9 @@ import com.google.common.base.Preconditions;
 public class ShardTransactionIdentifier {
     private final String remoteTransactionId;
 
-    private ShardTransactionIdentifier(String remoteTransactionId) {
+    public ShardTransactionIdentifier(String remoteTransactionId) {
         this.remoteTransactionId = Preconditions.checkNotNull(remoteTransactionId,
                 "remoteTransactionId should not be null");
-    }
-
-    public static Builder builder(){
-        return new Builder();
     }
 
     public String getRemoteTransactionId() {
@@ -55,17 +51,4 @@ public class ShardTransactionIdentifier {
         return sb.toString();
     }
 
-    public static class Builder {
-        private String remoteTransactionId;
-
-        public Builder remoteTransactionId(String remoteTransactionId){
-            this.remoteTransactionId = remoteTransactionId;
-            return this;
-        }
-
-        public ShardTransactionIdentifier build(){
-            return new ShardTransactionIdentifier(remoteTransactionId);
-        }
-
-    }
 }
