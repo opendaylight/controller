@@ -460,19 +460,11 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      * @param snapshotCapturedIndex
      */
     protected void performSnapshotWithoutCapture(final long snapshotCapturedIndex) {
-        //  we would want to keep the lastApplied as its used while capturing snapshots
-        long lastApplied = context.getLastApplied();
-        long tempMin = Math.min(snapshotCapturedIndex, (lastApplied > -1 ? lastApplied - 1 : -1));
 
-        if (tempMin > -1 && context.getReplicatedLog().isPresent(tempMin))  {
-            LOG.debug("{}: fakeSnapshot purging log to {} for term {}", logName(), tempMin,
-                    context.getTermInformation().getCurrentTerm());
+        long actualIndex = context.getSnapshotManager().trimLog(snapshotCapturedIndex);
 
-            //use the term of the temp-min, since we check for isPresent, entry will not be null
-            ReplicatedLogEntry entry = context.getReplicatedLog().get(tempMin);
-            context.getReplicatedLog().snapshotPreCommit(tempMin, entry.getTerm());
-            context.getReplicatedLog().snapshotCommit();
-            setReplicatedToAllIndex(tempMin);
+        if(actualIndex != -1){
+            setReplicatedToAllIndex(actualIndex);
         }
     }
 

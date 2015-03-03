@@ -349,7 +349,7 @@ public class SnapshotManager implements SnapshotState {
             } else if (entry != null) {
                 index = entry.getIndex();
                 term = entry.getTerm();
-            } else if(originalIndex == log.getSnapshotIndex()){
+            } else if(log.getSnapshotIndex() > -1){
                 index = log.getSnapshotIndex();
                 term = log.getSnapshotTerm();
             } else {
