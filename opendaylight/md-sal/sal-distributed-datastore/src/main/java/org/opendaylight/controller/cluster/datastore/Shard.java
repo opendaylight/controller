@@ -66,6 +66,7 @@ import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotifier;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationByteStringPayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationPayload;
@@ -288,6 +289,8 @@ public class Shard extends RaftActor {
                 handleTransactionCommitTimeoutCheck();
             } else if(message instanceof DatastoreContext) {
                 onDatastoreContext((DatastoreContext)message);
+            } else if (message instanceof FollowerInitialSyncUpStatus){
+                shardMBean.setFollowerInitialSyncStatus(((FollowerInitialSyncUpStatus) message).isInitialSyncDone());
             } else {
                 super.onReceiveCommand(message);
             }

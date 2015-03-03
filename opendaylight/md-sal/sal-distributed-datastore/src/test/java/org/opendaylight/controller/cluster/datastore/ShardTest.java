@@ -80,6 +80,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
+import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationByteStringPayload;
@@ -1590,6 +1591,24 @@ public class ShardTest extends AbstractActorTest {
             shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
         }};
     }
+
+    @Test
+    public void testFollowerInitialSyncStatus() throws Exception {
+        final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
+                newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                "testFollowerInitialSyncStatus");
+
+        shard.underlyingActor().onReceiveCommand(new FollowerInitialSyncUpStatus(false));
+
+        assertEquals(false, shard.underlyingActor().getShardMBean().getFollowerInitialSyncStatus());
+
+        shard.underlyingActor().onReceiveCommand(new FollowerInitialSyncUpStatus(true));
+
+        assertEquals(true, shard.underlyingActor().getShardMBean().getFollowerInitialSyncStatus());
+
+        shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
+    }
+
 
     private NormalizedNode<?, ?> readStore(final InMemoryDOMDataStore store) throws ReadFailedException {
         DOMStoreReadTransaction transaction = store.newReadOnlyTransaction();
