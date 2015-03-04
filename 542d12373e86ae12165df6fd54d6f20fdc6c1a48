@@ -70,6 +70,24 @@
       "revId": "542d12373e86ae12165df6fd54d6f20fdc6c1a48",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_001d880f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/identifiers/TransactionIdentifier.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-04T18:52:41Z",
+      "side": 1,
+      "message": "I\u0027m more comfortable with creating the string representation once in the constructor - that allows consumers to use toString without having to worry about the consequences.",
+      "parentUuid": "5a93c517_3d81cf4a",
+      "revId": "542d12373e86ae12165df6fd54d6f20fdc6c1a48",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
