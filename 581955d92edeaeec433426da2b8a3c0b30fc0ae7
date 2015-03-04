@@ -177,6 +177,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_7d943737",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-04T12:46:16Z",
+      "side": 1,
+      "message": "I tried resolving to ActorRef, there does not seem to be any noticeable advantage  to doing it - so will not be making that change for now.",
+      "parentUuid": "7a96c907_7671fba6",
+      "revId": "581955d92edeaeec433426da2b8a3c0b30fc0ae7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_bd0be68c",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
         "patchSetId": 1
