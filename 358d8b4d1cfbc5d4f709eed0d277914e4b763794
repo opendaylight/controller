@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_5b80aaf6",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 657,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-04T01:02:48Z",
+      "side": 0,
+      "message": "putting it back",
+      "parentUuid": "7a96c907_c6eb8811",
+      "revId": "358d8b4d1cfbc5d4f709eed0d277914e4b763794",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_46c6989b",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 3
@@ -81,6 +99,30 @@
       "writtenOn": "2015-02-27T07:19:47Z",
       "side": 0,
       "message": "This check here is different in the refactored code. Essentially it\u0027s now:\n\n  if(context.getLastApplied() \u003d\u003d getReplicatedLog().getSnapshotIndex())\n\nIs this equivalent?",
+      "range": {
+        "startLine": 566,
+        "startChar": 35,
+        "endLine": 566,
+        "endChar": 72
+      },
+      "revId": "358d8b4d1cfbc5d4f709eed0d277914e4b763794",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_dbaa7a70",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 566,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-04T01:02:48Z",
+      "side": 0,
+      "message": "I changed the condition in the refactored code.",
+      "parentUuid": "7a96c907_06bc1005",
       "range": {
         "startLine": 566,
         "startChar": 35,

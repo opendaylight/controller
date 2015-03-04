@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_bb8f6e29",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 428,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-04T01:02:48Z",
+      "side": 1,
+      "message": "Removed all the checks",
+      "parentUuid": "7a96c907_69e60717",
+      "revId": "9c43a199d3d19abd6bdebf80d1be6b172d3fffd8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_068e5079",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 3
@@ -89,6 +107,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_1b7ea219",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 737,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-04T01:02:48Z",
+      "side": 1,
+      "message": "yes",
+      "parentUuid": "7a96c907_068e5079",
+      "revId": "9c43a199d3d19abd6bdebf80d1be6b172d3fffd8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_c62e2843",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 3
@@ -100,6 +136,24 @@
       "writtenOn": "2015-02-27T09:12:51Z",
       "side": 1,
       "message": "Do we need the check isCapturing()? If the state is not idle, wont it reject anyway.",
+      "revId": "9c43a199d3d19abd6bdebf80d1be6b172d3fffd8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_7b856605",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 744,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-04T01:02:48Z",
+      "side": 1,
+      "message": "Removed",
+      "parentUuid": "7a96c907_c62e2843",
       "revId": "9c43a199d3d19abd6bdebf80d1be6b172d3fffd8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -141,6 +195,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_3b7b5e29",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 853,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-04T01:02:48Z",
+      "side": 1,
+      "message": "Adding the comment for now. That should be adequate I think.",
+      "parentUuid": "7a96c907_66dcf473",
+      "revId": "9c43a199d3d19abd6bdebf80d1be6b172d3fffd8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_59f0c866",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorContext.java",
         "patchSetId": 3
@@ -152,6 +224,24 @@
       "writtenOn": "2015-02-24T02:46:47Z",
       "side": 1,
       "message": "Need to get rid of this method",
+      "revId": "9c43a199d3d19abd6bdebf80d1be6b172d3fffd8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_bb968e3d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorContext.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-04T01:02:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_59f0c866",
       "revId": "9c43a199d3d19abd6bdebf80d1be6b172d3fffd8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
