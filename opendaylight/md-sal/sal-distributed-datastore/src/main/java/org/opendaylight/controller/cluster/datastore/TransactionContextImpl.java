@@ -37,7 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
 
-class TransactionContextImpl extends AbstractTransactionContext {
+public class TransactionContextImpl extends AbstractTransactionContext {
     private static final Logger LOG = LoggerFactory.getLogger(TransactionContextImpl.class);
 
     private final ActorContext actorContext;
@@ -49,7 +49,7 @@ class TransactionContextImpl extends AbstractTransactionContext {
     private final OperationCompleter operationCompleter;
     private BatchedModifications batchedModifications;
 
-    TransactionContextImpl(String transactionPath, ActorSelection actor, TransactionIdentifier identifier,
+    protected TransactionContextImpl(String transactionPath, ActorSelection actor, TransactionIdentifier identifier,
             ActorContext actorContext, SchemaContext schemaContext,
             boolean isTxActorLocal, short remoteTransactionVersion, OperationCompleter operationCompleter) {
         super(identifier);
