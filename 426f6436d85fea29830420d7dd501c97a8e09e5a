@@ -16,6 +16,24 @@
       "revId": "426f6436d85fea29830420d7dd501c97a8e09e5a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_3d9eaf57",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 745,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-04T12:49:12Z",
+      "side": 1,
+      "message": "good catch. How about if(isCapturing()) dataSizeSinceLastSnapshot\u003d0?",
+      "parentUuid": "7a96c907_db4b5aaf",
+      "revId": "426f6436d85fea29830420d7dd501c97a8e09e5a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
