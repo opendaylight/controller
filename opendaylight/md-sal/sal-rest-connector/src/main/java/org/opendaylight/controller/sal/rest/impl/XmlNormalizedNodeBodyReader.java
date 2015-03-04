@@ -49,7 +49,6 @@ import org.w3c.dom.Element;
 public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsProvider implements MessageBodyReader<NormalizedNodeContext> {
 
     private final static Logger LOG = LoggerFactory.getLogger(XmlNormalizedNodeBodyReader.class);
-    private final static DomToNormalizedNodeParserFactory DOM_PARSER_FACTORY = DomToNormalizedNodeParserFactory.getInstance(XmlUtils.DEFAULT_XML_CODEC_PROVIDER);
     private static final DocumentBuilderFactory BUILDERFACTORY;
 
     static {
@@ -121,11 +120,15 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
             }
         }
 
+        // FIXME the factory instance should be cached if the schema context is the same
+        final DomToNormalizedNodeParserFactory parserFactory =
+                DomToNormalizedNodeParserFactory.getInstance(XmlUtils.DEFAULT_XML_CODEC_PROVIDER, pathContext.getSchemaContext());
+
         if(schemaNode instanceof ContainerSchemaNode) {
-            return DOM_PARSER_FACTORY.getContainerNodeParser().parse(Collections.singletonList(doc.getDocumentElement()), (ContainerSchemaNode) schemaNode);
+            return parserFactory.getContainerNodeParser().parse(Collections.singletonList(doc.getDocumentElement()), (ContainerSchemaNode) schemaNode);
         } else if(schemaNode instanceof ListSchemaNode) {
             final ListSchemaNode casted = (ListSchemaNode) schemaNode;
-            return DOM_PARSER_FACTORY.getMapEntryNodeParser().parse(elements, casted);
+            return parserFactory.getMapEntryNodeParser().parse(elements, casted);
         }
         return null;
     }
