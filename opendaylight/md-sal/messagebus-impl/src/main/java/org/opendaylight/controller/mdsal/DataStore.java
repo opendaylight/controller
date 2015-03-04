@@ -44,21 +44,36 @@ public class DataStore {
         return mdSAL.getDataBroker().registerDataChangeListener(store, path, listener, triggeringScope);
     }
 
-    public <T extends DataObject> void asyncPUT(LogicalDatastoreType datastoreType,
+    public <T extends DataObject> void asyncPut(LogicalDatastoreType datastoreType,
                                                 InstanceIdentifier<T> path,
                                                 T data) {
-        asyncPUT(datastoreType, path, data, DEFAULT_CALLBACK);
+        asyncPut(datastoreType, path, data, DEFAULT_CALLBACK);
     }
 
-    public <T extends DataObject> void asyncPUT(LogicalDatastoreType datastoreType,
+    public <T extends DataObject> void asyncPut(LogicalDatastoreType datastoreType,
                                                 InstanceIdentifier<T> path,
                                                 T data,
                                                 FutureCallback<Void> callback) {
         WriteTransaction tx = mdSAL.getDataBroker().newWriteOnlyTransaction();
         tx.put(datastoreType, path, data, true);
-        execPut(tx, callback);
+        execWriteTx(tx, callback);
     }
 
+    public <T extends DataObject> void asyncDelete(LogicalDatastoreType datastoreType,
+            InstanceIdentifier<T> path) {
+    		asyncDelete(datastoreType, path, DEFAULT_CALLBACK);
+    }
+    
+    public <T extends DataObject> void asyncDelete(LogicalDatastoreType datastoreType,
+            InstanceIdentifier<T> path,
+            FutureCallback<Void> callback) {
+    		WriteTransaction tx = mdSAL.getDataBroker().newWriteOnlyTransaction();
+    		tx.delete(datastoreType, path);
+    		execWriteTx(tx, callback);
+    }
+    
+    
+    
     public <T extends DataObject> T read(LogicalDatastoreType datastoreType,
                                          InstanceIdentifier<T> path) {
 
@@ -74,7 +89,7 @@ public class DataStore {
         return result;
     }
 
-    private static void execPut(WriteTransaction tx, FutureCallback<Void> callback) {
+    private static void execWriteTx(WriteTransaction tx, FutureCallback<Void> callback) {
         Futures.addCallback(tx.submit(), callback);
     }
 }

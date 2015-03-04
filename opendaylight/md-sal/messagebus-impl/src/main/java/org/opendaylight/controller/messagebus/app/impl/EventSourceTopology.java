@@ -72,7 +72,7 @@ public class EventSourceTopology {
         TopologyEventSource topologySource = new TopologyEventSourceBuilder().build();
         TopologyTypes1 topologyTypeAugment = new TopologyTypes1Builder().setTopologyEventSource(topologySource).build();
 
-        dataStore.asyncPUT(datastoreType, topologyTypeInstanceIdentifier, topologyTypeAugment);
+        dataStore.asyncPut(datastoreType, topologyTypeInstanceIdentifier, topologyTypeAugment);
     }
 
     public void insert(Node node) {
@@ -85,9 +85,20 @@ public class EventSourceTopology {
                 .augmentation(Node1.class);
 
         Node1 nodeAgument = new Node1Builder().setEventSourceNode(node.getId()).build();
-        dataStore.asyncPUT(datastoreType, topologyNodeAugment, nodeAgument);
+        dataStore.asyncPut(datastoreType, topologyNodeAugment, nodeAgument);
     }
 
+    public void remove(Node node){
+    	String nodeId = node.getKey().getId().getValue();
+        NodeKey nodeKey = new NodeKey(new NodeId(nodeId));
+        InstanceIdentifier<Node1> topologyNodeAugment
+                = topologyInstanceIdentifier
+                .child(org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang
+                        .network.topology.rev131021.network.topology.topology.Node.class, nodeKey)
+                .augmentation(Node1.class);
+        dataStore.asyncDelete(datastoreType, topologyNodeAugment);
+    }
+    
     // TODO: Should we expose this functioanlity over RPC?
     public List<org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang
                 .network.topology.rev131021.network.topology.topology.Node> snapshot() {

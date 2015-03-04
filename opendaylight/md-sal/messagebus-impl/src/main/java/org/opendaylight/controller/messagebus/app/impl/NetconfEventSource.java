@@ -8,28 +8,34 @@
 
 package org.opendaylight.controller.messagebus.app.impl;
 
-import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
-import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
+
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.mdsal.MdSAL;
+import org.opendaylight.controller.messagebus.registration.EventSource;
 import org.opendaylight.controller.sal.core.api.notify.NotificationListener;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.NotificationPattern;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.TopicNotification;
-import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventsource.rev141202.EventSourceService;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventsource.rev141202.JoinTopicInput;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventsource.rev141202.JoinTopicOutput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf.notification._1._0.rev080714.CreateSubscriptionInput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf.notification._1._0.rev080714.CreateSubscriptionInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf.notification._1._0.rev080714.NotificationsService;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf.notification._1._0.rev080714.StreamNameType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeContext;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.inventory.rev140108.NetconfNode;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.yang.binding.BaseIdentity;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -40,26 +46,39 @@ import org.opendaylight.yangtools.yang.model.api.NotificationDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NetconfEventSource implements EventSourceService, NotificationListener, DataChangeListener {
+import com.google.common.base.Preconditions;
+
+public class NetconfEventSource implements EventSource<Node> {
     private static final Logger LOGGER = LoggerFactory.getLogger(NetconfEventSource.class);
 
     private final MdSAL mdSal;
     private final String nodeId;
-
+    private final Node node;
     private final List<String> activeStreams = new ArrayList<>();
 
     private final Map<String, String> urnPrefixToStreamMap;
-
-    public NetconfEventSource(final MdSAL mdSal, final String nodeId, final Map<String, String> streamMap) {
-        Preconditions.checkNotNull(mdSal);
-        Preconditions.checkNotNull(nodeId);
-
-        this.mdSal = mdSal;
-        this.nodeId = nodeId;
-        this.urnPrefixToStreamMap = streamMap;
-
-        LOGGER.info("NetconfEventSource [{}] created.", nodeId);
+    
+    public NetconfEventSource(final MdSAL mdSal, final Node node, final Map<String, String> streamMap){
+      Preconditions.checkNotNull(mdSal);
+      Preconditions.checkNotNull(node);
+      Preconditions.checkNotNull(streamMap);
+      this.mdSal = mdSal;
+      this.nodeId =  node.getKey().getId().getValue();
+      this.node = node;
+      this.urnPrefixToStreamMap = streamMap;
+      LOGGER.info("NetconfEventSource [{}] created.", nodeId);
     }
+    
+//    public NetconfEventSource(final MdSAL mdSal, final String nodeId, final Map<String, String> streamMap) {
+//        Preconditions.checkNotNull(mdSal);
+//        Preconditions.checkNotNull(nodeId);
+//
+//        this.mdSal = mdSal;
+//        this.nodeId = nodeId;
+//        this.urnPrefixToStreamMap = streamMap;
+//
+//        LOGGER.info("NetconfEventSource [{}] created.", nodeId);
+//    }
 
     @Override
     public Future<RpcResult<JoinTopicOutput>> joinTopic(final JoinTopicInput input) {
@@ -187,4 +206,38 @@ public class NetconfEventSource implements EventSourceService, NotificationListe
         return NetconfNode.class.equals(changeEntry.getKey().getTargetType());
     }
 
+	@Override
+	public InstanceIdentifier<?> getInstanceIdentifier() {
+		InstanceIdentifier<NetconfNode> nodeInstanceIdentifier =
+                InstanceIdentifier.create(Nodes.class)
+                        .child(Node.class, node.getKey())
+                        .augmentation(NetconfNode.class);
+		return nodeInstanceIdentifier;
+	}
+
+	@Override
+	public Node getSource() {
+		return this.node;
+	}
+
+	@Override
+	public Class<? extends BaseIdentity> getRpcPathBaseIdentity() {
+		return NodeContext.class;
+	}
+
+	@Override
+	public InstanceIdentifier<?> getRpcPathInstanceIdentifier() {
+		NodeRef nodeRef = createNodeRef(node.getId());
+		return nodeRef.getValue();
+	}
+
+	private NodeRef createNodeRef(NodeId nodeId) {
+        NodeKey nodeKey = new NodeKey(nodeId);
+        InstanceIdentifier<Node> path = InstanceIdentifier
+                .builder(Nodes.class)
+                .child(Node.class, nodeKey)
+                .build();
+        return new NodeRef(path);
+    }
+	
 }

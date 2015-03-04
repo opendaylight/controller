@@ -15,6 +15,8 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.mdsal.DataStore;
 import org.opendaylight.controller.mdsal.MdSAL;
+import org.opendaylight.controller.messagebus.registration.EventSourceNodeRegistry;
+import org.opendaylight.controller.messagebus.registration.EventSourceRegistry;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventsource.rev141202.EventSourceService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
@@ -34,20 +36,24 @@ public final class EventSourceManager implements DataChangeListener {
                                                                                      .child(Node.class);
     private final DataStore dataStore;
     private final MdSAL mdSal;
-    private final EventSourceTopology eventSourceTopology;
+   // private final EventSourceTopology eventSourceTopology;
     private final Map<String, String> streamMap;
-
+    private final EventSourceRegistry<Node> eventSourceNodeRegistry;
+    
+    
     public EventSourceManager(DataStore dataStore,
                               MdSAL mdSal,
                               EventSourceTopology eventSourceTopology,
                               List<NamespaceToStream> namespaceMapping) {
         this.dataStore = dataStore;
         this.mdSal = mdSal;
-        this.eventSourceTopology = eventSourceTopology;
+       // this.eventSourceTopology = eventSourceTopology;
         this.streamMap = namespaceToStreamMapping(namespaceMapping);
+        
+        this.eventSourceNodeRegistry = new EventSourceNodeRegistry(mdSal, eventSourceTopology);
     }
 
-    private Map namespaceToStreamMapping(List<NamespaceToStream> namespaceMapping) {
+    private Map<String, String> namespaceToStreamMapping(List<NamespaceToStream> namespaceMapping) {
         Map<String, String> streamMap = new HashMap<>(namespaceMapping.size());
 
         for (NamespaceToStream nToS  : namespaceMapping) {
@@ -86,22 +92,29 @@ public final class EventSourceManager implements DataChangeListener {
             return;
         }
 
-        NetconfEventSource netconfEventSource = new NetconfEventSource(mdSal,
-                                                                       node.getKey().getId().getValue(),
-                                                                       streamMap);
-        mdSal.addRpcImplementation(node, EventSourceService.class, netconfEventSource);
+        NetconfEventSource netconfEventSource = new NetconfEventSource(mdSal,node, streamMap);
+        
+        this.eventSourceNodeRegistry.registerEventSource(netconfEventSource);
+        
+        
+        
+//        NetconfEventSource netconfEventSource = new NetconfEventSource(mdSal,
+//                                                                       node.getKey().getId().getValue(),
+//                                                                       streamMap);
+        
+//        mdSal.addRpcImplementation(node, EventSourceService.class, netconfEventSource);
 
-        InstanceIdentifier<NetconfNode> nodeInstanceIdentifier =
-                InstanceIdentifier.create(Nodes.class)
-                        .child(Node.class, node.getKey())
-                        .augmentation(NetconfNode.class);
+//        InstanceIdentifier<NetconfNode> nodeInstanceIdentifier =
+//                InstanceIdentifier.create(Nodes.class)
+//                        .child(Node.class, node.getKey())
+//                        .augmentation(NetconfNode.class);
 
-        dataStore.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL,
-                nodeInstanceIdentifier,
-                netconfEventSource,
-                DataBroker.DataChangeScope.SUBTREE);
-
-        eventSourceTopology.insert(node);
+//        dataStore.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL,
+//        		netconfEventSource.getInstanceIdentifier(),
+//                netconfEventSource,
+//                DataBroker.DataChangeScope.SUBTREE);
+//
+//        eventSourceTopology.insert(node);
     }
 
     private boolean isNetconfNode(Node node)  {
