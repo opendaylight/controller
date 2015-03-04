@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_1b56a25c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-04T01:52:50Z",
+      "side": 1,
+      "message": "The only reason I switched to isInstance in the other cases was because it\u0027s more efficient to use than equals. instanceof is good as it is so left those cases alone.",
+      "parentUuid": "7a96c907_1dd3fa04",
+      "revId": "581955d92edeaeec433426da2b8a3c0b30fc0ae7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_3d53566c",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
         "patchSetId": 1
@@ -88,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_fbdf36d4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-04T01:52:50Z",
+      "side": 1,
+      "message": "will do",
+      "parentUuid": "7a96c907_7deb1e78",
+      "revId": "581955d92edeaeec433426da2b8a3c0b30fc0ae7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_bd9c4610",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
         "patchSetId": 1
@@ -105,6 +141,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_9bf07268",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-04T01:52:50Z",
+      "side": 1,
+      "message": "I should probably isolate this in a separate commit because this will result in changing a lot of lines of code.",
+      "parentUuid": "7a96c907_bd9c4610",
+      "revId": "581955d92edeaeec433426da2b8a3c0b30fc0ae7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_bd0be68c",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
         "patchSetId": 1
@@ -116,6 +170,24 @@
       "writtenOn": "2015-03-03T12:34:57Z",
       "side": 1,
       "message": "Why did create a new doAsk method? It only appears to be called here.",
+      "revId": "581955d92edeaeec433426da2b8a3c0b30fc0ae7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_7bd486bc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 355,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-04T01:52:50Z",
+      "side": 1,
+      "message": "For testing purposes. So I could override it in a derived class.",
+      "parentUuid": "7a96c907_bd0be68c",
       "revId": "581955d92edeaeec433426da2b8a3c0b30fc0ae7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
