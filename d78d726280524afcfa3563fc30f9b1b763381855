@@ -1,0 +1,401 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_9bbe3264",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-04T03:49:21Z",
+      "side": 1,
+      "message": "I think the Logger should be the RaftActor\u0027s logger to be consistent with everything else.",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_1bb22294",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-04T03:49:21Z",
+      "side": 1,
+      "message": "I think this should first call currentState.isCapturing() to avoid the debug logging in AbstractSnapshotState as it\u0027s valid to call this method if already capturing.",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_7bb9e677",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-04T03:49:21Z",
+      "side": 1,
+      "message": "Same as above.",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3b883ec4",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-04T03:49:21Z",
+      "side": 1,
+      "message": "We can remove these logs in lieu of the proposed debug log below.",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_1b8b02c4",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-04T03:49:21Z",
+      "side": 1,
+      "message": "Can we add logging similar to what we had before, e.g.:\n\nLOG.info(\"{}: Initiating snapshot capture {}: {}\", persistenceId(), toInstall ? \"to install\" : \"\", captureSnapshot);",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_db035a0e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-04T03:49:21Z",
+      "side": 1,
+      "message": "Since we\u0027re not done capturing in this state, it should return true from isCapturing().",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_760c9b3b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-04T03:49:21Z",
+      "side": 1,
+      "message": "Should we allow trimLog in the Persisted state? We did before although that may not have been correct. But I don\u0027t it hurts anything either way.",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_1b046248",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 357,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-04T03:49:21Z",
+      "side": 1,
+      "message": "You could initialize these to -1 at the start of the method then you wouldn\u0027t need the else or the one above. But not a big deal.",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3bafde2b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-04T03:49:21Z",
+      "side": 1,
+      "message": "Technically it\u0027s not illegal to request a snapshot when one is in progress since we removed the isCapturing() check from the callers to make it cleaner. We could name this testCaptureWithCaptureInProgress.",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5b6bcaf0",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-04T03:49:21Z",
+      "side": 1,
+      "message": "It would be good to capture the Snapshot instance and verify its contents.",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_fba4164c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-04T03:49:21Z",
+      "side": 1,
+      "message": "Perhaps move this expectation to setUp to avoid duplication in every test.",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_dba7da4e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-04T03:49:21Z",
+      "side": 1,
+      "message": "Don\u0027t need to setup expectation for dataSize() here since we\u0027re not testing persist(). Same in some of the other tests.",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_9b65d21f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-04T03:49:21Z",
+      "side": 1,
+      "message": "Expecting times \u003d\u003d1 confused me at first as mockProcedure shouldn\u0027t be called here until I realized it\u0027s expected from the first create call. While this is correct, I think it would be clearer to reset mockProcedure and expect never().",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_1b79c2c7",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-04T03:49:21Z",
+      "side": 1,
+      "message": "when replicatedToAllIndex !\u003d -1",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3b76fed7",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-04T03:49:21Z",
+      "side": 1,
+      "message": "Should also verify mockRaftActorBehavior.setReplicatedToAllIndex gets called.",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_db7efaae",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-04T03:49:21Z",
+      "side": 1,
+      "message": "Should also verify mockRaftActorBehavior.setReplicatedToAllIndex gets called.",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_fb7bb6bb",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-04T03:49:21Z",
+      "side": 1,
+      "message": "It would be good to capture SendInstallSnapshot and verify the ByteString. Pass in a non-empty byte[] to persist.",
+      "range": {
+        "startLine": 287,
+        "startChar": 77,
+        "endLine": 287,
+        "endChar": 96
+      },
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_bb51ae37",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 330,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-04T03:49:21Z",
+      "side": 1,
+      "message": "This could be moved to setUp to avoid duplicating in other tests.",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_9b4cf29f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 347,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-04T03:49:21Z",
+      "side": 1,
+      "message": "Could capture SnapshotSelectionCriteria and verify its maxSeqNumber (but probably not the mysterious hardcoded timestamp :)).",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5b42ea68",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-04T03:49:21Z",
+      "side": 1,
+      "message": "Don\u0027t need dataSize expectation.",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_7b47a677",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 374,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-04T03:49:21Z",
+      "side": 1,
+      "message": "Don\u0027t need dataSize expectation.",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3b0b5e2b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 380,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-04T03:49:21Z",
+      "side": 1,
+      "message": "We don\u0027t want deleteMessages called at all so technically we should verify the param with anyLong().",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5b10aa58",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 513,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-04T03:49:21Z",
+      "side": 1,
+      "message": "We don\u0027t want snapshotPreCommit called at all so technically we should verify the params with anyLong().",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
