@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.concurrent.GuardedBy;
+import org.opendaylight.controller.cluster.datastore.compat.PreLithiumTransactionContextImpl;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
@@ -731,7 +732,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                 return new TransactionContextImpl(transactionPath, transactionActor, identifier,
                     actorContext, schemaContext, isTxActorLocal, reply.getVersion(), operationCompleter);
             } else {
-                return new LegacyTransactionContextImpl(transactionPath, transactionActor, identifier,
+                return new PreLithiumTransactionContextImpl(transactionPath, transactionActor, identifier,
                         actorContext, schemaContext, isTxActorLocal, reply.getVersion(), operationCompleter);
             }
         }
