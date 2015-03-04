@@ -188,13 +188,8 @@ public final class NetconfStateSchemas {
             QName childNode = NetconfMessageTransformUtil.IETF_NETCONF_MONITORING_SCHEMA_FORMAT;
 
             String formatAsString = getSingleChildNodeValue(schemaNode, childNode).get();
-            //This is HotFix for situations where format statement in netconf-monitoring might be passed with prefix.
-            if (formatAsString.contains(":")) {
-                final String[] prefixedString = formatAsString.split(":");
-                //FIXME: might be good idea to check prefix against model namespace
-                formatAsString = prefixedString[1];
-            }
-            if(formatAsString.equals(Yang.QNAME.getLocalName()) == false) {
+
+            if(formatAsString.equals(Yang.QNAME.toString()) == false) {
                 LOG.debug("{}: Ignoring schema due to unsupported format: {}", id, formatAsString);
                 return Optional.absent();
             }

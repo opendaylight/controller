@@ -27,7 +27,7 @@ public class NetconfStateSchemasTest {
         final DataSchemaNode schemasNode = ((ContainerSchemaNode) NetconfDevice.INIT_SCHEMA_CTX.getDataChildByName("netconf-state")).getDataChildByName("schemas");
 
         final Document schemasXml = XmlUtil.readXmlToDocument(getClass().getResourceAsStream("/netconf-state.schemas.payload.xml"));
-        final ToNormalizedNodeParser<Element, ContainerNode, ContainerSchemaNode> containerNodeParser = DomToNormalizedNodeParserFactory.getInstance(XmlUtils.DEFAULT_XML_CODEC_PROVIDER).getContainerNodeParser();
+        final ToNormalizedNodeParser<Element, ContainerNode, ContainerSchemaNode> containerNodeParser = DomToNormalizedNodeParserFactory.getInstance(XmlUtils.DEFAULT_XML_CODEC_PROVIDER, NetconfDevice.INIT_SCHEMA_CTX).getContainerNodeParser();
         final ContainerNode compositeNodeSchemas = containerNodeParser.parse(Collections.singleton(schemasXml.getDocumentElement()), (ContainerSchemaNode) schemasNode);
         final NetconfStateSchemas schemas = NetconfStateSchemas.create(new RemoteDeviceId("device", new InetSocketAddress(99)), compositeNodeSchemas);
 
