@@ -34,6 +34,24 @@
       "revId": "542d12373e86ae12165df6fd54d6f20fdc6c1a48",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_56a39fff",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/identifiers/TransactionIdentifier.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-04T04:17:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_967607a3",
+      "revId": "542d12373e86ae12165df6fd54d6f20fdc6c1a48",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
